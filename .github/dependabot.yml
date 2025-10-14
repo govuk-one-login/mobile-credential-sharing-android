@@ -1,0 +1,54 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+registries:
+  github-maven:
+    type: maven-repository
+    url: https://maven.pkg.github.com/govuk-one-login/*
+    username: ${{ secrets.MODULE_FETCH_TOKEN_USERNAME }}
+    password: ${{ secrets.MODULE_FETCH_TOKEN }}
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    open-pull-requests-limit: 5
+    schedule:
+      # Check GitHub Action updates weekly
+      interval: "weekly"
+    commit-message:
+      prefix: "build"
+    groups:
+      actions:
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "gradle"
+    directory: "/"
+    open-pull-requests-limit: 10
+    schedule:
+      interval: "daily"
+    registries:
+      - github-maven
+    commit-message:
+      prefix: "build"
+    groups:
+      agp:
+        patterns:
+          - "com.android.tools.build*"
+          - "com.android.application*"
+          - "com.android.library*"
+      kotlin:
+        patterns:
+          - "org.jetbrains.kotlin*"
+          - "com.google.devtools.ksp*"
+      govuk:
+        patterns:
+          - "uk.gov*"
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "build"
