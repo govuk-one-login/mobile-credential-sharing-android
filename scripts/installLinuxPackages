@@ -13,7 +13,7 @@ sudo apt-get update
 
 # Install required apt / snap packages for the project
 xargs -a "${GIT_ROOT}"/.config/dependencies/aptPackages.txt sudo apt-get -y install
-xargs -a "${GIT_ROOT}"/.config/dependencies/snapPackages.txt sudo snap install
+xargs -a "${GIT_ROOT}"/.config/dependencies/snapDependencies.txt sudo snap install
 
 # Update properties to allow hardware acceleration
 # https://github.blog/changelog/2024-04-02-github-actions-hardware-accelerated-android-virtualization-now-available/
