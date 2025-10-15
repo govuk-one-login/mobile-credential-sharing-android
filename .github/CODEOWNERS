@@ -1,0 +1,5 @@
+# This is the CODEOWNERS file. These owners will be the default owners for everything in the
+# mobile-credential-sharing-android repository.
+# The proceeding list will be requested for review when someone opens a pull request.
+
+* @govuk-one-login/mobile-leads @govuk-one-login/mobile-wallet-sharing
