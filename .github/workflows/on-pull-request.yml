@@ -26,9 +26,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Grant execute permissions for gradle
-        run: chmod +x gradlew
-
       - name: Grant execute permissions for script files
         run: find ./scripts/ -type f | xargs chmod +x
 
