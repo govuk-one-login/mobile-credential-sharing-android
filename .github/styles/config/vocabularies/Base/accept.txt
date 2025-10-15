@@ -1,0 +1,5 @@
+(?i)Bluetooth
+(?i)Cocogitto
+(?i)Gradle
+(?i)Mbps
+(?i)Roborazzi
