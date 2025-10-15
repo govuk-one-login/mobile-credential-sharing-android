@@ -1,0 +1,4 @@
+(?i)Bluetooth
+(?i)Gradle
+(?i)Mbps
+(?i)Roborazzi
