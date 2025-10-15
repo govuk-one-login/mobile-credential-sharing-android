@@ -3,13 +3,13 @@
 # see also: the 'set' command within the 'Shell Builtin Commands' section of `man bash`
 set -o errexit
 
-source "$(git rev-parse --show-toplevel)/.sh/env"
+source "$(git rev-parse --show-toplevel)/scripts/env"
 
 if command -v vale; then
   echo "Vale is already installed. Syncing..."
 else
   echo "Vale is unavailable! Installing..."
-  "${GIT_ROOT}"/.sh/lint/vale/install
+  "${GIT_ROOT}"/scripts/lint/vale/install
 fi
 
 vale sync

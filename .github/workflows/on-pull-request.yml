@@ -30,11 +30,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Grant execute permissions for script files
-        run: find .sh/ -type f | xargs chmod +x
+        run: find ./scripts/ -type f | xargs chmod +x
 
       - name: Install linux packages
         run: |
-          .sh/installLinuxPackages
+          ./scripts/installLinuxPackages
 
       - name: Run vale prose linting
         uses: errata-ai/vale-action@d89dee975228ae261d22c15adcd03578634d429c # v2.1.1
