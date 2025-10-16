@@ -28,4 +28,5 @@ listOf(
     ":holder",
     ":models",
     ":security",
+    ":verifier",
 ).forEach(::include)

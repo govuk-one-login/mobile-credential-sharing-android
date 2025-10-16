@@ -1,6 +1,6 @@
 plugins {
     listOf(
-        libs.plugins.android.application,
+        libs.plugins.android.library,
         libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
     ).forEach(::alias)
@@ -12,24 +12,18 @@ val androidTargetSdk: Int by rootProject.extra
 val namespacePrefix: String by rootProject.extra
 val javaVersion: JavaVersion by rootProject.extra
 
-private val appId = "$namespacePrefix.testapp"
 
 android {
-    namespace = appId
+    namespace = "$namespacePrefix.verifier"
     compileSdk = androidCompileSdk
 
     defaultConfig {
-        applicationId = appId
         minSdk = androidMinSdk
-        targetSdk = androidTargetSdk
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
-    buildFeatures {
-        compose = true
-    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -47,7 +41,10 @@ android {
         jvmTarget = javaVersion.majorVersion
     }
     testOptions {
-        unitTests.isIncludeAndroidResources = true
+        targetSdk = androidTargetSdk
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
 }
 
@@ -56,11 +53,6 @@ dependencies {
         platform(libs.androidx.compose.bom),
         libs.bundles.testing.instrumentation,
     ).forEach(::androidTestImplementation)
-
-    listOf(
-        projects.holder,
-        projects.verifier,
-    ).forEach(::api)
 
     listOf(
         libs.bundles.debug.tooling,
