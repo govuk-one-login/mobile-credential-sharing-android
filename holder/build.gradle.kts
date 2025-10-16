@@ -61,6 +61,7 @@ dependencies {
     listOf(
         platform(libs.androidx.compose.bom),
         libs.bundles.android.baseline,
+        libs.zxing.core
     ).forEach(::implementation)
 
     listOf(

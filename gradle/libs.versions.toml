@@ -9,6 +9,7 @@ lifecycleRuntimeKtx = "2.9.4" # Changelog: https://developer.android.com/jetpack
 activityCompose = "1.11.0" # Changelog: https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
 composeBom = "2025.10.00" # Changelog: https://developer.android.com/jetpack/androidx/releases/compose
 robolectric = "4.16" # Changelog: https://github.com/robolectric/robolectric/releases
+xzing = "3.5.3" # Changelog
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -26,7 +27,7 @@ androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 junit = { module = "junit:junit", version.ref = "junit" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
-
+zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
 
 [bundles]
 testing-instrumentation = [
