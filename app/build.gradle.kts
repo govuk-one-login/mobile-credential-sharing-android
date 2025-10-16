@@ -4,12 +4,14 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+private val appId = "uk.gov.onelogin.sharing.testapp"
+
 android {
-    namespace = "uk.gov.sharing.android.testapp"
+    namespace = appId
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "uk.gov.sharing.android.testapp"
+        applicationId = appId
         minSdk = 29
         targetSdk = 36
         versionCode = 1
