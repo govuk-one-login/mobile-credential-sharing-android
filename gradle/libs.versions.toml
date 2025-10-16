@@ -3,7 +3,7 @@ agp = "8.11.2" # Changelog: https://developer.android.com/build/releases/past-re
 kotlin = "2.1.20" # Changelog: https://github.com/JetBrains/kotlin/releases/tag/v2.1.20
 coreKtx = "1.17.0" # Changelog: https://developer.android.com/jetpack/androidx/releases/core#1.17.0
 junit = "4.13.2" # Changelog: https://github.com/junit-team/junit4/releases/tag/r4.13.2
-junitVersion = "1.3.0" # Changelog: https://github.com/junit-team/junit5/releases/tag/r5.3.0
+androidx-test-ext-junit = "1.3.0" # Changelog: https://developer.android.com/jetpack/androidx/releases/test#junit_extensions_130_2
 espressoCore = "3.7.0" # Changelog: https://developer.android.com/jetpack/androidx/releases/test#3.7.0
 lifecycleRuntimeKtx = "2.9.4" # Changelog: https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
 activityCompose = "1.11.0" # Changelog: https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
@@ -12,7 +12,7 @@ composeBom = "2024.09.00" # Changelog: https://developer.android.com/jetpack/and
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
