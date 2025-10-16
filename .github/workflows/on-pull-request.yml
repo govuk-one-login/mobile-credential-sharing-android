@@ -39,3 +39,7 @@ jobs:
           fail_on_error: true
           reporter: github-pr-check
           version: latest
+
+      - name: Run unit tests
+        run: |
+          ./scripts/test/unit
