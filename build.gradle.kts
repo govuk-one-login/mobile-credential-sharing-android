@@ -9,3 +9,15 @@ val javaVersion: JavaVersion by extra(JavaVersion.VERSION_21)
  * Prefix used within the namespaces of gradle submodules.
  */
 val namespacePrefix: String by extra("uk.gov.onelogin.sharing")
+
+plugins {
+    listOf(
+        libs.plugins.android.application,
+        libs.plugins.android.library,
+        libs.plugins.kotlin.jvm,
+        libs.plugins.kotlin.android,
+        libs.plugins.kotlin.compose,
+    ).forEach { plugin ->
+        alias(plugin) apply false
+    }
+}

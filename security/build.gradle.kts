@@ -5,16 +5,14 @@ plugins {
         libs.plugins.kotlin.compose,
     ).forEach(::alias)
 }
-
 val androidCompileSdk: Int by rootProject.extra
 val androidMinSdk: Int by rootProject.extra
 val androidTargetSdk: Int by rootProject.extra
 val namespacePrefix: String by rootProject.extra
 val javaVersion: JavaVersion by rootProject.extra
 
-
 android {
-    namespace = "$namespacePrefix.holder"
+    namespace = "$namespacePrefix.security"
     compileSdk = androidCompileSdk
 
     defaultConfig {
@@ -49,22 +47,5 @@ android {
 }
 
 dependencies {
-    listOf(
-        platform(libs.androidx.compose.bom),
-        libs.bundles.testing.instrumentation,
-    ).forEach(::androidTestImplementation)
 
-    listOf(
-        libs.bundles.debug.tooling,
-    ).forEach(::debugImplementation)
-
-    listOf(
-        platform(libs.androidx.compose.bom),
-        libs.bundles.android.baseline,
-    ).forEach(::implementation)
-
-    listOf(
-        platform(libs.androidx.compose.bom),
-        libs.bundles.testing.unit,
-    ).forEach(::testImplementation)
 }

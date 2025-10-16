@@ -24,5 +24,8 @@ dependencyResolutionManagement {
 rootProject.name = "Mobile-credential-sharing-android"
 listOf(
     ":app",
+    ":bluetooth",
     ":holder",
+    ":models",
+    ":security",
 ).forEach(::include)
