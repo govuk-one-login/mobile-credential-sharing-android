@@ -5,11 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun VerifierWelcomeText(
-    modifier: Modifier = Modifier,
-) {
+fun VerifierWelcomeText(modifier: Modifier = Modifier) {
     Text(
         modifier = modifier,
-        text = "Welcome to GOV.UK Wallet Sharing"
+        text = "Welcome to GOV.UK Wallet Sharing's verifier module!"
     )
 }

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+SCRIPT_FOLDER=$(dirname "${0}")
+
+# Run the various testing suites
+"${SCRIPT_FOLDER}"/unit "${@}"
+"${SCRIPT_FOLDER}"/instrumentation "${@}"
+
+# Combine test coverage data from the various testing suites
+./gradlew combineDebugJacocoReports "${@}"

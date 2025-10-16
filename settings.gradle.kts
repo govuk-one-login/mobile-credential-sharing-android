@@ -21,6 +21,8 @@ dependencyResolutionManagement {
     }
 }
 
+includeBuild("custom-plugins")
+
 rootProject.name = "Mobile-credential-sharing-android"
 listOf(
     ":app",

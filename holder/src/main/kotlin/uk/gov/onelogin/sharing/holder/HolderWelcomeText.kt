@@ -5,9 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun HolderWelcomeText(
-    modifier: Modifier = Modifier,
-) {
+fun HolderWelcomeText(modifier: Modifier = Modifier) {
     Text(
         modifier = modifier,
         text = "Welcome to GOV.UK Wallet Sharing"

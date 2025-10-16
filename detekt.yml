@@ -1,0 +1,15 @@
+config:
+  validation: true
+  warningsAsErrors: false
+complexity:
+  # Remove the rule for Android Composable functions as they often have many function parameters.
+  LongParameterList:
+    ignoreAnnotated: ["Composable"]
+naming:
+  FunctionNaming:
+    # Remove the rule for Android Composable functions as they expect TitleCase.
+    ignoreAnnotated: ["Composable"]
+style:
+  UnusedPrivateMember:
+    # Remove the rule for Android Studio's Compose preview functions.
+    allowedNames: ".*?Preview"

@@ -3,14 +3,21 @@ plugins {
         libs.plugins.android.application,
         libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
-    ).forEach(::alias)
+        libs.plugins.custom.language.config,
+        libs.plugins.custom.managed.devices,
+        libs.plugins.roborazzi,
+        libs.plugins.screenshot.testing,
+        libs.plugins.android.lint.config,
+        libs.plugins.spotless.config,
+        libs.plugins.detekt.config,
+        libs.plugins.test.coverage
+    ).forEach { alias(it) }
 }
 
 val androidCompileSdk: Int by rootProject.extra
 val androidMinSdk: Int by rootProject.extra
 val androidTargetSdk: Int by rootProject.extra
 val namespacePrefix: String by rootProject.extra
-val javaVersion: JavaVersion by rootProject.extra
 
 private val appId = "$namespacePrefix.testapp"
 
@@ -39,40 +46,35 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-    }
-    kotlinOptions {
-        jvmTarget = javaVersion.majorVersion
-    }
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-    }
 }
 
 dependencies {
     listOf(
         platform(libs.androidx.compose.bom),
-        libs.bundles.testing.instrumentation,
+        libs.bundles.testing.instrumentation
     ).forEach(::androidTestImplementation)
 
     listOf(
         projects.holder,
-        projects.verifier,
+        projects.verifier
     ).forEach(::api)
 
     listOf(
-        libs.bundles.debug.tooling,
+        libs.bundles.debug.tooling
     ).forEach(::debugImplementation)
 
     listOf(
         platform(libs.androidx.compose.bom),
-        libs.bundles.android.baseline,
+        libs.bundles.android.baseline
     ).forEach(::implementation)
 
     listOf(
         platform(libs.androidx.compose.bom),
-        libs.bundles.testing.unit,
+        libs.bundles.android.baseline
+    ).forEach(::testFixturesImplementation)
+
+    listOf(
+        platform(libs.androidx.compose.bom),
+        libs.bundles.testing.unit
     ).forEach(::testImplementation)
 }
