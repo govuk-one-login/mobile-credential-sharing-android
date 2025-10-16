@@ -2,6 +2,8 @@
 .github/styles/Google
 .github/styles/tech-writing-style-guide
 
+.kotlin
+
 # Created by https://www.toptal.com/developers/gitignore/api/kotlin,java,android,androidstudio,gradle,macos,linux,windows,vim
 # Edit at https://www.toptal.com/developers/gitignore?templates=kotlin,java,android,androidstudio,gradle,macos,linux,windows,vim
 

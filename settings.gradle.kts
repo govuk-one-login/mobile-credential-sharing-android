@@ -1,3 +1,5 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     repositories {
         google {
@@ -19,6 +21,11 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Mobile credential sharing android"
-include(":app")
-
+rootProject.name = "Mobile-credential-sharing-android"
+listOf(
+    ":app",
+    ":bluetooth",
+    ":holder",
+    ":models",
+    ":security",
+).forEach(::include)

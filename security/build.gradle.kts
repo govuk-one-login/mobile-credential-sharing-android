@@ -1,25 +1,51 @@
 plugins {
+    listOf(
+        libs.plugins.android.library,
+        libs.plugins.kotlin.android,
+        libs.plugins.kotlin.compose,
+    ).forEach(::alias)
 }
+val androidCompileSdk: Int by rootProject.extra
+val androidMinSdk: Int by rootProject.extra
+val androidTargetSdk: Int by rootProject.extra
+val namespacePrefix: String by rootProject.extra
+val javaVersion: JavaVersion by rootProject.extra
 
-    android {
-    namespace = "uk.gov.onelogin.sharing.security"
-    compileSdk = 36
+android {
+    namespace = "$namespacePrefix.security"
+    compileSdk = androidCompileSdk
 
     defaultConfig {
-    minSdk = 29
+        minSdk = androidMinSdk
 
-      testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-      consumerProguardFiles("consumer-rules.pro")
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
-       release {
-           isMinifyEnabled = false
-           proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-       }
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
+    compileOptions {
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
+    kotlinOptions {
+        jvmTarget = javaVersion.majorVersion
+    }
+    testOptions {
+        targetSdk = androidTargetSdk
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+}
 
-  dependencies {
+dependencies {
 
-  }
+}
