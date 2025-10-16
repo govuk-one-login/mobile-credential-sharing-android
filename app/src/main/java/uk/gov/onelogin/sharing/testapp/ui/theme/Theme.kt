@@ -1,4 +1,4 @@
-package uk.gov.sharing.android.testapp.ui.theme
+package uk.gov.onelogin.sharing.testapp.ui.theme
 
 import android.app.Activity
 import android.os.Build

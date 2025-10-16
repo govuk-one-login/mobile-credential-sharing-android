@@ -1,4 +1,4 @@
-package uk.gov.sharing.android.testapp
+package uk.gov.onelogin.sharing.testapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import uk.gov.sharing.android.testapp.ui.theme.TestAppTheme
+import uk.gov.onelogin.sharing.testapp.ui.theme.TestAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
