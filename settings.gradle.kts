@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Test App"
+rootProject.name = "Mobile credential sharing android"
 include(":app")
