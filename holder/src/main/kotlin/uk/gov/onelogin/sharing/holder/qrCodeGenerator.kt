@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder
 
+import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
@@ -13,7 +14,7 @@ import com.google.zxing.qrcode.QRCodeWriter
  * generation.
  */
 
-fun qrCodeGenerator(data: String, size: Int) = try {
+fun qrCodeGenerator(data: String, size: Int): Bitmap? = try {
     val writer = QRCodeWriter()
     val bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, size, size)
     val width = bitMatrix.width

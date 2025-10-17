@@ -22,10 +22,18 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column {
                         HolderWelcomeText(modifier = Modifier.padding(innerPadding))
-                        QrCodeImage(modifier = Modifier, "https://www.gov.uk", 800)
+                        QrCodeImage(
+                            modifier = Modifier,
+                            data = "https://www.gov.uk",
+                            size = QR_SIZE
+                        )
                     }
                 }
             }
         }
+    }
+
+    companion object {
+        const val QR_SIZE = 500
     }
 }

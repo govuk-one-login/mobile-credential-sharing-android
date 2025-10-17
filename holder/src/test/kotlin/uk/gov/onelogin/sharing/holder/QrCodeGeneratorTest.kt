@@ -2,9 +2,14 @@ package uk.gov.onelogin.sharing.holder
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -35,7 +40,11 @@ class QrCodeGeneratorTest {
         }
 
         composeTestRule
-            .onNode(hasContentDescription(QR_CODE_CONTENT_DESC))
+            .onNodeWithTag(testTag)
+            .assertIsDisplayed()
+            .assertContentDescriptionEquals(QR_CODE_CONTENT_DESC)
+            .assertHeightIsEqualTo(QR_CODE_SIZE.dp)
+            .assertWidthIsEqualTo(QR_CODE_SIZE.dp)
             .assertIsDisplayed()
     }
 
@@ -43,7 +52,6 @@ class QrCodeGeneratorTest {
     fun showsNoQrCodeWhenDataIsEmpty() {
         composeTestRule.setContent {
             QrCodeImage(
-                modifier = Modifier.testTag(testTag),
                 data = INVALID_QR_CODE_DATA,
                 size = QR_CODE_SIZE
             )

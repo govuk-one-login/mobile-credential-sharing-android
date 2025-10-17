@@ -9,13 +9,13 @@ import androidx.compose.ui.layout.ContentScale
 @Composable
 fun QrCodeImage(
     modifier: Modifier = Modifier,
-    data: String, size: Int
+    data: String,
+    size: Int
 ) {
-    val qr = qrCodeGenerator(data, size)
-
-    if (qr != null) {
+    qrCodeGenerator(data, size)?.asImageBitmap()?.let {
         Image(
-            bitmap = qr.asImageBitmap(),
+            modifier = modifier,
+            bitmap = it,
             contentDescription = "QR code to gov.uk",
             contentScale = ContentScale.Fit
         )
