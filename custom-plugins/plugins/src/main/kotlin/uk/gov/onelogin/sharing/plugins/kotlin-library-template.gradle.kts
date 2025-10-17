@@ -14,6 +14,7 @@ listOf(
     "spotless-config",
     "detekt-config",
     "test-coverage",
+    "maven-publishing",
 ).map { versionCatalogId ->
     libs.findPlugin(versionCatalogId).get().get().pluginId
 }.forEach(pluginManager::apply)

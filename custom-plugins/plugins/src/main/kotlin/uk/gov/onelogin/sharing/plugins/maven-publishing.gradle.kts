@@ -22,6 +22,17 @@ if (pluginManager.isAndroidLibrary()) {
         }
     }
 
+    "default"
+} else if (pluginManager.isJavaLibrary()) {
+    configure<JavaPluginExtension> {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    "java"
+} else {
+    null
+}?.let { baseComponentName ->
     configure<PublishingExtension> {
         publications {
             register<MavenPublication>("default") {
@@ -34,7 +45,7 @@ if (pluginManager.isAndroidLibrary()) {
 
                 project.afterEvaluate {
                     // multipleVariants publish under the "default" name
-                    from(project.components["default"])
+                    from(project.components[baseComponentName])
                     withBuildIdentifier()
                 }
 
@@ -44,7 +55,6 @@ if (pluginManager.isAndroidLibrary()) {
             }
         }
     }
-
 
     tasks.register<Copy>("createLocalBuildMavenRepository") {
         group = "publishing"
@@ -63,8 +73,6 @@ if (pluginManager.isAndroidLibrary()) {
             )
         }
     }
-} else if (pluginManager.isJavaLibrary()) {
-
 }
 
 /**
