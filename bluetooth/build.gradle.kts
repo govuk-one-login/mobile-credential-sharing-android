@@ -1,16 +1,12 @@
 plugins {
     listOf(
-        libs.plugins.android.library,
-        libs.plugins.kotlin.android,
-        libs.plugins.kotlin.compose,
-    ).forEach(::alias)
+        libs.plugins.templates.android.library
+    ).forEach { alias(it) }
 }
 
 val androidCompileSdk: Int by rootProject.extra
 val androidMinSdk: Int by rootProject.extra
-val androidTargetSdk: Int by rootProject.extra
 val namespacePrefix: String by rootProject.extra
-val javaVersion: JavaVersion by rootProject.extra
 
 android {
     namespace = "$namespacePrefix.bluetooth"
@@ -32,21 +28,4 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-    }
-    kotlinOptions {
-        jvmTarget = javaVersion.majorVersion
-    }
-    testOptions {
-        targetSdk = androidTargetSdk
-        unitTests {
-            isIncludeAndroidResources = true
-        }
-    }
-}
-
-dependencies {
-
 }

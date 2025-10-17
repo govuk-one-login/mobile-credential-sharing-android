@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+source "$(git rev-parse --show-toplevel)/scripts/env"
+"${GIT_ROOT}"/gradlew spotlessApply --rerun-tasks

@@ -9,7 +9,9 @@ set -o errexit
 # The `"${@}" appends additional input to the command, like so:
 # `./scripts/test/unit --debug` -> adds `--debug` to the command.
 ./gradlew \
-  test \
+  :models:test \
+  :models:jacocoTestReport \
   testDebugUnitTest \
+  createDebugUnitTestCoverageReport \
   -x testReleaseUnitTest \
   "${@}"
