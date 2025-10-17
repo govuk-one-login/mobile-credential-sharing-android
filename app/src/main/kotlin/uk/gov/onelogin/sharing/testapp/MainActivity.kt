@@ -34,6 +34,6 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        const val QR_SIZE = 500
+        const val QR_SIZE = 800
     }
 }

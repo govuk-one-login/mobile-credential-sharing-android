@@ -1,8 +1,10 @@
 package uk.gov.onelogin.sharing.holder
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 
 /**
@@ -14,23 +16,22 @@ import com.google.zxing.qrcode.QRCodeWriter
  * generation.
  */
 
+private const val TAG = "QRCodeGenerator"
+private const val QR_CODE_BLACK = 0xFF000000.toInt()
+private const val QR_CODE_WHITE = 0xFFFFFFFF.toInt()
+
 fun qrCodeGenerator(data: String, size: Int): Bitmap? = try {
     val writer = QRCodeWriter()
     val bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, size, size)
     val width = bitMatrix.width
     val height = bitMatrix.height
-    val pixels = IntArray(width * height)
-    for (y in 0 until height) {
-        val offset = y * width
-        for (x in 0 until width) {
-            pixels[offset + x] =
-                if (bitMatrix.get(x, y)) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
-        }
+    val pixels = IntArray(width * height) { i ->
+        if (bitMatrix.get(i % width, i / width)) QR_CODE_BLACK else QR_CODE_WHITE
     }
     createBitmap(width, height).apply {
         setPixels(pixels, 0, width, 0, 0, width, height)
     }
-} catch (e: Exception) {
+} catch (e: WriterException) {
+    Log.e(TAG, "Error generating QR code", e)
     null
 }
-
