@@ -19,6 +19,7 @@ lifecycleRuntimeKtx = "2.9.4" # https://developer.android.com/jetpack/androidx/r
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.50.0" # https://github.com/takahirom/roborazzi/releases
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
+xzing = "3.5.3" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -50,6 +51,7 @@ roborazzi-compose = { module = "io.github.takahirom.roborazzi:roborazzi-compose"
 roborazzi-gradle = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-plugin", version.ref = "roborazzi" }
 roborazzi-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
 
 [bundles]
 testing-instrumentation = [
