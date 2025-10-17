@@ -19,7 +19,7 @@ lifecycleRuntimeKtx = "2.9.4" # https://developer.android.com/jetpack/androidx/r
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.50.0" # https://github.com/takahirom/roborazzi/releases
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
-xzing = "3.5.3" # Changelog
+xzing = "3.5.3" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
