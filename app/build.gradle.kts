@@ -17,6 +17,8 @@ plugins {
 val androidCompileSdk: Int by rootProject.extra
 val androidMinSdk: Int by rootProject.extra
 val androidTargetSdk: Int by rootProject.extra
+val androidVersionCode: Int by rootProject.extra
+val androidVersionName: String by rootProject.extra
 val namespacePrefix: String by rootProject.extra
 
 private val appId = "$namespacePrefix.testapp"
@@ -29,8 +31,8 @@ android {
         applicationId = appId
         minSdk = androidMinSdk
         targetSdk = androidTargetSdk
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = androidVersionCode
+        versionName = androidVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

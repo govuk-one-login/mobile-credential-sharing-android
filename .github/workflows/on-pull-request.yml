@@ -20,14 +20,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+      - name: Clean workspace
+        uses: ./mobile-android-pipelines/actions/clean-workspace
+
+      - name: Setup GitHub Runner workflow
+        uses: ./mobile-android-pipelines/actions/setup-runner
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          gradle-cache-disabled: "false"
+          jdk-version: "21"
 
       - name: Grant execute permissions for script files
         run: find ./scripts/ -type f | xargs chmod +x
+
+      - name: Verify Conventional commit standards against latest git tag
+        uses: ./mobile-android-pipelines/actions/verify-conventional-commit
 
       - name: Install linux packages
         run: |

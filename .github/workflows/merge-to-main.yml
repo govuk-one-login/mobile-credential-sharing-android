@@ -27,6 +27,19 @@ jobs:
       - name: Grant execute permissions for script files
         run: find ./scripts/ -type f | xargs chmod +x
 
+      - name: Verify Conventional commit standards against latest git tag
+        uses: ./mobile-android-pipelines/actions/verify-conventional-commit
+
+      - name: Increment the release version using Conventional Commits
+        id: versioning
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: ./mobile-android-pipelines/actions/increment-version
+
+      - name: Publish release tags
+        if: ${{ github.event_name != 'pull_request'
+          && steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
+        uses: ./mobile-android-pipelines/actions/publish-release-tag
+
       - name: Run linting suites
         run: |
           ./scripts/lint/all
@@ -39,3 +52,21 @@ jobs:
         uses: ./mobile-android-pipelines/actions/sonar-scan
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Publish package
+        if: ${{ github.event_name != 'pull_request'
+          && steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
+        uses: ./mobile-android-pipelines/actions/maven-publish
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Generate Changelog
+        uses: ./mobile-android-pipelines/actions/generate-and-upload-changelog
+        with:
+          current-version: ${{ steps.versioning.outputs.current_version }}
+          new-version: ${{ steps.versioning.outputs.new_version }}
+          version-prefix: "v"
+
+      - name: Clean workspace
+        uses: ./mobile-android-pipelines/actions/clean-workspace
