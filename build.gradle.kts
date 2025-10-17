@@ -53,16 +53,25 @@ plugins {
     }
 }
 
+subprojects {
+    group = "uk.gov.onelogin.sharing"
+    version = androidVersionName
+}
+
 /**
  * Gradle task for testing the [androidVersionCode] property value
  */
 val printVersionCode by tasks.registering {
-    logger.warn("Android version code: $androidVersionCode")
+    group = "validation"
+    description = "Outputs the generated android version code from the extra property"
+    logger.lifecycle("Android version code: $androidVersionCode")
 }
 
 /**
  * Gradle task for testing the [androidVersionName] property value.
  */
 val printVersionName by tasks.registering {
-    logger.warn("Android version name: $androidVersionName")
+    group = "validation"
+    description = "Outputs the generated android version name from the extra property"
+    logger.lifecycle("Android version name: $androidVersionName")
 }

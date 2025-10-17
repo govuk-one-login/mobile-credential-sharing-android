@@ -6,11 +6,14 @@ import com.android.build.api.dsl.LibraryExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidApp
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidLibrary
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isJavaLibrary
 import uk.gov.onelogin.sharing.plugins.language.LanguageVersionExtension.Companion.languageVersions
 
 val languageVersions: LanguageVersionExtension = languageVersions()
 
-if (pluginManager.hasPlugin("com.android.application")) {
+if (pluginManager.isAndroidApp()) {
     configure<ApplicationExtension> {
         configureCompileOptions()
     }
@@ -22,7 +25,7 @@ if (pluginManager.hasPlugin("com.android.application")) {
             configureKotlinCompiler()
         }
     }
-} else if (pluginManager.hasPlugin("com.android.library")) {
+} else if (pluginManager.isAndroidLibrary()) {
     configure<LibraryExtension> {
         configureCompileOptions()
     }
@@ -34,7 +37,7 @@ if (pluginManager.hasPlugin("com.android.application")) {
             configureKotlinCompiler()
         }
     }
-} else if (pluginManager.hasPlugin("java-library")) {
+} else if (pluginManager.isJavaLibrary()) {
     configure<KotlinJvmProjectExtension> {
         jvmToolchain(
             languageVersions.javaVersionNumber.get()

@@ -1,11 +1,6 @@
 plugins {
     listOf(
-        "java-library",
-        "java-test-fixtures",
-        "jacoco",
-    ).forEach(::id)
-    listOf(
-        libs.plugins.kotlin.jvm,
+        libs.plugins.templates.kotlin.library
     ).forEach { alias(it) }
 }
 
@@ -15,6 +10,6 @@ jacoco {
 
 dependencies {
     listOf(
-        libs.junit,
+        libs.junit
     ).forEach(::testImplementation)
 }

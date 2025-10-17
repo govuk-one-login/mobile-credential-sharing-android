@@ -95,6 +95,7 @@ detekt-config = { id = "uk.gov.onelogin.sharing.plugins.lint.detekt-configuratio
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+maven-publishing = { id = "uk.gov.onelogin.sharing.plugins.maven-publishing", version = "undefined" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 screenshot-testing = { id = "uk.gov.onelogin.sharing.plugins.testing.android-screenshot-testing", version = "undefined" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

@@ -1,4 +1,3 @@
 package uk.gov.onelogin.sharing.models
 
-class MyClass {
-}
+data class MyClass(val state: Any? = null)

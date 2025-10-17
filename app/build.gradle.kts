@@ -18,7 +18,6 @@ val androidCompileSdk: Int by rootProject.extra
 val androidMinSdk: Int by rootProject.extra
 val androidTargetSdk: Int by rootProject.extra
 val androidVersionCode: Int by rootProject.extra
-val androidVersionName: String by rootProject.extra
 val namespacePrefix: String by rootProject.extra
 
 private val appId = "$namespacePrefix.testapp"
@@ -32,7 +31,7 @@ android {
         minSdk = androidMinSdk
         targetSdk = androidTargetSdk
         versionCode = androidVersionCode
-        versionName = androidVersionName
+        versionName = project.version.toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
