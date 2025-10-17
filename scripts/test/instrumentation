@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Run the gradle managed devices instrumentation test task.
+# See `gradle-managed-devices.gradle.kts` for it's configuration.
+# Unfortunately, gradle managed devices don't create specific coverage tasks for each device
+# profile...
+
+# The `"${@}" appends additional input to the command, like so:
+# `./scripts/test/instrumentation --debug` -> adds `--debug` to the command.
+./gradlew \
+    aospAtdApi34Pixel9DebugAndroidTest \
+    createManagedDeviceDebugAndroidTestCoverageReport \
+    "${@}"

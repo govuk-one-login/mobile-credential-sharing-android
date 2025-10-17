@@ -4,6 +4,15 @@ import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 
+/**
+ * Generates a QR code bitmap from the given string data.
+ *
+ * @param data The string to be encoded into the QR code.
+ * @param size The desired width and height of the QR code in pixels.
+ * @return A [Bitmap] object representing the QR code, or `null` if an error occurs during
+ * generation.
+ */
+
 fun qrCodeGenerator(data: String, size: Int) = try {
     val writer = QRCodeWriter()
     val bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, size, size)

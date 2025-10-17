@@ -40,6 +40,10 @@ jobs:
           reporter: github-pr-check
           version: latest
 
-      - name: Run unit tests
+      - name: Run linting associated with Gradle
         run: |
-          ./scripts/test/unit
+          ./scripts/lint/gradle
+
+      - name: Run testing suites
+        run: |
+          ./scripts/test/all

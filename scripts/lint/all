@@ -3,3 +3,4 @@
 SCRIPT_FOLDER=$(dirname "${0}")
 
 "${SCRIPT_FOLDER}"/vale/run
+"${SCRIPT_FOLDER}"/gradle "${@}"

@@ -21,6 +21,8 @@ dependencyResolutionManagement {
     }
 }
 
+includeBuild("custom-plugins")
+
 rootProject.name = "Mobile-credential-sharing-android"
 listOf(
     ":app",
@@ -28,4 +30,5 @@ listOf(
     ":holder",
     ":models",
     ":security",
+    ":verifier",
 ).forEach(::include)
