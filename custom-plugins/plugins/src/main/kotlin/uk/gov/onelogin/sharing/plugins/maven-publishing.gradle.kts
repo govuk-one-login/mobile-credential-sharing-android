@@ -11,7 +11,7 @@ plugins {
 
 val githubRepositoryName = "mobile-credential-sharing-android"
 
-if (pluginManager.isAndroidLibrary()) {
+val baseComponentName = if (pluginManager.isAndroidLibrary()) {
     configure<LibraryExtension> {
         publishing {
             multipleVariants {
@@ -32,7 +32,9 @@ if (pluginManager.isAndroidLibrary()) {
     "java"
 } else {
     null
-}?.let { baseComponentName ->
+}
+
+baseComponentName?.let { baseComponentName ->
     configure<PublishingExtension> {
         publications {
             register<MavenPublication>("default") {

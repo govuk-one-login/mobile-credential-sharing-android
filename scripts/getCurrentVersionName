@@ -3,7 +3,7 @@
 # see also: the 'set' command within the 'Shell Builtin Commands' section of `man bash`
 set -o errexit
 
-if command -v cog; then
+if command -v cog > /dev/null; then
   cog -v get-version
 else
   echo "0.0.1"
