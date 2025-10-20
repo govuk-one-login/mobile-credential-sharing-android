@@ -52,20 +52,6 @@ object Filters {
             "**/*\$Result$*.*",
         )
 
-    val userInterfaces =
-        listOf(
-            "**/*Activity*",
-            "**/*Adapter*",
-            "**/*BindingAdapter*",
-            "**/*Dialog*",
-            "**/*DiffCallback*",
-            "**/*Fragment*",
-            "**/*ItemDecoration*",
-            "**/*LayoutManager*",
-            "**/*Service*",
-            "**/*ViewHolder*",
-        )
-
     val sonar =
         listOf(
             "*.json",
@@ -107,18 +93,12 @@ object Filters {
             kotlin,
         ).flatten()
 
-    val androidUnitTests =
-        listOf(
-            androidInstrumentationTests,
-            userInterfaces,
-        ).flatten()
-
     val testSourceSets =
         listOf(
-            "**/src/test/java/\$",
-            "**/src/test*/java/\$",
-            "**/src/androidTest*/java/\$",
-            "**/src/androidTest/java/\$",
+            "**/src/test/kotlin/\$",
+            "**/src/test*/kotlin/\$",
+            "**/src/androidTest*/kotlin/\$",
+            "**/src/androidTest/kotlin/\$",
         )
 
     val developer =
