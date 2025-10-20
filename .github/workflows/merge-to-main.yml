@@ -35,11 +35,16 @@ jobs:
           gradle-cache-disabled: "false"
           jdk-version: "21"
 
+      - name: Install homebrew packages
+        run: |
+          brew bundle
+
       - name: Grant execute permissions for script files
         run: find ./scripts/ -type f | xargs chmod +x
 
       - name: Verify Conventional commit standards against latest git tag
-        uses: ./mobile-android-pipelines/actions/verify-conventional-commit
+        run: cog check -l
+        shell: bash
 
       - name: Increment the release version using Conventional Commits
         id: versioning
