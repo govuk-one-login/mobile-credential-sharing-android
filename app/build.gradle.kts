@@ -10,7 +10,8 @@ plugins {
         libs.plugins.android.lint.config,
         libs.plugins.spotless.config,
         libs.plugins.detekt.config,
-        libs.plugins.test.coverage
+        libs.plugins.test.coverage,
+        libs.plugins.sonar.module.config
     ).forEach { alias(it) }
 }
 

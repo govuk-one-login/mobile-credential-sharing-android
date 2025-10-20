@@ -11,6 +11,7 @@ import com.android.build.api.variant.ScopedArtifacts
 import org.gradle.internal.extensions.stdlib.capitalized
 import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidApp
 import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidLibrary
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isJavaLibrary
 
 plugins {
     id("jacoco")

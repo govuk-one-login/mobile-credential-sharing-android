@@ -15,6 +15,7 @@ listOf(
     "detekt-config",
     "test-coverage",
     "maven-publishing",
+    "sonar-module-config",
 ).map { versionCatalogId ->
     libs.findPlugin(versionCatalogId).get().get().pluginId
 }.forEach(pluginManager::apply)

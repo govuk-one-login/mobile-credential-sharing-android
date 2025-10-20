@@ -1,5 +1,3 @@
-import java.io.ByteArrayOutputStream
-
 // Used within submodules instead of defining the API level in every submodule.
 val androidCompileSdk: Int by extra(36)
 val androidMinSdk: Int by extra(29)
@@ -51,6 +49,12 @@ plugins {
     ).forEach { plugin ->
         alias(plugin) apply false
     }
+
+    listOf(
+        libs.plugins.sonarqube
+    ).forEach { plugin ->
+        alias(plugin)
+    }
 }
 
 subprojects {
@@ -74,4 +78,25 @@ val printVersionName by tasks.registering {
     group = "validation"
     description = "Outputs the generated android version name from the extra property"
     logger.lifecycle("Android version name: $androidVersionName")
+}
+
+sonarqube {
+    this.setAndroidVariant("debug")
+
+    val sonarRootProperties =
+        mapOf(
+            "sonar.projectKey" to "govuk-one-login_mobile-credential-sharing-android",
+            "sonar.projectName" to "mobile-credential-sharing-android",
+            "sonar.token" to System.getProperty("SONAR_TOKEN"),
+            "sonar.projectVersion" to "v$androidVersionName-$androidVersionCode",
+            "sonar.organization" to "govuk-one-login",
+            "sonar.sourceEncoding" to "UTF-8",
+            "sonar.sources" to "",
+        )
+
+    properties {
+        sonarRootProperties.forEach { (key, value) ->
+            property(key, value)
+        }
+    }
 }

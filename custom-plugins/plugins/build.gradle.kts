@@ -22,6 +22,7 @@ dependencies {
         libs.detekt.gradle,
         libs.junit,
         libs.org.robolectric,
+        libs.sonarqube.gradle,
         libs.spotless.gradle,
     ).forEach(::api)
 
