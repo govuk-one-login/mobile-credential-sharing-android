@@ -3,4 +3,8 @@
 # see also: the 'set' command within the 'Shell Builtin Commands' section of `man bash`
 set -o errexit
 
-cog -v get-version
+if command -v cog; then
+  cog -v get-version
+else
+  echo "0.0.1"
+fi
