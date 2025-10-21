@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
-import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 
 /**
@@ -31,7 +30,7 @@ fun qrCodeGenerator(data: String, size: Int): Bitmap? = try {
     createBitmap(width, height).apply {
         setPixels(pixels, 0, width, 0, 0, width, height)
     }
-} catch (e: WriterException) {
+} catch (e: IllegalArgumentException) {
     Log.e(TAG, "Error generating QR code", e)
     null
 }
