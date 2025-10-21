@@ -52,6 +52,7 @@ roborazzi-gradle = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-pl
 roborazzi-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
 sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
+uk-gov-pipelines-plugins = { module = "uk.gov.pipelines:plugins" }
 
 [bundles]
 testing-instrumentation = [
@@ -97,7 +98,6 @@ detekt-config = { id = "uk.gov.onelogin.sharing.plugins.lint.detekt-configuratio
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-maven-publishing = { id = "uk.gov.onelogin.sharing.plugins.maven-publishing", version = "undefined" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 screenshot-testing = { id = "uk.gov.onelogin.sharing.plugins.testing.android-screenshot-testing", version = "undefined" }
 sonar-module-config = { id = "uk.gov.onelogin.sharing.plugins.sonar.sub-module-config", version = "undefined" }

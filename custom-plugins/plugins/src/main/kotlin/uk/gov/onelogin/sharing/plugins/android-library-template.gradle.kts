@@ -14,11 +14,14 @@ listOf(
     "spotless-config",
     "detekt-config",
     "test-coverage",
-    "maven-publishing",
     "sonar-module-config",
 ).map { versionCatalogId ->
     libs.findPlugin(versionCatalogId).get().get().pluginId
 }.forEach(pluginManager::apply)
+
+listOf(
+    "uk.gov.publishing.config"
+).forEach(pluginManager::apply)
 
 val androidTestImplementation by configurations
 val debugImplementation by configurations

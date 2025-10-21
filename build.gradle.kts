@@ -39,6 +39,11 @@ val javaVersion: JavaVersion by extra(JavaVersion.VERSION_21)
  */
 val namespacePrefix: String by extra("uk.gov.onelogin.sharing")
 
+/* GOV.UK pipelines publishing configuration */
+val githubRepositoryName: String by extra("mobile-credential-sharing-android")
+val mavenGroupId: String by extra(namespacePrefix)
+val buildLogicDir: String by extra("mobile-android-pipelines/buildLogic")
+
 plugins {
     listOf(
         libs.plugins.android.application,

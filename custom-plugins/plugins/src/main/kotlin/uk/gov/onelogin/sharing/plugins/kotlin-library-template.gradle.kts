@@ -13,8 +13,11 @@ listOf(
     "custom-language.config",
     "spotless-config",
     "detekt-config",
-    "maven-publishing",
     "sonar-module-config",
 ).map { versionCatalogId ->
     libs.findPlugin(versionCatalogId).get().get().pluginId
 }.forEach(pluginManager::apply)
+
+listOf(
+    "uk.gov.publishing.config"
+).forEach(pluginManager::apply)

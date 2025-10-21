@@ -31,6 +31,7 @@ dependencies {
         libs.com.google.devtools.ksp.gradle,
         libs.org.jetbrains.kotlin.gradle,
         libs.roborazzi.gradle,
+        libs.uk.gov.pipelines.plugins,
     ).forEach(::implementation)
 }
 

@@ -29,3 +29,17 @@ android {
         }
     }
 }
+
+mavenPublishingConfig {
+    mavenConfigBlock {
+        name.set(
+            "GOV.UK One Login CRI Orchestrator SDK Public API"
+        )
+        description.set(
+            """
+            The Credential Issuer (CRI) Orchestrator coordinates identity proofing capability.
+            This module contains the public API used to interface with the CRI Orchestrator
+            """.trimIndent()
+        )
+    }
+}
