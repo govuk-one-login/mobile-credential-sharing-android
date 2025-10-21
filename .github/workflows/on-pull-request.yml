@@ -15,8 +15,6 @@ concurrency:
 
 jobs:
   unit_tests_job:
-    permissions:
-      contents: write # For gradle dependency submission
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -69,9 +67,6 @@ jobs:
       - name: Run testing suites
         run: |
           ./scripts/test/all
-
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
 
       - name: Clean workspace
         uses: ./mobile-android-pipelines/actions/clean-workspace
