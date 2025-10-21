@@ -30,6 +30,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "custom-plugins"
 
+includeBuild("../mobile-android-pipelines/buildLogic")
 include(
     ":plugins"
 )

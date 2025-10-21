@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.plugins
 
+import uk.gov.onelogin.sharing.plugins.publishing.PublishingCustomTasks.createLocalBuildMavenRepositoryTask
+
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 listOf(
@@ -14,9 +16,14 @@ listOf(
     "spotless-config",
     "detekt-config",
     "test-coverage",
+    "sonar-module-config",
 ).map { versionCatalogId ->
     libs.findPlugin(versionCatalogId).get().get().pluginId
 }.forEach(pluginManager::apply)
+
+listOf(
+    "uk.gov.publishing.config"
+).forEach(pluginManager::apply)
 
 val androidTestImplementation by configurations
 val debugImplementation by configurations
@@ -58,3 +65,5 @@ dependencies {
         testImplementation(it)
     }
 }
+
+createLocalBuildMavenRepositoryTask()

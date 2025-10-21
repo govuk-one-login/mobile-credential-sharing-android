@@ -22,6 +22,7 @@ dependencies {
         libs.detekt.gradle,
         libs.junit,
         libs.org.robolectric,
+        libs.sonarqube.gradle,
         libs.spotless.gradle,
     ).forEach(::api)
 
@@ -30,6 +31,7 @@ dependencies {
         libs.com.google.devtools.ksp.gradle,
         libs.org.jetbrains.kotlin.gradle,
         libs.roborazzi.gradle,
+        libs.uk.gov.pipelines.plugins,
     ).forEach(::implementation)
 }
 

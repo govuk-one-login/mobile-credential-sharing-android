@@ -18,6 +18,7 @@ ktlint = "1.6.0" # https://github.com/pinterest/ktlint/releases/
 lifecycleRuntimeKtx = "2.9.4" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.50.0" # https://github.com/takahirom/roborazzi/releases
+sonarqube = "7.0.0.6105" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 
 [libraries]
@@ -49,7 +50,9 @@ roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = 
 roborazzi-compose = { module = "io.github.takahirom.roborazzi:roborazzi-compose", version.ref = "roborazzi" }
 roborazzi-gradle = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-plugin", version.ref = "roborazzi" }
 roborazzi-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
+sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
+uk-gov-pipelines-plugins = { module = "uk.gov.pipelines:plugins" }
 
 [bundles]
 testing-instrumentation = [
@@ -97,6 +100,8 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 screenshot-testing = { id = "uk.gov.onelogin.sharing.plugins.testing.android-screenshot-testing", version = "undefined" }
+sonar-module-config = { id = "uk.gov.onelogin.sharing.plugins.sonar.sub-module-config", version = "undefined" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 spotless-config = { id = "uk.gov.onelogin.sharing.plugins.lint.spotless-configuration", version = "undefined" }
 templates-android-library = { id = "uk.gov.onelogin.sharing.plugins.android-library-template", version = "undefined" }

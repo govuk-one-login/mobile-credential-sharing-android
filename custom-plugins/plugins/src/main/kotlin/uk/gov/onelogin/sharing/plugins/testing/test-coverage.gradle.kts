@@ -9,6 +9,9 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.build.api.variant.ScopedArtifacts
 import org.gradle.internal.extensions.stdlib.capitalized
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidApp
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidLibrary
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isJavaLibrary
 
 plugins {
     id("jacoco")
@@ -17,9 +20,9 @@ plugins {
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 // Configures the gradle module based on whether it's an app module or a library module
-if (pluginManager.hasPlugin("com.android.application")) {
+if (pluginManager.isAndroidApp()) {
     configureAndroidApp()
-} else if (pluginManager.hasPlugin("com.android.library")) {
+} else if (pluginManager.isAndroidLibrary()) {
     configureAndroidLibrary()
 }
 
@@ -149,6 +152,9 @@ fun registerAndroidJacocoTask(
 ) = tasks.register<JacocoReport>(
     "combine${titleCaseVariant}JacocoReports"
 ) {
+    group = "verification"
+    description =
+        "Merges all available jacoco data into a report in 'build/reports/coverage/combined'."
     configureJacocoExecutionData()
 
     kotlinSources?.let {

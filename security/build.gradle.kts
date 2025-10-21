@@ -28,3 +28,16 @@ android {
         }
     }
 }
+mavenPublishingConfig {
+    mavenConfigBlock {
+        name.set(
+            "GOV.UK One Login Wallet Sharing: Digital Credential securities"
+        )
+        description.set(
+            """
+            Provides functionality that ensures digital credentials passed between credential
+            holders and credential verifiers are done in a secure manner.
+            """.trimIndent()
+        )
+    }
+}

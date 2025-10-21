@@ -29,3 +29,16 @@ android {
         }
     }
 }
+mavenPublishingConfig {
+    mavenConfigBlock {
+        name.set(
+            "GOV.UK One Login Wallet Sharing: Credential Verifier"
+        )
+        description.set(
+            """
+            Provides functionality for apps to validate digital identification
+            credentials. This acts as the assurance mechanism for compliant digital credentials.
+            """.trimIndent()
+        )
+    }
+}

@@ -3,14 +3,16 @@ package uk.gov.onelogin.sharing.plugins.lint
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.Lint
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidApp
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidLibrary
 
-if (pluginManager.hasPlugin("com.android.application")) {
+if (pluginManager.isAndroidApp()) {
     configure<ApplicationExtension> {
         lint {
             configureAndroidLinting()
         }
     }
-} else if (pluginManager.hasPlugin("com.android.library")) {
+} else if (pluginManager.isAndroidLibrary()) {
     configure<LibraryExtension> {
         lint {
             configureAndroidLinting()

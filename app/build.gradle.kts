@@ -10,13 +10,15 @@ plugins {
         libs.plugins.android.lint.config,
         libs.plugins.spotless.config,
         libs.plugins.detekt.config,
-        libs.plugins.test.coverage
+        libs.plugins.test.coverage,
+        libs.plugins.sonar.module.config
     ).forEach { alias(it) }
 }
 
 val androidCompileSdk: Int by rootProject.extra
 val androidMinSdk: Int by rootProject.extra
 val androidTargetSdk: Int by rootProject.extra
+val androidVersionCode: Int by rootProject.extra
 val namespacePrefix: String by rootProject.extra
 
 private val appId = "$namespacePrefix.testapp"
@@ -29,8 +31,8 @@ android {
         applicationId = appId
         minSdk = androidMinSdk
         targetSdk = androidTargetSdk
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = androidVersionCode
+        versionName = project.version.toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
