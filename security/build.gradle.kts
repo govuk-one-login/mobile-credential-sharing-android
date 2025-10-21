@@ -31,12 +31,12 @@ android {
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(
-            "GOV.UK One Login CRI Orchestrator SDK Public API"
+            "GOV.UK One Login Wallet Sharing: Digital Credential securities"
         )
         description.set(
             """
-            The Credential Issuer (CRI) Orchestrator coordinates identity proofing capability.
-            This module contains the public API used to interface with the CRI Orchestrator
+            Provides functionality that ensures digital credentials passed between credential
+            holders and credential verifiers are done in a secure manner.
             """.trimIndent()
         )
     }

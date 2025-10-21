@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.plugins
 
+import uk.gov.onelogin.sharing.plugins.publishing.PublishingCustomTasks.createLocalBuildMavenRepositoryTask
+
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 listOf(
@@ -63,3 +65,5 @@ dependencies {
         testImplementation(it)
     }
 }
+
+createLocalBuildMavenRepositoryTask()

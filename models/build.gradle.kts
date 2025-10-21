@@ -27,12 +27,12 @@ tasks.jacocoTestReport {
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(
-            "GOV.UK One Login CRI Orchestrator SDK Public API"
+            "GOV.UK One Login Wallet Sharing: Digital Credential models"
         )
         description.set(
             """
-            The Credential Issuer (CRI) Orchestrator coordinates identity proofing capability.
-            This module contains the public API used to interface with the CRI Orchestrator
+            Provides data structures for digital credentials passed between credential holders and
+            credential verifiers.
             """.trimIndent()
         )
     }
