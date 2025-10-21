@@ -8,8 +8,8 @@ registries:
   github-maven:
     type: maven-repository
     url: https://maven.pkg.github.com/govuk-one-login/*
-    username: ${{ github.actor }}
-    password: ${{ secrets.GITHUB_TOKEN }}
+    username: ${{ secrets.MODULE_FETCH_TOKEN_USERNAME }}
+    password: ${{ secrets.MODULE_FETCH_TOKEN }}
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
