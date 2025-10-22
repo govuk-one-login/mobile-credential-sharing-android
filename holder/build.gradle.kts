@@ -42,3 +42,9 @@ mavenPublishingConfig {
         )
     }
 }
+
+dependencies {
+    listOf(
+        libs.zxing.core
+    ).forEach(::implementation)
+}
