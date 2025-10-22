@@ -29,3 +29,17 @@ android {
         }
     }
 }
+
+mavenPublishingConfig {
+    mavenConfigBlock {
+        name.set(
+            "GOV.UK One Login Wallet Sharing: Bluetooth"
+        )
+        description.set(
+            """
+            A module for handling the connections between devices when sharing
+            digital credentials.
+            """.trimIndent()
+        )
+    }
+}

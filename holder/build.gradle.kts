@@ -29,6 +29,19 @@ android {
         }
     }
 }
+mavenPublishingConfig {
+    mavenConfigBlock {
+        name.set(
+            "GOV.UK One Login Wallet Sharing: Credential Holder"
+        )
+        description.set(
+            """
+            Provides functionality for apps to contain digital identification
+            credentials. This acts as the data source.
+            """.trimIndent()
+        )
+    }
+}
 
 dependencies {
     listOf(
