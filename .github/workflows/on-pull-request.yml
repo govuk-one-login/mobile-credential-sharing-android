@@ -68,5 +68,10 @@ jobs:
         run: |
           ./scripts/test/all
 
+      - name: Sonar scan
+        uses: ./mobile-android-pipelines/actions/sonar-scan
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+
       - name: Clean workspace
         uses: ./mobile-android-pipelines/actions/clean-workspace
