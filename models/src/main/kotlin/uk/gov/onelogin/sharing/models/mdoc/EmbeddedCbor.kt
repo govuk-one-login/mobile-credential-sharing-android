@@ -16,7 +16,11 @@ class EmbeddedCborSerializer : StdSerializer<EmbeddedCbor>(EmbeddedCbor::class.j
     ) {
         val cborGen = gen as? CBORGenerator
             ?: error("EmbeddedCbor requires CBORGenerator")
-        cborGen.writeTag(24)
+        cborGen.writeTag(EMBEDDED_CBOR_TAG)
         cborGen.writeBinary(value.encoded)
+    }
+
+    companion object {
+        const val EMBEDDED_CBOR_TAG = 24
     }
 }
