@@ -7,13 +7,18 @@ import tools.jackson.databind.ser.std.StdSerializer
 import tools.jackson.dataformat.cbor.CBORFactory
 import tools.jackson.dataformat.cbor.CBORMapper
 import tools.jackson.module.kotlin.KotlinModule
+import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCborSerializer
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptionsSerializer
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethodSerializer
+import uk.gov.onelogin.sharing.models.mdoc.security.Security
+import uk.gov.onelogin.sharing.models.mdoc.security.SecuritySerializer
 
 data class DeviceEngagement(
     val version: String,
+    val security: Security,
     val deviceRetrievalMethods: List<DeviceRetrievalMethod>
 )
 
@@ -29,6 +34,8 @@ class DeviceEngagementSerializer :
         gen.writeStartObject()
         gen.writeName("0")
         gen.writeString(value.version)
+        gen.writeName("1")
+        provider.writeValue(gen, value.security)
         gen.writeName("2")
         gen.writeStartArray()
         value.deviceRetrievalMethods.forEach {
@@ -46,6 +53,8 @@ object DeviceEngagementCbor {
             SimpleModule().apply {
                 addSerializer(DeviceEngagement::class.java, DeviceEngagementSerializer())
                 addSerializer(BleOptions::class.java, BleOptionsSerializer())
+                addSerializer(Security::class.java, SecuritySerializer())
+                addSerializer(EmbeddedCbor::class.java, EmbeddedCborSerializer())
                 addSerializer(
                     DeviceRetrievalMethod::class.java,
                     DeviceRetrievalMethodSerializer()

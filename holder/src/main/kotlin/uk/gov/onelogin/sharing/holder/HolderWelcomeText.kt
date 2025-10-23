@@ -5,9 +5,11 @@ import android.util.Log
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementCbor
+import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 @Composable
 fun HolderWelcomeText(modifier: Modifier = Modifier) {
@@ -20,8 +22,13 @@ fun HolderWelcomeText(modifier: Modifier = Modifier) {
 }
 
 private fun test() {
+    val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
     val deviceEngagement = DeviceEngagement(
         "1.0",
+        Security(
+            1,
+            EmbeddedCbor(fakeKeyBytes)
+        ),
         listOf(
             BleDeviceRetrievalMethod()
         )
