@@ -6,30 +6,18 @@ import kotlin.test.assertEquals
 import org.junit.Test
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.databind.node.JsonNodeFactory
-import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod.Companion.BLE_TYPE
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod.Companion.BLE_VERSION
-import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 class DeviceEngagementTest {
-    private val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
+    private val uuid = "11111111-2222-3333-4444-555555555555"
     private val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
-    private val deviceEngagement = DeviceEngagement(
-        version = "1.0",
-        security = Security(
-            cipherSuiteIdentifier = 1,
-            eDeviceKeyBytes = EmbeddedCbor(fakeKeyBytes)
-        ),
-        deviceRetrievalMethods = listOf(
-            BleDeviceRetrievalMethod(
-                options = BleOptions(
-                    peripheralServerModeUuid = EmbeddedCbor(uuidBytes)
-                )
-            )
-        )
-    )
+
+    private val deviceEngagement = DeviceEngagement.builder()
+        .version("1.0")
+        .security(fakeKeyBytes, 1)
+        .ble(peripheralUuid = uuid)
+        .build()
 
     @Test
     fun `encode DeviceEngagement to expected base64 string`() {
@@ -44,7 +32,6 @@ class DeviceEngagementTest {
 
     @Test
     fun `encode DeviceEngagement to expected json structure`() {
-        val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
         val fakeCipherId = 1
 
         val mapper = CborMappers.default()
@@ -56,7 +43,7 @@ class DeviceEngagementTest {
         val expectedOptions = jsonNodeFactory.objectNode()
             .put("0", true)
             .put("1", false)
-            .put("10", uuidBytes)
+            .put("10", uuid.toByteArray())
 
         val expectedDrm = jsonNodeFactory.arrayNode()
             .add(BLE_TYPE)
