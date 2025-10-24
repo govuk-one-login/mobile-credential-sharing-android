@@ -14,9 +14,9 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrieva
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 class DeviceEngagementTest {
-    val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
-    val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
-    val deviceEngagement = DeviceEngagement(
+    private val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
+    private val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
+    private val deviceEngagement = DeviceEngagement(
         version = "1.0",
         security = Security(
             cipherSuiteIdentifier = 1,

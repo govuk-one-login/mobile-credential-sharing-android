@@ -13,6 +13,12 @@ import tools.jackson.module.kotlin.KotlinModule
 import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
 
 class SecurityTest {
+    private val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
+    private val fakeCipherId = 1
+    private val security = Security(
+        fakeCipherId,
+        EmbeddedCbor(fakeKeyBytes)
+    )
 
     private fun testMapper(): ObjectMapper = CBORMapper.builder(CBORFactory())
         .addModule(KotlinModule.Builder().build())
@@ -25,12 +31,6 @@ class SecurityTest {
 
     @Test
     fun `encode Security to expected base64 string`() {
-        val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
-        val security = Security(
-            1,
-            EmbeddedCbor(fakeKeyBytes)
-        )
-
         val encoded = testMapper().writeValueAsBytes(security)
         val base64 = Base64.getEncoder().encodeToString(encoded)
 
@@ -41,14 +41,6 @@ class SecurityTest {
 
     @Test
     fun `encode Security to expected json structure`() {
-        val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
-        val fakeCipherId = 1
-
-        val security = Security(
-            fakeCipherId,
-            EmbeddedCbor(fakeKeyBytes)
-        )
-
         val mapper = testMapper()
         val cborBytes = mapper.writeValueAsBytes(security)
         val actualNode = mapper.readTree(cborBytes)

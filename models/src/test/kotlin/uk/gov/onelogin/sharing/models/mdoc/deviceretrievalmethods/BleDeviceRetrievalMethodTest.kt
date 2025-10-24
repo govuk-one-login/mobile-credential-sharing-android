@@ -17,6 +17,17 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrieva
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod.Companion.BLE_VERSION
 
 class BleDeviceRetrievalMethodTest {
+    private val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
+    private val bleDeviceRetrievalMethod =
+        BleDeviceRetrievalMethod(
+            type = BLE_TYPE,
+            version = BLE_VERSION,
+            options = BleOptions(
+                serverMode = true,
+                clientMode = false,
+                peripheralServerModeUuid = EmbeddedCbor(uuidBytes)
+            )
+        )
 
     private fun testMapper(): ObjectMapper = CBORMapper.builder(CBORFactory())
         .addModule(KotlinModule.Builder().build())
@@ -37,19 +48,6 @@ class BleDeviceRetrievalMethodTest {
 
     @Test
     fun `encode BleDeviceRetrievalMethod to expected base64 string`() {
-        val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
-
-        val bleDeviceRetrievalMethod =
-            BleDeviceRetrievalMethod(
-                type = BLE_TYPE,
-                version = BLE_VERSION,
-                options = BleOptions(
-                    serverMode = true,
-                    clientMode = false,
-                    peripheralServerModeUuid = EmbeddedCbor(uuidBytes)
-                )
-            )
-
         val encoded = testMapper().writeValueAsBytes(bleDeviceRetrievalMethod)
         val base64 = Base64.getEncoder().encodeToString(encoded)
 
@@ -60,19 +58,6 @@ class BleDeviceRetrievalMethodTest {
 
     @Test
     fun `encode BleDeviceRetrievalMethod to expected json structure`() {
-        val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
-
-        val bleDeviceRetrievalMethod =
-            BleDeviceRetrievalMethod(
-                type = BLE_TYPE,
-                version = BLE_VERSION,
-                options = BleOptions(
-                    serverMode = true,
-                    clientMode = false,
-                    peripheralServerModeUuid = EmbeddedCbor(uuidBytes)
-                )
-            )
-
         val mapper = testMapper()
         val cborBytes = mapper.writeValueAsBytes(bleDeviceRetrievalMethod)
         val actualNode = mapper.readTree(cborBytes)

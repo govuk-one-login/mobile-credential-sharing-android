@@ -15,6 +15,12 @@ import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCborSerializer
 
 class BleOptionsTest {
+    private val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
+    private val bleOptions = BleOptions(
+        serverMode = true,
+        clientMode = false,
+        peripheralServerModeUuid = EmbeddedCbor(uuidBytes)
+    )
 
     private fun testMapper(): ObjectMapper = CBORMapper.builder(CBORFactory())
         .addModule(KotlinModule.Builder().build())
@@ -28,14 +34,6 @@ class BleOptionsTest {
 
     @Test
     fun `encode BleOptions to expected base64 string`() {
-        val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
-
-        val bleOptions = BleOptions(
-            serverMode = true,
-            clientMode = false,
-            peripheralServerModeUuid = EmbeddedCbor(uuidBytes)
-        )
-
         val encoded = testMapper().writeValueAsBytes(bleOptions)
         val base64 = Base64.getEncoder().encodeToString(encoded)
 
@@ -46,14 +44,6 @@ class BleOptionsTest {
 
     @Test
     fun `encode BleOptions to expected json structure`() {
-        val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()
-
-        val bleOptions = BleOptions(
-            serverMode = true,
-            clientMode = false,
-            peripheralServerModeUuid = EmbeddedCbor(uuidBytes)
-        )
-
         val mapper = testMapper()
         val cborBytes = mapper.writeValueAsBytes(bleOptions)
         val actualNode = mapper.readTree(cborBytes)
