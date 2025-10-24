@@ -6,7 +6,15 @@ plugins {
 
 dependencies {
     listOf(
-        libs.junit
+        libs.jackson.cbor,
+        libs.jackson.kotlin
+    ).forEach(::implementation)
+}
+
+dependencies {
+    listOf(
+        libs.junit,
+        libs.kotlin.test
     ).forEach(::testImplementation)
 }
 
