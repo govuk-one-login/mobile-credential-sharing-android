@@ -8,11 +8,6 @@ sealed interface DeviceRetrievalMethod {
     val type: Int
     val version: Int
     val options: Any?
-
-    companion object {
-        const val BLE_TYPE = 2
-        const val BLE_VERSION = 1
-    }
 }
 
 class DeviceRetrievalMethodSerializer :

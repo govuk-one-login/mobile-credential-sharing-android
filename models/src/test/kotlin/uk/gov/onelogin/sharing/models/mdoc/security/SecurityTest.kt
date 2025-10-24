@@ -10,7 +10,7 @@ import tools.jackson.databind.node.JsonNodeFactory
 import tools.jackson.dataformat.cbor.CBORFactory
 import tools.jackson.dataformat.cbor.CBORMapper
 import tools.jackson.module.kotlin.KotlinModule
-import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor
 
 class SecurityTest {
     private val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()

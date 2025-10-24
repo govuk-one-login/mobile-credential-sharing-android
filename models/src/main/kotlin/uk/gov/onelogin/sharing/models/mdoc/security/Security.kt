@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.models.mdoc.security
 import tools.jackson.core.JsonGenerator
 import tools.jackson.databind.SerializationContext
 import tools.jackson.databind.ser.std.StdSerializer
-import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor
 
 data class Security(val cipherSuiteIdentifier: Int, val eDeviceKeyBytes: EmbeddedCbor)
 

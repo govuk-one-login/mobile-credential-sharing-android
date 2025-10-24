@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.models.mdoc
+package uk.gov.onelogin.sharing.models.mdoc.cbor
 
 import tools.jackson.core.JsonGenerator
 import tools.jackson.databind.SerializationContext

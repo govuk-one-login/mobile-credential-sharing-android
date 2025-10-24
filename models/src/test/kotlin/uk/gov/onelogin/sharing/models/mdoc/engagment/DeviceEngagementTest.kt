@@ -6,8 +6,9 @@ import kotlin.test.assertEquals
 import org.junit.Test
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.databind.node.JsonNodeFactory
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod.Companion.BLE_TYPE
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod.Companion.BLE_VERSION
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMappers
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_TYPE
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_VERSION
 
 class DeviceEngagementTest {
     private val uuid = "11111111-2222-3333-4444-555555555555"
@@ -57,7 +58,7 @@ class DeviceEngagementTest {
             .add(fakeKeyBytes)
 
         val expectedEngagement = jsonNodeFactory.objectNode()
-            .put("0", "1.0") // version
+            .put("0", "1.0")
             .set("1", expectedSecurity)
             .set("2", expectedDrms)
 

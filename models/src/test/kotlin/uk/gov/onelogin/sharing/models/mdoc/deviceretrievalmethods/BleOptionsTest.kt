@@ -11,8 +11,8 @@ import tools.jackson.databind.node.JsonNodeFactory
 import tools.jackson.dataformat.cbor.CBORFactory
 import tools.jackson.dataformat.cbor.CBORMapper
 import tools.jackson.module.kotlin.KotlinModule
-import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
-import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCborSerializer
 
 class BleOptionsTest {
     private val uuidBytes = "11111111-2222-3333-4444-555555555555".toByteArray()

@@ -5,6 +5,4 @@ package uk.gov.onelogin.sharing.models
  *
  * Remove once there's meaningful code here.
  */
-object DummyObject {
-    val myClassInstance = MyClass()
-}
+object DummyObject

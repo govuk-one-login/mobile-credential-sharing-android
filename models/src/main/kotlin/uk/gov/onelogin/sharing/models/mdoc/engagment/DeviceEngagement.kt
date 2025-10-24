@@ -4,7 +4,8 @@ import tools.jackson.core.JsonGenerator
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.SerializationContext
 import tools.jackson.databind.ser.std.StdSerializer
-import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMappers
+import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod

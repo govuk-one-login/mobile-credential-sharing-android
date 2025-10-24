@@ -4,13 +4,18 @@ import java.util.UUID
 import tools.jackson.core.JsonGenerator
 import tools.jackson.databind.SerializationContext
 import tools.jackson.databind.ser.std.StdSerializer
-import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor
 
 data class BleDeviceRetrievalMethod(
-    override val type: Int = 2,
-    override val version: Int = 1,
+    override val type: Int = BLE_TYPE,
+    override val version: Int = BLE_VERSION,
     override val options: BleOptions
-) : DeviceRetrievalMethod
+) : DeviceRetrievalMethod {
+    companion object {
+        const val BLE_TYPE = 2
+        const val BLE_VERSION = 1
+    }
+}
 
 data class BleOptions(
     val serverMode: Boolean = true,
