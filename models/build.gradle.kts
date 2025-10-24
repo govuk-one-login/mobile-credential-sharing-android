@@ -6,7 +6,6 @@ plugins {
 
 dependencies {
     listOf(
-        libs.jackson.databind,
         libs.jackson.cbor,
         libs.jackson.kotlin
     ).forEach(::implementation)
@@ -14,7 +13,8 @@ dependencies {
 
 dependencies {
     listOf(
-        libs.junit
+        libs.junit,
+        libs.kotlin.test
     ).forEach(::testImplementation)
 }
 

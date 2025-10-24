@@ -9,7 +9,7 @@ import uk.gov.onelogin.sharing.models.mdoc.EmbeddedCbor
 data class BleDeviceRetrievalMethod(
     override val type: Int = 2,
     override val version: Int = 1,
-    override val options: BleOptions = BleOptions()
+    override val options: BleOptions
 ) : DeviceRetrievalMethod
 
 data class BleOptions(
