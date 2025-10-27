@@ -17,22 +17,18 @@ data class DeviceEngagement(
     val deviceRetrievalMethods: List<DeviceRetrievalMethod>
 ) {
     companion object {
-        fun builder() = Builder()
+        val mapper: ObjectMapper = CborMappers.default()
+
+        fun builder(security: Security): Builder = Builder(security)
     }
 
-    class Builder {
+    fun encode(): ByteArray = mapper.writeValueAsBytes(this)
+
+    class Builder(private val security: Security) {
         private var version: String = "1.0"
-        private var security: Security? = null
         private val retrievalMethods = mutableListOf<DeviceRetrievalMethod>()
 
         fun version(v: String) = apply { version = v }
-
-        fun security(keyBytes: ByteArray, cipherSuiteId: Int) = apply {
-            security = Security(
-                cipherSuiteIdentifier = cipherSuiteId,
-                eDeviceKeyBytes = EmbeddedCbor(keyBytes)
-            )
-        }
 
         fun ble(serverMode: Boolean = true, clientMode: Boolean = false, peripheralUuid: String) =
             apply {
@@ -45,15 +41,12 @@ data class DeviceEngagement(
             }
 
         fun build(): DeviceEngagement {
-            requireNotNull(security) {
-                "Security must be provided"
-            }
             require(retrievalMethods.isNotEmpty()) {
                 "At least one retrieval method required"
             }
             return DeviceEngagement(
                 version = version,
-                security = security!!,
+                security = security,
                 deviceRetrievalMethods = retrievalMethods
             )
         }
@@ -82,11 +75,4 @@ class DeviceEngagementSerializer :
         gen.writeEndArray()
         gen.writeEndObject()
     }
-}
-
-object DeviceEngagementCbor {
-    val mapper: ObjectMapper = CborMappers.default()
-
-    fun encode(deviceEngagement: DeviceEngagement): ByteArray =
-        mapper.writeValueAsBytes(deviceEngagement)
 }

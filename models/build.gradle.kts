@@ -13,8 +13,13 @@ dependencies {
 
 dependencies {
     listOf(
-        libs.junit,
-        libs.kotlin.test
+        libs.jackson.cbor
+    ).forEach(::testFixturesImplementation)
+}
+
+dependencies {
+    listOf(
+        libs.junit
     ).forEach(::testImplementation)
 }
 

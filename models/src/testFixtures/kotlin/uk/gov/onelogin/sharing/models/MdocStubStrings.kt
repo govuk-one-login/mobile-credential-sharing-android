@@ -1,0 +1,16 @@
+package uk.gov.onelogin.sharing.models
+
+object MdocStubStrings {
+    const val BLE_EXPECTED_BASE_64 =
+        "nwIBv2Ew9WEx9GIxMNgYWCQxMTExMTExMS0yMjIyLTMzMzMtNDQ0NC01NTU1NTU1NTU1NTX//w=="
+    const val BLE_OPTIONS_EXPECTED_BASE_64 =
+        "v2Ew9WEx9GIxMNgYWCQxMTExMTExMS0yMjIyLTMzMzMtNDQ0NC01NTU1NTU1NTU1NTX/"
+    const val ENGAGEMENT_EXPECTED_BASE_64 =
+        "v2EwYzEuMGExnwHYGFBGQUtFX0VERVZJQ0VfS0VZ/2Eyn58CAb9hMPVhMfRiMTDYGFgkM" +
+            "TExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1/////w=="
+    const val CBOR_STRUCTURE_MATCHES_JSON = "CBOR structure should match expected JSON"
+    const val FAKE_CIPHER_ID = 1
+    const val FAKE_EDEVICE_KEY = "FAKE_EDEVICE_KEY"
+    const val SECURITY_EXPECTED_BASE64 = "nwFQRkFLRV9FREVWSUNFX0tFWf8="
+    const val UUID = "11111111-2222-3333-4444-555555555555"
+}

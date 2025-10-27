@@ -56,9 +56,8 @@ sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-p
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
 uk-gov-pipelines-plugins = { module = "uk.gov.pipelines:plugins" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
-jackson-cbor = { group = "tools.jackson.dataformat", name = "jackson-dataformat-cbor", version.ref = "jackson" }
-jackson-kotlin = { group = "tools.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+jackson-cbor = { module = "tools.jackson.dataformat:jackson-dataformat-cbor", version.ref = "jackson" }
+jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 
 [bundles]
 testing-instrumentation = [
@@ -83,8 +82,7 @@ debug-tooling = [
 testing-unit = [
     "junit",
     "androidx-ui-test-junit4",
-    "org-robolectric",
-    "kotlin-test"
+    "org-robolectric"
 ]
 screenshot-testing = [
     "junit",

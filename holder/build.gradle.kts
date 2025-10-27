@@ -45,10 +45,10 @@ mavenPublishingConfig {
 
 dependencies {
     listOf(
-        libs.zxing.core
-    ).forEach(::implementation)
-
-    listOf(
         projects.models
     ).forEach(::api)
+
+    listOf(
+        libs.zxing.core
+    ).forEach(::implementation)
 }

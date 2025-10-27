@@ -6,20 +6,15 @@ import org.junit.Test
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.databind.module.SimpleModule
-import tools.jackson.databind.node.JsonNodeFactory
 import tools.jackson.dataformat.cbor.CBORFactory
 import tools.jackson.dataformat.cbor.CBORMapper
 import tools.jackson.module.kotlin.KotlinModule
-import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.JSONFactoryStub.securityNodes
+import uk.gov.onelogin.sharing.models.MdocStubStrings.CBOR_STRUCTURE_MATCHES_JSON
+import uk.gov.onelogin.sharing.models.MdocStubStrings.SECURITY_EXPECTED_BASE64
+import uk.gov.onelogin.sharing.models.SecurityTestStub.SECURITY
 
 class SecurityTest {
-    private val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
-    private val fakeCipherId = 1
-    private val security = Security(
-        fakeCipherId,
-        EmbeddedCbor(fakeKeyBytes)
-    )
-
     private fun testMapper(): ObjectMapper = CBORMapper.builder(CBORFactory())
         .addModule(KotlinModule.Builder().build())
         .addModule(
@@ -31,30 +26,21 @@ class SecurityTest {
 
     @Test
     fun `encode Security to expected base64 string`() {
-        val encoded = testMapper().writeValueAsBytes(security)
+        val encoded = testMapper().writeValueAsBytes(SECURITY)
         val base64 = Base64.getEncoder().encodeToString(encoded)
 
-        val expectedBase64 =
-            "nwFQRkFLRV9FREVWSUNFX0tFWf8="
-        assertEquals(expectedBase64, base64)
+        assertEquals(SECURITY_EXPECTED_BASE64, base64)
     }
 
     @Test
     fun `encode Security to expected json structure`() {
         val mapper = testMapper()
-        val cborBytes = mapper.writeValueAsBytes(security)
+        val cborBytes = mapper.writeValueAsBytes(SECURITY)
         val actualNode = mapper.readTree(cborBytes)
 
-        val jsonNodeFactory = JsonNodeFactory.instance
-        val expectedSecurity = jsonNodeFactory.arrayNode()
-            .add(fakeCipherId)
-            .add(fakeKeyBytes)
+        val expectedSecurity = securityNodes()
 
-        kotlin.test.assertEquals(
-            expectedSecurity,
-            actualNode,
-            "CBOR structure should match expected JSON"
-        )
+        assertEquals(CBOR_STRUCTURE_MATCHES_JSON, expectedSecurity, actualNode)
 
         val json = JsonMapper.builder().build()
         val pretty = json.writerWithDefaultPrettyPrinter().writeValueAsString(actualNode)
