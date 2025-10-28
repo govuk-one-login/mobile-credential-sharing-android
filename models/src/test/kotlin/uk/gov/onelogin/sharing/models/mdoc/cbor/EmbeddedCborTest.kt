@@ -7,11 +7,9 @@ import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.module.SimpleModule
 import tools.jackson.dataformat.cbor.CBORFactory
 import tools.jackson.dataformat.cbor.CBORMapper
+import uk.gov.onelogin.sharing.models.BleRetrievalStub.UUID
 import uk.gov.onelogin.sharing.models.EmbeddedCborStub.EXPECTED_BYTES
-import uk.gov.onelogin.sharing.models.MdocStubStrings.UUID
-
 class EmbeddedCborTest {
-
     private fun testMapper(): ObjectMapper {
         val module =
             SimpleModule().addSerializer(EmbeddedCbor::class.java, EmbeddedCborSerializer())

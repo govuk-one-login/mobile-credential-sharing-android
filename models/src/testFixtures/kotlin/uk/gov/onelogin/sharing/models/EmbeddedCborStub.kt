@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.models
 
-import uk.gov.onelogin.sharing.models.MdocStubStrings.UUID
+import uk.gov.onelogin.sharing.models.BleRetrievalStub.UUID
 import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
 
 object EmbeddedCborStub {

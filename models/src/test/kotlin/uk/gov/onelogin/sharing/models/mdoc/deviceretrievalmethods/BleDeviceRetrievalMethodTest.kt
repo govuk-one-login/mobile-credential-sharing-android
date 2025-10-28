@@ -9,10 +9,9 @@ import tools.jackson.databind.module.SimpleModule
 import tools.jackson.dataformat.cbor.CBORFactory
 import tools.jackson.dataformat.cbor.CBORMapper
 import tools.jackson.module.kotlin.KotlinModule
+import uk.gov.onelogin.sharing.models.BleRetrievalStub.BLE_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.models.BleRetrievalStub.BLE_RETRIEVAL_METHOD_SERVER_MODE
-import uk.gov.onelogin.sharing.models.JsonFactoryStub.deviceRetrievalNodes
-import uk.gov.onelogin.sharing.models.MdocStubStrings.BLE_EXPECTED_BASE_64
-import uk.gov.onelogin.sharing.models.MdocStubStrings.CBOR_STRUCTURE_MATCHES_JSON
+import uk.gov.onelogin.sharing.models.DeviceEngagementStub.deviceRetrievalNodes
 import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCborSerializer
 
@@ -50,7 +49,11 @@ class BleDeviceRetrievalMethodTest {
 
         val expectedNodes = deviceRetrievalNodes()
 
-        assertEquals(CBOR_STRUCTURE_MATCHES_JSON, expectedNodes, actualNode)
+        assertEquals(
+            "CBOR structure should match expected JSON",
+            expectedNodes,
+            actualNode
+        )
 
         val json = JsonMapper.builder().build()
         val pretty = json.writerWithDefaultPrettyPrinter().writeValueAsString(actualNode)

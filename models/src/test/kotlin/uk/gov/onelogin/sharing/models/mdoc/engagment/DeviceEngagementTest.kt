@@ -6,10 +6,9 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import tools.jackson.databind.json.JsonMapper
 import uk.gov.onelogin.sharing.models.DeviceEngagementStub.DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.models.DeviceEngagementStub.ENGAGEMENT_EXPECTED_BASE_64
+import uk.gov.onelogin.sharing.models.DeviceEngagementStub.deviceEngagementNodes
 import uk.gov.onelogin.sharing.models.InvalidDeviceEngagementStub.INVALID_DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.models.JsonFactoryStub.deviceEngagementNodes
-import uk.gov.onelogin.sharing.models.MdocStubStrings.CBOR_STRUCTURE_MATCHES_JSON
-import uk.gov.onelogin.sharing.models.MdocStubStrings.ENGAGEMENT_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMappers
 
 class DeviceEngagementTest {
@@ -30,7 +29,7 @@ class DeviceEngagementTest {
         val expectedDeviceEngagement = deviceEngagementNodes()
 
         assertEquals(
-            CBOR_STRUCTURE_MATCHES_JSON,
+            "CBOR structure should match expected JSON",
             expectedDeviceEngagement,
             actualNode
         )
