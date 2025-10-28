@@ -8,7 +8,7 @@ import uk.gov.onelogin.sharing.models.MdocStubStrings.FAKE_EDEVICE_KEY
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_TYPE
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_VERSION
 
-object JSONFactoryStub {
+object JsonFactoryStub {
     private val jsonNodeFactory: JsonNodeFactory = JsonNodeFactory.instance
 
     fun bleOptionNodes(

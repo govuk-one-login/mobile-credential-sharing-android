@@ -10,7 +10,7 @@ import tools.jackson.dataformat.cbor.CBORFactory
 import tools.jackson.dataformat.cbor.CBORMapper
 import tools.jackson.module.kotlin.KotlinModule
 import uk.gov.onelogin.sharing.models.BleRetrievalStub.BLE_RETRIEVAL_METHOD_SERVER_MODE
-import uk.gov.onelogin.sharing.models.JSONFactoryStub.deviceRetrievalNodes
+import uk.gov.onelogin.sharing.models.JsonFactoryStub.deviceRetrievalNodes
 import uk.gov.onelogin.sharing.models.MdocStubStrings.BLE_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.models.MdocStubStrings.CBOR_STRUCTURE_MATCHES_JSON
 import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor

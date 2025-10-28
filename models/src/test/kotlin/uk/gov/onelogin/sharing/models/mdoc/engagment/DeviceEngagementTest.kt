@@ -2,10 +2,12 @@ package uk.gov.onelogin.sharing.models.mdoc.engagment
 
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import tools.jackson.databind.json.JsonMapper
 import uk.gov.onelogin.sharing.models.DeviceEngagementStub.DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.models.JSONFactoryStub.deviceEngagementNodes
+import uk.gov.onelogin.sharing.models.InvalidDeviceEngagementStub.INVALID_DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.models.JsonFactoryStub.deviceEngagementNodes
 import uk.gov.onelogin.sharing.models.MdocStubStrings.CBOR_STRUCTURE_MATCHES_JSON
 import uk.gov.onelogin.sharing.models.MdocStubStrings.ENGAGEMENT_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMappers
@@ -27,10 +29,21 @@ class DeviceEngagementTest {
 
         val expectedDeviceEngagement = deviceEngagementNodes()
 
-        assertEquals(CBOR_STRUCTURE_MATCHES_JSON, expectedDeviceEngagement, actualNode)
+        assertEquals(
+            CBOR_STRUCTURE_MATCHES_JSON,
+            expectedDeviceEngagement,
+            actualNode
+        )
 
         val json = JsonMapper.builder().build()
         val pretty = json.writerWithDefaultPrettyPrinter().writeValueAsString(actualNode)
         println(pretty)
+    }
+
+    @Test
+    fun `ensure DeviceEngagement builder fails when retrieval methods is not provided`() {
+        assertThrows(ExceptionInInitializerError::class.java) {
+            INVALID_DEVICE_ENGAGEMENT.encode()
+        }
     }
 }

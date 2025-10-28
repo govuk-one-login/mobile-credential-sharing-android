@@ -4,10 +4,6 @@ import uk.gov.onelogin.sharing.models.MdocStubStrings.UUID
 import uk.gov.onelogin.sharing.models.SecurityTestStub.SECURITY
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 
-/**
- * Dummy object to provide some content within the test fixtures source set.
- *
- */
 object DeviceEngagementStub {
     private fun deviceEngagementBuilder(): DeviceEngagement.Builder =
         DeviceEngagement.builder(SECURITY)
@@ -15,4 +11,12 @@ object DeviceEngagementStub {
             .ble(peripheralUuid = UUID)
 
     val DEVICE_ENGAGEMENT: DeviceEngagement = deviceEngagementBuilder().build()
+}
+
+object InvalidDeviceEngagementStub {
+    private fun invalidDeviceEngagementBuilder(): DeviceEngagement.Builder =
+        DeviceEngagement.builder(SECURITY)
+
+    val INVALID_DEVICE_ENGAGEMENT: DeviceEngagement =
+        invalidDeviceEngagementBuilder().build()
 }

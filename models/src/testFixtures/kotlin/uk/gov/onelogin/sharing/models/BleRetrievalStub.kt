@@ -7,10 +7,6 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetri
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_VERSION
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 
-/**
- * Dummy object to provide some content within the test fixtures source set.
- *
- */
 object BleRetrievalStub {
 
     val BLE_OPTIONS = BleOptions(

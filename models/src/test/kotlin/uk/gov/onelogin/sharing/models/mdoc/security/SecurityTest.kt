@@ -9,7 +9,7 @@ import tools.jackson.databind.module.SimpleModule
 import tools.jackson.dataformat.cbor.CBORFactory
 import tools.jackson.dataformat.cbor.CBORMapper
 import tools.jackson.module.kotlin.KotlinModule
-import uk.gov.onelogin.sharing.models.JSONFactoryStub.securityNodes
+import uk.gov.onelogin.sharing.models.JsonFactoryStub.securityNodes
 import uk.gov.onelogin.sharing.models.MdocStubStrings.CBOR_STRUCTURE_MATCHES_JSON
 import uk.gov.onelogin.sharing.models.MdocStubStrings.SECURITY_EXPECTED_BASE64
 import uk.gov.onelogin.sharing.models.SecurityTestStub.SECURITY
