@@ -10,7 +10,7 @@ class EngagementGeneratorTest {
 
     @Test
     fun `generates base 64 encoded string for device engagement`() {
-        val engagementString = engagementGenerator.generateEncodedBase64QrEngagement()
+        val engagementString = engagementGenerator.qrCodeEngagement()
         assertNotNull(engagementString)
     }
 }

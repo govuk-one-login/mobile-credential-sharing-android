@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                         val engagement = EngagementGenerator()
                         QrCodeImage(
                             modifier = Modifier,
-                            data = "mdoc://${engagement.generateEncodedBase64QrEngagement()}",
+                            data = "mdoc://${engagement.qrCodeEngagement()}",
                             size = QR_SIZE
                         )
                     }

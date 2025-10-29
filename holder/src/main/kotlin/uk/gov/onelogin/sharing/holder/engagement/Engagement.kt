@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.holder.engagement
 
-interface Engagement {
+fun interface Engagement {
 
-    fun generateEncodedBase64QrEngagement(): String
+    fun qrCodeEngagement(): String
 }

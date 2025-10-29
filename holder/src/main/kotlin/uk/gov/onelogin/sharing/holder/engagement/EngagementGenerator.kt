@@ -7,7 +7,7 @@ import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 class EngagementGenerator : Engagement {
 
-    override fun generateEncodedBase64QrEngagement(): String {
+    override fun qrCodeEngagement(): String {
         val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
         val uuid = "11111111-2222-3333-4444-555555555555"
         val securityObject = Security(
