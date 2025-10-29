@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import uk.gov.onelogin.sharing.holder.HolderWelcomeText
 import uk.gov.onelogin.sharing.holder.QrCodeImage
+import uk.gov.onelogin.sharing.holder.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.testapp.ui.theme.TestAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,9 +23,10 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column {
                         HolderWelcomeText(modifier = Modifier.padding(innerPadding))
+                        val engagement = EngagementGenerator()
                         QrCodeImage(
                             modifier = Modifier,
-                            data = "https://www.gov.uk",
+                            data = "mdoc://${engagement.generateEncodedBase64QrEngagement()}",
                             size = QR_SIZE
                         )
                     }
