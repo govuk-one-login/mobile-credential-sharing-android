@@ -6,7 +6,7 @@ package uk.gov.onelogin.sharing.verifier
  * Remove once there's meaningful code here.
  */
 object QrCodeGenerator {
-    const val QR_CODE_CONTENT_DESC = "QR code to gov.uk"
+    const val QR_CODE_CONTENT_DESC = "QR Code"
     const val QR_CODE_DATA = "www.test.com"
     const val INVALID_QR_CODE_DATA = ""
     const val QR_CODE_SIZE = 300
