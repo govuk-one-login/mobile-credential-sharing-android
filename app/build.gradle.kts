@@ -77,6 +77,7 @@ dependencies {
 
     listOf(
         platform(libs.androidx.compose.bom),
-        libs.bundles.testing.unit
+        libs.bundles.testing.unit,
+        testFixtures(projects.holder)
     ).forEach(::testImplementation)
 }
