@@ -14,7 +14,7 @@ fun HolderWelcomeScreen(modifier: Modifier = Modifier) {
         val engagement = EngagementGenerator()
         QrCodeImage(
             modifier = Modifier,
-            data = "mdoc://${engagement.qrCodeEngagement()}",
+            data = "mdoc:${engagement.qrCodeEngagement()}",
             size = QR_SIZE
         )
     }

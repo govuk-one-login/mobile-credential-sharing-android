@@ -67,7 +67,7 @@ class QrCodeImageTest {
         composeTestRule.setContent {
             QrCodeImage(
                 modifier = Modifier.testTag(testTag),
-                data = "mdoc://${mdocUri.qrCodeEngagement()}",
+                data = "mdoc:${mdocUri.qrCodeEngagement()}",
                 size = QR_CODE_SIZE
             )
         }
