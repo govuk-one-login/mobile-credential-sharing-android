@@ -12,7 +12,7 @@ fun QrCodeImage(data: String, size: Int, modifier: Modifier = Modifier) {
         Image(
             modifier = modifier,
             bitmap = it,
-            contentDescription = "QR code to gov.uk",
+            contentDescription = "QR Code",
             contentScale = ContentScale.Fit
         )
     }

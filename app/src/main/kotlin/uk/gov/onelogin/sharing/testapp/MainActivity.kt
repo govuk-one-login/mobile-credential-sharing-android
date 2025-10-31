@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import uk.gov.onelogin.sharing.holder.HolderWelcomeText
-import uk.gov.onelogin.sharing.holder.QrCodeImage
+import uk.gov.onelogin.sharing.holder.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.testapp.ui.theme.TestAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,20 +19,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             TestAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column {
-                        HolderWelcomeText(modifier = Modifier.padding(innerPadding))
-                        QrCodeImage(
-                            modifier = Modifier,
-                            data = "https://www.gov.uk",
-                            size = QR_SIZE
-                        )
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                    ) {
+                        HolderWelcomeScreen()
                     }
                 }
             }
         }
-    }
-
-    companion object {
-        const val QR_SIZE = 800
     }
 }
