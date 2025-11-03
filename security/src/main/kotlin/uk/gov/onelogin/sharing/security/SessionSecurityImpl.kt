@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.security
 
+import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPairGenerator
+import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
 import java.security.spec.ECGenParameterSpec
 
@@ -22,12 +24,18 @@ class SessionSecurityImpl : SessionSecurity {
      * @return A [PublicKey] object representing the public part of the generated EC key pair,
      * or `null` if the key generation fails.
      */
-    override fun generateEcPublicKey(): PublicKey? {
-        val keyPairGenerator = KeyPairGenerator.getInstance("EC")
-        val ecSpec = ECGenParameterSpec("secp256r1")
+    override fun generateEcPublicKey(algorithm: String, parameterSpec: String): PublicKey? = try {
+        val keyPairGenerator = KeyPairGenerator.getInstance(algorithm)
+        val ecSpec = ECGenParameterSpec(parameterSpec)
         keyPairGenerator.initialize(ecSpec)
         val keyPair = keyPairGenerator.generateKeyPair()
         println(keyPair.public)
-        return keyPair.public
+        keyPair.public
+    } catch (e: NoSuchAlgorithmException) {
+        println(e.message)
+        null
+    } catch (e: InvalidAlgorithmParameterException) {
+        println(e.message)
+        null
     }
 }

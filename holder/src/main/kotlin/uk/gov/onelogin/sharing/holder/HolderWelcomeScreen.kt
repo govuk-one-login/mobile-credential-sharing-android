@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.holder
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_ALGORITHM
+import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.holder.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.security.SessionSecurityImpl
 
@@ -14,7 +16,7 @@ fun HolderWelcomeScreen(modifier: Modifier = Modifier) {
         HolderWelcomeText()
 
         val eDeviceKey = SessionSecurityImpl()
-        eDeviceKey.generateEcPublicKey()
+        eDeviceKey.generateEcPublicKey(EC_ALGORITHM, EC_PARAMETER_SPEC)
 
         val engagement = EngagementGenerator()
         QrCodeImage(
