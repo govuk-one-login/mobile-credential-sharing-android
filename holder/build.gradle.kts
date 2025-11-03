@@ -49,6 +49,7 @@ dependencies {
     ).forEach(::api)
 
     listOf(
-        libs.zxing.core
+        libs.zxing.core,
+        projects.security
     ).forEach(::implementation)
 }
