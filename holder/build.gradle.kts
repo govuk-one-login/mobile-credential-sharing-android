@@ -49,6 +49,7 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        projects.bluetooth,
         libs.zxing.core,
         projects.security
     ).forEach(::implementation)
