@@ -17,7 +17,7 @@ kotlin-symbol-processing = "2.3.1" # https://github.com/google/ksp/releases ; up
 ktlint = "1.6.0" # https://github.com/pinterest/ktlint/releases/
 lifecycleRuntimeKtx = "2.9.4" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
-roborazzi = "1.50.0" # https://github.com/takahirom/roborazzi/releases
+roborazzi = "1.51.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.0.0.6105" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 xzing = "3.5.3" # Changelog https://github.com/zxing/zxing/releases
