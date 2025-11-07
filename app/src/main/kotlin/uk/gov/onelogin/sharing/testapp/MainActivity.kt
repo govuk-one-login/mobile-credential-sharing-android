@@ -2,14 +2,12 @@ package uk.gov.onelogin.sharing.testapp
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -46,6 +44,10 @@ class MainActivity : ComponentActivity() {
 
     // This will be updated in - https://govukverify.atlassian.net/browse/DCMAW-16531
     private fun requestPermissions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return
+        }
+
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.BLUETOOTH_ADVERTISE
@@ -57,7 +59,6 @@ class MainActivity : ComponentActivity() {
         requestBluetoothPermissions()
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     private fun requestBluetoothPermissions() = runOnUiThread {
         AlertDialog.Builder(this)
             .setTitle("Bluetooth permission required")

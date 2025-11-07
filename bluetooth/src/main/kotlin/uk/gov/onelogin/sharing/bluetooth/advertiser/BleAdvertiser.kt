@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.bluetooth.advertiser
 
 import android.Manifest
-import android.bluetooth.le.AdvertisingSetParameters
 import kotlinx.coroutines.flow.StateFlow
+import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
 
 /**
  * Handles advertising BLE service
@@ -20,10 +20,7 @@ interface BleAdvertiser {
      * @return [AdvertiserStartResult] The result of the start advertising operation.
      * Monitor [state] to confirm the service has successfully started advertising.
      */
-    suspend fun startAdvertise(
-        payload: Payload,
-        parameters: AdvertisingSetParameters,
-    ): AdvertiserStartResult
+    suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData): AdvertiserStartResult
 
     /**
      * Stop advertising the BLE service.
@@ -39,7 +36,6 @@ interface BleAdvertiser {
      * Check if the bluetooth adapter has the [Manifest.permission.BLUETOOTH_ADVERTISE] permission.
      */
     fun hasAdvertisePermission(): Boolean
-
 
     val state: StateFlow<AdvertiserState>
 
