@@ -15,6 +15,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
+import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.verifier.EngagementGeneratorStub.Companion.BASE64_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.INVALID_QR_CODE_DATA
 import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.QR_CODE_CONTENT_DESC
@@ -65,9 +67,12 @@ class QrCodeImageTest {
     fun displaysQrCodeWithBase64EngagementCode() {
         val mdocUri = Engagement { BASE64_ENCODED_DEVICE_ENGAGEMENT }
         composeTestRule.setContent {
+            val key = generateValidKeyPair()
+            val coseKey = CoseKey.generateCoseKey(key!!)
+
             QrCodeImage(
                 modifier = Modifier.testTag(testTag),
-                data = "mdoc:${mdocUri.qrCodeEngagement()}",
+                data = "mdoc:${mdocUri.qrCodeEngagement(coseKey)}",
                 size = QR_CODE_SIZE
             )
         }
