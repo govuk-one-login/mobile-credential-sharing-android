@@ -11,9 +11,11 @@ import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.ble.BleProvider
+import uk.gov.onelogin.sharing.bluetooth.permissions.PermissionChecker
 
 class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
+    private val permissionChecker: PermissionChecker,
     private val startTimeoutMs: Long = 5_000
 ) : BleAdvertiser {
 
@@ -23,7 +25,7 @@ class AndroidBleAdvertiser(
     private var currentCallback: AdvertisingCallback? = null
 
     override fun isBluetoothEnabled() = bleProvider.isBluetoothEnabled()
-    override fun hasAdvertisePermission() = bleProvider.hasAdvertisePermission()
+    override fun hasAdvertisePermission() = permissionChecker.hasPermission()
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData): AdvertiserStartResult =
         when {
@@ -31,7 +33,7 @@ class AndroidBleAdvertiser(
                 AdvertiserStartResult.Error("Bluetooth is disabled")
             }
 
-            !bleProvider.hasAdvertisePermission() -> {
+            !permissionChecker.hasPermission() -> {
                 AdvertiserStartResult.Error("Missing permissions")
             }
 
@@ -50,6 +52,7 @@ class AndroidBleAdvertiser(
                     println("start failed")
                     AdvertiserStartResult.Error(e.message ?: "Advertising start timed out")
                 } catch (e: IllegalStateException) {
+                    println("start failed")
                     AdvertiserStartResult.Error(e.message ?: "Failed to start advertising")
                 }
             }
@@ -64,7 +67,10 @@ class AndroidBleAdvertiser(
                 }
 
                 override fun onAdvertisingFailed(status: Int) {
-                    _state.value = AdvertiserState.Failed("start failed: status=$status")
+                    _state.value = AdvertiserState.Failed("start failed: status = $status")
+                    continuation.resumeWithException(
+                        IllegalStateException("start failed: status = $status")
+                    )
                 }
 
                 override fun onAdvertisingStopped() {
@@ -92,14 +98,15 @@ class AndroidBleAdvertiser(
             }
 
             continuation.invokeOnCancellation {
-                bleProvider.stopAdvertisingSet(currentCallback)
+                _state.value = AdvertiserState.Stopping
+                bleProvider.stopAdvertisingSet()
                 currentCallback = null
             }
         }
 
     override suspend fun stopAdvertise() {
         _state.value = AdvertiserState.Stopping
-        runCatching { bleProvider.stopAdvertisingSet(currentCallback) }
+        runCatching { bleProvider.stopAdvertisingSet() }
         currentCallback = null
         _state.value = AdvertiserState.Stopped
     }

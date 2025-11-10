@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.bluetooth.advertiser
 
-import android.Manifest
 import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
 
@@ -33,13 +32,14 @@ interface BleAdvertiser {
     fun isBluetoothEnabled(): Boolean
 
     /**
-     * Check if the bluetooth adapter has the [Manifest.permission.BLUETOOTH_ADVERTISE] permission.
+     * Check if the bluetooth adapter has the
+     * [android.Manifest.permission.BLUETOOTH_ADVERTISE] permission.
      */
     fun hasAdvertisePermission(): Boolean
 
     val state: StateFlow<AdvertiserState>
 
-    interface Payload {
+    fun interface Payload {
         fun asBytes(): ByteArray
     }
 }

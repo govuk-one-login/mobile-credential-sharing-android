@@ -22,6 +22,7 @@ sonarqube = "7.0.0.6105" # https://github.com/SonarSource/sonar-scanner-gradle/r
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 xzing = "3.5.3" # Changelog https://github.com/zxing/zxing/releases
 jackson = "3.0.1" # https://github.com/FasterXML/jackson
+turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -58,6 +59,7 @@ uk-gov-pipelines-plugins = { module = "uk.gov.pipelines:plugins" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
 jackson-cbor = { module = "tools.jackson.dataformat:jackson-dataformat-cbor", version.ref = "jackson" }
 jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+app-cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [bundles]
 testing-instrumentation = [
@@ -82,7 +84,8 @@ debug-tooling = [
 testing-unit = [
     "junit",
     "androidx-ui-test-junit4",
-    "org-robolectric"
+    "app-cash-turbine",
+    "org-robolectric",
 ]
 screenshot-testing = [
     "junit",

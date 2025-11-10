@@ -9,12 +9,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import java.util.UUID
+import uk.gov.onelogin.sharing.bluetooth.AndroidBluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.AndroidBluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.advertiser.AdvertiserStartResult
 import uk.gov.onelogin.sharing.bluetooth.advertiser.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.advertiser.AndroidBleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.advertiser.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.ble.AndroidBleProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_ALGORITHM
 import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.holder.engagement.EngagementGenerator
@@ -40,9 +42,15 @@ fun HolderWelcomeScreen(modifier: Modifier = Modifier) {
             size = QR_SIZE
         )
 
+        val bluetoothAdapterProvider = AndroidBluetoothAdapterProvider(context)
+
         val bleAdvertiser = remember {
             AndroidBleAdvertiser(
-                bleProvider = AndroidBleProvider(context)
+                bleProvider = AndroidBleProvider(
+                    bluetoothAdapter = bluetoothAdapterProvider,
+                    bleAdvertiser = AndroidBluetoothAdvertiserProvider(bluetoothAdapterProvider)
+                ),
+                permissionChecker = BluetoothPermissionChecker(context)
             )
         }
 
@@ -51,9 +59,7 @@ fun HolderWelcomeScreen(modifier: Modifier = Modifier) {
         LaunchedEffect(Unit) {
             val result = bleAdvertiser.startAdvertise(
                 BleAdvertiseData(
-                    payload = object : BleAdvertiser.Payload {
-                        override fun asBytes(): ByteArray = engagementData.toByteArray()
-                    },
+                    payload = { engagementData.toByteArray() },
                     serviceUuid = UUID.fromString("00000000-0000-0000-0000-000000000001")
                 )
             )
