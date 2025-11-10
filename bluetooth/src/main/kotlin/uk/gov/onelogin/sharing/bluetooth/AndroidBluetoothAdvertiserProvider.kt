@@ -8,6 +8,7 @@ import android.os.ParcelUuid
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.ble.Status
 
 class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: BluetoothAdapterProvider) :
     BluetoothAdvertiserProvider {
@@ -18,6 +19,11 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
         bleAdvertiseData: BleAdvertiseData,
         callback: AdvertisingCallback
     ) {
+        if (currentCallback != null) {
+            callback.onAdvertisingFailed(Status.AlreadyStarted)
+            return
+        }
+
         currentCallback = object : AdvertisingSetCallback() {
             override fun onAdvertisingSetStarted(
                 advertisingSet: AdvertisingSet?,
@@ -27,7 +33,7 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
                 if (status == ADVERTISE_SUCCESS) {
                     callback.onAdvertisingStarted()
                 } else {
-                    callback.onAdvertisingFailed(status)
+                    callback.onAdvertisingFailed(Status.Error(status))
                 }
             }
 
@@ -69,8 +75,9 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
     override fun stopAdvertisingSet() {
         try {
             bluetoothAdapter.getAdvertiser()?.stopAdvertisingSet(currentCallback)
-        } catch (e: SecurityException) {
-            println(e.message)
+        } catch (_: SecurityException) {
+        } finally {
+            currentCallback = null
         }
     }
 }

@@ -29,7 +29,7 @@ class FakeBleProvider : BleProvider {
     }
 
     fun triggerOnAdvertisingFailed(status: Int) {
-        callback?.onAdvertisingFailed(status)
+        callback?.onAdvertisingFailed(Status.Error(status))
     }
 
     fun triggerOnAdvertisingStopped() {

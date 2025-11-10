@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.testapp
 
 import android.Manifest
+import android.annotation.TargetApi
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Build
@@ -43,6 +44,7 @@ class MainActivity : ComponentActivity() {
     }
 
     // This will be updated in - https://govukverify.atlassian.net/browse/DCMAW-16531
+    @TargetApi(Build.VERSION_CODES.S)
     private fun requestPermissions() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return
