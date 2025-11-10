@@ -37,10 +37,6 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
-        libs.junit
-    ).forEach(::testImplementation)
-
-    listOf(
         libs.jackson.cbor,
         projects.security,
         projects.models
