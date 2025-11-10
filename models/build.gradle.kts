@@ -6,19 +6,6 @@ plugins {
 
 dependencies {
     listOf(
-        libs.jackson.cbor,
-        libs.jackson.kotlin
-    ).forEach(::implementation)
-}
-
-dependencies {
-    listOf(
-        libs.jackson.cbor
-    ).forEach(::testFixturesImplementation)
-}
-
-dependencies {
-    listOf(
         libs.junit
     ).forEach(::testImplementation)
 }

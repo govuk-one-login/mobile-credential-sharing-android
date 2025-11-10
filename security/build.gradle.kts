@@ -28,6 +28,21 @@ android {
         }
     }
 }
+
+dependencies {
+    listOf(
+        libs.jackson.cbor,
+        libs.jackson.kotlin,
+        projects.models
+    ).forEach(::implementation)
+
+    listOf(
+        libs.jackson.cbor,
+        projects.security,
+        projects.models
+    ).forEach(::testFixturesImplementation)
+}
+
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(

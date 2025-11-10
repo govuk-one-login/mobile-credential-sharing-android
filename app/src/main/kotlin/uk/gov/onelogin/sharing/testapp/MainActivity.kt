@@ -16,7 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import uk.gov.onelogin.sharing.holder.HolderWelcomeScreen
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.testapp.ui.theme.TestAppTheme
 
 class MainActivity : ComponentActivity() {

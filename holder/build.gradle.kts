@@ -53,4 +53,8 @@ dependencies {
         libs.zxing.core,
         projects.security
     ).forEach(::implementation)
+
+    listOf(
+        testFixtures(projects.security)
+    ).forEach(::testImplementation)
 }
