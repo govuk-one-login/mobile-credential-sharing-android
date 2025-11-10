@@ -1,9 +1,11 @@
 package uk.gov.onelogin.sharing.holder.engagement
 
 import java.util.Base64
-import uk.gov.onelogin.sharing.models.mdoc.cbor.EmbeddedCbor
+import java.util.UUID
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
+import uk.gov.onelogin.sharing.security.cbor.encode
+import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 /**
  * Generates device engagement data for establishing a connection between mDoc holder
@@ -18,12 +20,12 @@ class EngagementGenerator : Engagement {
      *   @return A [String] containing the Base64Url encoded CBOR representation of Device Engagement
      *   data
      */
-    override fun qrCodeEngagement(): String {
-        val fakeKeyBytes = "FAKE_EDEVICE_KEY".toByteArray()
-        val uuid = "11111111-2222-3333-4444-555555555555"
+    override fun qrCodeEngagement(key: CoseKey): String {
+        val eDeviceKey = key.encode()
+        val uuid = UUID.fromString("11111111-2222-3333-4444-555555555555")
         val securityObject = Security(
             cipherSuiteIdentifier = 1,
-            eDeviceKeyBytes = EmbeddedCbor(fakeKeyBytes)
+            eDeviceKeyBytes = eDeviceKey
         )
 
         val deviceEngagement = DeviceEngagement.builder(securityObject)
@@ -33,6 +35,7 @@ class EngagementGenerator : Engagement {
 
         val bytes = deviceEngagement.encode()
         val base64 = Base64.getUrlEncoder().encodeToString(bytes)
+        println(base64)
 
         return base64
     }

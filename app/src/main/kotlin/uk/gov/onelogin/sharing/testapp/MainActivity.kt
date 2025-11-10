@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import uk.gov.onelogin.sharing.holder.HolderWelcomeScreen
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.testapp.ui.theme.TestAppTheme
 
 class MainActivity : ComponentActivity() {
