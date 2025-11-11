@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.ble
 
-import uk.gov.onelogin.sharing.bluetooth.advertiser.BleAdvertiser
 import java.util.UUID
+import uk.gov.onelogin.sharing.bluetooth.advertiser.BleAdvertiser
 
 fun stubBleAdvertiseData(
     payload: BleAdvertiser.Payload = object : BleAdvertiser.Payload {

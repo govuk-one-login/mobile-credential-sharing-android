@@ -11,6 +11,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.ble.BleProvider
+import uk.gov.onelogin.sharing.bluetooth.ble.Status
 import uk.gov.onelogin.sharing.bluetooth.permissions.PermissionChecker
 
 class AndroidBleAdvertiser(
@@ -37,6 +38,11 @@ class AndroidBleAdvertiser(
                 AdvertiserStartResult.Error("Missing permissions")
             }
 
+            _state.value == AdvertiserState.Starting ||
+                _state.value == AdvertiserState.Started -> {
+                AdvertiserStartResult.Error("Already starting")
+            }
+
             else -> {
                 _state.value = AdvertiserState.Starting
 
@@ -60,13 +66,19 @@ class AndroidBleAdvertiser(
 
     private suspend fun start(parameters: AdvertisingParameters, data: BleAdvertiseData) =
         suspendCancellableCoroutine { continuation ->
+            continuation.invokeOnCancellation {
+                _state.value = AdvertiserState.Stopping
+                bleProvider.stopAdvertisingSet()
+                currentCallback = null
+            }
+
             currentCallback = object : AdvertisingCallback {
                 override fun onAdvertisingStarted() {
                     _state.value = AdvertiserState.Started
                     continuation.resume(Unit)
                 }
 
-                override fun onAdvertisingFailed(status: Int) {
+                override fun onAdvertisingFailed(status: Status) {
                     _state.value = AdvertiserState.Failed("start failed: status = $status")
                     continuation.resumeWithException(
                         IllegalStateException("start failed: status = $status")
@@ -95,12 +107,6 @@ class AndroidBleAdvertiser(
                     continuation.resumeWithException(e)
                 }
                 return@suspendCancellableCoroutine
-            }
-
-            continuation.invokeOnCancellation {
-                _state.value = AdvertiserState.Stopping
-                bleProvider.stopAdvertisingSet()
-                currentCallback = null
             }
         }
 

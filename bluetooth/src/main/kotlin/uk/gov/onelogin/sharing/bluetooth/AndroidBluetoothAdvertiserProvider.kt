@@ -75,7 +75,8 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
     override fun stopAdvertisingSet() {
         try {
             bluetoothAdapter.getAdvertiser()?.stopAdvertisingSet(currentCallback)
-        } catch (_: SecurityException) {
+        } catch (e: SecurityException) {
+            println(e.message ?: "Security exception")
         } finally {
             currentCallback = null
         }
