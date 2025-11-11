@@ -11,6 +11,7 @@ import org.junit.Rule
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
+import uk.gov.onelogin.sharing.bluetooth.ble.Status
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
@@ -120,7 +121,8 @@ class AndroidBleAdvertiserTest {
 
     @Test
     fun `failed state events triggered when advertising fails`() = runTest {
-        val status = -1
+        val errorCode = -1
+        val status = Status.Error(errorCode)
 
         bleAdvertiser.state.test {
             assertEquals(AdvertiserState.Idle, awaitItem())
@@ -132,7 +134,7 @@ class AndroidBleAdvertiserTest {
             assertEquals(AdvertiserState.Starting, awaitItem())
 
             // Bluetooth advertising service has failed to start
-            bleProvider.triggerOnAdvertisingFailed(status)
+            bleProvider.triggerOnAdvertisingFailed(errorCode)
 
             assertEquals(
                 AdvertiserState.Failed("start failed: status = $status"),

@@ -4,9 +4,7 @@ import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.advertiser.BleAdvertiser
 
 fun stubBleAdvertiseData(
-    payload: BleAdvertiser.Payload = object : BleAdvertiser.Payload {
-        override fun asBytes(): ByteArray = "FakePayload".toByteArray()
-    },
+    payload: BleAdvertiser.Payload = BleAdvertiser.Payload { "FakePayload".toByteArray() },
     serviceUuid: UUID = UUID.randomUUID()
 ) = BleAdvertiseData(
     payload = payload,

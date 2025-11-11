@@ -1,47 +1,71 @@
 package uk.gov.onelogin.sharing.bluetooth.ble
 
 import org.junit.Test
-import uk.gov.onelogin.sharing.bluetooth.BluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.FakeBluetoothAdapterProvider
 
 class AndroidBleProviderTest {
+    val fakeAdapter = FakeBluetoothAdapterProvider(true)
+    val fakeAdvertiser = FakeBluetoothAdvertiserProvider()
+    val provider = AndroidBleProvider(
+        fakeAdapter,
+        fakeAdvertiser
+    )
 
     @Test
     fun `bluetooth enabled returns true when bluetooth is enabled`() {
-        val fakeBluetoothAdapter = FakeBluetoothAdapterProvider(true)
-        val fakeBluetoothAdapterProvider = FakeBluetoothAdvertiserProvider()
-
-        val bluetoothProvider = AndroidBleProvider(
-            fakeBluetoothAdapter,
-            fakeBluetoothAdapterProvider
-        )
-
-        assert(bluetoothProvider.isBluetoothEnabled())
+        assert(provider.isBluetoothEnabled())
     }
 
     @Test
     fun `bluetooth enabled returns false when bluetooth is disabled`() {
-        val fakeBluetoothAdapter = FakeBluetoothAdapterProvider(false)
-        val fakeBluetoothAdapterProvider = FakeBluetoothAdvertiserProvider()
-        val bluetoothProvider = AndroidBleProvider(
-            fakeBluetoothAdapter,
-            fakeBluetoothAdapterProvider
+        fakeAdapter.setEnabled(false)
+
+        assert(!provider.isBluetoothEnabled())
+    }
+
+    @Test
+    fun `startAdvertisingSet delegates to advertiser with same params and callback`() {
+        val parameters = AdvertisingParameters()
+        val bleAdvertiseData = stubBleAdvertiseData()
+        val callback = object : AdvertisingCallback {
+            override fun onAdvertisingStarted() {
+                println("advertising started")
+            }
+
+            override fun onAdvertisingStopped() {
+                println("advertising stopped")
+            }
+
+            override fun onAdvertisingFailed(status: Status) {
+                println("advertising failed")
+            }
+        }
+
+        provider.startAdvertisingSet(
+            parameters,
+            bleAdvertiseData,
+            callback
         )
 
-        assert(!bluetoothProvider.isBluetoothEnabled())
-    }
-}
-
-class FakeBluetoothAdvertiserProvider : BluetoothAdvertiserProvider {
-    override fun startAdvertisingSet(
-        parameters: AdvertisingParameters,
-        bleAdvertiseData: BleAdvertiseData,
-        callback: AdvertisingCallback
-    ) {
-        println("Advertising started")
+        assert(fakeAdvertiser.startCalled == 1)
+        assert(fakeAdvertiser.parameters == parameters)
+        assert(fakeAdvertiser.bleAdvertiseData == bleAdvertiseData)
+        assert(fakeAdvertiser.callback == callback)
     }
 
-    override fun stopAdvertisingSet() {
-        println("Advertising stopped")
+    @Test
+    fun `stopAdvertisingSet delegates to advertiser`() {
+        provider.stopAdvertisingSet()
+
+        assert(fakeAdvertiser.stopCalled == 1)
+    }
+
+    @Test
+    fun `stopAdvertisingSet does nothing when advertiser provider is null`() {
+        val provider = AndroidBleProvider(fakeAdapter, bleAdvertiser = null)
+
+        provider.stopAdvertisingSet()
+
+        assert(fakeAdvertiser.stopCalled == 0)
     }
 }

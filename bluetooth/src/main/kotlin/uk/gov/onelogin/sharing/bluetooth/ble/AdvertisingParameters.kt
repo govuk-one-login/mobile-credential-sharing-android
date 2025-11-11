@@ -10,3 +10,11 @@ data class AdvertisingParameters(
     val primaryPhy: Int = BluetoothDevice.PHY_LE_1M,
     val secondaryPhy: Int = BluetoothDevice.PHY_LE_2M
 )
+
+fun AdvertisingParameters.toAndroid(): AdvertisingSetParameters = AdvertisingSetParameters.Builder()
+    .setLegacyMode(legacyMode)
+    .setInterval(interval)
+    .setTxPowerLevel(txPowerLevel)
+    .setPrimaryPhy(primaryPhy)
+    .setSecondaryPhy(secondaryPhy)
+    .build()
