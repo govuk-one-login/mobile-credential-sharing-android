@@ -1,6 +1,9 @@
 package uk.gov.onelogin.sharing.bluetooth.ble
 
-import uk.gov.onelogin.sharing.bluetooth.BluetoothAdvertiserProvider
+import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BluetoothAdvertiserProvider
 
 class FakeBluetoothAdvertiserProvider : BluetoothAdvertiserProvider {
     var startCalled = 0

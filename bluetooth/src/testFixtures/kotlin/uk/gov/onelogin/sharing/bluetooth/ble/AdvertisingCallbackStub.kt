@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.bluetooth.ble
 
+import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingFailureReason
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
+
 class AdvertisingCallbackStub : AdvertisingCallback {
     var started = false
     var stopped = false
