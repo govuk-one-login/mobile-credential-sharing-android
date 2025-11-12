@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallback
+import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.ble.BleProvider
-import uk.gov.onelogin.sharing.bluetooth.ble.Reason
 import uk.gov.onelogin.sharing.bluetooth.permissions.PermissionChecker
 
 class AndroidBleAdvertiser(
@@ -55,11 +55,11 @@ class AndroidBleAdvertiser(
                     }
                     AdvertiserStartResult.Success
                 } catch (e: TimeoutCancellationException) {
-                    println("start failed")
-                    AdvertiserStartResult.Error(e.message ?: "Advertising start timed out")
+                    println(e.message)
+                    AdvertiserStartResult.Error("Advertising start timed out")
                 } catch (e: IllegalStateException) {
-                    println("start failed")
-                    AdvertiserStartResult.Error(e.message ?: "Failed to start advertising")
+                    println(e.message)
+                    AdvertiserStartResult.Error("Failed to start advertising")
                 }
             }
         }
@@ -78,7 +78,7 @@ class AndroidBleAdvertiser(
                     continuation.resume(Unit)
                 }
 
-                override fun onAdvertisingStartFailed(reason: Reason) {
+                override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {
                     _state.value = AdvertiserState.Failed("start failed: $reason")
                     continuation.resumeWithException(
                         IllegalStateException("start failed: $reason")

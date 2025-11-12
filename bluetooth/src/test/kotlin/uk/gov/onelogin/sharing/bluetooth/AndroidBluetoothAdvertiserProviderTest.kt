@@ -17,8 +17,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallbackStub
+import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
-import uk.gov.onelogin.sharing.bluetooth.ble.Reason
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.ble.toReason
 
@@ -50,7 +50,10 @@ class AndroidBluetoothAdvertiserProviderTest {
             callback2
         )
 
-        assertEquals(Reason.ALREADY_STARTED, callback2.reason)
+        assertEquals(
+            AdvertisingFailureReason.ALREADY_STARTED,
+            callback2.advertisingFailureReason
+        )
     }
 
     @Test
@@ -75,7 +78,10 @@ class AndroidBluetoothAdvertiserProviderTest {
             callback2
         )
 
-        assertNotEquals(Reason.ALREADY_STARTED, callback2.reason)
+        assertNotEquals(
+            AdvertisingFailureReason.ALREADY_STARTED,
+            callback2.advertisingFailureReason
+        )
     }
 
     @Test
@@ -96,13 +102,13 @@ class AndroidBluetoothAdvertiserProviderTest {
         )
 
         assertEquals(
-            Reason.ADVERTISER_NULL,
-            callback.reason
+            AdvertisingFailureReason.ADVERTISER_NULL,
+            callback.advertisingFailureReason
         )
     }
 
     @Test
-    fun `maps success status to onAdvertisingStarted`() {
+    fun `onAdvertisingStarted callback triggered when advertising is started`() {
         startAdvertising()
 
         callbackSlot.captured.onAdvertisingSetStarted(
@@ -112,6 +118,21 @@ class AndroidBluetoothAdvertiserProviderTest {
         )
 
         assertTrue(callback.started)
+    }
+
+    @Test
+    fun `onAdvertisingStopped callback triggered when advertising is stopped`() {
+        startAdvertising()
+
+        callbackSlot.captured.onAdvertisingSetStarted(
+            null,
+            0,
+            ADVERTISE_SUCCESS
+        )
+
+        callbackSlot.captured.onAdvertisingSetStopped(null)
+
+        assertTrue(callback.stopped)
     }
 
     @Test
@@ -125,7 +146,7 @@ class AndroidBluetoothAdvertiserProviderTest {
             status
         )
 
-        assertEquals(status.toReason(), callback.reason)
+        assertEquals(status.toReason(), callback.advertisingFailureReason)
     }
 
     @Test
@@ -148,8 +169,8 @@ class AndroidBluetoothAdvertiserProviderTest {
         provider.stopAdvertisingSet()
 
         assertEquals(
-            Reason.ADVERTISE_FAILED_SECURITY_EXCEPTION,
-            callback.reason
+            AdvertisingFailureReason.ADVERTISE_FAILED_SECURITY_EXCEPTION,
+            callback.advertisingFailureReason
         )
     }
 

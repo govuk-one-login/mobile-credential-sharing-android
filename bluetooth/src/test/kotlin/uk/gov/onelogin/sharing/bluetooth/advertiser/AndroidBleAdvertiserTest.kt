@@ -5,13 +5,14 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.MainDispatcherRule
+import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
-import uk.gov.onelogin.sharing.bluetooth.ble.Reason
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
@@ -83,13 +84,13 @@ class AndroidBleAdvertiserTest {
 
     @Test
     fun `start fails when exception thrown`() = runTest {
-        bleProvider.thrownOnStart = IllegalStateException("Test exception")
+        bleProvider.thrownOnStart = IllegalStateException("")
         val result = bleAdvertiser.startAdvertise(
             stubBleAdvertiseData()
         )
 
         assertEquals(
-            AdvertiserStartResult.Error("Test exception"),
+            AdvertiserStartResult.Error("Failed to start advertising"),
             result
         )
     }
@@ -120,8 +121,61 @@ class AndroidBleAdvertiserTest {
     }
 
     @Test
+    fun `returns error when start advertising called and state is starting`() = runTest {
+        bleAdvertiser.state.test {
+            assertEquals(AdvertiserState.Idle, awaitItem())
+
+            val first = async {
+                bleAdvertiser.startAdvertise(
+                    stubBleAdvertiseData()
+                )
+            }
+
+            assertEquals(AdvertiserState.Starting, awaitItem())
+
+            val second = bleAdvertiser.startAdvertise(stubBleAdvertiseData())
+            assertEquals(
+                AdvertiserStartResult.Error("Already starting"),
+                second
+            )
+
+            first.cancelAndJoin()
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `returns error when start advertising called and state is started`() = runTest {
+        bleAdvertiser.state.test {
+            assertEquals(AdvertiserState.Idle, awaitItem())
+
+            val first = async {
+                bleAdvertiser.startAdvertise(
+                    stubBleAdvertiseData()
+                )
+            }
+
+            assertEquals(AdvertiserState.Starting, awaitItem())
+
+            bleProvider.triggerOnAdvertisingStarted()
+            assertEquals(AdvertiserState.Started, awaitItem())
+
+            val second = bleAdvertiser.startAdvertise(stubBleAdvertiseData())
+            assertEquals(
+                AdvertiserStartResult.Error("Already starting"),
+                second
+            )
+
+            first.cancelAndJoin()
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `failed state events triggered when advertising fails`() = runTest {
-        val failReason = Reason.ADVERTISER_NULL
+        val reason = AdvertisingFailureReason.ADVERTISER_NULL
 
         bleAdvertiser.state.test {
             assertEquals(AdvertiserState.Idle, awaitItem())
@@ -133,15 +187,15 @@ class AndroidBleAdvertiserTest {
             assertEquals(AdvertiserState.Starting, awaitItem())
 
             // Bluetooth advertising service has failed to start
-            bleProvider.triggerOnAdvertisingFailed(failReason)
+            bleProvider.triggerOnAdvertisingFailed(reason)
 
             assertEquals(
-                AdvertiserState.Failed("start failed: $failReason"),
+                AdvertiserState.Failed("start failed: $reason"),
                 awaitItem()
             )
 
             assertEquals(
-                AdvertiserStartResult.Error("start failed: $failReason"),
+                AdvertiserStartResult.Error("Failed to start advertising"),
                 deferredStart.await()
             )
 
@@ -223,6 +277,39 @@ class AndroidBleAdvertiserTest {
 
             assertEquals(AdvertiserState.Stopping, awaitItem())
             assertEquals(AdvertiserState.Stopped, awaitItem())
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `start returns Error on timeout when provider never starts`() = runTest {
+        val timedAdvertiser = AndroidBleAdvertiser(
+            bleProvider = bleProvider,
+            permissionChecker = permissionChecker,
+            startTimeoutMs = 1_000L
+        )
+
+        timedAdvertiser.state.test {
+            assertEquals(AdvertiserState.Idle, awaitItem())
+
+            val deferred = async {
+                timedAdvertiser.startAdvertise(
+                    stubBleAdvertiseData()
+                )
+            }
+
+            assertEquals(AdvertiserState.Starting, awaitItem())
+
+            advanceTimeBy(1_050L)
+
+            val result = deferred.await()
+
+            assertEquals(
+                AdvertiserStartResult.Error("Advertising start timed out"),
+                result
+            )
 
             cancelAndIgnoreRemainingEvents()
         }

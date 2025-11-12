@@ -28,7 +28,7 @@ class FakeBleProvider : BleProvider {
         callback?.onAdvertisingStarted()
     }
 
-    fun triggerOnAdvertisingFailed(reason: Reason) {
+    fun triggerOnAdvertisingFailed(reason: AdvertisingFailureReason) {
         callback?.onAdvertisingStartFailed(reason)
     }
 

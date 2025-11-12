@@ -4,9 +4,9 @@ import android.bluetooth.le.AdvertisingSet
 import android.bluetooth.le.AdvertisingSetCallback
 import android.bluetooth.le.BluetoothLeAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallback
+import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
-import uk.gov.onelogin.sharing.bluetooth.ble.Reason
 import uk.gov.onelogin.sharing.bluetooth.ble.toAndroid
 import uk.gov.onelogin.sharing.bluetooth.ble.toReason
 
@@ -25,12 +25,12 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
         this.callback = callback
 
         if (currentCallback != null) {
-            callback.onAdvertisingStartFailed(Reason.ALREADY_STARTED)
+            callback.onAdvertisingStartFailed(AdvertisingFailureReason.ALREADY_STARTED)
             return
         }
 
         if (advertiser == null) {
-            callback.onAdvertisingStartFailed(Reason.ADVERTISER_NULL)
+            callback.onAdvertisingStartFailed(AdvertisingFailureReason.ADVERTISER_NULL)
             return
         }
 
@@ -72,7 +72,9 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
         try {
             advertiser?.stopAdvertisingSet(currentCallback)
         } catch (e: SecurityException) {
-            callback?.onAdvertisingStartFailed(Reason.ADVERTISE_FAILED_SECURITY_EXCEPTION)
+            callback?.onAdvertisingStartFailed(
+                AdvertisingFailureReason.ADVERTISE_FAILED_SECURITY_EXCEPTION
+            )
             println(e.message ?: "Security exception")
         } finally {
             currentCallback = null

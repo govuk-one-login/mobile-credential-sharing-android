@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.ble
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.FakeBluetoothAdapterProvider
 
@@ -24,6 +26,35 @@ class AndroidBleProviderTest {
     }
 
     @Test
+    fun `start advertising throws when advertiser provider is null`() {
+        val provider = AndroidBleProvider(
+            fakeAdapter,
+            bleAdvertiser = null
+        )
+
+        val exception = assertThrows(IllegalStateException::class.java) {
+            provider.startAdvertising(
+                AdvertisingParameters(),
+                stubBleAdvertiseData(),
+                object : AdvertisingCallback {
+                    override fun onAdvertisingStarted() {
+                        println("advertising started")
+                    }
+
+                    override fun onAdvertisingStopped() {
+                        println("advertising stopped")
+                    }
+
+                    override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {
+                        println("advertising failed reason")
+                    }
+                }
+            )
+        }
+        assertEquals("Bluetooth advertiser not available", exception.message)
+    }
+
+    @Test
     fun `start advertising delegates to advertiser with same params and callback`() {
         val parameters = AdvertisingParameters()
         val bleAdvertiseData = stubBleAdvertiseData()
@@ -36,7 +67,7 @@ class AndroidBleProviderTest {
                 println("advertising stopped")
             }
 
-            override fun onAdvertisingStartFailed(reason: Reason) {
+            override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {
                 println("advertising failed reason")
             }
         }
