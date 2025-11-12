@@ -3,13 +3,12 @@ package uk.gov.onelogin.sharing.bluetooth
 import android.bluetooth.le.AdvertisingSet
 import android.bluetooth.le.AdvertisingSetCallback
 import android.bluetooth.le.BluetoothLeAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.ble.ADVERTISE_FAILED_INTERNAL_ERROR
-import uk.gov.onelogin.sharing.bluetooth.ble.ADVERTISE_FAILED_SECURITY_EXCEPTION
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
-import uk.gov.onelogin.sharing.bluetooth.ble.Status
+import uk.gov.onelogin.sharing.bluetooth.ble.Reason
 import uk.gov.onelogin.sharing.bluetooth.ble.toAndroid
+import uk.gov.onelogin.sharing.bluetooth.ble.toReason
 
 class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: BluetoothAdapterProvider) :
     BluetoothAdvertiserProvider {
@@ -26,12 +25,12 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
         this.callback = callback
 
         if (currentCallback != null) {
-            callback.onAdvertisingFailed(Status.AlreadyStarted)
+            callback.onAdvertisingStartFailed(Reason.ALREADY_STARTED)
             return
         }
 
         if (advertiser == null) {
-            callback.onAdvertisingFailed(Status.Error(ADVERTISE_FAILED_INTERNAL_ERROR))
+            callback.onAdvertisingStartFailed(Reason.ADVERTISER_NULL)
             return
         }
 
@@ -44,7 +43,7 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
                 if (status == ADVERTISE_SUCCESS) {
                     callback.onAdvertisingStarted()
                 } else {
-                    callback.onAdvertisingFailed(Status.Error(status))
+                    callback.onAdvertisingStartFailed(status.toReason())
                     currentCallback = null
                 }
             }
@@ -73,11 +72,7 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
         try {
             advertiser?.stopAdvertisingSet(currentCallback)
         } catch (e: SecurityException) {
-            callback?.onAdvertisingFailed(
-                Status.Error(
-                    ADVERTISE_FAILED_SECURITY_EXCEPTION
-                )
-            )
+            callback?.onAdvertisingStartFailed(Reason.ADVERTISE_FAILED_SECURITY_EXCEPTION)
             println(e.message ?: "Security exception")
         } finally {
             currentCallback = null

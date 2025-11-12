@@ -24,7 +24,7 @@ class AndroidBleProviderTest {
     }
 
     @Test
-    fun `startAdvertisingSet delegates to advertiser with same params and callback`() {
+    fun `start advertising delegates to advertiser with same params and callback`() {
         val parameters = AdvertisingParameters()
         val bleAdvertiseData = stubBleAdvertiseData()
         val callback = object : AdvertisingCallback {
@@ -36,12 +36,12 @@ class AndroidBleProviderTest {
                 println("advertising stopped")
             }
 
-            override fun onAdvertisingFailed(status: Status) {
-                println("advertising failed")
+            override fun onAdvertisingStartFailed(reason: Reason) {
+                println("advertising failed reason")
             }
         }
 
-        provider.startAdvertisingSet(
+        provider.startAdvertising(
             parameters,
             bleAdvertiseData,
             callback
@@ -54,17 +54,17 @@ class AndroidBleProviderTest {
     }
 
     @Test
-    fun `stopAdvertisingSet delegates to advertiser`() {
-        provider.stopAdvertisingSet()
+    fun `stop advertising delegates to advertiser`() {
+        provider.stopAdvertising()
 
         assert(fakeAdvertiser.stopCalled == 1)
     }
 
     @Test
-    fun `stopAdvertisingSet does nothing when advertiser provider is null`() {
+    fun `stop advertising does nothing when advertiser provider is null`() {
         val provider = AndroidBleProvider(fakeAdapter, bleAdvertiser = null)
 
-        provider.stopAdvertisingSet()
+        provider.stopAdvertising()
 
         assert(fakeAdvertiser.stopCalled == 0)
     }

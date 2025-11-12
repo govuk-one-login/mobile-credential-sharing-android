@@ -10,7 +10,7 @@ class AndroidBleProvider(
 
     override fun isBluetoothEnabled(): Boolean = bluetoothAdapter.isEnabled()
 
-    override fun startAdvertisingSet(
+    override fun startAdvertising(
         parameters: AdvertisingParameters,
         bleAdvertiseData: BleAdvertiseData,
         callback: AdvertisingCallback
@@ -26,7 +26,7 @@ class AndroidBleProvider(
         )
     }
 
-    override fun stopAdvertisingSet() {
+    override fun stopAdvertising() {
         bleAdvertiser?.stopAdvertisingSet()
     }
 }

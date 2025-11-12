@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.ble
 class AdvertisingCallbackStub : AdvertisingCallback {
     var started = false
     var stopped = false
-    var failed: Status? = null
+    var reason: Reason? = null
 
     override fun onAdvertisingStarted() {
         started = true
@@ -13,7 +13,7 @@ class AdvertisingCallbackStub : AdvertisingCallback {
         stopped = true
     }
 
-    override fun onAdvertisingFailed(status: Status) {
-        failed = status
+    override fun onAdvertisingStartFailed(reason: Reason) {
+        this.reason = reason
     }
 }

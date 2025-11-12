@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.ble.BleProvider
-import uk.gov.onelogin.sharing.bluetooth.ble.Status
+import uk.gov.onelogin.sharing.bluetooth.ble.Reason
 import uk.gov.onelogin.sharing.bluetooth.permissions.PermissionChecker
 
 class AndroidBleAdvertiser(
@@ -68,7 +68,7 @@ class AndroidBleAdvertiser(
         suspendCancellableCoroutine { continuation ->
             continuation.invokeOnCancellation {
                 _state.value = AdvertiserState.Stopping
-                bleProvider.stopAdvertisingSet()
+                bleProvider.stopAdvertising()
                 currentCallback = null
             }
 
@@ -78,10 +78,10 @@ class AndroidBleAdvertiser(
                     continuation.resume(Unit)
                 }
 
-                override fun onAdvertisingFailed(status: Status) {
-                    _state.value = AdvertiserState.Failed("start failed: status = $status")
+                override fun onAdvertisingStartFailed(reason: Reason) {
+                    _state.value = AdvertiserState.Failed("start failed: $reason")
                     continuation.resumeWithException(
-                        IllegalStateException("start failed: status = $status")
+                        IllegalStateException("start failed: $reason")
                     )
                 }
 
@@ -92,7 +92,7 @@ class AndroidBleAdvertiser(
 
             try {
                 currentCallback?.let {
-                    bleProvider.startAdvertisingSet(
+                    bleProvider.startAdvertising(
                         parameters,
                         data,
                         it
@@ -112,7 +112,7 @@ class AndroidBleAdvertiser(
 
     override suspend fun stopAdvertise() {
         _state.value = AdvertiserState.Stopping
-        runCatching { bleProvider.stopAdvertisingSet() }
+        runCatching { bleProvider.stopAdvertising() }
         currentCallback = null
         _state.value = AdvertiserState.Stopped
     }

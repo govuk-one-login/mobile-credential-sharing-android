@@ -16,12 +16,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import uk.gov.onelogin.sharing.bluetooth.ble.ADVERTISE_FAILED_INTERNAL_ERROR
-import uk.gov.onelogin.sharing.bluetooth.ble.ADVERTISE_FAILED_SECURITY_EXCEPTION
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallbackStub
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingParameters
-import uk.gov.onelogin.sharing.bluetooth.ble.Status
+import uk.gov.onelogin.sharing.bluetooth.ble.Reason
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.ble.toReason
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidBluetoothAdvertiserProviderTest {
@@ -51,7 +50,7 @@ class AndroidBluetoothAdvertiserProviderTest {
             callback2
         )
 
-        assertEquals(Status.AlreadyStarted, callback2.failed)
+        assertEquals(Reason.ALREADY_STARTED, callback2.reason)
     }
 
     @Test
@@ -76,7 +75,7 @@ class AndroidBluetoothAdvertiserProviderTest {
             callback2
         )
 
-        assertNotEquals(Status.AlreadyStarted, callback2.failed)
+        assertNotEquals(Reason.ALREADY_STARTED, callback2.reason)
     }
 
     @Test
@@ -97,10 +96,8 @@ class AndroidBluetoothAdvertiserProviderTest {
         )
 
         assertEquals(
-            Status.Error(
-                ADVERTISE_FAILED_INTERNAL_ERROR
-            ),
-            callback.failed
+            Reason.ADVERTISER_NULL,
+            callback.reason
         )
     }
 
@@ -128,7 +125,7 @@ class AndroidBluetoothAdvertiserProviderTest {
             status
         )
 
-        assertEquals(Status.Error(status), callback.failed)
+        assertEquals(status.toReason(), callback.reason)
     }
 
     @Test
@@ -151,8 +148,8 @@ class AndroidBluetoothAdvertiserProviderTest {
         provider.stopAdvertisingSet()
 
         assertEquals(
-            Status.Error(ADVERTISE_FAILED_SECURITY_EXCEPTION),
-            callback.failed
+            Reason.ADVERTISE_FAILED_SECURITY_EXCEPTION,
+            callback.reason
         )
     }
 

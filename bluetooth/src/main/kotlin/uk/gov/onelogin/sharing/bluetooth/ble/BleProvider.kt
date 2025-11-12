@@ -2,11 +2,11 @@ package uk.gov.onelogin.sharing.bluetooth.ble
 
 interface BleProvider {
     fun isBluetoothEnabled(): Boolean
-    fun startAdvertisingSet(
+    fun startAdvertising(
         parameters: AdvertisingParameters,
         bleAdvertiseData: BleAdvertiseData,
         callback: AdvertisingCallback
     )
 
-    fun stopAdvertisingSet()
+    fun stopAdvertising()
 }

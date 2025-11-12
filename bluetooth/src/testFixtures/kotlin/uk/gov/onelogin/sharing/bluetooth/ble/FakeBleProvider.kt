@@ -9,7 +9,7 @@ class FakeBleProvider : BleProvider {
 
     override fun isBluetoothEnabled(): Boolean = enabled
 
-    override fun startAdvertisingSet(
+    override fun startAdvertising(
         parameters: AdvertisingParameters,
         bleAdvertiseData: BleAdvertiseData,
         callback: AdvertisingCallback
@@ -20,7 +20,7 @@ class FakeBleProvider : BleProvider {
         this.callback = callback
     }
 
-    override fun stopAdvertisingSet() {
+    override fun stopAdvertising() {
         callback?.onAdvertisingStopped()
     }
 
@@ -28,8 +28,8 @@ class FakeBleProvider : BleProvider {
         callback?.onAdvertisingStarted()
     }
 
-    fun triggerOnAdvertisingFailed(status: Int) {
-        callback?.onAdvertisingFailed(Status.Error(status))
+    fun triggerOnAdvertisingFailed(reason: Reason) {
+        callback?.onAdvertisingStartFailed(reason)
     }
 
     fun triggerOnAdvertisingStopped() {
