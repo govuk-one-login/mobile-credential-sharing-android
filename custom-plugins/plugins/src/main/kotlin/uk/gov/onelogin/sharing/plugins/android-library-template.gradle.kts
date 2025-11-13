@@ -54,6 +54,7 @@ dependencies {
 
     listOf(
         "android-baseline",
+        "uk-gov-ui",
     ).map { libs.findBundle(it).get() }.forEach {
         implementation(it)
         testFixturesImplementation(it)

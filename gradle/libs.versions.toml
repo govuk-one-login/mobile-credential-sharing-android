@@ -5,11 +5,12 @@ androidx-test-ext-junit = "1.3.0" # https://developer.android.com/jetpack/androi
 androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/test#orchestrator-1.6.1
 androidx-test-rules = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#rules-1.7.0
 androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#runner-1.7.0
-composeBom = "2025.11.00" # https://developer.android.com/jetpack/androidx/releases/compose
 compose-lint-rules = "0.4.27" # https://github.com/mrmans0n/compose-rules/releases/
+composeBom = "2025.11.00" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.17.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
 detekt = "1.23.8" # https://github.com/detekt/detekt/releases
 espressoCore = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#3.7.0
+jackson = "3.0.1" # https://github.com/FasterXML/jackson
 jacoco = "0.8.13" # https://github.com/jacoco/jacoco/releases
 junit = "4.13.2" # https://github.com/junit-team/junit4/releases/tag/r4.13.2
 kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases/tag/v2.2.20
@@ -20,8 +21,8 @@ robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.51.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.0.0.6105" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
+uk-gov-ui = "10.0.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.3" # Changelog https://github.com/zxing/zxing/releases
-jackson = "3.0.1" # https://github.com/FasterXML/jackson
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -55,6 +56,11 @@ roborazzi-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule"
 sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
 uk-gov-pipelines-plugins = { module = "uk.gov.pipelines:plugins" }
+uk-gov-ui-android-componentsv2 = { module = "uk.gov.android:componentsv2", version.ref = "uk-gov-ui" }
+uk-gov-ui-android-componentsv2-camera = { module = "uk.gov.android:componentsv2-camera", version.ref = "uk-gov-ui" }
+uk-gov-ui-android-patterns = { module = "uk.gov.android:patterns", version.ref = "uk-gov-ui" }
+uk-gov-ui-android-patterns-camera = { module = "uk.gov.android:patterns-camera", version.ref = "uk-gov-ui" }
+uk-gov-ui-android-theme = { module = "uk.gov.android:theme", version.ref = "uk-gov-ui" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
 jackson-cbor = { module = "tools.jackson.dataformat:jackson-dataformat-cbor", version.ref = "jackson" }
 jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
@@ -90,6 +96,13 @@ screenshot-testing = [
     "roborazzi",
     "roborazzi-compose",
     "roborazzi-rule",
+]
+uk-gov-ui = [
+    "uk-gov-ui-android-componentsv2",
+    "uk-gov-ui-android-componentsv2-camera",
+    "uk-gov-ui-android-patterns",
+    "uk-gov-ui-android-patterns-camera",
+    "uk-gov-ui-android-theme",
 ]
 
 [plugins]
