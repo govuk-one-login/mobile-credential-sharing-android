@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import java.util.UUID
 import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserStartResult
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
@@ -39,14 +40,14 @@ import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_PARAMET
 import uk.gov.onelogin.sharing.holder.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
-import java.util.UUID
 
 private const val QR_SIZE = 800
 
 @Composable
 fun HolderWelcomeScreen(modifier: Modifier = Modifier) {
-    RequestPermissions()
     Column(modifier = modifier) {
+        RequestPermissions()
+
         HolderWelcomeText()
 
         val eDeviceKey = SessionSecurityImpl()
@@ -167,10 +168,8 @@ private fun RequestPermissions() {
     )
 
     LaunchedEffect(hasPermission) {
-        if (!hasPermission) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                permissionLauncher.launch(Manifest.permission.BLUETOOTH_ADVERTISE)
-            }
+        if (!hasPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionLauncher.launch(Manifest.permission.BLUETOOTH_ADVERTISE)
         }
     }
 }

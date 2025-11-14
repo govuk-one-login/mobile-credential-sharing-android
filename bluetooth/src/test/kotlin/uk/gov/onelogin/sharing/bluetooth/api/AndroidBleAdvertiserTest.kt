@@ -1,6 +1,7 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.advertising
+package uk.gov.onelogin.sharing.bluetooth.api
 
 import app.cash.turbine.test
+import java.util.UUID
 import junit.framework.TestCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -10,11 +11,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserStartResult
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
@@ -67,6 +66,20 @@ class AndroidBleAdvertiserTest {
 
         TestCase.assertEquals(
             AdvertiserStartResult.Error("Bluetooth is disabled"),
+            result
+        )
+    }
+
+    @Test
+    fun `start fails when invalid UUID`() = runTest {
+        val result = bleAdvertiser.startAdvertise(
+            stubBleAdvertiseData(
+                UUID.fromString("00000000-0000-0000-0000-000000000000")
+            )
+        )
+
+        TestCase.assertEquals(
+            AdvertiserStartResult.Error("Invalid UUID"),
             result
         )
     }

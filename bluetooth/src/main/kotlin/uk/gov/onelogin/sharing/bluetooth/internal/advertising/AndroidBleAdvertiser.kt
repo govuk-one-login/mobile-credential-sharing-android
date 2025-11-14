@@ -13,6 +13,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.BleUuidValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.PermissionChecker
 
@@ -32,13 +33,14 @@ class AndroidBleAdvertiser(
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData): AdvertiserStartResult =
         when {
-            !bleProvider.isBluetoothEnabled() -> {
+            !bleProvider.isBluetoothEnabled() ->
                 AdvertiserStartResult.Error("Bluetooth is disabled")
-            }
 
-            !permissionChecker.hasPermission() -> {
+            !permissionChecker.hasPermission() ->
                 AdvertiserStartResult.Error("Missing permissions")
-            }
+
+            !BleUuidValidator.isValid(bleAdvertiseData.serviceUuid) ->
+                AdvertiserStartResult.Error("Invalid UUID")
 
             _state.value == AdvertiserState.Starting ||
                 _state.value == AdvertiserState.Started -> {
