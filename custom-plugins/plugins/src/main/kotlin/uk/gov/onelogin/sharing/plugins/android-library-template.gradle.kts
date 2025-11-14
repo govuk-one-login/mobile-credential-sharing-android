@@ -8,6 +8,7 @@ listOf(
     "android-library",
     "kotlin-android",
     "kotlin-compose",
+    "kotlin-parcelize",
     "kotlin-serialization",
     "custom-language.config",
     "custom-managed.devices",

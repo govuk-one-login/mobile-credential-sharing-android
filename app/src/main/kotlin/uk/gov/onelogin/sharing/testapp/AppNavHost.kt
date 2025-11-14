@@ -5,7 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderDestinations
+import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
+import uk.gov.onelogin.sharing.testapp.PrimaryTabDestination.Companion.configureTestAppRoutes
+import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 
 @Composable
 fun AppNavHost(
@@ -18,6 +20,8 @@ fun AppNavHost(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        configureHolderDestinations()
+        configureTestAppRoutes(onNavigate = navController::navigate)
+        configureHolderRoutes()
+        configureVerifierRoutes()
     }
 }

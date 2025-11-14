@@ -5,9 +5,9 @@ import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
 
 @Serializable
-object HolderWelcomeRoute {
+object HolderHomeRoute {
     fun NavGraphBuilder.configureHolderWelcomeScreen() {
-        composable<HolderWelcomeRoute> {
+        composable<HolderHomeRoute> {
             HolderWelcomeScreen()
         }
     }

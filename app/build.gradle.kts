@@ -3,6 +3,7 @@ plugins {
         libs.plugins.android.application,
         libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
+        libs.plugins.kotlin.parcelize,
         libs.plugins.kotlin.serialization,
         libs.plugins.custom.language.config,
         libs.plugins.custom.managed.devices,
@@ -70,8 +71,13 @@ dependencies {
     listOf(
         platform(libs.androidx.compose.bom),
         libs.bundles.android.baseline,
-        libs.uk.gov.ui.android.theme
+        libs.bundles.uk.gov.ui
     ).forEach(::implementation)
+
+    listOf(
+        libs.androidx.test.rules,
+        libs.androidx.ui.test.junit4
+    ).forEach(::testFixturesApi)
 
     listOf(
         platform(libs.androidx.compose.bom),

@@ -10,27 +10,28 @@ import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun TestWrapperTopBar(
+    currentDestination: PrimaryTabDestination,
+    destinations: List<PrimaryTabDestination>,
     modifier: Modifier = Modifier,
-    currentTabIndex: Int = 0,
-    updateTabIndex: (Int) -> Unit = {},
+    updateCurrentDestination: (PrimaryTabDestination) -> Unit = {},
     onNavigate: (Any) -> Unit = {}
 ) {
     PrimaryTabRow(
-        selectedTabIndex = currentTabIndex,
+        selectedTabIndex = destinations.indexOf(currentDestination),
         modifier = modifier.fillMaxWidth()
     ) {
-        PrimaryTabDestination.entries().forEachIndexed { index, destination ->
+        destinations.forEach { destination ->
             Tab(
-                selected = currentTabIndex == index,
+                selected = destination == currentDestination,
                 onClick = {
-                    onNavigate(destination.getStartRoute())
-                    updateTabIndex(index)
+                    onNavigate(destination)
+                    updateCurrentDestination(destination)
                 },
                 text = {
                     Text(
                         text = destination.label,
                         maxLines = 2,
-                        overflow = TextOverflow.Companion.Ellipsis
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             )

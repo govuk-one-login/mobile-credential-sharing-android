@@ -16,6 +16,7 @@ jacoco = "0.8.13" # https://github.com/jacoco/jacoco/releases
 junit = "4.13.2" # https://github.com/junit-team/junit4/releases/tag/r4.13.2
 kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases/tag/v2.2.20
 kotlin-symbol-processing = "2.3.2" # https://github.com/google/ksp/releases ; update with 'kotlin'
+kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 ktlint = "1.6.0" # https://github.com/pinterest/ktlint/releases/
 lifecycleRuntimeKtx = "2.9.4" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
@@ -50,6 +51,7 @@ compose-rules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref 
 compose-rules-ktlint = { module = "io.nlopez.compose.rules:ktlint", version.ref = "compose-lint-rules" }
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin", version.ref = "detekt" }
 junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin" }
 org-jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
@@ -61,6 +63,7 @@ sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-p
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
 uk-gov-pipelines-plugins = { module = "uk.gov.pipelines:plugins" }
 uk-gov-ui-android-componentsv2 = { module = "uk.gov.android:componentsv2", version.ref = "uk-gov-ui" }
+uk-gov-ui-android-componentsv2-fixtures = { module = "uk.gov.android:componentsv2-test-fixtures", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-componentsv2-camera = { module = "uk.gov.android:componentsv2-camera", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-patterns = { module = "uk.gov.android:patterns", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-patterns-camera = { module = "uk.gov.android:patterns-camera", version.ref = "uk-gov-ui" }
@@ -84,7 +87,8 @@ android-baseline = [
     "androidx-material3",
     "androidx-navigation-compose",
     "androidx-ui-graphics",
-    "androidx-ui-tooling-preview"
+    "androidx-ui-tooling-preview",
+    "kotlinx-collections-immutable"
 ]
 debug-tooling = [
     "androidx-ui-tooling",
@@ -122,6 +126,7 @@ detekt-config = { id = "uk.gov.onelogin.sharing.plugins.lint.detekt-configuratio
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 screenshot-testing = { id = "uk.gov.onelogin.sharing.plugins.testing.android-screenshot-testing", version = "undefined" }
