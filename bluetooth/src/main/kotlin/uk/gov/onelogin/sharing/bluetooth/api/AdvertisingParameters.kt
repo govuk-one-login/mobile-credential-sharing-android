@@ -7,7 +7,6 @@ import android.bluetooth.le.AdvertisingSetParameters
  *
  * This class encapsulates various settings that control how the BLE advertising is performed
  * It provides a platform-agnostic way to configure these parameters.
- * The toAndroid() converts this to the Android-specific parameters.
  *
  * @param legacyMode Whether to use legacy advertising mode. Defaults to `false`.
  * @param interval The advertising interval. Defaults to [AdvertisingSetParameters.INTERVAL_HIGH].
@@ -20,10 +19,3 @@ data class AdvertisingParameters(
     val txPowerLevel: Int = AdvertisingSetParameters.TX_POWER_MEDIUM,
     val connectable: Boolean = true
 )
-
-fun AdvertisingParameters.toAndroid(): AdvertisingSetParameters = AdvertisingSetParameters.Builder()
-    .setLegacyMode(legacyMode)
-    .setInterval(interval)
-    .setTxPowerLevel(txPowerLevel)
-    .setConnectable(connectable)
-    .build()
