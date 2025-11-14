@@ -30,6 +30,7 @@ listOf(
 val androidTestImplementation by configurations
 val debugImplementation by configurations
 val implementation by configurations
+val testFixturesApi by configurations
 val testFixturesImplementation by configurations
 val testImplementation by configurations
 
@@ -52,6 +53,13 @@ dependencies {
         "debug-tooling",
     ).map { libs.findBundle(it).get() }.forEach {
         debugImplementation(it)
+    }
+
+    listOf(
+        "androidx-test-rules",
+        "androidx-ui-test-junit4",
+    ).map { libs.findLibrary(it).get().get() }.forEach {
+        testFixturesApi(it)
     }
 
     listOf(

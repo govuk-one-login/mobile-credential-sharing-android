@@ -70,7 +70,7 @@ object VerifierScannerPermissionButtons {
             )
 
             GdsButton(
-                modifier = Modifier.testTag("permissionRationaleButton"),
+                modifier = Modifier.testTag("permissionPermanentDenialButton"),
                 text = stringResource(
                     R.string.verifier_scanner_require_open_permissions
                 ),

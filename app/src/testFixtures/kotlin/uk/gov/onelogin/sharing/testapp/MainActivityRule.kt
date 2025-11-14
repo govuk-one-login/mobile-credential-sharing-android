@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.testapp
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
@@ -23,7 +24,7 @@ class MainActivityRule(composeTestRule: ComposeContentTestRule) :
     }
 
     fun performMenuItemClick(textToClick: String) {
-        onNodeWithText("menuItems")
+        onNodeWithTag("menuItems")
             .performScrollToNode(hasText(textToClick))
             .assertIsDisplayed()
             .performClick()
