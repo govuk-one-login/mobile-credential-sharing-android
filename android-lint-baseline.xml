@@ -2,8 +2,7 @@
 <lint>
     <issue id="InvalidPackage">
         <ignore path="**/org.jacoco/org.jacoco.agent/0.8.13/**" />
-
         <!-- https://issuetracker.google.com/issues/423632847 -->
-        <ignore regexp="jackson-core-3\.0\.1\.jar" />
+        <ignore path="**/tools.jackson.core/jackson-core/3.0.2/**" />
     </issue>
 </lint>
