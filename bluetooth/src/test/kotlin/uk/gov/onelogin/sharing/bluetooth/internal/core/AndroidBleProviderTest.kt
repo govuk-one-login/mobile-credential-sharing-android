@@ -4,6 +4,7 @@ import org.junit.Assert
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallbackStub
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
@@ -40,19 +41,7 @@ class AndroidBleProviderTest {
             provider.startAdvertising(
                 AdvertisingParameters(),
                 stubBleAdvertiseData(),
-                object : AdvertisingCallback {
-                    override fun onAdvertisingStarted() {
-                        println("advertising started")
-                    }
-
-                    override fun onAdvertisingStopped() {
-                        println("advertising stopped")
-                    }
-
-                    override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {
-                        println("advertising failed reason")
-                    }
-                }
+                AdvertisingCallbackStub()
             )
         }
         Assert.assertEquals("Bluetooth advertiser not available", exception.message)

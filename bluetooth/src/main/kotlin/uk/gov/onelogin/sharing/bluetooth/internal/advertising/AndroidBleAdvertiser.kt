@@ -69,9 +69,7 @@ class AndroidBleAdvertiser(
     private suspend fun start(parameters: AdvertisingParameters, data: BleAdvertiseData) =
         suspendCancellableCoroutine { continuation ->
             continuation.invokeOnCancellation {
-                _state.value = AdvertiserState.Stopping
-                bleProvider.stopAdvertising()
-                currentCallback = null
+                doStopAdvertising()
             }
 
             currentCallback = object : AdvertisingCallback {
@@ -113,6 +111,10 @@ class AndroidBleAdvertiser(
         }
 
     override suspend fun stopAdvertise() {
+        doStopAdvertising()
+    }
+
+    private fun doStopAdvertising() {
         _state.value = AdvertiserState.Stopping
         runCatching { bleProvider.stopAdvertising() }
         currentCallback = null
