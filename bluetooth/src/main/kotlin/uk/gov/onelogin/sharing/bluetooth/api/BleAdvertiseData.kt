@@ -15,7 +15,7 @@ import java.util.UUID
 data class BleAdvertiseData(val serviceUuid: UUID)
 
 fun BleAdvertiseData.toAndroid(): AdvertiseData? {
-    println(serviceUuid)
+    println("advertising UUID: $serviceUuid")
     return AdvertiseData.Builder()
         .addServiceUuid(ParcelUuid(serviceUuid))
         .build()

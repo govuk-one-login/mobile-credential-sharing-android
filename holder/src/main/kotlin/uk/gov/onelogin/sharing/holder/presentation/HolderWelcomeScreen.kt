@@ -1,6 +1,10 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import android.Manifest
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,15 +14,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import java.util.UUID
 import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserStartResult
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
@@ -34,11 +39,13 @@ import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_PARAMET
 import uk.gov.onelogin.sharing.holder.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
+import java.util.UUID
 
 private const val QR_SIZE = 800
 
 @Composable
 fun HolderWelcomeScreen(modifier: Modifier = Modifier) {
+    RequestPermissions()
     Column(modifier = modifier) {
         HolderWelcomeText()
 
@@ -142,5 +149,28 @@ fun BluetoothScreen(uuid: UUID, modifier: Modifier = Modifier) {
             text = "State: $bleAdvertiserState",
             modifier = Modifier.padding(vertical = 16.dp)
         )
+    }
+}
+
+// This will be updated in - https://govukverify.atlassian.net/browse/DCMAW-16531
+@Composable
+private fun RequestPermissions() {
+    val context = LocalContext.current
+    val permissionChecker = BluetoothPermissionChecker(context)
+    var hasPermission by remember { mutableStateOf(permissionChecker.hasPermission()) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            hasPermission = isGranted
+        }
+    )
+
+    LaunchedEffect(hasPermission) {
+        if (!hasPermission) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissionLauncher.launch(Manifest.permission.BLUETOOTH_ADVERTISE)
+            }
+        }
     }
 }
