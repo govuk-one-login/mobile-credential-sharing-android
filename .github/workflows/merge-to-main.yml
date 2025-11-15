@@ -10,6 +10,8 @@ concurrency:
 
 jobs:
   bump_and_publish:
+    env:
+      PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       id-token: write
       contents: write
@@ -49,20 +51,16 @@ jobs:
         shell: bash
 
       - name: Run linting suites
-        env:
-          PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./scripts/lint/all \
           -Pgpr.user=${{ github.actor }} \
-          -Pgpr.token=PAT_TOKEN
+          -Pgpr.token=$PAT_TOKEN
 
       - name: Run testing suites
-        env:
-          PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./scripts/test/all \
           -Pgpr.user=${{ github.actor }} \
-          -Pgpr.token=PAT_TOKEN
+          -Pgpr.token=$PAT_TOKEN
 
       - name: Sonar scan
         uses: ./mobile-android-pipelines/actions/sonar-scan
