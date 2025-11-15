@@ -17,7 +17,6 @@ kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases/tag/v2.2.20
 kotlin-symbol-processing = "2.3.2" # https://github.com/google/ksp/releases ; update with 'kotlin'
 ktlint = "1.6.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.9.4" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
-mockito-kotlin = "6.1.0" # https://github.com/mockito/mockito-kotlin/releases
 mockk = "1.14.6" # https://github.com/mockk/mockk/releases
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.51.0" # https://github.com/takahirom/roborazzi/releases
@@ -51,7 +50,6 @@ compose-rules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref 
 compose-rules-ktlint = { module = "io.nlopez.compose.rules:ktlint", version.ref = "compose-lint-rules" }
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin", version.ref = "detekt" }
 junit = { module = "junit:junit", version.ref = "junit" }
-mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 org-jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
@@ -92,7 +90,6 @@ testing-unit = [
     "androidx-ui-test-junit4",
     "app-cash-turbine",
     "org-robolectric",
-    "mockito-kotlin",
     "mockk"
 ]
 screenshot-testing = [

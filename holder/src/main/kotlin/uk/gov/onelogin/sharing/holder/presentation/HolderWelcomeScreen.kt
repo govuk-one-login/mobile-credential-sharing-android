@@ -42,22 +42,32 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
 private const val QR_SIZE = 800
 
+data class HolderWelcomeContentState(
+    val errorMessage: String?,
+    val advertiserState: AdvertiserState,
+    val uuid: String,
+    val qrCodeData: String?
+)
+
 @Composable
 fun HolderWelcomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HolderWelcomeViewModel = holderWelcomeViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val contentState = HolderWelcomeContentState(
+        errorMessage = uiState.lastErrorMessage,
+        advertiserState = uiState.advertiserState,
+        uuid = uiState.uuid.toString(),
+        qrCodeData = uiState.qrData
+    )
 
     Column(modifier = modifier) {
         RequestPermissions()
         HolderWelcomeText()
 
         HolderWelcomeScreenContent(
-            errorMessage = uiState.lastErrorMessage,
-            advertiserState = uiState.advertiserState,
-            uuid = uiState.uuid.toString(),
-            qrCodeData = uiState.qrData,
+            contentState = contentState,
             onStartClick = viewModel::onStartAdvertise,
             onStopClick = viewModel::onStopAdvertise,
             onShowError = viewModel::onErrorMessageShown
@@ -89,10 +99,7 @@ private fun RequestPermissions() {
 @Suppress("LongMethod")
 @Composable
 fun HolderWelcomeScreenContent(
-    errorMessage: String?,
-    advertiserState: AdvertiserState,
-    uuid: String,
-    qrCodeData: String?,
+    contentState: HolderWelcomeContentState,
     onStartClick: () -> Unit,
     onStopClick: () -> Unit,
     onShowError: () -> Unit,
@@ -102,9 +109,13 @@ fun HolderWelcomeScreenContent(
 
     val currentErrorShown by rememberUpdatedState(onShowError)
 
-    LaunchedEffect(errorMessage) {
-        if (errorMessage != null) {
-            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+    LaunchedEffect(contentState.errorMessage) {
+        if (contentState.errorMessage != null) {
+            Toast.makeText(
+                context,
+                contentState.errorMessage,
+                Toast.LENGTH_LONG
+            ).show()
             currentErrorShown()
         }
     }
@@ -115,7 +126,7 @@ fun HolderWelcomeScreenContent(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        qrCodeData?.let {
+        contentState.qrCodeData?.let {
             QrCodeImage(
                 data = it,
                 size = QR_SIZE
@@ -137,7 +148,7 @@ fun HolderWelcomeScreenContent(
             Spacer(modifier = Modifier.padding(20.dp))
 
             Button(
-                enabled = advertiserState == AdvertiserState.Started,
+                enabled = contentState.advertiserState == AdvertiserState.Started,
                 onClick = onStopClick
             ) {
                 Text("Stop")
@@ -145,13 +156,13 @@ fun HolderWelcomeScreenContent(
         }
 
         Text(
-            text = "Status: $advertiserState",
+            text = "Status: ${contentState.advertiserState}",
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        if (advertiserState == AdvertiserState.Started) {
+        if (contentState.advertiserState == AdvertiserState.Started) {
             Text(
-                text = "UUID: $uuid"
+                text = "UUID: ${contentState.uuid}"
             )
         }
     }
@@ -200,11 +211,15 @@ private fun holderWelcomeViewModel(): HolderWelcomeViewModel {
 @Preview
 @Composable
 private fun HolderWelcomeScreenPreview() {
-    HolderWelcomeScreenContent(
+    val contentState = HolderWelcomeContentState(
         errorMessage = null,
         advertiserState = AdvertiserState.Started,
         uuid = "11111111-2222-3333-4444-555555555555",
-        qrCodeData = "QR Data",
+        qrCodeData = "QR Data"
+    )
+
+    HolderWelcomeScreenContent(
+        contentState = contentState,
         onStartClick = {},
         onStopClick = {},
         onShowError = {},

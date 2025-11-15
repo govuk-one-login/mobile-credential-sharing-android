@@ -13,6 +13,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeContentState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenContent
 import uk.gov.onelogin.sharing.verifier.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
@@ -37,12 +38,15 @@ class HolderWelcomeScreenTest {
 
     @Test
     fun `initial content is displayed`() {
+        val contentState = HolderWelcomeContentState(
+            errorMessage = null,
+            advertiserState = AdvertiserState.Idle,
+            uuid = "123",
+            qrCodeData = "some-qr-data"
+        )
         composeTestRule.setContent {
             HolderWelcomeScreenContent(
-                errorMessage = null,
-                advertiserState = AdvertiserState.Idle,
-                uuid = "123",
-                qrCodeData = "some-qr-data",
+                contentState = contentState,
                 onStartClick = { },
                 onStopClick = { },
                 onShowError = {}
@@ -78,13 +82,16 @@ class HolderWelcomeScreenTest {
     fun `start and stop buttons are visible and enabled when advertising`() {
         var startClicked = 0
         var stopClicked = 0
+        val contentState = HolderWelcomeContentState(
+            errorMessage = null,
+            advertiserState = AdvertiserState.Started,
+            uuid = "123",
+            qrCodeData = "some-qr-data"
+        )
 
         composeTestRule.setContent {
             HolderWelcomeScreenContent(
-                errorMessage = null,
-                advertiserState = AdvertiserState.Started,
-                uuid = "123",
-                qrCodeData = "some-qr-data",
+                contentState = contentState,
                 onStartClick = { startClicked++ },
                 onStopClick = { stopClicked++ },
                 onShowError = {}
@@ -111,13 +118,15 @@ class HolderWelcomeScreenTest {
     @Test
     fun `shows uuid when advertising started`() {
         val uuid = "11111111-2222-3333-4444-555555555555"
-
+        val contentState = HolderWelcomeContentState(
+            errorMessage = null,
+            advertiserState = AdvertiserState.Started,
+            uuid = uuid,
+            qrCodeData = "some-qr-data"
+        )
         composeTestRule.setContent {
             HolderWelcomeScreenContent(
-                errorMessage = null,
-                advertiserState = AdvertiserState.Started,
-                uuid = uuid,
-                qrCodeData = "some-qr-data",
+                contentState = contentState,
                 onStartClick = {},
                 onStopClick = {},
                 onShowError = {}
@@ -136,13 +145,16 @@ class HolderWelcomeScreenTest {
     @Test
     fun `calls OnErrorShown when errorMessage is non-null`() {
         var errorShown = false
+        val contentState = HolderWelcomeContentState(
+            errorMessage = "Something went wrong",
+            advertiserState = AdvertiserState.Stopped,
+            uuid = "123",
+            qrCodeData = null
+        )
 
         composeTestRule.setContent {
             HolderWelcomeScreenContent(
-                errorMessage = "Something went wrong",
-                advertiserState = AdvertiserState.Stopped,
-                uuid = "123",
-                qrCodeData = null,
+                contentState = contentState,
                 onStartClick = {},
                 onStopClick = {},
                 onShowError = { errorShown = true }
