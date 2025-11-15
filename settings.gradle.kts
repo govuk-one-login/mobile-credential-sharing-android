@@ -10,9 +10,23 @@ pluginManagement {
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
     repositories {
         google()
         mavenCentral()
+        listOf(
+            "mobile-android-ui",
+        ).forEach { githubRepositoryName ->
+            maven {
+                url = uri(
+                    "https://maven.pkg.github.com/govuk-one-login/$githubRepositoryName"
+                )
+                setGithubCredentials()
+                metadataSources {
+                    gradleMetadata()
+                }
+            }
+        }
     }
 }
 
@@ -27,3 +41,16 @@ listOf(
     ":security",
     ":verifier",
 ).forEach(::include)
+
+/**
+ * Obtained Github Personal Access Tokens (PATs) from gradle properties.
+ *
+ * See also:
+ * - [Generating a Github PAT](https://govukverify.atlassian.net/wiki/x/J4D9-Q)
+ */
+fun MavenArtifactRepository.setGithubCredentials() {
+    credentials {
+        username = providers.gradleProperty("gpr.user").get()
+        password = providers.gradleProperty("gpr.token").get()
+    }
+}

@@ -3,6 +3,8 @@ plugins {
         libs.plugins.android.application,
         libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
+        libs.plugins.kotlin.parcelize,
+        libs.plugins.kotlin.serialization,
         libs.plugins.custom.language.config,
         libs.plugins.custom.managed.devices,
         libs.plugins.roborazzi,
@@ -53,6 +55,7 @@ android {
 dependencies {
     listOf(
         platform(libs.androidx.compose.bom),
+        libs.androidx.navigation.testing,
         libs.bundles.testing.instrumentation
     ).forEach(::androidTestImplementation)
 
@@ -67,8 +70,14 @@ dependencies {
 
     listOf(
         platform(libs.androidx.compose.bom),
-        libs.bundles.android.baseline
+        libs.bundles.android.baseline,
+        libs.bundles.uk.gov.ui
     ).forEach(::implementation)
+
+    listOf(
+        libs.androidx.test.rules,
+        libs.androidx.ui.test.junit4
+    ).forEach(::testFixturesApi)
 
     listOf(
         platform(libs.androidx.compose.bom),

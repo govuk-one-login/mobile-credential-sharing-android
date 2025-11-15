@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,14 +16,18 @@ import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.QR_CODE_CONTENT_DESC
 class MainActivityTest {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val composeTestRule = MainActivityRule(createAndroidComposeRule<MainActivity>())
 
     @Test
-    fun displaysWelcomeTextAndQrCode() {
-        composeTestRule.onNodeWithText(HOLDER_WELCOME_TEXT)
-            .assertIsDisplayed()
+    fun displaysWelcomeTextAndQrCode() = runTest {
+        composeTestRule.run {
+            performHolderTabClick()
+            performMenuItemClick("Welcome screen")
 
-        composeTestRule.onNodeWithContentDescription(QR_CODE_CONTENT_DESC)
-            .assertIsDisplayed()
+            onNodeWithText(HOLDER_WELCOME_TEXT)
+                .assertIsDisplayed()
+            onNodeWithContentDescription(QR_CODE_CONTENT_DESC)
+                .assertIsDisplayed()
+        }
     }
 }

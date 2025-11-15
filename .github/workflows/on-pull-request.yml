@@ -15,7 +15,11 @@ concurrency:
 
 jobs:
   unit_tests_job:
+    env:
+      PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
+    permissions:
+      packages: read
     steps:
       - name: Checkout code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -62,11 +66,15 @@ jobs:
 
       - name: Run linting associated with Gradle
         run: |
-          ./scripts/lint/gradle
+          ./scripts/lint/gradle \
+          -Pgpr.user=${{ github.actor }} \
+          -Pgpr.token=$PAT_TOKEN
 
       - name: Run testing suites
         run: |
-          ./scripts/test/all
+          ./scripts/test/all \
+          -Pgpr.user=${{ github.actor }} \
+          -Pgpr.token=$PAT_TOKEN
 
       - name: Sonar scan
         uses: ./mobile-android-pipelines/actions/sonar-scan

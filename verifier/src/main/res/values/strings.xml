@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_permission_is_enabled">The camera permission is now enabled.</string>
+    <string name="camera_permission_is_permanently_denied">The camera permission is permanently denied.</string>
+    <string name="enable_camera_permission_to_continue">Please enable the camera permission to continue.</string>
+    <string name="open_app_permissions">Open app permissions</string>
+</resources>
