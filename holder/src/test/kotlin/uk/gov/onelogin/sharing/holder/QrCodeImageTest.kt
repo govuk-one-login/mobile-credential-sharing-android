@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
+import java.util.UUID
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,14 +66,16 @@ class QrCodeImageTest {
 
     @Test
     fun displaysQrCodeWithBase64EngagementCode() {
-        val mdocUri = Engagement { BASE64_ENCODED_DEVICE_ENGAGEMENT }
+        val uuid = UUID.randomUUID()
+        val mdocUri = Engagement { _, _ -> BASE64_ENCODED_DEVICE_ENGAGEMENT }
+
         composeTestRule.setContent {
             val key = generateValidKeyPair()
             val coseKey = CoseKey.generateCoseKey(key!!)
 
             QrCodeImage(
                 modifier = Modifier.testTag(testTag),
-                data = "mdoc:${mdocUri.qrCodeEngagement(coseKey)}",
+                data = "mdoc:${mdocUri.qrCodeEngagement(coseKey, uuid)}",
                 size = QR_CODE_SIZE
             )
         }
