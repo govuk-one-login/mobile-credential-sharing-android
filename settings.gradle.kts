@@ -50,7 +50,12 @@ listOf(
  */
 fun MavenArtifactRepository.setGithubCredentials() {
     credentials {
-        username = providers.gradleProperty("gpr.user").get()
-        password = providers.gradleProperty("gpr.token").get()
+        username = System.getenv().getOrElse("GITHUB_ACTOR") {
+            providers.gradleProperty("gpr.user").get()
+        }
+        // Prefer workflow environment variable if it exists
+        password = System.getenv().getOrElse("GITHUB_PAT") {
+            providers.gradleProperty("gpr.token").get()
+        }
     }
 }

@@ -18,6 +18,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import uk.gov.android.ui.componentsv2.permission.PermissionLogic
 import uk.gov.android.ui.componentsv2.permission.PermissionScreen
+import uk.gov.onelogin.sharing.models.dev.ImplementationDetail
+import uk.gov.onelogin.sharing.models.dev.RequiresImplementation
 import uk.gov.onelogin.sharing.verifier.R
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -67,7 +69,19 @@ private fun verifierScannerPermissionLogic(
     context: Context,
     modifier: Modifier = Modifier
 ): PermissionLogic = PermissionLogic(
-    onGrantPermission = {
+
+    onGrantPermission = @RequiresImplementation(
+        details = [
+            ImplementationDetail(
+                ticket = "DCMAW-16276",
+                description = "QR Scanner Screen UI"
+            ),
+            ImplementationDetail(
+                ticket = "DCMAW-16278",
+                description = "Invalid QR error handling"
+            )
+        ]
+    ) {
         Text(
             stringResource(
                 R.string.verifier_scanner_camera_permission_enabled
@@ -75,16 +89,37 @@ private fun verifierScannerPermissionLogic(
             modifier = modifier
         )
     },
-    onPermissionPermanentlyDenied = { _ ->
+    onPermissionPermanentlyDenied = @RequiresImplementation(
+        details = [
+            ImplementationDetail(
+                ticket = "DCMAW-16275",
+                description = "Finalise UI for permanent camera permission denial"
+            )
+        ]
+    ) { _ ->
         VerifierScannerPermissionButtons.PermanentCameraDenial(context, modifier)
     },
-    onShowRationale = { _, launchPermission ->
+    onShowRationale = @RequiresImplementation(
+        details = [
+            ImplementationDetail(
+                ticket = "DCMAW-16275",
+                description = "Finalise UI for camera permission rationale"
+            )
+        ]
+    ) { _, launchPermission ->
         VerifierScannerPermissionButtons.CameraPermissionRationaleButton(
             launchPermission = launchPermission,
             modifier = modifier
         )
     },
-    onRequirePermission = { _, launchPermission ->
+    onRequirePermission = @RequiresImplementation(
+        details = [
+            ImplementationDetail(
+                ticket = "DCMAW-16275",
+                description = "Finalise UI for camera permission denial"
+            )
+        ]
+    ) { _, launchPermission ->
         VerifierScannerPermissionButtons.CameraRequirePermissionButton(
             launchPermission = launchPermission,
             modifier = modifier
