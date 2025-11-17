@@ -2,25 +2,40 @@ package uk.gov.onelogin.sharing.verifier.scan
 
 import android.Manifest
 import android.content.Context
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import uk.gov.android.ui.componentsv2.permission.PermissionLogic
 import uk.gov.android.ui.componentsv2.permission.PermissionScreen
+import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
+import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.models.dev.ImplementationDetail
 import uk.gov.onelogin.sharing.models.dev.RequiresImplementation
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraPermissionRationaleButton
+import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraRequirePermissionButton
+import uk.gov.onelogin.sharing.verifier.scan.buttons.PermanentCameraDenial
+import uk.gov.onelogin.sharing.verifier.scan.buttons.VerifierScannerPreviewParameters
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -38,12 +53,33 @@ fun VerifierScanner(
             onUpdatePreviouslyDeniedPermission(!it)
         }
 
+    VerifierScanner(
+        lifecycleOwner = lifecycleOwner,
+        onUpdatePreviouslyDeniedPermission = onUpdatePreviouslyDeniedPermission,
+        hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
+        permissionState = permissionState,
+        modifier = modifier
+    )
+}
+
+@Composable
+@OptIn(ExperimentalPermissionsApi::class)
+fun VerifierScanner(
+    lifecycleOwner: LifecycleOwner,
+    onUpdatePreviouslyDeniedPermission: (Boolean) -> Unit,
+    hasPreviouslyDeniedPermission: Boolean,
+    permissionState: PermissionState,
+    modifier: Modifier = Modifier
+) {
+    val latestUpdatePreviouslyDeniedPermission by
+        rememberUpdatedState(onUpdatePreviouslyDeniedPermission)
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_PAUSE) {
                 // Allow a User to re-request permissions after navigating away via permanent
                 // denial.
-                onUpdatePreviouslyDeniedPermission(false)
+                latestUpdatePreviouslyDeniedPermission(false)
             }
         }
 
@@ -97,7 +133,7 @@ fun verifierScannerPermissionLogic(
             )
         ]
     ) { _ ->
-        VerifierScannerPermissionButtons.PermanentCameraDenial(context, modifier)
+        PermanentCameraDenial(context, modifier)
     },
     onShowRationale = @RequiresImplementation(
         details = [
@@ -107,7 +143,7 @@ fun verifierScannerPermissionLogic(
             )
         ]
     ) { _, launchPermission ->
-        VerifierScannerPermissionButtons.CameraPermissionRationaleButton(
+        CameraPermissionRationaleButton(
             launchPermission = launchPermission,
             modifier = modifier
         )
@@ -120,9 +156,32 @@ fun verifierScannerPermissionLogic(
             )
         ]
     ) { _, launchPermission ->
-        VerifierScannerPermissionButtons.CameraRequirePermissionButton(
+        CameraRequirePermissionButton(
             launchPermission = launchPermission,
             modifier = modifier
         )
     }
 )
+
+@Composable
+@OptIn(ExperimentalPermissionsApi::class)
+@Preview
+private fun VerifierScannerPreview(
+    @PreviewParameter(VerifierScannerPreviewParameters::class)
+    permissionStates: Pair<PermissionState, Boolean>
+) {
+    GdsTheme {
+        Column(
+            modifier = Modifier
+                .background(GdsLocalColorScheme.current.listBackground)
+                .padding(spacingDouble)
+        ) {
+            VerifierScanner(
+                lifecycleOwner = LocalLifecycleOwner.current,
+                onUpdatePreviouslyDeniedPermission = {},
+                hasPreviouslyDeniedPermission = permissionStates.second,
+                permissionState = permissionStates.first
+            )
+        }
+    }
+}

@@ -18,9 +18,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerPermissionButtons.CameraPermissionRationaleButton
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerPermissionButtons.CameraRequirePermissionButton
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerPermissionButtons.PermanentCameraDenial
+import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraPermissionRationaleButton
+import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraRequirePermissionButton
+import uk.gov.onelogin.sharing.verifier.scan.buttons.PermanentCameraDenial
 
 @RunWith(AndroidJUnit4::class)
 class VerifierScannerPermissionButtonsTest {
