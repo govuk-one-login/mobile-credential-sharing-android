@@ -65,7 +65,7 @@ fun VerifierScanner(
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
-private fun verifierScannerPermissionLogic(
+fun verifierScannerPermissionLogic(
     context: Context,
     modifier: Modifier = Modifier
 ): PermissionLogic = PermissionLogic(

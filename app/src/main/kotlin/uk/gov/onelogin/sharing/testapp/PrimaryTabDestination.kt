@@ -13,21 +13,16 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 @Serializable
 @Parcelize
 sealed class PrimaryTabDestination(val label: String) : Parcelable {
-    abstract fun getStartRoute(): Any
 
     @Serializable
     data object Holder : PrimaryTabDestination(
         "Holder"
-    ) {
-        override fun getStartRoute(): Any = HolderHomeRoute
-    }
+    )
 
     @Serializable
     data object Verifier : PrimaryTabDestination(
         "Verifier"
-    ) {
-        override fun getStartRoute(): Any = VerifierScanRoute
-    }
+    )
 
     companion object {
         @JvmStatic

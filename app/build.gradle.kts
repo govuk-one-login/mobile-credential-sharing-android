@@ -76,11 +76,14 @@ dependencies {
 
     listOf(
         libs.androidx.test.rules,
-        libs.androidx.ui.test.junit4
+        libs.androidx.ui.test.junit4,
+        testFixtures(projects.holder),
+        testFixtures(projects.verifier)
     ).forEach(::testFixturesApi)
 
     listOf(
         platform(libs.androidx.compose.bom),
+        libs.androidx.navigation.testing,
         libs.bundles.android.baseline
     ).forEach(::testFixturesImplementation)
 
