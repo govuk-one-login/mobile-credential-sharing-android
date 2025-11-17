@@ -104,4 +104,15 @@ class VerifierScannerPermissionLogicTest {
         ).assertIsDisplayed()
             .assertHasClickAction()
     }
+
+    @Test
+    fun verifyPreview() {
+        composeTestRule.setContent {
+            VerifierScannerPreview(
+                state to true
+            )
+        }
+
+        composeTestRule.assertPermissionGrantedTextIsDisplayed()
+    }
 }

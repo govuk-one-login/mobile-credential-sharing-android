@@ -60,7 +60,7 @@ fun PermanentCameraDenial(context: Context, modifier: Modifier = Modifier) {
 
 @Composable
 @Preview
-private fun PermanentCameraDenialPreview(modifier: Modifier = Modifier) {
+internal fun PermanentCameraDenialPreview(modifier: Modifier = Modifier) {
     GdsTheme {
         Column(
             modifier = modifier

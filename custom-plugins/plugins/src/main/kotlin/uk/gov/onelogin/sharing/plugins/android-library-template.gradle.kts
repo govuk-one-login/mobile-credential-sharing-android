@@ -56,6 +56,7 @@ dependencies {
     }
 
     listOf(
+        "androidx-test-espresso-intents",
         "androidx-test-rules",
         "androidx-ui-test-junit4",
     ).map { libs.findLibrary(it).get().get() }.forEach {

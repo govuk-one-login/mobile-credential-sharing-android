@@ -35,7 +35,6 @@ import uk.gov.onelogin.sharing.verifier.R
 import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraPermissionRationaleButton
 import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraRequirePermissionButton
 import uk.gov.onelogin.sharing.verifier.scan.buttons.PermanentCameraDenial
-import uk.gov.onelogin.sharing.verifier.scan.buttons.VerifierScannerPreviewParameters
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -105,7 +104,6 @@ fun verifierScannerPermissionLogic(
     context: Context,
     modifier: Modifier = Modifier
 ): PermissionLogic = PermissionLogic(
-
     onGrantPermission = @RequiresImplementation(
         details = [
             ImplementationDetail(
@@ -166,7 +164,7 @@ fun verifierScannerPermissionLogic(
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 @Preview
-private fun VerifierScannerPreview(
+internal fun VerifierScannerPreview(
     @PreviewParameter(VerifierScannerPreviewParameters::class)
     permissionStates: Pair<PermissionState, Boolean>
 ) {
