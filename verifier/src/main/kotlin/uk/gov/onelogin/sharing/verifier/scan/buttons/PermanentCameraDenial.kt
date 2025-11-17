@@ -67,7 +67,10 @@ internal fun PermanentCameraDenialPreview(modifier: Modifier = Modifier) {
                 .background(GdsLocalColorScheme.current.listBackground)
                 .padding(16.dp)
         ) {
-            PermanentCameraDenial(context = LocalContext.current)
+            PermanentCameraDenial(
+                context = LocalContext.current,
+                modifier = Modifier.testTag("preview")
+            )
         }
     }
 }

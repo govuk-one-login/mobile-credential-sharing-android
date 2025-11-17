@@ -1,21 +1,26 @@
 package uk.gov.onelogin.sharing.testapp
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 
 @RunWith(AndroidJUnit4::class)
-class MainActivityTest {
+class MainActivityContentTest {
 
     @get:Rule
-    val composeTestRule = MainActivityRule(createAndroidComposeRule<MainActivity>())
+    val composeTestRule = MainActivityRule(createComposeRule())
 
     @Test
     fun displaysHolderMenuItems() = runTest {
         composeTestRule.run {
+            render(
+                currentTabDestination = PrimaryTabDestination.Holder,
+                startDestination = PrimaryTabDestination.Holder
+            )
             performHolderTabClick()
             val expectedMenuItems = listOf(
                 "Welcome screen"
@@ -28,6 +33,10 @@ class MainActivityTest {
     @Test
     fun displaysVerifierMenuItems() = runTest {
         composeTestRule.run {
+            render(
+                currentTabDestination = PrimaryTabDestination.Holder,
+                startDestination = PrimaryTabDestination.Holder
+            )
             performVerifierTabClick()
             val expectedMenuItems = listOf(
                 "QR Scanner"

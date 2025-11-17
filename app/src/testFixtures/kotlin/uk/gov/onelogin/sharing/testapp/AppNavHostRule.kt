@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.testapp
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -23,7 +24,7 @@ class AppNavHostRule(private val composeTestRule: ComposeContentTestRule) :
 
     fun navigate(route: Any) = controller.navigate(route)
 
-    fun render(startDestination: Any, modifier: Modifier = Modifier) {
+    fun renderWithController(startDestination: Any, modifier: Modifier = Modifier) {
         setContent {
             controller = TestNavHostController(LocalContext.current)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
@@ -31,6 +32,15 @@ class AppNavHostRule(private val composeTestRule: ComposeContentTestRule) :
             AppNavHost(
                 modifier = modifier.testTag("appNavHost"),
                 navController = controller,
+                startDestination = startDestination
+            )
+        }
+    }
+
+    fun renderWithoutController(startDestination: Any, modifier: Modifier = Modifier) {
+        setContent {
+            AppNavHost(
+                modifier = modifier.testTag("appNavHost"),
                 startDestination = startDestination
             )
         }

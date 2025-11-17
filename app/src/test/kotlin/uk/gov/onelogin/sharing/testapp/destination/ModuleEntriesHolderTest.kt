@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.testapp
+package uk.gov.onelogin.sharing.testapp.destination
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -13,10 +13,10 @@ import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.testapp.PrimaryTabDestination.Companion.configureTestAppRoutes
+import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination.Companion.configureTestAppRoutes
 
 @RunWith(AndroidJUnit4::class)
-class PrimaryTabDestinationVerifierTest {
+class ModuleEntriesHolderTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -31,15 +31,15 @@ class PrimaryTabDestinationVerifierTest {
             controller.navigatorProvider.addNavigator(ComposeNavigator())
             NavHost(
                 navController = controller,
-                startDestination = PrimaryTabDestination.Verifier
+                startDestination = PrimaryTabDestination.Holder
             ) {
                 configureTestAppRoutes { route, _ ->
-                    this@PrimaryTabDestinationVerifierTest.route = route
+                    this@ModuleEntriesHolderTest.route = route
                 }
             }
         }
 
-        composeTestRule.onNodeWithText("QR Scanner").performClick()
+        composeTestRule.onNodeWithText("Welcome screen").performClick()
 
         assertNotNull(route)
     }

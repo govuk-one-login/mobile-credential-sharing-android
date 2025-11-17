@@ -9,15 +9,21 @@ import androidx.compose.foundation.layout.waterfallPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import kotlinx.collections.immutable.toPersistentList
+import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.testapp.MainActivityContentPreviewParameters
+import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 
 @Composable
 fun MainActivityContent(
     currentTab: PrimaryTabDestination,
     navController: NavHostController,
+    startDestination: Any,
     modifier: Modifier = Modifier,
-    startDestination: PrimaryTabDestination = PrimaryTabDestination.Holder,
     onUpdateTabDestination: (PrimaryTabDestination) -> Unit = {}
 ) {
     Scaffold(
@@ -26,10 +32,12 @@ fun MainActivityContent(
             TestWrapperTopBar(
                 destinations = PrimaryTabDestination.entries().toPersistentList(),
                 currentDestination = currentTab,
-                onNavigate = navController::navigate,
                 modifier = Modifier
                     .statusBarsPadding(),
-                updateCurrentDestination = onUpdateTabDestination
+                updateCurrentDestination = {
+                    navController.navigate(it)
+                    onUpdateTabDestination(it)
+                }
             )
         }
     ) { contentPadding ->
@@ -45,5 +53,20 @@ fun MainActivityContent(
                 startDestination = startDestination
             )
         }
+    }
+}
+
+@Composable
+@Preview
+internal fun MainActivityContentPreview(
+    @PreviewParameter(MainActivityContentPreviewParameters::class)
+    currentTabDestination: PrimaryTabDestination
+) {
+    GdsTheme {
+        MainActivityContent(
+            navController = rememberNavController(),
+            currentTab = currentTabDestination,
+            startDestination = currentTabDestination
+        )
     }
 }

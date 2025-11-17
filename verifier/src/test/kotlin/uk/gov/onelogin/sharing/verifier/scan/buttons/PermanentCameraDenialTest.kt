@@ -32,7 +32,9 @@ class PermanentCameraDenialTest {
 
     @Test
     fun standardUsage() = verifyBehaviour {
-        PermanentCameraDenial(context = LocalContext.current)
+        PermanentCameraDenial(
+            context = LocalContext.current
+        )
     }
 
     @Test

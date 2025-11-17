@@ -14,6 +14,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -178,7 +179,8 @@ internal fun VerifierScannerPreview(
                 lifecycleOwner = LocalLifecycleOwner.current,
                 onUpdatePreviouslyDeniedPermission = {},
                 hasPreviouslyDeniedPermission = permissionStates.second,
-                permissionState = permissionStates.first
+                permissionState = permissionStates.first,
+                modifier = Modifier.testTag("preview")
             )
         }
     }

@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.testapp
+package uk.gov.onelogin.sharing.testapp.destination
 
 import android.os.Parcelable
 import androidx.navigation.NavGraphBuilder

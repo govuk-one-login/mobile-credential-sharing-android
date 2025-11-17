@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
 import org.junit.Rule
 import org.junit.Test
@@ -33,15 +32,12 @@ class VerifierScannerPermissionLogicTest {
     private var permissionStatus: PermissionStatus = PermissionStatus.Granted
 
     private var hasLaunchedPermission = false
-    private val state = object : PermissionState {
-        override val permission: String
-            get() = Manifest.permission.CAMERA
-        override val status: PermissionStatus
-            get() = permissionStatus
-
-        override fun launchPermissionRequest() {
-            hasLaunchedPermission = true
-        }
+    private val state by lazy {
+        FakePermissionState(
+            permission = Manifest.permission.CAMERA,
+            status = permissionStatus,
+            onLaunchPermission = { hasLaunchedPermission = true }
+        )
     }
 
     @Test
@@ -98,6 +94,8 @@ class VerifierScannerPermissionLogicTest {
                 hasPreviouslyDeniedPermission = true
             )
         }
+
+        composeTestRule.assertOpenAppSettingsButtonIsDisplayed()
 
         composeTestRule.onNodeWithText(
             resources.getString(R.string.open_app_permissions)

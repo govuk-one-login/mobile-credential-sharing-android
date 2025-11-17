@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainActivityViewModel = MainActivityViewModel()

@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
-import uk.gov.onelogin.sharing.testapp.PrimaryTabDestination.Companion.configureTestAppRoutes
+import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination.Companion.configureTestAppRoutes
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 
 @Composable

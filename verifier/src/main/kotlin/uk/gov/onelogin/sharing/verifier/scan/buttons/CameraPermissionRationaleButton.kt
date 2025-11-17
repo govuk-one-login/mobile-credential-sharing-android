@@ -47,7 +47,10 @@ internal fun CameraPermissionRationaleButtonPreview(
                 .background(GdsLocalColorScheme.current.listBackground)
                 .padding(16.dp)
         ) {
-            CameraPermissionRationaleButton(launchPermission = launchPermission)
+            CameraPermissionRationaleButton(
+                launchPermission = launchPermission,
+                modifier = Modifier.testTag("preview")
+            )
         }
     }
 }
