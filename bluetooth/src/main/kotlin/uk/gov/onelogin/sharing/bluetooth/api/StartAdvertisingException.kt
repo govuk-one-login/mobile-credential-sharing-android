@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api
 
+import java.util.concurrent.Future
+
 data class StartAdvertisingException(val error: AdvertisingError) : Exception("Error: $error")
 
 /**
@@ -21,8 +23,6 @@ enum class AdvertisingError {
 
     START_TIMEOUT,
 
-    CANCELLED,
-
     INTERNAL_ERROR;
 
     override fun toString(): String = when (this) {
@@ -31,7 +31,6 @@ enum class AdvertisingError {
         ALREADY_IN_PROGRESS -> "Advertising already in progress"
         INVALID_UUID -> "Invalid UUID"
         START_TIMEOUT -> "Start advertising timed out"
-        CANCELLED -> "Start advertising cancelled"
         INTERNAL_ERROR -> "Internal error"
     }
 }

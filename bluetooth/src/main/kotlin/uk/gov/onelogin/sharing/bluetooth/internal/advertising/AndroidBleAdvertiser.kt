@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
+import kotlinx.coroutines.CancellableContinuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CancellationException
@@ -90,23 +91,10 @@ class AndroidBleAdvertiser(
                 doStopAdvertising()
             }
 
-            currentCallback = object : AdvertisingCallback {
-                override fun onAdvertisingStarted() {
-                    _state.value = AdvertiserState.Started
-                    continuation.resume(Unit)
-                }
-
-                override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {
-                    _state.value = AdvertiserState.Failed("start failed: $reason")
-                    if (continuation.isActive) {
-                        continuation.resume(Unit)
-                    }
-                }
-
-                override fun onAdvertisingStopped() {
-                    _state.value = AdvertiserState.Stopped
-                }
-            }
+            currentCallback = StartAdvertisingCallback(
+                onStateChange = { _state.value = it },
+                continuation = continuation
+            )
 
             try {
                 currentCallback?.let {
@@ -137,5 +125,26 @@ class AndroidBleAdvertiser(
         runCatching { bleProvider.stopAdvertising() }
         currentCallback = null
         _state.value = AdvertiserState.Stopped
+    }
+}
+
+private class StartAdvertisingCallback(
+    private val onStateChange: (AdvertiserState) -> Unit,
+    private val continuation: CancellableContinuation<Unit>
+) : AdvertisingCallback {
+    override fun onAdvertisingStarted() {
+        onStateChange(AdvertiserState.Started)
+        continuation.resume(Unit)
+    }
+
+    override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {
+        onStateChange(AdvertiserState.Failed("start failed: $reason"))
+        if (continuation.isActive) {
+            continuation.resume(Unit)
+        }
+    }
+
+    override fun onAdvertisingStopped() {
+        onStateChange(AdvertiserState.Stopped)
     }
 }

@@ -8,7 +8,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.toReason
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothAdapterProvider
-import uk.gov.onelogin.sharing.bluetooth.internal.mapper.toAndroid
+import uk.gov.onelogin.sharing.bluetooth.internal.mapper.AdvertisingParametersMapper
+import uk.gov.onelogin.sharing.bluetooth.internal.mapper.BleAdvertiseDataMapper
 
 class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: BluetoothAdapterProvider) :
     BluetoothAdvertiserProvider {
@@ -34,30 +35,15 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
             return
         }
 
-        currentCallback = object : AdvertisingSetCallback() {
-            override fun onAdvertisingSetStarted(
-                advertisingSet: AdvertisingSet?,
-                txPower: Int,
-                status: Int
-            ) {
-                if (status == ADVERTISE_SUCCESS) {
-                    callback.onAdvertisingStarted()
-                } else {
-                    callback.onAdvertisingStartFailed(status.toReason())
-                    currentCallback = null
-                }
-            }
-
-            override fun onAdvertisingSetStopped(advertisingSet: AdvertisingSet?) {
-                callback.onAdvertisingStopped()
-                currentCallback = null
-            }
-        }
+        currentCallback = AndroidAdvertisingSetCallback(
+            callback = callback,
+            onClearCallback = { currentCallback = null }
+        )
 
         try {
             advertiser?.startAdvertisingSet(
-                parameters.toAndroid(),
-                bleAdvertiseData.toAndroid(),
+                AdvertisingParametersMapper.toAndroid(parameters),
+                BleAdvertiseDataMapper.toAndroid(bleAdvertiseData),
                 null,
                 null,
                 null,
@@ -83,5 +69,29 @@ class AndroidBluetoothAdvertiserProvider(private val bluetoothAdapter: Bluetooth
             currentCallback = null
             advertiser = null
         }
+    }
+}
+
+internal class AndroidAdvertisingSetCallback(
+    private val callback: AdvertisingCallback,
+    private val onClearCallback: () -> Unit
+
+) : AdvertisingSetCallback() {
+    override fun onAdvertisingSetStarted(
+        advertisingSet: AdvertisingSet?,
+        txPower: Int,
+        status: Int
+    ) {
+        if (status == ADVERTISE_SUCCESS) {
+            callback.onAdvertisingStarted()
+        } else {
+            callback.onAdvertisingStartFailed(status.toReason())
+            onClearCallback()
+        }
+    }
+
+    override fun onAdvertisingSetStopped(advertisingSet: AdvertisingSet?) {
+        callback.onAdvertisingStopped()
+        onClearCallback()
     }
 }

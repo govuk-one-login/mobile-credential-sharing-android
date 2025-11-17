@@ -9,19 +9,22 @@ import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 /**
  * Converts this to the Android-specific advertising data.
  */
-fun BleAdvertiseData.toAndroid(): AdvertiseData? {
-    println("advertising UUID: $serviceUuid")
-    return AdvertiseData.Builder()
-        .addServiceUuid(ParcelUuid(serviceUuid))
-        .build()
+object BleAdvertiseDataMapper {
+    fun toAndroid(data: BleAdvertiseData): AdvertiseData =
+        AdvertiseData.Builder()
+            .addServiceUuid(ParcelUuid(data.serviceUuid))
+            .build()
 }
 
 /**
  * Converts this to the Android-specific parameters.
  */
-fun AdvertisingParameters.toAndroid(): AdvertisingSetParameters = AdvertisingSetParameters.Builder()
-    .setLegacyMode(legacyMode)
-    .setInterval(interval)
-    .setTxPowerLevel(txPowerLevel)
-    .setConnectable(connectable)
-    .build()
+object AdvertisingParametersMapper {
+    fun toAndroid(parameters: AdvertisingParameters): AdvertisingSetParameters =
+        AdvertisingSetParameters.Builder()
+            .setLegacyMode(parameters.legacyMode)
+            .setInterval(parameters.interval)
+            .setTxPowerLevel(parameters.txPowerLevel)
+            .setConnectable(parameters.connectable)
+            .build()
+}
