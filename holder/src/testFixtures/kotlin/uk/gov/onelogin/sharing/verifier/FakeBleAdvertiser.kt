@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.verifier
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserStartResult
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
@@ -14,20 +13,12 @@ class FakeBleAdvertiser(initialState: AdvertiserState = AdvertiserState.Idle) : 
     var startCalls = 0
     var stopCalls = 0
     var lastAdvertiseData: BleAdvertiseData? = null
-    var nextStartResult: AdvertiserStartResult = AdvertiserStartResult.Success
 
-    override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData): AdvertiserStartResult {
+    override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
         startCalls++
         lastAdvertiseData = bleAdvertiseData
         _state.value = AdvertiserState.Starting
-
-        if (nextStartResult is AdvertiserStartResult.Success) {
-            _state.value = AdvertiserState.Started
-        } else if (nextStartResult is AdvertiserStartResult.Error) {
-            _state.value = AdvertiserState.Idle
-        }
-
-        return nextStartResult
+        _state.value = AdvertiserState.Started
     }
 
     override suspend fun stopAdvertise() {

@@ -8,7 +8,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserStartResult
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
@@ -100,9 +99,6 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `on start advertise fail sets error message`() = runTest {
         val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Idle)
-            .apply {
-                nextStartResult = AdvertiserStartResult.Error("error message")
-            }
         val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
 
         viewModel.onStartAdvertise()
@@ -142,9 +138,6 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `on error message shown it clears last error message from ui state`() = runTest {
         val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Idle)
-            .apply {
-                nextStartResult = AdvertiserStartResult.Error("error message")
-            }
         val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
 
         viewModel.onStartAdvertise()

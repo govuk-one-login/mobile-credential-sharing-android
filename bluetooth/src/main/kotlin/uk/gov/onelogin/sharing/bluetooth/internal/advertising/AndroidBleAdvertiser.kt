@@ -2,18 +2,20 @@ package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserStartResult
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.BleUuidValidator
+import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.PermissionChecker
 
@@ -31,21 +33,28 @@ class AndroidBleAdvertiser(
     override fun isBluetoothEnabled() = bleProvider.isBluetoothEnabled()
     override fun hasAdvertisePermission() = permissionChecker.hasPermission()
 
-    override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData): AdvertiserStartResult =
+    override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
         when {
             !bleProvider.isBluetoothEnabled() ->
-                AdvertiserStartResult.Error("Bluetooth is disabled")
+                throw StartAdvertisingException(
+                    AdvertisingError.BLUETOOTH_DISABLED
+                )
 
             !permissionChecker.hasPermission() ->
-                AdvertiserStartResult.Error("Missing permissions")
+                throw StartAdvertisingException(
+                    AdvertisingError.MISSING_PERMISSION
+                )
 
             !BleUuidValidator.isValid(bleAdvertiseData.serviceUuid) ->
-                AdvertiserStartResult.Error("Invalid UUID")
+                throw StartAdvertisingException(
+                    AdvertisingError.INVALID_UUID
+                )
 
             _state.value == AdvertiserState.Starting ||
-                _state.value == AdvertiserState.Started -> {
-                AdvertiserStartResult.Error("Already starting")
-            }
+                _state.value == AdvertiserState.Started ->
+                throw StartAdvertisingException(
+                    AdvertisingError.ALREADY_IN_PROGRESS
+                )
 
             else -> {
                 _state.value = AdvertiserState.Starting
@@ -57,16 +66,23 @@ class AndroidBleAdvertiser(
                             bleAdvertiseData
                         )
                     }
-                    AdvertiserStartResult.Success
                 } catch (e: TimeoutCancellationException) {
                     println(e.message)
-                    AdvertiserStartResult.Error("Advertising start timed out")
+                    throw StartAdvertisingException(
+                        AdvertisingError.START_TIMEOUT
+                    )
+                } catch (e: CancellationException) {
+                    println(e.message)
+                    throw e
                 } catch (e: IllegalStateException) {
                     println(e.message)
-                    AdvertiserStartResult.Error("Failed to start advertising")
+                    throw StartAdvertisingException(
+                        AdvertisingError.INTERNAL_ERROR
+                    )
                 }
             }
         }
+    }
 
     private suspend fun start(parameters: AdvertisingParameters, data: BleAdvertiseData) =
         suspendCancellableCoroutine { continuation ->
@@ -82,9 +98,9 @@ class AndroidBleAdvertiser(
 
                 override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {
                     _state.value = AdvertiserState.Failed("start failed: $reason")
-                    continuation.resumeWithException(
-                        IllegalStateException("start failed: $reason")
-                    )
+                    if (continuation.isActive) {
+                        continuation.resume(Unit)
+                    }
                 }
 
                 override fun onAdvertisingStopped() {

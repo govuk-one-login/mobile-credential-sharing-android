@@ -14,10 +14,17 @@ interface BleAdvertiser {
      *
      * @param bleAdvertiseData The payload to advertise.
      *
-     * @return [AdvertiserStartResult] The result of the start advertising operation.
      * Monitor [state] to confirm the service has successfully started advertising.
+     *
+     * ### Throws
+     * @throws StartAdvertisingException if:
+     *  - Bluetooth is disabled
+     *  - The required Bluetooth permissions are missing
+     *  - The provided UUID is invalid
+     *  - Advertising is already in progress
+     *  - Advertising does not start within [startTimeoutMs]
      */
-    suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData): AdvertiserStartResult
+    suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData)
 
     /**
      * Stop advertising the BLE service.

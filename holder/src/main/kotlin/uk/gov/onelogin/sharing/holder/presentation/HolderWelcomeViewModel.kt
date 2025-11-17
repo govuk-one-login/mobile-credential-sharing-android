@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserStartResult
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
 import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_ALGORITHM
 import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
@@ -48,9 +48,10 @@ class HolderWelcomeViewModel(
     fun onStartAdvertise() {
         val uuid = _uiState.value.uuid
         viewModelScope.launch {
-            val result = bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid = uuid))
-            if (result is AdvertiserStartResult.Error) {
-                _uiState.update { it.copy(lastErrorMessage = result.error) }
+            try {
+                bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid = uuid))
+            } catch (e: StartAdvertisingException) {
+                _uiState.update { it.copy(lastErrorMessage = e.message) }
             }
         }
     }
