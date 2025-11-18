@@ -9,9 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -22,6 +20,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
@@ -41,21 +41,19 @@ import uk.gov.onelogin.sharing.verifier.scan.buttons.PermanentCameraDenial
 @Composable
 fun VerifierScanner(
     modifier: Modifier = Modifier,
-    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+    viewModel: VerifierScannerViewModel = viewModel<VerifierScannerViewModel>(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    permissionState: PermissionState = rememberPermissionState(Manifest.permission.CAMERA) {
+        viewModel.update(!it)
+    }
 ) {
-    val (
-        hasPreviouslyDeniedPermission,
-        onUpdatePreviouslyDeniedPermission
-    ) = rememberSaveable { mutableStateOf(false) }
-
-    val permissionState =
-        rememberPermissionState(Manifest.permission.CAMERA) {
-            onUpdatePreviouslyDeniedPermission(!it)
-        }
+    val hasPreviouslyDeniedPermission: Boolean by viewModel
+        .hasPreviouslyDeniedPermission
+        .collectAsStateWithLifecycle()
 
     VerifierScanner(
         lifecycleOwner = lifecycleOwner,
-        onUpdatePreviouslyDeniedPermission = onUpdatePreviouslyDeniedPermission,
+        onUpdatePreviouslyDeniedPermission = viewModel::update,
         hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
         permissionState = permissionState,
         modifier = modifier

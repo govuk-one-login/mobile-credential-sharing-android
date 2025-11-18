@@ -71,4 +71,12 @@ class MainActivityRule(composeTestRule: ComposeContentTestRule) :
             )
         }
     }
+
+    fun renderPreview(currentTabDestination: PrimaryTabDestination) {
+        setContent {
+            MainActivityContentPreview(
+                currentTabDestination = currentTabDestination
+            )
+        }
+    }
 }

@@ -20,7 +20,7 @@ import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 
 @OptIn(UnstableDesignSystemAPI::class)
 @Composable
-fun TestAppEntries(
+fun ModuleEntries(
     entries: PersistentList<Pair<String, Any>>,
     modifier: Modifier = Modifier,
     onNavigate: (Any, NavOptionsBuilder.() -> Unit) -> Unit = { _, _ -> }

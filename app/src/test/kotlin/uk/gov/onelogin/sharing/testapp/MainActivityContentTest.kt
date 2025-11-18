@@ -45,4 +45,22 @@ class MainActivityContentTest {
             expectedMenuItems.forEach(composeTestRule::assertMenuItem)
         }
     }
+
+    @Test
+    fun previewDisplaysHolderContent() = runTest {
+        composeTestRule.run {
+            renderPreview(
+                currentTabDestination = PrimaryTabDestination.Holder
+            )
+        }
+    }
+
+    @Test
+    fun previewDisplaysVerifierContent() = runTest {
+        composeTestRule.run {
+            renderPreview(
+                currentTabDestination = PrimaryTabDestination.Verifier
+            )
+        }
+    }
 }

@@ -35,7 +35,7 @@ sealed class PrimaryTabDestination(val label: String) : Parcelable {
             onNavigate: (Any, NavOptionsBuilder.() -> Unit) -> Unit = { _, _ -> }
         ) {
             composable<Holder> {
-                TestAppEntries(
+                ModuleEntries(
                     entries = listOf(
                         "Welcome screen" to HolderHomeRoute
                     ).sortedBy { navPair -> navPair.first }
@@ -44,7 +44,7 @@ sealed class PrimaryTabDestination(val label: String) : Parcelable {
                 )
             }
             composable<Verifier> {
-                TestAppEntries(
+                ModuleEntries(
                     entries = listOf(
                         "QR Scanner" to VerifierScanRoute
                     ).sortedBy { navPair -> navPair.first }

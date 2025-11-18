@@ -15,7 +15,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.collections.immutable.toPersistentList
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.testapp.MainActivityContentPreviewParameters
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 
 @Composable

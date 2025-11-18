@@ -7,10 +7,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
 
 @Serializable
 object VerifierScanRoute {
+    @OptIn(ExperimentalPermissionsApi::class)
     fun NavGraphBuilder.configureVerifierScannerRoute() {
         composable<VerifierScanRoute> {
             Column(

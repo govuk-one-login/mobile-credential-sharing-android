@@ -7,6 +7,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -33,6 +35,17 @@ class VerifierScannerGrantedTest {
     fun permissionGrantedTextIsShown() = runTest {
         composeTestRule.run {
             render()
+            assertPermissionGrantedTextIsDisplayed()
+        }
+    }
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Test
+    fun permissionGrantedTextRenderedWithPermissionState() = runTest {
+        composeTestRule.run {
+            render(permissionState = {
+                rememberPermissionState(permission = Manifest.permission.CAMERA)
+            })
             assertPermissionGrantedTextIsDisplayed()
         }
     }
