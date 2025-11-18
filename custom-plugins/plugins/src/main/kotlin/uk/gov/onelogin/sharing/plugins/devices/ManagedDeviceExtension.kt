@@ -9,15 +9,34 @@ import org.gradle.internal.extensions.stdlib.capitalized
  *
  */
 interface ManagedDeviceExtension {
-    // Use device profiles you typically see in Android Studio.
+    /**
+     * Use device profiles you typically see in Android Studio.
+     *
+     * @see com.android.build.api.dsl.ManagedVirtualDevice.device
+     */
     val deviceProfile: Property<String>
 
     // Use only API levels 27 and higher.
+    /**
+     * @see com.android.build.api.dsl.ManagedVirtualDevice.apiLevel
+     */
     val apiLevel: Property<Int>
 
-    // To include Google services, use "google-atd" instead
+    /**
+     * To include Google services, use "google-atd" instead
+     *
+     * @see com.android.build.api.dsl.ManagedVirtualDevice.systemImageSource
+     */
     val systemImageSource: Property<String>
+    /**
+     * @see com.android.build.api.dsl.ManagedVirtualDevice.require64Bit
+     */
     val requires64Bit: Property<Boolean>
+
+    /**
+     * @see com.android.build.api.dsl.ManagedVirtualDevice.testedAbi
+     */
+    val testedAbi: Property<String>
 
     fun name(): String {
         val systemImageArray = systemImageSource.get().split("-")
@@ -48,6 +67,7 @@ interface ManagedDeviceExtension {
             // Otherwise, use "aosp-atd"
             systemImageSource.convention("aosp-atd")
             requires64Bit.convention(false)
+            testedAbi.convention("x86_64")
         }
     }
 }

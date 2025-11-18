@@ -5,5 +5,6 @@ source "$(git rev-parse --show-toplevel)/scripts/env"
     lintDebug \
     detekt \
     spotlessCheck \
+    "${@}" \
     --rerun-tasks \
-    --stacktrace
+    --stacktrace \

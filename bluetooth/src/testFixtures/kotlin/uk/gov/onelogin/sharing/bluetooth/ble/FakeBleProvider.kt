@@ -6,7 +6,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 
-internal class FakeBleProvider : BleProvider {
+class FakeBleProvider : BleProvider {
     var enabled = true
     var thrownOnStart: Throwable? = null
     var parameters: AdvertisingParameters? = null

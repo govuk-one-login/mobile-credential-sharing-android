@@ -51,6 +51,8 @@ plugins {
         libs.plugins.kotlin.jvm,
         libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
+        libs.plugins.kotlin.parcelize,
+        libs.plugins.kotlin.serialization,
     ).forEach { plugin ->
         alias(plugin) apply false
     }
