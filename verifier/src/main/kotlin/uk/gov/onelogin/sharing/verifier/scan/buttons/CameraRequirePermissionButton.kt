@@ -37,18 +37,15 @@ fun CameraRequirePermissionButton(
 
 @Composable
 @Preview
-internal fun CameraRequirePermissionButtonPreview(
-    modifier: Modifier = Modifier,
-    launchPermission: () -> Unit = {}
-) {
+internal fun CameraRequirePermissionButtonPreview() {
     GdsTheme {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .background(GdsLocalColorScheme.current.listBackground)
                 .padding(16.dp)
         ) {
             CameraRequirePermissionButton(
-                launchPermission = launchPermission,
+                launchPermission = {},
                 modifier = Modifier.testTag("preview")
             )
         }

@@ -60,10 +60,10 @@ fun PermanentCameraDenial(context: Context, modifier: Modifier = Modifier) {
 
 @Composable
 @Preview
-internal fun PermanentCameraDenialPreview(modifier: Modifier = Modifier) {
+internal fun PermanentCameraDenialPreview() {
     GdsTheme {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .background(GdsLocalColorScheme.current.listBackground)
                 .padding(16.dp)
         ) {

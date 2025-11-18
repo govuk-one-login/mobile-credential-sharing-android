@@ -34,6 +34,7 @@ configure<BaseExtension> {
                     // To include Google services, use "google-atd" instead
                     this.systemImageSource = configuration.systemImageSource.get()
                     this.require64Bit = configuration.requires64Bit.get()
+                    this.testedAbi = configuration.testedAbi.get()
                 }
             }
         }

@@ -37,18 +37,15 @@ fun CameraPermissionRationaleButton(
 
 @Composable
 @Preview
-internal fun CameraPermissionRationaleButtonPreview(
-    modifier: Modifier = Modifier,
-    launchPermission: () -> Unit = {}
-) {
+internal fun CameraPermissionRationaleButtonPreview() {
     GdsTheme {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .background(GdsLocalColorScheme.current.listBackground)
                 .padding(16.dp)
         ) {
             CameraPermissionRationaleButton(
-                launchPermission = launchPermission,
+                launchPermission = {},
                 modifier = Modifier.testTag("preview")
             )
         }

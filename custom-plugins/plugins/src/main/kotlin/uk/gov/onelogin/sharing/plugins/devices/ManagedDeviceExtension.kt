@@ -19,6 +19,8 @@ interface ManagedDeviceExtension {
     val systemImageSource: Property<String>
     val requires64Bit: Property<Boolean>
 
+    val testedAbi: Property<String>
+
     fun name(): String {
         val systemImageArray = systemImageSource.get().split("-")
         val result = StringBuilder(systemImageArray[0])
@@ -48,6 +50,7 @@ interface ManagedDeviceExtension {
             // Otherwise, use "aosp-atd"
             systemImageSource.convention("aosp-atd")
             requires64Bit.convention(false)
+            testedAbi.convention("arm64-v8a")
         }
     }
 }

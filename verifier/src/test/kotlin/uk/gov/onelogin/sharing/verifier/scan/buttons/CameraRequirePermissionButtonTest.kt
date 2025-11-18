@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.scan.buttons
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -19,19 +20,22 @@ class CameraRequirePermissionButtonTest {
     private var hasLaunchedPermission = false
 
     @Test
-    fun standardUsage() = verifyBehaviour {
-        CameraRequirePermissionButton { hasLaunchedPermission = true }
-    }
-
-    @Test
-    fun previewUsage() = verifyBehaviour {
-        CameraRequirePermissionButtonPreview { hasLaunchedPermission = true }
-    }
-
-    private fun verifyBehaviour(content: @Composable () -> Unit = {}) = runTest {
-        composeTestRule.setContent(content)
+    fun standardUsage() = runTest {
+        composeTestRule.setContent {
+            CameraRequirePermissionButton { hasLaunchedPermission = true }
+        }
 
         composeTestRule.onNodeWithTag("permissionRequiredButton").performClick()
         assertTrue(hasLaunchedPermission)
+    }
+
+    @Test
+    fun previewUsage() = runTest {
+        composeTestRule.setContent {
+            CameraRequirePermissionButtonPreview()
+        }
+
+        composeTestRule.onNodeWithTag("permissionRequiredButton")
+            .assertIsDisplayed()
     }
 }

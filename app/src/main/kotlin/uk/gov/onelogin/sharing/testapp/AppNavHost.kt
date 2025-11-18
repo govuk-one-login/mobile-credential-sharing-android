@@ -11,9 +11,9 @@ import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 
 @Composable
 fun AppNavHost(
+    startDestination: Any,
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
-    startDestination: Any = Unit
+    navController: NavHostController = rememberNavController()
 ) {
     NavHost(
         navController = navController,
