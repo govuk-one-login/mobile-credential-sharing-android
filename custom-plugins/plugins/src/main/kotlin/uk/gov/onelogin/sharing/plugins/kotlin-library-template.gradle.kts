@@ -12,6 +12,7 @@ listOf(
 
 listOf(
     "kotlin-jvm",
+    "kotlin-serialization",
     "custom-language.config",
     "spotless-config",
     "detekt-config",

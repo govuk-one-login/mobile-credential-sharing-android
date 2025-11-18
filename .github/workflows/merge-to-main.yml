@@ -10,6 +10,9 @@ concurrency:
 
 jobs:
   bump_and_publish:
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       id-token: write
       contents: write
@@ -30,6 +33,14 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+
+      - name: Install homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Install linux packages
+        run: |
+          ./scripts/installLinuxPackages
 
       - name: Setup GitHub Runner workflow
         uses: ./mobile-android-pipelines/actions/setup-runner
