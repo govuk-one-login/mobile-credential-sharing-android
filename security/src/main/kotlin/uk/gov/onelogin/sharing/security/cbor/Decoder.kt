@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.security.cbor
 
 import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -36,7 +37,7 @@ fun decodeDeviceEngagement(cborBase64Url: String) {
             " - Security - Ephemeral Public Key (as hex): ${deviceEngagement.security.ephemeralPublicKey}"
         )
         println(" - Device Retrieval Methods: ${deviceEngagement.deviceRetrievalMethods}")
-    } catch (e: JsonParseException) {
+    } catch (e: JsonProcessingException) {
         // We need to send error status code 10 to the reader in the event of CBOR decoding errors
         println("Failed to deserialize CBOR: ${e.message}")
     }
