@@ -98,12 +98,13 @@ class HolderWelcomeViewModel(
 
         viewModelScope.launch {
             bleAdvertiser.state.collect { state ->
+                println("state: $state")
                 _uiState.update { it.copy(advertiserState = state) }
             }
         }
     }
 
-    fun onStartAdvertise() {
+    fun startAdvertising() {
         val uuid = _uiState.value.uuid
         viewModelScope.launch {
             try {
@@ -114,14 +115,10 @@ class HolderWelcomeViewModel(
         }
     }
 
-    fun onStopAdvertise() {
+    fun stopAdvertising() {
         viewModelScope.launch {
             bleAdvertiser.stopAdvertise()
         }
-    }
-
-    fun onErrorMessageShown() {
-        _uiState.update { it.copy(lastErrorMessage = null) }
     }
 }
 

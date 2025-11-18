@@ -82,13 +82,13 @@ class HolderWelcomeViewModelTest {
         val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
         val initialUuid = viewModel.uiState.value.uuid
 
-        viewModel.onStartAdvertise()
+        viewModel.startAdvertising()
 
         advanceUntilIdle()
         assertEquals(1, fakeBleAdvertiser.startCalls)
         assertEquals(
             initialUuid,
-            fakeBleAdvertiser.lastAdvertiseData?.serviceUuid.toString()
+            fakeBleAdvertiser.lastAdvertiseData?.serviceUuid
         )
 
         assertEquals(
@@ -99,14 +99,14 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `on start advertise fail sets error message`() = runTest {
+    fun `start advertising fail sets error message`() = runTest {
         val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Idle)
         val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
         fakeBleAdvertiser.exceptionToThrow = StartAdvertisingException(
             AdvertisingError.BLUETOOTH_DISABLED
         )
 
-        viewModel.onStartAdvertise()
+        viewModel.startAdvertising()
         advanceUntilIdle()
 
         assertEquals(
@@ -120,7 +120,7 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `on stop advertise calls stop and updates state`() = runTest {
+    fun `stop advertising calls stop and updates state`() = runTest {
         val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Started)
         val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
 
@@ -130,7 +130,7 @@ class HolderWelcomeViewModelTest {
             viewModel.uiState.value.advertiserState
         )
 
-        viewModel.onStopAdvertise()
+        viewModel.stopAdvertising()
         advanceUntilIdle()
 
         assertEquals(1, fakeBleAdvertiser.stopCalls)
@@ -138,19 +138,5 @@ class HolderWelcomeViewModelTest {
             AdvertiserState.Stopped,
             viewModel.uiState.value.advertiserState
         )
-    }
-
-    @Test
-    fun `on error message shown it clears last error message from ui state`() = runTest {
-        val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Idle)
-        val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
-
-        viewModel.onStartAdvertise()
-        advanceUntilIdle()
-
-        viewModel.uiState.value.let { current ->
-            viewModel.onErrorMessageShown()
-            assertNull(viewModel.uiState.value.lastErrorMessage)
-        }
     }
 }
