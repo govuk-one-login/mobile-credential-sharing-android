@@ -39,8 +39,7 @@ jobs:
 
       - name: Install homebrew
         run: |
-          curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
-        shell: bash
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       - name: Setup GitHub Runner workflow
         uses: ./mobile-android-pipelines/actions/setup-runner
