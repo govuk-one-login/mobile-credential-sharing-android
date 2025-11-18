@@ -2,12 +2,11 @@ package uk.gov.onelogin.sharing.bluetooth.internal.core
 
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.internal.Errors
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BluetoothAdvertiserProvider
 
-private const val BLUETOOTH_NOT_AVAILABLE = "Bluetooth advertiser not available"
-
-class AndroidBleProvider(
+internal class AndroidBleProvider(
     private val bluetoothAdapter: BluetoothAdapterProvider,
     private val bleAdvertiser: BluetoothAdvertiserProvider?
 ) : BleProvider {
@@ -20,7 +19,7 @@ class AndroidBleProvider(
         callback: AdvertisingCallback
     ) {
         check(bleAdvertiser != null) {
-            BLUETOOTH_NOT_AVAILABLE
+            Errors.BLUETOOTH_NOT_AVAILABLE
         }
 
         bleAdvertiser.startAdvertisingSet(

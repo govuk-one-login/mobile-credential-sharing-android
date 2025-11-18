@@ -20,7 +20,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 
 @RunWith(RobolectricTestRunner::class)
-class AndroidBluetoothAdvertiserProviderTest {
+internal class AndroidBluetoothAdvertiserProviderTest {
     private val advertiser = mockk<BluetoothLeAdvertiser>(relaxed = true)
     private val adapter = FakeBluetoothAdapterProvider(
         isEnabled = true,

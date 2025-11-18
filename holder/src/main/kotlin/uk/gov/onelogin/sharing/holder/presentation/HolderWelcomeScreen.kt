@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.internal.permissions.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 
 private const val QR_SIZE = 800

@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
 
 /**
  * Provides a contract for starting and stopping Bluetooth advertising.
@@ -9,7 +10,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
  * Decouples the [AndroidBleAdvertiser] from the concrete Android implementation
  * details.
  */
-interface BluetoothAdvertiserProvider {
+internal interface BluetoothAdvertiserProvider {
     /**
      * Starts a BLE advertising with the given parameters and data.
      *

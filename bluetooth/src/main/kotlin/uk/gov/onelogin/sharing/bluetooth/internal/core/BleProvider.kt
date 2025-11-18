@@ -8,7 +8,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallbac
  * Provides a contract for interacting with the device's Bluetooth Low
  * Energy (BLE) capabilities.
  */
-interface BleProvider {
+internal interface BleProvider {
     /**
      * Checks if Bluetooth is currently enabled on the device.
      */

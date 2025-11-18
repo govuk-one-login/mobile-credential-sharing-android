@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.permissions
+package uk.gov.onelogin.sharing.bluetooth.api.permissions
 
 import android.Manifest
 import android.annotation.SuppressLint

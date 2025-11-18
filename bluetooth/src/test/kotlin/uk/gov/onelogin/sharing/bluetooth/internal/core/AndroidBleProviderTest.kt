@@ -10,10 +10,10 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
 
-class AndroidBleProviderTest {
+internal class AndroidBleProviderTest {
     val fakeAdapter = FakeBluetoothAdapterProvider(true)
     val fakeAdvertiser = FakeBluetoothAdvertiserProvider()
-    val provider = AndroidBleProvider(
+    val provider: BleProvider = AndroidBleProvider(
         fakeAdapter,
         fakeAdvertiser
     )

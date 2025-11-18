@@ -9,7 +9,7 @@ import android.bluetooth.le.BluetoothLeAdvertiser
  * Decouples other components from the static Android `BluetoothManager` and
  * `BluetoothAdapter` classes.
  */
-interface BluetoothAdapterProvider {
+internal interface BluetoothAdapterProvider {
     /**
      * Checks if the Bluetooth adapter is currently enabled.
      */

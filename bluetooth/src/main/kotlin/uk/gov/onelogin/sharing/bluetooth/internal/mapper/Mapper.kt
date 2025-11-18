@@ -9,7 +9,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 /**
  * Converts this to the Android-specific advertising data.
  */
-object BleAdvertiseDataMapper {
+internal object BleAdvertiseDataMapper {
     fun toAndroid(data: BleAdvertiseData): AdvertiseData = AdvertiseData.Builder()
         .addServiceUuid(ParcelUuid(data.serviceUuid))
         .build()
@@ -18,7 +18,7 @@ object BleAdvertiseDataMapper {
 /**
  * Converts this to the Android-specific parameters.
  */
-object AdvertisingParametersMapper {
+internal object AdvertisingParametersMapper {
     fun toAndroid(parameters: AdvertisingParameters): AdvertisingSetParameters =
         AdvertisingSetParameters.Builder()
             .setLegacyMode(parameters.legacyMode)

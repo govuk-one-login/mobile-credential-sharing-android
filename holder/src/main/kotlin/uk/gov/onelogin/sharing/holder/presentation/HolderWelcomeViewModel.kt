@@ -18,12 +18,8 @@ import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiserFactory
 import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBluetoothAdvertiserProvider
-import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
-import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterProvider
-import uk.gov.onelogin.sharing.bluetooth.internal.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
 import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_ALGORITHM
 import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
@@ -56,16 +52,7 @@ class HolderWelcomeViewModel(
                             "Unknown ViewModel class $modelClass"
                         }
 
-                        val adapterProvider = AndroidBluetoothAdapterProvider(context)
-                        val bleAdvertiser = AndroidBleAdvertiser(
-                            bleProvider = AndroidBleProvider(
-                                bluetoothAdapter = adapterProvider,
-                                bleAdvertiser = AndroidBluetoothAdvertiserProvider(
-                                    adapterProvider
-                                )
-                            ),
-                            permissionChecker = BluetoothPermissionChecker(context)
-                        )
+                        val bleAdvertiser = BleAdvertiserFactory.create(context)
 
                         return HolderWelcomeViewModel(
                             sessionSecurity = SessionSecurityImpl(),

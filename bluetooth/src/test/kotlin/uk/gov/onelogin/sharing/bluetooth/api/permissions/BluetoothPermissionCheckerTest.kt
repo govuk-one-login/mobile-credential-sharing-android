@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.permissions
+package uk.gov.onelogin.sharing.bluetooth.api.permissions
 
 import android.Manifest
 import android.content.Context
@@ -18,6 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.util.ReflectionHelpers
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 
 @RunWith(RobolectricTestRunner::class)
 class BluetoothPermissionCheckerTest {

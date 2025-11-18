@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.permissions
+package uk.gov.onelogin.sharing.bluetooth.api.permissions
 
 // This will be updated in - https://govukverify.atlassian.net/browse/DCMAW-16531
 fun interface PermissionChecker {
