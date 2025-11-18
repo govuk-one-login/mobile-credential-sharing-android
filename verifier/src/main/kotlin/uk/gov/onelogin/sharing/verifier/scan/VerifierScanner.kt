@@ -167,55 +167,28 @@ fun verifierScannerPermissionLogic(
             initialValue = null,
             lifecycleOwner = lifecycleOwner
         )
-        val imageCaptureUseCase: ImageCapture? by
-            viewModel.imageCapture.collectAsStateWithLifecycle(
-                initialValue = null,
-                lifecycleOwner = lifecycleOwner
-            )
 
         QrScannerScreen(
             modifier = modifier,
             surfaceRequest = surfaceRequest,
             previewUseCase = previewUseCase,
             analysisUseCase = analysisUseCase,
-            imageCaptureUseCase = imageCaptureUseCase,
             scanningWidthMultiplier = ModifierExtensions.CANVAS_WIDTH_MULTIPLIER,
             coroutineScope = coroutineScope,
             onUpdateViewModelCamera = viewModel::update,
             colors = QrScannerOverlayDefaults
         )
     },
-    onPermissionPermanentlyDenied = @RequiresImplementation(
-        details = [
-            ImplementationDetail(
-                ticket = "DCMAW-16275",
-                description = "Finalise UI for permanent camera permission denial"
-            )
-        ]
-    ) { _ ->
+    onPermissionPermanentlyDenied = { _ ->
         PermanentCameraDenial(context, modifier)
     },
-    onShowRationale = @RequiresImplementation(
-        details = [
-            ImplementationDetail(
-                ticket = "DCMAW-16275",
-                description = "Finalise UI for camera permission rationale"
-            )
-        ]
-    ) { _, launchPermission ->
+    onShowRationale = { _, launchPermission ->
         CameraPermissionRationaleButton(
             launchPermission = launchPermission,
             modifier = modifier
         )
     },
-    onRequirePermission = @RequiresImplementation(
-        details = [
-            ImplementationDetail(
-                ticket = "DCMAW-16275",
-                description = "Finalise UI for camera permission denial"
-            )
-        ]
-    ) { _, launchPermission ->
+    onRequirePermission = { _, launchPermission ->
         CameraRequirePermissionButton(
             launchPermission = launchPermission,
             modifier = modifier
