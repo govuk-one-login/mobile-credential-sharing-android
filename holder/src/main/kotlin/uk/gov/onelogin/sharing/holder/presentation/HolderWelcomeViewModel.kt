@@ -85,7 +85,7 @@ class HolderWelcomeViewModel(
 
         viewModelScope.launch {
             bleAdvertiser.state.collect { state ->
-                println("state: $state")
+                println("Advertiser state: $state")
                 _uiState.update { it.copy(advertiserState = state) }
             }
         }
@@ -97,6 +97,7 @@ class HolderWelcomeViewModel(
             try {
                 bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid = uuid))
             } catch (e: StartAdvertisingException) {
+                println("Error starting advertising: ${e.error}")
                 _uiState.update { it.copy(lastErrorMessage = e.message) }
             }
         }

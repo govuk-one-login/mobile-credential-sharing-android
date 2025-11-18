@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier
+package uk.gov.onelogin.sharing.holder
 
 import java.util.UUID
 import uk.gov.onelogin.sharing.holder.engagement.Engagement

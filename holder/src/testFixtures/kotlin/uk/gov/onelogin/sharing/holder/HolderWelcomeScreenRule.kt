@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier
+package uk.gov.onelogin.sharing.holder
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -9,9 +9,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
+import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
-import uk.gov.onelogin.sharing.verifier.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
-import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.QR_CODE_CONTENT_DESC
 
 class HolderWelcomeScreenRule(composeTestRule: ComposeContentTestRule) :
     ComposeContentTestRule by composeTestRule {
