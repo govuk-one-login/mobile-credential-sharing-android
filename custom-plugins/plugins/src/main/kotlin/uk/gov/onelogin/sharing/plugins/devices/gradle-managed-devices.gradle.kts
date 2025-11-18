@@ -25,10 +25,8 @@ configure<BaseExtension> {
         animationsDisabled = true
         execution = "ANDROIDX_TEST_ORCHESTRATOR"
         managedDevices {
-            allDevices {
-                maybeCreate<ManagedVirtualDevice>(
-                    configuration.name()
-                ).apply {
+            localDevices {
+                create(configuration.name()) {
                     // Use device profiles you typically see in Android Studio.
                     this.device = configuration.deviceProfile.get()
                     // Use only API levels 27 and higher.
@@ -36,6 +34,7 @@ configure<BaseExtension> {
                     // To include Google services, use "google-atd" instead
                     this.systemImageSource = configuration.systemImageSource.get()
                     this.require64Bit = configuration.requires64Bit.get()
+                    this.testedAbi = configuration.testedAbi.get()
                 }
             }
         }

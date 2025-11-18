@@ -29,6 +29,9 @@ android {
         }
     }
 }
+dependencies {
+    api(projects.models)
+}
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(

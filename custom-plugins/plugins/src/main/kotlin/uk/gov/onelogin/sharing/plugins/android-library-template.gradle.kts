@@ -8,6 +8,8 @@ listOf(
     "android-library",
     "kotlin-android",
     "kotlin-compose",
+    "kotlin-parcelize",
+    "kotlin-serialization",
     "custom-language.config",
     "custom-managed.devices",
     "roborazzi",
@@ -28,6 +30,7 @@ listOf(
 val androidTestImplementation by configurations
 val debugImplementation by configurations
 val implementation by configurations
+val testFixturesApi by configurations
 val testFixturesImplementation by configurations
 val testImplementation by configurations
 
@@ -53,7 +56,16 @@ dependencies {
     }
 
     listOf(
+        "androidx-test-espresso-intents",
+        "androidx-test-rules",
+        "androidx-ui-test-junit4",
+    ).map { libs.findLibrary(it).get().get() }.forEach {
+        testFixturesApi(it)
+    }
+
+    listOf(
         "android-baseline",
+        "uk-gov-ui",
     ).map { libs.findBundle(it).get() }.forEach {
         implementation(it)
         testFixturesImplementation(it)
