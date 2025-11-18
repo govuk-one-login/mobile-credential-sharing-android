@@ -1,6 +1,7 @@
 [versions]
 activityCompose = "1.11.0" # https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
 agp = "8.13.1" # https://developer.android.com/build/releases/gradle-plugin
+androidx-browser = "1.9.0" # https://developer.android.com/jetpack/androidx/releases/browser
 androidx-navigation = "2.9.6" # https://developer.android.com/jetpack/androidx/releases/navigation
 androidx-test-espresso = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#espresso-3.7.0
 androidx-test-ext-junit = "1.3.0" # https://developer.android.com/jetpack/androidx/releases/test#junit_extensions_130_2
@@ -29,6 +30,7 @@ xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -92,6 +94,7 @@ debug-tooling = [
 testing-instrumentation = [
     "androidx-espresso-core",
     "androidx-junit",
+    "androidx-navigation-testing",
     "androidx-test-rules",
     "androidx-ui-test-junit4",
 ]

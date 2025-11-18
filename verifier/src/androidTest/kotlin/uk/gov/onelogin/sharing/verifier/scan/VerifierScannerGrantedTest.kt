@@ -35,7 +35,7 @@ class VerifierScannerGrantedTest {
     fun permissionGrantedTextIsShown() = runTest {
         composeTestRule.run {
             render()
-            assertPermissionGrantedTextIsDisplayed()
+            assertCameraViewfinderIsDisplayed()
         }
     }
 
@@ -46,7 +46,7 @@ class VerifierScannerGrantedTest {
             render(permissionState = {
                 rememberPermissionState(permission = Manifest.permission.CAMERA)
             })
-            assertPermissionGrantedTextIsDisplayed()
+            assertCameraViewfinderIsDisplayed()
         }
     }
 }

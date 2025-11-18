@@ -31,6 +31,7 @@ android {
 }
 dependencies {
     api(projects.models)
+    implementation(libs.androidx.browser)
 }
 mavenPublishingConfig {
     mavenConfigBlock {
