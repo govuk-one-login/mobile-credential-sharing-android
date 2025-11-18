@@ -27,18 +27,22 @@ class FakeBleProvider : BleProvider {
     }
 
     override fun stopAdvertising() {
+        requireNotNull(callback) { "Must call startAdvertising first" }
         callback?.onAdvertisingStopped()
     }
 
     fun triggerOnAdvertisingStarted() {
+        requireNotNull(callback) { "Must call startAdvertising first" }
         callback?.onAdvertisingStarted()
     }
 
     fun triggerOnAdvertisingFailed(reason: AdvertisingFailureReason) {
+        requireNotNull(callback) { "Must call startAdvertising first" }
         callback?.onAdvertisingStartFailed(reason)
     }
 
     fun triggerOnAdvertisingStopped() {
+        requireNotNull(callback) { "Must call startAdvertising first" }
         callback?.onAdvertisingStopped()
     }
 }

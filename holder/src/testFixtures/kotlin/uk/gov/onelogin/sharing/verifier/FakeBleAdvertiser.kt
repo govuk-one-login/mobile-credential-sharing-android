@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
 
 class FakeBleAdvertiser(initialState: AdvertiserState = AdvertiserState.Idle) : BleAdvertiser {
     private val _state = MutableStateFlow(initialState)
@@ -13,8 +14,12 @@ class FakeBleAdvertiser(initialState: AdvertiserState = AdvertiserState.Idle) : 
     var startCalls = 0
     var stopCalls = 0
     var lastAdvertiseData: BleAdvertiseData? = null
+    var exceptionToThrow: StartAdvertisingException? = null
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
+        if (exceptionToThrow != null) {
+            throw exceptionToThrow!!
+        }
         startCalls++
         lastAdvertiseData = bleAdvertiseData
         _state.value = AdvertiserState.Starting

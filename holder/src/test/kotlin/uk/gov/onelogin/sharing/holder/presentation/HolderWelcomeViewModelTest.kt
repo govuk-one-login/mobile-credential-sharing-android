@@ -9,7 +9,9 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
@@ -86,7 +88,7 @@ class HolderWelcomeViewModelTest {
         assertEquals(1, fakeBleAdvertiser.startCalls)
         assertEquals(
             initialUuid,
-            fakeBleAdvertiser.lastAdvertiseData?.serviceUuid
+            fakeBleAdvertiser.lastAdvertiseData?.serviceUuid.toString()
         )
 
         assertEquals(
@@ -100,12 +102,15 @@ class HolderWelcomeViewModelTest {
     fun `on start advertise fail sets error message`() = runTest {
         val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Idle)
         val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
+        fakeBleAdvertiser.exceptionToThrow = StartAdvertisingException(
+            AdvertisingError.BLUETOOTH_DISABLED
+        )
 
         viewModel.onStartAdvertise()
         advanceUntilIdle()
 
         assertEquals(
-            "error message",
+            "Error: Bluetooth is disabled",
             viewModel.uiState.value.lastErrorMessage
         )
         assertEquals(

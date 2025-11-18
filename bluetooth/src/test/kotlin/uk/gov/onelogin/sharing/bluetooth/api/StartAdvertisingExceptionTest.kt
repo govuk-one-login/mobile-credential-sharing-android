@@ -10,7 +10,7 @@ class StartAdvertisingExceptionTest(
     private val error: AdvertisingError,
     private val expectedMessage: String
 ) {
-    companion object{
+    companion object {
         @JvmStatic
         @Parameterized.Parameters
         fun data(): Collection<Array<Any>> = listOf(

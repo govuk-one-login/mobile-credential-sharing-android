@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.bluetooth.api
 
-import java.util.concurrent.Future
-
 data class StartAdvertisingException(val error: AdvertisingError) : Exception("Error: $error")
 
 /**

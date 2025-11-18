@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
-import kotlinx.coroutines.CancellableContinuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow

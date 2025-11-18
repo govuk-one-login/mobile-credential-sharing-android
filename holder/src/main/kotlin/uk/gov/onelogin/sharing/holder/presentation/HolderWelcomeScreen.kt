@@ -17,7 +17,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,40 +26,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBluetoothAdvertiserProvider
-import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
-import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.holder.QrCodeImage
-import uk.gov.onelogin.sharing.holder.engagement.EngagementGenerator
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
 private const val QR_SIZE = 800
-
-data class HolderWelcomeContentState(
-    val errorMessage: String?,
-    val advertiserState: AdvertiserState,
-    val uuid: String,
-    val qrCodeData: String?
-)
 
 @Composable
 fun HolderWelcomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HolderWelcomeViewModel = holderWelcomeViewModel()
+    viewModel: HolderWelcomeViewModel = HolderWelcomeViewModel.holderWelcomeViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val contentState = HolderWelcomeContentState(
-        errorMessage = uiState.lastErrorMessage,
-        advertiserState = uiState.advertiserState,
-        uuid = uiState.uuid.toString(),
-        qrCodeData = uiState.qrData
-    )
+    val contentState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
         RequestPermissions()
@@ -99,7 +78,7 @@ private fun RequestPermissions() {
 @Suppress("LongMethod")
 @Composable
 fun HolderWelcomeScreenContent(
-    contentState: HolderWelcomeContentState,
+    contentState: HolderWelcomeUiState,
     onStartClick: () -> Unit,
     onStopClick: () -> Unit,
     onShowError: () -> Unit,
@@ -109,11 +88,11 @@ fun HolderWelcomeScreenContent(
 
     val currentErrorShown by rememberUpdatedState(onShowError)
 
-    LaunchedEffect(contentState.errorMessage) {
-        if (contentState.errorMessage != null) {
+    LaunchedEffect(contentState.lastErrorMessage) {
+        if (contentState.lastErrorMessage != null) {
             Toast.makeText(
                 context,
-                contentState.errorMessage,
+                contentState.lastErrorMessage,
                 Toast.LENGTH_LONG
             ).show()
             currentErrorShown()
@@ -126,7 +105,7 @@ fun HolderWelcomeScreenContent(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        contentState.qrCodeData?.let {
+        contentState.qrData?.let {
             QrCodeImage(
                 data = it,
                 size = QR_SIZE
@@ -168,54 +147,14 @@ fun HolderWelcomeScreenContent(
     }
 }
 
-// This can be removed when DI is added
-@Composable
-private fun holderWelcomeViewModel(): HolderWelcomeViewModel {
-    val context = LocalContext.current
-
-    val factory = remember {
-        object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                require(
-                    modelClass.isAssignableFrom(
-                        HolderWelcomeViewModel::class.java
-                    )
-                ) {
-                    "Unknown ViewModel class $modelClass"
-                }
-
-                val adapterProvider = AndroidBluetoothAdapterProvider(context)
-                val bleAdvertiser = AndroidBleAdvertiser(
-                    bleProvider = AndroidBleProvider(
-                        bluetoothAdapter = adapterProvider,
-                        bleAdvertiser = AndroidBluetoothAdvertiserProvider(
-                            adapterProvider
-                        )
-                    ),
-                    permissionChecker = BluetoothPermissionChecker(context)
-                )
-
-                return HolderWelcomeViewModel(
-                    sessionSecurity = SessionSecurityImpl(),
-                    engagementGenerator = EngagementGenerator(),
-                    bleAdvertiser = bleAdvertiser
-                ) as T
-            }
-        }
-    }
-
-    return viewModel(factory = factory)
-}
-
 @Preview
 @Composable
 private fun HolderWelcomeScreenPreview() {
-    val contentState = HolderWelcomeContentState(
-        errorMessage = null,
+    val contentState = HolderWelcomeUiState(
+        lastErrorMessage = null,
         advertiserState = AdvertiserState.Started,
-        uuid = "11111111-2222-3333-4444-555555555555",
-        qrCodeData = "QR Data"
+        uuid = UUID.randomUUID(),
+        qrData = "QR Data"
     )
 
     HolderWelcomeScreenContent(
