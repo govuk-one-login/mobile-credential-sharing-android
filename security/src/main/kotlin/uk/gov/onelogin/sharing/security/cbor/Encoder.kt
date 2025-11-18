@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.security.cbor
 
-import tools.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement

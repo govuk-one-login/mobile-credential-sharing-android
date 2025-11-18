@@ -1,0 +1,43 @@
+package uk.gov.onelogin.sharing.security.cbor
+
+import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
+import java.util.Base64
+import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+
+/**
+ * Decodes a CBOR-encoded, Base64 URL-safe string into a [DeviceEngagementDto] object.
+ *
+ * The Base64 URL string is decoded into a raw CBOR byte array.
+ *
+ * The Jackson ObjectMapper is then used to deserialize the byte array into [DeviceEngagementDto]
+ *
+ * Successful deserialization will print data to the console. If there are any exceptions, the stack
+ * trace will be printed.
+ *
+ * @param cborBase64Url The CBOR-encoded data represented as a Base64 URL string.
+ */
+fun decodeDeviceEngagement(cborBase64Url: String) {
+    val cborData = Base64.getUrlDecoder().decode(cborBase64Url)
+
+    val cborMapper = ObjectMapper(CBORFactory()).apply {
+        registerModule(KotlinModule.Builder().build())
+    }
+
+    try {
+        val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
+        println("Successfully deserialized DeviceEngagementDto:")
+        println(" - Version: ${deviceEngagement.version}")
+        println(" - Security - Cipher Suite: ${deviceEngagement.security.cipherSuiteIdentifier}")
+        println(
+            " - Security - Ephemeral Public Key (as hex): ${deviceEngagement.security.ephemeralPublicKey}"
+        )
+        println(" - Device Retrieval Methods: ${deviceEngagement.deviceRetrievalMethods}")
+    } catch (e: JsonParseException) {
+        // We need to send error status code 10 to the reader in the event of CBOR decoding errors
+        println("Failed to deserialize CBOR: ${e.message}")
+    }
+}

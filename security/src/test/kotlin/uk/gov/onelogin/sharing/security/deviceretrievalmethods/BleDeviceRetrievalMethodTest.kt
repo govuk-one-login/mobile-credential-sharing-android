@@ -1,14 +1,14 @@
 package uk.gov.onelogin.sharing.security.deviceretrievalmethods
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.databind.json.JsonMapper
-import tools.jackson.databind.module.SimpleModule
-import tools.jackson.dataformat.cbor.CBORFactory
-import tools.jackson.dataformat.cbor.CBORMapper
-import tools.jackson.module.kotlin.KotlinModule
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.security.BleRetrievalStub.BLE_EXPECTED_BASE_64

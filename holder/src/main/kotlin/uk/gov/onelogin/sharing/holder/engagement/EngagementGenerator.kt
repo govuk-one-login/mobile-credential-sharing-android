@@ -4,6 +4,7 @@ import java.util.Base64
 import java.util.UUID
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
+import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.encode
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 
@@ -36,6 +37,9 @@ class EngagementGenerator : Engagement {
         val bytes = deviceEngagement.encode()
         val base64 = Base64.getUrlEncoder().encodeToString(bytes)
         println(base64)
+
+        // for testing purposes - remove when verifier built
+        decodeDeviceEngagement(base64)
 
         return base64
     }
