@@ -53,7 +53,7 @@ class VerifierScannerPermissionGrantedTest {
     @Test
     fun verifyPreview() {
         composeTestRule.setContent {
-            VerifierScannerPreview(
+            VerifierScannerContentPreview(
                 state to true
             )
         }
