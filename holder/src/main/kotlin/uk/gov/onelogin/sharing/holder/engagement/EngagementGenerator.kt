@@ -20,9 +20,8 @@ class EngagementGenerator : Engagement {
      *   @return A [String] containing the Base64Url encoded CBOR representation of Device Engagement
      *   data
      */
-    override fun qrCodeEngagement(key: CoseKey): String {
+    override fun qrCodeEngagement(key: CoseKey, uuid: UUID): String {
         val eDeviceKey = key.encode()
-        val uuid = UUID.fromString("11111111-2222-3333-4444-555555555555")
         val securityObject = Security(
             cipherSuiteIdentifier = 1,
             eDeviceKeyBytes = eDeviceKey

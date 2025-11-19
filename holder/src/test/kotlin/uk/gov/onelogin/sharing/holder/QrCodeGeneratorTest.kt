@@ -5,9 +5,9 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.INVALID_QR_CODE_DATA
-import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.QR_CODE_DATA
-import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.QR_CODE_SIZE
+import uk.gov.onelogin.sharing.holder.QrCodeGenerator.INVALID_QR_CODE_DATA
+import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_DATA
+import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_SIZE
 
 @RunWith(RobolectricTestRunner::class)
 class QrCodeGeneratorTest {
