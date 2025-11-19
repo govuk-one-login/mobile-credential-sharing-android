@@ -29,16 +29,3 @@ android {
         }
     }
 }
-
-mavenPublishingConfig {
-    mavenConfigBlock {
-        name.set(
-            "GOV.UK One Login Wallet Sharing: Core"
-        )
-        description.set(
-            """
-            A module to share common features between modules
-            """.trimIndent()
-        )
-    }
-}
