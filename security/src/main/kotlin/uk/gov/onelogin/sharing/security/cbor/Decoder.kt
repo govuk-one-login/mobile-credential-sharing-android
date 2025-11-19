@@ -1,13 +1,12 @@
 package uk.gov.onelogin.sharing.security.cbor
 
-import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.util.Base64
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+import java.util.Base64
 
 /**
  * Decodes a CBOR-encoded, Base64 URL-safe string into a [DeviceEngagementDto] object.
