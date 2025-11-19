@@ -2,8 +2,6 @@ package uk.gov.onelogin.sharing.verifier.scan
 
 import android.Manifest
 import android.content.Context
-import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.camera.core.Camera
 import androidx.camera.core.ImageAnalysis
@@ -23,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview as ComposablePreview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -34,7 +31,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.camera.CameraContentViewModel
 import uk.gov.android.ui.componentsv2.camera.ImageProxyConverter
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
@@ -49,10 +45,11 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.m3.QrScannerOverlayDefaults
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.models.dev.ImplementationDetail
-import uk.gov.onelogin.sharing.models.dev.RequiresImplementation
 import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraPermissionRationaleButton
 import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraRequirePermissionButton
 import uk.gov.onelogin.sharing.verifier.scan.buttons.PermanentCameraDenial
+import uk.gov.onelogin.sharing.verifier.scan.callbacks.VerifierScannerBarcodeScanCallback
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -69,13 +66,13 @@ fun VerifierScanner(
         .collectAsStateWithLifecycle()
     val launcher = rememberLauncherForActivityResult(
         BarcodeAnalysisUrlContract { _, _ ->
-            viewModel.resetUri()
+            viewModel.resetBarcodeData()
         }
     ) {
         // do nothing as it's handled within the constructor parameter.
     }
 
-    val uri: BarcodeDataResult by viewModel.uri.collectAsStateWithLifecycle()
+    val uri: BarcodeDataResult by viewModel.barcodeDataResult.collectAsStateWithLifecycle()
 
     LaunchedEffect(uri) {
         when (uri) {
@@ -86,13 +83,17 @@ fun VerifierScanner(
         }
     }
 
+    val barcodeScanResultCallback: BarcodeScanResult.Callback = VerifierScannerBarcodeScanCallback(
+        onUrlFound = viewModel::update
+    )
+
     VerifierScanner(
         lifecycleOwner = lifecycleOwner,
         onUpdatePreviouslyDeniedPermission = viewModel::update,
         hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
         permissionState = permissionState,
         modifier = modifier,
-        onUpdateUri = viewModel::update
+        barcodeScanResultCallback = barcodeScanResultCallback
     )
 }
 
@@ -103,10 +104,9 @@ fun VerifierScanner(
     onUpdatePreviouslyDeniedPermission: (Boolean) -> Unit,
     hasPreviouslyDeniedPermission: Boolean,
     permissionState: PermissionState,
+    barcodeScanResultCallback: BarcodeScanResult.Callback,
     modifier: Modifier = Modifier,
-    coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    viewModel: CameraContentViewModel = viewModel<CameraContentViewModel>(),
-    onUpdateUri: (Uri) -> Unit = {}
+    viewModel: CameraContentViewModel = viewModel<CameraContentViewModel>()
 ) {
     val latestUpdatePreviouslyDeniedPermission by
         rememberUpdatedState(onUpdatePreviouslyDeniedPermission)
@@ -116,11 +116,7 @@ fun VerifierScanner(
         context = LocalContext.current,
         getCurrentCamera = viewModel::getCurrentCamera,
         converter = CentrallyCroppedImageProxyConverter(),
-        onUrlFound = { uri ->
-            coroutineScope.launch {
-                onUpdateUri(uri)
-            }
-        }
+        callback = barcodeScanResultCallback
     ).let(viewModel::update)
 
     DisposableEffect(lifecycleOwner) {
@@ -221,7 +217,8 @@ internal fun VerifierScannerPreview(
                 onUpdatePreviouslyDeniedPermission = {},
                 hasPreviouslyDeniedPermission = permissionStates.second,
                 permissionState = permissionStates.first,
-                modifier = Modifier.testTag("preview")
+                modifier = Modifier.testTag("preview"),
+                barcodeScanResultCallback = { _, _ -> }
             )
         }
     }
@@ -231,41 +228,13 @@ private fun verifierScannerBarcodeAnalysis(
     context: Context,
     getCurrentCamera: () -> Camera?,
     converter: ImageProxyConverter,
-    onUrlFound: (Uri) -> Unit
+    callback: BarcodeScanResult.Callback
 ) = BarcodeUseCaseProviders.barcodeAnalysis(
     context = context,
     options =
     BarcodeUseCaseProviders.provideQrScanningOptions(
         BarcodeUseCaseProviders.provideZoomOptions(getCurrentCamera)
     ),
-    callback = verifierScannerBarcodeCallback(
-        onUrlFound = onUrlFound
-    ),
+    callback = callback,
     converter = converter
 )
-
-@RequiresImplementation(
-    details = [
-        ImplementationDetail(
-            ticket = "DCMAW-16278",
-            description = "Invalid QR error handling"
-        )
-    ]
-)
-private fun verifierScannerBarcodeCallback(onUrlFound: (Uri) -> Unit): BarcodeScanResult.Callback =
-    BarcodeScanResult.Callback { result, toggleScanner ->
-        val logTag = "QrScannerScreenDemo"
-        if (Log.isLoggable(logTag, Log.INFO)) {
-            Log.i(logTag, "Obtained BarcodeScanResult: $result")
-        }
-        when (result) {
-            is BarcodeScanResult.Success -> result.firstOrNull()?.url?.url
-            is BarcodeScanResult.Single -> result.barcode.url?.url
-            else -> {
-                null
-            }
-        }?.let { url ->
-            onUrlFound(url.toUri())
-            toggleScanner()
-        } ?: toggleScanner()
-    }

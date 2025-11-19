@@ -50,7 +50,7 @@ class VerifierScannerLaunchUrlTest {
         composeTestRule.run {
             val model = VerifierScannerViewModel()
             val uri = "https://this.is.an.instrumentation.test".toUri()
-            model.update(uri).join()
+            model.update(uri)
             render(model)
             assertIntentLaunched(uri)
         }

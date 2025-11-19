@@ -12,6 +12,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.android.ui.componentsv2.permission.PermissionScreen
+import uk.gov.onelogin.sharing.verifier.scan.state.permission.FakePermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)

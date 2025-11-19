@@ -7,7 +7,7 @@ object VerifierScannerViewModelHelper {
     fun TestScope.monitor(model: VerifierScannerViewModel) {
         listOf(
             model.hasPreviouslyDeniedPermission,
-            model.uri
+            model.barcodeDataResult
         ).forEach {
             backgroundScope.launch { it.collect {} }
         }

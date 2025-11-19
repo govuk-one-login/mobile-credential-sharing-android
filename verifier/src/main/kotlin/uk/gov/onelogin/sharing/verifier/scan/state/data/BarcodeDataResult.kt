@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.scan
+package uk.gov.onelogin.sharing.verifier.scan.state.data
 
 import android.net.Uri
 
