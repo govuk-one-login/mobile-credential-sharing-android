@@ -43,9 +43,3 @@ mavenPublishingConfig {
         )
     }
 }
-
-dependencies {
-    listOf(
-        kotlin("test")
-    ).forEach(::testImplementation)
-}

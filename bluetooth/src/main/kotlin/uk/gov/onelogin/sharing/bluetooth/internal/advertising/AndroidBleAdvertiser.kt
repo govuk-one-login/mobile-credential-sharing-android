@@ -18,7 +18,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.BleUuidValidator
 import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 
 internal class AndroidBleAdvertiser(

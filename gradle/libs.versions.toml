@@ -61,6 +61,7 @@ jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", versio
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 org-jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
@@ -107,6 +108,7 @@ testing-unit = [
     "androidx-test-rules",
     "androidx-ui-test-junit4",
     "app-cash-turbine",
+    "kotlin-test",
     "mockk",
     "org-robolectric",
 ]

@@ -7,7 +7,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.toReason
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.mapper.AdvertisingParametersMapper
 import uk.gov.onelogin.sharing.bluetooth.internal.mapper.BleAdvertiseDataMapper
