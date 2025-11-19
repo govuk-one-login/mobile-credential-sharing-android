@@ -75,11 +75,14 @@ fun VerifierScanner(
         // do nothing as it's handled within the constructor parameter.
     }
 
-    val uri by viewModel.uri.collectAsStateWithLifecycle()
+    val uri: BarcodeDataResult by viewModel.uri.collectAsStateWithLifecycle()
 
     LaunchedEffect(uri) {
-        if (uri != null) {
-            launcher.launch(uri!!)
+        when (uri) {
+            is BarcodeDataResult.Found -> launcher.launch((uri as BarcodeDataResult.Found).data)
+            else -> {
+                // do nothing as there's no barcode Uri to launch
+            }
         }
     }
 

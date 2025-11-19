@@ -13,8 +13,8 @@ class VerifierScannerViewModel : ViewModel() {
     private val _hasPreviouslyDeniedPermission = MutableStateFlow(false)
     val hasPreviouslyDeniedPermission: StateFlow<Boolean> = _hasPreviouslyDeniedPermission
 
-    private val _uri = MutableStateFlow<Uri?>(null)
-    val uri: StateFlow<Uri?> = _uri
+    private val _uri = MutableStateFlow<BarcodeDataResult>(BarcodeDataResult.NotFound)
+    val uri: StateFlow<BarcodeDataResult> = _uri
 
     override fun onCleared() {
         reset()
@@ -27,7 +27,7 @@ class VerifierScannerViewModel : ViewModel() {
     }
 
     fun resetUri(): Job = viewModelScope.launch {
-        _uri.update { null }
+        _uri.update { BarcodeDataResult.NotFound }
     }
 
     fun update(hasPreviouslyDeniedPermission: Boolean): Job = viewModelScope.launch {
@@ -35,6 +35,6 @@ class VerifierScannerViewModel : ViewModel() {
     }
 
     fun update(uri: Uri): Job = viewModelScope.launch {
-        _uri.update { uri }
+        _uri.update { BarcodeDataResult.Found(uri) }
     }
 }

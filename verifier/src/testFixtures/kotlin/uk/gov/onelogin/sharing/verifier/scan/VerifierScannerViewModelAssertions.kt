@@ -7,6 +7,8 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
+import uk.gov.onelogin.sharing.verifier.scan.BarcodeDataResultAssertions.hasFoundBarcode
+import uk.gov.onelogin.sharing.verifier.scan.BarcodeDataResultAssertions.hasNotFoundBarcode
 
 object VerifierScannerViewModelAssertions {
     fun hasPreviouslyDeniedPermission() = hasPreviouslyDeniedPermission(true)
@@ -15,9 +17,10 @@ object VerifierScannerViewModelAssertions {
 
     fun hasPreviouslyGrantedPermission() = hasPreviouslyDeniedPermission(false)
 
-    fun hasNullUri() = hasUri(nullValue(Uri::class.java))
-    fun hasUri(expected: Uri) = hasUri(equalTo(expected))
-    fun hasUri(matcher: Matcher<Uri>): Matcher<VerifierScannerViewModel> = HasUri(matcher)
+    fun hasNullUri() = hasUri(hasNotFoundBarcode())
+    fun hasUri(expected: Uri) = hasUri(hasFoundBarcode(expected))
+    fun hasUri(matcher: Matcher<BarcodeDataResult>): Matcher<VerifierScannerViewModel> =
+        HasUri(matcher)
 
     fun isInInitialState(): Matcher<VerifierScannerViewModel> = allOf(
         hasPreviouslyGrantedPermission(),
@@ -42,7 +45,7 @@ internal class HasPreviouslyDeniedPermission(private val expected: Boolean) :
     }
 }
 
-internal class HasUri(private val matcher: Matcher<Uri>) :
+internal class HasUri(private val matcher: Matcher<BarcodeDataResult>) :
     TypeSafeMatcher<VerifierScannerViewModel>() {
     override fun matchesSafely(item: VerifierScannerViewModel?): Boolean =
         matcher.matches(item?.uri?.value)
