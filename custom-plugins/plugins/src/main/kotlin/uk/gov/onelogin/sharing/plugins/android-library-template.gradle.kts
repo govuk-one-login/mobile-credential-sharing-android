@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.plugins
 
 import uk.gov.onelogin.sharing.plugins.publishing.PublishingCustomTasks.createLocalBuildMavenRepositoryTask
+import uk.gov.onelogin.sharing.plugins.publishing.PublishingCustomTasks.disableJavadocGeneration
 
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
@@ -79,3 +80,5 @@ dependencies {
 }
 
 createLocalBuildMavenRepositoryTask()
+
+project.disableJavadocGeneration()
