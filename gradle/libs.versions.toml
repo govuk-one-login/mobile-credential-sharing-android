@@ -25,9 +25,7 @@ roborazzi = "1.51.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.0.1.6134" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 uk-gov-ui = "10.0.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
-xzing = "3.5.4"
-appcompat = "1.7.1"
-material = "1.13.0" # Changelog https://github.com/zxing/zxing/releases
+xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -74,8 +72,6 @@ uk-gov-ui-android-patterns = { module = "uk.gov.android:patterns", version.ref =
 uk-gov-ui-android-patterns-camera = { module = "uk.gov.android:patterns-camera", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-theme = { module = "uk.gov.android:theme", version.ref = "uk-gov-ui" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [bundles]
 android-baseline = [
