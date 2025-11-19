@@ -87,6 +87,9 @@ class HolderWelcomeViewModel(
             bleAdvertiser.state.collect { state ->
                 println("Advertiser state: $state")
                 _uiState.update { it.copy(advertiserState = state) }
+                if (state == AdvertiserState.Started) {
+                    println("Advertising UUID: ${_uiState.value.uuid}")
+                }
             }
         }
     }
