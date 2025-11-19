@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import java.util.Base64
+import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 
 /**
  * Decodes a CBOR-encoded, Base64 URL-safe string into a [DeviceEngagementDto] object.
