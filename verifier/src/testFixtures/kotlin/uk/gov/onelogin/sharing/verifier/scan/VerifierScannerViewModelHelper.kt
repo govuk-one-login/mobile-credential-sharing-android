@@ -4,9 +4,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 
 object VerifierScannerViewModelHelper {
-    fun TestScope.monitor(viewModel: VerifierScannerViewModel) {
+    fun TestScope.monitor(model: VerifierScannerViewModel) {
         listOf(
-            viewModel.hasPreviouslyDeniedPermission
+            model.hasPreviouslyDeniedPermission,
+            model.uri
         ).forEach {
             backgroundScope.launch { it.collect {} }
         }

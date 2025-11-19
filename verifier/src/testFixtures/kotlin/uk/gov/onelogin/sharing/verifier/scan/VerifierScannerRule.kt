@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.verifier.scan
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
@@ -24,6 +26,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import org.hamcrest.CoreMatchers.allOf
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertions.hasState
 
 class VerifierScannerRule(
     composeTestRule: ComposeContentTestRule,
@@ -43,6 +46,14 @@ class VerifierScannerRule(
     )
 
     fun assertCameraViewfinderIsDisplayed() = onCameraViewfinder().assertIsDisplayed()
+
+    /**
+     * Requires the use of [Intents.init] and [Intents.release] as part of test classes / functions
+     * that utilise this function.
+     */
+    fun assertIntentLaunched(expected: Uri) {
+        intended(hasState(expected))
+    }
 
     fun assertOpenAppSettingsButtonIsDisplayed() = onOpenAppSettingsButton().assertIsDisplayed()
 
@@ -92,6 +103,16 @@ class VerifierScannerRule(
         setContent {
             VerifierScanner(
                 modifier = modifier
+            )
+        }
+    }
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    fun render(model: VerifierScannerViewModel, modifier: Modifier = Modifier) {
+        setContent {
+            VerifierScanner(
+                modifier = modifier,
+                viewModel = model
             )
         }
     }

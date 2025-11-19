@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.camera.core.Camera
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.compose.foundation.background
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -68,25 +68,29 @@ fun VerifierScanner(
         .hasPreviouslyDeniedPermission
         .collectAsStateWithLifecycle()
     val launcher = rememberLauncherForActivityResult(
-        BarcodeAnalysisUrlContract()
+        BarcodeAnalysisUrlContract { _, _ ->
+            viewModel.resetUri()
+        }
     ) {
-        viewModel.resetUri()
+        // do nothing as it's handled within the constructor parameter.
     }
 
     val uri by viewModel.uri.collectAsStateWithLifecycle()
 
-    if (uri != null) {
-        launcher.launch(uri!!)
-    } else {
-        VerifierScanner(
-            lifecycleOwner = lifecycleOwner,
-            onUpdatePreviouslyDeniedPermission = viewModel::update,
-            hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
-            permissionState = permissionState,
-            modifier = modifier,
-            onUpdateUri = viewModel::update
-        )
+    LaunchedEffect(uri) {
+        if (uri != null) {
+            launcher.launch(uri!!)
+        }
     }
+
+    VerifierScanner(
+        lifecycleOwner = lifecycleOwner,
+        onUpdatePreviouslyDeniedPermission = viewModel::update,
+        hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
+        permissionState = permissionState,
+        modifier = modifier,
+        onUpdateUri = viewModel::update
+    )
 }
 
 @Composable
@@ -231,7 +235,7 @@ private fun verifierScannerBarcodeAnalysis(
     BarcodeUseCaseProviders.provideQrScanningOptions(
         BarcodeUseCaseProviders.provideZoomOptions(getCurrentCamera)
     ),
-    callback = qrScannerDemoCallback(
+    callback = verifierScannerBarcodeCallback(
         onUrlFound = onUrlFound
     ),
     converter = converter
@@ -245,7 +249,7 @@ private fun verifierScannerBarcodeAnalysis(
         )
     ]
 )
-private fun qrScannerDemoCallback(onUrlFound: (Uri) -> Unit): BarcodeScanResult.Callback =
+private fun verifierScannerBarcodeCallback(onUrlFound: (Uri) -> Unit): BarcodeScanResult.Callback =
     BarcodeScanResult.Callback { result, toggleScanner ->
         val logTag = "QrScannerScreenDemo"
         if (Log.isLoggable(logTag, Log.INFO)) {
