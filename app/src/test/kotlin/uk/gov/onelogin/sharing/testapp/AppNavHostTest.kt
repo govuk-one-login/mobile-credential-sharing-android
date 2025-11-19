@@ -18,22 +18,22 @@ class AppNavHostTest {
 
     @Test
     fun holderStartDestination() = runTest {
-        navHostRule.renderWithController(HolderHomeRoute)
-        navHostRule.assertCurrentRoute(HolderHomeRoute::class)
+        navHostRule.renderWithController(PrimaryTabDestination.Holder)
+        navHostRule.assertCurrentRoute(PrimaryTabDestination.Holder::class)
     }
 
     @Test
     fun verifierStartDestination() = runTest {
-        navHostRule.renderWithController(VerifierScanRoute)
-        navHostRule.assertCurrentRoute(VerifierScanRoute::class)
+        navHostRule.renderWithController(PrimaryTabDestination.Verifier)
+        navHostRule.assertCurrentRoute(PrimaryTabDestination.Verifier::class)
     }
 
     @Test
     fun controllerHandlesNavigation() = runTest {
         navHostRule.run {
-            renderWithController(HolderHomeRoute)
-            navigate(VerifierScanRoute)
-            assertCurrentRoute(VerifierScanRoute::class)
+            renderWithController(PrimaryTabDestination.Holder)
+            navigate(PrimaryTabDestination.Verifier)
+            assertCurrentRoute(PrimaryTabDestination.Verifier::class)
         }
     }
 
