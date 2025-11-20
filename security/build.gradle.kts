@@ -38,7 +38,6 @@ android {
 dependencies {
     listOf(
         libs.jackson.cbor,
-        libs.jackson.databind,
         libs.jackson.core,
         libs.jackson.kotlin,
         projects.models
