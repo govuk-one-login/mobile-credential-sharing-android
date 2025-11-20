@@ -10,18 +10,19 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
+import java.util.UUID
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import uk.gov.onelogin.sharing.holder.EngagementGeneratorStub.Companion.BASE64_ENCODED_DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.holder.QrCodeGenerator.INVALID_QR_CODE_DATA
+import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
+import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_DATA
+import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_SIZE
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
 import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.verifier.EngagementGeneratorStub.Companion.BASE64_ENCODED_DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.INVALID_QR_CODE_DATA
-import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.QR_CODE_CONTENT_DESC
-import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.QR_CODE_DATA
-import uk.gov.onelogin.sharing.verifier.QrCodeGenerator.QR_CODE_SIZE
 
 @RunWith(RobolectricTestRunner::class)
 class QrCodeImageTest {
@@ -65,14 +66,16 @@ class QrCodeImageTest {
 
     @Test
     fun displaysQrCodeWithBase64EngagementCode() {
-        val mdocUri = Engagement { BASE64_ENCODED_DEVICE_ENGAGEMENT }
+        val uuid = UUID.randomUUID()
+        val mdocUri = Engagement { _, _ -> BASE64_ENCODED_DEVICE_ENGAGEMENT }
+
         composeTestRule.setContent {
             val key = generateValidKeyPair()
             val coseKey = CoseKey.generateCoseKey(key!!)
 
             QrCodeImage(
                 modifier = Modifier.testTag(testTag),
-                data = "mdoc:${mdocUri.qrCodeEngagement(coseKey)}",
+                data = "mdoc:${mdocUri.qrCodeEngagement(coseKey, uuid)}",
                 size = QR_CODE_SIZE
             )
         }

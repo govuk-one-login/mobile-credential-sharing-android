@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier
+package uk.gov.onelogin.sharing.holder
 
 /**
  * Test fake to be used by other classes if required

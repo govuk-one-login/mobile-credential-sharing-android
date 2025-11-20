@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier
+package uk.gov.onelogin.sharing.holder
 
 /**
  * Dummy object to provide some content within the test fixtures source set.

@@ -40,6 +40,7 @@ listOf(
     ":models",
     ":security",
     ":verifier",
+    ":core",
 ).forEach(::include)
 
 /**

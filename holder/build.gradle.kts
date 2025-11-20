@@ -49,11 +49,19 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.androidx.lifecycle.viewmodel.compose,
         libs.zxing.core,
+        projects.bluetooth,
         projects.security
     ).forEach(::implementation)
 
     listOf(
-        testFixtures(projects.security)
+        testFixtures(projects.security),
+        testFixtures(projects.bluetooth)
     ).forEach(::testImplementation)
+
+    listOf(
+        testFixtures(projects.security),
+        testFixtures(projects.bluetooth)
+    ).forEach(::testFixturesImplementation)
 }
