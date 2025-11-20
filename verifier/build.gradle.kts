@@ -31,7 +31,12 @@ android {
 }
 dependencies {
     api(projects.models)
+
+    listOf(
+        projects.core
+    ).forEach(::implementation)
 }
+
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(

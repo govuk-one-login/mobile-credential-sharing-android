@@ -44,33 +44,11 @@ fun HolderWelcomeScreen(
     }
 
     Column(modifier = modifier) {
-        RequestPermissions()
         HolderWelcomeText()
 
         HolderWelcomeScreenContent(
             contentState = contentState
         )
-    }
-}
-
-// This will be updated in - https://govukverify.atlassian.net/browse/DCMAW-16531
-@Composable
-private fun RequestPermissions() {
-    val context = LocalContext.current
-    val permissionChecker = BluetoothPermissionChecker(context)
-    var hasPermission by remember { mutableStateOf(permissionChecker.hasPermission()) }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            hasPermission = isGranted
-        }
-    )
-
-    LaunchedEffect(hasPermission) {
-        if (!hasPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            permissionLauncher.launch(Manifest.permission.BLUETOOTH_ADVERTISE)
-        }
     }
 }
 

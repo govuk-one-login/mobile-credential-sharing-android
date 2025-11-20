@@ -30,12 +30,12 @@ import uk.gov.android.ui.componentsv2.permission.PermissionScreen
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
+import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
+import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.models.dev.ImplementationDetail
 import uk.gov.onelogin.sharing.models.dev.RequiresImplementation
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraPermissionRationaleButton
-import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraRequirePermissionButton
-import uk.gov.onelogin.sharing.verifier.scan.buttons.PermanentCameraDenial
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -70,7 +70,7 @@ fun VerifierScanner(
     modifier: Modifier = Modifier
 ) {
     val latestUpdatePreviouslyDeniedPermission by
-        rememberUpdatedState(onUpdatePreviouslyDeniedPermission)
+    rememberUpdatedState(onUpdatePreviouslyDeniedPermission)
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -130,7 +130,14 @@ fun verifierScannerPermissionLogic(
             )
         ]
     ) { _ ->
-        PermanentCameraDenial(context, modifier)
+        PermanentPermissionDenialButton(
+            context,
+            modifier,
+            stringResource(R.string.verifier_scanner_camera_permission_permanently_denied),
+            stringResource(
+                R.string.verifier_scanner_require_open_permissions
+            )
+        )
     },
     onShowRationale = @RequiresImplementation(
         details = [
@@ -140,9 +147,11 @@ fun verifierScannerPermissionLogic(
             )
         ]
     ) { _, launchPermission ->
-        CameraPermissionRationaleButton(
-            launchPermission = launchPermission,
-            modifier = modifier
+
+        PermissionRationaleButton(
+            modifier = modifier,
+            buttonText = stringResource(R.string.verifier_scanner_require_camera_rationale),
+            launchPermission = launchPermission
         )
     },
     onRequirePermission = @RequiresImplementation(
@@ -153,8 +162,11 @@ fun verifierScannerPermissionLogic(
             )
         ]
     ) { _, launchPermission ->
-        CameraRequirePermissionButton(
+        RequirePermissionButton(
             launchPermission = launchPermission,
+            text = stringResource(
+                R.string.verifier_scanner_require_camera_permission
+            ),
             modifier = modifier
         )
     }

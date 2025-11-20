@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.scan.buttons
+package uk.gov.onelogin.sharing.core.presentation.buttons
 
 import android.content.Context
 import android.content.Intent
@@ -12,34 +12,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
-@OptIn(ExperimentalPermissionsApi::class)
-fun PermanentCameraDenial(context: Context, modifier: Modifier = Modifier) {
+fun PermanentPermissionDenialButton(
+    context: Context,
+    modifier: Modifier = Modifier,
+    titleText: String,
+    buttonText: String
+) {
     Column(modifier = modifier) {
         Text(
-            text =
-            stringResource(
-                R.string.verifier_scanner_camera_permission_permanently_denied
-            ),
-            textAlign = TextAlign.Companion.Center
+            text = titleText,
+            textAlign = TextAlign.Center
         )
 
         GdsButton(
             modifier = Modifier.testTag("permissionPermanentDenialButton"),
-            text = stringResource(
-                R.string.verifier_scanner_require_open_permissions
-            ),
+            text = buttonText,
             buttonType = ButtonTypeV2.Primary(),
             onClick = {
                 val intent =
@@ -60,16 +56,18 @@ fun PermanentCameraDenial(context: Context, modifier: Modifier = Modifier) {
 
 @Composable
 @Preview
-internal fun PermanentCameraDenialPreview() {
+fun PermanentPermissionDenialButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier
                 .background(GdsLocalColorScheme.current.listBackground)
                 .padding(16.dp)
         ) {
-            PermanentCameraDenial(
+            PermanentPermissionDenialButton(
                 context = LocalContext.current,
-                modifier = Modifier.testTag("preview")
+                modifier = Modifier.testTag("preview"),
+                titleText = "The camera permission is permanently denied.",
+                buttonText = "Open app permissions"
             )
         }
     }
