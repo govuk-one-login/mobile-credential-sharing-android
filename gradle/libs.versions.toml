@@ -52,6 +52,10 @@ com-google-devtools-ksp-gradle = { module = "com.google.devtools.ksp:com.google.
 compose-rules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "compose-lint-rules" }
 compose-rules-ktlint = { module = "io.nlopez.compose.rules:ktlint", version.ref = "compose-lint-rules" }
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin", version.ref = "detekt" }
+jackson-cbor = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor", version.ref = "jackson" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin" }
@@ -70,11 +74,6 @@ uk-gov-ui-android-patterns = { module = "uk.gov.android:patterns", version.ref =
 uk-gov-ui-android-patterns-camera = { module = "uk.gov.android:patterns-camera", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-theme = { module = "uk.gov.android:theme", version.ref = "uk-gov-ui" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
-jackson-cbor = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor", version.ref = "jackson" }
-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
-jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
-
 
 [bundles]
 android-baseline = [

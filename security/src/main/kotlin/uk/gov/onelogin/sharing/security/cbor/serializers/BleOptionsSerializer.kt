@@ -4,10 +4,9 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
-
-const val PROPERTY_ID_0: Long = 0
-const val PROPERTY_ID_1: Long = 1
-const val PROPERTY_ID_10: Long = 10
+import uk.gov.onelogin.sharing.security.cbor.CborPropertyIds.PROPERTY_ID_0
+import uk.gov.onelogin.sharing.security.cbor.CborPropertyIds.PROPERTY_ID_1
+import uk.gov.onelogin.sharing.security.cbor.CborPropertyIds.PROPERTY_ID_10
 
 class BleOptionsSerializer : StdSerializer<BleOptions>(BleOptions::class.java) {
     override fun serialize(value: BleOptions, gen: JsonGenerator, provider: SerializerProvider) {

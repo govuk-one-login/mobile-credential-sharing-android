@@ -14,11 +14,12 @@ object DecoderStub {
     private val keyPair = generateValidKeyPair()
     private val coseKey = CoseKey.generateCoseKey(keyPair!!)
 
-    val validCbor =
+    const val VALID_CBOR =
         "vwBjMS4wAZ8B2BhYTL8BAiABIVggk7wmKUmR5q-ozZGB1uPAKfi8upiiA8JC88Ilgg8EaqoiWCA8Qib" +
             "6bCfaav-5A8QvfCEceATx1H9HR_Kj2ZnNeyxZLf__Ap-fAgG_APUB9ApQERERESIiMzNERFVVVVVVVf____8="
-    val invalidCbor = "gg8EaqoiWCA8Qib6bCfaav-5A8QvfCEceATx1H9HR_Kj2ZnNeyxZLf__Ap-fAgG_APUB9A" +
-        "pQERERESIiMzNERFVVVVVVVf____8="
+    const val INVALID_CBOR =
+        "gg8EaqoiWCA8Qib6bCfaav-5A8QvfCEceATx1H9HR_Kj2ZnNeyxZLf__Ap-fAgG_APUB9A" +
+            "pQERERESIiMzNERFVVVVVVVf____8="
 
     val validDeviceEngagementDto = DeviceEngagementDto(
         version = "1.0",
