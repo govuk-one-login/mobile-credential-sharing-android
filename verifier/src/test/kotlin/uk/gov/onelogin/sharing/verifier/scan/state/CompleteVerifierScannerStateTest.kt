@@ -25,8 +25,8 @@ class CompleteVerifierScannerStateTest {
             state,
             allOf(
                 hasNoBarcodeData(),
-                hasPreviouslyGrantedPermission(),
-            ),
+                hasPreviouslyGrantedPermission()
+            )
         )
     }
 
@@ -43,7 +43,6 @@ class CompleteVerifierScannerStateTest {
             hasBarcodeData(uri)
         )
     }
-
 
     @Test
     fun canUpdatePreviouslyDeniedPermission() = runTest {

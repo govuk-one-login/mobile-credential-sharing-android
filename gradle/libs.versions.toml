@@ -25,7 +25,7 @@ robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.51.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.0.1.6134" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
-uk-gov-ui = "10.0.2" # https://github.com/govuk-one-login/mobile-android-ui/tags
+uk-gov-ui = "11.0.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
