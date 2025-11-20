@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAs
 @RunWith(AndroidJUnit4::class)
 class MutableBarcodeDataResultStateTest {
 
-    private val state = MutableBarcodeDataResultState()
+    private val state: BarcodeDataResultState.Complete = MutableBarcodeDataResultState()
     private val uri = "https://this.is.a.unit.test".toUri()
 
     @Test
@@ -25,7 +25,7 @@ class MutableBarcodeDataResultStateTest {
     }
 
     @Test
-    fun canUpdateImageAnalysisUseCase() = runTest {
+    fun canUpdateBarcodeDataResult() = runTest {
         backgroundScope.launch {
             state.barcodeDataResult.collect {}
         }

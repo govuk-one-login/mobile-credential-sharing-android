@@ -33,6 +33,7 @@ dependencies {
     api(projects.models)
     implementation(libs.androidx.browser)
     testFixturesImplementation(libs.androidx.browser)
+    testImplementation(testFixtures(libs.uk.gov.ui.android.componentsv2.camera))
 }
 mavenPublishingConfig {
     mavenConfigBlock {
