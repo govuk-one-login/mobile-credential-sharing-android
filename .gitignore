@@ -1,3 +1,7 @@
+# Local libraries aren't included
+libs/**/*
+!libs/README.md
+
 # Vale configuration styles should always be downloaded / up to date:
 .github/styles/Google
 .github/styles/tech-writing-style-guide
