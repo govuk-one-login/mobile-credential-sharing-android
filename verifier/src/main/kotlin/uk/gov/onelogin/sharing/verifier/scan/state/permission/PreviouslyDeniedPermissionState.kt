@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.verifier.scan.state.permission
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 sealed interface PreviouslyDeniedPermissionState {
     /**
@@ -11,7 +13,19 @@ sealed interface PreviouslyDeniedPermissionState {
      */
     interface Complete :
         State,
-        Updater
+        Updater {
+        companion object {
+            @JvmStatic
+            fun from(flow: MutableStateFlow<Boolean>) = object : Complete {
+                override val hasPreviouslyDeniedPermission: StateFlow<Boolean>
+                    get() = flow
+
+                override fun update(hasPreviouslyDeniedPermission: Boolean) {
+                    flow.update { hasPreviouslyDeniedPermission }
+                }
+            }
+        }
+    }
 
     /**
      * Interface for exposing a [Boolean] [StateFlow]. Commonly paired with the [Updater]
