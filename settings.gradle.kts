@@ -39,11 +39,11 @@ rootProject.name = "Mobile-credential-sharing-android"
 listOf(
     ":app",
     ":bluetooth",
+    ":core",
     ":holder",
     ":models",
     ":security",
     ":verifier",
-    ":core",
 ).forEach(::include)
 
 /**

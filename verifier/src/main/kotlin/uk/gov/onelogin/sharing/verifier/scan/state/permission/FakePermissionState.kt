@@ -5,7 +5,8 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
 
 /**
- * Fake implementation of the accompanist [com.google.accompanist.permissions.PermissionState] interface.
+ * Fake implementation of the accompanist [com.google.accompanist.permissions.PermissionState]
+ * interface.
  *
  * Kept within production code due to it's use within composable Preview functions.
  *

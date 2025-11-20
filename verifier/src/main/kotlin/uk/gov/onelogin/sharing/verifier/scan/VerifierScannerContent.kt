@@ -40,7 +40,7 @@ import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.m3.QrScannerOverlayDefaults
 import uk.gov.android.ui.theme.spacingDouble
-import uk.gov.onelogin.sharing.models.dev.ImplementationDetail
+import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraPermissionRationaleButton
 import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraRequirePermissionButton
 import uk.gov.onelogin.sharing.verifier.scan.buttons.PermanentCameraDenial
