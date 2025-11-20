@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.security.cbor
+package uk.gov.onelogin.sharing.security.cbor.deserializers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
@@ -8,7 +8,6 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.onelogin.sharing.security.DeviceRetrievalMethodsDeserializerStub.expectedMethods
 import uk.gov.onelogin.sharing.security.DeviceRetrievalMethodsDeserializerStub.rawCborMock
-import uk.gov.onelogin.sharing.security.cbor.deserializers.DeviceRetrievalMethodsDeserializer
 
 class DeviceRetrievalMethodsDeserializerTest {
 
