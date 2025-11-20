@@ -24,4 +24,16 @@ object PublishingCustomTasks {
             }
         }
     }
+
+    // https://govukverify.atlassian.net/browse/DCMAW-11888
+    // https://github.com/Kotlin/dokka/issues/2956
+    fun Project.disableJavadocGeneration() {
+        tasks
+            .matching { task ->
+                task.name.contains("javaDocReleaseGeneration") ||
+                        task.name.contains("javaDocDebugGeneration")
+            }.configureEach {
+                enabled = false
+            }
+    }
 }

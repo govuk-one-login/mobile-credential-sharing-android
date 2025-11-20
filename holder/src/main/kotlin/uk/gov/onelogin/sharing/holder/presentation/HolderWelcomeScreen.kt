@@ -1,35 +1,108 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.util.UUID
+import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.holder.QrCodeImage
-import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
-import uk.gov.onelogin.sharing.holder.engagement.EngagementGenerator
-import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
 private const val QR_SIZE = 800
 
 @Composable
-fun HolderWelcomeScreen(modifier: Modifier = Modifier) {
+fun HolderWelcomeScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HolderWelcomeViewModel = HolderWelcomeViewModel.holderWelcomeViewModel()
+) {
+    val contentState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.startAdvertising()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopAdvertising()
+        }
+    }
+
     Column(modifier = modifier) {
+        RequestPermissions()
         HolderWelcomeText()
 
-        val eDeviceKey = SessionSecurityImpl()
-        val ecPublicKey = eDeviceKey.generateEcPublicKey(EC_ALGORITHM, EC_PARAMETER_SPEC)
-        val engagement = EngagementGenerator()
+        HolderWelcomeScreenContent(
+            contentState = contentState
+        )
+    }
+}
 
-        ecPublicKey?.let {
-            val key = CoseKey.generateCoseKey(it)
-            println("Successfully created CoseKey: $key")
+// This will be updated in - https://govukverify.atlassian.net/browse/DCMAW-16531
+@Composable
+private fun RequestPermissions() {
+    val context = LocalContext.current
+    val permissionChecker = BluetoothPermissionChecker(context)
+    var hasPermission by remember { mutableStateOf(permissionChecker.hasPermission()) }
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            hasPermission = isGranted
+        }
+    )
+
+    LaunchedEffect(hasPermission) {
+        if (!hasPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionLauncher.launch(Manifest.permission.BLUETOOTH_ADVERTISE)
+        }
+    }
+}
+
+@Suppress("LongMethod")
+@Composable
+fun HolderWelcomeScreenContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        contentState.qrData?.let {
             QrCodeImage(
-                modifier = Modifier,
-                data = "mdoc:${engagement.qrCodeEngagement(key)}",
+                data = it,
                 size = QR_SIZE
             )
         }
     }
+}
+
+@Preview
+@Composable
+private fun HolderWelcomeScreenPreview() {
+    val contentState = HolderWelcomeUiState(
+        lastErrorMessage = null,
+        advertiserState = AdvertiserState.Started,
+        uuid = UUID.randomUUID(),
+        qrData = "QR Data"
+    )
+
+    HolderWelcomeScreenContent(
+        contentState = contentState,
+        modifier = Modifier
+    )
 }

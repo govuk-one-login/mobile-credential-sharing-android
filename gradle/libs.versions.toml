@@ -20,15 +20,18 @@ kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases
 kotlin-symbol-processing = "2.3.2" # https://github.com/google/ksp/releases ; update with 'kotlin'
 kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 ktlint = "1.7.1" # https://github.com/pinterest/ktlint/releases/
-lifecycleRuntimeKtx = "2.9.4" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
+lifecycle = "2.9.4" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
+mockk = "1.14.6" # https://github.com/mockk/mockk/releases
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.51.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.0.1.6134" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
+turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-ui = "11.0.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
+app-cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -36,7 +39,8 @@ androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext-junit" }
-androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
 androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "androidx-navigation" }
@@ -59,6 +63,8 @@ jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", versio
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 org-jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = "roborazzi" }
@@ -104,7 +110,10 @@ testing-unit = [
     "androidx-test-espresso-intents",
     "androidx-test-rules",
     "androidx-ui-test-junit4",
-    "org-robolectric"
+    "app-cash-turbine",
+    "kotlin-test",
+    "mockk",
+    "org-robolectric",
 ]
 screenshot-testing = [
     "junit",
