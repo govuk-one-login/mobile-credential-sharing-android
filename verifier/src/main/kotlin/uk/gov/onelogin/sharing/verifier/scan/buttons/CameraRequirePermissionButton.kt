@@ -13,9 +13,19 @@ import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
+@RequiresImplementation(
+    details = [
+        ImplementationDetail(
+            ticket = "DCMAW-16275",
+            description = "Finalise UI for camera permission denial"
+        )
+    ]
+)
 fun CameraRequirePermissionButton(
     modifier: Modifier = Modifier,
     launchPermission: () -> Unit = {}

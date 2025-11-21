@@ -30,7 +30,14 @@ android {
     }
 }
 dependencies {
-    api(projects.models)
+    listOf(
+        projects.core,
+        projects.models
+    ).forEach(::api)
+
+    implementation(libs.androidx.browser)
+    testFixturesImplementation(libs.androidx.browser)
+    testImplementation(testFixtures(libs.uk.gov.ui.android.componentsv2.camera))
 }
 mavenPublishingConfig {
     mavenConfigBlock {

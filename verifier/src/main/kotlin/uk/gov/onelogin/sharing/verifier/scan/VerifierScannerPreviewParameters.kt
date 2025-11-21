@@ -5,9 +5,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
+import uk.gov.onelogin.sharing.verifier.scan.state.permission.FakePermissionState
 
 /**
- * [PreviewParameterProvider] implementation for use within [VerifierScannerPreview].
+ * [PreviewParameterProvider] implementation for use within [VerifierScannerContentPreview].
  *
  * Creates the cartesian product of all expected [PermissionState] states, along with both boolean
  * values.

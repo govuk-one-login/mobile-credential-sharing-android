@@ -16,6 +16,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.android.ui.componentsv2.permission.PermissionScreen
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.verifier.scan.state.permission.FakePermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -38,19 +39,6 @@ class VerifierScannerPermissionLogicTest {
             status = permissionStatus,
             onLaunchPermission = { hasLaunchedPermission = true }
         )
-    }
-
-    @Test
-    fun permissionGrantedBehaviour() {
-        composeTestRule.setContent {
-            PermissionScreen(
-                permissionState = state,
-                logic = verifierScannerPermissionLogic(LocalContext.current),
-                hasPreviouslyDeniedPermission = false
-            )
-        }
-
-        composeTestRule.assertPermissionGrantedTextIsDisplayed()
     }
 
     @Test
@@ -101,16 +89,5 @@ class VerifierScannerPermissionLogicTest {
             resources.getString(R.string.open_app_permissions)
         ).assertIsDisplayed()
             .assertHasClickAction()
-    }
-
-    @Test
-    fun verifyPreview() {
-        composeTestRule.setContent {
-            VerifierScannerPreview(
-                state to true
-            )
-        }
-
-        composeTestRule.assertPermissionGrantedTextIsDisplayed()
     }
 }

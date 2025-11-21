@@ -12,6 +12,9 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 
     repositories {
+        maven {
+            url = file("libs").toURI()
+        }
         google()
         mavenCentral()
         listOf(
@@ -36,11 +39,11 @@ rootProject.name = "Mobile-credential-sharing-android"
 listOf(
     ":app",
     ":bluetooth",
+    ":core",
     ":holder",
     ":models",
     ":security",
     ":verifier",
-    ":core",
 ).forEach(::include)
 
 /**
