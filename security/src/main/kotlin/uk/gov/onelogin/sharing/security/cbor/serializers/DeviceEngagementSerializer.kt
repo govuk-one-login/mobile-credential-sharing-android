@@ -1,9 +1,12 @@
 package uk.gov.onelogin.sharing.security.cbor.serializers
 
-import tools.jackson.core.JsonGenerator
-import tools.jackson.databind.SerializationContext
-import tools.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
+import uk.gov.onelogin.sharing.security.cbor.CborPropertyIds.PROPERTY_ID_0
+import uk.gov.onelogin.sharing.security.cbor.CborPropertyIds.PROPERTY_ID_1
+import uk.gov.onelogin.sharing.security.cbor.CborPropertyIds.PROPERTY_ID_2
 
 class DeviceEngagementSerializer :
     StdSerializer<DeviceEngagement>(
@@ -12,17 +15,17 @@ class DeviceEngagementSerializer :
     override fun serialize(
         value: DeviceEngagement,
         gen: JsonGenerator,
-        provider: SerializationContext
+        provider: SerializerProvider
     ) {
         gen.writeStartObject()
-        gen.writePropertyId(0)
+        gen.writeFieldId(PROPERTY_ID_0)
         gen.writeString(value.version)
-        gen.writePropertyId(1)
-        provider.writeValue(gen, value.security)
-        gen.writePropertyId(2)
+        gen.writeFieldId(PROPERTY_ID_1)
+        provider.defaultSerializeValue(value.security, gen)
+        gen.writeFieldId(PROPERTY_ID_2)
         gen.writeStartArray()
         value.deviceRetrievalMethods.forEach {
-            provider.writeValue(gen, it)
+            provider.defaultSerializeValue(it, gen)
         }
         gen.writeEndArray()
         gen.writeEndObject()

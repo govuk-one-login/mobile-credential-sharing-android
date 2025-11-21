@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.security.engagment
 
+import com.fasterxml.jackson.databind.json.JsonMapper
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import tools.jackson.databind.json.JsonMapper
 import uk.gov.onelogin.sharing.security.DeviceEngagementStub.DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.security.DeviceEngagementStub.ENGAGEMENT_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.security.DeviceEngagementStub.deviceEngagementNodes
