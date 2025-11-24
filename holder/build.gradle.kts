@@ -58,12 +58,12 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
-        testFixtures(projects.security),
-        testFixtures(projects.bluetooth)
+        testFixtures(projects.bluetooth),
+        testFixtures(projects.security)
     ).forEach(::testImplementation)
 
     listOf(
-        testFixtures(projects.security),
-        testFixtures(projects.bluetooth)
+        projects.bluetooth,
+        projects.security
     ).forEach(::testFixturesImplementation)
 }

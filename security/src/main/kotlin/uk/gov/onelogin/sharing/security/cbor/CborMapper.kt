@@ -1,11 +1,11 @@
 package uk.gov.onelogin.sharing.security.cbor
 
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.databind.module.SimpleModule
-import tools.jackson.databind.ser.std.StdSerializer
-import tools.jackson.dataformat.cbor.CBORFactory
-import tools.jackson.dataformat.cbor.CBORMapper
-import tools.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 
 /**
  * A factory object for creating and configuring Jackson [ObjectMapper] instances
