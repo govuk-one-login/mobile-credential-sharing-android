@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="enable_bluetooth_permission">Please enable bluetooth permissions to continue</string>
+    <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
+    <string name="open_app_permissions">Open app permissions</string>
+</resources>

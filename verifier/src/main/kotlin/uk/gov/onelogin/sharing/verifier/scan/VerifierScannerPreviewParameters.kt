@@ -5,6 +5,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 
 /**
  * [PreviewParameterProvider] implementation for use within [VerifierScannerPreview].

@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.scan
+package uk.gov.onelogin.sharing.core.presentation.permissions
 
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState

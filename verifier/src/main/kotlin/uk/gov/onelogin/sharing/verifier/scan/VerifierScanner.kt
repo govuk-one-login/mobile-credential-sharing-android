@@ -36,6 +36,10 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.models.dev.ImplementationDetail
 import uk.gov.onelogin.sharing.models.dev.RequiresImplementation
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.verifier.R.string.verifier_scanner_camera_permission_permanently_denied
+import uk.gov.onelogin.sharing.verifier.R.string.verifier_scanner_require_camera_permission
+import uk.gov.onelogin.sharing.verifier.R.string.verifier_scanner_require_camera_rationale
+import uk.gov.onelogin.sharing.verifier.R.string.verifier_scanner_require_open_permissions
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -133,9 +137,9 @@ fun verifierScannerPermissionLogic(
         PermanentPermissionDenialButton(
             context,
             modifier,
-            stringResource(R.string.verifier_scanner_camera_permission_permanently_denied),
+            stringResource(verifier_scanner_camera_permission_permanently_denied),
             stringResource(
-                R.string.verifier_scanner_require_open_permissions
+                verifier_scanner_require_open_permissions
             )
         )
     },
@@ -150,7 +154,7 @@ fun verifierScannerPermissionLogic(
 
         PermissionRationaleButton(
             modifier = modifier,
-            buttonText = stringResource(R.string.verifier_scanner_require_camera_rationale),
+            buttonText = stringResource(verifier_scanner_require_camera_rationale),
             launchPermission = launchPermission
         )
     },
@@ -165,7 +169,7 @@ fun verifierScannerPermissionLogic(
         RequirePermissionButton(
             launchPermission = launchPermission,
             text = stringResource(
-                R.string.verifier_scanner_require_camera_permission
+                verifier_scanner_require_camera_permission
             ),
             modifier = modifier
         )

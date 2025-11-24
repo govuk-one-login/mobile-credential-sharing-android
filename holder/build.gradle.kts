@@ -52,6 +52,7 @@ dependencies {
         libs.androidx.lifecycle.viewmodel.compose,
         libs.zxing.core,
         projects.bluetooth,
+        projects.core,
         projects.security
     ).forEach(::implementation)
 

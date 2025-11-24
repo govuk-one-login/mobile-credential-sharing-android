@@ -7,6 +7,7 @@ import com.google.accompanist.permissions.PermissionStatus
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
