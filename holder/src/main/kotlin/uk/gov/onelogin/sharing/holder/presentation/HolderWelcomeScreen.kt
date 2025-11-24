@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
@@ -30,6 +31,7 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDeni
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
 
@@ -136,7 +138,7 @@ fun HolderWelcomeScreenContent(
 
 @Preview
 @Composable
-private fun HolderWelcomeScreenPreview() {
+internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
         advertiserState = AdvertiserState.Started,
@@ -144,10 +146,24 @@ private fun HolderWelcomeScreenPreview() {
         qrData = "QR Data"
     )
 
+    val fakeState = FakeMultiplePermissionsState(
+        permissions = listOf(
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_CONNECT,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                status = PermissionStatus.Granted
+            )
+        ),
+        onLaunchPermission = { }
+    )
+
     HolderWelcomeScreenContent(
         contentState = contentState,
         modifier = Modifier,
-        multiplePermissionsState = FakeMultiplePermissionsState(listOf(), {}),
+        multiplePermissionsState = fakeState,
         hasPreviouslyRequestedPermission = false,
         onGrantedPermissions = {}
     )

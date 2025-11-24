@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.scan.state.permission
+package uk.gov.onelogin.sharing.core.presentation
 
 import android.Manifest
 import androidx.test.ext.junit.runners.AndroidJUnit4

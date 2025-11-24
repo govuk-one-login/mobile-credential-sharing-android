@@ -4,10 +4,12 @@ import android.Manifest
 import android.content.Context
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,6 +17,7 @@ import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermiss
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.holder.EngagementGeneratorStub.Companion.BASE64_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenContent
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 
 @RunWith(AndroidJUnit4::class)
@@ -55,5 +58,14 @@ class HolderWelcomeScreenTest {
         }
         composeTestRule.assertWelcomeTextIsDisplayed()
         composeTestRule.assertQrCodeIsDisplayed()
+    }
+
+    @Test
+    fun previewUsage() = runTest {
+        composeTestRule.setContent {
+            HolderWelcomeScreenPreview()
+        }
+
+        composeTestRule.onNodeWithContentDescription("QR Data")
     }
 }
