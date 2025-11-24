@@ -77,7 +77,7 @@ fun HolderWelcomeScreen(
 @OptIn(ExperimentalPermissionsApi::class)
 fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
     !perm.status.isGranted &&
-        !perm.status.shouldShowRationale
+            !perm.status.shouldShowRationale
 }
 
 @Suppress("LongMethod")
@@ -147,16 +147,25 @@ internal fun HolderWelcomeScreenPreview() {
     )
 
     val fakeState = FakeMultiplePermissionsState(
-        permissions = listOf(
-            FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_CONNECT,
-                status = PermissionStatus.Granted
-            ),
-            FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                status = PermissionStatus.Granted
+        permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            listOf(
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_CONNECT,
+                    status = PermissionStatus.Granted
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                    status = PermissionStatus.Granted
+                )
             )
-        ),
+        } else {
+            listOf(
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH,
+                    status = PermissionStatus.Granted
+                )
+            )
+        },
         onLaunchPermission = { }
     )
 
