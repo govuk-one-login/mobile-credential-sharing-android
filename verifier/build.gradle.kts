@@ -39,6 +39,7 @@ dependencies {
     testFixturesImplementation(libs.androidx.browser)
     testImplementation(testFixtures(libs.uk.gov.ui.android.componentsv2.camera))
     testImplementation(testFixtures(projects.core))
+    testImplementation(libs.com.google.test.parameter.injector)
 }
 mavenPublishingConfig {
     mavenConfigBlock {

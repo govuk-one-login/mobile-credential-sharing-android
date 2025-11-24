@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Update `StringsXmlData` enum as well -->
     <string name="camera_permission_is_enabled">The camera permission is now enabled.</string>
     <string name="camera_permission_is_permanently_denied">The camera permission is permanently denied.</string>
     <string name="cannot_use_the_scanned_qr">Cannot use the scanned QR code</string>

@@ -8,6 +8,7 @@ androidx-test-ext-junit = "1.3.0" # https://developer.android.com/jetpack/androi
 androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/test#orchestrator-1.6.1
 androidx-test-rules = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#rules-1.7.0
 androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#runner-1.7.0
+com-google-test-parameter-injector = "1.20" # https://github.com/google/TestParameterInjector
 compose-lint-rules = "0.4.27" # https://github.com/mrmans0n/compose-rules/releases/
 composeBom = "2025.11.00" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.17.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
@@ -55,6 +56,7 @@ androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 com-android-tools-build-gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 com-google-devtools-ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "kotlin-symbol-processing" }
+com-google-test-parameter-injector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "com-google-test-parameter-injector"}
 compose-rules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "compose-lint-rules" }
 compose-rules-ktlint = { module = "io.nlopez.compose.rules:ktlint", version.ref = "compose-lint-rules" }
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin", version.ref = "detekt" }
