@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.security
 
-import tools.jackson.databind.node.ArrayNode
-import tools.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 object SecurityTestStub {
