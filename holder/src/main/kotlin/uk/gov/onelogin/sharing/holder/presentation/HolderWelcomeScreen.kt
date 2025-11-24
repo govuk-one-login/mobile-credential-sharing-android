@@ -24,6 +24,7 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
+import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
@@ -31,15 +32,13 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
-import java.util.UUID
 
 private const val QR_SIZE = 800
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HolderWelcomeScreen(
-    modifier: Modifier = Modifier,
-    viewModel: HolderWelcomeViewModel = HolderWelcomeViewModel.holderWelcomeViewModel(),
+    viewModel: HolderWelcomeViewModel = HolderWelcomeViewModel.holderWelcomeViewModel()
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
@@ -59,9 +58,9 @@ fun HolderWelcomeScreen(
 
     HolderWelcomeScreenContent(
         contentState,
-        Modifier,
         multiplePermissionsState,
         hasPreviouslyRequestedPermission,
+        Modifier,
         onGrantedPermissions = {
             DisposableEffect(Unit) {
                 viewModel.startAdvertising()
@@ -74,23 +73,20 @@ fun HolderWelcomeScreen(
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
-fun MultiplePermissionsState.isPermanentlyDenied(): Boolean {
-    return permissions.any { perm ->
-        !perm.status.isGranted &&
-                !perm.status.shouldShowRationale
-    }
+fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
+    !perm.status.isGranted &&
+        !perm.status.shouldShowRationale
 }
 
 @Suppress("LongMethod")
 @Composable
 fun HolderWelcomeScreenContent(
     contentState: HolderWelcomeUiState,
-    modifier: Modifier = Modifier,
     multiplePermissionsState: MultiplePermissionsState,
     hasPreviouslyRequestedPermission: Boolean,
+    modifier: Modifier = Modifier,
     onGrantedPermissions: @Composable () -> Unit
 ) {
-
     when {
         multiplePermissionsState.allPermissionsGranted -> {
             HolderWelcomeText()
@@ -111,7 +107,7 @@ fun HolderWelcomeScreenContent(
 
         multiplePermissionsState.shouldShowRationale -> {
             PermissionRationaleButton(
-                buttonText = stringResource(R.string.enable_bluetooth_permission),
+                text = stringResource(R.string.enable_bluetooth_permission),
                 launchPermission = {
                     multiplePermissionsState.launchMultiplePermissionRequest()
                 }
@@ -138,21 +134,21 @@ fun HolderWelcomeScreenContent(
     }
 }
 
-        @Preview
-        @Composable
-        private fun HolderWelcomeScreenPreview() {
-            val contentState = HolderWelcomeUiState(
-                lastErrorMessage = null,
-                advertiserState = AdvertiserState.Started,
-                uuid = UUID.randomUUID(),
-                qrData = "QR Data"
-            )
+@Preview
+@Composable
+private fun HolderWelcomeScreenPreview() {
+    val contentState = HolderWelcomeUiState(
+        lastErrorMessage = null,
+        advertiserState = AdvertiserState.Started,
+        uuid = UUID.randomUUID(),
+        qrData = "QR Data"
+    )
 
-            HolderWelcomeScreenContent(
-                contentState = contentState,
-                modifier = Modifier,
-                multiplePermissionsState = FakeMultiplePermissionsState(listOf(), {}),
-                hasPreviouslyRequestedPermission = false,
-                onGrantedPermissions = {}
-            )
-        }
+    HolderWelcomeScreenContent(
+        contentState = contentState,
+        modifier = Modifier,
+        multiplePermissionsState = FakeMultiplePermissionsState(listOf(), {}),
+        hasPreviouslyRequestedPermission = false,
+        onGrantedPermissions = {}
+    )
+}

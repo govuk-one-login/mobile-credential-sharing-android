@@ -23,7 +23,7 @@ class PermissionRationaleButtonTest {
     @Test
     fun standardUsage() = runTest {
         composeTestRule.setContent {
-            PermissionRationaleButton(buttonText = "") { hasLaunchedPermission = true }
+            PermissionRationaleButton(text = "") { hasLaunchedPermission = true }
         }
 
         composeTestRule.onNodeWithTag("permissionRationaleButton").performClick()

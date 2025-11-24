@@ -23,9 +23,9 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 @Composable
 fun PermanentPermissionDenialButton(
     context: Context,
-    modifier: Modifier = Modifier,
     titleText: String,
-    buttonText: String
+    buttonText: String,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Text(
@@ -56,7 +56,7 @@ fun PermanentPermissionDenialButton(
 
 @Composable
 @Preview
-fun PermanentPermissionDenialButtonPreview() {
+private fun PermanentPermissionDenialButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier

@@ -1,10 +1,10 @@
-package uk.gov.onelogin.sharing.verifier.scan
+package uk.gov.onelogin.sharing.verifier.scan.state.permission
 
 import android.Manifest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
-import org.junit.Assert.assertTrue
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
@@ -25,6 +25,6 @@ class FakePermissionStateTest {
     fun launchPermissionRequestDefersToLambda() {
         state.launchPermissionRequest()
 
-        assertTrue(hasLaunched)
+        Assert.assertTrue(hasLaunched)
     }
 }

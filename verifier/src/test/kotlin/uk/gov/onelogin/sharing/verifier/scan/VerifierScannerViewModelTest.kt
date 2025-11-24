@@ -1,48 +1,47 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
+import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerViewModelAssertions.hasPreviouslyDeniedPermission
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerViewModelAssertions.hasPreviouslyGrantedPermission
+import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerViewModelAssertions.isInInitialState
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerViewModelHelper.monitor
+import uk.gov.onelogin.sharing.verifier.scan.state.CompleteVerifierScannerState
 
 @RunWith(AndroidJUnit4::class)
 class VerifierScannerViewModelTest {
 
-    private val viewModel = VerifierScannerViewModel()
+    private val uri = "https://this.is.a.unit.test".toUri()
 
     @Test
-    fun previouslyDeniedPermissionIsUpdatable() = runTest {
-        monitor(viewModel)
+    fun initialState() = runTest {
+        val model = VerifierScannerViewModel()
+        monitor(model)
 
         assertThat(
-            viewModel,
-            hasPreviouslyGrantedPermission()
+            model,
+            isInInitialState()
+        )
+    }
+
+    @Test
+    fun modelIsResettable() = runTest {
+        val model = VerifierScannerViewModel(
+            state = CompleteVerifierScannerState()
         )
 
-        var job = viewModel.update(true)
+        monitor(model)
 
-        while (!job.isCompleted) {
-            // infinite loop until it's finished
-        }
+        model.update(uri)
+        model.update(true)
 
-        assertThat(
-            viewModel,
-            hasPreviouslyDeniedPermission()
-        )
-
-        job = viewModel.reset()
-
-        while (!job.isCompleted) {
-            // infinite loop until it's finished
-        }
+        model.reset()
 
         assertThat(
-            viewModel,
-            hasPreviouslyGrantedPermission()
+            model,
+            isInInitialState()
         )
     }
 }

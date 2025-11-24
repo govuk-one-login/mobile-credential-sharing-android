@@ -31,7 +31,9 @@ class HolderWelcomeScreenRule(
         composeTestRule = composeTestRule,
         enablePermissionsText = resources.getString(R.string.enable_bluetooth_permission),
         openAppSettingsText = resources.getString(R.string.open_app_permissions),
-        permissionDeniedText = resources.getString(R.string.bluetooth_permission_permanently_denied),
+        permissionDeniedText = resources.getString(
+            R.string.bluetooth_permission_permanently_denied
+        )
     )
 
     private lateinit var content: () -> Unit
@@ -70,10 +72,4 @@ class HolderWelcomeScreenRule(
                 Role.Image
             )
         )
-
-    fun render(modifier: Modifier = Modifier) {
-        setContent {
-            HolderWelcomeScreen(modifier = modifier)
-        }
-    }
 }

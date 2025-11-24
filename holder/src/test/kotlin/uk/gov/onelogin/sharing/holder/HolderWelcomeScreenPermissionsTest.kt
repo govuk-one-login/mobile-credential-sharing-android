@@ -114,6 +114,5 @@ class HolderWelcomeScreenPermissionsTest {
 
         composeTestRule.assertOpenAppSettingsButton()
         composeTestRule.assertPermanentlyDeniedTextIsDisplayed()
-
     }
 }

@@ -15,8 +15,8 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 
 @Composable
 fun RequirePermissionButton(
-    modifier: Modifier = Modifier,
     text: String,
+    modifier: Modifier = Modifier,
     launchPermission: () -> Unit = {}
 ) {
     Column(modifier = modifier) {
@@ -33,7 +33,7 @@ fun RequirePermissionButton(
 
 @Composable
 @Preview
-fun RequirePermissionButtonPreview() {
+private fun RequirePermissionButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier
@@ -42,7 +42,7 @@ fun RequirePermissionButtonPreview() {
         ) {
             RequirePermissionButton(
                 launchPermission = {},
-                text = "",
+                text = "Application requires permissions",
                 modifier = Modifier.testTag("preview")
             )
         }

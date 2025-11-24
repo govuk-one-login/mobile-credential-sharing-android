@@ -15,14 +15,14 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 
 @Composable
 fun PermissionRationaleButton(
+    text: String,
     modifier: Modifier = Modifier,
-    buttonText: String,
     launchPermission: () -> Unit = {}
 ) {
     Column(modifier = modifier) {
         GdsButton(
             modifier = Modifier.testTag("permissionRationaleButton"),
-            text = buttonText,
+            text = text,
             buttonType = ButtonTypeV2.Secondary(),
             onClick = {
                 launchPermission()
@@ -33,7 +33,7 @@ fun PermissionRationaleButton(
 
 @Composable
 @Preview
-fun PermissionRationaleButtonPreview() {
+private fun PermissionRationaleButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier
@@ -42,7 +42,7 @@ fun PermissionRationaleButtonPreview() {
         ) {
             PermissionRationaleButton(
                 launchPermission = {},
-                buttonText = "asd",
+                text = "asd",
                 modifier = Modifier.testTag("preview")
             )
         }

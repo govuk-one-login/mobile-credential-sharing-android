@@ -42,19 +42,6 @@ class VerifierScannerPermissionLogicTest {
     }
 
     @Test
-    fun permissionGrantedBehaviour() {
-        composeTestRule.setContent {
-            PermissionScreen(
-                permissionState = state,
-                logic = verifierScannerPermissionLogic(LocalContext.current),
-                hasPreviouslyDeniedPermission = false
-            )
-        }
-
-        composeTestRule.assertPermissionGrantedTextIsDisplayed()
-    }
-
-    @Test
     fun permissionDeniedBehaviour() {
         permissionStatus = PermissionStatus.Denied(false)
 
@@ -102,16 +89,5 @@ class VerifierScannerPermissionLogicTest {
             resources.getString(R.string.open_app_permissions)
         ).assertIsDisplayed()
             .assertHasClickAction()
-    }
-
-    @Test
-    fun verifyPreview() {
-        composeTestRule.setContent {
-            VerifierScannerPreview(
-                state to true
-            )
-        }
-
-        composeTestRule.assertPermissionGrantedTextIsDisplayed()
     }
 }

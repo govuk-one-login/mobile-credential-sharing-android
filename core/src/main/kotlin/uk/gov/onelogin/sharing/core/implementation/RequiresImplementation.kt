@@ -1,10 +1,9 @@
-package uk.gov.onelogin.sharing.models.dev
+package uk.gov.onelogin.sharing.core.implementation
 
 /**
- * @param ticket The Jira ticket ID that should implement the missing
- * features. Defaults to `"Unknown"`.
- * @param description A high-level description of the currently missing feature with the
- * current implementation.
+ * Annotation declaring that there's missing functionality on the annotated target.
+ *
+ * Used for tracking incomplete features where completion's deferred, such as error handling.
  */
 @Target(
     AnnotationTarget.ANNOTATION_CLASS,
@@ -25,4 +24,4 @@ package uk.gov.onelogin.sharing.models.dev
 )
 @Retention(AnnotationRetention.SOURCE)
 @MustBeDocumented
-annotation class ImplementationDetail(val ticket: String = "Unknown", val description: String = "")
+annotation class RequiresImplementation(val details: Array<ImplementationDetail> = [])
