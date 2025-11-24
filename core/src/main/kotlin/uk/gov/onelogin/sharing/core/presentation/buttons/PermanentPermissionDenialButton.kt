@@ -56,7 +56,7 @@ fun PermanentPermissionDenialButton(
 
 @Composable
 @Preview
-private fun PermanentPermissionDenialButtonPreview() {
+internal fun PermanentPermissionDenialButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier

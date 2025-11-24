@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.scan.buttons
+package uk.gov.onelogin.sharing.core.presentation.buttons
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,8 +10,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
-import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButtonPreview
 
 @RunWith(AndroidJUnit4::class)
 class RequirePermissionButtonTest {

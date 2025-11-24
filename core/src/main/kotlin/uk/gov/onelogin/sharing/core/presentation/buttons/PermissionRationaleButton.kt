@@ -33,7 +33,7 @@ fun PermissionRationaleButton(
 
 @Composable
 @Preview
-private fun PermissionRationaleButtonPreview() {
+internal fun PermissionRationaleButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier

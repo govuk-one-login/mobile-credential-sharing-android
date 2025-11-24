@@ -33,7 +33,7 @@ fun RequirePermissionButton(
 
 @Composable
 @Preview
-private fun RequirePermissionButtonPreview() {
+internal fun RequirePermissionButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier
