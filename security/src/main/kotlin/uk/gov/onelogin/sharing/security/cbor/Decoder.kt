@@ -6,8 +6,8 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.Base64
-import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 
 /**
@@ -37,7 +37,7 @@ fun decodeDeviceEngagement(cborBase64Url: String) {
                 ImplementationDetail(
                     ticket = "N/A not captured",
                     description = "Create DTO -> Domain mapping functions for verifier to extract" +
-                            "deserialized device engagement message"
+                        "deserialized device engagement message"
                 )
             ]
         )
