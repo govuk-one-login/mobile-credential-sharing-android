@@ -4,10 +4,12 @@ import android.Manifest
 import android.content.Context
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,6 +33,7 @@ class HolderWelcomeScreenPermissionsTest {
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
     fun `should show enablePermissionsButton when permissions have not been requested yet`() {
+        var hasLaunched = false
         val fakeState = FakeMultiplePermissionsState(
             permissions = listOf(
                 FakePermissionState(
@@ -42,7 +45,7 @@ class HolderWelcomeScreenPermissionsTest {
                     status = PermissionStatus.Denied(false)
                 )
             ),
-            onLaunchPermission = { }
+            onLaunchPermission = { hasLaunched = true }
         )
 
         composeTestRule.setContent {
@@ -55,11 +58,14 @@ class HolderWelcomeScreenPermissionsTest {
         }
 
         composeTestRule.assertEnablePermissionsButtonTextIsDisplayed()
+        composeTestRule.onEnablePermissionsButtonText().performClick()
+        assertTrue { hasLaunched }
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
     fun `should show permissionRationale when permissions have been denied once`() {
+        var hasLaunched = false
         val fakeState = FakeMultiplePermissionsState(
             permissions = listOf(
                 FakePermissionState(
@@ -71,7 +77,7 @@ class HolderWelcomeScreenPermissionsTest {
                     status = PermissionStatus.Denied(true)
                 )
             ),
-            onLaunchPermission = {}
+            onLaunchPermission = { hasLaunched = true }
         )
 
         composeTestRule.setContent {
@@ -84,6 +90,9 @@ class HolderWelcomeScreenPermissionsTest {
         }
 
         composeTestRule.assertEnablePermissionsButtonTextIsDisplayed()
+        composeTestRule.onEnablePermissionsButtonText().performClick()
+
+        assertTrue { hasLaunched }
     }
 
     @OptIn(ExperimentalPermissionsApi::class)

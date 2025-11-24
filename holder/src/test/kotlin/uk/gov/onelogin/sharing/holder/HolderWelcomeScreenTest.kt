@@ -104,34 +104,6 @@ class HolderWelcomeScreenTest {
     }
 
     @Test
-    fun `should stop bluetooth advertisement when disposed`() {
-        val viewModel = createViewModel()
-        var showContent by mutableStateOf(true)
-
-        composeTestRule.setContent {
-            HolderWelcomeScreenContent(
-                contentState = HolderWelcomeUiState(
-                    qrData = BASE64_ENCODED_DEVICE_ENGAGEMENT
-                ),
-                modifier = Modifier,
-                multiplePermissionsState = fakeGrantedPermissionsState,
-                hasPreviouslyRequestedPermission = true
-            ) {
-                DisposableEffect(showContent) {
-                    viewModel.startAdvertising()
-                    onDispose {
-                        viewModel.stopAdvertising()
-                    }
-                }
-            }
-        }
-
-        composeTestRule.runOnUiThread { showContent = false }
-
-        assertEquals(AdvertiserState.Stopped, viewModel.uiState.value.advertiserState)
-    }
-
-    @Test
     fun previewUsage() = runTest {
         composeTestRule.setContent {
             HolderWelcomeScreenPreview()

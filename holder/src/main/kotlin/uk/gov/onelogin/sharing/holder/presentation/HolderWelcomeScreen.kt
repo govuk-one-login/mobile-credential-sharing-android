@@ -77,7 +77,7 @@ fun HolderWelcomeScreen(
 @OptIn(ExperimentalPermissionsApi::class)
 fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
     !perm.status.isGranted &&
-            !perm.status.shouldShowRationale
+        !perm.status.shouldShowRationale
 }
 
 @Suppress("LongMethod")
