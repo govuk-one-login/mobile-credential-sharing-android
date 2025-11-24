@@ -7,8 +7,6 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -25,6 +23,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasFlags
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import org.hamcrest.CoreMatchers.allOf
+import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.verifier.R
 import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertions.hasState
 
@@ -65,22 +64,12 @@ class VerifierScannerRule(
 
     fun onOpenAppSettingsButton() = onNodeWithText(openAppSettingsText)
         .assertExists()
-        .assert(
-            SemanticsMatcher.expectValue(
-                SemanticsProperties.Role,
-                Role.Button
-            )
-        )
+        .assert(hasRole(Role.Button))
         .assertHasClickAction()
 
     fun onPermissionDeniedButton() = onNodeWithText(permissionDeniedText)
         .assertExists()
-        .assert(
-            SemanticsMatcher.expectValue(
-                SemanticsProperties.Role,
-                Role.Button
-            )
-        )
+        .assert(hasRole(Role.Button))
         .assertHasClickAction()
 
     fun onPermissionGrantedText() = onNodeWithText(permissionGrantedText)

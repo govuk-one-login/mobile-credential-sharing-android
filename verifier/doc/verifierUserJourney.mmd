@@ -1,0 +1,11 @@
+flowchart LR
+    %% Node definitions
+    Start@{shape: terminal}
+    VerifierScanner
+    isValidQr{"Is valid QR?"}
+    ScannedInvalidQrScreen
+
+    %% Node relationships
+    Start --> VerifierScanner
+    VerifierScanner -->|Scan Digital credential QR code| isValidQr
+    isValidQr -->|Invalid| ScannedInvalidQrScreen

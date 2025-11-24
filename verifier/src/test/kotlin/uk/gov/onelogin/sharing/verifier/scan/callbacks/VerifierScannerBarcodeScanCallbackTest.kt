@@ -18,6 +18,8 @@ import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Compa
 import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Companion.unknown
 import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Companion.urlQrCode
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
+import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
+import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriTwo
 
 @RunWith(AndroidJUnit4::class)
 @Config(
@@ -40,7 +42,7 @@ class VerifierScannerBarcodeScanCallbackTest {
 
     @Before
     fun setUp() {
-        loggingFile = folder.newFile("barcodeScanResultLoggingCallbackOutputs.txt")
+        loggingFile = folder.newFile("VerifierScannerBarcodeScanCallbackTest.txt")
         fileOutputStream = FileOutputStream(loggingFile)
         printStream = PrintStream(fileOutputStream)
 
@@ -60,7 +62,7 @@ class VerifierScannerBarcodeScanCallbackTest {
     )
 
     @Test
-    fun singleUrlScans() = "https://this.is.a.unit.test".run {
+    fun singleUrlScans() = exampleUriOne.run {
         performLoggingFlow(
             result = BarcodeScanResult.Single(urlQrCode(this)),
             expectedMessage = this
@@ -86,11 +88,11 @@ class VerifierScannerBarcodeScanCallbackTest {
         result =
         BarcodeScanResult.Success(
             listOf(
-                "https://this.is.a.unit.test",
-                "https://this.is.another.test"
+                exampleUriOne,
+                exampleUriTwo
             ).asUrlBarcodes()
         ),
-        expectedMessage = "https://this.is.a.unit.test"
+        expectedMessage = exampleUriOne
     ).also {
         assert(
             loggingFile.readLines().none {

@@ -73,6 +73,16 @@ dependencies {
     }
 
     listOf(
+        "uk-gov-ui-android-componentsv2",
+        "uk-gov-ui-android-patterns",
+        "uk-gov-ui-android-theme",
+    ).map { libs.findLibrary(it).get() }
+        .map(::testFixtures)
+        .forEach {
+            testFixturesImplementation(it)
+        }
+
+    listOf(
         "testing-unit",
     ).map { libs.findBundle(it).get() }.forEach {
         testImplementation(it)

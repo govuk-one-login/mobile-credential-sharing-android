@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scanned_invalid_qr_body">@string/did_not_scan_digital_credential_qr</string>
+    <string name="scanned_invalid_qr_title">@string/cannot_use_the_scanned_qr</string>
+    <string name="scanned_invalid_qr_try_again">@string/try_again</string>
+</resources>

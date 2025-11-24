@@ -2,6 +2,9 @@
 <resources>
     <string name="camera_permission_is_enabled">The camera permission is now enabled.</string>
     <string name="camera_permission_is_permanently_denied">The camera permission is permanently denied.</string>
+    <string name="cannot_use_the_scanned_qr">Cannot use the scanned QR code</string>
+    <string name="did_not_scan_digital_credential_qr">The scanned QR code didn’t contain a digital credential. Please check the correct QR code to scan, then try again.</string>
     <string name="enable_camera_permission_to_continue">Please enable the camera permission to continue.</string>
     <string name="open_app_permissions">Open app permissions</string>
+    <string name="try_again">Try again</string>
 </resources>
