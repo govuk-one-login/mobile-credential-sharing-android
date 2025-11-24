@@ -40,7 +40,8 @@ dependencies {
         libs.jackson.cbor,
         libs.jackson.core,
         libs.jackson.kotlin,
-        projects.models
+        projects.models,
+        projects.core
     ).forEach(::implementation)
 
     listOf(
