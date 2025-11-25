@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.security
 
-import tools.jackson.databind.node.ArrayNode
-import tools.jackson.databind.node.JsonNodeFactory
-import tools.jackson.databind.node.ObjectNode
-import tools.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_TYPE
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_VERSION
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
@@ -58,12 +58,17 @@ object DeviceEngagementStub {
         securityNode: ArrayNode = securityNodes(),
         deviceRetrievalMethods: List<ArrayNode> = listOf(deviceRetrievalNodes())
     ): ObjectNode {
-        val drmsArray = jsonNodeFactory.arrayNode().addAll(deviceRetrievalMethods)
+        val drmsArray = jsonNodeFactory.arrayNode()
 
-        return jsonNodeFactory.objectNode()
-            .put("0", version)
-            .set("1", securityNode)
-            .set("2", drmsArray)
+        deviceRetrievalMethods.forEach { drm ->
+            drmsArray.add(drm)
+        }
+
+        return jsonNodeFactory.objectNode().apply {
+            put("0", version)
+            set<ArrayNode>("1", securityNode)
+            set<ArrayNode>("2", drmsArray)
+        }
     }
 }
 
