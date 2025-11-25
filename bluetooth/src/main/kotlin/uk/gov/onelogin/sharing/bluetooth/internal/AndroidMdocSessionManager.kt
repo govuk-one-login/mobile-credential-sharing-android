@@ -77,20 +77,22 @@ internal class AndroidMdocSessionManager(
     private fun handleGattEvent(event: GattServerEvent) {
         when (event) {
             is GattServerEvent.Connected -> {
-                connectedDevices.add(event.address)
-                _state.value = MdocSessionState.Connected(event.address)
+                if (connectedDevices.add(event.address)) {
+                    _state.value = MdocSessionState.Connected(event.address)
+                }
             }
 
             is GattServerEvent.Disconnected -> {
-                connectedDevices.remove(event.address)
-                _state.value = MdocSessionState.Disconnected(event.address)
+                if (connectedDevices.remove(event.address)) {
+                    _state.value = MdocSessionState.Disconnected(event.address)
+                }
             }
 
             is GattServerEvent.Error ->
                 _state.value = MdocSessionState.Error(event.error)
 
             is GattServerEvent.UnsupportedEvent ->
-                println("Ignored unsupported event: $event")
+                println("Unsupported event - status: ${event.status} new state: ${event.newState}")
         }
     }
 }

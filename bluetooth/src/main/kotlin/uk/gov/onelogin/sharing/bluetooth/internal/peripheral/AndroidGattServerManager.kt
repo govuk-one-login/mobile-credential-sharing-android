@@ -57,8 +57,6 @@ class AndroidGattServerManager(
 
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
-            is GattEvent.Error -> println(event.message)
-
             is GattEvent.ConnectionStateChange -> {
                 val address = event.device.address
 

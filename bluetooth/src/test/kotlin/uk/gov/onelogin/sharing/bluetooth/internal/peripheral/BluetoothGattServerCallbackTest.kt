@@ -22,7 +22,7 @@ class BluetoothGattServerCallbackTest {
     }
 
     @Test
-    fun `onConnectionStateChange should emit the event`() {
+    fun `onConnectionStateChange should emit connected event`() {
         callback.onConnectionStateChange(
             device = device,
             status = BluetoothGatt.GATT_SUCCESS,
