@@ -6,8 +6,8 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.Base64
-import uk.gov.onelogin.sharing.models.dev.ImplementationDetail
-import uk.gov.onelogin.sharing.models.dev.RequiresImplementation
+import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 
 /**
