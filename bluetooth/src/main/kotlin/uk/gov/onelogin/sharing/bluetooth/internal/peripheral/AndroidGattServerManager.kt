@@ -9,7 +9,7 @@ import android.content.Context
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.MdocError
-import uk.gov.onelogin.sharing.bluetooth.api.MdocEvent
+import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 
@@ -20,12 +20,11 @@ class AndroidGattServerManager(
         GattServiceSpec.mdocService()
     )
 ) : GattServerManager {
-    private val _events = MutableSharedFlow<MdocEvent>(
+    private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
     )
-    override val events: SharedFlow<MdocEvent> = _events
+    override val events: SharedFlow<GattServerEvent> = _events
     private var gattServer: BluetoothGattServer? = null
-    private val connectedDevices = mutableSetOf<String>()
     private val eventEmitter = GattEventEmitter {
         handleGattEvent(it)
     }
@@ -37,7 +36,7 @@ class AndroidGattServerManager(
         )
 
         if (server == null) {
-            _events.tryEmit(MdocEvent.Error(MdocError.GATT_NOT_AVAILABLE))
+            _events.tryEmit(GattServerEvent.Error(MdocError.GATT_NOT_AVAILABLE))
             return
         }
 
@@ -50,7 +49,6 @@ class AndroidGattServerManager(
     override fun close() {
         gattServer?.close()
         gattServer = null
-        connectedDevices.clear()
     }
 
     private fun handleGattEvent(event: GattEvent) {
@@ -64,23 +62,22 @@ class AndroidGattServerManager(
                     event.status == BluetoothGatt.GATT_SUCCESS &&
                             event.newState == BluetoothProfile.STATE_CONNECTED -> {
 
-                        if (connectedDevices.add(address)) {
-                            _events.tryEmit(MdocEvent.Connected(address))
-                        }
+                        _events.tryEmit(GattServerEvent.Connected(address))
                     }
 
                     event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
-                        if (connectedDevices.remove(address)) {
-                            _events.tryEmit(MdocEvent.Disconnected(address))
-                        }
+                        _events.tryEmit(GattServerEvent.Disconnected(address))
+
                     }
 
                     else -> {
-                        _events.tryEmit(MdocEvent.UnsupportedEvent(
-                            event.device.address,
-                            event.status,
-                            event.newState
-                        ))
+                        _events.tryEmit(
+                            GattServerEvent.UnsupportedEvent(
+                                event.device.address,
+                                event.status,
+                                event.newState
+                            )
+                        )
                     }
                 }
             }

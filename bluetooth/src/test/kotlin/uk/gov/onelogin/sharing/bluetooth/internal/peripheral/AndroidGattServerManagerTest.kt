@@ -15,7 +15,7 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import uk.gov.onelogin.sharing.bluetooth.api.MdocError
-import uk.gov.onelogin.sharing.bluetooth.api.MdocEvent
+import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
 import java.util.UUID
@@ -66,9 +66,9 @@ class AndroidGattServerManagerTest {
             manager.open()
 
             val event = awaitItem()
-            assert(event is MdocEvent.Error)
+            assert(event is GattServerEvent.Error)
             assertEquals(
-                MdocEvent.Error(MdocError.GATT_NOT_AVAILABLE),
+                GattServerEvent.Error(MdocError.GATT_NOT_AVAILABLE),
                 event
             )
 
@@ -110,46 +110,10 @@ class AndroidGattServerManagerTest {
             )
 
             assertEquals(
-                MdocEvent.Connected("AA:BB:CC:DD:EE:FF"),
+                GattServerEvent.Connected("AA:BB:CC:DD:EE:FF"),
                 awaitItem()
             )
 
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `does not emit duplicate Connected for same device`() = runTest {
-        val callbackSlot = slot<BluetoothGattServerCallback>()
-        every {
-            bluetoothManager.openGattServer(context, capture(callbackSlot))
-        } returns gattServer
-
-        manager.open()
-
-        val device = mockk<BluetoothDevice>()
-        every { device.address } returns "AA:BB:CC:DD:EE:FF"
-
-        manager.events.test {
-            callbackSlot.captured.onConnectionStateChange(
-                device,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothProfile.STATE_CONNECTED
-            )
-
-            assertEquals(
-                MdocEvent.Connected("AA:BB:CC:DD:EE:FF"),
-                awaitItem()
-            )
-
-            // second connect with same address should NOT emit another event
-            callbackSlot.captured.onConnectionStateChange(
-                device,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothProfile.STATE_CONNECTED
-            )
-
-            expectNoEvents()
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -174,7 +138,7 @@ class AndroidGattServerManagerTest {
             )
 
             assertEquals(
-                MdocEvent.Connected("AA:BB:CC:DD:EE:FF"),
+                GattServerEvent.Connected("AA:BB:CC:DD:EE:FF"),
                 awaitItem()
             )
 
@@ -186,7 +150,7 @@ class AndroidGattServerManagerTest {
             )
 
             assertEquals(
-                MdocEvent.Disconnected("AA:BB:CC:DD:EE:FF"),
+                GattServerEvent.Disconnected("AA:BB:CC:DD:EE:FF"),
                 awaitItem()
             )
 
@@ -214,7 +178,7 @@ class AndroidGattServerManagerTest {
             )
 
             assertEquals(
-                MdocEvent.UnsupportedEvent(
+                GattServerEvent.UnsupportedEvent(
                     address = "AA:BB:CC:DD:EE:FF",
                     status = BluetoothGatt.GATT_FAILURE,
                     newState = BluetoothProfile.STATE_CONNECTED

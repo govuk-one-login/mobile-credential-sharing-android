@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
 import android.Manifest
-import android.bluetooth.BluetoothManager
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,10 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import uk.gov.onelogin.sharing.bluetooth.api.MdocBleSessionImpl
 import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 
 private const val QR_SIZE = 800
@@ -37,6 +34,15 @@ fun HolderWelcomeScreen(
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    Column(modifier = modifier) {
+        RequestPermissions()
+        HolderWelcomeText()
+
+        HolderWelcomeScreenContent(
+            contentState = contentState
+        )
+    }
+
     LaunchedEffect(Unit) {
         viewModel.startAdvertising()
     }
@@ -45,28 +51,6 @@ fun HolderWelcomeScreen(
         onDispose {
             viewModel.stopAdvertising()
         }
-    }
-
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        val sessionManager = MdocBleSessionImpl(
-            AndroidGattServerManager(
-                context = context,
-                bluetoothManager = context.getSystemService(BluetoothManager::class.java)
-            )
-        )
-
-        sessionManager.startSession(UUID.randomUUID())
-    }
-
-    Column(modifier = modifier) {
-        RequestPermissions()
-        HolderWelcomeText()
-
-        HolderWelcomeScreenContent(
-            contentState = contentState
-        )
     }
 }
 
@@ -77,7 +61,8 @@ private fun RequestPermissions() {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val requiredPermissions = arrayOf(
-            Manifest.permission.BLUETOOTH_ADVERTISE
+            Manifest.permission.BLUETOOTH_ADVERTISE,
+            Manifest.permission.BLUETOOTH_CONNECT
         )
 
         var allPermissionsGranted by remember {
@@ -128,7 +113,7 @@ fun HolderWelcomeScreenContent(contentState: HolderWelcomeUiState, modifier: Mod
 private fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
-        sessionState = MdocSessionState.Started,
+        sessionState = MdocSessionState.Advertising,
         uuid = UUID.randomUUID(),
         qrData = "QR Data"
     )
