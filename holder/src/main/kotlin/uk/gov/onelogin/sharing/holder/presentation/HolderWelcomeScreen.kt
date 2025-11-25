@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
@@ -31,7 +30,6 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDeni
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
 
@@ -80,7 +78,7 @@ fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { 
         !perm.status.shouldShowRationale
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "ComposableLambdaParameterNaming")
 @Composable
 fun HolderWelcomeScreenContent(
     contentState: HolderWelcomeUiState,
@@ -136,8 +134,8 @@ fun HolderWelcomeScreenContent(
     }
 }
 
-@Preview
 @Composable
+@Preview
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
@@ -146,33 +144,10 @@ internal fun HolderWelcomeScreenPreview() {
         qrData = "QR Data"
     )
 
-    val fakeState = FakeMultiplePermissionsState(
-        permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            listOf(
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_CONNECT,
-                    status = PermissionStatus.Granted
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                    status = PermissionStatus.Granted
-                )
-            )
-        } else {
-            listOf(
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH,
-                    status = PermissionStatus.Granted
-                )
-            )
-        },
-        onLaunchPermission = { }
-    )
-
     HolderWelcomeScreenContent(
         contentState = contentState,
         modifier = Modifier,
-        multiplePermissionsState = fakeState,
+        multiplePermissionsState = FakeMultiplePermissionsState(listOf(), {}),
         hasPreviouslyRequestedPermission = false,
         onGrantedPermissions = {}
     )
