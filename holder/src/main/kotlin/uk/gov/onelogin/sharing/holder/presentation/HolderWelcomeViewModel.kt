@@ -85,7 +85,7 @@ class HolderWelcomeViewModel(
             mdocBleSession.state.collect { state ->
                 println("Advertiser state: $state")
                 _uiState.update { it.copy(sessionState = state) }
-                if (state == MdocSessionState.Started) {
+                if (state == MdocSessionState.Advertising) {
                     println("Advertising UUID: ${_uiState.value.uuid}")
                 }
             }

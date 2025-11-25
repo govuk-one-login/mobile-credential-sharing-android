@@ -16,28 +16,22 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
+import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
 
-internal class AndroidMdocSessionManagerTest {
+class AndroidMdocSessionManagerTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
-    private lateinit var advertiser: FakeBleAdvertiser
-    private lateinit var sessionManager: AndroidMdocSessionManager
-    private lateinit var testScope: CoroutineScope
+    private val advertiser = FakeBleAdvertiser()
+    private val gattServerManager = FakeGattServerManager()
+    private val testScope = CoroutineScope(SupervisorJob() + dispatcherRule.testDispatcher)
+    private val sessionManager = AndroidMdocSessionManager(
+        bleAdvertiser = advertiser,
+        gattServerManager = gattServerManager,
+        coroutineScope = testScope
+    )
     private val uuid = UUID.randomUUID()
-
-    @Before
-    fun setUp() {
-        advertiser = FakeBleAdvertiser()
-
-        testScope = CoroutineScope(SupervisorJob() + dispatcherRule.testDispatcher)
-
-        sessionManager = AndroidMdocSessionManager(
-            bleAdvertiser = advertiser,
-            coroutineScope = testScope
-        )
-    }
 
     @Test
     fun `initial state is Idle`() = runTest {
@@ -49,11 +43,8 @@ internal class AndroidMdocSessionManagerTest {
         sessionManager.state.test {
             Assert.assertEquals(MdocSessionState.Idle, awaitItem())
 
-            advertiser.emitState(AdvertiserState.Starting)
-            Assert.assertEquals(MdocSessionState.Starting, awaitItem())
-
             advertiser.emitState(AdvertiserState.Started)
-            Assert.assertEquals(MdocSessionState.Started, awaitItem())
+            Assert.assertEquals(MdocSessionState.Advertising, awaitItem())
 
             advertiser.emitState(AdvertiserState.Stopped)
             Assert.assertEquals(MdocSessionState.Stopped, awaitItem())
@@ -77,6 +68,7 @@ internal class AndroidMdocSessionManagerTest {
 
         val sessionManager = AndroidMdocSessionManager(
             bleAdvertiser = advertiser,
+            gattServerManager = gattServerManager,
             coroutineScope = testScope
         )
 
@@ -96,11 +88,12 @@ internal class AndroidMdocSessionManagerTest {
         val advertiser = FakeBleAdvertiser(initialState = AdvertiserState.Started)
         val sessionManager = AndroidMdocSessionManager(
             bleAdvertiser = advertiser,
+            gattServerManager = gattServerManager,
             coroutineScope = testScope
         )
 
         sessionManager.state.test {
-            Assert.assertEquals(MdocSessionState.Started, awaitItem())
+            Assert.assertEquals(MdocSessionState.Advertising, awaitItem())
 
             sessionManager.stop()
 
