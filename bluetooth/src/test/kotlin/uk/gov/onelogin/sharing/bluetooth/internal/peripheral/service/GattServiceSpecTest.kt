@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service
 
 import android.bluetooth.BluetoothGattCharacteristic
+import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -9,7 +10,6 @@ import org.junit.runners.Parameterized
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.CLIENT_2_SERVER_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.STATE_UUID
-import java.util.UUID
 
 @RunWith(Parameterized::class)
 class GattServiceSpecTest(
@@ -17,7 +17,7 @@ class GattServiceSpecTest(
     private val expectedUuid: UUID,
     private val expectedProperties: Int,
     private val expectedPermissions: Int,
-    private val expectedHasCccd: Boolean,
+    private val expectedHasCccd: Boolean
 ) {
     /*companion object {
         @JvmStatic
@@ -56,24 +56,24 @@ class GattServiceSpecTest(
                 "state characteristic",
                 STATE_UUID,
                 BluetoothGattCharacteristic.PROPERTY_NOTIFY or
-                        BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
+                    BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
                 BluetoothGattCharacteristic.PERMISSION_WRITE,
-                true,
+                true
             ),
             arrayOf(
                 "client → server characteristic",
                 CLIENT_2_SERVER_UUID,
                 BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
                 BluetoothGattCharacteristic.PERMISSION_WRITE,
-                false,
+                false
             ),
             arrayOf(
                 "server → client characteristic",
                 SERVER_2_CLIENT_UUID,
                 BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                 BluetoothGattCharacteristic.PERMISSION_WRITE,
-                true,
-            ),
+                true
+            )
         )
     }
 
@@ -92,17 +92,17 @@ class GattServiceSpecTest(
         assertEquals(
             "Properties do not match for $name ($expectedUuid)",
             expectedProperties,
-            characteristic.properties,
+            characteristic.properties
         )
         assertEquals(
             "Permissions do not match for $name ($expectedUuid)",
             expectedPermissions,
-            characteristic.permissions,
+            characteristic.permissions
         )
         assertEquals(
             "hasCccd flag does not match for $name ($expectedUuid)",
             expectedHasCccd,
-            characteristic.hasCccd,
+            characteristic.hasCccd
         )
     }
 
@@ -112,13 +112,13 @@ class GattServiceSpecTest(
         val expectedUuids = setOf(
             STATE_UUID,
             CLIENT_2_SERVER_UUID,
-            SERVER_2_CLIENT_UUID,
+            SERVER_2_CLIENT_UUID
         )
 
         assertEquals(
             "Unexpected number of characteristics in MDOC GATT service",
             expectedUuids.size,
-            spec.characteristics.size,
+            spec.characteristics.size
         )
 
         val actualUuids = spec.characteristics.map { it.uuid }.toSet()

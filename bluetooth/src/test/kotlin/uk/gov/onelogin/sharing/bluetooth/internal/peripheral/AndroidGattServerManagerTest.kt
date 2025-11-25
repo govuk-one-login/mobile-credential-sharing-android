@@ -12,15 +12,15 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import uk.gov.onelogin.sharing.bluetooth.api.MdocError
-import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.test.runTest
+import org.junit.Before
+import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.MdocError
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
 
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
