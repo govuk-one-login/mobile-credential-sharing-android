@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan.errors.invalid
 
+import androidx.annotation.Keep
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -12,6 +13,7 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
  *
  * @param data The URI stored within a successfully scanned QR code.
  */
+@Keep
 @Serializable
 data class ScannedInvalidQrRoute(val data: String) {
     companion object {

@@ -1,9 +1,12 @@
 package uk.gov.onelogin.sharing.verifier
 
+import androidx.annotation.Keep
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
@@ -12,6 +15,7 @@ import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRout
 /**
  * Serializable data object that acts as a navigation route for the Wallet sharing verifier module.
  */
+@Keep
 @Serializable
 data object VerifierRoutes {
 
@@ -36,8 +40,8 @@ data object VerifierRoutes {
                 onInvalidBarcode = { invalidBarcodeUri ->
                     onNavigate(ScannedInvalidQrRoute(data = invalidBarcodeUri)) {}
                 },
-                onValidBarcode = { _ ->
-                    // DCMAW-16278: Navigate to empty screen
+                onValidBarcode = { validBarcodeUri ->
+                    onNavigate(ConnectWithHolderDeviceRoute(validBarcodeUri)) {}
                 }
             )
             scannedInvalidQrErrorRoute(
@@ -49,6 +53,7 @@ data object VerifierRoutes {
                     }
                 }
             )
+            configureConnectWithHolderDeviceRoute()
         }
     }
 }

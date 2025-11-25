@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
+import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import kotlinx.serialization.Serializable
 /**
  * Serialization object used as a navigation route. Maps to the [VerifierScanner] composable UI.
  */
+@Keep
 @Serializable
 object VerifierScanRoute {
 

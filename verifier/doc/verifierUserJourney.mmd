@@ -4,8 +4,10 @@ flowchart LR
     VerifierScanner
     isValidQr{"Is valid QR?"}
     ScannedInvalidQrScreen
+    ConnectWithHolderDevice
 
     %% Node relationships
     Start --> VerifierScanner
     VerifierScanner -->|Scan Digital credential QR code| isValidQr
     isValidQr -->|Invalid| ScannedInvalidQrScreen
+    isValidQr -->|Valid| ConnectWithHolderDevice
