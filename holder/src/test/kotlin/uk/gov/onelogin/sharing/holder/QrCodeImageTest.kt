@@ -23,7 +23,6 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKey
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.BASE64_ENCODED_DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.ENCODED_DEVICE_ENGAGEMENT
 
 @RunWith(RobolectricTestRunner::class)
 class QrCodeImageTest {
