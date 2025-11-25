@@ -12,7 +12,6 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallbackStub
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData

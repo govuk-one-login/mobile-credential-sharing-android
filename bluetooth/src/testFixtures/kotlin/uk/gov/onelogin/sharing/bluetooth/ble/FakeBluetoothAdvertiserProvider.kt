@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.ble
 
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BluetoothAdvertiserProvider
 

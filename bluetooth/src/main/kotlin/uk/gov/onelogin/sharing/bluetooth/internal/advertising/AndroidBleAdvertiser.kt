@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 

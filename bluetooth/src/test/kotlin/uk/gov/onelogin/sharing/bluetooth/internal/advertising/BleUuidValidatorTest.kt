@@ -4,7 +4,7 @@ import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class BleUuidValidatorTest {
+internal class BleUuidValidatorTest {
 
     @Test
     fun `validate accepts normal random uuid`() {

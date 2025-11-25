@@ -10,8 +10,3 @@ interface MdocSessionManager {
 
     suspend fun stop()
 }
-
-/*
-data class MdocSessionOptions(
-    val serviceUuid: UUID
-)*/

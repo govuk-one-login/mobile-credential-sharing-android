@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.mapper
 import android.bluetooth.le.AdvertiseData
 import android.bluetooth.le.AdvertisingSetParameters
 import android.os.ParcelUuid
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
 
 /**
