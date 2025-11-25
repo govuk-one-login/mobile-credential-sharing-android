@@ -17,7 +17,6 @@ class BarcodeDataResultStateFactoryTest {
 
     private val flow = MutableStateFlow<BarcodeDataResult>(BarcodeDataResult.NotFound)
     private val state: BarcodeDataResultState.Complete = BarcodeDataResultState.Complete.from(flow)
-    private val uri = exampleUriOne.toUri()
 
     @Test
     fun initialState() {
@@ -33,11 +32,11 @@ class BarcodeDataResultStateFactoryTest {
             flow.collect {}
         }
 
-        state.update(uri)
+        state.update(exampleUriOne)
 
         assertThat(
             state,
-            hasBarcodeData(uri)
+            hasBarcodeData(exampleUriOne)
         )
     }
 }

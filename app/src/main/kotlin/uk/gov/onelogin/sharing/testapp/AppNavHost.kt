@@ -23,7 +23,7 @@ fun AppNavHost(
         configureTestAppRoutes(onNavigate = navController::navigate)
         configureHolderRoutes()
         configureVerifierRoutes(
-            onPopBackstack = navController::popBackStack
+            onNavigate = navController::navigate
         )
     }
 }

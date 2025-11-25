@@ -1,10 +1,12 @@
 package uk.gov.onelogin.sharing.verifier
 
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
+import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.scannedInvalidQrErrorRoute
 
 /**
@@ -26,11 +28,26 @@ data object VerifierRoutes {
      * @see configureVerifierScannerRoute
      * @see scannedInvalidQrErrorRoute
      */
-    fun NavGraphBuilder.configureVerifierRoutes(onPopBackstack: () -> Unit) {
+    fun NavGraphBuilder.configureVerifierRoutes(
+        onNavigate: (Any, NavOptionsBuilder.() -> Unit) -> Unit = { _, _ -> }
+    ) {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
-            configureVerifierScannerRoute()
+            configureVerifierScannerRoute(
+                onInvalidBarcode = { invalidBarcodeUri ->
+                    onNavigate(ScannedInvalidQrRoute(data = invalidBarcodeUri)) {}
+                },
+                onValidBarcode = { _ ->
+                    // DCMAW-16278: Navigate to empty screen
+                }
+            )
             scannedInvalidQrErrorRoute(
-                onTryAgainClick = onPopBackstack
+                onTryAgainClick = {
+                    onNavigate(VerifierScanRoute) {
+                        popUpTo<VerifierScanRoute> {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
     }

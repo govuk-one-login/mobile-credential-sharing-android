@@ -21,14 +21,20 @@ object VerifierScanRoute {
      * target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    fun NavGraphBuilder.configureVerifierScannerRoute() {
+    fun NavGraphBuilder.configureVerifierScannerRoute(
+        onInvalidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
+    ) {
         composable<VerifierScanRoute> {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                VerifierScanner()
+                VerifierScanner(
+                    onInvalidBarcode = onValidBarcode,
+                    onValidBarcode = onInvalidBarcode
+                )
             }
         }
     }

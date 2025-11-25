@@ -13,11 +13,11 @@ import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
-import uk.gov.onelogin.sharing.holder.FakeEngagementGenerator
-import uk.gov.onelogin.sharing.holder.engagement.Engagement
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
+import uk.gov.onelogin.sharing.security.engagement.Engagement
+import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
 @OptIn(ExperimentalCoroutinesApi::class)

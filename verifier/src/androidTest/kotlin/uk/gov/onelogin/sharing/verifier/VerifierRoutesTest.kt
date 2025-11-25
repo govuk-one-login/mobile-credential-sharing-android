@@ -20,7 +20,6 @@ class VerifierRoutesTest {
 
     @get:Rule
     val composeTestRule = VerifierScannerRule(
-        resources = ApplicationProvider.getApplicationContext<Context>().resources,
         composeTestRule = createComposeRule()
     )
 
@@ -32,7 +31,7 @@ class VerifierRoutesTest {
 
             NavHost(
                 navController = controller,
-                startDestination = VerifierScanRoute
+                startDestination = VerifierRoutes
             ) {
                 configureVerifierRoutes()
             }

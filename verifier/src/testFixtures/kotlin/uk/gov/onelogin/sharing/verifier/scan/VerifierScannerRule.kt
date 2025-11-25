@@ -95,30 +95,50 @@ class VerifierScannerRule(
     fun performPermissionDeniedClick() = onPermissionDeniedButton().performClick()
 
     @OptIn(ExperimentalPermissionsApi::class)
-    fun render(modifier: Modifier = Modifier) {
+    fun render(
+        modifier: Modifier = Modifier,
+        onInvalidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
+    ) {
         setContent {
             VerifierScanner(
-                modifier = modifier
+                modifier = modifier,
+                onInvalidBarcode = onInvalidBarcode,
+                onValidBarcode = onValidBarcode
             )
         }
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
-    fun render(model: VerifierScannerViewModel, modifier: Modifier = Modifier) {
+    fun render(
+        model: VerifierScannerViewModel,
+        modifier: Modifier = Modifier,
+        onInvalidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
+    ) {
         setContent {
             VerifierScanner(
                 modifier = modifier,
-                viewModel = model
+                viewModel = model,
+                onInvalidBarcode = onInvalidBarcode,
+                onValidBarcode = onValidBarcode
             )
         }
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
-    fun render(permissionState: @Composable () -> PermissionState, modifier: Modifier = Modifier) {
+    fun render(
+        permissionState: @Composable () -> PermissionState,
+        modifier: Modifier = Modifier,
+        onInvalidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
+    ) {
         setContent {
             VerifierScanner(
                 modifier = modifier,
-                permissionState = permissionState()
+                permissionState = permissionState(),
+                onInvalidBarcode = onInvalidBarcode,
+                onValidBarcode = onValidBarcode
             )
         }
     }

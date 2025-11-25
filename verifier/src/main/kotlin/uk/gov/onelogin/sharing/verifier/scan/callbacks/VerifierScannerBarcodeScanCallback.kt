@@ -6,9 +6,10 @@ import androidx.core.net.toUri
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 
 /**
- * [BarcodeScanResult.Callback] implementation that defers to the [onUrlFound] parameter when
+ * [BarcodeScanResult.Callback] implementation that defers to the [onDataFound] parameter when
  * finding an applicable [Uri].
  */
 @RequiresImplementation(
@@ -19,8 +20,9 @@ import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
         )
     ]
 )
-class VerifierScannerBarcodeScanCallback(private val onUrlFound: (Uri) -> Unit = {}) :
-    BarcodeScanResult.Callback {
+class VerifierScannerBarcodeScanCallback(
+    private val onDataFound: (BarcodeDataResult) -> Unit = {}
+) : BarcodeScanResult.Callback {
 
     override fun onResult(result: BarcodeScanResult, toggleScanner: () -> Unit) {
         if (
@@ -34,13 +36,19 @@ class VerifierScannerBarcodeScanCallback(private val onUrlFound: (Uri) -> Unit =
                 "Obtained BarcodeScanResult: $result"
             )
         }
-        when (result) {
+        val result = when (result) {
             is BarcodeScanResult.Success -> result.firstOrNull()?.url?.url
             is BarcodeScanResult.Single -> result.barcode.url?.url
             else -> null
         }?.let { url ->
-            onUrlFound(url.toUri())
-            toggleScanner()
-        } ?: toggleScanner()
+            if (url.startsWith("mdoc:")) {
+                BarcodeDataResult.Valid(url)
+            } else {
+                BarcodeDataResult.Invalid(url)
+            }
+        } ?: BarcodeDataResult.NotFound
+
+        onDataFound(result)
+        toggleScanner()
     }
 }

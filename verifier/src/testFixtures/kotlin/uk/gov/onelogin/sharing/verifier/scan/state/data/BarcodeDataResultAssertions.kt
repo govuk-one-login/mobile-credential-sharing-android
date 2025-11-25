@@ -9,6 +9,6 @@ import org.hamcrest.Matcher
  */
 object BarcodeDataResultAssertions {
     fun isNotFound() = hasFound(BarcodeDataResult.NotFound)
-    fun hasFound(expected: Uri) = hasFound(BarcodeDataResult.Found(expected))
+    fun hasFound(expected: String) = hasFound(BarcodeDataResult.Valid(expected))
     fun hasFound(data: BarcodeDataResult): Matcher<BarcodeDataResult> = equalTo(data)
 }

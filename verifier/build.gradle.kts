@@ -32,14 +32,25 @@ android {
 dependencies {
     listOf(
         projects.core,
-        projects.models
+        projects.models,
+        projects.security
     ).forEach(::api)
 
+    listOf(
+        testFixtures(projects.security)
+    ).forEach(::testFixturesApi)
+
     implementation(libs.androidx.browser)
-    testFixturesImplementation(libs.androidx.browser)
-    testImplementation(testFixtures(libs.uk.gov.ui.android.componentsv2.camera))
-    testImplementation(testFixtures(projects.core))
-    testImplementation(libs.com.google.test.parameter.injector)
+    listOf(
+        libs.androidx.browser,
+        testFixtures(projects.core)
+    ).forEach(::testFixturesImplementation)
+
+    listOf(
+        libs.com.google.test.parameter.injector,
+        testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
+        testFixtures(projects.core)
+    ).forEach(::testImplementation)
 }
 mavenPublishingConfig {
     mavenConfigBlock {

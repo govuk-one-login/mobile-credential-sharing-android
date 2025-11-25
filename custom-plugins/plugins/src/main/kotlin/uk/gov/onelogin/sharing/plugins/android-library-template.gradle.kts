@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.plugins
 
+import com.android.build.api.dsl.LibraryExtension
+import uk.gov.onelogin.sharing.plugins.Filters.licenseFilters
 import uk.gov.onelogin.sharing.plugins.publishing.PublishingCustomTasks.createLocalBuildMavenRepositoryTask
 import uk.gov.onelogin.sharing.plugins.publishing.PublishingCustomTasks.disableJavadocGeneration
 
@@ -92,3 +94,9 @@ dependencies {
 createLocalBuildMavenRepositoryTask()
 
 project.disableJavadocGeneration()
+
+configure<LibraryExtension> {
+    packaging {
+        licenseFilters.forEach(resources.excludes::plusAssign)
+    }
+}

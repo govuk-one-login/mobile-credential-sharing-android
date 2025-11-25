@@ -3,9 +3,9 @@ package uk.gov.onelogin.sharing.holder
 import java.util.UUID
 import junit.framework.TestCase.assertNotNull
 import org.junit.Test
-import uk.gov.onelogin.sharing.holder.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
 import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.engagement.EngagementGenerator
 
 class EngagementGeneratorTest {
 

@@ -46,6 +46,6 @@ sealed interface BarcodeDataResultState {
      */
     fun interface Updater {
         fun update(result: BarcodeDataResult)
-        fun update(uri: Uri) = update(BarcodeDataResult.Found(uri))
+        fun update(uri: String) = update(BarcodeDataResult.Valid(uri))
     }
 }

@@ -14,8 +14,6 @@ import uk.gov.onelogin.sharing.verifier.scan.state.CompleteVerifierScannerState
 @RunWith(AndroidJUnit4::class)
 class VerifierScannerViewModelTest {
 
-    private val uri = exampleUriOne.toUri()
-
     @Test
     fun initialState() = runTest {
         val model = VerifierScannerViewModel()
@@ -35,7 +33,7 @@ class VerifierScannerViewModelTest {
 
         monitor(model)
 
-        model.update(uri)
+        model.update(exampleUriOne)
         model.update(true)
 
         model.reset()

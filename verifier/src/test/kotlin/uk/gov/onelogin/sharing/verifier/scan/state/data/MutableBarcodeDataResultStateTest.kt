@@ -15,7 +15,6 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAs
 class MutableBarcodeDataResultStateTest {
 
     private val state: BarcodeDataResultState.Complete = MutableBarcodeDataResultState()
-    private val uri = exampleUriOne.toUri()
 
     @Test
     fun initialState() {
@@ -31,11 +30,11 @@ class MutableBarcodeDataResultStateTest {
             state.barcodeDataResult.collect {}
         }
 
-        state.update(uri)
+        state.update(exampleUriOne)
 
         assertThat(
             state,
-            hasBarcodeData(uri)
+            hasBarcodeData(exampleUriOne)
         )
     }
 }

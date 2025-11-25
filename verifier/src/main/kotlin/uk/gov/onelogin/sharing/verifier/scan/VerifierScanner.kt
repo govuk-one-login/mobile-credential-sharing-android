@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
 import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -25,21 +25,16 @@ fun VerifierScanner(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     permissionState: PermissionState = rememberPermissionState(Manifest.permission.CAMERA) {
         viewModel.update(!it)
-    }
+    },
+    onInvalidBarcode: (String) -> Unit = {},
+    onValidBarcode: (String) -> Unit = {}
 ) {
     val hasPreviouslyDeniedPermission: Boolean by viewModel
         .hasPreviouslyDeniedPermission
         .collectAsStateWithLifecycle()
-    val launcher = rememberLauncherForActivityResult(
-        BarcodeAnalysisUrlContract { _, _ ->
-            viewModel.resetBarcodeData()
-        }
-    ) {
-        // do nothing as it's handled within the constructor parameter.
-    }
 
     val barcodeScanResultCallback: BarcodeScanResult.Callback = VerifierScannerBarcodeScanCallback(
-        onUrlFound = viewModel::update
+        onDataFound = viewModel::update
     )
 
     VerifierScannerContent(
@@ -52,13 +47,22 @@ fun VerifierScanner(
     )
 
     val uri: BarcodeDataResult by viewModel.barcodeDataResult.collectAsStateWithLifecycle()
+    val latestOnInvalidBarcode by rememberUpdatedState(onInvalidBarcode)
+    val latestOnValidBarcode by rememberUpdatedState(onValidBarcode)
 
     LaunchedEffect(uri) {
         when (uri) {
-            is BarcodeDataResult.Found -> launcher.launch((uri as BarcodeDataResult.Found).data)
+            is BarcodeDataResult.Valid -> latestOnValidBarcode(
+                (uri as BarcodeDataResult.Valid).data
+            )
+            is BarcodeDataResult.Invalid -> latestOnInvalidBarcode(
+                (uri as BarcodeDataResult.Invalid).data
+            )
             else -> {
                 // do nothing as there's no barcode Uri to launch
             }
         }
+
+        viewModel.resetBarcodeData()
     }
 }
