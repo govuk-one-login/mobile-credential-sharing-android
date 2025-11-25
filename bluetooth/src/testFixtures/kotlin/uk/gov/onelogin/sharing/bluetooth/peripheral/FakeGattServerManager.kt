@@ -9,18 +9,18 @@ class FakeGattServerManager : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>()
     override val events: SharedFlow<GattServerEvent> = _events
 
-    var startCalls = 0
-    var stopCalls = 0
+    var openCalls = 0
+    var closeCalls = 0
 
     override fun open() {
-        startCalls++
+        openCalls++
     }
 
     override fun close() {
-        stopCalls++
+        closeCalls++
     }
 
-    fun emitEvent(event: GattServerEvent) {
-        _events.tryEmit(event)
+    suspend fun emitEvent(event: GattServerEvent) {
+        _events.emit(event)
     }
 }
