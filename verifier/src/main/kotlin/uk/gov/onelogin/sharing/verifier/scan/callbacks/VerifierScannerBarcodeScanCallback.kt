@@ -7,6 +7,10 @@ import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 
+/**
+ * [BarcodeScanResult.Callback] implementation that defers to the [onUrlFound] parameter when
+ * finding an applicable [Uri].
+ */
 @RequiresImplementation(
     details = [
         ImplementationDetail(

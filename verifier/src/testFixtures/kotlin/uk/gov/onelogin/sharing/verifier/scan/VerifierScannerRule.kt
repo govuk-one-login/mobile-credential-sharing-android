@@ -27,6 +27,10 @@ import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.verifier.R
 import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertions.hasState
 
+/**
+ * JUnit 4 Rule for encapsulating assertion / performance behaviour for the [VerifierScanner] UI
+ * composable.
+ */
 class VerifierScannerRule(
     composeTestRule: ComposeContentTestRule,
     private val openAppSettingsText: String,
@@ -34,6 +38,9 @@ class VerifierScannerRule(
     private val permissionGrantedText: String
 ) : ComposeContentTestRule by composeTestRule {
 
+    /**
+     * Convenience constructor that extracts [String] values via the provided [resources] parameter.
+     */
     constructor(
         composeTestRule: ComposeContentTestRule,
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources

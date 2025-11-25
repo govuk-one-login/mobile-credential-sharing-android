@@ -10,8 +10,16 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
 
+/**
+ * Serialization object used as a navigation route. Maps to the [VerifierScanner] composable UI.
+ */
 @Serializable
 object VerifierScanRoute {
+
+    /**
+     * [NavGraphBuilder] extension function for configuring the [VerifierScanRoute] navigation
+     * target.
+     */
     @OptIn(ExperimentalPermissionsApi::class)
     fun NavGraphBuilder.configureVerifierScannerRoute() {
         composable<VerifierScanRoute> {

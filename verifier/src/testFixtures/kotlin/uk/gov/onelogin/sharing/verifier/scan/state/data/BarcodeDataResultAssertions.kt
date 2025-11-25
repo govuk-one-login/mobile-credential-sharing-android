@@ -4,6 +4,9 @@ import android.net.Uri
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matcher
 
+/**
+ * Wrapper object for [Matcher] assertions against a [BarcodeDataResult] object.
+ */
 object BarcodeDataResultAssertions {
     fun isNotFound() = hasFound(BarcodeDataResult.NotFound)
     fun hasFound(expected: Uri) = hasFound(BarcodeDataResult.Found(expected))

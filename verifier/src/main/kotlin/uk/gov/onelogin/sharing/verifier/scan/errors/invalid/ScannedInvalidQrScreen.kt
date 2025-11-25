@@ -28,6 +28,14 @@ import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.verifier.R
 
+/**
+ * Error screen that's shown to the User when they scan a URL-based QR code that isn't considered
+ * to be a digital credential.
+ *
+ * @param inputUri The URI obtained from the QR Scanner.
+ * @param modifier The composable [Modifier] affecting the UI. Defaults to `Modifier`.
+ * @param onTryAgainClick The behaviour when clicking the primary [GdsButton].
+ */
 @Composable
 @ImplementationDetail(
     ticket = "DCMAW-16278",

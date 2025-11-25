@@ -5,6 +5,9 @@ import org.hamcrest.Matcher
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultAssertions.hasFound
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultAssertions.isNotFound
 
+/**
+ * Wrapper object containing [Matcher] functions that map to [BarcodeDataResultState.State] objects.
+ */
 object BarcodeDataResultStateAssertions {
     fun hasNoBarcodeData() = hasBarcodeData(isNotFound())
     fun hasBarcodeData(expected: Uri) = hasBarcodeData(hasFound(expected))
