@@ -3,12 +3,14 @@ package uk.gov.onelogin.sharing.bluetooth.internal
 import app.cash.turbine.test
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
@@ -17,6 +19,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
+
+private const val DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF"
 
 class AndroidMdocSessionManagerTest {
 
@@ -48,16 +52,23 @@ class AndroidMdocSessionManagerTest {
 
             advertiser.emitState(AdvertiserState.Stopped)
             Assert.assertEquals(MdocSessionState.Stopped, awaitItem())
+
+            advertiser.emitState(AdvertiserState.Failed("error"))
+            Assert.assertEquals(
+                MdocSessionState.Error(MdocError.ADVERTISING_FAILED),
+                awaitItem()
+            )
         }
     }
 
     @Test
-    fun `start triggers advertiser start with correct UUID`() = runTest {
+    fun `start triggers advertiser start and gatt server open`() = runTest {
         sessionManager.start(uuid)
 
         Assert.assertEquals(1, advertiser.startCalls)
         Assert.assertEquals(uuid, advertiser.lastAdvertiseData?.serviceUuid)
         Assert.assertEquals(AdvertiserState.Started, advertiser.state.value)
+        Assert.assertEquals(1, gattServerManager.openCalls)
     }
 
     @Test
@@ -84,7 +95,7 @@ class AndroidMdocSessionManagerTest {
     }
 
     @Test
-    fun `stop calls advertiser stop and resets session state`() = runTest {
+    fun `stop calls advertiser stop and sets session state to stopped`() = runTest {
         val advertiser = FakeBleAdvertiser(initialState = AdvertiserState.Started)
         val sessionManager = AndroidMdocSessionManager(
             bleAdvertiser = advertiser,
@@ -99,6 +110,102 @@ class AndroidMdocSessionManagerTest {
 
             Assert.assertEquals(1, advertiser.stopCalls)
             Assert.assertEquals(MdocSessionState.Stopped, awaitItem())
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `gatt Connected event triggers mdoc session Connected`() = runTest {
+        sessionManager.state.test {
+            Assert.assertEquals(MdocSessionState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
+            Assert.assertEquals(
+                MdocSessionState.Connected(DEVICE_ADDRESS),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `gatt Disconnected event riggers mdoc session Disconnected`() = runTest {
+        sessionManager.state.test {
+            Assert.assertEquals(MdocSessionState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
+            Assert.assertEquals(
+                MdocSessionState.Connected(DEVICE_ADDRESS),
+                awaitItem()
+            )
+
+            gattServerManager.emitEvent(GattServerEvent.Disconnected(DEVICE_ADDRESS))
+            Assert.assertEquals(
+                MdocSessionState.Disconnected(DEVICE_ADDRESS),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `duplicate gatt Connected for same device does not emit duplicate Connected state`() =
+        runTest {
+            sessionManager.state.test {
+                Assert.assertEquals(MdocSessionState.Idle, awaitItem())
+
+                gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
+                Assert.assertEquals(
+                    MdocSessionState.Connected(DEVICE_ADDRESS),
+                    awaitItem()
+                )
+
+                gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
+
+                expectNoEvents()
+            }
+        }
+
+    @Test
+    fun `gatt Disconnected for unknown device does not emit Disconnected state`() = runTest {
+        sessionManager.state.test {
+            Assert.assertEquals(MdocSessionState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(GattServerEvent.Disconnected(DEVICE_ADDRESS))
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `gatt Error event maps to session Error state`() = runTest {
+        sessionManager.state.test {
+            Assert.assertEquals(MdocSessionState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(
+                GattServerEvent.Error(
+                    MdocError.GATT_NOT_AVAILABLE
+                )
+            )
+            Assert.assertEquals(
+                MdocSessionState.Error(MdocError.GATT_NOT_AVAILABLE),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `gatt UnsupportedEvent does not change session state`() = runTest {
+        sessionManager.state.test {
+            Assert.assertEquals(MdocSessionState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(
+                GattServerEvent.UnsupportedEvent(
+                    address = DEVICE_ADDRESS,
+                    status = 999,
+                    newState = 42
+                )
+            )
+
+            expectNoEvents()
         }
     }
 }
