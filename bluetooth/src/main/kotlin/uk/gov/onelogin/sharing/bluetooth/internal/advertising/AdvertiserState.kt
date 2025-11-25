@@ -1,4 +1,7 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.bluetooth.internal.advertising
+
+import uk.gov.onelogin.sharing.bluetooth.api.MdocError
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 
 /**
  * Represents the various states of a Bluetooth Low Energy (BLE) advertiser.
@@ -23,4 +26,15 @@ sealed interface AdvertiserState {
 
     /** The advertiser has stopped. */
     data object Stopped : AdvertiserState
+}
+
+internal fun AdvertiserState.toMdocState(): MdocSessionState = when (this) {
+    AdvertiserState.Idle -> MdocSessionState.Idle
+    AdvertiserState.Starting -> MdocSessionState.Starting
+    AdvertiserState.Started -> MdocSessionState.Started
+    is AdvertiserState.Failed ->
+        MdocSessionState.Error(MdocError.ADVERTISING_FAILED)
+
+    AdvertiserState.Stopped -> MdocSessionState.Stopped
+    AdvertiserState.Stopping -> MdocSessionState.Stopping
 }

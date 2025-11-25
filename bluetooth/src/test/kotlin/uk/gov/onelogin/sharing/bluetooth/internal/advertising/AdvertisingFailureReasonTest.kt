@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 import android.bluetooth.le.AdvertisingSetCallback
 import org.junit.Assert
@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class AdvertisingFailureReasonToStringTest(
+internal class AdvertisingFailureReasonToStringTest(
     private val reason: AdvertisingFailureReason,
     private val expected: String
 ) {
@@ -54,7 +54,7 @@ class AdvertisingFailureReasonToStringTest(
 }
 
 @RunWith(Parameterized::class)
-class AdvertisingFailureReasonMappingTest(
+internal class AdvertisingFailureReasonMappingTest(
     private val androidCode: Int,
     private val expectedReason: AdvertisingFailureReason
 ) {

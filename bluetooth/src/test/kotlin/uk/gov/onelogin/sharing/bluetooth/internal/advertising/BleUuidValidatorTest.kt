@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 import java.util.UUID
 import org.junit.Assert.assertEquals

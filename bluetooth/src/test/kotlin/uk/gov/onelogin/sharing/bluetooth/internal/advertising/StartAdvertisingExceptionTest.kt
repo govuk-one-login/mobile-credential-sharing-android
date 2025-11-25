@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class StartAdvertisingExceptionTest(
+internal class StartAdvertisingExceptionTest(
     private val error: AdvertisingError,
     private val expectedMessage: String
 ) {

@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.util.UUID
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 
@@ -96,7 +96,7 @@ fun HolderWelcomeScreenContent(contentState: HolderWelcomeUiState, modifier: Mod
 private fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
-        advertiserState = AdvertiserState.Started,
+        sessionState = MdocSessionState.Started,
         uuid = UUID.randomUUID(),
         qrData = "QR Data"
     )
