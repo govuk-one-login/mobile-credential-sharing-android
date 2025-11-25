@@ -23,7 +23,7 @@ internal object AndroidGattServiceBuilder {
                     BluetoothGattDescriptor(
                         CLIENT_CHARACTERISTIC_CONFIG_UUID,
                         BluetoothGattDescriptor.PERMISSION_READ
-                                or BluetoothGattDescriptor.PERMISSION_WRITE
+                            or BluetoothGattDescriptor.PERMISSION_WRITE
                     )
                 )
             }

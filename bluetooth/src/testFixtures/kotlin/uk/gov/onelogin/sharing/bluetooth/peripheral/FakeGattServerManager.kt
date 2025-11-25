@@ -5,8 +5,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
 
-class FakeGattServerManager() :
-    GattServerManager {
+class FakeGattServerManager : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>()
     override val events: SharedFlow<GattServerEvent> = _events
 

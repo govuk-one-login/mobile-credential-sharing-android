@@ -1,15 +1,17 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
+import android.Manifest
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import uk.gov.onelogin.sharing.bluetooth.api.MdocError
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.MdocError
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 
@@ -29,6 +31,7 @@ class AndroidGattServerManager(
         handleGattEvent(it)
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open() {
         val server = bluetoothManager.openGattServer(
             context,
@@ -46,6 +49,7 @@ class AndroidGattServerManager(
         gattServer = server
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun close() {
         gattServer?.close()
         gattServer = null
@@ -60,14 +64,12 @@ class AndroidGattServerManager(
 
                 when {
                     event.status == BluetoothGatt.GATT_SUCCESS &&
-                            event.newState == BluetoothProfile.STATE_CONNECTED -> {
-
+                        event.newState == BluetoothProfile.STATE_CONNECTED -> {
                         _events.tryEmit(GattServerEvent.Connected(address))
                     }
 
                     event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
                         _events.tryEmit(GattServerEvent.Disconnected(address))
-
                     }
 
                     else -> {

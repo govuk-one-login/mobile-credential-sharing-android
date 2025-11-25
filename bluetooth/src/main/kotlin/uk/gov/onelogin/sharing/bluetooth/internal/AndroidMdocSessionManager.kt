@@ -7,8 +7,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.sharing.bluetooth.api.MdocError
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.MdocError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
