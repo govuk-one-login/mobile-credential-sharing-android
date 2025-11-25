@@ -76,10 +76,10 @@ class BluetoothPermissionCheckerTest {
 
         every {
             ContextCompat.checkSelfPermission(
-                context,Manifest.permission.BLUETOOTH_CONNECT
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
             )
         } returns PackageManager.PERMISSION_GRANTED
-
 
         val checker = BluetoothPermissionChecker(context)
 

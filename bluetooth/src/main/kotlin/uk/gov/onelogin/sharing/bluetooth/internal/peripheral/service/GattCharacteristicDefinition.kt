@@ -6,5 +6,6 @@ data class GattCharacteristicDefinition(
     val uuid: UUID,
     val properties: Int,
     val permissions: Int,
-    val hasCccd: Boolean = false //Client Characteristic Configuration Descriptor
+    // Client Characteristic Configuration Descriptor
+    val hasCccd: Boolean = false
 )
