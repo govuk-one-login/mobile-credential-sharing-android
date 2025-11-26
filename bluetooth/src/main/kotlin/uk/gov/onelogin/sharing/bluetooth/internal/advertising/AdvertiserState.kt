@@ -30,11 +30,15 @@ sealed interface AdvertiserState {
 
 internal fun AdvertiserState.toMdocState(): MdocSessionState = when (this) {
     AdvertiserState.Idle -> MdocSessionState.Idle
+
     AdvertiserState.Starting -> MdocSessionState.Starting
+
     AdvertiserState.Started -> MdocSessionState.Started
+
     is AdvertiserState.Failed ->
         MdocSessionState.Error(MdocError.ADVERTISING_FAILED)
 
     AdvertiserState.Stopped -> MdocSessionState.Stopped
+
     AdvertiserState.Stopping -> MdocSessionState.Stopping
 }

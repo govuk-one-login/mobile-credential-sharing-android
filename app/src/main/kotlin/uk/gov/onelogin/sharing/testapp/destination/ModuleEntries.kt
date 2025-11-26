@@ -32,14 +32,14 @@ fun ModuleEntries(
             GdsHeading(
                 text = destination.first,
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = {
-                        onNavigate(destination.second) {
-                            launchSingleTop = true
-                        }
-                    })
-                    .padding(smallPadding),
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = {
+                            onNavigate(destination.second) {
+                                launchSingleTop = true
+                            }
+                        })
+                        .padding(smallPadding),
                 textAlign = GdsHeadingAlignment.LeftAligned,
                 style = GdsHeadingStyle.Title3
             )
