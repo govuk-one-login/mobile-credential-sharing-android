@@ -34,9 +34,9 @@ fun CameraRequirePermissionButton(
         GdsButton(
             modifier = Modifier.testTag("permissionRequiredButton"),
             text =
-            stringResource(
-                R.string.verifier_scanner_require_camera_permission
-            ),
+                stringResource(
+                    R.string.verifier_scanner_require_camera_permission
+                ),
             buttonType = ButtonTypeV2.Primary(),
             onClick = {
                 launchPermission()

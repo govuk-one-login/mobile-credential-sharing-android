@@ -34,9 +34,9 @@ fun CameraPermissionRationaleButton(
         GdsButton(
             modifier = Modifier.testTag("permissionRationaleButton"),
             text =
-            stringResource(
-                R.string.verifier_scanner_require_camera_rationale
-            ),
+                stringResource(
+                    R.string.verifier_scanner_require_camera_rationale
+                ),
             buttonType = ButtonTypeV2.Secondary(),
             onClick = {
                 launchPermission()
