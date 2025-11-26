@@ -15,11 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiserFactory
-import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionFactory
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
 import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_ALGORITHM
 import uk.gov.onelogin.sharing.holder.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
@@ -31,7 +29,7 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
-    private val bleAdvertiser: BleAdvertiser,
+    private val mdocBleSession: MdocSessionManager,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     companion object {
@@ -52,12 +50,12 @@ class HolderWelcomeViewModel(
                             "Unknown ViewModel class $modelClass"
                         }
 
-                        val bleAdvertiser = BleAdvertiserFactory.create(context)
+                        val mdocBleSession = MdocSessionFactory.create(context)
 
                         return HolderWelcomeViewModel(
                             sessionSecurity = SessionSecurityImpl(),
                             engagementGenerator = EngagementGenerator(),
-                            bleAdvertiser = bleAdvertiser
+                            mdocBleSession = mdocBleSession
                         ) as T
                     }
                 }
@@ -84,10 +82,10 @@ class HolderWelcomeViewModel(
         }
 
         viewModelScope.launch {
-            bleAdvertiser.state.collect { state ->
+            mdocBleSession.state.collect { state ->
                 println("Advertiser state: $state")
-                _uiState.update { it.copy(advertiserState = state) }
-                if (state == AdvertiserState.Started) {
+                _uiState.update { it.copy(sessionState = state) }
+                if (state == MdocSessionState.Started) {
                     println("Advertising UUID: ${_uiState.value.uuid}")
                 }
             }
@@ -97,18 +95,13 @@ class HolderWelcomeViewModel(
     fun startAdvertising() {
         val uuid = _uiState.value.uuid
         viewModelScope.launch {
-            try {
-                bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid = uuid))
-            } catch (e: StartAdvertisingException) {
-                println("Error starting advertising: ${e.error}")
-                _uiState.update { it.copy(lastErrorMessage = e.message) }
-            }
+            mdocBleSession.start(uuid)
         }
     }
 
     fun stopAdvertising() {
         viewModelScope.launch {
-            bleAdvertiser.stopAdvertise()
+            mdocBleSession.stop()
         }
     }
 }
@@ -116,6 +109,6 @@ class HolderWelcomeViewModel(
 data class HolderWelcomeUiState(
     val uuid: UUID = UUID.randomUUID(),
     val qrData: String? = null,
-    val advertiserState: AdvertiserState = AdvertiserState.Idle,
+    val sessionState: MdocSessionState = MdocSessionState.Idle,
     val lastErrorMessage: String? = null
 )
