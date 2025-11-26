@@ -41,7 +41,6 @@ class HolderWelcomeScreenRule(
         )
     )
 
-    private lateinit var content: () -> Unit
     private val fakeMdocSession = FakeMdocSessionManager()
     val dummyPublicKey = SessionSecurityTestStub.generateValidKeyPair()
     private val fakeSessionSecurity = FakeSessionSecurity(
@@ -55,7 +54,7 @@ class HolderWelcomeScreenRule(
         HolderWelcomeViewModel(
             sessionSecurity = fakeSessionSecurity,
             engagementGenerator = fakeEngagementGenerator,
-            mdocBleSession = fakeMdocSession,
+            mdocSessionManagerFactory = { fakeMdocSession },
             dispatcher = Dispatchers.Main
         )
     }

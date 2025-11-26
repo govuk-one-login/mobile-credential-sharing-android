@@ -14,8 +14,8 @@ internal object GattServiceSpec {
             GattCharacteristicDefinition(
                 uuid = STATE_UUID,
                 properties =
-                BluetoothGattCharacteristic.PROPERTY_NOTIFY or
-                    BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
+                    BluetoothGattCharacteristic.PROPERTY_NOTIFY or
+                        BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
                 permissions = BluetoothGattCharacteristic.PERMISSION_WRITE,
                 hasCccd = true
             ),

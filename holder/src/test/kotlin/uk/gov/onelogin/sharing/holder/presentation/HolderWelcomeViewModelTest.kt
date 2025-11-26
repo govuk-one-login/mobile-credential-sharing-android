@@ -32,7 +32,7 @@ class HolderWelcomeViewModelTest {
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
-        mdocBleSession = mdocSessionManager,
+        mdocSessionManagerFactory = { mdocSessionManager },
         dispatcher = mainDispatcherRule.testDispatcher
     )
 
