@@ -20,7 +20,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
 internal class AndroidMdocSessionManager(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
-    coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    coroutineScope: CoroutineScope
 ) : MdocSessionManager {
     private val _state = MutableStateFlow<MdocSessionState>(MdocSessionState.Idle)
     override val state: StateFlow<MdocSessionState> = _state
@@ -53,7 +53,7 @@ internal class AndroidMdocSessionManager(
 
     override suspend fun stop() {
         bleAdvertiser.stopAdvertise()
-        _state.value = MdocSessionState.AdvertisingStopped
+        gattServerManager.close()
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {

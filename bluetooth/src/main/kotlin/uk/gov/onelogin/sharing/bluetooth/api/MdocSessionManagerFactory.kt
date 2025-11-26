@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api
 
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.AndroidMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
@@ -16,17 +17,15 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerMa
  * Encapsulates the creation and dependency wiring of the components
  * required for the BLE advertiser and GATT server.
  */
-object MdocSessionFactory {
+class MdocSessionManagerFactory(private val context: Context) : SessionManagerFactory {
     /**
-     *
      * Constructs and configures all the necessary dependencies for a
      * [AndroidMdocSessionManager].
      *
-     * @param context The Android [Context] used to access system services like the
-     * [BluetoothManager].
+     * @param scope The [CoroutineScope] in which the session manager will be launched in.
      * @return A fully configured [MdocSessionManager] instance.
      */
-    fun create(context: Context): MdocSessionManager {
+    override fun create(scope: CoroutineScope): MdocSessionManager {
         val adapterProvider = AndroidBluetoothAdapterProvider(context)
         val bleAdvertiser = AndroidBleAdvertiser(
             bleProvider = AndroidBleProvider(
@@ -39,9 +38,11 @@ object MdocSessionFactory {
             context = context,
             bluetoothManager = context.getSystemService(BluetoothManager::class.java)
         )
+
         return AndroidMdocSessionManager(
-            bleAdvertiser,
-            gattServerManager
+            bleAdvertiser = bleAdvertiser,
+            gattServerManager = gattServerManager,
+            coroutineScope = scope
         )
     }
 }
