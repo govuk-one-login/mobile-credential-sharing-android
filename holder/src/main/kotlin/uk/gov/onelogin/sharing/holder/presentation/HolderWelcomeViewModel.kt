@@ -83,9 +83,9 @@ class HolderWelcomeViewModel(
 
         viewModelScope.launch {
             mdocBleSession.state.collect { state ->
-                println("Advertiser state: $state")
+                println("Mdoc BLE state: $state")
                 _uiState.update { it.copy(sessionState = state) }
-                if (state == MdocSessionState.Advertising) {
+                if (state == MdocSessionState.AdvertisingStarted) {
                     println("Advertising UUID: ${_uiState.value.uuid}")
                 }
             }
