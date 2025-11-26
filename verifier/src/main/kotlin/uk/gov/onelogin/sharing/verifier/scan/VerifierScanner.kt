@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.verifier.scan
 
 import android.Manifest
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -13,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
+import uk.gov.android.ui.componentsv2.camera.CameraContentViewModel
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.verifier.scan.callbacks.VerifierScannerBarcodeScanCallback
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
@@ -47,22 +49,44 @@ fun VerifierScanner(
     )
 
     val uri: BarcodeDataResult by viewModel.barcodeDataResult.collectAsStateWithLifecycle()
+    val isNavigationAllowed: Boolean by
+        viewModel.isNavigationAllowed.collectAsStateWithLifecycle()
     val latestOnInvalidBarcode by rememberUpdatedState(onInvalidBarcode)
     val latestOnValidBarcode by rememberUpdatedState(onValidBarcode)
 
     LaunchedEffect(uri) {
         when (uri) {
-            is BarcodeDataResult.Valid -> latestOnValidBarcode(
-                (uri as BarcodeDataResult.Valid).data
-            )
-            is BarcodeDataResult.Invalid -> latestOnInvalidBarcode(
-                (uri as BarcodeDataResult.Invalid).data
-            )
+            is BarcodeDataResult.Valid -> {
+                if (isNavigationAllowed) {
+                    viewModel.stopNavigation().also {
+                        latestOnValidBarcode(
+                            (uri as BarcodeDataResult.Valid).data
+                        )
+                    }
+                }
+            }
+
+            is BarcodeDataResult.Invalid -> {
+                if (isNavigationAllowed) {
+                    viewModel.stopNavigation().also {
+                        latestOnInvalidBarcode(
+                            (uri as BarcodeDataResult.Invalid).data
+                        )
+                    }
+                }
+            }
+
             else -> {
                 // do nothing as there's no barcode Uri to launch
             }
         }
 
         viewModel.resetBarcodeData()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.allowNavigation()
+        }
     }
 }

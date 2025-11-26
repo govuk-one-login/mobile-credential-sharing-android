@@ -34,8 +34,8 @@ object VerifierScanRoute {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 VerifierScanner(
-                    onInvalidBarcode = onValidBarcode,
-                    onValidBarcode = onInvalidBarcode
+                    onInvalidBarcode = onInvalidBarcode,
+                    onValidBarcode = onValidBarcode
                 )
             }
         }

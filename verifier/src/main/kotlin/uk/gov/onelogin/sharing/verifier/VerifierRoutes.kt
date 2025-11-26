@@ -38,10 +38,18 @@ data object VerifierRoutes {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
             configureVerifierScannerRoute(
                 onInvalidBarcode = { invalidBarcodeUri ->
-                    onNavigate(ScannedInvalidQrRoute(data = invalidBarcodeUri)) {}
+                    onNavigate(ScannedInvalidQrRoute(data = invalidBarcodeUri)) {
+                        popUpTo<VerifierScanRoute> {
+                            inclusive = false
+                        }
+                    }
                 },
                 onValidBarcode = { validBarcodeUri ->
-                    onNavigate(ConnectWithHolderDeviceRoute(validBarcodeUri)) {}
+                    onNavigate(ConnectWithHolderDeviceRoute(validBarcodeUri)) {
+                        popUpTo<VerifierScanRoute> {
+                            inclusive = false
+                        }
+                    }
                 }
             )
             scannedInvalidQrErrorRoute(
