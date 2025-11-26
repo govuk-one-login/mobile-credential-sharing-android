@@ -10,14 +10,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
@@ -29,14 +29,14 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
-    private val mdocBleSession: MdocSessionManager,
+    private val mdocSessionManagerFactory: SessionManagerFactory,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     companion object {
         // This can be removed when DI is added
         @Composable
         fun holderWelcomeViewModel(): HolderWelcomeViewModel {
-            val context = LocalContext.current
+            val appContext = LocalContext.current.applicationContext
 
             val factory = remember {
                 object : ViewModelProvider.Factory {
@@ -50,12 +50,12 @@ class HolderWelcomeViewModel(
                             "Unknown ViewModel class $modelClass"
                         }
 
-                        val mdocBleSession = MdocSessionFactory.create(context)
+                        val mdocFactory = MdocSessionManagerFactory(appContext)
 
                         return HolderWelcomeViewModel(
                             sessionSecurity = SessionSecurityImpl(),
                             engagementGenerator = EngagementGenerator(),
-                            mdocBleSession = mdocBleSession
+                            mdocSessionManagerFactory = mdocFactory
                         ) as T
                     }
                 }
@@ -67,8 +67,9 @@ class HolderWelcomeViewModel(
 
     private val initialState = HolderWelcomeUiState()
     private val _uiState = MutableStateFlow(initialState)
+    private val mdocBleSession: MdocSessionManager =
+        mdocSessionManagerFactory.create(viewModelScope)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
     init {
@@ -83,10 +84,10 @@ class HolderWelcomeViewModel(
 
         viewModelScope.launch {
             mdocBleSession.state.collect { state ->
-                println("Mdoc BLE state: $state")
+                println("Mdoc - BLE state: $state")
                 _uiState.update { it.copy(sessionState = state) }
                 if (state == MdocSessionState.AdvertisingStarted) {
-                    println("Advertising UUID: ${_uiState.value.uuid}")
+                    println("Mdoc - Advertising UUID: ${_uiState.value.uuid}")
                 }
             }
         }
