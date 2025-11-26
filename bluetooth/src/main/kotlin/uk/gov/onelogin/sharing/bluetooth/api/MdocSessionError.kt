@@ -1,9 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api
 
-enum class MdocError {
+enum class MdocSessionError {
     ADVERTISING_FAILED,
-
-    CONNECTION_FAILED,
 
     GATT_NOT_AVAILABLE
 }

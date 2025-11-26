@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattServerCallback
+import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
@@ -18,9 +19,11 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.MdocError
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
+
+private const val DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF"
 
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
@@ -68,7 +71,7 @@ class AndroidGattServerManagerTest {
             val event = awaitItem()
             assert(event is GattServerEvent.Error)
             assertEquals(
-                GattServerEvent.Error(MdocError.GATT_NOT_AVAILABLE),
+                GattServerEvent.Error(MdocSessionError.GATT_NOT_AVAILABLE),
                 event
             )
 
@@ -100,7 +103,7 @@ class AndroidGattServerManagerTest {
         manager.open()
 
         val device = mockk<BluetoothDevice>()
-        every { device.address } returns "AA:BB:CC:DD:EE:FF"
+        every { device.address } returns DEVICE_ADDRESS
 
         manager.events.test {
             callbackSlot.captured.onConnectionStateChange(
@@ -110,7 +113,7 @@ class AndroidGattServerManagerTest {
             )
 
             assertEquals(
-                GattServerEvent.Connected("AA:BB:CC:DD:EE:FF"),
+                GattServerEvent.Connected(DEVICE_ADDRESS),
                 awaitItem()
             )
 
@@ -128,7 +131,7 @@ class AndroidGattServerManagerTest {
         manager.open()
 
         val device = mockk<BluetoothDevice>()
-        every { device.address } returns "AA:BB:CC:DD:EE:FF"
+        every { device.address } returns DEVICE_ADDRESS
 
         manager.events.test {
             callbackSlot.captured.onConnectionStateChange(
@@ -138,7 +141,7 @@ class AndroidGattServerManagerTest {
             )
 
             assertEquals(
-                GattServerEvent.Connected("AA:BB:CC:DD:EE:FF"),
+                GattServerEvent.Connected(DEVICE_ADDRESS),
                 awaitItem()
             )
 
@@ -150,7 +153,35 @@ class AndroidGattServerManagerTest {
             )
 
             assertEquals(
-                GattServerEvent.Disconnected("AA:BB:CC:DD:EE:FF"),
+                GattServerEvent.Disconnected(DEVICE_ADDRESS),
+                awaitItem()
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `emits Service added event`() = runTest {
+        val callbackSlot = slot<BluetoothGattServerCallback>()
+        every {
+            bluetoothManager.openGattServer(context, capture(callbackSlot))
+        } returns gattServer
+        val service = mockk<BluetoothGattService>()
+
+        manager.open()
+
+        manager.events.test {
+            callbackSlot.captured.onServiceAdded(
+                BluetoothGatt.GATT_SUCCESS,
+                service
+            )
+
+            assertEquals(
+                GattServerEvent.ServiceAdded(
+                    status = BluetoothGatt.GATT_SUCCESS,
+                    service = service
+                ),
                 awaitItem()
             )
 
@@ -168,7 +199,7 @@ class AndroidGattServerManagerTest {
         manager.open()
 
         val device = mockk<BluetoothDevice>()
-        every { device.address } returns "AA:BB:CC:DD:EE:FF"
+        every { device.address } returns DEVICE_ADDRESS
 
         manager.events.test {
             callbackSlot.captured.onConnectionStateChange(
@@ -179,7 +210,7 @@ class AndroidGattServerManagerTest {
 
             assertEquals(
                 GattServerEvent.UnsupportedEvent(
-                    address = "AA:BB:CC:DD:EE:FF",
+                    address = DEVICE_ADDRESS,
                     status = BluetoothGatt.GATT_FAILURE,
                     newState = BluetoothProfile.STATE_CONNECTED
                 ),

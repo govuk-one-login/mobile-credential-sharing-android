@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.MdocError
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
@@ -45,7 +45,7 @@ internal class AndroidMdocSessionManager(
             bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid))
         } catch (e: StartAdvertisingException) {
             println("Error starting advertising: ${e.error}")
-            _state.value = MdocSessionState.Error(MdocError.ADVERTISING_FAILED)
+            _state.value = MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED)
         }
 
         gattServerManager.open()
@@ -53,19 +53,19 @@ internal class AndroidMdocSessionManager(
 
     override suspend fun stop() {
         bleAdvertiser.stopAdvertise()
-        _state.value = MdocSessionState.Stopped
+        _state.value = MdocSessionState.AdvertisingStopped
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {
         when (state) {
             AdvertiserState.Started ->
-                _state.value = MdocSessionState.Advertising
+                _state.value = MdocSessionState.AdvertisingStarted
 
             AdvertiserState.Stopped ->
-                _state.value = MdocSessionState.Stopped
+                _state.value = MdocSessionState.AdvertisingStopped
 
             is AdvertiserState.Failed ->
-                _state.value = MdocSessionState.Error(MdocError.ADVERTISING_FAILED)
+                _state.value = MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED)
 
             AdvertiserState.Idle ->
                 _state.value = MdocSessionState.Idle
@@ -90,6 +90,10 @@ internal class AndroidMdocSessionManager(
 
             is GattServerEvent.Error ->
                 _state.value = MdocSessionState.Error(event.error)
+
+            is GattServerEvent.ServiceAdded -> {
+                _state.value = MdocSessionState.ServiceAdded(event.service?.uuid)
+            }
 
             is GattServerEvent.UnsupportedEvent ->
                 println("Unsupported event - status: ${event.status} new state: ${event.newState}")

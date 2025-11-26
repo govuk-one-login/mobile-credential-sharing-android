@@ -1,17 +1,20 @@
 package uk.gov.onelogin.sharing.bluetooth.internal
 
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattService
 import app.cash.turbine.test
+import io.mockk.every
+import io.mockk.mockk
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.MdocError
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
@@ -48,14 +51,14 @@ class AndroidMdocSessionManagerTest {
             Assert.assertEquals(MdocSessionState.Idle, awaitItem())
 
             advertiser.emitState(AdvertiserState.Started)
-            Assert.assertEquals(MdocSessionState.Advertising, awaitItem())
+            Assert.assertEquals(MdocSessionState.AdvertisingStarted, awaitItem())
 
             advertiser.emitState(AdvertiserState.Stopped)
-            Assert.assertEquals(MdocSessionState.Stopped, awaitItem())
+            Assert.assertEquals(MdocSessionState.AdvertisingStopped, awaitItem())
 
             advertiser.emitState(AdvertiserState.Failed("error"))
             Assert.assertEquals(
-                MdocSessionState.Error(MdocError.ADVERTISING_FAILED),
+                MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED),
                 awaitItem()
             )
         }
@@ -88,7 +91,7 @@ class AndroidMdocSessionManagerTest {
 
             sessionManager.start(uuid)
             Assert.assertEquals(
-                MdocSessionState.Error(MdocError.ADVERTISING_FAILED),
+                MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED),
                 awaitItem()
             )
         }
@@ -104,12 +107,12 @@ class AndroidMdocSessionManagerTest {
         )
 
         sessionManager.state.test {
-            Assert.assertEquals(MdocSessionState.Advertising, awaitItem())
+            Assert.assertEquals(MdocSessionState.AdvertisingStarted, awaitItem())
 
             sessionManager.stop()
 
             Assert.assertEquals(1, advertiser.stopCalls)
-            Assert.assertEquals(MdocSessionState.Stopped, awaitItem())
+            Assert.assertEquals(MdocSessionState.AdvertisingStopped, awaitItem())
         }
     }
 
@@ -122,6 +125,28 @@ class AndroidMdocSessionManagerTest {
             gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
             Assert.assertEquals(
                 MdocSessionState.Connected(DEVICE_ADDRESS),
+                awaitItem()
+            )
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `gatt service added event triggers mdoc session service added`() = runTest {
+        val service = mockk<BluetoothGattService>()
+        every { service.uuid } returns uuid
+
+        sessionManager.state.test {
+            Assert.assertEquals(MdocSessionState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(
+                GattServerEvent.ServiceAdded(
+                    BluetoothGatt.GATT_SUCCESS,
+                    service
+                )
+            )
+            Assert.assertEquals(
+                MdocSessionState.ServiceAdded(service.uuid),
                 awaitItem()
             )
         }
@@ -182,11 +207,11 @@ class AndroidMdocSessionManagerTest {
 
             gattServerManager.emitEvent(
                 GattServerEvent.Error(
-                    MdocError.GATT_NOT_AVAILABLE
+                    MdocSessionError.GATT_NOT_AVAILABLE
                 )
             )
             Assert.assertEquals(
-                MdocSessionState.Error(MdocError.GATT_NOT_AVAILABLE),
+                MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE),
                 awaitItem()
             )
         }
