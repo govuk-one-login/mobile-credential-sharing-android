@@ -18,9 +18,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.holder.EngagementGeneratorStub.Companion.BASE64_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
@@ -46,13 +45,13 @@ class HolderWelcomeScreenTest {
     private val dummyEngagementData = "ENGAGEMENT_DATA"
 
     private fun createViewModel(
-        bleAdvertiser: BleAdvertiser = FakeBleAdvertiser(),
+        mdocBleSession: FakeMdocSessionManager = FakeMdocSessionManager(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
         sessionSecurity: SessionSecurity = FakeSessionSecurity(publicKey = null)
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
-        bleAdvertiser = bleAdvertiser,
+        mdocBleSession = mdocBleSession,
         dispatcher = mainDispatcherRule.testDispatcher
     )
 
@@ -94,7 +93,7 @@ class HolderWelcomeScreenTest {
             )
         }
 
-        assertEquals(AdvertiserState.Started, viewModel.uiState.value.advertiserState)
+        assertEquals(MdocSessionState.Started, viewModel.uiState.value.sessionState)
     }
 
     @Test
@@ -130,7 +129,7 @@ class HolderWelcomeScreenTest {
 
         composeTestRule.waitForIdle()
 
-        assertEquals(AdvertiserState.Stopped, viewModel.uiState.value.advertiserState)
+        assertEquals(MdocSessionState.Stopped, viewModel.uiState.value.sessionState)
     }
 
     @Test
