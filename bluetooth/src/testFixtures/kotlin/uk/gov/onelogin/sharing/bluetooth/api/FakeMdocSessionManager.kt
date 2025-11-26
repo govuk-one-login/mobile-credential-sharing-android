@@ -16,12 +16,12 @@ class FakeMdocSessionManager(initialState: MdocSessionState = MdocSessionState.I
     override suspend fun start(serviceUuid: UUID) {
         startCalls++
         lastUuid = serviceUuid
-        _state.value = MdocSessionState.Advertising
+        _state.value = MdocSessionState.AdvertisingStarted
     }
 
     override suspend fun stop() {
         stopCalls++
-        _state.value = MdocSessionState.Stopped
+        _state.value = MdocSessionState.AdvertisingStopped
     }
 
     fun emitState(state: MdocSessionState) {
