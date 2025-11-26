@@ -4,15 +4,18 @@ package uk.gov.onelogin.sharing.holder.presentation
 
 import android.Manifest
 import android.os.Build
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,7 +27,8 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
-import java.util.UUID
+import uk.gov.onelogin.sharing.bluetooth.BluetoothDialog
+import uk.gov.onelogin.sharing.bluetooth.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
@@ -32,6 +36,7 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
+import java.util.UUID
 
 private const val QR_SIZE = 800
 
@@ -56,52 +61,62 @@ fun HolderWelcomeScreen(
         hasPreviouslyRequestedPermission = true
     }
 
-    HolderWelcomeScreenContent(
-        contentState,
+    BluetoothPermissionPrompt(
         multiplePermissionsState,
         hasPreviouslyRequestedPermission,
-        Modifier,
         onGrantedPermissions = {
-            DisposableEffect(Unit) {
-                viewModel.startAdvertising()
-                onDispose {
-                    viewModel.stopAdvertising()
-                }
-            }
+            viewModel.updateBluetoothPermissions(true)
         }
     )
+
+    if (multiplePermissionsState.allPermissionsGranted) {
+        BluetoothDialog() {
+            when (it) {
+                BluetoothStatus.BLUETOOTH_ON -> viewModel.updateBluetoothState(BluetoothState.Enabled)
+                BluetoothStatus.BLUETOOTH_OFF -> viewModel.updateBluetoothState(BluetoothState.Disabled)
+                BluetoothStatus.INITIALIZING -> viewModel.updateBluetoothState(BluetoothState.Initializing)
+            }
+        }
+
+        HolderScreenContent(contentState)
+    }
+}
+
+@Composable
+private fun HolderScreenContent(contentState: HolderWelcomeUiState) {
+    when (contentState.bluetoothStatus) {
+        BluetoothState.Disabled -> BluetoothDisabledScreen()
+        BluetoothState.Enabled -> QrContent(contentState, Modifier)
+        BluetoothState.Initializing -> Unit
+    }
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
 fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
     !perm.status.isGranted &&
-        !perm.status.shouldShowRationale
+            !perm.status.shouldShowRationale
+}
+
+@Composable
+fun BluetoothDisabledScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Please enable bluetooth to view your QR code")
+    }
 }
 
 @Suppress("LongMethod", "ComposableLambdaParameterNaming")
 @Composable
-fun HolderWelcomeScreenContent(
-    contentState: HolderWelcomeUiState,
+fun BluetoothPermissionPrompt(
     multiplePermissionsState: MultiplePermissionsState,
     hasPreviouslyRequestedPermission: Boolean,
-    modifier: Modifier = Modifier,
     onGrantedPermissions: @Composable () -> Unit
 ) {
     when {
         multiplePermissionsState.allPermissionsGranted -> {
-            HolderWelcomeText()
-            Column(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                contentState.qrData?.let {
-                    QrCodeImage(
-                        data = it,
-                        size = QR_SIZE
-                    )
-                }
-            }
             onGrantedPermissions()
         }
 
@@ -135,6 +150,23 @@ fun HolderWelcomeScreenContent(
 }
 
 @Composable
+fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier) {
+    HolderWelcomeText()
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        contentState.qrData?.let {
+            QrCodeImage(
+                data = it,
+                size = QR_SIZE
+            )
+        }
+    }
+}
+
+@Composable
 @Preview
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
@@ -144,9 +176,8 @@ internal fun HolderWelcomeScreenPreview() {
         qrData = "QR Data"
     )
 
-    HolderWelcomeScreenContent(
-        contentState = contentState,
-        modifier = Modifier,
+    BluetoothPermissionPrompt(
+
         multiplePermissionsState = FakeMultiplePermissionsState(listOf(), {}),
         hasPreviouslyRequestedPermission = false,
         onGrantedPermissions = {}

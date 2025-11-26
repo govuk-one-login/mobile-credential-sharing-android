@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.holder.EngagementGeneratorStub.Companion.BASE64_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenContent
+import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
@@ -59,7 +59,7 @@ class HolderWelcomeScreenTest {
     @Test
     fun `should show QR code content when permissions granted`() {
         composeTestRule.setContent {
-            HolderWelcomeScreenContent(
+            BluetoothPermissionPrompt(
                 contentState = HolderWelcomeUiState(
                     qrData = BASE64_ENCODED_DEVICE_ENGAGEMENT
                 ),
@@ -76,7 +76,7 @@ class HolderWelcomeScreenTest {
     fun `should start bluetooth advertisement once granted permissions`() {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            HolderWelcomeScreenContent(
+            BluetoothPermissionPrompt(
                 contentState = HolderWelcomeUiState(
                     qrData = BASE64_ENCODED_DEVICE_ENGAGEMENT
                 ),
@@ -105,7 +105,7 @@ class HolderWelcomeScreenTest {
 
         composeTestRule.setContent {
             if (showContent) {
-                HolderWelcomeScreenContent(
+                BluetoothPermissionPrompt(
                     contentState = HolderWelcomeUiState(
                         qrData = BASE64_ENCODED_DEVICE_ENGAGEMENT
                     ),

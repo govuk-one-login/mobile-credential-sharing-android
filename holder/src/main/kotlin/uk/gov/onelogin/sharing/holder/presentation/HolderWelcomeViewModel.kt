@@ -32,6 +32,7 @@ class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
     private val bleAdvertiser: BleAdvertiser,
+    private val
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     companion object {
@@ -54,6 +55,7 @@ class HolderWelcomeViewModel(
 
                         val bleAdvertiser = BleAdvertiserFactory.create(context)
 
+
                         return HolderWelcomeViewModel(
                             sessionSecurity = SessionSecurityImpl(),
                             engagementGenerator = EngagementGenerator(),
@@ -74,6 +76,7 @@ class HolderWelcomeViewModel(
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
     init {
+        checkBluetoothStatus()
         viewModelScope.launch(dispatcher) {
             val pubKey = sessionSecurity.generateEcPublicKey(EC_ALGORITHM, EC_PARAMETER_SPEC)
             val key = pubKey?.let { CoseKey.generateCoseKey(it) }
@@ -111,11 +114,37 @@ class HolderWelcomeViewModel(
             bleAdvertiser.stopAdvertise()
         }
     }
+
+    fun updateBluetoothState(state: BluetoothState) {
+        _uiState.update {
+            it.copy(bluetoothStatus = state)
+        }
+    }
+
+    fun updateBluetoothPermissions(state: Boolean) {
+        _uiState.update {
+            it.copy(hasBluetoothPermissions = state)
+        }
+    }
+
+    fun checkBluetoothStatus() {
+        if (bleAdvertiser.isBluetoothEnabled()) {
+            _uiState.update {
+                it.copy(bluetoothStatus = BluetoothState.Enabled)
+            }
+        } else {
+            _uiState.update {
+                it.copy(bluetoothStatus = BluetoothState.Disabled)
+            }
+        }
+    }
 }
 
 data class HolderWelcomeUiState(
     val uuid: UUID = UUID.randomUUID(),
     val qrData: String? = null,
     val advertiserState: AdvertiserState = AdvertiserState.Idle,
-    val lastErrorMessage: String? = null
+    val lastErrorMessage: String? = null,
+    val bluetoothStatus: BluetoothState = BluetoothState.Initializing,
+    val hasBluetoothPermissions: Boolean? = null
 )

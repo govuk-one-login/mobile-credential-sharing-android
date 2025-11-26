@@ -15,7 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenContent
+import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -49,7 +49,7 @@ class HolderWelcomeScreenPermissionsTest {
         )
 
         composeTestRule.setContent {
-            HolderWelcomeScreenContent(
+            BluetoothPermissionPrompt(
                 contentState = HolderWelcomeUiState(),
                 modifier = Modifier,
                 multiplePermissionsState = fakeState,
@@ -81,7 +81,7 @@ class HolderWelcomeScreenPermissionsTest {
         )
 
         composeTestRule.setContent {
-            HolderWelcomeScreenContent(
+            BluetoothPermissionPrompt(
                 contentState = HolderWelcomeUiState(),
                 modifier = Modifier,
                 multiplePermissionsState = fakeState,
@@ -113,7 +113,7 @@ class HolderWelcomeScreenPermissionsTest {
         )
 
         composeTestRule.setContent {
-            HolderWelcomeScreenContent(
+            BluetoothPermissionPrompt(
                 contentState = HolderWelcomeUiState(),
                 modifier = Modifier,
                 multiplePermissionsState = fakeState,
