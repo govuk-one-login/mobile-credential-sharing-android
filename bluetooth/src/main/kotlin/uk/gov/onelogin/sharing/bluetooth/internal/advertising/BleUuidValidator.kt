@@ -1,11 +1,11 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 import java.util.UUID
 
 /**
  * Validates UUIDs used in BLE advertising.
  */
-object BleUuidValidator {
+internal object BleUuidValidator {
 
     /**
      * Returns false if the UUID is not valid valid.

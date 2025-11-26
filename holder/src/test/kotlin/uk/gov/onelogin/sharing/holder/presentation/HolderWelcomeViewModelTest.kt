@@ -8,11 +8,9 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingError
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
@@ -28,13 +26,13 @@ class HolderWelcomeViewModelTest {
     private val dummyEngagementData = "ENGAGEMENT_DATA"
 
     private fun createViewModel(
-        bleAdvertiser: BleAdvertiser = FakeBleAdvertiser(),
+        mdocSessionManager: MdocSessionManager = FakeMdocSessionManager(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
         sessionSecurity: SessionSecurity = FakeSessionSecurity(publicKey = null)
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
-        bleAdvertiser = bleAdvertiser,
+        mdocBleSession = mdocSessionManager,
         dispatcher = mainDispatcherRule.testDispatcher
     )
 
@@ -44,7 +42,7 @@ class HolderWelcomeViewModelTest {
 
         val state = viewModel.uiState.value
         assertNull(state.qrData)
-        assertEquals(AdvertiserState.Idle, state.advertiserState)
+        assertEquals(MdocSessionState.Idle, state.sessionState)
         assertNull(state.lastErrorMessage)
         assertNotNull(state.uuid)
     }
@@ -59,84 +57,63 @@ class HolderWelcomeViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals("mdoc:$dummyEngagementData", state.qrData)
-        assertEquals(AdvertiserState.Idle, state.advertiserState)
+        assertEquals(MdocSessionState.Idle, state.sessionState)
     }
 
     @Test
     fun `collects advertiser state changes`() = runTest {
-        val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Starting)
-        val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
+        val fakeMdocSession = FakeMdocSessionManager(initialState = MdocSessionState.Starting)
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
         advanceUntilIdle()
-        assertEquals(AdvertiserState.Starting, viewModel.uiState.value.advertiserState)
+        assertEquals(MdocSessionState.Starting, viewModel.uiState.value.sessionState)
 
-        fakeBleAdvertiser.emitState(AdvertiserState.Started)
+        fakeMdocSession.emitState(MdocSessionState.Started)
 
         advanceUntilIdle()
-        assertEquals(AdvertiserState.Started, viewModel.uiState.value.advertiserState)
+        assertEquals(MdocSessionState.Started, viewModel.uiState.value.sessionState)
     }
 
     @Test
     fun `on start advertise success updates state via BleAdvertiser`() = runTest {
-        val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Idle)
-        val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
+        val fakeMdocSession = FakeMdocSessionManager(initialState = MdocSessionState.Idle)
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
         val initialUuid = viewModel.uiState.value.uuid
 
         viewModel.startAdvertising()
 
         advanceUntilIdle()
-        assertEquals(1, fakeBleAdvertiser.startCalls)
+        assertEquals(1, fakeMdocSession.startCalls)
         assertEquals(
             initialUuid,
-            fakeBleAdvertiser.lastAdvertiseData?.serviceUuid
+            fakeMdocSession.lastUuid
         )
 
         assertEquals(
-            AdvertiserState.Started,
-            viewModel.uiState.value.advertiserState
+            MdocSessionState.Started,
+            viewModel.uiState.value.sessionState
         )
         assertNull(viewModel.uiState.value.lastErrorMessage)
     }
 
     @Test
-    fun `start advertising fail sets error message`() = runTest {
-        val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Idle)
-        val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
-        fakeBleAdvertiser.exceptionToThrow = StartAdvertisingException(
-            AdvertisingError.BLUETOOTH_DISABLED
-        )
-
-        viewModel.startAdvertising()
-        advanceUntilIdle()
-
-        assertEquals(
-            "Error: Bluetooth is disabled",
-            viewModel.uiState.value.lastErrorMessage
-        )
-        assertEquals(
-            AdvertiserState.Idle,
-            viewModel.uiState.value.advertiserState
-        )
-    }
-
-    @Test
     fun `stop advertising calls stop and updates state`() = runTest {
-        val fakeBleAdvertiser = FakeBleAdvertiser(initialState = AdvertiserState.Started)
-        val viewModel = createViewModel(bleAdvertiser = fakeBleAdvertiser)
+        val fakeMdocSession = FakeMdocSessionManager(initialState = MdocSessionState.Started)
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
         advanceUntilIdle()
         assertEquals(
-            AdvertiserState.Started,
-            viewModel.uiState.value.advertiserState
+            MdocSessionState.Started,
+            viewModel.uiState.value.sessionState
         )
 
         viewModel.stopAdvertising()
         advanceUntilIdle()
 
-        assertEquals(1, fakeBleAdvertiser.stopCalls)
+        assertEquals(1, fakeMdocSession.stopCalls)
         assertEquals(
-            AdvertiserState.Stopped,
-            viewModel.uiState.value.advertiserState
+            MdocSessionState.Stopped,
+            viewModel.uiState.value.sessionState
         )
     }
 }

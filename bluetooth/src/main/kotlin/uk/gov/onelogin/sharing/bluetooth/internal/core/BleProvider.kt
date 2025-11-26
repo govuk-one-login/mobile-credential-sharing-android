@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
 
 /**
  * Provides a contract for interacting with the device's Bluetooth Low

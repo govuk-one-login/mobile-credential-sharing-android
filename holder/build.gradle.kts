@@ -64,6 +64,7 @@ dependencies {
     listOf(
         projects.bluetooth,
         projects.security,
+        testFixtures(projects.bluetooth),
         testFixtures(projects.security)
     ).forEach(::testFixturesImplementation)
 }

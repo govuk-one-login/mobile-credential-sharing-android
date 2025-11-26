@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.Errors
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BluetoothAdvertiserProvider
 
 internal class AndroidBleProvider(
