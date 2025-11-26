@@ -39,9 +39,9 @@ fun PermanentCameraDenial(context: Context, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text =
-            stringResource(
-                R.string.verifier_scanner_camera_permission_permanently_denied
-            ),
+                stringResource(
+                    R.string.verifier_scanner_camera_permission_permanently_denied
+                ),
             textAlign = TextAlign.Companion.Center
         )
 

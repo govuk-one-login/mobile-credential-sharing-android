@@ -101,12 +101,12 @@ class VerifierScannerBarcodeScanCallbackTest {
     @Test
     fun onlyChecksTheFirstBarcode() = performLoggingFlow(
         result =
-        BarcodeScanResult.Success(
-            listOf(
-                invalidBarcodeDataResultOne.data,
-                invalidBarcodeDataResultTwo.data
-            ).asUrlBarcodes()
-        ),
+            BarcodeScanResult.Success(
+                listOf(
+                    invalidBarcodeDataResultOne.data,
+                    invalidBarcodeDataResultTwo.data
+                ).asUrlBarcodes()
+            ),
         expectedMessage = exampleUriOne,
         expectedData = invalidBarcodeDataResultOne
     ).also {
@@ -120,12 +120,12 @@ class VerifierScannerBarcodeScanCallbackTest {
     @Test
     fun scansWithoutUrlsCannotBeFound() = performLoggingFlow(
         result =
-        BarcodeScanResult.Success(
-            listOf(
-                unknown(),
-                unknown()
-            )
-        ),
+            BarcodeScanResult.Success(
+                listOf(
+                    unknown(),
+                    unknown()
+                )
+            ),
         expectedMessage = "No URL found!",
         expectedData = BarcodeDataResult.NotFound
     )
