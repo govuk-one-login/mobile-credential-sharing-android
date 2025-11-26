@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 data class StartAdvertisingException(val error: AdvertisingError) : Exception("Error: $error")
 

@@ -24,14 +24,14 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
-import java.util.UUID
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
+import java.util.UUID
 
 private const val QR_SIZE = 800
 
@@ -75,7 +75,7 @@ fun HolderWelcomeScreen(
 @OptIn(ExperimentalPermissionsApi::class)
 fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
     !perm.status.isGranted &&
-        !perm.status.shouldShowRationale
+            !perm.status.shouldShowRationale
 }
 
 @Suppress("LongMethod", "ComposableLambdaParameterNaming")
@@ -139,7 +139,7 @@ fun HolderWelcomeScreenContent(
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
-        advertiserState = AdvertiserState.Started,
+        sessionState = MdocSessionState.Started,
         uuid = UUID.randomUUID(),
         qrData = "QR Data"
     )

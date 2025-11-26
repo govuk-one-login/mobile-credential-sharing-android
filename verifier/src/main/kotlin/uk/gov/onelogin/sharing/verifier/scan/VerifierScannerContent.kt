@@ -197,9 +197,9 @@ private fun verifierScannerBarcodeAnalysis(
 ) = BarcodeUseCaseProviders.barcodeAnalysis(
     context = context,
     options =
-    BarcodeUseCaseProviders.provideQrScanningOptions(
-        BarcodeUseCaseProviders.provideZoomOptions(getCurrentCamera)
-    ),
+        BarcodeUseCaseProviders.provideQrScanningOptions(
+            BarcodeUseCaseProviders.provideZoomOptions(getCurrentCamera)
+        ),
     callback = callback,
     converter = converter
 )

@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 import android.bluetooth.le.AdvertisingSetCallback
 
@@ -50,7 +50,7 @@ enum class AdvertisingFailureReason {
  *
  * @return The corresponding reason or if the code.
  */
-fun Int.toReason(): AdvertisingFailureReason = when (this) {
+internal fun Int.toReason(): AdvertisingFailureReason = when (this) {
     AdvertisingSetCallback.ADVERTISE_FAILED_ALREADY_STARTED
     -> AdvertisingFailureReason.ALREADY_STARTED
 

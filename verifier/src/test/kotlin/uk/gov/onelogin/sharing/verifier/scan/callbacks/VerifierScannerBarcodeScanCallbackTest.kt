@@ -84,12 +84,12 @@ class VerifierScannerBarcodeScanCallbackTest {
     @Test
     fun successScansPrintTheFirstUrl() = performLoggingFlow(
         result =
-        BarcodeScanResult.Success(
-            listOf(
-                "https://this.is.a.unit.test",
-                "https://this.is.another.test"
-            ).asUrlBarcodes()
-        ),
+            BarcodeScanResult.Success(
+                listOf(
+                    "https://this.is.a.unit.test",
+                    "https://this.is.another.test"
+                ).asUrlBarcodes()
+            ),
         expectedMessage = "https://this.is.a.unit.test"
     ).also {
         assert(
@@ -102,12 +102,12 @@ class VerifierScannerBarcodeScanCallbackTest {
     @Test
     fun successfulScansWithoutUrls() = performLoggingFlow(
         result =
-        BarcodeScanResult.Success(
-            listOf(
-                unknown(),
-                unknown()
-            )
-        ),
+            BarcodeScanResult.Success(
+                listOf(
+                    unknown(),
+                    unknown()
+                )
+            ),
         expectedMessage = "No URL found!"
     )
 

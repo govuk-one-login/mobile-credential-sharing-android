@@ -2,10 +2,10 @@ package uk.gov.onelogin.sharing.bluetooth.ble
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiseData
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.api.StartAdvertisingException
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
 
 class FakeBleAdvertiser(initialState: AdvertiserState = AdvertiserState.Idle) : BleAdvertiser {
     private val _state = MutableStateFlow(initialState)
