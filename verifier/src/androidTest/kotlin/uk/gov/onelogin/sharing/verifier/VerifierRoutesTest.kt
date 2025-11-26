@@ -1,8 +1,10 @@
 package uk.gov.onelogin.sharing.verifier
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
@@ -17,6 +19,7 @@ import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerRule
+import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerViewModel
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScreenRule
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
@@ -37,7 +40,7 @@ class VerifierRoutesTest {
     private lateinit var controller: TestNavHostController
 
     @Test
-    fun verifierRoutesAreConfigured() = runTest {
+    fun verifierScanRouteIsStartingRouteOfNestedNavigationGraph() = runTest {
         composeTestRule.setContent {
             SetupNavHost()
         }
@@ -87,7 +90,7 @@ class VerifierRoutesTest {
             navController = controller,
             startDestination = VerifierRoutes
         ) {
-            configureVerifierRoutes()
+            configureVerifierRoutes(navController = controller)
         }
         postConfiguration()
     }

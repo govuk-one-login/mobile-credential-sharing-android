@@ -1,16 +1,17 @@
 package uk.gov.onelogin.sharing.verifier
 
 import androidx.annotation.Keep
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
-import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
-import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.scannedInvalidQrErrorRoute
+import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanRoute
+import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
+import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
 
 /**
  * Serializable data object that acts as a navigation route for the Wallet sharing verifier module.
@@ -30,36 +31,20 @@ data object VerifierRoutes {
      *   for a visualisation aid.
      *
      * @see configureVerifierScannerRoute
-     * @see scannedInvalidQrErrorRoute
+     * @see configureScannedInvalidQrRoute
      */
-    fun NavGraphBuilder.configureVerifierRoutes(
-        onNavigate: (Any, NavOptionsBuilder.() -> Unit) -> Unit = { _, _ -> }
-    ) {
+    fun NavGraphBuilder.configureVerifierRoutes(navController: NavController) {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
             configureVerifierScannerRoute(
-                onInvalidBarcode = { invalidBarcodeUri ->
-                    onNavigate(ScannedInvalidQrRoute(data = invalidBarcodeUri)) {
-                        popUpTo<VerifierScanRoute> {
-                            inclusive = false
-                        }
-                    }
+                onInvalidBarcode = {
+                    navController.navigateToScannedInvalidQrRoute(uri = it)
                 },
-                onValidBarcode = { validBarcodeUri ->
-                    onNavigate(ConnectWithHolderDeviceRoute(validBarcodeUri)) {
-                        popUpTo<VerifierScanRoute> {
-                            inclusive = false
-                        }
-                    }
+                onValidBarcode = {
+                    navController.navigateToConnectWithHolderDeviceRoute(uri = it)
                 }
             )
-            scannedInvalidQrErrorRoute(
-                onTryAgainClick = {
-                    onNavigate(VerifierScanRoute) {
-                        popUpTo<VerifierScanRoute> {
-                            inclusive = true
-                        }
-                    }
-                }
+            configureScannedInvalidQrRoute(
+                onTryAgainClick = { navController.navigateToVerifierScanRoute() }
             )
             configureConnectWithHolderDeviceRoute()
         }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -38,6 +39,12 @@ object VerifierScanRoute {
                     onValidBarcode = onValidBarcode
                 )
             }
+        }
+    }
+
+    fun NavController.navigateToVerifierScanRoute() = navigate(VerifierScanRoute) {
+        popUpTo<VerifierScanRoute> {
+            inclusive = true
         }
     }
 }

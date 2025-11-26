@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 
 /**
  * Serialization object used as a navigation route.
@@ -33,6 +35,14 @@ data class ConnectWithHolderDeviceRoute(val mdocUri: String) {
                     Text("Successfully scanned QR code:")
                     Text(arguments.mdocUri)
                 }
+            }
+        }
+
+        fun NavController.navigateToConnectWithHolderDeviceRoute(uri: String) = navigate(
+            ConnectWithHolderDeviceRoute(uri)
+        ) {
+            popUpTo<VerifierScanRoute> {
+                inclusive = false
             }
         }
     }

@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.scan.errors.invalid
 
 import androidx.annotation.Keep
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -21,13 +22,21 @@ data class ScannedInvalidQrRoute(val data: String) {
          * [NavGraphBuilder] extension function for configuring the [ScannedInvalidQrRoute]
          * navigation target.
          */
-        fun NavGraphBuilder.scannedInvalidQrErrorRoute(onTryAgainClick: () -> Unit = {}) {
+        fun NavGraphBuilder.configureScannedInvalidQrRoute(onTryAgainClick: () -> Unit = {}) {
             composable<ScannedInvalidQrRoute> { navBackStackEntry ->
                 val arguments: ScannedInvalidQrRoute = navBackStackEntry.toRoute()
                 ScannedInvalidQrScreen(
                     inputUri = arguments.data,
                     onTryAgainClick = onTryAgainClick
                 )
+            }
+        }
+
+        fun NavController.navigateToScannedInvalidQrRoute(uri: String) = navigate(
+            ScannedInvalidQrRoute(data = uri)
+        ) {
+            popUpTo<VerifierScanRoute> {
+                inclusive = false
             }
         }
     }
