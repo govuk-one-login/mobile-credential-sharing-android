@@ -56,7 +56,7 @@ class HolderWelcomeViewModelTest {
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        assertEquals("mdoc:$dummyEngagementData", state.qrData)
+        assertEquals("${Engagement.QR_CODE_SCHEME}$dummyEngagementData", state.qrData)
         assertEquals(MdocSessionState.Idle, state.sessionState)
     }
 

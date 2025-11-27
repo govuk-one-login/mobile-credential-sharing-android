@@ -19,6 +19,7 @@ import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Compa
 import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Companion.urlQrCode
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
+import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.encodedEngagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.validMdocUri
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
@@ -77,7 +78,7 @@ class VerifierScannerBarcodeScanCallbackTest {
     fun mdocUrlsAreValid() {
         performLoggingFlow(
             result = BarcodeScanResult.Single(urlQrCode(validMdocUri)),
-            expectedMessage = validMdocUri,
+            expectedMessage = encodedEngagement,
             expectedData = validBarcodeDataResult
         )
     }

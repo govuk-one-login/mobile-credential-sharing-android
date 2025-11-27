@@ -75,7 +75,7 @@ class QrCodeImageTest {
 
             QrCodeImage(
                 modifier = Modifier.testTag(testTag),
-                data = "mdoc:${mdocUri.qrCodeEngagement(coseKey, uuid)}",
+                data = "${Engagement.QR_CODE_SCHEME}${mdocUri.qrCodeEngagement(coseKey, uuid)}",
                 size = QR_CODE_SIZE
             )
         }

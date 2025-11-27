@@ -77,7 +77,7 @@ class HolderWelcomeViewModel(
             val key = pubKey?.let { CoseKey.generateCoseKey(it) }
             if (key != null) {
                 val engagement = engagementGenerator.qrCodeEngagement(key, _uiState.value.uuid)
-                _uiState.update { it.copy(qrData = "mdoc:$engagement") }
+                _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
             }
         }
 

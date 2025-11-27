@@ -5,6 +5,7 @@ import android.util.Log
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
+import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 
 /**
@@ -40,8 +41,8 @@ class VerifierScannerBarcodeScanCallback(
             is BarcodeScanResult.Single -> result.barcode.url?.url
             else -> null
         }?.let { url ->
-            if (url.startsWith("mdoc:")) {
-                BarcodeDataResult.Valid(url)
+            if (url.startsWith(Engagement.QR_CODE_SCHEME)) {
+                BarcodeDataResult.Valid(url.removePrefix(Engagement.QR_CODE_SCHEME))
             } else {
                 BarcodeDataResult.Invalid(url)
             }
