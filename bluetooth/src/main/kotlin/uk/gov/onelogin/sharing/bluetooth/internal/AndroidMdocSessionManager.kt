@@ -2,8 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.internal
 
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -48,7 +46,7 @@ internal class AndroidMdocSessionManager(
             _state.value = MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED)
         }
 
-        gattServerManager.open()
+        gattServerManager.open(serviceUuid)
     }
 
     override suspend fun stop() {

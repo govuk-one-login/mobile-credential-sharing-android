@@ -22,8 +22,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
-
-private const val DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF"
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
 
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
@@ -37,13 +36,14 @@ class AndroidGattServerManagerTest {
     )
 
     private lateinit var manager: AndroidGattServerManager
+    private val uuid = UUID.randomUUID()
 
     @Before
     fun setup() {
         manager = AndroidGattServerManager(
             context = context,
             bluetoothManager = bluetoothManager,
-            gattService = fakeGattService
+            gattServiceFactory = { fakeGattService }
         )
     }
 
@@ -53,7 +53,7 @@ class AndroidGattServerManagerTest {
             bluetoothManager.openGattServer(context, any())
         } returns gattServer
 
-        manager.open()
+        manager.open(uuid)
 
         verify(exactly = 1) { gattServer.clearServices() }
         verify(exactly = 1) { gattServer.addService(fakeGattService) }
@@ -66,7 +66,7 @@ class AndroidGattServerManagerTest {
         } returns null
 
         manager.events.test {
-            manager.open()
+            manager.open(uuid)
 
             val event = awaitItem()
             assert(event is GattServerEvent.Error)
@@ -85,7 +85,7 @@ class AndroidGattServerManagerTest {
             bluetoothManager.openGattServer(context, any())
         } returns gattServer
 
-        manager.open()
+        manager.open(uuid)
         manager.close()
 
         verify(exactly = 1) { gattServer.clearServices() }
@@ -100,7 +100,7 @@ class AndroidGattServerManagerTest {
             bluetoothManager.openGattServer(context, capture(callbackSlot))
         } returns gattServer
 
-        manager.open()
+        manager.open(uuid)
 
         val device = mockk<BluetoothDevice>()
         every { device.address } returns DEVICE_ADDRESS
@@ -128,7 +128,7 @@ class AndroidGattServerManagerTest {
             bluetoothManager.openGattServer(context, capture(callbackSlot))
         } returns gattServer
 
-        manager.open()
+        manager.open(uuid)
 
         val device = mockk<BluetoothDevice>()
         every { device.address } returns DEVICE_ADDRESS
@@ -169,7 +169,7 @@ class AndroidGattServerManagerTest {
         } returns gattServer
         val service = mockk<BluetoothGattService>()
 
-        manager.open()
+        manager.open(uuid)
 
         manager.events.test {
             callbackSlot.captured.onServiceAdded(
@@ -196,7 +196,7 @@ class AndroidGattServerManagerTest {
             bluetoothManager.openGattServer(context, capture(callbackSlot))
         } returns gattServer
 
-        manager.open()
+        manager.open(uuid)
 
         val device = mockk<BluetoothDevice>()
         every { device.address } returns DEVICE_ADDRESS
