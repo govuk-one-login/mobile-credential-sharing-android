@@ -1,16 +1,21 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service
 
 import android.bluetooth.BluetoothGattCharacteristic
+import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.CLIENT_2_SERVER_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.MDOC_SERVICE_ID
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.STATE_UUID
 
+/**
+ * Mdoc service characteristics for the BLE GATT service as specified in
+ * ISO/IEC 18013-5:2021(E), Section 11.1.3.2 Service definition - Table 5
+ *
+ */
 internal object GattServiceSpec {
-    fun mdocService(): GattServiceDefinition = GattServiceDefinition(
-        uuid = MDOC_SERVICE_ID,
+    fun mdocService(serviceUuid: UUID): GattServiceDefinition = GattServiceDefinition(
+        uuid = serviceUuid,
         characteristics = listOf(
-            // state characteristic (properties: notify, write without response)
+            // state (properties: notify, write without response)
             GattCharacteristicDefinition(
                 uuid = STATE_UUID,
                 properties =
