@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.engagement
+package uk.gov.onelogin.sharing.security.engagement
 
 object EngagementAlgorithms {
     const val EC_ALGORITHM = "EC"

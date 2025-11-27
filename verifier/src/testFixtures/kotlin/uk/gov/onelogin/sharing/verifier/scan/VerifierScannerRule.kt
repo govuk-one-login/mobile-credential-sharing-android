@@ -7,8 +7,6 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -25,9 +23,14 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasFlags
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import org.hamcrest.CoreMatchers.allOf
+import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.verifier.R
 import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertions.hasState
 
+/**
+ * JUnit 4 Rule for encapsulating assertion / performance behaviour for the [VerifierScanner] UI
+ * composable.
+ */
 class VerifierScannerRule(
     composeTestRule: ComposeContentTestRule,
     private val openAppSettingsText: String,
@@ -35,6 +38,9 @@ class VerifierScannerRule(
     private val permissionGrantedText: String
 ) : ComposeContentTestRule by composeTestRule {
 
+    /**
+     * Convenience constructor that extracts [String] values via the provided [resources] parameter.
+     */
     constructor(
         composeTestRule: ComposeContentTestRule,
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
@@ -65,22 +71,12 @@ class VerifierScannerRule(
 
     fun onOpenAppSettingsButton() = onNodeWithText(openAppSettingsText)
         .assertExists()
-        .assert(
-            SemanticsMatcher.expectValue(
-                SemanticsProperties.Role,
-                Role.Button
-            )
-        )
+        .assert(hasRole(Role.Button))
         .assertHasClickAction()
 
     fun onPermissionDeniedButton() = onNodeWithText(permissionDeniedText)
         .assertExists()
-        .assert(
-            SemanticsMatcher.expectValue(
-                SemanticsProperties.Role,
-                Role.Button
-            )
-        )
+        .assert(hasRole(Role.Button))
         .assertHasClickAction()
 
     fun onPermissionGrantedText() = onNodeWithText(permissionGrantedText)
@@ -99,30 +95,50 @@ class VerifierScannerRule(
     fun performPermissionDeniedClick() = onPermissionDeniedButton().performClick()
 
     @OptIn(ExperimentalPermissionsApi::class)
-    fun render(modifier: Modifier = Modifier) {
+    fun render(
+        modifier: Modifier = Modifier,
+        onInvalidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
+    ) {
         setContent {
             VerifierScanner(
-                modifier = modifier
+                modifier = modifier,
+                onInvalidBarcode = onInvalidBarcode,
+                onValidBarcode = onValidBarcode
             )
         }
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
-    fun render(model: VerifierScannerViewModel, modifier: Modifier = Modifier) {
+    fun render(
+        model: VerifierScannerViewModel,
+        modifier: Modifier = Modifier,
+        onInvalidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
+    ) {
         setContent {
             VerifierScanner(
                 modifier = modifier,
-                viewModel = model
+                viewModel = model,
+                onInvalidBarcode = onInvalidBarcode,
+                onValidBarcode = onValidBarcode
             )
         }
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
-    fun render(permissionState: @Composable () -> PermissionState, modifier: Modifier = Modifier) {
+    fun render(
+        permissionState: @Composable () -> PermissionState,
+        modifier: Modifier = Modifier,
+        onInvalidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
+    ) {
         setContent {
             VerifierScanner(
                 modifier = modifier,
-                permissionState = permissionState()
+                permissionState = permissionState(),
+                onInvalidBarcode = onInvalidBarcode,
+                onValidBarcode = onValidBarcode
             )
         }
     }

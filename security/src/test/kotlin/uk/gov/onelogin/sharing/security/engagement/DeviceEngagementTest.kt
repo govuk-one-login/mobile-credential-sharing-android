@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.security.engagment
+package uk.gov.onelogin.sharing.security.engagement
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import java.util.Base64

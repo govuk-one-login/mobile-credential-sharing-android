@@ -1,9 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
 import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.LifecycleOwner
@@ -25,41 +23,42 @@ fun VerifierScanner(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     permissionState: PermissionState = rememberPermissionState(Manifest.permission.CAMERA) {
         viewModel.update(!it)
-    }
+    },
+    onInvalidBarcode: (String) -> Unit = {},
+    onValidBarcode: (String) -> Unit = {}
 ) {
     val hasPreviouslyDeniedPermission: Boolean by viewModel
         .hasPreviouslyDeniedPermission
         .collectAsStateWithLifecycle()
-    val launcher = rememberLauncherForActivityResult(
-        BarcodeAnalysisUrlContract { _, _ ->
-            viewModel.resetBarcodeData()
-        }
-    ) {
-        // do nothing as it's handled within the constructor parameter.
-    }
 
     val barcodeScanResultCallback: BarcodeScanResult.Callback = VerifierScannerBarcodeScanCallback(
-        onUrlFound = viewModel::update
-    )
-
-    VerifierScannerContent(
-        lifecycleOwner = lifecycleOwner,
-        onUpdatePreviouslyDeniedPermission = viewModel::update,
-        hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
-        permissionState = permissionState,
-        modifier = modifier,
-        barcodeScanResultCallback = barcodeScanResultCallback
+        onDataFound = viewModel::update
     )
 
     val uri: BarcodeDataResult by viewModel.barcodeDataResult.collectAsStateWithLifecycle()
 
-    LaunchedEffect(uri) {
-        when (uri) {
-            is BarcodeDataResult.Found -> launcher.launch((uri as BarcodeDataResult.Found).data)
-
-            else -> {
-                // do nothing as there's no barcode Uri to launch
+    when (uri) {
+        is BarcodeDataResult.Valid -> {
+            onValidBarcode((uri as BarcodeDataResult.Valid).data).also {
+                viewModel.resetBarcodeData()
             }
+        }
+
+        is BarcodeDataResult.Invalid -> {
+            onInvalidBarcode((uri as BarcodeDataResult.Invalid).data).also {
+                viewModel.resetBarcodeData()
+            }
+        }
+
+        else -> {
+            VerifierScannerContent(
+                lifecycleOwner = lifecycleOwner,
+                onUpdatePreviouslyDeniedPermission = viewModel::update,
+                hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
+                permissionState = permissionState,
+                modifier = modifier,
+                barcodeScanResultCallback = barcodeScanResultCallback
+            )
         }
     }
 }
