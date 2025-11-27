@@ -28,7 +28,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
 import java.util.UUID
-import uk.gov.onelogin.sharing.bluetooth.BluetoothDialog
+import uk.gov.onelogin.sharing.bluetooth.BluetoothStateManagerPrompt
 import uk.gov.onelogin.sharing.bluetooth.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
@@ -69,7 +69,7 @@ fun HolderWelcomeScreen(
     )
 
     if (multiplePermissionsState.allPermissionsGranted) {
-        BluetoothDialog {
+        BluetoothStateManagerPrompt {
             when (it) {
                 BluetoothStatus.BLUETOOTH_ON -> viewModel.updateBluetoothState(
                     BluetoothState.Enabled

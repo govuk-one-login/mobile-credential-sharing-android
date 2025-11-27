@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,7 +25,6 @@ import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAM
 import uk.gov.onelogin.sharing.security.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
-import java.util.UUID
 
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
