@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
     ticket = "DCMAW-16955",
     description = "Successful handling of scanned QR code"
 )
-data class ConnectWithHolderDeviceRoute(val mdocUri: String) {
+data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
     companion object {
         /**
          * [NavGraphBuilder] extension function for configuring a work-in-progress navigation
@@ -27,7 +27,9 @@ data class ConnectWithHolderDeviceRoute(val mdocUri: String) {
         fun NavGraphBuilder.configureConnectWithHolderDeviceRoute() {
             composable<ConnectWithHolderDeviceRoute> { navBackstackEntry ->
                 val arguments: ConnectWithHolderDeviceRoute = navBackstackEntry.toRoute()
-                ConnectWithHolderDeviceScreen(mdocUri = arguments.mdocUri)
+                ConnectWithHolderDeviceScreen(
+                    base64EncodedEngagement = arguments.base64EncodedEngagement
+                )
             }
         }
 

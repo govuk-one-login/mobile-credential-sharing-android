@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connect_with_holder_heading" translatable="false">@string/successfully_scanned_qr_code_data</string>
+    <string name="connect_with_holder_error_decode" translatable="false">@string/could_not_decode_device_engagement</string>
+</resources>

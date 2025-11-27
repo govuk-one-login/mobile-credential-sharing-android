@@ -1,20 +1,39 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
-fun ConnectWithHolderDeviceScreen(mdocUri: String, modifier: Modifier = Modifier) {
-    Column(
+fun ConnectWithHolderDeviceScreen(base64EncodedEngagement: String, modifier: Modifier = Modifier) {
+    val engagementData = decodeDeviceEngagement(base64EncodedEngagement)
+
+    LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacingDouble)
     ) {
-        Text("Successfully scanned QR code:")
-        Text(mdocUri)
+        item {
+            Text(stringResource(R.string.connect_with_holder_heading))
+        }
+        item {
+            Text(base64EncodedEngagement)
+        }
+
+        if (engagementData == null) {
+            item {
+                Text(stringResource(R.string.connect_with_holder_error_decode))
+            }
+        } else {
+            item {
+                Text(engagementData.toString())
+            }
+        }
     }
 }
