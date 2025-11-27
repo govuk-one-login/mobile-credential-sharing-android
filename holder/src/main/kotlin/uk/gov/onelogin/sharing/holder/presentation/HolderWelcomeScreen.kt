@@ -102,10 +102,12 @@ fun HolderWelcomeScreenContent(
                     )
                 }
             }
+            println("Bluetooth permissions granted")
             onGrantedPermissions()
         }
 
         multiplePermissionsState.shouldShowRationale -> {
+            println("Bluetooth permissions denied")
             PermissionRationaleButton(
                 text = stringResource(R.string.enable_bluetooth_permission),
                 launchPermission = {
@@ -115,6 +117,7 @@ fun HolderWelcomeScreenContent(
         }
 
         hasPreviouslyRequestedPermission && multiplePermissionsState.isPermanentlyDenied() -> {
+            println("Bluetooth permissions permanently denied")
             PermanentPermissionDenialButton(
                 context = LocalContext.current,
                 modifier = Modifier,
