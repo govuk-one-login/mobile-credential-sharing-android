@@ -56,6 +56,7 @@ fun VerifierScanner(
     LaunchedEffect(uri) {
         when (uri) {
             is BarcodeDataResult.Found -> launcher.launch((uri as BarcodeDataResult.Found).data)
+
             else -> {
                 // do nothing as there's no barcode Uri to launch
             }

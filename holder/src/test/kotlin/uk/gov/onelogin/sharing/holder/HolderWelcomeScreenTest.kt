@@ -18,16 +18,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.api.BleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
-import uk.gov.onelogin.sharing.holder.EngagementGeneratorStub.Companion.BASE64_ENCODED_DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.bluetooth.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
 import uk.gov.onelogin.sharing.holder.engagement.Engagement
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
+import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
+import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
+import uk.gov.onelogin.sharing.holder.presentation.QrContent
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
@@ -46,27 +47,26 @@ class HolderWelcomeScreenTest {
     private val dummyEngagementData = "ENGAGEMENT_DATA"
 
     private fun createViewModel(
-        bleAdvertiser: BleAdvertiser = FakeBleAdvertiser(),
+        mdocSessionManager: FakeMdocSessionManager = FakeMdocSessionManager(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
         sessionSecurity: SessionSecurity = FakeSessionSecurity(publicKey = null)
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
-        bleAdvertiser = bleAdvertiser,
+        mdocBleSession = mdocSessionManager,
         dispatcher = mainDispatcherRule.testDispatcher
     )
 
     @Test
     fun `should show QR code content when permissions granted`() {
         composeTestRule.setContent {
-            BluetoothPermissionPrompt(
+            HolderScreenContent(
                 contentState = HolderWelcomeUiState(
-                    qrData = BASE64_ENCODED_DEVICE_ENGAGEMENT
-                ),
-                modifier = Modifier,
-                multiplePermissionsState = fakeGrantedPermissionsState,
-                hasPreviouslyRequestedPermission = true
-            ) {}
+                    qrData = "Fake90109jec",
+                    bluetoothStatus = BluetoothState.Enabled,
+                    hasBluetoothPermissions = true
+                )
+            )
         }
         composeTestRule.assertWelcomeTextIsDisplayed()
         composeTestRule.assertQrCodeIsDisplayed()
@@ -77,10 +77,6 @@ class HolderWelcomeScreenTest {
         val viewModel = createViewModel()
         composeTestRule.setContent {
             BluetoothPermissionPrompt(
-                contentState = HolderWelcomeUiState(
-                    qrData = BASE64_ENCODED_DEVICE_ENGAGEMENT
-                ),
-                modifier = Modifier,
                 multiplePermissionsState = fakeGrantedPermissionsState,
                 hasPreviouslyRequestedPermission = true,
                 onGrantedPermissions = {
@@ -94,7 +90,7 @@ class HolderWelcomeScreenTest {
             )
         }
 
-        assertEquals(AdvertiserState.Started, viewModel.uiState.value.advertiserState)
+        assertEquals(MdocSessionState.Started, viewModel.uiState.value.sessionState)
     }
 
     @Test
@@ -106,10 +102,6 @@ class HolderWelcomeScreenTest {
         composeTestRule.setContent {
             if (showContent) {
                 BluetoothPermissionPrompt(
-                    contentState = HolderWelcomeUiState(
-                        qrData = BASE64_ENCODED_DEVICE_ENGAGEMENT
-                    ),
-                    modifier = Modifier,
                     multiplePermissionsState = fakeGrantedPermissionsState,
                     hasPreviouslyRequestedPermission = true,
                     onGrantedPermissions = {
@@ -130,13 +122,16 @@ class HolderWelcomeScreenTest {
 
         composeTestRule.waitForIdle()
 
-        assertEquals(AdvertiserState.Stopped, viewModel.uiState.value.advertiserState)
+        assertEquals(MdocSessionState.Stopped, viewModel.uiState.value.sessionState)
     }
 
     @Test
     fun previewUsage() = runTest {
         composeTestRule.setContent {
-            HolderWelcomeScreenPreview()
+            QrContent(
+                contentState = HolderWelcomeUiState(qrData = "192301092doi"),
+                modifier = Modifier
+            )
         }
 
         composeTestRule.onNodeWithContentDescription("QR Data")

@@ -50,8 +50,6 @@ class HolderWelcomeScreenPermissionsTest {
 
         composeTestRule.setContent {
             BluetoothPermissionPrompt(
-                contentState = HolderWelcomeUiState(),
-                modifier = Modifier,
                 multiplePermissionsState = fakeState,
                 hasPreviouslyRequestedPermission = false
             ) {}
@@ -82,8 +80,6 @@ class HolderWelcomeScreenPermissionsTest {
 
         composeTestRule.setContent {
             BluetoothPermissionPrompt(
-                contentState = HolderWelcomeUiState(),
-                modifier = Modifier,
                 multiplePermissionsState = fakeState,
                 hasPreviouslyRequestedPermission = true
             ) { }
@@ -114,8 +110,6 @@ class HolderWelcomeScreenPermissionsTest {
 
         composeTestRule.setContent {
             BluetoothPermissionPrompt(
-                contentState = HolderWelcomeUiState(),
-                modifier = Modifier,
                 multiplePermissionsState = fakeState,
                 hasPreviouslyRequestedPermission = true
             ) { }

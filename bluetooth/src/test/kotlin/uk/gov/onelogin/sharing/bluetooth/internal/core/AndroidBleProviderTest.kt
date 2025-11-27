@@ -2,13 +2,13 @@ package uk.gov.onelogin.sharing.bluetooth.internal.core
 
 import org.junit.Assert
 import org.junit.Test
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingFailureReason
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallbackStub
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingFailureReason
+import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingParameters
 
 internal class AndroidBleProviderTest {
     val fakeAdapter = FakeBluetoothAdapterProvider(true)

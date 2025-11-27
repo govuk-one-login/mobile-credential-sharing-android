@@ -27,16 +27,15 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
+import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.BluetoothDialog
 import uk.gov.onelogin.sharing.bluetooth.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
-import java.util.UUID
 
 private const val QR_SIZE = 800
 
@@ -62,19 +61,27 @@ fun HolderWelcomeScreen(
     }
 
     BluetoothPermissionPrompt(
-        multiplePermissionsState,
-        hasPreviouslyRequestedPermission,
+        multiplePermissionsState = multiplePermissionsState,
+        hasPreviouslyRequestedPermission = hasPreviouslyRequestedPermission,
         onGrantedPermissions = {
             viewModel.updateBluetoothPermissions(true)
         }
     )
 
     if (multiplePermissionsState.allPermissionsGranted) {
-        BluetoothDialog() {
+        BluetoothDialog {
             when (it) {
-                BluetoothStatus.BLUETOOTH_ON -> viewModel.updateBluetoothState(BluetoothState.Enabled)
-                BluetoothStatus.BLUETOOTH_OFF -> viewModel.updateBluetoothState(BluetoothState.Disabled)
-                BluetoothStatus.INITIALIZING -> viewModel.updateBluetoothState(BluetoothState.Initializing)
+                BluetoothStatus.BLUETOOTH_ON -> viewModel.updateBluetoothState(
+                    BluetoothState.Enabled
+                )
+
+                BluetoothStatus.BLUETOOTH_OFF -> viewModel.updateBluetoothState(
+                    BluetoothState.Disabled
+                )
+
+                BluetoothStatus.INITIALIZING -> viewModel.updateBluetoothState(
+                    BluetoothState.Initializing
+                )
             }
         }
 
@@ -83,7 +90,7 @@ fun HolderWelcomeScreen(
 }
 
 @Composable
-private fun HolderScreenContent(contentState: HolderWelcomeUiState) {
+fun HolderScreenContent(contentState: HolderWelcomeUiState) {
     when (contentState.bluetoothStatus) {
         BluetoothState.Disabled -> BluetoothDisabledScreen()
         BluetoothState.Enabled -> QrContent(contentState, Modifier)
@@ -94,13 +101,13 @@ private fun HolderScreenContent(contentState: HolderWelcomeUiState) {
 @OptIn(ExperimentalPermissionsApi::class)
 fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
     !perm.status.isGranted &&
-            !perm.status.shouldShowRationale
+        !perm.status.shouldShowRationale
 }
 
 @Composable
-fun BluetoothDisabledScreen() {
+fun BluetoothDisabledScreen(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -113,6 +120,7 @@ fun BluetoothDisabledScreen() {
 fun BluetoothPermissionPrompt(
     multiplePermissionsState: MultiplePermissionsState,
     hasPreviouslyRequestedPermission: Boolean,
+    modifier: Modifier = Modifier,
     onGrantedPermissions: @Composable () -> Unit
 ) {
     when {
@@ -132,7 +140,7 @@ fun BluetoothPermissionPrompt(
         hasPreviouslyRequestedPermission && multiplePermissionsState.isPermanentlyDenied() -> {
             PermanentPermissionDenialButton(
                 context = LocalContext.current,
-                modifier = Modifier,
+                modifier = modifier,
                 titleText = stringResource(R.string.bluetooth_permission_permanently_denied),
                 buttonText = stringResource(R.string.open_app_permissions)
             )
@@ -150,7 +158,7 @@ fun BluetoothPermissionPrompt(
 }
 
 @Composable
-fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier) {
+fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier) {
     HolderWelcomeText()
     Column(
         modifier = modifier
@@ -171,15 +179,10 @@ fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier) {
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
-        advertiserState = AdvertiserState.Started,
+        sessionState = MdocSessionState.Started,
         uuid = UUID.randomUUID(),
         qrData = "QR Data"
     )
 
-    BluetoothPermissionPrompt(
-
-        multiplePermissionsState = FakeMultiplePermissionsState(listOf(), {}),
-        hasPreviouslyRequestedPermission = false,
-        onGrantedPermissions = {}
-    )
+    QrContent(contentState, Modifier)
 }

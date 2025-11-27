@@ -25,7 +25,7 @@ class DeviceRetrievalMethodsDeserializer : JsonDeserializer<List<DeviceRetrieval
                 serverMode = optsNode["0"].booleanValue(),
                 clientMode = optsNode["1"].booleanValue(),
                 peripheralServerModeUuid =
-                if (optsNode.has("10")) optsNode["10"].binaryValue() else null
+                    if (optsNode.has("10")) optsNode["10"].binaryValue() else null
             )
 
             DeviceRetrievalMethodDto(type, version, options)

@@ -12,17 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
-enum class BluetoothStatus {
-    BLUETOOTH_ON,
-    BLUETOOTH_OFF,
-    INITIALIZING
-}
-
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun BluetoothDialog(
-    onStateChange: @Composable (BluetoothStatus) -> Unit
-) {
+fun BluetoothDialog(onStateChange: @Composable (BluetoothStatus) -> Unit) {
     var bluetoothStatus by remember { mutableStateOf(BluetoothStatus.INITIALIZING) }
 
     val resultLauncher = rememberLauncherForActivityResult(
@@ -47,4 +39,10 @@ fun BluetoothDialog(
     }
 
     onStateChange(bluetoothStatus)
+}
+
+enum class BluetoothStatus {
+    BLUETOOTH_ON,
+    BLUETOOTH_OFF,
+    INITIALIZING
 }

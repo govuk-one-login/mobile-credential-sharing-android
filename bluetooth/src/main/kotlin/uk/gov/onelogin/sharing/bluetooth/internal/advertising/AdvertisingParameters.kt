@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
 import android.bluetooth.le.AdvertisingSetParameters
 
@@ -10,7 +10,8 @@ import android.bluetooth.le.AdvertisingSetParameters
  *
  * @param legacyMode Whether to use legacy advertising mode. Defaults to `false`.
  * @param interval The advertising interval. Defaults to [AdvertisingSetParameters.INTERVAL_HIGH].
- * @param txPowerLevel The transmission power level. Defaults to [AdvertisingSetParameters.TX_POWER_MEDIUM].
+ * @param txPowerLevel The transmission power level. Defaults to
+ * [AdvertisingSetParameters.TX_POWER_MEDIUM].
  * @param connectable Whether the advertising is connectable. Defaults to `true`.
  */
 data class AdvertisingParameters(
