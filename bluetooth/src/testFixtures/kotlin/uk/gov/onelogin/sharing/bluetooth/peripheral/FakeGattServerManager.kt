@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.peripheral
 
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
@@ -12,7 +13,7 @@ class FakeGattServerManager : GattServerManager {
     var openCalls = 0
     var closeCalls = 0
 
-    override fun open() {
+    override fun open(serviceUuid: UUID) {
         openCalls++
     }
 

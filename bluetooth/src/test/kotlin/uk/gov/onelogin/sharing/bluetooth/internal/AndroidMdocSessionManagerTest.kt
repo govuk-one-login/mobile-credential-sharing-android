@@ -22,8 +22,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
-
-private const val DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF"
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
 
 class AndroidMdocSessionManagerTest {
 

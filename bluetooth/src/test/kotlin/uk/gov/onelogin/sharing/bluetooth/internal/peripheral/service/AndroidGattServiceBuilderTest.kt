@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
+import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -13,10 +14,12 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidGattServiceBuilderTest {
+    private val serviceUuid = UUID.randomUUID()
+
     @Test
     fun `builds Android GATT service matching spec`() {
         val spec = GattServiceDefinition(
-            uuid = GattUuids.MDOC_SERVICE_ID,
+            uuid = serviceUuid,
             characteristics = listOf(
                 GattCharacteristicDefinition(
                     uuid = GattUuids.STATE_UUID,
@@ -42,7 +45,7 @@ class AndroidGattServiceBuilderTest {
 
         val service: BluetoothGattService = AndroidGattServiceBuilder.build(spec)
 
-        assertEquals(GattUuids.MDOC_SERVICE_ID, service.uuid)
+        assertEquals(serviceUuid, service.uuid)
         assertEquals(BluetoothGattService.SERVICE_TYPE_PRIMARY, service.type)
 
         val characteristics = service.characteristics

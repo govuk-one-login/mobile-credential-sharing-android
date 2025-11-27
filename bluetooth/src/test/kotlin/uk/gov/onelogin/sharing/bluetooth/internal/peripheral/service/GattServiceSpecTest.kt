@@ -19,35 +19,6 @@ class GattServiceSpecTest(
     private val expectedPermissions: Int,
     private val expectedHasCccd: Boolean
 ) {
-    /*companion object {
-        @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        fun data(): Collection<Array<Any>> = listOf(
-            arrayOf(
-                "state characteristic",
-                STATE_UUID,
-                BluetoothGattCharacteristic.PROPERTY_NOTIFY or
-                        BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
-                BluetoothGattCharacteristic.PERMISSION_WRITE,
-                true,
-            ),
-            arrayOf(
-                "client → server characteristic",
-                CLIENT_2_SERVER_UUID,
-                BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
-                BluetoothGattCharacteristic.PERMISSION_WRITE,
-                false,
-            ),
-            arrayOf(
-                "server → client characteristic",
-                SERVER_2_CLIENT_UUID,
-                BluetoothGattCharacteristic.PROPERTY_NOTIFY,
-                BluetoothGattCharacteristic.PERMISSION_WRITE,
-                true,
-            ),
-        )
-    }*/
-
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
@@ -79,7 +50,7 @@ class GattServiceSpecTest(
 
     @Test
     fun `mdoc service characteristic matches ISO spec`() {
-        val spec = GattServiceSpec.mdocService()
+        val spec = GattServiceSpec.mdocService(expectedUuid)
 
         val characteristic = spec.characteristics.firstOrNull { it.uuid == expectedUuid }
         assertNotNull(
@@ -108,7 +79,7 @@ class GattServiceSpecTest(
 
     @Test
     fun `mdoc service exposes all expected characteristics`() {
-        val spec = GattServiceSpec.mdocService()
+        val spec = GattServiceSpec.mdocService(expectedUuid)
         val expectedUuids = setOf(
             STATE_UUID,
             CLIENT_2_SERVER_UUID,

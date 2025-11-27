@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import androidx.annotation.RequiresPermission
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
@@ -16,9 +17,11 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattService
 class AndroidGattServerManager(
     private val context: Context,
     private val bluetoothManager: BluetoothManager,
-    private val gattService: BluetoothGattService = AndroidGattServiceBuilder.build(
-        GattServiceSpec.mdocService()
-    )
+    private val gattServiceFactory: (UUID) -> BluetoothGattService = {
+        AndroidGattServiceBuilder.build(
+            GattServiceSpec.mdocService(it)
+        )
+    }
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
@@ -30,7 +33,9 @@ class AndroidGattServerManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun open() {
+    override fun open(serviceUuid: UUID) {
+        val gattService = gattServiceFactory(serviceUuid)
+
         val server = bluetoothManager.openGattServer(
             context,
             GattServerCallback(eventEmitter)
