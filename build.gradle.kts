@@ -25,12 +25,7 @@ val androidVersionCode: Int by extra {
  * publication.
  */
 val androidVersionName: String by extra {
-    providers.exec {
-        executable(
-            layout.projectDirectory.file("scripts/getCurrentVersionName")
-        )
-    }.standardOutput.asText.map(String::trim)
-        .getOrElse("0.0.1")
+    "0.1.0"
 }
 val javaVersion: JavaVersion by extra(JavaVersion.VERSION_21)
 
