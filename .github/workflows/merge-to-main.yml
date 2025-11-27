@@ -77,10 +77,17 @@ jobs:
         run: |
           ./scripts/test/all
 
+      - name: Calculate version increment
+        id: calc-version
+        uses: ./mobile-android-pipelines/actions/increment-version
+        with:
+          dry-run: true
+
       - name: Sonar scan
         uses: ./mobile-android-pipelines/actions/sonar-scan
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          version-name: ${{ github.ref == 'refs/heads/main' && steps.calc-version.outputs.new_version }}
 
       - name: Increment the release version using Conventional Commits
         id: versioning
