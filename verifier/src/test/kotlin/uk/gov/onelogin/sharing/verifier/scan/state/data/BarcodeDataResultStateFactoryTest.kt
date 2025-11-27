@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAssertions.hasBarcodeData
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAssertions.hasNoBarcodeData
 
@@ -16,7 +17,6 @@ class BarcodeDataResultStateFactoryTest {
 
     private val flow = MutableStateFlow<BarcodeDataResult>(BarcodeDataResult.NotFound)
     private val state: BarcodeDataResultState.Complete = BarcodeDataResultState.Complete.from(flow)
-    private val uri = "https://this.is.a.unit.test".toUri()
 
     @Test
     fun initialState() {
@@ -32,11 +32,11 @@ class BarcodeDataResultStateFactoryTest {
             flow.collect {}
         }
 
-        state.update(uri)
+        state.update(exampleUriOne)
 
         assertThat(
             state,
-            hasBarcodeData(uri)
+            hasBarcodeData(exampleUriOne)
         )
     }
 }

@@ -1,3 +1,5 @@
+import uk.gov.onelogin.sharing.plugins.Filters.licenseFilters
+
 plugins {
     listOf(
         libs.plugins.android.application,
@@ -49,6 +51,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+    packaging {
+        licenseFilters.forEach(resources.excludes::plusAssign)
     }
 }
 

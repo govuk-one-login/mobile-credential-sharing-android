@@ -2,14 +2,13 @@ package uk.gov.onelogin.sharing.holder
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import kotlinx.coroutines.Dispatchers
+import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
@@ -17,6 +16,7 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
+import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 
 class HolderWelcomeScreenRule(composeTestRule: ComposeContentTestRule) :
     ComposeContentTestRule by composeTestRule {
@@ -44,13 +44,7 @@ class HolderWelcomeScreenRule(composeTestRule: ComposeContentTestRule) :
 
     fun assertQrCodeIsDisplayed() = onNodeWithContentDescription(QR_CODE_CONTENT_DESC)
         .assertIsDisplayed()
-        // Replace with GOV.UK UI components V2 test fixture `hasRole` when applicable.
-        .assert(
-            SemanticsMatcher.expectValue(
-                SemanticsProperties.Role,
-                Role.Image
-            )
-        )
+        .assert(hasRole(Role.Image))
 
     fun render(modifier: Modifier = Modifier) {
         setContent {

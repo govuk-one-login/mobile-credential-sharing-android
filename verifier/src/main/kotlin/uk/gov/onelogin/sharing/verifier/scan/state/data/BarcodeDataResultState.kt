@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan.state.data
 
-import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -46,6 +45,6 @@ sealed interface BarcodeDataResultState {
      */
     fun interface Updater {
         fun update(result: BarcodeDataResult)
-        fun update(uri: Uri) = update(BarcodeDataResult.Found(uri))
+        fun update(uri: String) = update(BarcodeDataResult.Valid(uri))
     }
 }

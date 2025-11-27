@@ -8,6 +8,7 @@ androidx-test-ext-junit = "1.3.0" # https://developer.android.com/jetpack/androi
 androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/test#orchestrator-1.6.1
 androidx-test-rules = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#rules-1.7.0
 androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#runner-1.7.0
+com-google-test-parameter-injector = "1.20" # https://github.com/google/TestParameterInjector
 compose-lint-rules = "0.4.28" # https://github.com/mrmans0n/compose-rules/releases/
 composeBom = "2025.11.01" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.17.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
@@ -24,8 +25,8 @@ lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/l
 mockk = "1.14.6" # https://github.com/mockk/mockk/releases
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.52.0" # https://github.com/takahirom/roborazzi/releases
-sonarqube = "7.0.1.6134" # https://github.com/SonarSource/sonar-scanner-gradle/releases
-spotless = "8.0.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
+sonarqube = "7.1.0.6387" # https://github.com/SonarSource/sonar-scanner-gradle/releases
+spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-ui = "11.1.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
@@ -55,6 +56,7 @@ androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 com-android-tools-build-gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 com-google-devtools-ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "kotlin-symbol-processing" }
+com-google-test-parameter-injector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "com-google-test-parameter-injector"}
 compose-rules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "compose-lint-rules" }
 compose-rules-ktlint = { module = "io.nlopez.compose.rules:ktlint", version.ref = "compose-lint-rules" }
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin", version.ref = "detekt" }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Update `DeferredStringsXmlData` enum as well -->
     <string name="verifier_scanner_camera_permission_enabled" translatable="false">@string/camera_permission_is_enabled</string>
     <string name="verifier_scanner_camera_permission_permanently_denied" translatable="false">@string/camera_permission_is_permanently_denied</string>
     <string name="verifier_scanner_require_camera_permission" translatable="false">@string/enable_camera_permission_to_continue</string>

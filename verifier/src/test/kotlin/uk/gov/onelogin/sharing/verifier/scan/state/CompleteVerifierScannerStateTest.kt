@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan.state
 
-import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -8,6 +7,7 @@ import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAssertions.hasBarcodeData
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAssertions.hasNoBarcodeData
 import uk.gov.onelogin.sharing.verifier.scan.state.permission.PreviouslyDeniedPermissionStateAssertions.hasPreviouslyDeniedPermission
@@ -17,7 +17,6 @@ import uk.gov.onelogin.sharing.verifier.scan.state.permission.PreviouslyDeniedPe
 class CompleteVerifierScannerStateTest {
 
     private val state: VerifierScannerState.Complete = CompleteVerifierScannerState()
-    private val uri = "https://this.is.a.unit.test".toUri()
 
     @Test
     fun initialState() {
@@ -36,11 +35,11 @@ class CompleteVerifierScannerStateTest {
             state.barcodeDataResult.collect {}
         }
 
-        state.update(uri)
+        state.update(exampleUriOne)
 
         assertThat(
             state,
-            hasBarcodeData(uri)
+            hasBarcodeData(exampleUriOne)
         )
     }
 

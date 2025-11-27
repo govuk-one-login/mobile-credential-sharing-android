@@ -3,6 +3,11 @@ package uk.gov.onelogin.sharing.verifier.scan.state.permission
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 
+/**
+ * [TypeSafeMatcher] implementation that maps to the latest value of the
+ * [PreviouslyDeniedPermissionState.State.hasPreviouslyDeniedPermission]
+ * [kotlinx.coroutines.flow.StateFlow].
+ */
 internal class HasPreviouslyDeniedPermission(private val expected: Boolean) :
     TypeSafeMatcher<PreviouslyDeniedPermissionState.State>() {
     override fun matchesSafely(item: PreviouslyDeniedPermissionState.State?): Boolean =

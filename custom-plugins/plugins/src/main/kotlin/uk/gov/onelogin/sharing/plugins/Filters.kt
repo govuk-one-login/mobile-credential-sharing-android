@@ -52,6 +52,13 @@ object Filters {
             "**/*\$Result$*.*",
         )
 
+    val licenseFilters = listOf(
+        "AL2.0",
+        "LGPL2.1",
+    ).map {
+        "META-INF/$it"
+    }
+
     val sonar =
         listOf(
             "*.json",

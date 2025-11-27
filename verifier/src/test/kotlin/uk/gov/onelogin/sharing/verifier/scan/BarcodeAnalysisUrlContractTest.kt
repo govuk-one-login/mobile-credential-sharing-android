@@ -9,6 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertions.hasState
 
 @RunWith(AndroidJUnit4::class)
@@ -21,7 +22,7 @@ class BarcodeAnalysisUrlContractTest {
         resultIntent = intent
     }
 
-    private val uri = "https://this.is.a.unit.test".toUri()
+    private val uri = exampleUriOne.toUri()
 
     @Test
     fun createsIntent() {
