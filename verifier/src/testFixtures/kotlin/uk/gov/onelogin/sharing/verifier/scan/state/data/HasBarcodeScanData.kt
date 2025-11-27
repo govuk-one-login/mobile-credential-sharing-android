@@ -4,6 +4,10 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 
+/**
+ * [TypeSafeMatcher] implementation that maps to the latest value of the
+ * [BarcodeDataResultState.State.barcodeDataResult] [kotlinx.coroutines.flow.StateFlow].
+ */
 internal class HasBarcodeScanData(private val matcher: Matcher<BarcodeDataResult>) :
     TypeSafeMatcher<BarcodeDataResultState.State>() {
     override fun matchesSafely(item: BarcodeDataResultState.State?): Boolean =

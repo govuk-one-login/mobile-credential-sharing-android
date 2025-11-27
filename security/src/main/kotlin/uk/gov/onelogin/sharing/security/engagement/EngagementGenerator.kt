@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.engagement
+package uk.gov.onelogin.sharing.security.engagement
 
 import java.util.Base64
 import java.util.UUID
@@ -28,7 +28,7 @@ class EngagementGenerator : Engagement {
             eDeviceKeyBytes = eDeviceKey
         )
 
-        val deviceEngagement = DeviceEngagement.builder(securityObject)
+        val deviceEngagement = DeviceEngagement.Companion.builder(securityObject)
             .version("1.0")
             .ble(peripheralUuid = uuid)
             .build()

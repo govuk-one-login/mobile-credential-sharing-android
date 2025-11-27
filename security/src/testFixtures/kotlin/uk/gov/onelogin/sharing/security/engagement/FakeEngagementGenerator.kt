@@ -1,7 +1,6 @@
-package uk.gov.onelogin.sharing.holder
+package uk.gov.onelogin.sharing.security.engagement
 
 import java.util.UUID
-import uk.gov.onelogin.sharing.holder.engagement.Engagement
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 class FakeEngagementGenerator(private val data: String) : Engagement {

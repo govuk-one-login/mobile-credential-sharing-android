@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAssertions.hasBarcodeData
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAssertions.hasNoBarcodeData
 
@@ -14,7 +15,6 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAs
 class MutableBarcodeDataResultStateTest {
 
     private val state: BarcodeDataResultState.Complete = MutableBarcodeDataResultState()
-    private val uri = "https://this.is.a.unit.test".toUri()
 
     @Test
     fun initialState() {
@@ -30,11 +30,11 @@ class MutableBarcodeDataResultStateTest {
             state.barcodeDataResult.collect {}
         }
 
-        state.update(uri)
+        state.update(exampleUriOne)
 
         assertThat(
             state,
-            hasBarcodeData(uri)
+            hasBarcodeData(exampleUriOne)
         )
     }
 }
