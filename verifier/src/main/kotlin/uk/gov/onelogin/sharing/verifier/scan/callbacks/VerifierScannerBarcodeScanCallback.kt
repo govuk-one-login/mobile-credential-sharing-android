@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.verifier.scan.callbacks
 
 import android.net.Uri
 import android.util.Log
-import androidx.core.net.toUri
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
