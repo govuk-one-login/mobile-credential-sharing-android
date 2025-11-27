@@ -22,14 +22,14 @@ import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
  *
  * @param cborBase64Url The CBOR-encoded data represented as a Base64 URL string.
  */
-fun decodeDeviceEngagement(cborBase64Url: String) {
-    val cborData = Base64.getUrlDecoder().decode(cborBase64Url)
+fun decodeDeviceEngagement(cborBase64Url: String): DeviceEngagementDto? {
+    val cborData = cborBase64Url.base64Decode()
 
     val cborMapper = ObjectMapper(CBORFactory()).apply {
         registerModule(KotlinModule.Builder().build())
     }
 
-    try {
+    return try {
         val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
         println("Successfully deserialized DeviceEngagementDto:")
         @RequiresImplementation(
@@ -47,8 +47,14 @@ fun decodeDeviceEngagement(cborBase64Url: String) {
             " - Security - Ephemeral Public Key (as hex): ${deviceEngagement.security.ephemeralPublicKey}"
         )
         println(" - Device Retrieval Methods: ${deviceEngagement.deviceRetrievalMethods}")
+
+        deviceEngagement
     } catch (e: JsonProcessingException) {
         // We need to send error status code 10 to the reader in the event of CBOR decoding errors
         println("Failed to deserialize CBOR: ${e.message}")
+        null
     }
 }
+
+fun String.base64Decode(decoder: Base64.Decoder = Base64.getUrlDecoder()): ByteArray =
+    decoder.decode(this)
