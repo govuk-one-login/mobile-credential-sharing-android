@@ -83,6 +83,7 @@ dependencies {
     listOf(
         libs.androidx.test.rules,
         libs.androidx.ui.test.junit4,
+        libs.com.google.test.parameter.injector,
         testFixtures(projects.holder),
         testFixtures(projects.verifier)
     ).forEach(::testFixturesApi)
