@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.security.engagement
 
 import java.util.UUID
+import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 
@@ -22,6 +23,4 @@ object EngagementGeneratorStub {
         key = CoseKey.generateCoseKey(generateValidKeyPair()!!),
         uuid = qrCodeEngagementUuid
     )
-
-    val validMdocUri: String = "mdoc:$encodedEngagement"
 }

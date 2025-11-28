@@ -20,6 +20,7 @@ import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
+import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 
 class HolderWelcomeScreenRule(
@@ -48,7 +49,7 @@ class HolderWelcomeScreenRule(
         publicKey = dummyPublicKey
     )
     private val fakeEngagementGenerator = FakeEngagementGenerator(
-        data = "mdoc:TEST_QR"
+        data = "${Engagement.QR_CODE_SCHEME}TEST_QR"
     )
 
     val viewModel: HolderWelcomeViewModel by lazy {

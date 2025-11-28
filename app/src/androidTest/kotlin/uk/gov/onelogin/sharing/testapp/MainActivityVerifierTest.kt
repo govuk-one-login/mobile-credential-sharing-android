@@ -7,7 +7,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRule
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerRule
+import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScreenRule
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityVerifierTest {
@@ -18,14 +21,33 @@ class MainActivityVerifierTest {
     val composeTestRule = MainActivityRule(createAndroidComposeRule<MainActivity>())
 
     private val verifierScannerRule = VerifierScannerRule(composeTestRule)
+    private val scannedInvalidQrRule = ScannedInvalidQrScreenRule(composeTestRule)
+    private val connectWithHolderRule = ConnectWithHolderDeviceRule(composeTestRule)
+
+    @Test
+    fun displaysConnectWithHolderDevice() = runTest {
+        composeTestRule.run {
+            performVerifierTabClick()
+            performMenuItemClick("Connect with credential holder")
+        }
+        connectWithHolderRule.assertBasicInformationIsDisplayed(validBarcodeDataResult.data)
+    }
+
+    @Test
+    fun displaysInvalidQrError() = runTest {
+        composeTestRule.run {
+            performVerifierTabClick()
+            performMenuItemClick("Error: Scanned invalid barcode")
+        }
+        scannedInvalidQrRule.assertTitleIsDisplayed()
+    }
 
     @Test
     fun displaysQrScanner() = runTest {
         composeTestRule.run {
             performVerifierTabClick()
             performMenuItemClick("QR Scanner")
-
-            verifierScannerRule.assertPermissionDeniedButtonIsDisplayed()
         }
+        verifierScannerRule.assertPermissionDeniedButtonIsDisplayed()
     }
 }
