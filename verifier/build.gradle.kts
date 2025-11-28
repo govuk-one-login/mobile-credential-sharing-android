@@ -52,6 +52,7 @@ dependencies {
         testFixtures(projects.core)
     ).forEach(::testImplementation)
 }
+
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(

@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview as ComposablePreview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.Lifecycle
@@ -41,9 +42,10 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.m3.QrScannerOverlayDefaults
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
-import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraPermissionRationaleButton
-import uk.gov.onelogin.sharing.verifier.scan.buttons.CameraRequirePermissionButton
-import uk.gov.onelogin.sharing.verifier.scan.buttons.PermanentCameraDenial
+import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
+import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
+import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
+import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
@@ -164,18 +166,25 @@ fun verifierScannerPermissionLogic(
         )
     },
     onPermissionPermanentlyDenied = { _ ->
-        PermanentCameraDenial(context, modifier)
+        PermanentPermissionDenialButton(
+            context = context,
+            modifier = modifier,
+            titleText = stringResource(R.string.enable_camera_permission_to_continue),
+            buttonText = stringResource(R.string.open_app_permissions)
+        )
     },
     onShowRationale = { _, launchPermission ->
-        CameraPermissionRationaleButton(
-            launchPermission = launchPermission,
-            modifier = modifier
+        PermissionRationaleButton(
+            modifier = modifier,
+            text = stringResource(R.string.verifier_scanner_require_camera_permission),
+            launchPermission = launchPermission
         )
     },
     onRequirePermission = { _, launchPermission ->
-        CameraRequirePermissionButton(
-            launchPermission = launchPermission,
-            modifier = modifier
+        RequirePermissionButton(
+            modifier = modifier,
+            text = stringResource(R.string.verifier_scanner_require_camera_permission),
+            launchPermission = launchPermission
         )
     }
 )

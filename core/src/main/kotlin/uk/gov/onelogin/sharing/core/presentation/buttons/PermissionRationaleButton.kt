@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.scan.buttons
+package uk.gov.onelogin.sharing.core.presentation.buttons
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -6,37 +6,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
-import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
-import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
-@RequiresImplementation(
-    details = [
-        ImplementationDetail(
-            ticket = "DCMAW-16275",
-            description = "Finalise UI for camera permission rationale"
-        )
-    ]
-)
-fun CameraPermissionRationaleButton(
+fun PermissionRationaleButton(
+    text: String,
     modifier: Modifier = Modifier,
     launchPermission: () -> Unit = {}
 ) {
     Column(modifier = modifier) {
         GdsButton(
             modifier = Modifier.testTag("permissionRationaleButton"),
-            text =
-                stringResource(
-                    R.string.verifier_scanner_require_camera_rationale
-                ),
+            text = text,
             buttonType = ButtonTypeV2.Secondary(),
             onClick = {
                 launchPermission()
@@ -47,15 +33,16 @@ fun CameraPermissionRationaleButton(
 
 @Composable
 @Preview
-internal fun CameraPermissionRationaleButtonPreview() {
+internal fun PermissionRationaleButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier
                 .background(GdsLocalColorScheme.current.listBackground)
                 .padding(16.dp)
         ) {
-            CameraPermissionRationaleButton(
+            PermissionRationaleButton(
                 launchPermission = {},
+                text = "asd",
                 modifier = Modifier.testTag("preview")
             )
         }
