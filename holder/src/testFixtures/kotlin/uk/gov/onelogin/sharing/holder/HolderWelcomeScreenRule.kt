@@ -88,4 +88,11 @@ class HolderWelcomeScreenRule(
     fun assertQrCodeIsDisplayed() = onNodeWithContentDescription(QR_CODE_CONTENT_DESC)
         .assertIsDisplayed()
         .assert(hasRole(Role.Image))
+        // Replace with GOV.UK UI components V2 test fixture `hasRole` when applicable.
+        .assert(
+            SemanticsMatcher.expectValue(
+                SemanticsProperties.Role,
+                Role.Image
+            )
+        )
 }
