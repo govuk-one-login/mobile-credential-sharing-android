@@ -22,4 +22,19 @@ object HolderWelcomeScreenPermissionsStub {
         ),
         onLaunchPermission = { }
     )
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    val fakeDeniedPermissionsState = FakeMultiplePermissionsState(
+        permissions = listOf(
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_CONNECT,
+                status = PermissionStatus.Denied(false)
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                status = PermissionStatus.Denied(false)
+            )
+        ),
+        onLaunchPermission = { }
+    )
 }

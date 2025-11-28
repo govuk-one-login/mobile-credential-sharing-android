@@ -116,4 +116,50 @@ class HolderWelcomeViewModelTest {
             viewModel.uiState.value.sessionState
         )
     }
+
+    @Test
+    fun `checkBluetoothStatus should update status to Enabled when bluetooth is on`() {
+        val fakeMdocSession = FakeMdocSessionManager().apply {
+            isBluetoothEnabled().apply {
+                mockBluetoothEnabled = true
+            }
+        }
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        viewModel.checkBluetoothStatus()
+
+        assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
+    }
+
+    @Test
+    fun `checkBluetoothStatus should update status to Disabled when bluetooth is off`() {
+        val fakeMdocSession = FakeMdocSessionManager().apply {
+            isBluetoothEnabled().apply {
+                mockBluetoothEnabled = false
+            }
+        }
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        viewModel.checkBluetoothStatus()
+
+        assertEquals(BluetoothState.Disabled, viewModel.uiState.value.bluetoothStatus)
+    }
+
+    @Test
+    fun `updateBluetoothPermissions should update hasBluetoothPermissions`() {
+        val viewModel = createViewModel()
+
+        viewModel.updateBluetoothPermissions(true)
+
+        assertEquals(true, viewModel.uiState.value.hasBluetoothPermissions)
+    }
+
+    @Test
+    fun `updateBluetoothState should update the bluetoothStatus`() {
+        val viewModel = createViewModel()
+
+        viewModel.updateBluetoothState(BluetoothState.Enabled)
+
+        assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
+    }
 }

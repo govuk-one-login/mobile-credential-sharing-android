@@ -9,4 +9,6 @@ interface MdocSessionManager {
     suspend fun start(serviceUuid: UUID)
 
     suspend fun stop()
+
+    fun isBluetoothEnabled(): Boolean
 }

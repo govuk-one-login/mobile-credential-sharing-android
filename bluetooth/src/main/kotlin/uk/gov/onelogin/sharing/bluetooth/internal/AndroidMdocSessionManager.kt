@@ -43,4 +43,6 @@ internal class AndroidMdocSessionManager(
         bleAdvertiser.stopAdvertise()
         _state.value = MdocSessionState.Stopped
     }
+
+    override fun isBluetoothEnabled(): Boolean = bleAdvertiser.isBluetoothEnabled()
 }
