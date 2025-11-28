@@ -13,7 +13,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
@@ -62,7 +61,7 @@ class ScannedInvalidQrRouteTest {
 
             NavHost(
                 navController = controller,
-                startDestination = ConnectWithHolderDeviceRoute(VALID_CBOR)
+                startDestination = ConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
             ) {
                 configureConnectWithHolderDeviceRoute()
                 configureScannedInvalidQrRoute()

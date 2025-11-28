@@ -7,7 +7,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
-import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @RunWith(AndroidJUnit4::class)
 class ConnectWithHolderDeviceScreenTest {
@@ -28,8 +28,8 @@ class ConnectWithHolderDeviceScreenTest {
     @Test
     fun validCborExistsOnScreen() = runTest {
         composeTestRule.run {
-            render(VALID_CBOR)
-            assertBasicInformationIsDisplayed(base64EncodedEngagement = VALID_CBOR)
+            render(validBarcodeDataResult.data)
+            assertBasicInformationIsDisplayed(base64EncodedEngagement = validBarcodeDataResult.data)
             assertErrorDoesNotExist()
             assertDeviceEngagementDataIsDisplayed()
         }

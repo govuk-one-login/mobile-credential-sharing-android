@@ -10,12 +10,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.security.DecoderStub
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @RunWith(AndroidJUnit4::class)
 class ConnectWithHolderDeviceRouteTest {
@@ -41,9 +41,9 @@ class ConnectWithHolderDeviceRouteTest {
                 configureScannedInvalidQrRoute()
             }
 
-            controller.navigateToConnectWithHolderDeviceRoute(DecoderStub.VALID_CBOR)
+            controller.navigateToConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
         }
 
-        composeTestRule.assertBasicInformationIsDisplayed(DecoderStub.VALID_CBOR)
+        composeTestRule.assertBasicInformationIsDisplayed(validBarcodeDataResult.data)
     }
 }
