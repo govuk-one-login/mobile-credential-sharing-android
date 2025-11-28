@@ -8,10 +8,16 @@ set -o errexit
 # Unfortunately, gradle managed devices don't create specific coverage tasks for each device
 # profile...
 
+if [[ -z "${WORKER_COUNT}" ]]; then
+  WORKER_COUNT=3
+fi
+
+./gradlew cleanManagedDevices
+
 # The `"${@}" appends additional input to the command, like so:
 # `./scripts/test/instrumentation --debug` -> adds `--debug` to the command.
 ./gradlew \
-    cleanManagedDevices \
     aospAtdApi34Pixel9DebugAndroidTest \
     createManagedDeviceDebugAndroidTestCoverageReport \
+    --max-workers="${WORKER_COUNT}" \
     "${@}"
