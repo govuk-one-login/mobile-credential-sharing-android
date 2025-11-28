@@ -18,7 +18,6 @@ if [[ "${GITHUB_ACTIONS}" == "true" ]]; then
   EXTRA_ARGS=(
     --max-workers="${WORKER_COUNT}"
     -Pandroid.experimental.androidTest.numManagedDeviceShards="${WORKER_COUNT}"
-    -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
   )
 fi
 
