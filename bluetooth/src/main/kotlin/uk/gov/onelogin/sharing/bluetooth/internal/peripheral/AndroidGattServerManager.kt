@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 
@@ -21,7 +22,8 @@ class AndroidGattServerManager(
         AndroidGattServiceBuilder.build(
             GattServiceSpec.mdocService(it)
         )
-    }
+    },
+    private val permissionsChecker: PermissionChecker
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
@@ -35,6 +37,15 @@ class AndroidGattServerManager(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open(serviceUuid: UUID) {
         val gattService = gattServiceFactory(serviceUuid)
+
+        if (!permissionsChecker.hasPermission()) {
+            _events.tryEmit(
+                GattServerEvent.Error(
+                    MdocSessionError.BLUETOOTH_PERMISSION_MISSING
+                )
+            )
+            return
+        }
 
         val server = bluetoothManager.openGattServer(
             context,
