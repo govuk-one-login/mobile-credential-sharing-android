@@ -8,10 +8,26 @@ set -o errexit
 # Unfortunately, gradle managed devices don't create specific coverage tasks for each device
 # profile...
 
+if [[ -z "${WORKER_COUNT}" ]]; then
+  WORKER_COUNT=3
+fi
+
+# Extra args only when running in GitHub Actions
+EXTRA_ARGS=()
+if [[ "${GITHUB_ACTIONS}" == "true" ]]; then
+  EXTRA_ARGS=(
+    --max-workers="${WORKER_COUNT}"
+    -Pandroid.experimental.androidTest.numManagedDeviceShards="${WORKER_COUNT}"
+    -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+  )
+fi
+
+./gradlew cleanManagedDevices
+
 # The `"${@}" appends additional input to the command, like so:
 # `./scripts/test/instrumentation --debug` -> adds `--debug` to the command.
 ./gradlew \
-    cleanManagedDevices \
     aospAtdApi34Pixel9DebugAndroidTest \
     createManagedDeviceDebugAndroidTestCoverageReport \
+    "${EXTRA_ARGS[@]}" \
     "${@}"
