@@ -37,7 +37,7 @@ class VerifierScannerBarcodeScanCallback(
                 "Obtained BarcodeScanResult: $result"
             )
         }
-        val result = when (result) {
+        val barcodeDataResult = when (result) {
             is BarcodeScanResult.Success -> result.first()
             is BarcodeScanResult.Single -> result.barcode
             else -> null
@@ -54,7 +54,7 @@ class VerifierScannerBarcodeScanCallback(
             }
         } ?: BarcodeDataResult.NotFound
 
-        onDataFound(result)
+        onDataFound(barcodeDataResult)
         toggleScanner()
     }
 }
