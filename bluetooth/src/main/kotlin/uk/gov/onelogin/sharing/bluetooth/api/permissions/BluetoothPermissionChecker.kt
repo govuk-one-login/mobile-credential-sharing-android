@@ -13,6 +13,9 @@ class BluetoothPermissionChecker(private val context: Context) : PermissionCheck
         ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.BLUETOOTH_ADVERTISE
+        ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.BLUETOOTH_CONNECT
         ) == PackageManager.PERMISSION_GRANTED
     } else {
         true

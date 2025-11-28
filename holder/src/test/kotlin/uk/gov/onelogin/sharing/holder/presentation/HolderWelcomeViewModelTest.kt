@@ -32,7 +32,7 @@ class HolderWelcomeViewModelTest {
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
-        mdocBleSession = mdocSessionManager,
+        mdocSessionManagerFactory = { mdocSessionManager },
         dispatcher = mainDispatcherRule.testDispatcher
     )
 
@@ -62,16 +62,17 @@ class HolderWelcomeViewModelTest {
 
     @Test
     fun `collects advertiser state changes`() = runTest {
-        val fakeMdocSession = FakeMdocSessionManager(initialState = MdocSessionState.Starting)
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.AdvertisingStarted)
         val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
         advanceUntilIdle()
-        assertEquals(MdocSessionState.Starting, viewModel.uiState.value.sessionState)
+        assertEquals(MdocSessionState.AdvertisingStarted, viewModel.uiState.value.sessionState)
 
-        fakeMdocSession.emitState(MdocSessionState.Started)
+        fakeMdocSession.emitState(MdocSessionState.AdvertisingStarted)
 
         advanceUntilIdle()
-        assertEquals(MdocSessionState.Started, viewModel.uiState.value.sessionState)
+        assertEquals(MdocSessionState.AdvertisingStarted, viewModel.uiState.value.sessionState)
     }
 
     @Test
@@ -90,7 +91,7 @@ class HolderWelcomeViewModelTest {
         )
 
         assertEquals(
-            MdocSessionState.Started,
+            MdocSessionState.AdvertisingStarted,
             viewModel.uiState.value.sessionState
         )
         assertNull(viewModel.uiState.value.lastErrorMessage)
@@ -98,12 +99,13 @@ class HolderWelcomeViewModelTest {
 
     @Test
     fun `stop advertising calls stop and updates state`() = runTest {
-        val fakeMdocSession = FakeMdocSessionManager(initialState = MdocSessionState.Started)
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.AdvertisingStarted)
         val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
         advanceUntilIdle()
         assertEquals(
-            MdocSessionState.Started,
+            MdocSessionState.AdvertisingStarted,
             viewModel.uiState.value.sessionState
         )
 
@@ -112,7 +114,7 @@ class HolderWelcomeViewModelTest {
 
         assertEquals(1, fakeMdocSession.stopCalls)
         assertEquals(
-            MdocSessionState.Stopped,
+            MdocSessionState.AdvertisingStopped,
             viewModel.uiState.value.sessionState
         )
     }
