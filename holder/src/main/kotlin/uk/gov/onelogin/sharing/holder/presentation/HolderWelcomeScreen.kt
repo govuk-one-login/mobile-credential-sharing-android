@@ -92,8 +92,16 @@ fun HolderWelcomeScreen(
 @Composable
 fun HolderScreenContent(contentState: HolderWelcomeUiState) {
     when (contentState.bluetoothStatus) {
-        BluetoothState.Disabled -> BluetoothDisabledScreen()
-        BluetoothState.Enabled -> QrContent(contentState, Modifier)
+        BluetoothState.Disabled -> {
+            println("User denied turning on bluetooth via prompt")
+            BluetoothDisabledScreen()
+        }
+
+        BluetoothState.Enabled -> {
+            println("User turned bluetooth on via prompt")
+            QrContent(contentState, Modifier)
+        }
+
         BluetoothState.Initializing -> Unit
     }
 }
@@ -111,7 +119,7 @@ fun BluetoothDisabledScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Please enable bluetooth to view your QR code")
+        Text(stringResource(R.string.bluetooth_disabled_error_text))
     }
 }
 
