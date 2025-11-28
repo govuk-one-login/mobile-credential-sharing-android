@@ -32,6 +32,9 @@ fun ConnectWithHolderDeviceScreen(base64EncodedEngagement: String, modifier: Mod
             }
         } else {
             item {
+                Text(stringResource(R.string.connect_with_holder_decoded_data))
+            }
+            item {
                 Text(engagementData.toString())
             }
         }

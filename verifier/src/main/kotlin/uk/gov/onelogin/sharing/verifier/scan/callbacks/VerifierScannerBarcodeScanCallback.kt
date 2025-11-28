@@ -2,6 +2,8 @@ package uk.gov.onelogin.sharing.verifier.scan.callbacks
 
 import android.net.Uri
 import android.util.Log
+import com.google.mlkit.vision.barcode.common.Barcode
+import kotlin.let
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
@@ -37,9 +39,14 @@ class VerifierScannerBarcodeScanCallback(
             )
         }
         val result = when (result) {
-            is BarcodeScanResult.Success -> result.firstOrNull()?.url?.url
-            is BarcodeScanResult.Single -> result.barcode.url?.url
+            is BarcodeScanResult.Success -> result.first()
+            is BarcodeScanResult.Single -> result.barcode
             else -> null
+        }?.let { barcode ->
+            when (barcode.valueType) {
+                Barcode.TYPE_URL -> barcode.url?.url
+                else -> barcode.rawValue
+            }
         }?.let { url ->
             if (url.startsWith(Engagement.QR_CODE_SCHEME)) {
                 BarcodeDataResult.Valid(url.removePrefix(Engagement.QR_CODE_SCHEME))

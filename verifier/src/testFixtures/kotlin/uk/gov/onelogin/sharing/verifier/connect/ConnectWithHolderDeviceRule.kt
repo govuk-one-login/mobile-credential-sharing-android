@@ -11,6 +11,7 @@ import uk.gov.onelogin.sharing.verifier.R
 
 class ConnectWithHolderDeviceRule(
     composeContentTestRule: ComposeContentTestRule,
+    private val decodedDataHeader: String,
     private val decodeError: String,
     private val header: String
 ) : ComposeContentTestRule by composeContentTestRule {
@@ -20,6 +21,7 @@ class ConnectWithHolderDeviceRule(
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
     ) : this (
         composeContentTestRule = composeContentTestRule,
+        decodedDataHeader = resources.getString(R.string.connect_with_holder_decoded_data),
         decodeError = resources.getString(R.string.connect_with_holder_error_decode),
         header = resources.getString(R.string.connect_with_holder_heading)
     )
@@ -34,16 +36,29 @@ class ConnectWithHolderDeviceRule(
             .assertIsDisplayed()
     }
 
-    fun assertDeviceEngagementDataDoesNotExist() = onNodeWithText(
-        "DeviceEngagementDto",
-        substring = true
-    ).assertDoesNotExist()
+    fun assertDeviceEngagementDataDoesNotExist() {
+        onNodeWithText(
+            decodedDataHeader
+        ).assertDoesNotExist()
 
-    fun assertDeviceEngagementDataIsDisplayed() = onNodeWithText(
-        "DeviceEngagementDto",
-        substring = true
-    ).assertExists()
-        .assertIsDisplayed()
+        onNodeWithText(
+            "DeviceEngagementDto",
+            substring = true
+        ).assertDoesNotExist()
+    }
+
+    fun assertDeviceEngagementDataIsDisplayed() {
+        onNodeWithText(
+            decodedDataHeader
+        ).assertExists()
+            .assertIsDisplayed()
+
+        onNodeWithText(
+            "DeviceEngagementDto",
+            substring = true
+        ).assertExists()
+            .assertIsDisplayed()
+    }
 
     fun assertErrorDoesNotExist() = onNodeWithText(decodeError)
         .assertDoesNotExist()

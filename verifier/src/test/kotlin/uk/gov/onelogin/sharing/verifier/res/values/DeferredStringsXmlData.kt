@@ -16,6 +16,10 @@ enum class DeferredStringsXmlData(
         R.string.successfully_scanned_qr_code_data,
         R.string.connect_with_holder_heading
     ),
+    CONNECT_WITH_HOLDER_DECODED_DATA(
+        R.string.decoded_device_engagement_data,
+        R.string.connect_with_holder_decoded_data
+    ),
     CONNECT_WITH_HOLDER_DECODE_ERROR(
         R.string.could_not_decode_device_engagement,
         R.string.connect_with_holder_error_decode

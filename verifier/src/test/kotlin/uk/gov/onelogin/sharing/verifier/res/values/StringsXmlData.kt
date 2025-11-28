@@ -25,6 +25,10 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Couldn’t decode device engagement!",
         resourceId = R.string.could_not_decode_device_engagement
     ),
+    DECODED_DEVICE_ENGAGEMENT_DATA(
+        expected = "Decoded device engagement data:",
+        resourceId = R.string.decoded_device_engagement_data
+    ),
     DID_NOT_SCAN_DIGITAL_CREDENTIAL_QR(
         expected = "The scanned QR code didn’t contain a digital credential. " +
             "Please check the correct QR code to scan, then try again.",

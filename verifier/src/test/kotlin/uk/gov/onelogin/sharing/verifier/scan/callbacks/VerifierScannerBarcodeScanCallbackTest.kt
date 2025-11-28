@@ -105,7 +105,7 @@ class VerifierScannerBarcodeScanCallbackTest {
             BarcodeScanResult.Success(
                 listOf(
                     invalidBarcodeDataResultOne.data,
-                    invalidBarcodeDataResultTwo.data
+                    validBarcodeDataResult.data
                 ).asUrlBarcodes()
             ),
         expectedMessage = exampleUriOne,
