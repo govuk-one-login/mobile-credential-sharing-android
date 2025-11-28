@@ -34,6 +34,6 @@ class HolderRoutesTest {
             }
         }
 
-        composeTestRule.assertWelcomeTextIsDisplayed()
+        composeTestRule.assertEnablePermissionsButtonTextIsDisplayed()
     }
 }
