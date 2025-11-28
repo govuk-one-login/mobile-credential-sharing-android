@@ -76,7 +76,8 @@ dependencies {
     listOf(
         platform(libs.androidx.compose.bom),
         libs.bundles.android.baseline,
-        libs.bundles.uk.gov.ui
+        libs.bundles.uk.gov.ui,
+        testFixtures(projects.verifier)
     ).forEach(::implementation)
 
     listOf(
