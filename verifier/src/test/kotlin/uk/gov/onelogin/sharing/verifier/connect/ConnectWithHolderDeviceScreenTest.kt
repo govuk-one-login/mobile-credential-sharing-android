@@ -1,24 +1,29 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class ConnectWithHolderDeviceScreenTest {
 
     @get:Rule
     val composeTestRule = ConnectWithHolderDeviceRule(createComposeRule())
 
+    @TestParameter(valuesProvider = ConnectWithHolderDeviceRenderProvider::class)
+    lateinit var renderFunction: ConnectWithHolderDeviceRule.(String, Modifier) -> Unit
+
     @Test
     fun cannotDecodeProvidedCborString() = runTest {
         composeTestRule.run {
-            render(INVALID_CBOR)
+            renderFunction(INVALID_CBOR, Modifier)
             assertBasicInformationIsDisplayed(base64EncodedEngagement = INVALID_CBOR)
             assertErrorIsDisplayed()
             assertDeviceEngagementDataDoesNotExist()
@@ -28,7 +33,7 @@ class ConnectWithHolderDeviceScreenTest {
     @Test
     fun validCborExistsOnScreen() = runTest {
         composeTestRule.run {
-            render(validBarcodeDataResult.data)
+            renderFunction(validBarcodeDataResult.data, Modifier)
             assertBasicInformationIsDisplayed(base64EncodedEngagement = validBarcodeDataResult.data)
             assertErrorDoesNotExist()
             assertDeviceEngagementDataIsDisplayed()

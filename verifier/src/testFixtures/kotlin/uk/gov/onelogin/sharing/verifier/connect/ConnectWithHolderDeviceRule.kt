@@ -67,9 +67,18 @@ class ConnectWithHolderDeviceRule(
         .assertExists()
         .assertIsDisplayed()
 
-    fun render(base64EncodedEngagement: String, modifier: Modifier = Modifier.Companion) {
+    fun render(base64EncodedEngagement: String, modifier: Modifier = Modifier) {
         setContent {
             ConnectWithHolderDeviceScreen(
+                base64EncodedEngagement = base64EncodedEngagement,
+                modifier = modifier
+            )
+        }
+    }
+
+    fun renderPreview(base64EncodedEngagement: String, modifier: Modifier = Modifier) {
+        setContent {
+            ConnectWithHolderDevicePreview(
                 base64EncodedEngagement = base64EncodedEngagement,
                 modifier = modifier
             )
