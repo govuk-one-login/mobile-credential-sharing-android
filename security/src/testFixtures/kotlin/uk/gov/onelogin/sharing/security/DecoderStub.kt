@@ -15,6 +15,8 @@ object DecoderStub {
         "gg8EaqoiWCA8Qib6bCfaav-5A8QvfCEceATx1H9HR_Kj2ZnNeyxZLf__Ap-fAgG_APUB9A" +
             "pQERERESIiMzNERFVVVVVVVf____8="
 
+    const val VALID_MDOC_URI = "mdoc:$VALID_CBOR"
+
     /**
      * [DeviceEngagementDto] representation of the [VALID_CBOR] property.
      */

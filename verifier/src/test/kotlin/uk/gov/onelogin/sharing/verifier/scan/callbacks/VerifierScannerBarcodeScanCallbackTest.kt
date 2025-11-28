@@ -1,6 +1,12 @@
 package uk.gov.onelogin.sharing.verifier.scan.callbacks
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterValue
+import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import com.google.testing.junit.testparameterinjector.TestParameters
+import com.google.testing.junit.testparameterinjector.TestParameters.TestParametersValues
+import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintStream
@@ -12,6 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
 import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Companion.asUrlBarcodes
@@ -19,14 +26,14 @@ import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Compa
 import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Companion.urlQrCode
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
+import uk.gov.onelogin.sharing.security.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.encodedEngagement
-import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.validMdocUri
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultTwo
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestParameterInjector::class)
 @Config(
     shadows = [ShadowLog::class]
 )
@@ -61,45 +68,6 @@ class VerifierScannerBarcodeScanCallbackTest {
     }
 
     @Test
-    fun emptyScans() = performLoggingFlow(
-        result = BarcodeScanResult.EmptyScan,
-        expectedMessage = "Barcode data not found",
-        expectedData = BarcodeDataResult.NotFound
-    )
-
-    @Test
-    fun httpsUrlsAreInvalid() = performLoggingFlow(
-        result = BarcodeScanResult.Single(urlQrCode(invalidBarcodeDataResultOne.data)),
-        expectedMessage = invalidBarcodeDataResultOne.data,
-        expectedData = invalidBarcodeDataResultOne
-    )
-
-    @Test
-    fun mdocUrlsAreValid() {
-        performLoggingFlow(
-            result = BarcodeScanResult.Single(urlQrCode(validMdocUri)),
-            expectedMessage = encodedEngagement,
-            expectedData = validBarcodeDataResult
-        )
-    }
-
-    @Test
-    fun singleUnknownScans() = performLoggingFlow(
-        result = BarcodeScanResult.Single(unknown()),
-        expectedMessage = "No URL found from single result!",
-        expectedData = BarcodeDataResult.NotFound
-    )
-
-    @Test
-    fun exceptions() = "This is a unit test!".run {
-        performLoggingFlow(
-            result = BarcodeScanResult.Failure(Exception(this)),
-            expectedMessage = this,
-            expectedData = BarcodeDataResult.NotFound
-        )
-    }
-
-    @Test
     fun onlyChecksTheFirstBarcode() = performLoggingFlow(
         result =
             BarcodeScanResult.Success(
@@ -108,7 +76,6 @@ class VerifierScannerBarcodeScanCallbackTest {
                     validBarcodeDataResult.data
                 ).asUrlBarcodes()
             ),
-        expectedMessage = exampleUriOne,
         expectedData = invalidBarcodeDataResultOne
     ).also {
         assert(
@@ -119,23 +86,8 @@ class VerifierScannerBarcodeScanCallbackTest {
     }
 
     @Test
-    fun scansWithoutUrlsCannotBeFound() = performLoggingFlow(
-        result =
-            BarcodeScanResult.Success(
-                listOf(
-                    unknown(),
-                    unknown()
-                )
-            ),
-        expectedMessage = "No URL found!",
-        expectedData = BarcodeDataResult.NotFound
-    )
-
-    private fun performLoggingFlow(
-        result: BarcodeScanResult,
-        expectedMessage: String,
-        expectedData: BarcodeDataResult
-    ) = runTest {
+    @TestParameters(valuesProvider = VerifierScannerBarcodeScanCallbackProvider::class)
+    fun performLoggingFlow(result: BarcodeScanResult, expectedData: BarcodeDataResult) = runTest {
         callback.onResult(result) { hasToggledScanner = true }
 
         val loggingOutput = loggingFile.readLines()
@@ -146,12 +98,51 @@ class VerifierScannerBarcodeScanCallbackTest {
                 )
             }
         ) {
-            "Couldn't find the \"$expectedMessage\" in: $loggingOutput"
+            "Couldn't find a \"${result::class.java.simpleName}\" entry in: $loggingOutput"
         }
 
         assertEquals(
             expectedData,
             scanData
         )
+    }
+
+    class VerifierScannerBarcodeScanCallbackProvider : TestParametersValuesProvider() {
+        override fun provideValues(context: Context?): List<TestParametersValues> = listOf(
+            Triple(
+                "Empty scan",
+                BarcodeScanResult.EmptyScan,
+                BarcodeDataResult.NotFound
+            ),
+            Triple(
+                "HTTP URLs are invalid",
+                BarcodeScanResult.Single(urlQrCode(invalidBarcodeDataResultOne.data)),
+                invalidBarcodeDataResultOne
+            ),
+            Triple(
+                "mdoc URLs are valid",
+                BarcodeScanResult.Single(urlQrCode(VALID_MDOC_URI)),
+                validBarcodeDataResult
+            ),
+            Triple(
+                "An Unknown barcode is considered to be not found",
+                BarcodeScanResult.Single(unknown()),
+                BarcodeDataResult.NotFound
+            ),
+            Triple(
+                "Barcode failures are considered to be not found",
+                BarcodeScanResult.Failure(Exception("This is a unit test!")),
+                BarcodeDataResult.NotFound
+            )
+        ).map { (name, result, expectedData) ->
+            TestParametersValues.builder()
+                .name(name)
+                .addParameter(
+                    "result",
+                    result
+                )
+                .addParameter("expectedData", expectedData)
+                .build()
+        }
     }
 }
