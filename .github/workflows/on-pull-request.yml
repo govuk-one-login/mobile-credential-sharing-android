@@ -83,9 +83,13 @@ jobs:
         run: |
           ./scripts/lint/gradle
 
+      - name: Run unit tests
+        run: |
+          ./scripts/test/unit
+
       - name: Run testing suites
         run: |
-          ./scripts/test/all
+          ./scripts/test/instrumentation --no-configuration-cache
 
       - name: Sonar scan
         uses: ./mobile-android-pipelines/actions/sonar-scan
