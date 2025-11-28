@@ -52,8 +52,7 @@ class HolderWelcomeScreenTest {
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
-        mdocBleSession = mdocBleSession,
-        dispatcher = mainDispatcherRule.testDispatcher
+        mdocSessionManagerFactory = { mdocBleSession }
     )
 
     @Test
@@ -94,7 +93,10 @@ class HolderWelcomeScreenTest {
             )
         }
 
-        assertEquals(MdocSessionState.Started, viewModel.uiState.value.sessionState)
+        assertEquals(
+            MdocSessionState.AdvertisingStarted,
+            viewModel.uiState.value.sessionState
+        )
     }
 
     @Test
@@ -130,7 +132,10 @@ class HolderWelcomeScreenTest {
 
         composeTestRule.waitForIdle()
 
-        assertEquals(MdocSessionState.Stopped, viewModel.uiState.value.sessionState)
+        assertEquals(
+            MdocSessionState.AdvertisingStopped,
+            viewModel.uiState.value.sessionState
+        )
     }
 
     @Test
