@@ -36,7 +36,8 @@ class MdocSessionManagerFactory(private val context: Context) : SessionManagerFa
         )
         val gattServerManager = AndroidGattServerManager(
             context = context,
-            bluetoothManager = context.getSystemService(BluetoothManager::class.java)
+            bluetoothManager = context.getSystemService(BluetoothManager::class.java),
+            permissionsChecker = BluetoothPermissionChecker(context)
         )
 
         return AndroidMdocSessionManager(

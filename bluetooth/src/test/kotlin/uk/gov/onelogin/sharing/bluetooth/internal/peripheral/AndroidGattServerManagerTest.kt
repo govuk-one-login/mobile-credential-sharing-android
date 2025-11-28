@@ -22,6 +22,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
+import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
 
 class AndroidGattServerManagerTest {
@@ -34,6 +35,7 @@ class AndroidGattServerManagerTest {
             listOf()
         )
     )
+    private val fakePermissionChecker = FakePermissionChecker()
 
     private lateinit var manager: AndroidGattServerManager
     private val uuid = UUID.randomUUID()
@@ -43,7 +45,8 @@ class AndroidGattServerManagerTest {
         manager = AndroidGattServerManager(
             context = context,
             bluetoothManager = bluetoothManager,
-            gattServiceFactory = { fakeGattService }
+            gattServiceFactory = { fakeGattService },
+            permissionsChecker = fakePermissionChecker
         )
     }
 
@@ -218,6 +221,25 @@ class AndroidGattServerManagerTest {
             )
 
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `gatt server returns error if permissions are not granted`() = runTest {
+        fakePermissionChecker.hasPermission = false
+        every {
+            bluetoothManager.openGattServer(context, any())
+        } returns gattServer
+
+        manager.events.test {
+            manager.open(uuid)
+
+            assertEquals(
+                GattServerEvent.Error(
+                    MdocSessionError.BLUETOOTH_PERMISSION_MISSING
+                ),
+                awaitItem()
+            )
         }
     }
 }
