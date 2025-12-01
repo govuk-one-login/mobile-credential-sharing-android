@@ -142,7 +142,7 @@ fun HolderWelcomeScreenContent(
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
-        sessionState = MdocSessionState.Started,
+        sessionState = MdocSessionState.AdvertisingStarted,
         uuid = UUID.randomUUID(),
         qrData = "QR Data"
     )
