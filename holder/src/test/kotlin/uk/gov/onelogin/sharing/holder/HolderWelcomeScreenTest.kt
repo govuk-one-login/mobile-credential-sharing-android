@@ -35,6 +35,7 @@ import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGra
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
@@ -239,6 +240,66 @@ class HolderWelcomeScreenTest {
             BluetoothState.Disabled,
             viewModel.uiState.value.bluetoothStatus
         )
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun holderScreenSetsBluetoothStatusEnabledWhenUserClicksAllow() = runTest {
+        val viewModel = createViewModel()
+
+        val result = android.app.Instrumentation.ActivityResult(Activity.RESULT_OK, null)
+        Intents.intending(IntentMatchers.hasAction(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+            .respondWith(result)
+
+        composeTestRule.setContent {
+            HolderWelcomeScreen(viewModel)
+        }
+
+        advanceUntilIdle()
+
+        assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
+    }
+
+    @Test
+    fun holderScreenSetsBluetoothStatusInitializingWhenPermissionsAreGranted() = runTest {
+        val mdocBleSession = FakeMdocSessionManager().apply {
+            mockBluetoothEnabled = false
+        }
+        val viewModel = createViewModel(mdocBleSession = mdocBleSession)
+
+        composeTestRule.setContent {
+            HolderWelcomeScreen(viewModel)
+        }
+
+        viewModel.updateBluetoothPermissions(true)
+
+        composeTestRule.waitForIdle()
+        assertEquals(
+            BluetoothState.Initializing,
+            viewModel.uiState.value.bluetoothStatus
+        )
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun holderScreenSetsBluetoothStatusDisabledWhenUserClicksDeny() = runTest {
+        val mdocBleSession = FakeMdocSessionManager().apply {
+            mockBluetoothEnabled = false
+        }
+
+        val viewModel = createViewModel(mdocBleSession = mdocBleSession)
+        val result = android.app.Instrumentation.ActivityResult(Activity.RESULT_CANCELED, null)
+
+        Intents.intending(IntentMatchers.hasAction(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+            .respondWith(result)
+
+        composeTestRule.setContent {
+            HolderWelcomeScreen(viewModel)
+        }
+
+        advanceUntilIdle()
+
+        assertEquals(BluetoothState.Disabled, viewModel.uiState.value.bluetoothStatus)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
