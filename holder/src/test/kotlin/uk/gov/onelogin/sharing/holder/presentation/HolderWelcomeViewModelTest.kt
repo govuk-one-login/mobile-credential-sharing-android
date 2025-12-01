@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -9,8 +10,10 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.bluetooth.ble.deviceAddressStub
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
@@ -115,6 +118,103 @@ class HolderWelcomeViewModelTest {
         assertEquals(1, fakeMdocSession.stopCalls)
         assertEquals(
             MdocSessionState.AdvertisingStopped,
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `state updates to connected`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.AdvertisingStarted)
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.AdvertisingStarted,
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(MdocSessionState.Connected(deviceAddressStub()))
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Connected(deviceAddressStub()),
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `state updates to disconnected`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(deviceAddressStub()))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.Connected(deviceAddressStub()),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(MdocSessionState.Disconnected(deviceAddressStub()))
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Disconnected(deviceAddressStub()),
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `state updates to error`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(deviceAddressStub()))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.Connected(deviceAddressStub()),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE))
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE),
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `state updates to service added`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(deviceAddressStub()))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+        val uuid = UUID.randomUUID()
+
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.Connected(deviceAddressStub()),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(MdocSessionState.ServiceAdded(uuid))
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.ServiceAdded(uuid),
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `state updates to idle`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.Idle,
             viewModel.uiState.value.sessionState
         )
     }

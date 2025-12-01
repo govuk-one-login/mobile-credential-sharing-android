@@ -101,9 +101,6 @@ internal class AndroidMdocSessionManager(
                 )
 
             GattServerEvent.SessionStarted -> {
-                coroutineScope.launch {
-                    bleAdvertiser.stopAdvertise()
-                }
                 println("Mdoc - Connection has been setup successfully - session state started")
             }
         }
