@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +66,12 @@ fun HolderWelcomeScreen(
         hasPreviouslyRequestedPermission = hasPreviouslyRequestedPermission,
         onGrantedPermissions = {
             viewModel.updateBluetoothPermissions(true)
+            DisposableEffect(Unit) {
+                viewModel.startAdvertising()
+                onDispose {
+                    viewModel.stopAdvertising()
+                }
+            }
         }
     )
 
@@ -129,7 +136,7 @@ fun BluetoothPermissionPrompt(
     multiplePermissionsState: MultiplePermissionsState,
     hasPreviouslyRequestedPermission: Boolean,
     modifier: Modifier = Modifier,
-    onGrantedPermissions: () -> Unit
+    onGrantedPermissions: @Composable () -> Unit
 ) {
     when {
         multiplePermissionsState.allPermissionsGranted -> {
@@ -187,7 +194,7 @@ fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier)
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
-        sessionState = MdocSessionState.Started,
+        sessionState = MdocSessionState.AdvertisingStarted,
         uuid = UUID.randomUUID(),
         qrData = "QR Data"
     )

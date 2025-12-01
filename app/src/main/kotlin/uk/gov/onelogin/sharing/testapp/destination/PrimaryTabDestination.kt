@@ -8,7 +8,11 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.holder.presentation.HolderHomeRoute
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
+import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @Serializable
 @Parcelize
@@ -46,6 +50,10 @@ sealed class PrimaryTabDestination(val label: String) : Parcelable {
             composable<Verifier> {
                 ModuleEntries(
                     entries = listOf(
+                        "Connect with credential holder"
+                            to ConnectWithHolderDeviceRoute(validBarcodeDataResult.data),
+                        "Error: Scanned invalid barcode"
+                            to ScannedInvalidQrRoute(invalidBarcodeDataResultOne.data),
                         "QR Scanner" to VerifierScanRoute
                     ).sortedBy { navPair -> navPair.first }
                         .toPersistentList(),

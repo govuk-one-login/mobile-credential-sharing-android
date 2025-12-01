@@ -37,17 +37,18 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.com.google.test.parameter.injector,
         testFixtures(projects.security)
     ).forEach(::testFixturesApi)
 
     implementation(libs.androidx.browser)
     listOf(
         libs.androidx.browser,
+        testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.core)
     ).forEach(::testFixturesImplementation)
 
     listOf(
-        libs.com.google.test.parameter.injector,
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.core)
     ).forEach(::testImplementation)

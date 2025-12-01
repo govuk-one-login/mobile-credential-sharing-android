@@ -7,6 +7,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
+import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestinationData.expectedHolderMenuItems
+import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestinationData.expectedVerifierMenuItems
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityContentTest {
@@ -22,11 +24,8 @@ class MainActivityContentTest {
                 startDestination = PrimaryTabDestination.Holder
             )
             performHolderTabClick()
-            val expectedMenuItems = listOf(
-                "Welcome screen"
-            )
-            assertMenuItemsCount(expectedMenuItems.size)
-            expectedMenuItems.forEach(composeTestRule::assertMenuItem)
+            assertMenuItemsCount(expectedHolderMenuItems.size)
+            expectedHolderMenuItems.forEach(::assertMenuItem)
         }
     }
 
@@ -38,11 +37,8 @@ class MainActivityContentTest {
                 startDestination = PrimaryTabDestination.Holder
             )
             performVerifierTabClick()
-            val expectedMenuItems = listOf(
-                "QR Scanner"
-            )
-            assertMenuItemsCount(expectedMenuItems.size)
-            expectedMenuItems.forEach(composeTestRule::assertMenuItem)
+            assertMenuItemsCount(expectedVerifierMenuItems.size)
+            expectedVerifierMenuItems.forEach(::assertMenuItem)
         }
     }
 

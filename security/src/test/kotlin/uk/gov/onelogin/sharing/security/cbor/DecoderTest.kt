@@ -3,11 +3,14 @@ package uk.gov.onelogin.sharing.security.cbor
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import junit.framework.TestCase.assertTrue
+import kotlin.test.assertNull
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
+import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
 
 class DecoderTest {
 
@@ -30,16 +33,23 @@ class DecoderTest {
 
     @Test
     fun `successfully decodes device engagement from base64 url cbor`() {
-        decodeDeviceEngagement(VALID_CBOR)
+        val result = decodeDeviceEngagement(VALID_CBOR)
 
         val actualOutput = outContent.toString()
         assertTrue(actualOutput.contains("Successfully deserialized DeviceEngagementDto:"))
+
+        assertEquals(
+            validDeviceEngagementDto,
+            result
+        )
     }
 
     @Test
     fun `decodes device engagement from base64 url`() {
-        decodeDeviceEngagement(INVALID_CBOR)
+        val result = decodeDeviceEngagement(INVALID_CBOR)
         val actualErrorMessage = outContent.toString()
         assertTrue(actualErrorMessage.contains("Failed to deserialize CBOR:"))
+
+        assertNull(result)
     }
 }

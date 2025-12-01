@@ -5,6 +5,8 @@ package uk.gov.onelogin.sharing.holder
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -27,9 +29,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.SetupBluetoothStateManagerPrompt
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeDeniedPermissionsState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
-import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.setUpBluetoothStateManagerPrompt
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
@@ -69,13 +71,13 @@ class HolderWelcomeScreenTest {
     private val dummyEngagementData = "ENGAGEMENT_DATA"
 
     private fun createViewModel(
-        mdocSessionManager: FakeMdocSessionManager = FakeMdocSessionManager(),
+        mdocBleSession: FakeMdocSessionManager = FakeMdocSessionManager(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
         sessionSecurity: SessionSecurity = FakeSessionSecurity(publicKey = null)
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
-        mdocBleSession = mdocSessionManager,
+        mdocSessionManagerFactory = { mdocBleSession },
         dispatcher = mainDispatcherRule.testDispatcher
     )
 
@@ -102,17 +104,20 @@ class HolderWelcomeScreenTest {
                 multiplePermissionsState = fakeGrantedPermissionsState,
                 hasPreviouslyRequestedPermission = true,
                 onGrantedPermissions = {
-//                    DisposableEffect(Unit) {
-//                        viewModel.startAdvertising()
-//                        onDispose {
-//                            viewModel.stopAdvertising()
-//                        }
-//                    }
+                    DisposableEffect(Unit) {
+                        viewModel.startAdvertising()
+                        onDispose {
+                            viewModel.stopAdvertising()
+                        }
+                    }
                 }
             )
         }
 
-        assertEquals(MdocSessionState.Started, viewModel.uiState.value.sessionState)
+        assertEquals(
+            MdocSessionState.AdvertisingStarted,
+            viewModel.uiState.value.sessionState
+        )
     }
 
     @Test
@@ -127,12 +132,12 @@ class HolderWelcomeScreenTest {
                     multiplePermissionsState = fakeGrantedPermissionsState,
                     hasPreviouslyRequestedPermission = true,
                     onGrantedPermissions = {
-//                        DisposableEffect(Unit) {
-//                            viewModel.startAdvertising()
-//                            onDispose {
-//                                viewModel.stopAdvertising()
-//                            }
-//                        }
+                        DisposableEffect(Unit) {
+                            viewModel.startAdvertising()
+                            onDispose {
+                                viewModel.stopAdvertising()
+                            }
+                        }
                     }
                 )
             }
@@ -144,7 +149,10 @@ class HolderWelcomeScreenTest {
 
         composeTestRule.waitForIdle()
 
-        assertEquals(MdocSessionState.Stopped, viewModel.uiState.value.sessionState)
+        assertEquals(
+            MdocSessionState.AdvertisingStopped,
+            viewModel.uiState.value.sessionState
+        )
     }
 
     @Test
@@ -164,7 +172,7 @@ class HolderWelcomeScreenTest {
     fun stateShouldBeSetToInitializingBeforeRequestingBluetoothOnOrOff() {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            setUpBluetoothStateManagerPrompt(viewModel)
+            SetupBluetoothStateManagerPrompt(viewModel)
         }
 
         assertEquals(
@@ -182,7 +190,7 @@ class HolderWelcomeScreenTest {
             .respondWith(result)
 
         composeTestRule.setContent {
-            setUpBluetoothStateManagerPrompt(viewModel)
+            SetupBluetoothStateManagerPrompt(viewModel)
         }
 
         assertEquals(
@@ -200,7 +208,7 @@ class HolderWelcomeScreenTest {
             .respondWith(result)
 
         composeTestRule.setContent {
-            setUpBluetoothStateManagerPrompt(viewModel)
+            SetupBluetoothStateManagerPrompt(viewModel)
         }
 
         assertEquals(
@@ -218,12 +226,11 @@ class HolderWelcomeScreenTest {
             .respondWith(result)
 
         composeTestRule.setContent {
-            setUpBluetoothStateManagerPrompt(viewModel)
+            val uiState by viewModel.uiState.collectAsState()
+            SetupBluetoothStateManagerPrompt(viewModel)
 
             HolderScreenContent(
-                contentState = HolderWelcomeUiState(
-                    bluetoothStatus = viewModel.uiState.value.bluetoothStatus
-                )
+                contentState = uiState
             )
         }
 

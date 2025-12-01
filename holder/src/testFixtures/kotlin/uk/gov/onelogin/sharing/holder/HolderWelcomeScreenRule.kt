@@ -16,6 +16,7 @@ import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
@@ -24,6 +25,7 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
+import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 
 class HolderWelcomeScreenRule(
@@ -45,22 +47,23 @@ class HolderWelcomeScreenRule(
         )
     )
 
-    private lateinit var content: () -> Unit
-    private val fakeMdocSession = FakeMdocSessionManager()
+    val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
     val dummyPublicKey = SessionSecurityTestStub.generateValidKeyPair()
     private val fakeSessionSecurity = FakeSessionSecurity(
         publicKey = dummyPublicKey
     )
     private val fakeEngagementGenerator = FakeEngagementGenerator(
-        data = "mdoc:TEST_QR"
+        data = "${Engagement.QR_CODE_SCHEME}TEST_QR"
     )
 
     val viewModel: HolderWelcomeViewModel by lazy {
         HolderWelcomeViewModel(
             sessionSecurity = fakeSessionSecurity,
             engagementGenerator = fakeEngagementGenerator,
-            mdocBleSession = fakeMdocSession.apply {
-                isBluetoothEnabled()
+            mdocSessionManagerFactory = {
+                mdocSessionManager.apply {
+                    isBluetoothEnabled()
+                }
             },
             dispatcher = Dispatchers.Main
         )

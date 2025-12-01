@@ -44,7 +44,7 @@ object HolderWelcomeScreenPermissionsStub {
     )
 
     @Composable
-    fun setUpBluetoothStateManagerPrompt(viewModel: HolderWelcomeViewModel){
+    fun SetupBluetoothStateManagerPrompt(viewModel: HolderWelcomeViewModel) {
         BluetoothStateManagerPrompt(
             onStateChange = { status ->
                 when (status) {

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
     <issue id="InvalidPackage">
+        <ignore path="**/com.android.tools/common/31.13.0/**" />
+        <ignore path="**/com.android.tools.layoutlib/layoutlib-api/31.13.0/**" />
+        <ignore path="**/net.java.dev.jna/jna-platform/5.6.0/**" />
         <ignore path="**/org.jacoco/org.jacoco.agent/0.8.13/**" />
         <!-- https://issuetracker.google.com/issues/423632847 -->
         <ignore path="**/tools.jackson.core/jackson-core/3.0.2/**" />
