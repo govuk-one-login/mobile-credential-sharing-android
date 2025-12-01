@@ -242,7 +242,6 @@ class HolderWelcomeScreenTest {
         )
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun holderScreenSetsBluetoothStatusEnabledWhenUserClicksAllow() = runTest {
         val viewModel = createViewModel()
@@ -255,7 +254,7 @@ class HolderWelcomeScreenTest {
             HolderWelcomeScreen(viewModel)
         }
 
-        advanceUntilIdle()
+        composeTestRule.waitForIdle()
 
         assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
     }
@@ -280,7 +279,6 @@ class HolderWelcomeScreenTest {
         )
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun holderScreenSetsBluetoothStatusDisabledWhenUserClicksDeny() = runTest {
         val mdocBleSession = FakeMdocSessionManager().apply {
@@ -297,7 +295,7 @@ class HolderWelcomeScreenTest {
             HolderWelcomeScreen(viewModel)
         }
 
-        advanceUntilIdle()
+        composeTestRule.waitForIdle()
 
         assertEquals(BluetoothState.Disabled, viewModel.uiState.value.bluetoothStatus)
     }
