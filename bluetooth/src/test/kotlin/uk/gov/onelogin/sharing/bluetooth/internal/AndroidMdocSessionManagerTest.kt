@@ -7,7 +7,6 @@ import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
@@ -16,13 +15,13 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
-import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
 
 class AndroidMdocSessionManagerTest {
 
@@ -112,10 +111,13 @@ class AndroidMdocSessionManagerTest {
 
             Assert.assertEquals(1, advertiser.stopCalls)
             Assert.assertEquals(MdocSessionState.AdvertisingStopped, awaitItem())
+
+            gattServerManager.emitEvent(GattServerEvent.ServiceStopped)
+            Assert.assertEquals(1, gattServerManager.closeCalls)
+            Assert.assertEquals(MdocSessionState.GattServiceStopped, awaitItem())
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `gatt Connected event triggers mdoc session Connected`() = runTest {
         sessionManager.state.test {
@@ -129,7 +131,6 @@ class AndroidMdocSessionManagerTest {
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `gatt service added event triggers mdoc session service added`() = runTest {
         val service = mockk<BluetoothGattService>()

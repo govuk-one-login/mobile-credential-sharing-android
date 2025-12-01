@@ -84,10 +84,32 @@ class HolderWelcomeViewModel(
 
         viewModelScope.launch {
             mdocBleSession.state.collect { state ->
-                println("Mdoc - BLE state: $state")
                 _uiState.update { it.copy(sessionState = state) }
-                if (state == MdocSessionState.AdvertisingStarted) {
-                    println("Mdoc - Advertising UUID: ${_uiState.value.uuid}")
+
+                when (state) {
+                    MdocSessionState.AdvertisingStarted ->
+                        println("Mdoc - Advertising Started UUID: ${_uiState.value.uuid}")
+
+                    MdocSessionState.AdvertisingStopped ->
+                        println("Mdoc - Advertising Stopped")
+
+                    is MdocSessionState.Connected ->
+                        println("Mdoc - Connected: ${state.address}")
+
+                    is MdocSessionState.Disconnected ->
+                        println("Mdoc - Disconnected: ${state.address}")
+
+                    is MdocSessionState.Error ->
+                        println("Mdoc - Error: ${state.reason}")
+
+                    MdocSessionState.GattServiceStopped ->
+                        println("Mdoc - GattService Stopped")
+
+                    MdocSessionState.Idle ->
+                        println("Mdoc - Idle")
+
+                    is MdocSessionState.ServiceAdded ->
+                        println("Mdoc - Service Added: ${state.uuid}")
                 }
             }
         }

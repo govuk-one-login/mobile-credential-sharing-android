@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
 internal class AndroidMdocSessionManager(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
-    coroutineScope: CoroutineScope
+    val coroutineScope: CoroutineScope
 ) : MdocSessionManager {
     private val _state = MutableStateFlow<MdocSessionState>(MdocSessionState.Idle)
     override val state: StateFlow<MdocSessionState> = _state
@@ -89,12 +89,23 @@ internal class AndroidMdocSessionManager(
             is GattServerEvent.Error ->
                 _state.value = MdocSessionState.Error(event.error)
 
-            is GattServerEvent.ServiceAdded -> {
+            is GattServerEvent.ServiceAdded ->
                 _state.value = MdocSessionState.ServiceAdded(event.service?.uuid)
-            }
+
+            GattServerEvent.ServiceStopped ->
+                _state.value = MdocSessionState.GattServiceStopped
 
             is GattServerEvent.UnsupportedEvent ->
-                println("Unsupported event - status: ${event.status} new state: ${event.newState}")
+                println(
+                    "Mdoc - Unsupported event - status: ${event.status} new state: ${event.newState}"
+                )
+
+            GattServerEvent.SessionStarted -> {
+                coroutineScope.launch {
+                    bleAdvertiser.stopAdvertise()
+                }
+                println("Mdoc - Connection has been setup successfully - session state started")
+            }
         }
     }
 }
