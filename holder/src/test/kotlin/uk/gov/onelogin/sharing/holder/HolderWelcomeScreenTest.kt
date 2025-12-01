@@ -254,6 +254,8 @@ class HolderWelcomeScreenTest {
             HolderWelcomeScreen(viewModel)
         }
 
+        viewModel.updateBluetoothPermissions(true)
+
         composeTestRule.waitForIdle()
 
         assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
@@ -294,6 +296,8 @@ class HolderWelcomeScreenTest {
         composeTestRule.setContent {
             HolderWelcomeScreen(viewModel)
         }
+
+        viewModel.updateBluetoothPermissions(true)
 
         composeTestRule.waitForIdle()
 
