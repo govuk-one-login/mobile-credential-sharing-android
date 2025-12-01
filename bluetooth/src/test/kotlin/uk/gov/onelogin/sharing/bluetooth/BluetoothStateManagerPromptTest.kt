@@ -29,6 +29,22 @@ class BluetoothStateManagerPromptTest {
     }
 
     @Test
+    fun shouldReturnBluetoothInitialisingWhenNoRequestMade() {
+        var capturedStatus: BluetoothStatus? = null
+        composeTestRule.setContent {
+            BluetoothStateManagerPrompt(
+                onStateChange = { status ->
+                    capturedStatus = status
+                }
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        assertEquals(BluetoothStatus.INITIALIZING, capturedStatus)
+    }
+
+    @Test
     fun shouldReturnBluetoothOnWhenResultOK() {
         var capturedStatus: BluetoothStatus? = null
 

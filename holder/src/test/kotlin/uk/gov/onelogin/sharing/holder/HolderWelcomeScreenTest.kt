@@ -5,11 +5,9 @@ package uk.gov.onelogin.sharing.holder
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -27,12 +25,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.bluetooth.BluetoothStateManagerPrompt
-import uk.gov.onelogin.sharing.bluetooth.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeDeniedPermissionsState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
+import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.setUpBluetoothStateManagerPrompt
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
@@ -105,12 +102,12 @@ class HolderWelcomeScreenTest {
                 multiplePermissionsState = fakeGrantedPermissionsState,
                 hasPreviouslyRequestedPermission = true,
                 onGrantedPermissions = {
-                    DisposableEffect(Unit) {
-                        viewModel.startAdvertising()
-                        onDispose {
-                            viewModel.stopAdvertising()
-                        }
-                    }
+//                    DisposableEffect(Unit) {
+//                        viewModel.startAdvertising()
+//                        onDispose {
+//                            viewModel.stopAdvertising()
+//                        }
+//                    }
                 }
             )
         }
@@ -130,12 +127,12 @@ class HolderWelcomeScreenTest {
                     multiplePermissionsState = fakeGrantedPermissionsState,
                     hasPreviouslyRequestedPermission = true,
                     onGrantedPermissions = {
-                        DisposableEffect(Unit) {
-                            viewModel.startAdvertising()
-                            onDispose {
-                                viewModel.stopAdvertising()
-                            }
-                        }
+//                        DisposableEffect(Unit) {
+//                            viewModel.startAdvertising()
+//                            onDispose {
+//                                viewModel.stopAdvertising()
+//                            }
+//                        }
                     }
                 )
             }
@@ -167,23 +164,7 @@ class HolderWelcomeScreenTest {
     fun stateShouldBeSetToInitializingBeforeRequestingBluetoothOnOrOff() {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            BluetoothStateManagerPrompt(
-                onStateChange = { status ->
-                    when (status) {
-                        BluetoothStatus.BLUETOOTH_OFF -> {
-                            viewModel.updateBluetoothState(BluetoothState.Disabled)
-                        }
-
-                        BluetoothStatus.BLUETOOTH_ON -> {
-                            viewModel.updateBluetoothState(BluetoothState.Enabled)
-                        }
-
-                        else -> {
-                            viewModel.updateBluetoothState(BluetoothState.Initializing)
-                        }
-                    }
-                }
-            )
+            setUpBluetoothStateManagerPrompt(viewModel)
         }
 
         assertEquals(
@@ -201,23 +182,7 @@ class HolderWelcomeScreenTest {
             .respondWith(result)
 
         composeTestRule.setContent {
-            BluetoothStateManagerPrompt(
-                onStateChange = { status ->
-                    when (status) {
-                        BluetoothStatus.BLUETOOTH_OFF -> {
-                            viewModel.updateBluetoothState(BluetoothState.Disabled)
-                        }
-
-                        BluetoothStatus.BLUETOOTH_ON -> {
-                            viewModel.updateBluetoothState(BluetoothState.Enabled)
-                        }
-
-                        else -> {
-                            viewModel.updateBluetoothState(BluetoothState.Initializing)
-                        }
-                    }
-                }
-            )
+            setUpBluetoothStateManagerPrompt(viewModel)
         }
 
         assertEquals(
@@ -235,23 +200,7 @@ class HolderWelcomeScreenTest {
             .respondWith(result)
 
         composeTestRule.setContent {
-            BluetoothStateManagerPrompt(
-                onStateChange = { status ->
-                    when (status) {
-                        BluetoothStatus.BLUETOOTH_OFF -> {
-                            viewModel.updateBluetoothState(BluetoothState.Disabled)
-                        }
-
-                        BluetoothStatus.BLUETOOTH_ON -> {
-                            viewModel.updateBluetoothState(BluetoothState.Enabled)
-                        }
-
-                        else -> {
-                            viewModel.updateBluetoothState(BluetoothState.Initializing)
-                        }
-                    }
-                }
-            )
+            setUpBluetoothStateManagerPrompt(viewModel)
         }
 
         assertEquals(
@@ -269,33 +218,16 @@ class HolderWelcomeScreenTest {
             .respondWith(result)
 
         composeTestRule.setContent {
-            BluetoothStateManagerPrompt(
-                onStateChange = { status ->
-                    when (status) {
-                        BluetoothStatus.BLUETOOTH_OFF -> {
-                            viewModel.updateBluetoothState(BluetoothState.Disabled)
-                        }
-
-                        BluetoothStatus.BLUETOOTH_ON -> {
-                            viewModel.updateBluetoothState(BluetoothState.Enabled)
-                        }
-
-                        else -> {
-                            viewModel.updateBluetoothState(BluetoothState.Initializing)
-                        }
-                    }
-                }
-            )
+            setUpBluetoothStateManagerPrompt(viewModel)
 
             HolderScreenContent(
                 contentState = HolderWelcomeUiState(
                     bluetoothStatus = viewModel.uiState.value.bluetoothStatus
                 )
             )
-
-            composeTestRule.onNodeWithText(stringResource(R.string.bluetooth_disabled_error_text))
         }
 
+        composeTestRule.onNodeWithText(resources.getString(R.string.bluetooth_disabled_error_text))
         assertEquals(
             BluetoothState.Disabled,
             viewModel.uiState.value.bluetoothStatus

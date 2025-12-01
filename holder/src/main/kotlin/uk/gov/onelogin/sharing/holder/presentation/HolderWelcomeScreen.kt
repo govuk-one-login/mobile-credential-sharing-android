@@ -129,7 +129,7 @@ fun BluetoothPermissionPrompt(
     multiplePermissionsState: MultiplePermissionsState,
     hasPreviouslyRequestedPermission: Boolean,
     modifier: Modifier = Modifier,
-    onGrantedPermissions: @Composable () -> Unit
+    onGrantedPermissions: () -> Unit
 ) {
     when {
         multiplePermissionsState.allPermissionsGranted -> {
