@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothState
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
@@ -100,7 +102,7 @@ class HolderWelcomeViewModel(
                         println("Mdoc - Disconnected: ${state.address}")
 
                     is MdocSessionState.Error ->
-                        println("Mdoc - Error: ${state.reason}")
+                        handleError(state.reason)
 
                     MdocSessionState.GattServiceStopped ->
                         println("Mdoc - GattService Stopped")
@@ -112,6 +114,31 @@ class HolderWelcomeViewModel(
                         println("Mdoc - Service Added: ${state.uuid}")
                 }
             }
+        }
+
+        viewModelScope.launch {
+            mdocBleSession.bluetoothState.collect { bluetoothState ->
+                when (bluetoothState) {
+                    BluetoothState.OFF -> {
+                        // take user to: Bluetooth turned off on holder device during session
+                        // placeholder error screen (can be a plain screen with this as the title)
+                        println("Mdoc - Bluetooth switched off")
+                    }
+
+                    else -> println("Mdoc - Bluetooth State: $bluetoothState")
+                }
+            }
+        }
+    }
+
+    private fun handleError(reason: MdocSessionError) {
+        when (reason) {
+            MdocSessionError.ADVERTISING_FAILED -> println("Mdoc - Error: Advertising failed")
+
+            MdocSessionError.GATT_NOT_AVAILABLE -> println("Mdoc - Error: GATT not available")
+
+            MdocSessionError.BLUETOOTH_PERMISSION_MISSING ->
+                println("Mdoc - Error: Bluetooth permission missing")
         }
     }
 

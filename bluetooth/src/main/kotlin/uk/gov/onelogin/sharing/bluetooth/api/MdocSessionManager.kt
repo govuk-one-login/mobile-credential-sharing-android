@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api
 
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothState
 
 /**
  * Responsible for orchestrating the BLE advertising and GATT service
@@ -15,6 +16,13 @@ interface MdocSessionManager {
      * connected, or has encountered an error.
      */
     val state: StateFlow<MdocSessionState>
+
+    /**
+     * Current state of the Bluetooth adapter, exposed as a [StateFlow].
+     *
+     * This exposes the broadcast receiver that listens for Bluetooth state changes.
+     */
+    val bluetoothState: StateFlow<BluetoothState>
 
     /**
      * Starts the BLE advertising and GATT service.
