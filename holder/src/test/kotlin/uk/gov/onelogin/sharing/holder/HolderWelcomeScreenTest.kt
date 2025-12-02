@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -311,8 +312,8 @@ class HolderWelcomeScreenTest {
             composeTestRule.viewModel.updateBluetoothPermissions(true)
             render()
             advanceUntilIdle()
-            composeTestRule.onNodeWithContentDescription("QR Data")
         }
+        composeTestRule.assertQrCodeIsDisplayed()
     }
 
     @Test

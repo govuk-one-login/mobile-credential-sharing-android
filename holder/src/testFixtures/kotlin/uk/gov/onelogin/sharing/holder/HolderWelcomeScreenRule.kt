@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
+import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
@@ -103,7 +104,8 @@ class HolderWelcomeScreenRule(
             HolderScreenContent(
                 contentState = HolderWelcomeUiState(
                     qrData = "fakestring",
-                    hasBluetoothPermissions = true
+                    hasBluetoothPermissions = true,
+                    bluetoothStatus = BluetoothState.Enabled
                 )
             )
         }
