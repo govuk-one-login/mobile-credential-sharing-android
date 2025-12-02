@@ -80,28 +80,6 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `on start advertise success updates state via BleAdvertiser`() = runTest {
-        val fakeMdocSession = FakeMdocSessionManager(initialState = MdocSessionState.Idle)
-        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
-        val initialUuid = viewModel.uiState.value.uuid
-
-        viewModel.startAdvertising()
-
-        advanceUntilIdle()
-        assertEquals(1, fakeMdocSession.startCalls)
-        assertEquals(
-            initialUuid,
-            fakeMdocSession.lastUuid
-        )
-
-        assertEquals(
-            MdocSessionState.AdvertisingStarted,
-            viewModel.uiState.value.sessionState
-        )
-        assertNull(viewModel.uiState.value.lastErrorMessage)
-    }
-
-    @Test
     fun `stop advertising calls stop and updates state`() = runTest {
         val fakeMdocSession =
             FakeMdocSessionManager(initialState = MdocSessionState.AdvertisingStarted)

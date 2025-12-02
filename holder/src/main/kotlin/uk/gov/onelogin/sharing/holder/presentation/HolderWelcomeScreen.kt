@@ -66,7 +66,6 @@ fun HolderWelcomeScreen(
         onGrantedPermissions = {
             viewModel.updateBluetoothPermissions(true)
             DisposableEffect(Unit) {
-                viewModel.startAdvertising()
                 onDispose {
                     viewModel.stopAdvertising()
                 }

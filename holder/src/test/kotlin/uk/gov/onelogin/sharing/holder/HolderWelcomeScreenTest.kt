@@ -99,7 +99,6 @@ class HolderWelcomeScreenTest {
                 hasPreviouslyRequestedPermission = true,
                 onGrantedPermissions = {
                     DisposableEffect(Unit) {
-                        viewModel.startAdvertising()
                         onDispose {
                             viewModel.stopAdvertising()
                         }
@@ -109,7 +108,7 @@ class HolderWelcomeScreenTest {
         }
 
         assertEquals(
-            MdocSessionState.AdvertisingStarted,
+            MdocSessionState.Idle,
             viewModel.uiState.value.sessionState
         )
     }
@@ -127,7 +126,6 @@ class HolderWelcomeScreenTest {
                     hasPreviouslyRequestedPermission = true,
                     onGrantedPermissions = {
                         DisposableEffect(Unit) {
-                            viewModel.startAdvertising()
                             onDispose {
                                 viewModel.stopAdvertising()
                             }
@@ -180,6 +178,20 @@ class HolderWelcomeScreenTest {
             BluetoothState.Unknown,
             viewModel.uiState.value.bluetoothState
         )
+    }
+
+    @Test
+    fun `holder screen shows bluetooth disabled screen when bluetooth is disabled`() {
+        composeTestRule.setContent {
+            HolderScreenContent(
+                contentState = HolderWelcomeUiState(
+                    bluetoothState = BluetoothState.Disabled,
+                    hasBluetoothPermissions = true
+                )
+            )
+        }
+
+        composeTestRule.assertBluetoothDisabledTextIsDisplayed()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

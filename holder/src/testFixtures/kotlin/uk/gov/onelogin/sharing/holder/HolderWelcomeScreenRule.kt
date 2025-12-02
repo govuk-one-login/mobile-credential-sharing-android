@@ -31,7 +31,8 @@ class HolderWelcomeScreenRule(
     composeTestRule: ComposeContentTestRule,
     private val enablePermissionsText: String,
     private val openAppSettingsText: String,
-    private val permissionDeniedText: String
+    private val permissionDeniedText: String,
+    private val bluetoothDisabledText: String
 ) : ComposeContentTestRule by composeTestRule {
 
     constructor(
@@ -43,7 +44,8 @@ class HolderWelcomeScreenRule(
         openAppSettingsText = resources.getString(R.string.open_app_permissions),
         permissionDeniedText = resources.getString(
             R.string.bluetooth_permission_permanently_denied
-        )
+        ),
+        bluetoothDisabledText = resources.getString(R.string.bluetooth_disabled_error_text)
     )
 
     val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
@@ -92,6 +94,9 @@ class HolderWelcomeScreenRule(
     fun assertQrCodeIsDisplayed() = onNodeWithContentDescription(QR_CODE_CONTENT_DESC)
         .assertIsDisplayed()
         .assert(hasRole(Role.Image))
+
+    fun assertBluetoothDisabledTextIsDisplayed() =
+        onNodeWithText(bluetoothDisabledText).assertIsDisplayed()
 
     fun render() {
         setContent {

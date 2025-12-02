@@ -142,6 +142,7 @@ class HolderWelcomeViewModel(
                         val wasEnabled = _uiState.value.bluetoothState == BluetoothState.Enabled
                         _uiState.update { it.copy(bluetoothState = BluetoothState.Enabled) }
 
+                        // Entry point - only when bluetooth is enabled start advertising
                         if (!wasEnabled) {
                             mdocBleSession.start(_uiState.value.uuid)
                         }
@@ -166,12 +167,6 @@ class HolderWelcomeViewModel(
 
             MdocSessionError.BLUETOOTH_PERMISSION_MISSING ->
                 println("Mdoc - Error: Bluetooth permission missing")
-        }
-    }
-
-    fun startAdvertising() {
-        viewModelScope.launch {
-            mdocBleSession.start(_uiState.value.uuid)
         }
     }
 
