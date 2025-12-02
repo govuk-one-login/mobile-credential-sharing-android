@@ -260,22 +260,4 @@ class AndroidMdocSessionManagerTest {
         assertEquals(1, gattServerManager.closeCalls)
         assertEquals(1, advertiser.stopCalls)
     }
-
-    @Test
-    fun `should return true if bluetooth enabled`() {
-        advertiser.apply {
-            mockBluetoothEnabled = true
-        }
-
-        assertTrue { sessionManager.isBluetoothEnabled() }
-    }
-
-    @Test
-    fun `should return false if bluetooth disabled`() {
-        advertiser.apply {
-            mockBluetoothEnabled = false
-        }
-
-        assertFalse { sessionManager.isBluetoothEnabled() }
-    }
 }

@@ -45,7 +45,7 @@ class AndroidBluetoothStateMonitorTest {
         monitor.states.test {
             monitor.start()
 
-            assertEquals(BluetoothState.ON, awaitItem())
+            assertEquals(BluetoothStatus.ON, awaitItem())
         }
     }
 
@@ -56,7 +56,7 @@ class AndroidBluetoothStateMonitorTest {
         monitor.states.test {
             monitor.start()
 
-            assertEquals(BluetoothState.OFF, awaitItem())
+            assertEquals(BluetoothStatus.OFF, awaitItem())
         }
     }
 
@@ -81,15 +81,15 @@ class AndroidBluetoothStateMonitorTest {
         monitor.states.test {
             monitor.start()
 
-            assertEquals(BluetoothState.ON, awaitItem())
+            assertEquals(BluetoothStatus.ON, awaitItem())
 
             context.sendBroadcast(intentTurningOff)
             shadowOf(Looper.getMainLooper()).idle()
-            assertEquals(BluetoothState.TURNING_OFF, awaitItem())
+            assertEquals(BluetoothStatus.TURNING_OFF, awaitItem())
 
             context.sendBroadcast(intentOff)
             shadowOf(Looper.getMainLooper()).idle()
-            assertEquals(BluetoothState.OFF, awaitItem())
+            assertEquals(BluetoothStatus.OFF, awaitItem())
         }
     }
 }

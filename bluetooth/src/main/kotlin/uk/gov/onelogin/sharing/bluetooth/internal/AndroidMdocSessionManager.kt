@@ -13,8 +13,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothState
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
 
 internal class AndroidMdocSessionManager(
@@ -26,8 +26,8 @@ internal class AndroidMdocSessionManager(
     private val _state = MutableStateFlow<MdocSessionState>(MdocSessionState.Idle)
     override val state: StateFlow<MdocSessionState> = _state
 
-    private val _bluetoothState = MutableStateFlow(BluetoothState.UNKNOWN)
-    override val bluetoothState: StateFlow<BluetoothState> = _bluetoothState
+    private val _bluetoothStatus = MutableStateFlow(BluetoothStatus.UNKNOWN)
+    override val bluetoothStatus: StateFlow<BluetoothStatus> = _bluetoothStatus
 
     private val connectedDevices = mutableSetOf<String>()
 
@@ -47,15 +47,15 @@ internal class AndroidMdocSessionManager(
         coroutineScope.launch {
             bluetoothStateMonitor.states.collect { state ->
                 when (state) {
-                    BluetoothState.OFF,
-                    BluetoothState.TURNING_OFF -> {
+                    BluetoothStatus.OFF,
+                    BluetoothStatus.TURNING_OFF -> {
                         bleAdvertiser.stopAdvertise()
                         gattServerManager.close()
-                        _bluetoothState.value = BluetoothState.OFF
+                        _bluetoothStatus.value = BluetoothStatus.OFF
                     }
 
-                    BluetoothState.ON -> {
-                        _bluetoothState.value = BluetoothState.ON
+                    BluetoothStatus.ON -> {
+                        _bluetoothStatus.value = BluetoothStatus.ON
                     }
 
                     else -> Unit
@@ -134,6 +134,4 @@ internal class AndroidMdocSessionManager(
             }
         }
     }
-
-    override fun isBluetoothEnabled(): Boolean = bleAdvertiser.isBluetoothEnabled()
 }

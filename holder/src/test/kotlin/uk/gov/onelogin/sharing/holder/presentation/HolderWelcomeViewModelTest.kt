@@ -14,6 +14,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.ble.deviceAddressStub
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
@@ -220,31 +221,73 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `checkBluetoothStatus should update status to Enabled when bluetooth is on`() {
-        val fakeMdocSession = FakeMdocSessionManager().apply {
-            isBluetoothEnabled().apply {
-                mockBluetoothEnabled = true
-            }
-        }
+    fun `bluetooth switched off updates state to Disabled`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
         val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
-        viewModel.checkBluetoothStatus()
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.OFF)
 
-        assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Disabled,
+            viewModel.uiState.value.bluetoothState
+        )
     }
 
     @Test
-    fun `checkBluetoothStatus should update status to Disabled when bluetooth is off`() {
-        val fakeMdocSession = FakeMdocSessionManager().apply {
-            isBluetoothEnabled().apply {
-                mockBluetoothEnabled = false
-            }
-        }
+    fun `bluetooth turning off updates state to Disabled`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
         val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
-        viewModel.checkBluetoothStatus()
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.TURNING_OFF)
 
-        assertEquals(BluetoothState.Disabled, viewModel.uiState.value.bluetoothStatus)
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Disabled,
+            viewModel.uiState.value.bluetoothState
+        )
+    }
+
+    @Test
+    fun `bluetooth turning on updates state to Initializing`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.TURNING_ON)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Initializing,
+            viewModel.uiState.value.bluetoothState
+        )
+    }
+
+    @Test
+    fun `bluetooth switched on updates state to Enabled`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.TURNING_ON)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Initializing,
+            viewModel.uiState.value.bluetoothState
+        )
+    }
+
+    @Test
+    fun `bluetooth unknown status on updates state to Unknown`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.UNKNOWN)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Unknown,
+            viewModel.uiState.value.bluetoothState
+        )
     }
 
     @Test
@@ -254,14 +297,5 @@ class HolderWelcomeViewModelTest {
         viewModel.updateBluetoothPermissions(true)
 
         assertEquals(true, viewModel.uiState.value.hasBluetoothPermissions)
-    }
-
-    @Test
-    fun `updateBluetoothState should update the bluetoothStatus`() {
-        val viewModel = createViewModel()
-
-        viewModel.updateBluetoothState(BluetoothState.Enabled)
-
-        assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
     }
 }

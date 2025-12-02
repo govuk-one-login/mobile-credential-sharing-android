@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.SharedFlow
 
 internal class AndroidBluetoothStateMonitor(private val appContext: Context) :
     BluetoothStateMonitor {
-    private val _states = MutableSharedFlow<BluetoothState>(
+    private val _states = MutableSharedFlow<BluetoothStatus>(
         replay = 1
     )
-    override val states: SharedFlow<BluetoothState> = _states
+    override val states: SharedFlow<BluetoothStatus> = _states
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -28,11 +28,11 @@ internal class AndroidBluetoothStateMonitor(private val appContext: Context) :
                     BluetoothAdapter.ERROR
                 )
             ) {
-                BluetoothAdapter.STATE_ON -> BluetoothState.ON
-                BluetoothAdapter.STATE_OFF -> BluetoothState.OFF
-                BluetoothAdapter.STATE_TURNING_ON -> BluetoothState.TURNING_ON
-                BluetoothAdapter.STATE_TURNING_OFF -> BluetoothState.TURNING_OFF
-                else -> BluetoothState.UNKNOWN
+                BluetoothAdapter.STATE_ON -> BluetoothStatus.ON
+                BluetoothAdapter.STATE_OFF -> BluetoothStatus.OFF
+                BluetoothAdapter.STATE_TURNING_ON -> BluetoothStatus.TURNING_ON
+                BluetoothAdapter.STATE_TURNING_OFF -> BluetoothStatus.TURNING_OFF
+                else -> BluetoothStatus.UNKNOWN
             }
 
             _states.tryEmit(state)
@@ -70,9 +70,9 @@ internal class AndroidBluetoothStateMonitor(private val appContext: Context) :
             ?.adapter
 
         val initialState = if (adapter?.isEnabled == true) {
-            BluetoothState.ON
+            BluetoothStatus.ON
         } else {
-            BluetoothState.OFF
+            BluetoothStatus.OFF
         }
         _states.tryEmit(initialState)
     }

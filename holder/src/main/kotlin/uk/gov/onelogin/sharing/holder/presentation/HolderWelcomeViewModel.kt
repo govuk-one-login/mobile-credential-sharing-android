@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothState
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
@@ -75,7 +75,6 @@ class HolderWelcomeViewModel(
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
     init {
-        checkBluetoothStatus()
         viewModelScope.launch(dispatcher) {
             val pubKey = sessionSecurity.generateEcPublicKey(EC_ALGORITHM, EC_PARAMETER_SPEC)
             val key = pubKey?.let { CoseKey.generateCoseKey(it) }
@@ -118,15 +117,42 @@ class HolderWelcomeViewModel(
         }
 
         viewModelScope.launch {
-            mdocBleSession.bluetoothState.collect { bluetoothState ->
+            mdocBleSession.bluetoothStatus.collect { bluetoothState ->
                 when (bluetoothState) {
-                    BluetoothState.OFF -> {
-                        // take user to: Bluetooth turned off on holder device during session
-                        // placeholder error screen (can be a plain screen with this as the title)
-                        println("Mdoc - Bluetooth switched off")
+                    BluetoothStatus.OFF,
+                    BluetoothStatus.TURNING_OFF -> {
+                        val wasDisabled = _uiState.value.bluetoothState == BluetoothState.Disabled
+                        if (!wasDisabled) {
+                            println("Mdoc - Bluetooth switched OFF")
+                            _uiState.update {
+                                it.copy(bluetoothState = BluetoothState.Disabled)
+                            }
+                        }
                     }
 
-                    else -> println("Mdoc - Bluetooth State: $bluetoothState")
+                    BluetoothStatus.TURNING_ON -> {
+                        println("Mdoc - Bluetooth initializing")
+                        _uiState.update {
+                            it.copy(bluetoothState = BluetoothState.Initializing)
+                        }
+                    }
+
+                    BluetoothStatus.ON -> {
+                        println("Mdoc - Bluetooth switched ON")
+                        val wasEnabled = _uiState.value.bluetoothState == BluetoothState.Enabled
+                        _uiState.update { it.copy(bluetoothState = BluetoothState.Enabled) }
+
+                        if (!wasEnabled) {
+                            mdocBleSession.start(_uiState.value.uuid)
+                        }
+                    }
+
+                    BluetoothStatus.UNKNOWN -> {
+                        println("Mdoc - Bluetooth status unknown")
+                        _uiState.update {
+                            it.copy(bluetoothState = BluetoothState.Unknown)
+                        }
+                    }
                 }
             }
         }
@@ -144,9 +170,8 @@ class HolderWelcomeViewModel(
     }
 
     fun startAdvertising() {
-        val uuid = _uiState.value.uuid
         viewModelScope.launch {
-            mdocBleSession.start(uuid)
+            mdocBleSession.start(_uiState.value.uuid)
         }
     }
 
@@ -156,27 +181,9 @@ class HolderWelcomeViewModel(
         }
     }
 
-    fun updateBluetoothState(state: BluetoothState) {
-        _uiState.update {
-            it.copy(bluetoothStatus = state)
-        }
-    }
-
     fun updateBluetoothPermissions(state: Boolean) {
         _uiState.update {
             it.copy(hasBluetoothPermissions = state)
-        }
-    }
-
-    fun checkBluetoothStatus() {
-        if (mdocBleSession.isBluetoothEnabled()) {
-            _uiState.update {
-                it.copy(bluetoothStatus = BluetoothState.Enabled)
-            }
-        } else {
-            _uiState.update {
-                it.copy(bluetoothStatus = BluetoothState.Disabled)
-            }
         }
     }
 }
@@ -186,6 +193,6 @@ data class HolderWelcomeUiState(
     val qrData: String? = null,
     val sessionState: MdocSessionState = MdocSessionState.Idle,
     val lastErrorMessage: String? = null,
-    val bluetoothStatus: BluetoothState = BluetoothState.Initializing,
+    val bluetoothState: BluetoothState = BluetoothState.Unknown,
     val hasBluetoothPermissions: Boolean? = null
 )
