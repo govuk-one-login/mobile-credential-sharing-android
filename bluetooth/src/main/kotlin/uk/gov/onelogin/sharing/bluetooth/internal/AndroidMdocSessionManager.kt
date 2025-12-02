@@ -97,4 +97,6 @@ internal class AndroidMdocSessionManager(
                 println("Unsupported event - status: ${event.status} new state: ${event.newState}")
         }
     }
+
+    override fun isBluetoothEnabled(): Boolean = bleAdvertiser.isBluetoothEnabled()
 }

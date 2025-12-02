@@ -12,6 +12,7 @@ class FakeMdocSessionManager(initialState: MdocSessionState = MdocSessionState.I
     var startCalls = 0
     var stopCalls = 0
     var lastUuid: UUID? = null
+    var mockBluetoothEnabled: Boolean = true
 
     override suspend fun start(serviceUuid: UUID) {
         startCalls++
@@ -23,6 +24,8 @@ class FakeMdocSessionManager(initialState: MdocSessionState = MdocSessionState.I
         stopCalls++
         _state.value = MdocSessionState.AdvertisingStopped
     }
+
+    override fun isBluetoothEnabled(): Boolean = mockBluetoothEnabled
 
     fun emitState(state: MdocSessionState) {
         _state.value = state

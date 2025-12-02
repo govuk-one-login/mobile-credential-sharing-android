@@ -27,4 +27,6 @@ interface MdocSessionManager {
      * Stops the BLE advertising and GATT service.
      */
     suspend fun stop()
+
+    fun isBluetoothEnabled(): Boolean
 }

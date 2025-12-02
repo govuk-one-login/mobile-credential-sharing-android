@@ -6,6 +6,8 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -231,5 +233,23 @@ class AndroidMdocSessionManagerTest {
 
             expectNoEvents()
         }
+    }
+
+    @Test
+    fun `should return true if bluetooth enabled`() {
+        advertiser.apply {
+            mockBluetoothEnabled = true
+        }
+
+        assertTrue { sessionManager.isBluetoothEnabled() }
+    }
+
+    @Test
+    fun `should return false if bluetooth disabled`() {
+        advertiser.apply {
+            mockBluetoothEnabled = false
+        }
+
+        assertFalse { sessionManager.isBluetoothEnabled() }
     }
 }

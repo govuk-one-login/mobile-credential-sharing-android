@@ -15,6 +15,7 @@ class FakeBleAdvertiser(initialState: AdvertiserState = AdvertiserState.Idle) : 
     var stopCalls = 0
     var lastAdvertiseData: BleAdvertiseData? = null
     var exceptionToThrow: StartAdvertisingException? = null
+    var mockBluetoothEnabled = true
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
         if (exceptionToThrow != null) {
@@ -31,7 +32,7 @@ class FakeBleAdvertiser(initialState: AdvertiserState = AdvertiserState.Idle) : 
         _state.value = AdvertiserState.Stopped
     }
 
-    override fun isBluetoothEnabled(): Boolean = true
+    override fun isBluetoothEnabled(): Boolean = mockBluetoothEnabled
 
     override fun hasAdvertisePermission(): Boolean = true
 
