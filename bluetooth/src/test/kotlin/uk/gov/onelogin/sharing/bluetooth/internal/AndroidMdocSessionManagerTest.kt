@@ -6,6 +6,8 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.runTest
@@ -21,7 +23,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothState
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
 
@@ -245,10 +247,10 @@ class AndroidMdocSessionManagerTest {
 
     @Test
     fun `bluetooth switched off triggers event and stops session`() = runTest {
-        bluetoothStateMonitor.emit(BluetoothState.OFF)
+        bluetoothStateMonitor.emit(BluetoothStatus.OFF)
 
-        sessionManager.bluetoothState.test {
-            assertEquals(BluetoothState.OFF, awaitItem())
+        sessionManager.bluetoothStatus.test {
+            assertEquals(BluetoothStatus.OFF, awaitItem())
         }
 
         sessionManager.state.test {
@@ -257,5 +259,23 @@ class AndroidMdocSessionManagerTest {
 
         assertEquals(1, gattServerManager.closeCalls)
         assertEquals(1, advertiser.stopCalls)
+    }
+
+    @Test
+    fun `should return true if bluetooth enabled`() {
+        advertiser.apply {
+            mockBluetoothEnabled = true
+        }
+
+        assertTrue { sessionManager.isBluetoothEnabled() }
+    }
+
+    @Test
+    fun `should return false if bluetooth disabled`() {
+        advertiser.apply {
+            mockBluetoothEnabled = false
+        }
+
+        assertFalse { sessionManager.isBluetoothEnabled() }
     }
 }

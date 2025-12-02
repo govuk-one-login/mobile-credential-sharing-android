@@ -134,4 +134,6 @@ internal class AndroidMdocSessionManager(
             }
         }
     }
+
+    override fun isBluetoothEnabled(): Boolean = bleAdvertiser.isBluetoothEnabled()
 }
