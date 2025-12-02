@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Monitors the state of the device's Bluetooth adapter.
  *
- * This contract is responsible for observing changes to the Bluetooth state
- * and exposing them as a [Flow] of [BluetoothStatus] events.
+ * Observes changes to the Bluetooth state changes and exposes them
+ * as a [Flow] of [BluetoothStatus] events.
  */
 interface BluetoothStateMonitor {
     /**

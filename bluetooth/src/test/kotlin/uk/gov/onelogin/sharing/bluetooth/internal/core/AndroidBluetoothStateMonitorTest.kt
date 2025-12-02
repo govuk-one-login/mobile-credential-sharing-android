@@ -61,6 +61,39 @@ class AndroidBluetoothStateMonitorTest {
     }
 
     @Test
+    fun `broadcast receiver emits TURNING_ON and ON`() = runTest {
+        every { mockAdapter.isEnabled } returns true
+
+        val intentTurningOn = Intent(BluetoothAdapter.ACTION_STATE_CHANGED).apply {
+            putExtra(
+                BluetoothAdapter.EXTRA_STATE,
+                BluetoothAdapter.STATE_TURNING_ON
+            )
+        }
+
+        val intentOn = Intent(BluetoothAdapter.ACTION_STATE_CHANGED).apply {
+            putExtra(
+                BluetoothAdapter.EXTRA_STATE,
+                BluetoothAdapter.STATE_ON
+            )
+        }
+
+        monitor.states.test {
+            monitor.start()
+
+            awaitItem()
+
+            context.sendBroadcast(intentTurningOn)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(BluetoothStatus.TURNING_ON, awaitItem())
+
+            context.sendBroadcast(intentOn)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(BluetoothStatus.ON, awaitItem())
+        }
+    }
+
+    @Test
     fun `broadcast receiver emits TURNING_OFF and OFF`() = runTest {
         every { mockAdapter.isEnabled } returns true
 
@@ -90,6 +123,28 @@ class AndroidBluetoothStateMonitorTest {
             context.sendBroadcast(intentOff)
             shadowOf(Looper.getMainLooper()).idle()
             assertEquals(BluetoothStatus.OFF, awaitItem())
+        }
+    }
+
+    @Test
+    fun `broadcast receiver emits unhandled event`() = runTest {
+        every { mockAdapter.isEnabled } returns true
+
+        val unhandledIntent = Intent(BluetoothAdapter.ACTION_STATE_CHANGED).apply {
+            putExtra(
+                BluetoothAdapter.EXTRA_STATE,
+                BluetoothAdapter.STATE_DISCONNECTED
+            )
+        }
+
+        monitor.states.test {
+            monitor.start()
+
+            assertEquals(BluetoothStatus.ON, awaitItem())
+
+            context.sendBroadcast(unhandledIntent)
+            shadowOf(Looper.getMainLooper()).idle()
+            assertEquals(BluetoothStatus.UNKNOWN, awaitItem())
         }
     }
 }

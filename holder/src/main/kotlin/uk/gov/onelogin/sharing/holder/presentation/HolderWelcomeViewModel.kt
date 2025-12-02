@@ -142,18 +142,13 @@ class HolderWelcomeViewModel(
                         val wasEnabled = _uiState.value.bluetoothState == BluetoothState.Enabled
                         _uiState.update { it.copy(bluetoothState = BluetoothState.Enabled) }
 
-                        // Entry point - only when bluetooth is enabled start advertising
-                        if (!wasEnabled) {
+                        if (!wasEnabled && _uiState.value.hasBluetoothPermissions == true) {
                             mdocBleSession.start(_uiState.value.uuid)
                         }
                     }
 
-                    BluetoothStatus.UNKNOWN -> {
+                    BluetoothStatus.UNKNOWN ->
                         println("Mdoc - Bluetooth status unknown")
-                        _uiState.update {
-                            it.copy(bluetoothState = BluetoothState.Unknown)
-                        }
-                    }
                 }
             }
         }

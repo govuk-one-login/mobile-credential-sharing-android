@@ -9,7 +9,9 @@ import java.util.UUID
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -242,6 +244,42 @@ class AndroidMdocSessionManagerTest {
             )
 
             expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `gatt SessionStarted does not change session state`() = runTest {
+        sessionManager.state.test {
+            assertEquals(MdocSessionState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(GattServerEvent.SessionStarted)
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `bluetooth switched off triggers event stops BLE session`() = runTest {
+        bluetoothStateMonitor.emit(BluetoothStatus.OFF)
+
+        sessionManager.bluetoothStatus.test {
+            assertEquals(BluetoothStatus.OFF, awaitItem())
+        }
+
+        sessionManager.state.test {
+            assertEquals(MdocSessionState.AdvertisingStopped, awaitItem())
+        }
+
+        assertEquals(1, gattServerManager.closeCalls)
+        assertEquals(1, advertiser.stopCalls)
+    }
+
+    @Test
+    fun `bluetooth switched on triggers Bluetooth ON event`() = runTest {
+        bluetoothStateMonitor.emit(BluetoothStatus.ON)
+
+        sessionManager.bluetoothStatus.test {
+            assertEquals(BluetoothStatus.ON, awaitItem())
         }
     }
 

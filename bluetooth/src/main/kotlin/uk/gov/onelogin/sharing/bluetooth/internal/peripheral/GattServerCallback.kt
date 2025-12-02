@@ -51,7 +51,7 @@ internal class GattServerCallback(private val gatGattEventEmitter: GattEventEmit
                 println(
                     "Unknown or empty command: ${
                         value?.joinToString {
-                            "%02X".format(it)
+                            BYTE_TO_HEX_FORMAT.format(it)
                         }
                     }"
                 )
@@ -63,5 +63,9 @@ internal class GattServerCallback(private val gatGattEventEmitter: GattEventEmit
         gatGattEventEmitter.emit(
             GattEvent.ServiceAdded(status, service)
         )
+    }
+
+    companion object {
+        const val BYTE_TO_HEX_FORMAT = "%02X"
     }
 }

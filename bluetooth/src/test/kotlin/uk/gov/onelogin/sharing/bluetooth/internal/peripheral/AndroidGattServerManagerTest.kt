@@ -30,7 +30,7 @@ class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothManager = mockk<BluetoothManager>(relaxed = true)
     private val gattServer = mockk<BluetoothGattServer>(relaxed = true)
-    val device = mockBluetoothDevice()
+    private val device = mockBluetoothDevice()
     private val fakeGattService = AndroidGattServiceBuilder.build(
         GattServiceDefinition(
             UUID.randomUUID(),
