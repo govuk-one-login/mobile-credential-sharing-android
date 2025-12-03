@@ -298,4 +298,56 @@ class HolderWelcomeViewModelTest {
 
         assertEquals(true, viewModel.uiState.value.hasBluetoothPermissions)
     }
+
+    @Test
+    fun `bluetooth ON only triggers start once while already enabled`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        viewModel.updateBluetoothPermissions(true)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+        advanceUntilIdle()
+
+        assertEquals(
+            BluetoothState.Enabled,
+            viewModel.uiState.value.bluetoothState
+        )
+        assertEquals(1, fakeMdocSession.startCalls)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+        advanceUntilIdle()
+
+        assertEquals(
+            BluetoothState.Enabled,
+            viewModel.uiState.value.bluetoothState
+        )
+        assertEquals(
+            1,
+            fakeMdocSession.startCalls
+        )
+    }
+
+    @Test
+    fun `bluetooth ON does not trigger restart until session has fully stopped`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        viewModel.updateBluetoothPermissions(true)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+        advanceUntilIdle()
+        assertEquals(1, fakeMdocSession.startCalls)
+
+        fakeMdocSession.emitState(MdocSessionState.AdvertisingStopped)
+        advanceUntilIdle()
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+        advanceUntilIdle()
+
+        assertEquals(
+            1,
+            fakeMdocSession.startCalls
+        )
+    }
 }

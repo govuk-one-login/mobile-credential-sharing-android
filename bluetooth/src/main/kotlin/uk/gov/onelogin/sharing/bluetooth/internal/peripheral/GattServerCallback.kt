@@ -66,6 +66,6 @@ internal class GattServerCallback(private val gatGattEventEmitter: GattEventEmit
     }
 
     companion object {
-        const val BYTE_TO_HEX_FORMAT = "%02X"
+        private const val BYTE_TO_HEX_FORMAT = "%02X"
     }
 }
