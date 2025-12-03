@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.security.engagement
 
+import uk.gov.logging.api.Logger
 import java.util.Base64
 import java.util.UUID
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
@@ -13,7 +14,7 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
  * and a verifier.
  */
 
-class EngagementGenerator : Engagement {
+class EngagementGenerator(private val logger: Logger) : Engagement {
 
     /**
      *   Creates an mDoc engagement structure and returns it as a Base64Url encoded string.
@@ -35,10 +36,12 @@ class EngagementGenerator : Engagement {
 
         val bytes = deviceEngagement.encode()
         val base64 = Base64.getUrlEncoder().encodeToString(bytes)
-        println(base64)
 
         // for testing purposes - remove when verifier built
-        decodeDeviceEngagement(base64)
+        decodeDeviceEngagement(
+            cborBase64Url = base64,
+            logger = logger
+        )
 
         return base64
     }

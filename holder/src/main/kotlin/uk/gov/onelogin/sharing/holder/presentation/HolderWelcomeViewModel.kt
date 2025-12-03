@@ -59,8 +59,8 @@ class HolderWelcomeViewModel(
                         val logger = AndroidLoggerFactory.create()
 
                         return HolderWelcomeViewModel(
-                            sessionSecurity = SessionSecurityImpl(),
-                            engagementGenerator = EngagementGenerator(),
+                            sessionSecurity = SessionSecurityImpl(logger),
+                            engagementGenerator = EngagementGenerator(logger),
                             mdocSessionManagerFactory = mdocFactory,
                             logger = logger
                         ) as T

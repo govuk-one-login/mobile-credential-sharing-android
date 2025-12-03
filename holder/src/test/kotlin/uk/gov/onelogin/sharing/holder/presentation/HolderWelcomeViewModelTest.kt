@@ -8,10 +8,10 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
-import uk.gov.onelogin.sharing.core.FakeLogger
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
@@ -35,7 +35,7 @@ class HolderWelcomeViewModelTest {
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocSessionManager },
         dispatcher = mainDispatcherRule.testDispatcher,
-        logger = FakeLogger()
+        logger = SystemLogger()
     )
 
     @Test

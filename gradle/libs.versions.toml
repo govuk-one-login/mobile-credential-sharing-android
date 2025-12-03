@@ -98,6 +98,7 @@ android-baseline = [
     "androidx-ui-tooling-preview",
     "kotlinx-collections-immutable",
     "uk-gov-logging-api",
+    "uk-gov-logging-testdouble"
 ]
 debug-tooling = [
     "androidx-ui-tooling",

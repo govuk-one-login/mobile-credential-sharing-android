@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.holder
 
 import android.content.Context
 import android.content.res.Resources
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -15,14 +14,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
-import uk.gov.onelogin.sharing.core.FakeLogger
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
@@ -68,7 +66,7 @@ class HolderWelcomeScreenRule(
                 }
             },
             dispatcher = Dispatchers.Main,
-            logger = FakeLogger()
+            logger = SystemLogger()
         )
     }
 

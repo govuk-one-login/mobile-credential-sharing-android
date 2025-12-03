@@ -52,17 +52,11 @@ internal class AndroidBleProviderTest {
         val parameters = AdvertisingParameters()
         val bleAdvertiseData = stubBleAdvertiseData()
         val callback = object : AdvertisingCallback {
-            override fun onAdvertisingStarted() {
-                println("advertising started")
-            }
+            override fun onAdvertisingStarted() {}
 
-            override fun onAdvertisingStopped() {
-                println("advertising stopped")
-            }
+            override fun onAdvertisingStopped() {}
 
-            override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {
-                println("advertising failed reason")
-            }
+            override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {}
         }
 
         provider.startAdvertising(

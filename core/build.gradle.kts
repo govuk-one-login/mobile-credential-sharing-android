@@ -29,8 +29,3 @@ android {
         }
     }
 }
-
-dependencies {
-    listOf(libs.uk.gov.logging.api)
-        .forEach(::testImplementation)
-}

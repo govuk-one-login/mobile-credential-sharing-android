@@ -10,9 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents
@@ -28,9 +26,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
-import uk.gov.onelogin.sharing.core.FakeLogger
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.SetupBluetoothStateManagerPrompt
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeDeniedPermissionsState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
@@ -82,7 +80,7 @@ class HolderWelcomeScreenTest {
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocBleSession },
         dispatcher = mainDispatcherRule.testDispatcher,
-        logger = FakeLogger()
+        logger = SystemLogger()
     )
 
     @Test

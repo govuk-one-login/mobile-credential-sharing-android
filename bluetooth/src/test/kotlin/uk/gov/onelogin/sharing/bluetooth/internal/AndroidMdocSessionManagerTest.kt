@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
@@ -25,7 +26,6 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingEx
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
 import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
-import uk.gov.onelogin.sharing.core.FakeLogger
 
 class AndroidMdocSessionManagerTest {
 
@@ -35,7 +35,7 @@ class AndroidMdocSessionManagerTest {
     private val advertiser = FakeBleAdvertiser()
     private val gattServerManager = FakeGattServerManager()
     private val testScope = CoroutineScope(SupervisorJob() + dispatcherRule.testDispatcher)
-    private val logger = FakeLogger()
+    private val logger = SystemLogger()
     private val sessionManager = AndroidMdocSessionManager(
         bleAdvertiser = advertiser,
         gattServerManager = gattServerManager,

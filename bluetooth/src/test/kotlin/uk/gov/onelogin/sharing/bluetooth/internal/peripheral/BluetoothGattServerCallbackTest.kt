@@ -10,12 +10,16 @@ import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
 
 class BluetoothGattServerCallbackTest {
     private val fakeEmitter = FakeGattEventEmitter()
-    private val callback = GattServerCallback(fakeEmitter)
+    private val callback = GattServerCallback(
+        gatGattEventEmitter = fakeEmitter,
+        logger = SystemLogger()
+    )
     private val device = mockk<BluetoothDevice>()
     private val service = mockk<BluetoothGattService>()
 
