@@ -160,6 +160,15 @@ jobs:
           keystore-key-password: ${{ secrets.KEYSTORE_KEY_PASSWORD}}
           version-code: ${{ steps.generate-version-code.outputs.version-code }}
 
+      - name: Publish to Play Store
+        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
+        uses: ./actions/publish-to-play-store
+        with:
+          aab-paths: ${{ steps.bundle-release-app.outputs.aab-paths }}
+          package-name: 'uk.gov.onelogin.sharing'
+          google-service-account-json: ${{ steps.auth.outputs.credentials_file_path }}
+          track: 'internal'
+
       - name: Clean workspace
         uses: ./mobile-android-pipelines/actions/clean-workspace
 
