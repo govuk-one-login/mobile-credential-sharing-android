@@ -97,8 +97,6 @@ android-baseline = [
     "androidx-ui-graphics",
     "androidx-ui-tooling-preview",
     "kotlinx-collections-immutable",
-    "uk-gov-logging-api",
-    "uk-gov-logging-testdouble"
 ]
 debug-tooling = [
     "androidx-ui-tooling",
@@ -127,6 +125,11 @@ screenshot-testing = [
     "roborazzi",
     "roborazzi-compose",
     "roborazzi-rule",
+]
+uk-gov-logging = [
+    "uk-gov-logging-api",
+    "uk-gov-logging-impl",
+    "uk-gov-logging-testdouble",
 ]
 uk-gov-ui = [
     "uk-gov-ui-android-componentsv2",

@@ -39,8 +39,8 @@ class AndroidMdocSessionManagerTest {
     private val sessionManager = AndroidMdocSessionManager(
         bleAdvertiser = advertiser,
         gattServerManager = gattServerManager,
-        coroutineScope = testScope,
         bluetoothStateMonitor = bluetoothStateMonitor,
+        coroutineScope = testScope,
         logger = logger
     )
     private val uuid = UUID.randomUUID()
@@ -89,8 +89,8 @@ class AndroidMdocSessionManagerTest {
         val sessionManager = AndroidMdocSessionManager(
             bleAdvertiser = advertiser,
             gattServerManager = gattServerManager,
-            coroutineScope = testScope,
             bluetoothStateMonitor = bluetoothStateMonitor,
+            coroutineScope = testScope,
             logger = logger
         )
 
@@ -111,8 +111,8 @@ class AndroidMdocSessionManagerTest {
         val sessionManager = AndroidMdocSessionManager(
             bleAdvertiser = advertiser,
             gattServerManager = gattServerManager,
-            coroutineScope = testScope,
             bluetoothStateMonitor = bluetoothStateMonitor,
+            coroutineScope = testScope,
             logger = logger
         )
 

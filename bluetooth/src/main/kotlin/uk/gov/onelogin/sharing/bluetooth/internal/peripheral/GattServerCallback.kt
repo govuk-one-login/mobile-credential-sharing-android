@@ -42,7 +42,6 @@ internal class GattServerCallback(
             "ResponseNeeded: $responseNeeded",
             "Offset: $offset"
         )
-
         logger.debug(logTag, logs.joinToString(separator = "\n"))
 
         val state = value?.firstOrNull()?.let {

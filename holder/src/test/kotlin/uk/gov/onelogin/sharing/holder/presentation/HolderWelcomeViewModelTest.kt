@@ -157,11 +157,39 @@ class HolderWelcomeViewModelTest {
             viewModel.uiState.value.sessionState
         )
 
-        fakeMdocSession.emitState(MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE))
+        fakeMdocSession.emitState(
+            MdocSessionState.Error(
+                MdocSessionError.ADVERTISING_FAILED
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(
+            MdocSessionState.Error(
+                MdocSessionError.GATT_NOT_AVAILABLE
+            )
+        )
         advanceUntilIdle()
 
         assertEquals(
             MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(
+            MdocSessionState.Error(
+                MdocSessionError.BLUETOOTH_PERMISSION_MISSING
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Error(MdocSessionError.BLUETOOTH_PERMISSION_MISSING),
             viewModel.uiState.value.sessionState
         )
     }

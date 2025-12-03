@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
-import android.R.attr.tag
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -22,7 +21,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
-import uk.gov.onelogin.sharing.core.logger.AndroidLoggerFactory
+import uk.gov.onelogin.sharing.core.logger.StandardLoggerFactory
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
@@ -40,8 +39,6 @@ class HolderWelcomeViewModel(
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     companion object {
-        private const val TAG = "HolderWelcomeViewModel"
-
         // This can be removed when DI is added
         @Composable
         fun holderWelcomeViewModel(): HolderWelcomeViewModel {
@@ -60,7 +57,7 @@ class HolderWelcomeViewModel(
                         }
 
                         val mdocFactory = MdocSessionManagerFactory(appContext)
-                        val logger = AndroidLoggerFactory.create()
+                        val logger = StandardLoggerFactory.create()
 
                         return HolderWelcomeViewModel(
                             sessionSecurity = SessionSecurityImpl(logger),
@@ -96,11 +93,7 @@ class HolderWelcomeViewModel(
 
         viewModelScope.launch {
             mdocBleSession.state.collect { state ->
-                logger.debug(TAG, "Mdoc - BLE state: $state")
                 _uiState.update { it.copy(sessionState = state) }
-                if (state == MdocSessionState.AdvertisingStarted) {
-                    logger.debug(TAG, "Mdoc - Advertising UUID: ${_uiState.value.uuid}")
-                }
 
                 when (state) {
                     MdocSessionState.AdvertisingStarted ->
@@ -215,6 +208,7 @@ class HolderWelcomeViewModel(
             !sessionStartRequested
 
         if (canStart) {
+            sessionStartRequested = true
             viewModelScope.launch {
                 mdocBleSession.start(state.uuid)
             }

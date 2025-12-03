@@ -22,8 +22,8 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 internal class AndroidMdocSessionManager(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
-    coroutineScope: CoroutineScope,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
+    coroutineScope: CoroutineScope,
     private val logger: Logger
 ) : MdocSessionManager {
     private val _state = MutableStateFlow<MdocSessionState>(MdocSessionState.Idle)
@@ -73,7 +73,7 @@ internal class AndroidMdocSessionManager(
         try {
             bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid))
         } catch (e: StartAdvertisingException) {
-            logger.error(logTag, "Error starting advertising", e)
+            logger.error(logTag, "Error starting advertising: ${e.error}", e)
             _state.value = MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED)
         }
 

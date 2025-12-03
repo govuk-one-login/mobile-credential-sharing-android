@@ -195,4 +195,31 @@ internal class AndroidBluetoothAdvertiserProviderTest {
             callback
         )
     }
+
+    @Test
+    fun `illegal argument from advertiser maps to internal error`() {
+        every {
+            advertiser.startAdvertisingSet(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } throws IllegalArgumentException("bad args")
+
+        val callback = AdvertisingCallbackStub()
+
+        provider.startAdvertisingSet(
+            AdvertisingParameters(),
+            stubBleAdvertiseData(),
+            callback
+        )
+
+        Assert.assertEquals(
+            AdvertisingFailureReason.ADVERTISE_FAILED_INTERNAL_ERROR,
+            callback.advertisingFailureReason
+        )
+    }
 }

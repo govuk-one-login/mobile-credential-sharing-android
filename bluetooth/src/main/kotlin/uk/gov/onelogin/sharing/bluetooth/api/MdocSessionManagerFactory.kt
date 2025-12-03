@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
-import uk.gov.onelogin.sharing.core.logger.AndroidLoggerFactory
+import uk.gov.onelogin.sharing.core.logger.StandardLoggerFactory
 
 /**
  * A factory for creating a [AndroidMdocSessionManager].
@@ -28,7 +28,7 @@ class MdocSessionManagerFactory(private val context: Context) : SessionManagerFa
      * @return A fully configured [MdocSessionManager] instance.
      */
     override fun create(scope: CoroutineScope): MdocSessionManager {
-        val logger = AndroidLoggerFactory.create()
+        val logger = StandardLoggerFactory.create()
         val adapterProvider = AndroidBluetoothAdapterProvider(context)
         val bleAdvertiser = AndroidBleAdvertiser(
             bleProvider = AndroidBleProvider(
@@ -56,8 +56,8 @@ class MdocSessionManagerFactory(private val context: Context) : SessionManagerFa
         return AndroidMdocSessionManager(
             bleAdvertiser = bleAdvertiser,
             gattServerManager = gattServerManager,
-            coroutineScope = scope,
             bluetoothStateMonitor = bluetoothStateMonitor,
+            coroutineScope = scope,
             logger = logger
         )
     }

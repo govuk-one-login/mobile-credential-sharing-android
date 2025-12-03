@@ -47,7 +47,4 @@ mavenPublishingConfig {
 dependencies {
     listOf(projects.core)
         .forEach(::implementation)
-
-    listOf(testFixtures(projects.core))
-        .forEach(::testImplementation)
 }
