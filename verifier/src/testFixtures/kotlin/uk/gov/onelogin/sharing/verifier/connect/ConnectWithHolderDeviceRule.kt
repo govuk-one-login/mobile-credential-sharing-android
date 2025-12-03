@@ -7,12 +7,14 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.verifier.R
 
 class ConnectWithHolderDeviceRule(
     composeContentTestRule: ComposeContentTestRule,
     private val decodedDataHeader: String,
     private val decodeError: String,
+    private val deniedBluetoothPermission: String,
     private val header: String
 ) : ComposeContentTestRule by composeContentTestRule {
 
@@ -25,6 +27,10 @@ class ConnectWithHolderDeviceRule(
         composeContentTestRule = composeContentTestRule,
         decodedDataHeader = resources.getString(R.string.connect_with_holder_decoded_data),
         decodeError = resources.getString(R.string.connect_with_holder_error_decode),
+        deniedBluetoothPermission = resources.getString(
+            R.string.connect_with_holder_permission_state,
+            resources.getString(coreR.string.permission_state_denied)
+        ),
         header = resources.getString(R.string.connect_with_holder_heading)
     )
 
@@ -34,6 +40,12 @@ class ConnectWithHolderDeviceRule(
             .assertIsDisplayed()
 
         onNodeWithText(renderState.base64EncodedEngagement)
+            .assertExists()
+            .assertIsDisplayed()
+    }
+
+    fun assertBluetoothPermissionIsDenied() {
+        onNodeWithText(deniedBluetoothPermission)
             .assertExists()
             .assertIsDisplayed()
     }

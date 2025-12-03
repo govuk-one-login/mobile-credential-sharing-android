@@ -32,6 +32,7 @@ class ConnectWithHolderDeviceScreenTest {
             assertBasicInformationIsDisplayed()
             assertErrorIsDisplayed()
             assertDeviceEngagementDataDoesNotExist()
+            assertBluetoothPermissionIsDenied()
         }
     }
 
@@ -42,6 +43,7 @@ class ConnectWithHolderDeviceScreenTest {
             assertBasicInformationIsDisplayed()
             assertErrorDoesNotExist()
             assertDeviceEngagementDataIsDisplayed()
+            assertBluetoothPermissionIsDenied()
         }
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.res.values
 
 import androidx.annotation.StringRes
+import uk.gov.onelogin.sharing.bluetooth.R as bluetoothR
 import uk.gov.onelogin.sharing.verifier.R
 
 /**
@@ -23,6 +24,10 @@ enum class DeferredStringsXmlData(
     CONNECT_WITH_HOLDER_DECODE_ERROR(
         R.string.could_not_decode_device_engagement,
         R.string.connect_with_holder_error_decode
+    ),
+    CONNECT_WITH_HOLDER_PERMISSION_STATE(
+        defersTo = bluetoothR.string.bluetooth_permission_state,
+        resourceId = R.string.connect_with_holder_permission_state
     ),
     SCANNED_INVALID_QR_BODY(
         R.string.did_not_scan_digital_credential_qr,

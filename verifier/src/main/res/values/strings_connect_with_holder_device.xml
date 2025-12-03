@@ -3,4 +3,5 @@
     <string name="connect_with_holder_heading" translatable="false">@string/successfully_scanned_qr_code_data</string>
     <string name="connect_with_holder_decoded_data" translatable="false">@string/decoded_device_engagement_data</string>
     <string name="connect_with_holder_error_decode" translatable="false">@string/could_not_decode_device_engagement</string>
+    <string name="connect_with_holder_permission_state" translatable="false">@string/bluetooth_permission_state</string>
 </resources>

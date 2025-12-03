@@ -12,12 +12,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
+@OptIn(ExperimentalPermissionsApi::class)
 fun ConnectWithHolderDeviceScreen(base64EncodedEngagement: String, modifier: Modifier = Modifier) {
     val engagementData = remember { decodeDeviceEngagement(base64EncodedEngagement) }
 
@@ -30,6 +33,14 @@ fun ConnectWithHolderDeviceScreen(base64EncodedEngagement: String, modifier: Mod
         }
         item {
             Text(base64EncodedEngagement)
+        }
+        item {
+            Text(
+                stringResource(
+                    R.string.connect_with_holder_permission_state,
+                    stringResource(coreR.string.permission_state_denied)
+                )
+            )
         }
 
         if (engagementData == null) {

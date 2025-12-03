@@ -111,6 +111,7 @@ testing-unit = [
     "androidx-test-rules",
     "androidx-ui-test-junit4",
     "app-cash-turbine",
+    "com-google-test-parameter-injector",
     "kotlin-test",
     "mockk",
     "org-robolectric",
