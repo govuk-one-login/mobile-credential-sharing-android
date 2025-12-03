@@ -72,6 +72,7 @@ class AndroidGattServerManager(
     override fun close() {
         gattServer?.close()
         gattServer = null
+        _events.tryEmit(GattServerEvent.ServiceStopped)
     }
 
     private fun handleGattEvent(event: GattEvent) {
@@ -86,6 +87,10 @@ class AndroidGattServerManager(
                         event.service
                     )
                 )
+            }
+
+            GattEvent.ConnectionStateStarted -> {
+                _events.tryEmit(GattServerEvent.SessionStarted)
             }
         }
     }

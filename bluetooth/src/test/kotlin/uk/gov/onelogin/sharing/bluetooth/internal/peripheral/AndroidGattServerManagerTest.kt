@@ -1,9 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattServer
-import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
@@ -11,7 +9,6 @@ import android.content.Context
 import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import kotlin.test.Test
@@ -21,15 +18,20 @@ import org.junit.Before
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
+import uk.gov.onelogin.sharing.bluetooth.ble.mockBluetoothDevice
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
+import uk.gov.onelogin.sharing.bluetooth.peripheral.GattServerMock.setupNullGattServer
+import uk.gov.onelogin.sharing.bluetooth.peripheral.GattServerMock.setupOpenGattServer
+import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
 
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothManager = mockk<BluetoothManager>(relaxed = true)
     private val gattServer = mockk<BluetoothGattServer>(relaxed = true)
+    private val device = mockBluetoothDevice()
     private val fakeGattService = AndroidGattServiceBuilder.build(
         GattServiceDefinition(
             UUID.randomUUID(),
@@ -54,21 +56,17 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `gatt server starts successfully`() {
-        every {
-            bluetoothManager.openGattServer(context, any())
-        } returns gattServer
+        val (_, server) = setupOpenGattServer(bluetoothManager, context)
 
         manager.open(uuid)
 
-        verify(exactly = 1) { gattServer.clearServices() }
-        verify(exactly = 1) { gattServer.addService(fakeGattService) }
+        verify(exactly = 1) { server.clearServices() }
+        verify(exactly = 1) { server.addService(fakeGattService) }
     }
 
     @Test
     fun `emits error when gatt server is not available`() = runTest {
-        every {
-            bluetoothManager.openGattServer(context, any())
-        } returns null
+        setupNullGattServer(bluetoothManager, context)
 
         manager.events.test {
             manager.open(uuid)
@@ -85,30 +83,29 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `gatt server starts and closes successfully`() {
-        every {
-            bluetoothManager.openGattServer(context, any())
-        } returns gattServer
+    fun `gatt server starts and closes successfully`() = runTest {
+        val (_, server) = setupOpenGattServer(bluetoothManager, context)
 
         manager.open(uuid)
-        manager.close()
 
-        verify(exactly = 1) { gattServer.clearServices() }
-        verify(exactly = 1) { gattServer.addService(fakeGattService) }
-        verify(exactly = 1) { gattServer.close() }
+        manager.events.test {
+            manager.close()
+
+            assertEquals(
+                GattServerEvent.ServiceStopped,
+                awaitItem()
+            )
+        }
+
+        verify(exactly = 1) { server.clearServices() }
+        verify(exactly = 1) { server.addService(fakeGattService) }
+        verify(exactly = 1) { server.close() }
     }
 
     @Test
     fun `emits Connected event when device connects successfully`() = runTest {
-        val callbackSlot = slot<BluetoothGattServerCallback>()
-        every {
-            bluetoothManager.openGattServer(context, capture(callbackSlot))
-        } returns gattServer
-
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
         manager.open(uuid)
-
-        val device = mockk<BluetoothDevice>()
-        every { device.address } returns DEVICE_ADDRESS
 
         manager.events.test {
             callbackSlot.captured.onConnectionStateChange(
@@ -128,15 +125,8 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `emits Disconnected after a successful connect`() = runTest {
-        val callbackSlot = slot<BluetoothGattServerCallback>()
-        every {
-            bluetoothManager.openGattServer(context, capture(callbackSlot))
-        } returns gattServer
-
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
         manager.open(uuid)
-
-        val device = mockk<BluetoothDevice>()
-        every { device.address } returns DEVICE_ADDRESS
 
         manager.events.test {
             callbackSlot.captured.onConnectionStateChange(
@@ -168,10 +158,7 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `emits Service added event`() = runTest {
-        val callbackSlot = slot<BluetoothGattServerCallback>()
-        every {
-            bluetoothManager.openGattServer(context, capture(callbackSlot))
-        } returns gattServer
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
         val service = mockk<BluetoothGattService>()
 
         manager.open(uuid)
@@ -195,16 +182,38 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `emits UnsupportedEvent for unhandled events`() = runTest {
-        val callbackSlot = slot<BluetoothGattServerCallback>()
-        every {
-            bluetoothManager.openGattServer(context, capture(callbackSlot))
-        } returns gattServer
+    fun `emits session state started event`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
         manager.open(uuid)
 
-        val device = mockk<BluetoothDevice>()
-        every { device.address } returns DEVICE_ADDRESS
+        val args = CharacteristicWriteRequestStub.writeRequestStart()
+
+        manager.events.test {
+            callbackSlot.captured.onCharacteristicWriteRequest(
+                args.device,
+                args.requestId,
+                args.characteristic,
+                args.preparedWrite,
+                args.responseNeeded,
+                args.offset,
+                args.value
+            )
+
+            assertEquals(
+                GattServerEvent.SessionStarted,
+                awaitItem()
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `emits UnsupportedEvent for unhandled events`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
 
         manager.events.test {
             callbackSlot.captured.onConnectionStateChange(

@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -10,8 +11,11 @@ import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
@@ -78,28 +82,6 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `on start advertise success updates state via BleAdvertiser`() = runTest {
-        val fakeMdocSession = FakeMdocSessionManager(initialState = MdocSessionState.Idle)
-        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
-        val initialUuid = viewModel.uiState.value.uuid
-
-        viewModel.startAdvertising()
-
-        advanceUntilIdle()
-        assertEquals(1, fakeMdocSession.startCalls)
-        assertEquals(
-            initialUuid,
-            fakeMdocSession.lastUuid
-        )
-
-        assertEquals(
-            MdocSessionState.AdvertisingStarted,
-            viewModel.uiState.value.sessionState
-        )
-        assertNull(viewModel.uiState.value.lastErrorMessage)
-    }
-
-    @Test
     fun `stop advertising calls stop and updates state`() = runTest {
         val fakeMdocSession =
             FakeMdocSessionManager(initialState = MdocSessionState.AdvertisingStarted)
@@ -122,31 +104,192 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `checkBluetoothStatus should update status to Enabled when bluetooth is on`() {
-        val fakeMdocSession = FakeMdocSessionManager().apply {
-            isBluetoothEnabled().apply {
-                mockBluetoothEnabled = true
-            }
-        }
+    fun `state updates to connected`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.AdvertisingStarted)
         val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
-        viewModel.checkBluetoothStatus()
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.AdvertisingStarted,
+            viewModel.uiState.value.sessionState
+        )
 
-        assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
+        fakeMdocSession.emitState(MdocSessionState.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Connected(DEVICE_ADDRESS),
+            viewModel.uiState.value.sessionState
+        )
     }
 
     @Test
-    fun `checkBluetoothStatus should update status to Disabled when bluetooth is off`() {
-        val fakeMdocSession = FakeMdocSessionManager().apply {
-            isBluetoothEnabled().apply {
-                mockBluetoothEnabled = false
-            }
-        }
+    fun `state updates to disconnected`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
         val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
-        viewModel.checkBluetoothStatus()
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.Connected(DEVICE_ADDRESS),
+            viewModel.uiState.value.sessionState
+        )
 
-        assertEquals(BluetoothState.Disabled, viewModel.uiState.value.bluetoothStatus)
+        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Disconnected(DEVICE_ADDRESS),
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `state updates to error`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.Connected(DEVICE_ADDRESS),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE))
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE),
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `state updates to service added`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+        val uuid = UUID.randomUUID()
+
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.Connected(DEVICE_ADDRESS),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(MdocSessionState.ServiceAdded(uuid))
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.ServiceAdded(uuid),
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `state updates to idle`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        advanceUntilIdle()
+        assertEquals(
+            MdocSessionState.Idle,
+            viewModel.uiState.value.sessionState
+        )
+    }
+
+    @Test
+    fun `bluetooth switched off updates state to Disabled`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.OFF)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Disabled,
+            viewModel.uiState.value.bluetoothState
+        )
+    }
+
+    @Test
+    fun `bluetooth turning off updates state to Disabled`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.TURNING_OFF)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Disabled,
+            viewModel.uiState.value.bluetoothState
+        )
+    }
+
+    @Test
+    fun `bluetooth turning on updates state to Initializing`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.TURNING_ON)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Initializing,
+            viewModel.uiState.value.bluetoothState
+        )
+    }
+
+    @Test
+    fun `bluetooth on updates state to Enabled and triggers start BLE session`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        viewModel.updateBluetoothPermissions(true)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Enabled,
+            viewModel.uiState.value.bluetoothState
+        )
+
+        assertEquals(1, fakeMdocSession.startCalls)
+    }
+
+    @Test
+    fun `does not start BLE session if permissions not granted`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        viewModel.updateBluetoothPermissions(false)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Enabled,
+            viewModel.uiState.value.bluetoothState
+        )
+
+        assertEquals(0, fakeMdocSession.startCalls)
+    }
+
+    @Test
+    fun `bluetooth unknown status on updates state to Unknown`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.UNKNOWN)
+
+        advanceUntilIdle()
+        assertEquals(
+            BluetoothState.Unknown,
+            viewModel.uiState.value.bluetoothState
+        )
     }
 
     @Test
@@ -159,11 +302,54 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `updateBluetoothState should update the bluetoothStatus`() {
-        val viewModel = createViewModel()
+    fun `bluetooth ON only triggers start once while already enabled`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
 
-        viewModel.updateBluetoothState(BluetoothState.Enabled)
+        viewModel.updateBluetoothPermissions(true)
 
-        assertEquals(BluetoothState.Enabled, viewModel.uiState.value.bluetoothStatus)
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+        advanceUntilIdle()
+
+        assertEquals(
+            BluetoothState.Enabled,
+            viewModel.uiState.value.bluetoothState
+        )
+        assertEquals(1, fakeMdocSession.startCalls)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+        advanceUntilIdle()
+
+        assertEquals(
+            BluetoothState.Enabled,
+            viewModel.uiState.value.bluetoothState
+        )
+        assertEquals(
+            1,
+            fakeMdocSession.startCalls
+        )
+    }
+
+    @Test
+    fun `bluetooth ON does not trigger restart until session has fully stopped`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager()
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        viewModel.updateBluetoothPermissions(true)
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+        advanceUntilIdle()
+        assertEquals(1, fakeMdocSession.startCalls)
+
+        fakeMdocSession.emitState(MdocSessionState.AdvertisingStopped)
+        advanceUntilIdle()
+
+        fakeMdocSession.emitBluetoothState(BluetoothStatus.ON)
+        advanceUntilIdle()
+
+        assertEquals(
+            1,
+            fakeMdocSession.startCalls
+        )
     }
 }

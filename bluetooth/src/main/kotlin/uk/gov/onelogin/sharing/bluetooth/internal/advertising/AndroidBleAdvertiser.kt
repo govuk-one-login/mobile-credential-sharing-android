@@ -117,7 +117,10 @@ internal class AndroidBleAdvertiser(
 
     private fun doStopAdvertising() {
         _state.value = AdvertiserState.Stopping
-        runCatching { bleProvider.stopAdvertising() }
+        val result = runCatching { bleProvider.stopAdvertising() }
+        result.onFailure { e ->
+            println(e.message)
+        }
         currentCallback = null
         _state.value = AdvertiserState.Stopped
     }

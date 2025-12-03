@@ -11,8 +11,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattEventEmitter
-import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
+import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestNullValue
+import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestStart
+import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestUnknown
 
 class BluetoothGattServerCallbackTest {
     private val fakeEmitter = FakeGattEventEmitter()
@@ -58,5 +61,60 @@ class BluetoothGattServerCallbackTest {
         val event = fakeEmitter.events.single() as GattEvent.ServiceAdded
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
         assertEquals(uuid, event.service?.uuid)
+    }
+
+    @Test
+    fun `onCharacteristicWriteRequest 0x01 should emit ConnectionStateStarted event`() {
+        val args = writeRequestStart()
+
+        callback.onCharacteristicWriteRequest(
+            device = args.device,
+            requestId = args.requestId,
+            characteristic = args.characteristic,
+            preparedWrite = args.preparedWrite,
+            responseNeeded = args.responseNeeded,
+            offset = args.offset,
+            value = args.value
+        )
+
+        assertEquals(1, fakeEmitter.events.size)
+        assertEquals(
+            GattEvent.ConnectionStateStarted,
+            fakeEmitter.events.single()
+        )
+    }
+
+    @Test
+    fun `onCharacteristicWriteRequest unknown opcode should not emit event`() {
+        val args = writeRequestUnknown()
+
+        callback.onCharacteristicWriteRequest(
+            device = args.device,
+            requestId = args.requestId,
+            characteristic = args.characteristic,
+            preparedWrite = args.preparedWrite,
+            responseNeeded = args.responseNeeded,
+            offset = args.offset,
+            value = args.value
+        )
+
+        assertEquals(0, fakeEmitter.events.size)
+    }
+
+    @Test
+    fun `onCharacteristicWriteRequest null opcode should not emit event`() {
+        val args = writeRequestNullValue()
+
+        callback.onCharacteristicWriteRequest(
+            device = args.device,
+            requestId = args.requestId,
+            characteristic = args.characteristic,
+            preparedWrite = args.preparedWrite,
+            responseNeeded = args.responseNeeded,
+            offset = args.offset,
+            value = args.value
+        )
+
+        assertEquals(0, fakeEmitter.events.size)
     }
 }

@@ -55,6 +55,8 @@ object Filters {
     val licenseFilters = listOf(
         "AL2.0",
         "LGPL2.1",
+        "LICENSE.md",
+        "LICENSE-notice.md",
     ).map {
         "META-INF/$it"
     }
