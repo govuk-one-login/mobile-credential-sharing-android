@@ -11,6 +11,7 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.core.FakeLogger
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
@@ -33,7 +34,8 @@ class HolderWelcomeViewModelTest {
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocSessionManager },
-        dispatcher = mainDispatcherRule.testDispatcher
+        dispatcher = mainDispatcherRule.testDispatcher,
+        logger = FakeLogger()
     )
 
     @Test

@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidMdocSessionManager(
     private val bleAdvertiser: BleAdvertiser,
@@ -44,7 +45,7 @@ internal class AndroidMdocSessionManager(
         try {
             bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid))
         } catch (e: StartAdvertisingException) {
-            logger.error(TAG, "Error starting advertising", e)
+            logger.error(logTag, "Error starting advertising", e)
             _state.value = MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED)
         }
 
@@ -97,15 +98,11 @@ internal class AndroidMdocSessionManager(
 
             is GattServerEvent.UnsupportedEvent ->
                 logger.error(
-                    TAG,
+                    logTag,
                     "Unsupported event - status: ${event.status} new state: ${event.newState}"
                 )
         }
     }
 
     override fun isBluetoothEnabled(): Boolean = bleAdvertiser.isBluetoothEnabled()
-
-    companion object {
-        private const val TAG = "AndroidMdocSessionManager"
-    }
 }

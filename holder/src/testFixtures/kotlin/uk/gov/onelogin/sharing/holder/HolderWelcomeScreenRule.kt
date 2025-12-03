@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
+import uk.gov.onelogin.sharing.core.FakeLogger
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
@@ -66,7 +67,8 @@ class HolderWelcomeScreenRule(
                     isBluetoothEnabled()
                 }
             },
-            dispatcher = Dispatchers.Main
+            dispatcher = Dispatchers.Main,
+            logger = FakeLogger()
         )
     }
 

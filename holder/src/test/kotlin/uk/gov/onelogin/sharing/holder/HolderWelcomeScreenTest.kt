@@ -30,6 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.core.FakeLogger
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.SetupBluetoothStateManagerPrompt
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeDeniedPermissionsState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
@@ -80,7 +81,8 @@ class HolderWelcomeScreenTest {
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocBleSession },
-        dispatcher = mainDispatcherRule.testDispatcher
+        dispatcher = mainDispatcherRule.testDispatcher,
+        logger = FakeLogger()
     )
 
     @Test
