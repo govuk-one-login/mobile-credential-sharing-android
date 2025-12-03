@@ -77,7 +77,7 @@ jobs:
       - name: Clean workspace
         uses: ./mobile-android-pipelines/actions/clean-workspace
 
-   bump_and_publish:
+  bump_and_publish:
     permissions:
       contents: write
       id-token: write
