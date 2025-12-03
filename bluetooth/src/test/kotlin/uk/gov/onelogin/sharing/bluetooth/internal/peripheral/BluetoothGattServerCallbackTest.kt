@@ -11,6 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattEventEmitter
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubDeviceAddress.DEVICE_ADDRESS
 
 class BluetoothGattServerCallbackTest {
     private val fakeEmitter = FakeGattEventEmitter()
@@ -21,7 +22,7 @@ class BluetoothGattServerCallbackTest {
     @Before
     fun setup() {
         fakeEmitter.events.clear()
-        every { device.address } returns "device-address"
+        every { device.address } returns DEVICE_ADDRESS
     }
 
     @Test
@@ -34,7 +35,7 @@ class BluetoothGattServerCallbackTest {
 
         assertEquals(1, fakeEmitter.events.size)
         val event = fakeEmitter.events.single() as GattEvent.ConnectionStateChange
-        assertEquals("device-address", event.device.address)
+        assertEquals(DEVICE_ADDRESS, event.device.address)
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
         assertEquals(BluetoothProfile.STATE_CONNECTED, event.newState)
     }

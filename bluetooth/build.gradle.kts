@@ -43,3 +43,8 @@ mavenPublishingConfig {
         )
     }
 }
+
+dependencies {
+    listOf(projects.core)
+        .forEach(::implementation)
+}

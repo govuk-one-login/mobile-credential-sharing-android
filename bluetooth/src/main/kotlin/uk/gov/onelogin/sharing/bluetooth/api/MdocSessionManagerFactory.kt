@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBluetoothAd
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
+import uk.gov.onelogin.sharing.core.logger.AndroidLoggerFactory
 
 /**
  * A factory for creating a [AndroidMdocSessionManager].
@@ -40,10 +41,13 @@ class MdocSessionManagerFactory(private val context: Context) : SessionManagerFa
             permissionsChecker = BluetoothPermissionChecker(context)
         )
 
+        val logger = AndroidLoggerFactory.create()
+
         return AndroidMdocSessionManager(
             bleAdvertiser = bleAdvertiser,
             gattServerManager = gattServerManager,
-            coroutineScope = scope
+            coroutineScope = scope,
+            logger = logger
         )
     }
 }

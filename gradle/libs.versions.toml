@@ -27,6 +27,7 @@ roborazzi = "1.52.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.1.0.6387" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
+uk-gov-logging = "0.36.1" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
 uk-gov-ui = "11.1.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
@@ -74,6 +75,9 @@ roborazzi-gradle = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-pl
 roborazzi-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
 sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
+uk-gov-logging-api = { module = "uk.gov.logging:logging-api", version.ref = "uk-gov-logging" }
+uk-gov-logging-impl = { module = "uk.gov.logging:logging-impl", version.ref = "uk-gov-logging" }
+uk-gov-logging-testdouble = { module = "uk.gov.logging:logging-testdouble", version.ref = "uk-gov-logging" }
 uk-gov-pipelines-plugins = { module = "uk.gov.pipelines:plugins" }
 uk-gov-ui-android-componentsv2 = { module = "uk.gov.android:componentsv2", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-componentsv2-camera = { module = "uk.gov.android:componentsv2-camera", version.ref = "uk-gov-ui" }
@@ -92,7 +96,8 @@ android-baseline = [
     "androidx-navigation-compose",
     "androidx-ui-graphics",
     "androidx-ui-tooling-preview",
-    "kotlinx-collections-immutable"
+    "kotlinx-collections-immutable",
+    "uk-gov-logging-api",
 ]
 debug-tooling = [
     "androidx-ui-tooling",

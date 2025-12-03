@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
+import uk.gov.onelogin.sharing.core.logger.AndroidLoggerFactory
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
@@ -30,9 +32,12 @@ class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
     private val mdocSessionManagerFactory: SessionManagerFactory,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val logger: Logger,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
     companion object {
+        private const val TAG = "HolderWelcomeViewModel"
+
         // This can be removed when DI is added
         @Composable
         fun holderWelcomeViewModel(): HolderWelcomeViewModel {
@@ -51,11 +56,13 @@ class HolderWelcomeViewModel(
                         }
 
                         val mdocFactory = MdocSessionManagerFactory(appContext)
+                        val logger = AndroidLoggerFactory.create()
 
                         return HolderWelcomeViewModel(
                             sessionSecurity = SessionSecurityImpl(),
                             engagementGenerator = EngagementGenerator(),
-                            mdocSessionManagerFactory = mdocFactory
+                            mdocSessionManagerFactory = mdocFactory,
+                            logger = logger
                         ) as T
                     }
                 }
@@ -85,10 +92,10 @@ class HolderWelcomeViewModel(
 
         viewModelScope.launch {
             mdocBleSession.state.collect { state ->
-                println("Mdoc - BLE state: $state")
+                logger.debug(TAG, "Mdoc - BLE state: $state")
                 _uiState.update { it.copy(sessionState = state) }
                 if (state == MdocSessionState.AdvertisingStarted) {
-                    println("Mdoc - Advertising UUID: ${_uiState.value.uuid}")
+                    logger.debug(TAG, "Mdoc - Advertising UUID: ${_uiState.value.uuid}")
                 }
             }
         }
