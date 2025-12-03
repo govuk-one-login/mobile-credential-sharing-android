@@ -15,7 +15,9 @@ plugins {
         libs.plugins.spotless.config,
         libs.plugins.detekt.config,
         libs.plugins.test.coverage,
-        libs.plugins.sonar.module.config
+        libs.plugins.sonar.module.config,
+        libs.plugins.kotlin.ksp,
+        libs.plugins.hilt.plugin
     ).forEach { alias(it) }
 }
 
@@ -55,6 +57,11 @@ android {
     packaging {
         licenseFilters.forEach(resources.excludes::plusAssign)
     }
+
+    hilt {
+        enableAggregatingTask = false
+    }
+    // we might need a more robust way to handle transitive dependencies here
 }
 
 dependencies {
@@ -65,7 +72,7 @@ dependencies {
     ).forEach(::androidTestImplementation)
 
     listOf(
-        projects.holder,
+        //  projects.holder,
         projects.verifier
     ).forEach(::api)
 
@@ -77,8 +84,11 @@ dependencies {
         platform(libs.androidx.compose.bom),
         libs.bundles.android.baseline,
         libs.bundles.uk.gov.ui,
+        libs.hilt.android,
+        projects.holder,
         testFixtures(projects.verifier)
     ).forEach(::implementation)
+    ksp(libs.hilt.compiler)
 
     listOf(
         libs.androidx.test.rules,

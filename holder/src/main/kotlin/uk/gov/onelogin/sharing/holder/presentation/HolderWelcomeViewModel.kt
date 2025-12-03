@@ -1,13 +1,8 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import java.util.UUID
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,56 +10,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
-import uk.gov.onelogin.sharing.security.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
+import java.util.UUID
 
+@Inject
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
     private val mdocBleSession: MdocSessionManager,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
-    companion object {
-        // This can be removed when DI is added
-        @Composable
-        fun holderWelcomeViewModel(): HolderWelcomeViewModel {
-            val context = LocalContext.current
-
-            val factory = remember {
-                object : ViewModelProvider.Factory {
-                    @Suppress("UNCHECKED_CAST")
-                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                        require(
-                            modelClass.isAssignableFrom(
-                                HolderWelcomeViewModel::class.java
-                            )
-                        ) {
-                            "Unknown ViewModel class $modelClass"
-                        }
-
-                        val mdocBleSession = MdocSessionFactory.create(context)
-
-                        return HolderWelcomeViewModel(
-                            sessionSecurity = SessionSecurityImpl(),
-                            engagementGenerator = EngagementGenerator(),
-                            mdocBleSession = mdocBleSession
-                        ) as T
-                    }
-                }
-            }
-
-            return viewModel(factory = factory)
-        }
-    }
-
     private val initialState = HolderWelcomeUiState()
     private val _uiState = MutableStateFlow(initialState)
 

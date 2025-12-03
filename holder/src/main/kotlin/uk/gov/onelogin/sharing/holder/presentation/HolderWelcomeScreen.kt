@@ -38,7 +38,7 @@ private const val QR_SIZE = 800
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HolderWelcomeScreen(
-    viewModel: HolderWelcomeViewModel = HolderWelcomeViewModel.holderWelcomeViewModel()
+    viewModel: HolderWelcomeViewModel
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
