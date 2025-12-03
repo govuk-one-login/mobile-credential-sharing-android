@@ -105,7 +105,6 @@ jobs:
 
       - name: Increment the release version using Conventional Commits
         id: versioning
-        if: ${{ github.event_name != 'pull_request' }}
         uses: ./mobile-android-pipelines/actions/increment-version
 
       - name: Publish release tags
@@ -127,6 +126,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Changelog
+        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
         uses: ./mobile-android-pipelines/actions/generate-and-upload-changelog
         with:
           current-version: ${{ steps.versioning.outputs.current_version }}
@@ -149,6 +149,7 @@ jobs:
           service_account: deploy-credential-sharing-and@${{ vars.GCP_PROJECT_ID }}.iam.gserviceaccount.com
 
       - name: Bundle Demo Release
+        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
         id: bundle
         uses: ./mobile-android-pipelines/actions/bundle-release-app
         with:
