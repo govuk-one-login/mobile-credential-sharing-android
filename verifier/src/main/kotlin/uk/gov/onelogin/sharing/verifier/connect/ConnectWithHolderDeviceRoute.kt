@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
@@ -24,6 +25,7 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
          * [NavGraphBuilder] extension function for configuring a work-in-progress navigation
          * target.
          */
+        @OptIn(ExperimentalPermissionsApi::class)
         fun NavGraphBuilder.configureConnectWithHolderDeviceRoute() {
             composable<ConnectWithHolderDeviceRoute> { navBackstackEntry ->
                 val arguments: ConnectWithHolderDeviceRoute = navBackstackEntry.toRoute()

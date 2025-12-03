@@ -9,8 +9,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceState.Companion.decodeableState
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceState.Companion.undecodeableState
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableGrantedState
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.undecodableState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(RobolectricTestParameterInjector::class)
@@ -28,7 +29,7 @@ class ConnectWithHolderDeviceScreenTest {
     @Test
     fun cannotDecodeProvidedCborString() = runTest {
         composeTestRule.run {
-            renderFunction(undecodeableState, Modifier)
+            renderFunction(undecodableState, Modifier)
             assertBasicInformationIsDisplayed()
             assertErrorIsDisplayed()
             assertDeviceEngagementDataDoesNotExist()
@@ -39,11 +40,19 @@ class ConnectWithHolderDeviceScreenTest {
     @Test
     fun validCborExistsOnScreen() = runTest {
         composeTestRule.run {
-            renderFunction(decodeableState, Modifier)
+            renderFunction(decodableDeniedState, Modifier)
             assertBasicInformationIsDisplayed()
             assertErrorDoesNotExist()
             assertDeviceEngagementDataIsDisplayed()
             assertBluetoothPermissionIsDenied()
+        }
+    }
+
+    @Test
+    fun bluetoothPermissionIsGranted() = runTest {
+        composeTestRule.run {
+            renderFunction(decodableGrantedState, Modifier)
+            assertBluetoothPermissionIsGranted()
         }
     }
 }

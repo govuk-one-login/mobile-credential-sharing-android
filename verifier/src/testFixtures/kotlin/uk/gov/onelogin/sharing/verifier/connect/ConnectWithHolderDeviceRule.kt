@@ -7,14 +7,17 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.verifier.R
 
+@OptIn(ExperimentalPermissionsApi::class)
 class ConnectWithHolderDeviceRule(
     composeContentTestRule: ComposeContentTestRule,
     private val decodedDataHeader: String,
     private val decodeError: String,
     private val deniedBluetoothPermission: String,
+    private val grantedBluetoothPermission: String,
     private val header: String
 ) : ComposeContentTestRule by composeContentTestRule {
 
@@ -23,13 +26,17 @@ class ConnectWithHolderDeviceRule(
     constructor(
         composeContentTestRule: ComposeContentTestRule,
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
-    ) : this (
+    ) : this(
         composeContentTestRule = composeContentTestRule,
         decodedDataHeader = resources.getString(R.string.connect_with_holder_decoded_data),
         decodeError = resources.getString(R.string.connect_with_holder_error_decode),
         deniedBluetoothPermission = resources.getString(
             R.string.connect_with_holder_permission_state,
             resources.getString(coreR.string.permission_state_denied)
+        ),
+        grantedBluetoothPermission = resources.getString(
+            R.string.connect_with_holder_permission_state,
+            resources.getString(coreR.string.permission_state_granted)
         ),
         header = resources.getString(R.string.connect_with_holder_heading)
     )
@@ -44,11 +51,13 @@ class ConnectWithHolderDeviceRule(
             .assertIsDisplayed()
     }
 
-    fun assertBluetoothPermissionIsDenied() {
-        onNodeWithText(deniedBluetoothPermission)
-            .assertExists()
-            .assertIsDisplayed()
-    }
+    fun assertBluetoothPermissionIsDenied() = onNodeWithText(deniedBluetoothPermission)
+        .assertExists()
+        .assertIsDisplayed()
+
+    fun assertBluetoothPermissionIsGranted() = onNodeWithText(grantedBluetoothPermission)
+        .assertExists()
+        .assertIsDisplayed()
 
     fun assertDeviceEngagementDataDoesNotExist() {
         onNodeWithText(
@@ -86,7 +95,8 @@ class ConnectWithHolderDeviceRule(
         setContent {
             ConnectWithHolderDeviceScreen(
                 base64EncodedEngagement = renderState.base64EncodedEngagement,
-                modifier = modifier
+                modifier = modifier,
+                permissionState = renderState.permissionState
             )
         }
     }
@@ -95,7 +105,7 @@ class ConnectWithHolderDeviceRule(
         update(state)
         setContent {
             ConnectWithHolderDevicePreview(
-                base64EncodedEngagement = renderState.base64EncodedEngagement,
+                state = renderState,
                 modifier = modifier
             )
         }

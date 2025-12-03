@@ -12,11 +12,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceState.Companion.decodeableState
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @RunWith(AndroidJUnit4::class)
 class ConnectWithHolderDeviceRouteTest {
@@ -43,10 +42,10 @@ class ConnectWithHolderDeviceRouteTest {
             }
 
             controller.navigateToConnectWithHolderDeviceRoute(
-                decodeableState.base64EncodedEngagement
+                decodableDeniedState.base64EncodedEngagement
             )
         }
-        composeTestRule.update(decodeableState)
+        composeTestRule.update(decodableDeniedState)
         composeTestRule.assertBasicInformationIsDisplayed()
     }
 }

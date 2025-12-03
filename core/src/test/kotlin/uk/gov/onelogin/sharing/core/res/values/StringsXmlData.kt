@@ -12,5 +12,9 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     PERMISSION_STATE_DENIED(
         expected = "Denied",
         resourceId = R.string.permission_state_denied
+    ),
+    PERMISSION_STATE_GRANTED(
+        expected = "Granted",
+        resourceId = R.string.permission_state_denied
     )
 }
