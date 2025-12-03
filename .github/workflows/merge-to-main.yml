@@ -10,9 +10,6 @@ concurrency:
 
 jobs:
   validate:
-    env:
-      GITHUB_ACTOR: ${{ github.actor }}
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - name: Free disk space
@@ -125,6 +122,9 @@ jobs:
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Changelog
         uses: ./mobile-android-pipelines/actions/generate-and-upload-changelog
