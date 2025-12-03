@@ -3,12 +3,15 @@ package uk.gov.onelogin.sharing.verifier.connect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableGrantedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.undecodableState
@@ -53,6 +56,28 @@ class ConnectWithHolderDeviceScreenTest {
         composeTestRule.run {
             renderFunction(decodableGrantedState, Modifier)
             assertBluetoothPermissionIsGranted()
+        }
+    }
+
+    @Test
+    fun bluetoothPermissionRequestOccursViaLaunchEffect() = runTest {
+        composeTestRule.run {
+            var hasLaunchedPermission = false
+            renderFunction(
+                ConnectWithHolderDeviceState(
+                    base64EncodedEngagement = decodableGrantedState.base64EncodedEngagement,
+                    permissionState = FakePermissionState.bluetoothConnect(
+                        status = PermissionStatus.Denied(shouldShowRationale = false)
+                    ) {
+                        hasLaunchedPermission = true
+                    }
+                ),
+                Modifier
+            )
+
+            testScheduler.advanceUntilIdle()
+
+            assertTrue(hasLaunchedPermission)
         }
     }
 }

@@ -7,13 +7,13 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.u
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 /**
- * Property bag data class for holding state for the [ConnectWithHolderDeviceRule]'s rendering
- * functions.
+ * Convenience object for holding various [ConnectWithHolderDeviceState] objects for testing
+ * purposes.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 data object ConnectWithHolderDeviceStateStubs {
     /**
-     * State for when the [ConnectWithHolderDeviceStateStubs.base64EncodedEngagement] cannot be
+     * State for when the [ConnectWithHolderDeviceState.base64EncodedEngagement] cannot be
      * decoded for bluetooth connection purposes.
      */
     val undecodableState = ConnectWithHolderDeviceState(
@@ -24,7 +24,7 @@ data object ConnectWithHolderDeviceStateStubs {
     )
 
     /**
-     * State that includes a valid [ConnectWithHolderDeviceStateStubs.base64EncodedEngagement] for
+     * State that includes a valid [ConnectWithHolderDeviceState.base64EncodedEngagement] for
      * bluetooth connection purposes.
      *
      * Doesn't grant bluetooth permissions.
@@ -37,7 +37,7 @@ data object ConnectWithHolderDeviceStateStubs {
     )
 
     /**
-     * State that includes a valid [ConnectWithHolderDeviceStateStubs.base64EncodedEngagement] for
+     * State that includes a valid [ConnectWithHolderDeviceState.base64EncodedEngagement] for
      * bluetooth connection purposes.
      *
      * Also grants [android.Manifest.permission.BLUETOOTH_CONNECT] permissions.
