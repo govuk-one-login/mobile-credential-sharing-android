@@ -31,6 +31,7 @@ android {
 }
 dependencies {
     listOf(
+        projects.bluetooth,
         projects.core,
         projects.models,
         projects.security
