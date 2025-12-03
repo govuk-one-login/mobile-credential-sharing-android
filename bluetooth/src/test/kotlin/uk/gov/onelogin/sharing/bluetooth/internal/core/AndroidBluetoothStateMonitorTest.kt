@@ -17,6 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.ble.BluetoothContext
 
 @RunWith(RobolectricTestRunner::class)
@@ -30,7 +31,10 @@ class AndroidBluetoothStateMonitorTest {
     @Before
     fun setup() {
         every { mockManager.adapter } returns mockAdapter
-        monitor = AndroidBluetoothStateMonitor(context)
+        monitor = AndroidBluetoothStateMonitor(
+            appContext = context,
+            logger = SystemLogger()
+        )
     }
 
     @After

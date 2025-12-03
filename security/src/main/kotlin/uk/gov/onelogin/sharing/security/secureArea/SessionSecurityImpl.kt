@@ -1,13 +1,13 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
-import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.core.logger.logTag
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPairGenerator
 import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 /**
  * An implementation of [SessionSecurity] that handles cryptographic operations for a

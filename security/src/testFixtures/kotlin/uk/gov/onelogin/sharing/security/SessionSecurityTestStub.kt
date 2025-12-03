@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.security
 
-import uk.gov.logging.testdouble.SystemLogger
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
 object SessionSecurityTestStub {

@@ -23,8 +23,8 @@ internal class AndroidMdocSessionManager(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
     coroutineScope: CoroutineScope,
-    private val logger: Logger,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
+    private val logger: Logger
 ) : MdocSessionManager {
     private val _state = MutableStateFlow<MdocSessionState>(MdocSessionState.Idle)
     override val state: StateFlow<MdocSessionState> = _state
@@ -133,10 +133,10 @@ internal class AndroidMdocSessionManager(
                     "Mdoc - UUnsupported event - status: ${event.status} new state: ${event.newState}"
                 )
 
-
             GattServerEvent.SessionStarted -> {
                 logger.error(
-                    logTag, "Mdoc - Connection has been setup successfully - session state started"
+                    logTag,
+                    "Mdoc - Connection has been setup successfully - session state started"
                 )
             }
         }

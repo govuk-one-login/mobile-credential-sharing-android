@@ -9,16 +9,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
-import java.util.logging.Logger
-import kotlin.jvm.java
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
     private val permissionChecker: PermissionChecker,
-    private val startTimeoutMs: Long = 5_000,
-    private val logger: Logger = Logger.getLogger(AndroidBleAdvertiser::class.java.name)
+    private val logger: Logger,
+    private val startTimeoutMs: Long = 5_000
 ) : BleAdvertiser {
 
     private val _state = MutableStateFlow<AdvertiserState>(AdvertiserState.Idle)
@@ -63,15 +63,15 @@ internal class AndroidBleAdvertiser(
                         )
                     }
                 } catch (e: TimeoutCancellationException) {
-                    logger.warning("Advertising start timed out: ${e.message}")
+                    logger.error(logTag, "Advertising start timed out: ${e.message}")
                     throw StartAdvertisingException(
                         AdvertisingError.START_TIMEOUT
                     )
                 } catch (e: CancellationException) {
-                    logger.warning("Advertising start cancelled: ${e.message}")
+                    logger.error(logTag, "Advertising start cancelled: ${e.message}")
                     throw e
                 } catch (e: IllegalStateException) {
-                    logger.severe("Failed to start advertising: ${e.message}")
+                    logger.error(logTag, "Failed to start advertising: ${e.message}")
                     throw StartAdvertisingException(
                         AdvertisingError.INTERNAL_ERROR
                     )
@@ -119,7 +119,7 @@ internal class AndroidBleAdvertiser(
         _state.value = AdvertiserState.Stopping
         val result = runCatching { bleProvider.stopAdvertising() }
         result.onFailure { e ->
-            println(e.message)
+            logger.error(logTag, e.message ?: "Failed to stop advertising")
         }
         currentCallback = null
         _state.value = AdvertiserState.Stopped

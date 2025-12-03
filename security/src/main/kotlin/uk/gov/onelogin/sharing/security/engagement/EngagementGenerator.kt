@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.security.engagement
 
-import uk.gov.logging.api.Logger
 import java.util.Base64
 import java.util.UUID
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement

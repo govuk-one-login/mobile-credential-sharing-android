@@ -6,12 +6,8 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule

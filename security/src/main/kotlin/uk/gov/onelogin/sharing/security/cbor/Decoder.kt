@@ -5,13 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import uk.gov.logging.api.Logger
 import java.util.Base64
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 
 private const val TAG = "decodeDeviceEngagement"
+
 /**
  * Decodes a CBOR-encoded, Base64 URL-safe string into a [DeviceEngagementDto] object.
  *
@@ -25,10 +26,7 @@ private const val TAG = "decodeDeviceEngagement"
  * @param cborBase64Url The CBOR-encoded data represented as a Base64 URL string.
  * @param logger An instance of [Logger] for logging events.
  */
-fun decodeDeviceEngagement(
-    cborBase64Url: String,
-    logger: Logger
-): DeviceEngagementDto? {
+fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagementDto? {
     val cborData = cborBase64Url.base64Decode()
 
     val cborMapper = ObjectMapper(CBORFactory()).apply {
@@ -37,29 +35,31 @@ fun decodeDeviceEngagement(
 
     return try {
         val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
-        println("Successfully deserialized DeviceEngagementDto:")
+        logger.debug(TAG, "Successfully deserialized DeviceEngagementDto:")
         @RequiresImplementation(
             details = [
                 ImplementationDetail(
                     ticket = "N/A not captured",
                     description = "Create DTO -> Domain mapping functions for verifier to extract" +
-                            "deserialized device engagement message"
+                        "deserialized device engagement message"
                 )
             ]
         )
         logger.debug(TAG, " - Version: ${deviceEngagement.version}")
         logger.debug(
-            TAG, " - Security - Cipher Suite: " +
-                    "${deviceEngagement.security.cipherSuiteIdentifier}"
+            TAG,
+            " - Security - Cipher Suite: " +
+                "${deviceEngagement.security.cipherSuiteIdentifier}"
         )
         logger.debug(
             TAG,
             " - Security - Ephemeral Public Key (as hex): " +
-                    "${deviceEngagement.security.ephemeralPublicKey}"
+                "${deviceEngagement.security.ephemeralPublicKey}"
         )
         logger.debug(
-            TAG, " - Device Retrieval Methods: " +
-                    "${deviceEngagement.deviceRetrievalMethods}"
+            TAG,
+            " - Device Retrieval Methods: " +
+                "${deviceEngagement.deviceRetrievalMethods}"
         )
 
         deviceEngagement

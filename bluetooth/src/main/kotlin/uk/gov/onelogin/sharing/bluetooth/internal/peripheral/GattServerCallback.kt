@@ -10,8 +10,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 internal class GattServerCallback(
     private val gatGattEventEmitter: GattEventEmitter,
     private val logger: Logger
-) :
-    BluetoothGattServerCallback() {
+) : BluetoothGattServerCallback() {
     override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
         logger.debug(logTag, "Address: ${device.address}")
         logger.debug(logTag, "Status: $status")
@@ -34,13 +33,17 @@ internal class GattServerCallback(
         offset: Int,
         value: ByteArray?
     ) {
-        println("onCharacteristicWriteRequest")
-        println("Device: ${device?.address}")
-        println("RequestId: $requestId")
-        println("Characteristic UUID: ${characteristic?.uuid}")
-        println("PreparedWrite: $preparedWrite")
-        println("ResponseNeeded: $responseNeeded")
-        println("Offset: $offset")
+        logger.debug(logTag, "onCharacteristicWriteRequest")
+        val logs = listOf(
+            "Device: ${device?.address}",
+            "RequestId: $requestId",
+            "Characteristic UUID: ${characteristic?.uuid}",
+            "PreparedWrite: $preparedWrite",
+            "ResponseNeeded: $responseNeeded",
+            "Offset: $offset"
+        )
+
+        logger.debug(logTag, logs.joinToString(separator = "\n"))
 
         val state = value?.firstOrNull()?.let {
             MdocState.fromByte(it)
@@ -48,12 +51,13 @@ internal class GattServerCallback(
 
         when (state) {
             MdocState.START -> {
-                println("Received START command from ${device?.address}")
+                logger.debug(logTag, "Received START command from ${device?.address}")
                 gatGattEventEmitter.emit(GattEvent.ConnectionStateStarted)
             }
 
             null -> {
-                println(
+                logger.debug(
+                    logTag,
                     "Unknown or empty command: ${
                         value?.joinToString {
                             BYTE_TO_HEX_FORMAT.format(it)

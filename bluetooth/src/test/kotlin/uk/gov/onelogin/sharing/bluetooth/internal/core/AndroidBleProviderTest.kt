@@ -51,13 +51,7 @@ internal class AndroidBleProviderTest {
     fun `start advertising delegates to advertiser with same params and callback`() {
         val parameters = AdvertisingParameters()
         val bleAdvertiseData = stubBleAdvertiseData()
-        val callback = object : AdvertisingCallback {
-            override fun onAdvertisingStarted() {}
-
-            override fun onAdvertisingStopped() {}
-
-            override fun onAdvertisingStartFailed(reason: AdvertisingFailureReason) {}
-        }
+        val callback = AdvertisingCallbackStub()
 
         provider.startAdvertising(
             parameters,

@@ -12,6 +12,7 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallbackStub
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
@@ -19,11 +20,15 @@ import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 @RunWith(RobolectricTestRunner::class)
 internal class AndroidBluetoothAdvertiserProviderTest {
     private val advertiser = mockk<BluetoothLeAdvertiser>(relaxed = true)
+    private val logger = SystemLogger()
     private val adapter = FakeBluetoothAdapterProvider(
         isEnabled = true,
         advertiser = advertiser
     )
-    private val provider = AndroidBluetoothAdvertiserProvider(adapter)
+    private val provider = AndroidBluetoothAdvertiserProvider(
+        bluetoothAdapter = adapter,
+        logger = logger
+    )
     private val callbackSlot = slot<AdvertisingSetCallback>()
     private val callback = AdvertisingCallbackStub()
 
@@ -53,7 +58,8 @@ internal class AndroidBluetoothAdvertiserProviderTest {
     @Test
     fun `stop clears internal callback`() {
         val provider = AndroidBluetoothAdvertiserProvider(
-            FakeBluetoothAdapterProvider(true)
+            bluetoothAdapter = FakeBluetoothAdapterProvider(isEnabled = true),
+            logger = logger
         )
         val callback1 = AdvertisingCallbackStub()
         val callback2 = AdvertisingCallbackStub()
@@ -87,7 +93,10 @@ internal class AndroidBluetoothAdvertiserProviderTest {
             advertiser = null
         )
 
-        val provider = AndroidBluetoothAdvertiserProvider(adapter)
+        val provider = AndroidBluetoothAdvertiserProvider(
+            bluetoothAdapter = adapter,
+            logger = logger
+        )
 
         provider.startAdvertisingSet(
             AdvertisingParameters(),
