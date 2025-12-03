@@ -8,9 +8,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRule
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceState.Companion.decodeableState
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerRule
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScreenRule
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityVerifierTest {
@@ -30,7 +30,8 @@ class MainActivityVerifierTest {
             performVerifierTabClick()
             performMenuItemClick("Connect with credential holder")
         }
-        connectWithHolderRule.assertBasicInformationIsDisplayed(validBarcodeDataResult.data)
+        connectWithHolderRule.update(decodeableState)
+        connectWithHolderRule.assertBasicInformationIsDisplayed()
     }
 
     @Test

@@ -12,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceState.Companion.decodeableState
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
@@ -41,9 +42,11 @@ class ConnectWithHolderDeviceRouteTest {
                 configureScannedInvalidQrRoute()
             }
 
-            controller.navigateToConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
+            controller.navigateToConnectWithHolderDeviceRoute(
+                decodeableState.base64EncodedEngagement
+            )
         }
-
-        composeTestRule.assertBasicInformationIsDisplayed(validBarcodeDataResult.data)
+        composeTestRule.update(decodeableState)
+        composeTestRule.assertBasicInformationIsDisplayed()
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.verifier.scan.state.data
 
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriTwo
+import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
 
 /**
@@ -12,4 +13,5 @@ object BarcodeDataResultStubs {
     val invalidBarcodeDataResultTwo = BarcodeDataResult.Invalid(exampleUriTwo)
 
     val validBarcodeDataResult = BarcodeDataResult.Valid(VALID_CBOR)
+    val undecodeableBarcodeDataResult = BarcodeDataResult.Valid(INVALID_CBOR)
 }

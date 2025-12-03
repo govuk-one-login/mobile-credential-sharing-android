@@ -16,6 +16,8 @@ class ConnectWithHolderDeviceRule(
     private val header: String
 ) : ComposeContentTestRule by composeContentTestRule {
 
+    private lateinit var renderState: ConnectWithHolderDeviceState
+
     constructor(
         composeContentTestRule: ComposeContentTestRule,
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
@@ -26,12 +28,12 @@ class ConnectWithHolderDeviceRule(
         header = resources.getString(R.string.connect_with_holder_heading)
     )
 
-    fun assertBasicInformationIsDisplayed(base64EncodedEngagement: String) {
+    fun assertBasicInformationIsDisplayed() {
         onNodeWithText(header)
             .assertExists()
             .assertIsDisplayed()
 
-        onNodeWithText(base64EncodedEngagement)
+        onNodeWithText(renderState.base64EncodedEngagement)
             .assertExists()
             .assertIsDisplayed()
     }
@@ -67,21 +69,27 @@ class ConnectWithHolderDeviceRule(
         .assertExists()
         .assertIsDisplayed()
 
-    fun render(base64EncodedEngagement: String, modifier: Modifier = Modifier) {
+    fun render(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {
+        update(state)
         setContent {
             ConnectWithHolderDeviceScreen(
-                base64EncodedEngagement = base64EncodedEngagement,
+                base64EncodedEngagement = renderState.base64EncodedEngagement,
                 modifier = modifier
             )
         }
     }
 
-    fun renderPreview(base64EncodedEngagement: String, modifier: Modifier = Modifier) {
+    fun renderPreview(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {
+        update(state)
         setContent {
             ConnectWithHolderDevicePreview(
-                base64EncodedEngagement = base64EncodedEngagement,
+                base64EncodedEngagement = renderState.base64EncodedEngagement,
                 modifier = modifier
             )
         }
+    }
+
+    fun update(state: ConnectWithHolderDeviceState) {
+        renderState = state
     }
 }
