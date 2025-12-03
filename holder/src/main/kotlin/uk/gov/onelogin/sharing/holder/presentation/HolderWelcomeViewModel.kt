@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
@@ -70,10 +72,10 @@ class HolderWelcomeViewModel(
     private val mdocBleSession: MdocSessionManager =
         mdocSessionManagerFactory.create(viewModelScope)
 
+    private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
     init {
-        checkBluetoothStatus()
         viewModelScope.launch(dispatcher) {
             val pubKey = sessionSecurity.generateEcPublicKey(EC_ALGORITHM, EC_PARAMETER_SPEC)
             val key = pubKey?.let { CoseKey.generateCoseKey(it) }
@@ -85,19 +87,86 @@ class HolderWelcomeViewModel(
 
         viewModelScope.launch {
             mdocBleSession.state.collect { state ->
-                println("Mdoc - BLE state: $state")
                 _uiState.update { it.copy(sessionState = state) }
-                if (state == MdocSessionState.AdvertisingStarted) {
-                    println("Mdoc - Advertising UUID: ${_uiState.value.uuid}")
+
+                when (state) {
+                    MdocSessionState.AdvertisingStarted ->
+                        println("Mdoc - Advertising Started UUID: ${_uiState.value.uuid}")
+
+                    MdocSessionState.AdvertisingStopped -> {
+                        sessionStartRequested = false
+                        println("Mdoc - Advertising Stopped")
+                    }
+
+                    is MdocSessionState.Connected ->
+                        println("Mdoc - Connected: ${state.address}")
+
+                    is MdocSessionState.Disconnected ->
+                        println("Mdoc - Disconnected: ${state.address}")
+
+                    is MdocSessionState.Error -> {
+                        sessionStartRequested = false
+                        handleError(state.reason)
+                    }
+
+                    MdocSessionState.GattServiceStopped -> {
+                        sessionStartRequested = false
+                        println("Mdoc - GattService Stopped")
+                    }
+
+                    MdocSessionState.Idle -> {
+                        sessionStartRequested = false
+                        println("Mdoc - Idle")
+                    }
+
+                    is MdocSessionState.ServiceAdded ->
+                        println("Mdoc - Service Added: ${state.uuid}")
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            mdocBleSession.bluetoothStatus.collect { bluetoothState ->
+                when (bluetoothState) {
+                    BluetoothStatus.OFF,
+                    BluetoothStatus.TURNING_OFF -> {
+                        val wasDisabled = _uiState.value.bluetoothState == BluetoothState.Disabled
+                        if (!wasDisabled) {
+                            println("Mdoc - Bluetooth switched OFF")
+                            _uiState.update {
+                                it.copy(bluetoothState = BluetoothState.Disabled)
+                            }
+                        }
+                    }
+
+                    BluetoothStatus.TURNING_ON -> {
+                        println("Mdoc - Bluetooth initializing")
+                        _uiState.update {
+                            it.copy(bluetoothState = BluetoothState.Initializing)
+                        }
+                    }
+
+                    BluetoothStatus.ON -> {
+                        println("Mdoc - Bluetooth switched ON")
+                        _uiState.update { it.copy(bluetoothState = BluetoothState.Enabled) }
+                        startBleSession()
+                    }
+
+                    BluetoothStatus.UNKNOWN ->
+                        println("Mdoc - Bluetooth status unknown")
                 }
             }
         }
     }
 
-    fun startAdvertising() {
-        val uuid = _uiState.value.uuid
-        viewModelScope.launch {
-            mdocBleSession.start(uuid)
+    private fun handleError(reason: MdocSessionError) {
+        when (reason) {
+            MdocSessionError.ADVERTISING_FAILED -> println("Mdoc - Error: Advertising failed")
+
+            MdocSessionError.GATT_NOT_AVAILABLE -> println("Mdoc - Error: GATT not available")
+
+            MdocSessionError.BLUETOOTH_PERMISSION_MISSING ->
+                println("Mdoc - Error: Bluetooth permission missing")
         }
     }
 
@@ -107,29 +176,37 @@ class HolderWelcomeViewModel(
         }
     }
 
-    fun updateBluetoothState(state: BluetoothState) {
-        _uiState.update {
-            it.copy(bluetoothStatus = state)
-        }
-    }
-
     fun updateBluetoothPermissions(state: Boolean) {
         _uiState.update {
             it.copy(hasBluetoothPermissions = state)
         }
+
+        startBleSession()
     }
 
-    fun checkBluetoothStatus() {
-        if (mdocBleSession.isBluetoothEnabled()) {
-            _uiState.update {
-                it.copy(bluetoothStatus = BluetoothState.Enabled)
-            }
-        } else {
-            _uiState.update {
-                it.copy(bluetoothStatus = BluetoothState.Disabled)
+    private fun startBleSession() {
+        val state = _uiState.value
+
+        val hasPermissions = state.hasBluetoothPermissions == true
+        val bluetoothOn = state.bluetoothState == BluetoothState.Enabled
+
+        val canStart = !sessionStartRequested &&
+            hasPermissions &&
+            bluetoothOn &&
+            canStartNewSession(state) &&
+            !sessionStartRequested
+
+        if (canStart) {
+            viewModelScope.launch {
+                mdocBleSession.start(state.uuid)
             }
         }
     }
+
+    private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
+        state.sessionState == MdocSessionState.Idle ||
+            state.sessionState == MdocSessionState.AdvertisingStopped ||
+            state.sessionState == MdocSessionState.GattServiceStopped
 }
 
 data class HolderWelcomeUiState(
@@ -137,6 +214,6 @@ data class HolderWelcomeUiState(
     val qrData: String? = null,
     val sessionState: MdocSessionState = MdocSessionState.Idle,
     val lastErrorMessage: String? = null,
-    val bluetoothStatus: BluetoothState = BluetoothState.Initializing,
+    val bluetoothState: BluetoothState = BluetoothState.Unknown,
     val hasBluetoothPermissions: Boolean? = null
 )

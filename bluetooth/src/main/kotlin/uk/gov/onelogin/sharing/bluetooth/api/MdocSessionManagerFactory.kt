@@ -9,6 +9,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertis
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
 
 /**
@@ -39,10 +40,12 @@ class MdocSessionManagerFactory(private val context: Context) : SessionManagerFa
             bluetoothManager = context.getSystemService(BluetoothManager::class.java),
             permissionsChecker = BluetoothPermissionChecker(context)
         )
+        val bluetoothStateMonitor = AndroidBluetoothStateMonitor(context)
 
         return AndroidMdocSessionManager(
             bleAdvertiser = bleAdvertiser,
             gattServerManager = gattServerManager,
+            bluetoothStateMonitor = bluetoothStateMonitor,
             coroutineScope = scope
         )
     }

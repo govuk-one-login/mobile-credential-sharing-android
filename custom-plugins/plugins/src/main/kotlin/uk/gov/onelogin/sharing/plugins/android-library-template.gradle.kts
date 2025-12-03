@@ -62,6 +62,7 @@ dependencies {
         "androidx-test-espresso-intents",
         "androidx-test-rules",
         "androidx-ui-test-junit4",
+        "mockk"
     ).map { libs.findLibrary(it).get().get() }.forEach {
         testFixturesApi(it)
     }

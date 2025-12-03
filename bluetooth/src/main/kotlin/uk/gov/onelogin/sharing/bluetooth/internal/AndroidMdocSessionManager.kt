@@ -13,15 +13,22 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
 
 internal class AndroidMdocSessionManager(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
+    private val bluetoothStateMonitor: BluetoothStateMonitor,
     coroutineScope: CoroutineScope
 ) : MdocSessionManager {
     private val _state = MutableStateFlow<MdocSessionState>(MdocSessionState.Idle)
     override val state: StateFlow<MdocSessionState> = _state
+
+    private val _bluetoothStatus = MutableStateFlow(BluetoothStatus.UNKNOWN)
+    override val bluetoothStatus: StateFlow<BluetoothStatus> = _bluetoothStatus
+
     private val connectedDevices = mutableSetOf<String>()
 
     init {
@@ -36,6 +43,27 @@ internal class AndroidMdocSessionManager(
                 handleGattEvent(it)
             }
         }
+
+        coroutineScope.launch {
+            bluetoothStateMonitor.states.collect { state ->
+                when (state) {
+                    BluetoothStatus.OFF,
+                    BluetoothStatus.TURNING_OFF -> {
+                        bleAdvertiser.stopAdvertise()
+                        gattServerManager.close()
+                        _bluetoothStatus.value = BluetoothStatus.OFF
+                    }
+
+                    BluetoothStatus.ON -> {
+                        _bluetoothStatus.value = BluetoothStatus.ON
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
+
+        bluetoothStateMonitor.start()
     }
 
     override suspend fun start(serviceUuid: UUID) {
@@ -52,6 +80,7 @@ internal class AndroidMdocSessionManager(
     override suspend fun stop() {
         bleAdvertiser.stopAdvertise()
         gattServerManager.close()
+        bluetoothStateMonitor.stop()
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {
@@ -89,14 +118,20 @@ internal class AndroidMdocSessionManager(
             is GattServerEvent.Error ->
                 _state.value = MdocSessionState.Error(event.error)
 
-            is GattServerEvent.ServiceAdded -> {
+            is GattServerEvent.ServiceAdded ->
                 _state.value = MdocSessionState.ServiceAdded(event.service?.uuid)
-            }
+
+            GattServerEvent.ServiceStopped ->
+                _state.value = MdocSessionState.GattServiceStopped
 
             is GattServerEvent.UnsupportedEvent ->
-                println("Unsupported event - status: ${event.status} new state: ${event.newState}")
+                println(
+                    "Mdoc - Unsupported event - status: ${event.status} new state: ${event.newState}"
+                )
+
+            GattServerEvent.SessionStarted -> {
+                println("Mdoc - Connection has been setup successfully - session state started")
+            }
         }
     }
-
-    override fun isBluetoothEnabled(): Boolean = bleAdvertiser.isBluetoothEnabled()
 }

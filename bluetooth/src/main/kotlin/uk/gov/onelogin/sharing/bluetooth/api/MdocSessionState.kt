@@ -15,6 +15,9 @@ sealed interface MdocSessionState {
     /** BLE advertising has stopped. */
     data object AdvertisingStopped : MdocSessionState
 
+    /** GATT service stopped */
+    data object GattServiceStopped : MdocSessionState
+
     /**
      * The device has successfully connected.
      *
