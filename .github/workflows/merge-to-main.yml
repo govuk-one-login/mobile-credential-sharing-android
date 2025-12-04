@@ -157,13 +157,13 @@ jobs:
           keystore-password: ${{ secrets.KEYSTORE_PASSWORD }}
           keystore-key-alias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
           keystore-key-password: ${{ secrets.KEYSTORE_KEY_PASSWORD}}
-          version-code: ${{ steps.generate-version-code.outputs.version-code }}
+          version-code: ${{ steps.versioning.outputs.version-code }}
 
       - name: Publish to Play Store
         if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
         uses: ./actions/publish-to-play-store
         with:
-          aab-paths: ${{ steps.bundle-release-app.outputs.aab-paths }}
+          aab-paths: ${{ steps.bundle.outputs.aab-paths }}
           package-name: 'uk.gov.onelogin.sharing'
           google-service-account-json: ${{ steps.auth.outputs.credentials_file_path }}
           track: 'internal'
