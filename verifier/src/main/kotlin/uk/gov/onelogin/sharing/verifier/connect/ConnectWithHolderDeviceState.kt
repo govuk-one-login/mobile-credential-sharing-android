@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.verifier.connect
 
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 
 /**
  * Property bag data class for holding the [ConnectWithHolderDeviceScreen] composable UI state.
@@ -12,6 +13,7 @@ import com.google.accompanist.permissions.PermissionState
  */
 @OptIn(ExperimentalPermissionsApi::class)
 data class ConnectWithHolderDeviceState(
+    val adapter: BluetoothAdapterProvider,
     val base64EncodedEngagement: String,
     val permissionState: PermissionState
 )

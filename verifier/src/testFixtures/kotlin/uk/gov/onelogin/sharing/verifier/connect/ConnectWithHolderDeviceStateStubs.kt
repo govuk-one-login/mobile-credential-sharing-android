@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.verifier.connect
 
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.undecodeableBarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
@@ -17,6 +18,7 @@ data object ConnectWithHolderDeviceStateStubs {
      * decoded for bluetooth connection purposes.
      */
     val undecodableState = ConnectWithHolderDeviceState(
+        adapter = FakeBluetoothAdapterProvider(isEnabled = false),
         base64EncodedEngagement = undecodeableBarcodeDataResult.data,
         permissionState = FakePermissionState.Companion.bluetoothConnect(
             status = PermissionStatus.Denied(shouldShowRationale = false)
@@ -30,6 +32,7 @@ data object ConnectWithHolderDeviceStateStubs {
      * Doesn't grant bluetooth permissions.
      */
     val decodableDeniedState = ConnectWithHolderDeviceState(
+        adapter = FakeBluetoothAdapterProvider(isEnabled = false),
         base64EncodedEngagement = validBarcodeDataResult.data,
         permissionState = FakePermissionState.Companion.bluetoothConnect(
             status = PermissionStatus.Denied(shouldShowRationale = false)
@@ -43,6 +46,21 @@ data object ConnectWithHolderDeviceStateStubs {
      * Also grants [android.Manifest.permission.BLUETOOTH_CONNECT] permissions.
      */
     val decodableGrantedState = ConnectWithHolderDeviceState(
+        adapter = FakeBluetoothAdapterProvider(isEnabled = false),
+        base64EncodedEngagement = validBarcodeDataResult.data,
+        permissionState = FakePermissionState.Companion.bluetoothConnect(
+            status = PermissionStatus.Granted
+        )
+    )
+
+    /**
+     * State that includes a valid [ConnectWithHolderDeviceState.base64EncodedEngagement] for
+     * bluetooth connection purposes.
+     *
+     * Also grants [android.Manifest.permission.BLUETOOTH_CONNECT] permissions.
+     */
+    val validWithCorrectBluetoothSetup = ConnectWithHolderDeviceState(
+        adapter = FakeBluetoothAdapterProvider(isEnabled = true),
         base64EncodedEngagement = validBarcodeDataResult.data,
         permissionState = FakePermissionState.Companion.bluetoothConnect(
             status = PermissionStatus.Granted

@@ -1,10 +1,10 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.core
+package uk.gov.onelogin.sharing.bluetooth.api.adapter
 
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeAdvertiser
 import android.content.Context
 
-internal class AndroidBluetoothAdapterProvider(val context: Context) : BluetoothAdapterProvider {
+class AndroidBluetoothAdapterProvider(val context: Context) : BluetoothAdapterProvider {
     private val bluetoothManager by lazy {
         context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     }

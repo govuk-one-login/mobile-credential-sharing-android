@@ -1,7 +1,6 @@
-package uk.gov.onelogin.sharing.bluetooth.ble
+package uk.gov.onelogin.sharing.bluetooth.api.adapter
 
 import android.bluetooth.le.BluetoothLeAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothAdapterProvider
 
 class FakeBluetoothAdapterProvider(
     private var isEnabled: Boolean,

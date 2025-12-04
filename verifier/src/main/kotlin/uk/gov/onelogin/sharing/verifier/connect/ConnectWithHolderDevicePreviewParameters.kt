@@ -3,19 +3,23 @@ package uk.gov.onelogin.sharing.verifier.connect
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 internal data class ConnectWithHolderDevicePreviewParameters(
     override val values: Sequence<ConnectWithHolderDeviceState> =
         cborEngagements.flatMap { base64EncodedEngagement ->
-            permissionStatuses.map { permissionStatus ->
-                ConnectWithHolderDeviceState(
-                    base64EncodedEngagement = base64EncodedEngagement,
-                    permissionState = FakePermissionState.bluetoothConnect(
-                        status = permissionStatus
+            bluetoothAdapters.flatMap { adapterProvider ->
+                permissionStatuses.map { permissionStatus ->
+                    ConnectWithHolderDeviceState(
+                        adapter = adapterProvider,
+                        base64EncodedEngagement = base64EncodedEngagement,
+                        permissionState = FakePermissionState.bluetoothConnect(
+                            status = permissionStatus
+                        )
                     )
-                )
+                }
             }
         }.asSequence()
 ) : PreviewParameterProvider<ConnectWithHolderDeviceState> {
@@ -28,6 +32,15 @@ internal data class ConnectWithHolderDevicePreviewParameters(
         private val permissionStatuses = listOf(
             PermissionStatus.Denied(shouldShowRationale = false),
             PermissionStatus.Granted
+        )
+
+        private val bluetoothAdapters = listOf(
+            FakeBluetoothAdapterProvider(
+                isEnabled = true
+            ),
+            FakeBluetoothAdapterProvider(
+                isEnabled = false
+            )
         )
 
         private const val INVALID_CBOR =

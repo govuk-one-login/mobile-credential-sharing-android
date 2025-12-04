@@ -9,6 +9,10 @@ import uk.gov.onelogin.sharing.bluetooth.R
  * Ensures that tests would fail when strings update without updating this test data.
  */
 enum class StringsXmlData(val expected: String, @param:StringRes val resourceId: Int) {
+    BLUETOOTH_DEVICE_STATE(
+        expected = "Bluetooth device state: %1\$s",
+        resourceId = R.string.bluetooth_device_state
+    ),
     BLUETOOTH_PERMISSION_STATE(
         expected = "Bluetooth permission state: %1\$s",
         resourceId = R.string.bluetooth_permission_state

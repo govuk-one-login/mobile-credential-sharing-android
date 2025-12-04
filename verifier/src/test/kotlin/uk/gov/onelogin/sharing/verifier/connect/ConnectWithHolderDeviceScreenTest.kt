@@ -37,6 +37,7 @@ class ConnectWithHolderDeviceScreenTest {
             assertErrorIsDisplayed()
             assertDeviceEngagementDataDoesNotExist()
             assertBluetoothPermissionIsDenied()
+            assertDeviceBluetoothIsDisabled()
         }
     }
 
@@ -48,6 +49,7 @@ class ConnectWithHolderDeviceScreenTest {
             assertErrorDoesNotExist()
             assertDeviceEngagementDataIsDisplayed()
             assertBluetoothPermissionIsDenied()
+            assertDeviceBluetoothIsDisabled()
         }
     }
 
@@ -56,6 +58,7 @@ class ConnectWithHolderDeviceScreenTest {
         composeTestRule.run {
             renderFunction(decodableGrantedState, Modifier)
             assertBluetoothPermissionIsGranted()
+            assertDeviceBluetoothIsDisabled()
         }
     }
 
@@ -64,8 +67,7 @@ class ConnectWithHolderDeviceScreenTest {
         composeTestRule.run {
             var hasLaunchedPermission = false
             renderFunction(
-                ConnectWithHolderDeviceState(
-                    base64EncodedEngagement = decodableGrantedState.base64EncodedEngagement,
+                decodableDeniedState.copy(
                     permissionState = FakePermissionState.bluetoothConnect(
                         status = PermissionStatus.Denied(shouldShowRationale = false)
                     ) {

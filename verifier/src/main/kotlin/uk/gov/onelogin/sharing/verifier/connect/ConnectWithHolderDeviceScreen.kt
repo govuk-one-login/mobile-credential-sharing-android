@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -21,6 +22,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
@@ -30,6 +33,8 @@ import uk.gov.onelogin.sharing.verifier.R
 fun ConnectWithHolderDeviceScreen(
     base64EncodedEngagement: String,
     modifier: Modifier = Modifier,
+    bluetoothAdapter: BluetoothAdapterProvider =
+        AndroidBluetoothAdapterProvider(LocalContext.current),
     permissionState: PermissionState = rememberPermissionState(
         permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             Manifest.permission.BLUETOOTH_CONNECT
@@ -59,14 +64,29 @@ fun ConnectWithHolderDeviceScreen(
         item {
             val permissionStateText = when {
                 permissionState.status.isGranted ->
-                    stringResource(coreR.string.permission_state_granted)
+                    coreR.string.granted
 
-                else -> stringResource(coreR.string.permission_state_denied)
-            }
+                else -> coreR.string.denied
+            }.let { stringResource(it) }
+
             Text(
                 stringResource(
                     R.string.connect_with_holder_permission_state,
                     permissionStateText
+                )
+            )
+        }
+        item {
+            val deviceBluetoothState = if (bluetoothAdapter.isEnabled()) {
+                coreR.string.enabled
+            } else {
+                coreR.string.disabled
+            }.let { stringResource(it) }
+
+            Text(
+                stringResource(
+                    R.string.connect_with_holder_bluetooth_state,
+                    deviceBluetoothState
                 )
             )
         }

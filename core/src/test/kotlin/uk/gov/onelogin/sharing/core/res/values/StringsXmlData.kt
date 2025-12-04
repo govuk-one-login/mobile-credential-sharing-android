@@ -9,12 +9,20 @@ import uk.gov.onelogin.sharing.core.R
  * Ensures that tests would fail when strings update without updating this test data.
  */
 enum class StringsXmlData(val expected: String, @param:StringRes val resourceId: Int) {
-    PERMISSION_STATE_DENIED(
-        expected = "Denied",
-        resourceId = R.string.permission_state_denied
+    DISABLED(
+        expected = "Disabled",
+        resourceId = R.string.disabled
     ),
-    PERMISSION_STATE_GRANTED(
+    DENIED(
+        expected = "Denied",
+        resourceId = R.string.denied
+    ),
+    ENABLED(
+        expected = "Enabled",
+        resourceId = R.string.enabled
+    ),
+    GRANTED(
         expected = "Granted",
-        resourceId = R.string.permission_state_denied
+        resourceId = R.string.granted
     )
 }
