@@ -5,27 +5,10 @@ import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
-import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
-import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.engagement.EngagementGenerator
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
 @DependencyGraph(ViewModelScope::class)
 interface HolderGraph : ViewModelGraph {
     val context: Context
-
-    @Provides
-    fun providesSessionSecurity(): SessionSecurity = SessionSecurityImpl()
-
-    @Provides
-    fun providesEngagementGenerator(): Engagement = EngagementGenerator()
-
-    @Provides
-    fun provideMdocSessionManagerFactory(): SessionManagerFactory = MdocSessionManagerFactory(
-        context = context
-    )
 
     @DependencyGraph.Factory
     fun interface Factory {

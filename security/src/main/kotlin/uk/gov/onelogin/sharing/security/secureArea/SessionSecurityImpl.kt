@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPairGenerator
 import java.security.NoSuchAlgorithmException
@@ -13,6 +16,8 @@ import java.security.spec.ECGenParameterSpec
  *
  * This implementation uses Elliptic Curve (EC) cryptography.
  */
+@ContributesBinding(ViewModelScope::class)
+@Inject
 class SessionSecurityImpl : SessionSecurity {
 
     /**

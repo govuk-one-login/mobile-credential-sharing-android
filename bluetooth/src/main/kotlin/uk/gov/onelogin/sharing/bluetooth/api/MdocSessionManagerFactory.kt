@@ -2,6 +2,9 @@ package uk.gov.onelogin.sharing.bluetooth.api
 
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineScope
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.AndroidMdocSessionManager
@@ -18,6 +21,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerMa
  * Encapsulates the creation and dependency wiring of the components
  * required for the BLE advertiser and GATT server.
  */
+@ContributesBinding(ViewModelScope::class)
+@Inject
 class MdocSessionManagerFactory(private val context: Context) : SessionManagerFactory {
     /**
      * Constructs and configures all the necessary dependencies for a

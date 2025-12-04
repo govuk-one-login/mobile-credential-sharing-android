@@ -1,6 +1,7 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library
+        libs.plugins.templates.android.library,
+        libs.plugins.metro.di
     ).forEach { alias(it) }
 }
 
@@ -28,6 +29,12 @@ android {
             )
         }
     }
+}
+
+dependencies {
+    listOf(
+        libs.metro.viewmodel.compose
+    ).forEach(::implementation)
 }
 
 mavenPublishingConfig {
