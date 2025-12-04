@@ -57,11 +57,6 @@ android {
     packaging {
         licenseFilters.forEach(resources.excludes::plusAssign)
     }
-
-    hilt {
-        enableAggregatingTask = false
-    }
-    // we might need a more robust way to handle transitive dependencies here
 }
 
 dependencies {
