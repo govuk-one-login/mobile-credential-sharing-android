@@ -117,6 +117,7 @@ internal fun ConnectWithHolderDevicePreview(
     GdsTheme {
         ConnectWithHolderDeviceScreen(
             base64EncodedEngagement = state.base64EncodedEngagement,
+            bluetoothAdapter = state.adapter,
             modifier = modifier.background(Color.White),
             permissionState = state.permissionState
         )

@@ -79,6 +79,15 @@ class ConnectWithHolderDeviceRule(
             .assertDoesNotExist()
     }
 
+    fun assertDeviceBluetoothIsEnabled() {
+        onNodeWithText(enabledDeviceBluetooth)
+            .assertExists()
+            .assertIsDisplayed()
+
+        onNodeWithText(disabledDeviceBluetooth)
+            .assertDoesNotExist()
+    }
+
     fun assertDeviceEngagementDataDoesNotExist() {
         onNodeWithText(
             decodedDataHeader
@@ -114,6 +123,7 @@ class ConnectWithHolderDeviceRule(
         update(state)
         setContent {
             ConnectWithHolderDeviceScreen(
+                bluetoothAdapter = renderState.adapter,
                 base64EncodedEngagement = renderState.base64EncodedEngagement,
                 modifier = modifier,
                 permissionState = renderState.permissionState

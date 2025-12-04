@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableGrantedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.undecodableState
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.validWithCorrectBluetoothSetup
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(RobolectricTestParameterInjector::class)
@@ -54,9 +55,24 @@ class ConnectWithHolderDeviceScreenTest {
     }
 
     @Test
+    fun grantedAndEnabledBluetoothWithValidCborStartsScanning() = runTest {
+        composeTestRule.run {
+            renderFunction(validWithCorrectBluetoothSetup, Modifier)
+            assertBasicInformationIsDisplayed()
+            assertErrorDoesNotExist()
+            assertDeviceEngagementDataIsDisplayed()
+            assertBluetoothPermissionIsGranted()
+            assertDeviceBluetoothIsEnabled()
+        }
+    }
+
+    @Test
     fun bluetoothPermissionIsGranted() = runTest {
         composeTestRule.run {
             renderFunction(decodableGrantedState, Modifier)
+            assertBasicInformationIsDisplayed()
+            assertErrorDoesNotExist()
+            assertDeviceEngagementDataIsDisplayed()
             assertBluetoothPermissionIsGranted()
             assertDeviceBluetoothIsDisabled()
         }
