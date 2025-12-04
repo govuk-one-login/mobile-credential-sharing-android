@@ -2,7 +2,10 @@ package uk.gov.onelogin.sharing.holder.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +25,8 @@ import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAM
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
 @Inject
+@ViewModelKey(HolderWelcomeViewModel::class)
+@ContributesIntoMap(ViewModelScope::class)
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,

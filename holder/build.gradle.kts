@@ -52,6 +52,7 @@ dependencies {
 
     listOf(
         libs.androidx.lifecycle.viewmodel.compose,
+        libs.metro.viewmodel.compose,
         libs.zxing.core,
         projects.bluetooth,
         projects.core,

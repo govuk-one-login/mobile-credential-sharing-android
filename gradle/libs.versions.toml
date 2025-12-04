@@ -22,7 +22,7 @@ kotlin-symbol-processing = "2.3.3" # https://github.com/google/ksp/releases ; up
 kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
-metro = "0.7.7"  # https://github.com/ZacSweers/Metro/releases
+metro = "0.8.0"  # https://github.com/ZacSweers/Metro/releases
 mockk = "1.14.6" # https://github.com/mockk/mockk/releases
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.52.0" # https://github.com/takahirom/roborazzi/releases
@@ -69,7 +69,7 @@ hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.re
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-metro-viewmodel-compose = { module = "dev.zacsweers.metro:metro-viewmodel-compose", version.ref = "metro" }
+metro-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 org-jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }

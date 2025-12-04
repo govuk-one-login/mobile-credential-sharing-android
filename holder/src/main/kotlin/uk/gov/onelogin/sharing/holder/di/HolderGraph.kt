@@ -3,18 +3,18 @@ package uk.gov.onelogin.sharing.holder.di
 import android.content.Context
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
+import dev.zacsweers.metrox.viewmodel.ViewModelGraph
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
-@DependencyGraph
-interface HolderGraph {
+@DependencyGraph(ViewModelScope::class)
+interface HolderGraph : ViewModelGraph {
     val context: Context
-    val holderViewModel: HolderWelcomeViewModel
 
     @Provides
     fun providesSessionSecurity(): SessionSecurity = SessionSecurityImpl()
