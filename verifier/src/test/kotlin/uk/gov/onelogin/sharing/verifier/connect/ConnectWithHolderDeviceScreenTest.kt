@@ -39,6 +39,7 @@ class ConnectWithHolderDeviceScreenTest {
             assertDeviceEngagementDataDoesNotExist()
             assertBluetoothPermissionIsDenied()
             assertDeviceBluetoothIsDisabled()
+            assertIsNotSearchingForBluetoothDevices()
         }
     }
 
@@ -51,18 +52,7 @@ class ConnectWithHolderDeviceScreenTest {
             assertDeviceEngagementDataIsDisplayed()
             assertBluetoothPermissionIsDenied()
             assertDeviceBluetoothIsDisabled()
-        }
-    }
-
-    @Test
-    fun grantedAndEnabledBluetoothWithValidCborStartsScanning() = runTest {
-        composeTestRule.run {
-            renderFunction(validWithCorrectBluetoothSetup, Modifier)
-            assertBasicInformationIsDisplayed()
-            assertErrorDoesNotExist()
-            assertDeviceEngagementDataIsDisplayed()
-            assertBluetoothPermissionIsGranted()
-            assertDeviceBluetoothIsEnabled()
+            assertIsNotSearchingForBluetoothDevices()
         }
     }
 
@@ -75,6 +65,20 @@ class ConnectWithHolderDeviceScreenTest {
             assertDeviceEngagementDataIsDisplayed()
             assertBluetoothPermissionIsGranted()
             assertDeviceBluetoothIsDisabled()
+            assertIsNotSearchingForBluetoothDevices()
+        }
+    }
+
+    @Test
+    fun grantedAndEnabledBluetoothWithValidCborStartsScanning() = runTest {
+        composeTestRule.run {
+            renderFunction(validWithCorrectBluetoothSetup, Modifier)
+            assertBasicInformationIsDisplayed()
+            assertErrorDoesNotExist()
+            assertDeviceEngagementDataIsDisplayed()
+            assertBluetoothPermissionIsGranted()
+            assertDeviceBluetoothIsEnabled()
+            assertIsSearchingForBluetoothDevices()
         }
     }
 

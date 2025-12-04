@@ -21,7 +21,8 @@ class ConnectWithHolderDeviceRule(
     private val disabledDeviceBluetooth: String,
     private val enabledDeviceBluetooth: String,
     private val grantedBluetoothPermission: String,
-    private val header: String
+    private val header: String,
+    private val scanningForUuids: String
 ) : ComposeContentTestRule by composeContentTestRule {
 
     private lateinit var renderState: ConnectWithHolderDeviceState
@@ -49,7 +50,8 @@ class ConnectWithHolderDeviceRule(
             R.string.connect_with_holder_permission_state,
             resources.getString(coreR.string.granted)
         ),
-        header = resources.getString(R.string.connect_with_holder_heading)
+        header = resources.getString(R.string.connect_with_holder_heading),
+        scanningForUuids = resources.getString(R.string.connect_with_holder_searching_for_uuids)
     )
 
     fun assertBasicInformationIsDisplayed() {
@@ -118,6 +120,17 @@ class ConnectWithHolderDeviceRule(
     fun assertErrorIsDisplayed() = onNodeWithText(decodeError)
         .assertExists()
         .assertIsDisplayed()
+
+    fun assertIsNotSearchingForBluetoothDevices() {
+        onNodeWithText(scanningForUuids)
+            .assertDoesNotExist()
+    }
+
+    fun assertIsSearchingForBluetoothDevices() {
+        onNodeWithText(scanningForUuids)
+            .assertExists()
+            .assertIsDisplayed()
+    }
 
     fun render(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {
         update(state)

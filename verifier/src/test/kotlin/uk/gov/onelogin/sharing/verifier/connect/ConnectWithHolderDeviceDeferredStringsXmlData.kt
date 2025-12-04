@@ -32,5 +32,9 @@ enum class ConnectWithHolderDeviceDeferredStringsXmlData(
     CONNECT_WITH_HOLDER_PERMISSION_STATE(
         defersTo = bluetoothR.string.bluetooth_permission_state,
         resourceId = R.string.connect_with_holder_permission_state
+    ),
+    CONNECT_WITH_HOLDER_SEARCHING_FOR_UUIDS(
+        defersTo = R.string.searching_for_uuids,
+        resourceId = R.string.connect_with_holder_searching_for_uuids
     )
 }

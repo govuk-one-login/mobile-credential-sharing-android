@@ -5,4 +5,5 @@
     <string name="connect_with_holder_error_decode" translatable="false">@string/could_not_decode_device_engagement</string>
     <string name="connect_with_holder_heading" translatable="false">@string/successfully_scanned_qr_code_data</string>
     <string name="connect_with_holder_permission_state" translatable="false">@string/bluetooth_permission_state</string>
+    <string name="connect_with_holder_searching_for_uuids" translatable="false">@string/searching_for_uuids</string>
 </resources>

@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +27,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProv
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
@@ -61,47 +63,66 @@ fun ConnectWithHolderDeviceScreen(
         item {
             Text(base64EncodedEngagement)
         }
-        item {
-            val permissionStateText = when {
-                permissionState.status.isGranted ->
-                    coreR.string.granted
+        showBluetoothPermissionState(permissionState)
+        showBluetoothDeviceState(bluetoothAdapter::isEnabled)
 
-                else -> coreR.string.denied
-            }.let { stringResource(it) }
-
-            Text(
-                stringResource(
-                    R.string.connect_with_holder_permission_state,
-                    permissionStateText
-                )
-            )
-        }
-        item {
-            val deviceBluetoothState = if (bluetoothAdapter.isEnabled()) {
-                coreR.string.enabled
-            } else {
-                coreR.string.disabled
-            }.let { stringResource(it) }
-
-            Text(
-                stringResource(
-                    R.string.connect_with_holder_bluetooth_state,
-                    deviceBluetoothState
-                )
-            )
-        }
-
-        if (engagementData == null) {
+        if (permissionState.status.isGranted && bluetoothAdapter.isEnabled()) {
             item {
-                Text(stringResource(R.string.connect_with_holder_error_decode))
+                Text(stringResource(R.string.connect_with_holder_searching_for_uuids))
             }
+        }
+
+        showEngagementData(engagementData)
+    }
+}
+
+private fun LazyListScope.showBluetoothDeviceState(isEnabled: () -> Boolean) {
+    item {
+        val deviceBluetoothState = if (isEnabled()) {
+            coreR.string.enabled
         } else {
-            item {
-                Text(stringResource(R.string.connect_with_holder_decoded_data))
-            }
-            item {
-                Text(engagementData.toString())
-            }
+            coreR.string.disabled
+        }.let { stringResource(it) }
+
+        Text(
+            stringResource(
+                R.string.connect_with_holder_bluetooth_state,
+                deviceBluetoothState
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+private fun LazyListScope.showBluetoothPermissionState(permissionState: PermissionState) {
+    item {
+        val permissionStateText = when {
+            permissionState.status.isGranted ->
+                coreR.string.granted
+
+            else -> coreR.string.denied
+        }.let { stringResource(it) }
+
+        Text(
+            stringResource(
+                R.string.connect_with_holder_permission_state,
+                permissionStateText
+            )
+        )
+    }
+}
+
+private fun LazyListScope.showEngagementData(engagementData: DeviceEngagementDto?) {
+    if (engagementData == null) {
+        item {
+            Text(stringResource(R.string.connect_with_holder_error_decode))
+        }
+    } else {
+        item {
+            Text(stringResource(R.string.connect_with_holder_decoded_data))
+        }
+        item {
+            Text(engagementData.toString())
         }
     }
 }
