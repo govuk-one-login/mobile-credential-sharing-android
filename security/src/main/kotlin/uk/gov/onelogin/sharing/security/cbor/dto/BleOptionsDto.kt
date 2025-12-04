@@ -5,6 +5,8 @@ data class BleOptionsDto(
     val clientMode: Boolean,
     val peripheralServerModeUuid: ByteArray?
 ) {
+    fun getPeripheralServerModeUuidString(): String? = peripheralServerModeUuid?.decodeToString()
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

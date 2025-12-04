@@ -8,8 +8,10 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import org.junit.Assert.fail
 import uk.gov.onelogin.sharing.bluetooth.R as bluetoothR
 import uk.gov.onelogin.sharing.core.R as coreR
+import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -130,6 +132,16 @@ class ConnectWithHolderDeviceRule(
         onNodeWithText(scanningForUuids)
             .assertExists()
             .assertIsDisplayed()
+
+        decodeDeviceEngagement(
+            renderState.base64EncodedEngagement
+        )?.deviceRetrievalMethods?.forEach { deviceRetrievalMethodDto ->
+            deviceRetrievalMethodDto.getPeripheralServerModeUuidString()?.let {
+                onNodeWithText("UUID: $it")
+                    .assertExists()
+                    .assertIsDisplayed()
+            } ?: fail("Couldn't find peripheral server UUID!")
+        } ?: fail("Couldn't decode device engagement DTO!")
     }
 
     fun render(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {

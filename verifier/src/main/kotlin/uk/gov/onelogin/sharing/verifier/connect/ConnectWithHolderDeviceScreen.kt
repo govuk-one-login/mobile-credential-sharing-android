@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -23,6 +24,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.R as coreR
@@ -68,7 +70,19 @@ fun ConnectWithHolderDeviceScreen(
 
         if (permissionState.status.isGranted && bluetoothAdapter.isEnabled()) {
             item {
-                Text(stringResource(R.string.connect_with_holder_searching_for_uuids))
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(spacingSingle)
+                ) {
+                    Text(
+                        stringResource(R.string.connect_with_holder_searching_for_uuids)
+                    )
+
+                    engagementData?.deviceRetrievalMethods?.forEach { deviceRetrievalMethodDto ->
+                        deviceRetrievalMethodDto.getPeripheralServerModeUuidString()?.let {
+                            Text("UUID: $it")
+                        }
+                    }
+                }
             }
         }
 
