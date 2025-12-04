@@ -67,7 +67,7 @@ dependencies {
     ).forEach(::androidTestImplementation)
 
     listOf(
-        //  projects.holder,
+        projects.holder,
         projects.verifier
     ).forEach(::api)
 
@@ -80,7 +80,6 @@ dependencies {
         libs.bundles.android.baseline,
         libs.bundles.uk.gov.ui,
         libs.hilt.android,
-        projects.holder,
         testFixtures(projects.verifier)
     ).forEach(::implementation)
     ksp(libs.hilt.compiler)

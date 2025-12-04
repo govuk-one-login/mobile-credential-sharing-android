@@ -27,7 +27,6 @@ object HolderHomeRoute {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 HolderWelcomeScreen(viewModel = viewModel)
             }
         }

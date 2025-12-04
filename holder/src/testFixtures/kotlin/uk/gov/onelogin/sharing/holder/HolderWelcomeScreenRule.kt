@@ -15,8 +15,12 @@ import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
+import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
+import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
@@ -27,7 +31,8 @@ class HolderWelcomeScreenRule(
     composeTestRule: ComposeContentTestRule,
     private val enablePermissionsText: String,
     private val openAppSettingsText: String,
-    private val permissionDeniedText: String
+    private val permissionDeniedText: String,
+    private val bluetoothDisabledText: String
 ) : ComposeContentTestRule by composeTestRule {
 
     constructor(
@@ -39,11 +44,11 @@ class HolderWelcomeScreenRule(
         openAppSettingsText = resources.getString(R.string.open_app_permissions),
         permissionDeniedText = resources.getString(
             R.string.bluetooth_permission_permanently_denied
-        )
+        ),
+        bluetoothDisabledText = resources.getString(R.string.bluetooth_disabled_error_text)
     )
 
-    private lateinit var content: () -> Unit
-    private val fakeMdocSession = FakeMdocSessionManager()
+    val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
     val dummyPublicKey = SessionSecurityTestStub.generateValidKeyPair()
     private val fakeSessionSecurity = FakeSessionSecurity(
         publicKey = dummyPublicKey
@@ -56,7 +61,7 @@ class HolderWelcomeScreenRule(
         HolderWelcomeViewModel(
             sessionSecurity = fakeSessionSecurity,
             engagementGenerator = fakeEngagementGenerator,
-            mdocBleSession = fakeMdocSession,
+            mdocSessionManagerFactory = { mdocSessionManager },
             dispatcher = Dispatchers.Main
         )
     }
@@ -89,11 +94,19 @@ class HolderWelcomeScreenRule(
     fun assertQrCodeIsDisplayed() = onNodeWithContentDescription(QR_CODE_CONTENT_DESC)
         .assertIsDisplayed()
         .assert(hasRole(Role.Image))
-        // Replace with GOV.UK UI components V2 test fixture `hasRole` when applicable.
-        .assert(
-            SemanticsMatcher.expectValue(
-                SemanticsProperties.Role,
-                Role.Image
+
+    fun assertBluetoothDisabledTextIsDisplayed() =
+        onNodeWithText(bluetoothDisabledText).assertIsDisplayed()
+
+    fun render() {
+        setContent {
+            HolderScreenContent(
+                contentState = HolderWelcomeUiState(
+                    qrData = "fakestring",
+                    hasBluetoothPermissions = true,
+                    bluetoothState = BluetoothState.Enabled
+                )
             )
-        )
+        }
+    }
 }

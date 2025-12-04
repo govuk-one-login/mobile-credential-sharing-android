@@ -55,7 +55,7 @@ dependencies {
         libs.zxing.core,
         projects.bluetooth,
         projects.core,
-        projects.security,
+        projects.security
     ).forEach(::implementation)
 
     listOf(
