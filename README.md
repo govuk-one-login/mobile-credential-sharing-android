@@ -4,13 +4,13 @@ A reference implementation for sharing and verifying digital credentials.
 
 The current implementation includes a demo app and implements ISO 18013-5 for in-person Bluetooth presentation and verification.
 
-Internal team members can find our ways of working on Confluence.
+Internal team members can find the team ways of working on Confluence.
 
 ## Overview
 
 This repository contains packages for: 
 
-- [Models](./models): representing data models in CBOR format
+- [Models](./models): representing data models in Concise Binary Object Representation (CBOR) format
 - [Bluetooth](./bluetooth): sharing data over Bluetooth
 - [Security](./security): encryption and decryption of data for transit
 - [Holder](./holder): securely share a credential with a verifier
