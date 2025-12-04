@@ -17,7 +17,7 @@ jobs:
   unit_tests_job:
     env:
       GITHUB_ACTOR: ${{ github.actor }}
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     permissions:
       packages: read
@@ -47,10 +47,6 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
 
-      - name: Install homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
       - name: Install linux packages
         run: |
           ./scripts/installLinuxPackages
@@ -64,9 +60,6 @@ jobs:
       - name: Install homebrew packages
         run: |
           brew bundle
-
-      - name: Grant execute permissions for script files
-        run: find ./scripts/ -type f | xargs chmod +x
 
       - name: Verify Conventional commit standards against latest git tag
         run: cog check -l
