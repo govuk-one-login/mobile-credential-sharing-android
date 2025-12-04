@@ -50,7 +50,7 @@ internal class AndroidBluetoothAdvertiserProvider(
                 currentCallback
             )
         } catch (e: IllegalArgumentException) {
-            logger.error(logTag, e.message ?: "Illegal argument")
+            logger.error(logTag, e.message ?: "Illegal argument", e)
             callback.onAdvertisingStartFailed(
                 AdvertisingFailureReason.ADVERTISE_FAILED_INTERNAL_ERROR
             )
@@ -64,7 +64,7 @@ internal class AndroidBluetoothAdvertiserProvider(
             callback?.onAdvertisingStartFailed(
                 AdvertisingFailureReason.ADVERTISE_FAILED_SECURITY_EXCEPTION
             )
-            logger.error(logTag, e.message ?: "Security exception")
+            logger.error(logTag, e.message ?: "Security exception", e)
         } finally {
             currentCallback = null
             advertiser = null

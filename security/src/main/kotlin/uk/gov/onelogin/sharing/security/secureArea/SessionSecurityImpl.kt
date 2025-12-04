@@ -37,10 +37,10 @@ class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
         logger.debug(logTag, "Generated public key: ${keyPair.public}")
         keyPair.public as ECPublicKey
     } catch (e: NoSuchAlgorithmException) {
-        logger.error(logTag, e.message ?: "No such algorithm exception")
+        logger.error(logTag, e.message ?: "No such algorithm exception", e)
         null
     } catch (e: InvalidAlgorithmParameterException) {
-        logger.error(logTag, e.message ?: "Invalid algorithm parameter exception")
+        logger.error(logTag, e.message ?: "Invalid algorithm parameter exception", e)
         null
     }
 }

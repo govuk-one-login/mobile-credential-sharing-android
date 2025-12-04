@@ -85,7 +85,7 @@ internal class AndroidBluetoothStateMonitor(
         try {
             appContext.unregisterReceiver(receiver)
         } catch (e: IllegalArgumentException) {
-            logger.error(logTag, e.message ?: "Illegal argument exception")
+            logger.error(logTag, e.message ?: "Illegal argument exception", e)
         }
     }
 }

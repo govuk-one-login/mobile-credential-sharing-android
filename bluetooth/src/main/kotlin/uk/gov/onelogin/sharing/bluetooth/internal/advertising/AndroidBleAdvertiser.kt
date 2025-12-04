@@ -63,15 +63,15 @@ internal class AndroidBleAdvertiser(
                         )
                     }
                 } catch (e: TimeoutCancellationException) {
-                    logger.error(logTag, "Advertising start timed out: ${e.message}")
+                    logger.error(logTag, "Advertising start timed out: ${e.message}", e)
                     throw StartAdvertisingException(
                         AdvertisingError.START_TIMEOUT
                     )
                 } catch (e: CancellationException) {
-                    logger.error(logTag, "Advertising start cancelled: ${e.message}")
+                    logger.error(logTag, "Advertising start cancelled: ${e.message}", e)
                     throw e
                 } catch (e: IllegalStateException) {
-                    logger.error(logTag, "Failed to start advertising: ${e.message}")
+                    logger.error(logTag, "Failed to start advertising: ${e.message}", e)
                     throw StartAdvertisingException(
                         AdvertisingError.INTERNAL_ERROR
                     )
@@ -119,7 +119,7 @@ internal class AndroidBleAdvertiser(
         _state.value = AdvertiserState.Stopping
         val result = runCatching { bleProvider.stopAdvertising() }
         result.onFailure { e ->
-            logger.error(logTag, e.message ?: "Failed to stop advertising")
+            logger.error(logTag, e.message ?: "Failed to stop advertising", e)
         }
         currentCallback = null
         _state.value = AdvertiserState.Stopped
