@@ -2,7 +2,7 @@ name: Release mobile-credential-sharing-android
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dcmaw-16161-google-play-deployment" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -42,10 +42,6 @@ jobs:
         with:
           gradle-cache-disabled: "false"
           jdk-version: "21"
-
-      - name: Install homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       - name: Install homebrew packages
         run: |
