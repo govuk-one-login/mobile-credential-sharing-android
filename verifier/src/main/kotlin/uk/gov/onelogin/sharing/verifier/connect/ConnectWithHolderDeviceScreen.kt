@@ -30,6 +30,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
@@ -69,21 +70,9 @@ fun ConnectWithHolderDeviceScreen(
         showBluetoothDeviceState(bluetoothAdapter::isEnabled)
 
         if (permissionState.status.isGranted && bluetoothAdapter.isEnabled()) {
-            item {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(spacingSingle)
-                ) {
-                    Text(
-                        stringResource(R.string.connect_with_holder_searching_for_uuids)
-                    )
-
-                    engagementData?.deviceRetrievalMethods?.forEach { deviceRetrievalMethodDto ->
-                        deviceRetrievalMethodDto.getPeripheralServerModeUuidString()?.let {
-                            Text("UUID: $it")
-                        }
-                    }
-                }
-            }
+            showUuidsToScan(
+                engagementData?.deviceRetrievalMethods
+            )
         }
 
         showEngagementData(engagementData)
@@ -137,6 +126,24 @@ private fun LazyListScope.showEngagementData(engagementData: DeviceEngagementDto
         }
         item {
             Text(engagementData.toString())
+        }
+    }
+}
+
+private fun LazyListScope.showUuidsToScan(deviceRetrievalMethods: List<DeviceRetrievalMethodDto>?) {
+    item {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(spacingSingle)
+        ) {
+            Text(
+                stringResource(R.string.connect_with_holder_searching_for_uuids)
+            )
+
+            deviceRetrievalMethods?.forEach { deviceRetrievalMethodDto ->
+                deviceRetrievalMethodDto.getPeripheralServerModeUuidString()?.let {
+                    Text("UUID: $it")
+                }
+            }
         }
     }
 }

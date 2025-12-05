@@ -29,3 +29,20 @@ android {
         }
     }
 }
+
+dependencies {
+    testFixturesImplementation(libs.org.robolectric)
+}
+
+mavenPublishingConfig {
+    mavenConfigBlock {
+        name.set(
+            "GOV.UK One Login Wallet Sharing: Core"
+        )
+        description.set(
+            """
+            A module for holding behaviour that's common throughout the wallet sharing code base.
+            """.trimIndent()
+        )
+    }
+}

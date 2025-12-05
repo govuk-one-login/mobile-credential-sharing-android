@@ -30,6 +30,11 @@ android {
     }
 }
 
+dependencies {
+    implementation(projects.core)
+    testImplementation(testFixtures(projects.core))
+}
+
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(
