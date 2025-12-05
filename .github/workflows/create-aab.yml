@@ -1,0 +1,84 @@
+name: Create initial aab
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - build/create-initial-aab
+
+jobs:
+  create_aab:
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+
+      - name: Configure git User
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Setup GitHub Runner workflow
+        uses: ./mobile-android-pipelines/actions/setup-runner
+        with:
+          gradle-cache-disabled: "false"
+          jdk-version: "21"
+
+      - name: Install homebrew packages
+        run: |
+          brew bundle
+
+      - name: Retrieve Secrets
+        id: secrets
+        uses: ./mobile-android-pipelines/actions/retrieve-secrets
+        with:
+          keystore-base64: ${{ secrets.KEYSTORE_BASE64 }}
+          google-service-account-json-base64: ${{ secrets.SERVICE_ACCOUNT_JSON_BASE64 }}
+
+      - name: Debug signing inputs
+        run: |
+          echo "keystore-file-path: '${{ steps.secrets.outputs.keystore-file-path }}'"
+          ls -l '${{ steps.secrets.outputs.keystore-file-path }}' || echo "Keystore file not found"
+          echo "KEYSTORE_PASSWORD length: ${#KEYSTORE_PASSWORD}"
+          echo "KEYSTORE_KEY_ALIAS length: ${#KEYSTORE_KEY_ALIAS}"
+          echo "KEYSTORE_KEY_PASSWORD length: ${#KEYSTORE_KEY_PASSWORD}"
+        shell: bash
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+
+      - name: Bundle Demo Release (raw Gradle)
+        env:
+          SIGNING_STORE_FILE_PATH: ${{ steps.secrets.outputs.keystore-file-path }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_CODE: "1"
+          VERSION_NAME: "1.0.0"
+        run: |
+          echo ">>> Running signingReport"
+          ./gradlew :app:signingReport --info --stacktrace
+
+          echo ">>> Building bundle"
+          ./gradlew :app:bundleRelease \
+            -PversionCode=$VERSION_CODE \
+            -PversionName=$VERSION_NAME \
+            --info \
+            --stacktrace
+
+      - name: Upload App Bundle as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-bundle
+          path: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Clean workspace
+        uses: ./mobile-android-pipelines/actions/clean-workspace
