@@ -15,7 +15,9 @@ plugins {
         libs.plugins.spotless.config,
         libs.plugins.detekt.config,
         libs.plugins.test.coverage,
-        libs.plugins.sonar.module.config
+        libs.plugins.sonar.module.config,
+        libs.plugins.kotlin.ksp,
+        libs.plugins.hilt.plugin
     ).forEach { alias(it) }
 }
 
@@ -77,8 +79,10 @@ dependencies {
         platform(libs.androidx.compose.bom),
         libs.bundles.android.baseline,
         libs.bundles.uk.gov.ui,
+        libs.hilt.android,
         testFixtures(projects.verifier)
     ).forEach(::implementation)
+    ksp(libs.hilt.compiler)
 
     listOf(
         libs.androidx.test.rules,

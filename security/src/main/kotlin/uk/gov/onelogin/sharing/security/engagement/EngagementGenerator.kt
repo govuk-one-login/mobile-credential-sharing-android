@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.security.engagement
 
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.Base64
 import java.util.UUID
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
@@ -12,7 +15,8 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
  * Generates device engagement data for establishing a connection between mDoc holder
  * and a verifier.
  */
-
+@ContributesBinding(ViewModelScope::class)
+@Inject
 class EngagementGenerator : Engagement {
 
     /**

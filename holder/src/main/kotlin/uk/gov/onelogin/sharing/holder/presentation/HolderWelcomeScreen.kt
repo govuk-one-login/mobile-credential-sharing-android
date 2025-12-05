@@ -28,6 +28,7 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
@@ -41,9 +42,7 @@ private const val QR_SIZE = 800
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun HolderWelcomeScreen(
-    viewModel: HolderWelcomeViewModel = HolderWelcomeViewModel.holderWelcomeViewModel()
-) {
+fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = metroViewModel()) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
 
