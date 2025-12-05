@@ -12,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
@@ -22,6 +23,7 @@ internal class AndroidBleAdvertiserTest {
     private lateinit var bleProvider: FakeBleProvider
     private lateinit var bleAdvertiser: AndroidBleAdvertiser
     private val permissionChecker = FakePermissionChecker()
+    private val logger = SystemLogger()
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -31,7 +33,8 @@ internal class AndroidBleAdvertiserTest {
         bleProvider = FakeBleProvider()
         bleAdvertiser = AndroidBleAdvertiser(
             bleProvider,
-            permissionChecker
+            permissionChecker,
+            logger = logger
         )
     }
 
@@ -289,6 +292,7 @@ internal class AndroidBleAdvertiserTest {
         val timedAdvertiser = AndroidBleAdvertiser(
             bleProvider = bleProvider,
             permissionChecker = permissionChecker,
+            logger = logger,
             startTimeoutMs = 1_000L
         )
 

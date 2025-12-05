@@ -11,6 +11,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
+import uk.gov.onelogin.sharing.core.logger.StandardLoggerFactory
 
 /**
  * A factory for creating a [AndroidMdocSessionManager].
@@ -27,26 +28,37 @@ class MdocSessionManagerFactory(private val context: Context) : SessionManagerFa
      * @return A fully configured [MdocSessionManager] instance.
      */
     override fun create(scope: CoroutineScope): MdocSessionManager {
+        val logger = StandardLoggerFactory.create()
         val adapterProvider = AndroidBluetoothAdapterProvider(context)
         val bleAdvertiser = AndroidBleAdvertiser(
             bleProvider = AndroidBleProvider(
                 bluetoothAdapter = adapterProvider,
-                bleAdvertiser = AndroidBluetoothAdvertiserProvider(adapterProvider)
+                bleAdvertiser = AndroidBluetoothAdvertiserProvider(
+                    bluetoothAdapter = adapterProvider,
+                    logger = logger
+                )
             ),
-            permissionChecker = BluetoothPermissionChecker(context)
+            permissionChecker = BluetoothPermissionChecker(context),
+            logger = logger
         )
+
         val gattServerManager = AndroidGattServerManager(
             context = context,
             bluetoothManager = context.getSystemService(BluetoothManager::class.java),
-            permissionsChecker = BluetoothPermissionChecker(context)
+            permissionsChecker = BluetoothPermissionChecker(context),
+            logger = logger
         )
-        val bluetoothStateMonitor = AndroidBluetoothStateMonitor(context)
+        val bluetoothStateMonitor = AndroidBluetoothStateMonitor(
+            appContext = context,
+            logger = logger
+        )
 
         return AndroidMdocSessionManager(
             bleAdvertiser = bleAdvertiser,
             gattServerManager = gattServerManager,
             bluetoothStateMonitor = bluetoothStateMonitor,
-            coroutineScope = scope
+            coroutineScope = scope,
+            logger = logger
         )
     }
 }

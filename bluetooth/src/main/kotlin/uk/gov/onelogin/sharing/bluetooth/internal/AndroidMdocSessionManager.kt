@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
@@ -16,12 +17,14 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingEx
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidMdocSessionManager(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    private val logger: Logger
 ) : MdocSessionManager {
     private val _state = MutableStateFlow<MdocSessionState>(MdocSessionState.Idle)
     override val state: StateFlow<MdocSessionState> = _state
@@ -70,7 +73,7 @@ internal class AndroidMdocSessionManager(
         try {
             bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid))
         } catch (e: StartAdvertisingException) {
-            println("Error starting advertising: ${e.error}")
+            logger.error(logTag, "Error starting advertising: ${e.error}", e)
             _state.value = MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED)
         }
 
@@ -125,12 +128,16 @@ internal class AndroidMdocSessionManager(
                 _state.value = MdocSessionState.GattServiceStopped
 
             is GattServerEvent.UnsupportedEvent ->
-                println(
-                    "Mdoc - Unsupported event - status: ${event.status} new state: ${event.newState}"
+                logger.error(
+                    logTag,
+                    "Mdoc - UUnsupported event - status: ${event.status} new state: ${event.newState}"
                 )
 
             GattServerEvent.SessionStarted -> {
-                println("Mdoc - Connection has been setup successfully - session state started")
+                logger.error(
+                    logTag,
+                    "Mdoc - Connection has been setup successfully - session state started"
+                )
             }
         }
     }

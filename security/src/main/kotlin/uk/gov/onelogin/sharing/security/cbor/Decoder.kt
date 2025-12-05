@@ -6,9 +6,12 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.Base64
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+
+private const val TAG = "decodeDeviceEngagement"
 
 /**
  * Decodes a CBOR-encoded, Base64 URL-safe string into a [DeviceEngagementDto] object.
@@ -21,8 +24,9 @@ import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
  * trace will be printed.
  *
  * @param cborBase64Url The CBOR-encoded data represented as a Base64 URL string.
+ * @param logger An instance of [Logger] for logging events.
  */
-fun decodeDeviceEngagement(cborBase64Url: String): DeviceEngagementDto? {
+fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagementDto? {
     val cborData = cborBase64Url.base64Decode()
 
     val cborMapper = ObjectMapper(CBORFactory()).apply {
@@ -31,7 +35,7 @@ fun decodeDeviceEngagement(cborBase64Url: String): DeviceEngagementDto? {
 
     return try {
         val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
-        println("Successfully deserialized DeviceEngagementDto:")
+        logger.debug(TAG, "Successfully deserialized DeviceEngagementDto:")
         @RequiresImplementation(
             details = [
                 ImplementationDetail(
@@ -41,17 +45,27 @@ fun decodeDeviceEngagement(cborBase64Url: String): DeviceEngagementDto? {
                 )
             ]
         )
-        println(" - Version: ${deviceEngagement.version}")
-        println(" - Security - Cipher Suite: ${deviceEngagement.security.cipherSuiteIdentifier}")
-        println(
-            " - Security - Ephemeral Public Key (as hex): ${deviceEngagement.security.ephemeralPublicKey}"
+        logger.debug(TAG, " - Version: ${deviceEngagement.version}")
+        logger.debug(
+            TAG,
+            " - Security - Cipher Suite: " +
+                "${deviceEngagement.security.cipherSuiteIdentifier}"
         )
-        println(" - Device Retrieval Methods: ${deviceEngagement.deviceRetrievalMethods}")
+        logger.debug(
+            TAG,
+            " - Security - Ephemeral Public Key (as hex): " +
+                "${deviceEngagement.security.ephemeralPublicKey}"
+        )
+        logger.debug(
+            TAG,
+            " - Device Retrieval Methods: " +
+                "${deviceEngagement.deviceRetrievalMethods}"
+        )
 
         deviceEngagement
     } catch (e: JsonProcessingException) {
         // We need to send error status code 10 to the reader in the event of CBOR decoding errors
-        println("Failed to deserialize CBOR: ${e.message}")
+        logger.debug(TAG, "Failed to deserialize CBOR: ${e.message}")
         null
     }
 }

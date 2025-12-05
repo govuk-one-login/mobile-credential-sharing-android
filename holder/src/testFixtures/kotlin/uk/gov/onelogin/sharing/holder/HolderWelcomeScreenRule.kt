@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
@@ -62,6 +63,7 @@ class HolderWelcomeScreenRule(
             sessionSecurity = fakeSessionSecurity,
             engagementGenerator = fakeEngagementGenerator,
             mdocSessionManagerFactory = { mdocSessionManager },
+            logger = SystemLogger(),
             dispatcher = Dispatchers.Main
         )
     }

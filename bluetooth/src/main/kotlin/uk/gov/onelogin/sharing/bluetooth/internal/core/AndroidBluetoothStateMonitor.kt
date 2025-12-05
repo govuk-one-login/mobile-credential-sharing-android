@@ -10,9 +10,13 @@ import android.content.IntentFilter
 import android.os.Build
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 
-internal class AndroidBluetoothStateMonitor(private val appContext: Context) :
-    BluetoothStateMonitor {
+internal class AndroidBluetoothStateMonitor(
+    private val appContext: Context,
+    private val logger: Logger
+) : BluetoothStateMonitor {
     private val _states = MutableSharedFlow<BluetoothStatus>(
         replay = 1
     )
@@ -81,7 +85,7 @@ internal class AndroidBluetoothStateMonitor(private val appContext: Context) :
         try {
             appContext.unregisterReceiver(receiver)
         } catch (e: IllegalArgumentException) {
-            println(e.message)
+            logger.error(logTag, e.message ?: "Illegal argument exception", e)
         }
     }
 }

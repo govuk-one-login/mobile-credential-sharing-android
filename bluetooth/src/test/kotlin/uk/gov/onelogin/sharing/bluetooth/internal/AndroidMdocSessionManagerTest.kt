@@ -6,16 +6,13 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
@@ -38,11 +35,13 @@ class AndroidMdocSessionManagerTest {
     private val gattServerManager = FakeGattServerManager()
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
     private val testScope = CoroutineScope(SupervisorJob() + dispatcherRule.testDispatcher)
+    private val logger = SystemLogger()
     private val sessionManager = AndroidMdocSessionManager(
         bleAdvertiser = advertiser,
         gattServerManager = gattServerManager,
         bluetoothStateMonitor = bluetoothStateMonitor,
-        coroutineScope = testScope
+        coroutineScope = testScope,
+        logger = logger
     )
     private val uuid = UUID.randomUUID()
 
@@ -91,7 +90,8 @@ class AndroidMdocSessionManagerTest {
             bleAdvertiser = advertiser,
             gattServerManager = gattServerManager,
             bluetoothStateMonitor = bluetoothStateMonitor,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            logger = logger
         )
 
         sessionManager.state.test {
@@ -112,7 +112,8 @@ class AndroidMdocSessionManagerTest {
             bleAdvertiser = advertiser,
             gattServerManager = gattServerManager,
             bluetoothStateMonitor = bluetoothStateMonitor,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            logger = logger
         )
 
         sessionManager.state.test {

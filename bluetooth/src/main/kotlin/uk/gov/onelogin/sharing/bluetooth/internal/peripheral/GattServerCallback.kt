@@ -4,13 +4,17 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 
-internal class GattServerCallback(private val gatGattEventEmitter: GattEventEmitter) :
-    BluetoothGattServerCallback() {
+internal class GattServerCallback(
+    private val gatGattEventEmitter: GattEventEmitter,
+    private val logger: Logger
+) : BluetoothGattServerCallback() {
     override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
-        println("Address: ${device.address}")
-        println("Status: $status")
-        println("NewState: $newState")
+        logger.debug(logTag, "Address: ${device.address}")
+        logger.debug(logTag, "Status: $status")
+        logger.debug(logTag, "NewState: $newState")
         gatGattEventEmitter.emit(
             GattEvent.ConnectionStateChange(
                 status,
@@ -29,13 +33,16 @@ internal class GattServerCallback(private val gatGattEventEmitter: GattEventEmit
         offset: Int,
         value: ByteArray?
     ) {
-        println("onCharacteristicWriteRequest")
-        println("Device: ${device?.address}")
-        println("RequestId: $requestId")
-        println("Characteristic UUID: ${characteristic?.uuid}")
-        println("PreparedWrite: $preparedWrite")
-        println("ResponseNeeded: $responseNeeded")
-        println("Offset: $offset")
+        logger.debug(logTag, "onCharacteristicWriteRequest")
+        val logs = listOf(
+            "Device: ${device?.address}",
+            "RequestId: $requestId",
+            "Characteristic UUID: ${characteristic?.uuid}",
+            "PreparedWrite: $preparedWrite",
+            "ResponseNeeded: $responseNeeded",
+            "Offset: $offset"
+        )
+        logger.debug(logTag, logs.joinToString(separator = "\n"))
 
         val state = value?.firstOrNull()?.let {
             MdocState.fromByte(it)
@@ -43,12 +50,13 @@ internal class GattServerCallback(private val gatGattEventEmitter: GattEventEmit
 
         when (state) {
             MdocState.START -> {
-                println("Received START command from ${device?.address}")
+                logger.debug(logTag, "Received START command from ${device?.address}")
                 gatGattEventEmitter.emit(GattEvent.ConnectionStateStarted)
             }
 
             null -> {
-                println(
+                logger.debug(
+                    logTag,
                     "Unknown or empty command: ${
                         value?.joinToString {
                             BYTE_TO_HEX_FORMAT.format(it)

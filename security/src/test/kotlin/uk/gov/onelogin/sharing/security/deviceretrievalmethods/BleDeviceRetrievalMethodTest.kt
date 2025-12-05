@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.security.deviceretrievalmethods
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
@@ -58,9 +57,5 @@ class BleDeviceRetrievalMethodTest {
             expectedNodes,
             actualNode
         )
-
-        val json = JsonMapper.builder().build()
-        val pretty = json.writerWithDefaultPrettyPrinter().writeValueAsString(actualNode)
-        println(pretty)
     }
 }

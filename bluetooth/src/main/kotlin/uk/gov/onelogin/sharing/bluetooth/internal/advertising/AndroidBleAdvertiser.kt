@@ -9,12 +9,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
     private val permissionChecker: PermissionChecker,
+    private val logger: Logger,
     private val startTimeoutMs: Long = 5_000
 ) : BleAdvertiser {
 
@@ -60,15 +63,15 @@ internal class AndroidBleAdvertiser(
                         )
                     }
                 } catch (e: TimeoutCancellationException) {
-                    println(e.message)
+                    logger.error(logTag, "Advertising start timed out: ${e.message}", e)
                     throw StartAdvertisingException(
                         AdvertisingError.START_TIMEOUT
                     )
                 } catch (e: CancellationException) {
-                    println(e.message)
+                    logger.error(logTag, "Advertising start cancelled: ${e.message}", e)
                     throw e
                 } catch (e: IllegalStateException) {
-                    println(e.message)
+                    logger.error(logTag, "Failed to start advertising: ${e.message}", e)
                     throw StartAdvertisingException(
                         AdvertisingError.INTERNAL_ERROR
                     )
@@ -116,7 +119,7 @@ internal class AndroidBleAdvertiser(
         _state.value = AdvertiserState.Stopping
         val result = runCatching { bleProvider.stopAdvertising() }
         result.onFailure { e ->
-            println(e.message)
+            logger.error(logTag, e.message ?: "Failed to stop advertising", e)
         }
         currentCallback = null
         _state.value = AdvertiserState.Stopped

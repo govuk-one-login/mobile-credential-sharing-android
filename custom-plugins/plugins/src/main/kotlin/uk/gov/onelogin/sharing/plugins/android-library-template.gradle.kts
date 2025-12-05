@@ -69,6 +69,7 @@ dependencies {
 
     listOf(
         "android-baseline",
+        "uk-gov-logging",
         "uk-gov-ui",
     ).map { libs.findBundle(it).get() }.forEach {
         implementation(it)
