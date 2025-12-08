@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.ContributesIntoMap
@@ -18,6 +19,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
+import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
@@ -64,11 +67,26 @@ class HolderWelcomeViewModel(
                         println("Mdoc - Advertising Stopped")
                     }
 
-                    is MdocSessionState.Connected ->
+                    is MdocSessionState.Connected -> {
                         println("Mdoc - Connected: ${state.address}")
+                    }
 
-                    is MdocSessionState.Disconnected ->
-                        println("Mdoc - Disconnected: ${state.address}")
+                    is MdocSessionState.Disconnected -> {
+                        @RequiresImplementation(
+                            details = [
+                                ImplementationDetail(
+                                    ticket = "DCMAW-16898",
+                                    description = "We may need to handle explicit bluetooth" +
+                                            "disconnection states to handle common error codes " +
+                                            "8, 19, 22 and 133. The function below will handle " +
+                                            "treat all disconnect states the same when connected " +
+                                            "to a device"
+                                )
+                            ]
+                        )
+                        println("Error Mdoc - Disconnected: ${state.address}")
+                        _uiState.update { it.copy(showErrorScreen = true) }
+                    }
 
                     is MdocSessionState.Error -> {
                         sessionStartRequested = false
@@ -157,10 +175,10 @@ class HolderWelcomeViewModel(
         val bluetoothOn = state.bluetoothState == BluetoothState.Enabled
 
         val canStart = !sessionStartRequested &&
-            hasPermissions &&
-            bluetoothOn &&
-            canStartNewSession(state) &&
-            !sessionStartRequested
+                hasPermissions &&
+                bluetoothOn &&
+                canStartNewSession(state) &&
+                !sessionStartRequested
 
         if (canStart) {
             viewModelScope.launch {
@@ -171,8 +189,8 @@ class HolderWelcomeViewModel(
 
     private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
         state.sessionState == MdocSessionState.Idle ||
-            state.sessionState == MdocSessionState.AdvertisingStopped ||
-            state.sessionState == MdocSessionState.GattServiceStopped
+                state.sessionState == MdocSessionState.AdvertisingStopped ||
+                state.sessionState == MdocSessionState.GattServiceStopped
 }
 
 data class HolderWelcomeUiState(
@@ -181,5 +199,6 @@ data class HolderWelcomeUiState(
     val sessionState: MdocSessionState = MdocSessionState.Idle,
     val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
-    val hasBluetoothPermissions: Boolean? = null
+    val hasBluetoothPermissions: Boolean? = null,
+    val showErrorScreen: Boolean = false
 )

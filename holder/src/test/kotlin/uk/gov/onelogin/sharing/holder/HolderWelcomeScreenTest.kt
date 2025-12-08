@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -192,6 +193,20 @@ class HolderWelcomeScreenTest {
         }
 
         composeTestRule.assertBluetoothDisabledTextIsDisplayed()
+    }
+
+    @Test
+    fun displaysErrorScreenWhenShowErrorScreenIsTrue() {
+        composeTestRule.setContent {
+            HolderScreenContent(
+                contentState = HolderWelcomeUiState(
+                    bluetoothState = BluetoothState.Disabled,
+                    hasBluetoothPermissions = true,
+                    showErrorScreen = true
+                )
+            )
+        }
+        composeTestRule.onNodeWithText("An error has occurred")
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
