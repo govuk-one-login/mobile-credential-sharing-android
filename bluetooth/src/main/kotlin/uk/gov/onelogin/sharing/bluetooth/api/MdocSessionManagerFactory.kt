@@ -6,6 +6,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineScope
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.AndroidMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
@@ -14,7 +15,6 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
-import uk.gov.onelogin.sharing.core.logger.StandardLoggerFactory
 
 /**
  * A factory for creating a [AndroidMdocSessionManager].
@@ -24,7 +24,8 @@ import uk.gov.onelogin.sharing.core.logger.StandardLoggerFactory
  */
 @ContributesBinding(ViewModelScope::class)
 @Inject
-class MdocSessionManagerFactory(private val context: Context) : SessionManagerFactory {
+class MdocSessionManagerFactory(private val context: Context, private val logger: Logger) :
+    SessionManagerFactory {
     /**
      * Constructs and configures all the necessary dependencies for a
      * [AndroidMdocSessionManager].
@@ -33,7 +34,6 @@ class MdocSessionManagerFactory(private val context: Context) : SessionManagerFa
      * @return A fully configured [MdocSessionManager] instance.
      */
     override fun create(scope: CoroutineScope): MdocSessionManager {
-        val logger = StandardLoggerFactory.create()
         val adapterProvider = AndroidBluetoothAdapterProvider(context)
         val bleAdvertiser = AndroidBleAdvertiser(
             bleProvider = AndroidBleProvider(

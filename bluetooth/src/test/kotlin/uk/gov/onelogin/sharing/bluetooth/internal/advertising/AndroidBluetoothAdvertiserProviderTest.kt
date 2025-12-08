@@ -175,6 +175,8 @@ internal class AndroidBluetoothAdvertiserProviderTest {
             AdvertisingFailureReason.ADVERTISE_FAILED_SECURITY_EXCEPTION,
             callback.advertisingFailureReason
         )
+
+        assert(logger.contains("Security exception"))
     }
 
     private fun startAdvertising() {
@@ -221,5 +223,7 @@ internal class AndroidBluetoothAdvertiserProviderTest {
             AdvertisingFailureReason.ADVERTISE_FAILED_INTERNAL_ERROR,
             callback.advertisingFailureReason
         )
+
+        assert(logger.contains("bad args"))
     }
 }

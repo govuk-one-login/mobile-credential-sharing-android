@@ -19,7 +19,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
-import uk.gov.onelogin.sharing.core.logger.StandardLoggerFactory
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement

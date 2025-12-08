@@ -302,4 +302,16 @@ internal class AndroidBleAdvertiserTest {
 
         assertEquals(AdvertisingError.START_TIMEOUT, exception.error)
     }
+
+    @Test
+    fun `start fails with internal error when provider throws IllegalStateException`() = runTest {
+        bleProvider.thrownOnStart = IllegalStateException("Test exception")
+
+        val exception = assertFailsWith<StartAdvertisingException> {
+            bleAdvertiser.startAdvertise(stubBleAdvertiseData())
+        }
+
+        assertEquals(AdvertisingError.INTERNAL_ERROR, exception.error)
+        assert(logger.contains("Failed to start advertising: Test exception"))
+    }
 }
