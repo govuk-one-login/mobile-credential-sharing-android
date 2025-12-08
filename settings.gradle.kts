@@ -58,7 +58,7 @@ fun MavenArtifactRepository.setGithubCredentials() {
             providers.gradleProperty("gpr.user").get()
         }
         // Prefer workflow environment variable if it exists
-        password = System.getenv().getOrElse("GITHUB_PAT") {
+        password = System.getenv().getOrElse("GITHUB_TOKEN") {
             providers.gradleProperty("gpr.token").get()
         }
     }

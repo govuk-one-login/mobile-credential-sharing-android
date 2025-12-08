@@ -43,6 +43,7 @@ val namespacePrefix: String by extra("uk.gov.onelogin.sharing")
 val githubRepositoryName: String by extra("mobile-credential-sharing-android")
 val mavenGroupId: String by extra(namespacePrefix)
 val buildLogicDir: String by extra("mobile-android-pipelines/buildLogic")
+val configDir: String by extra( "${rootProject.rootDir}/config")
 
 plugins {
     listOf(
@@ -51,6 +52,8 @@ plugins {
         libs.plugins.kotlin.jvm,
         libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
+        libs.plugins.kotlin.ksp,
+        libs.plugins.hilt.plugin,
         libs.plugins.kotlin.parcelize,
         libs.plugins.kotlin.serialization,
     ).forEach { plugin ->

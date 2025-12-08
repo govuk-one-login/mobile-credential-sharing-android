@@ -1,6 +1,7 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library
+        libs.plugins.templates.android.library,
+        libs.plugins.metro.di
     ).forEach { alias(it) }
 }
 
@@ -51,6 +52,7 @@ dependencies {
 
     listOf(
         libs.androidx.lifecycle.viewmodel.compose,
+        libs.metro.viewmodel.compose,
         libs.zxing.core,
         projects.bluetooth,
         projects.core,

@@ -15,7 +15,9 @@ plugins {
         libs.plugins.spotless.config,
         libs.plugins.detekt.config,
         libs.plugins.test.coverage,
-        libs.plugins.sonar.module.config
+        libs.plugins.sonar.module.config,
+        libs.plugins.kotlin.ksp,
+        libs.plugins.hilt.plugin
     ).forEach { alias(it) }
 }
 
@@ -43,6 +45,17 @@ android {
     buildFeatures {
         compose = true
     }
+    signingConfigs {
+        create("release") {
+            val configDir = rootProject.extra["configDir"]
+
+            storeFile = file("$configDir/keystore.jks")
+
+            storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+            keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+            keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -50,6 +63,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     packaging {
@@ -77,8 +91,10 @@ dependencies {
         platform(libs.androidx.compose.bom),
         libs.bundles.android.baseline,
         libs.bundles.uk.gov.ui,
+        libs.hilt.android,
         testFixtures(projects.verifier)
     ).forEach(::implementation)
+    ksp(libs.hilt.compiler)
 
     listOf(
         libs.androidx.test.rules,

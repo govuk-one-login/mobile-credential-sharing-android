@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.security.engagement
 
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.Base64
 import java.util.UUID
 import uk.gov.logging.api.Logger
@@ -14,6 +17,8 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
  * and a verifier.
  */
 
+@ContributesBinding(ViewModelScope::class)
+@Inject
 class EngagementGenerator(private val logger: Logger) : Engagement {
 
     /**

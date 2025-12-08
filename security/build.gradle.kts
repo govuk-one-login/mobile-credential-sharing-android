@@ -1,6 +1,7 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library
+        libs.plugins.templates.android.library,
+        libs.plugins.metro.di
     ).forEach { alias(it) }
 }
 val androidCompileSdk: Int by rootProject.extra
@@ -40,6 +41,7 @@ dependencies {
         libs.jackson.cbor,
         libs.jackson.core,
         libs.jackson.kotlin,
+        libs.metro.viewmodel.compose,
         projects.core,
         projects.models
     ).forEach(::implementation)

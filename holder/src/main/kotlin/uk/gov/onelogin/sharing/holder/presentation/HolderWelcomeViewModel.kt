@@ -1,12 +1,11 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +16,6 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
@@ -27,52 +25,18 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
-import uk.gov.onelogin.sharing.security.engagement.EngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
+@Inject
+@ViewModelKey(HolderWelcomeViewModel::class)
+@ContributesIntoMap(ViewModelScope::class)
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
-    private val mdocSessionManagerFactory: SessionManagerFactory,
+    mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
-    companion object {
-        // This can be removed when DI is added
-        @Composable
-        fun holderWelcomeViewModel(): HolderWelcomeViewModel {
-            val appContext = LocalContext.current.applicationContext
-
-            val factory = remember {
-                object : ViewModelProvider.Factory {
-                    @Suppress("UNCHECKED_CAST")
-                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                        require(
-                            modelClass.isAssignableFrom(
-                                HolderWelcomeViewModel::class.java
-                            )
-                        ) {
-                            "Unknown ViewModel class $modelClass"
-                        }
-
-                        val mdocFactory = MdocSessionManagerFactory(appContext)
-                        val logger = StandardLoggerFactory.create()
-
-                        return HolderWelcomeViewModel(
-                            sessionSecurity = SessionSecurityImpl(logger),
-                            engagementGenerator = EngagementGenerator(logger),
-                            mdocSessionManagerFactory = mdocFactory,
-                            logger = logger
-                        ) as T
-                    }
-                }
-            }
-
-            return viewModel(factory = factory)
-        }
-    }
-
     private val initialState = HolderWelcomeUiState()
     private val _uiState = MutableStateFlow(initialState)
     private val mdocBleSession: MdocSessionManager =
