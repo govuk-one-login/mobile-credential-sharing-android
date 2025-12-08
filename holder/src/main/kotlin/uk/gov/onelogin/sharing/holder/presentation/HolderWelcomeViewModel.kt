@@ -77,10 +77,10 @@ class HolderWelcomeViewModel(
                                 ImplementationDetail(
                                     ticket = "DCMAW-16898",
                                     description = "We may need to handle explicit bluetooth" +
-                                            "disconnection states to handle common error codes " +
-                                            "8, 19, 22 and 133. The function below will handle " +
-                                            "treat all disconnect states the same when connected " +
-                                            "to a device"
+                                        "disconnection states to handle common error codes " +
+                                        "8, 19, 22 and 133. The function below will handle " +
+                                        "treat all disconnect states the same when connected " +
+                                        "to a device"
                                 )
                             ]
                         )
@@ -175,10 +175,10 @@ class HolderWelcomeViewModel(
         val bluetoothOn = state.bluetoothState == BluetoothState.Enabled
 
         val canStart = !sessionStartRequested &&
-                hasPermissions &&
-                bluetoothOn &&
-                canStartNewSession(state) &&
-                !sessionStartRequested
+            hasPermissions &&
+            bluetoothOn &&
+            canStartNewSession(state) &&
+            !sessionStartRequested
 
         if (canStart) {
             viewModelScope.launch {
@@ -189,8 +189,8 @@ class HolderWelcomeViewModel(
 
     private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
         state.sessionState == MdocSessionState.Idle ||
-                state.sessionState == MdocSessionState.AdvertisingStopped ||
-                state.sessionState == MdocSessionState.GattServiceStopped
+            state.sessionState == MdocSessionState.AdvertisingStopped ||
+            state.sessionState == MdocSessionState.GattServiceStopped
 }
 
 data class HolderWelcomeUiState(
