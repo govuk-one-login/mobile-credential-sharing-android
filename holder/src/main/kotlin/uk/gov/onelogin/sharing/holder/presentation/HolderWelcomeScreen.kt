@@ -31,7 +31,6 @@ import com.google.accompanist.permissions.shouldShowRationale
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton

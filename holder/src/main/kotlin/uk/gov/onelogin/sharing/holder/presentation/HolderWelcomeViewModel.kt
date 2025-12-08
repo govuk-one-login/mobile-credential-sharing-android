@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.ContributesIntoMap

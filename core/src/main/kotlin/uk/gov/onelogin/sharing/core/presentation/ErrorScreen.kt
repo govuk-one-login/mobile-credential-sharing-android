@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import uk.gov.onelogin.sharing.core.R
 
 @Composable
 fun ErrorScreen(modifier: Modifier = Modifier) {
@@ -16,7 +18,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "An error has occurred"
+            text = stringResource(R.string.an_error_has_occurred)
         )
     }
 }
