@@ -156,7 +156,7 @@ jobs:
         uses: ./mobile-android-pipelines/actions/publish-to-play-store
         with:
           aab-paths: ${{ steps.bundle.outputs.aab-paths }}
-          package-name: 'uk.gov.onelogin.sharing'
+          package-name: 'uk.gov.onelogin.sharing.testapp'
           google-service-account-json: ${{ steps.auth.outputs.credentials_file_path }}
           track: 'internal'
 
