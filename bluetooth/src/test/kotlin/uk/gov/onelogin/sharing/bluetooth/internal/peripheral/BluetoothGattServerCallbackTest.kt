@@ -10,6 +10,8 @@ import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattEventEmitter
 
 class BluetoothGattServerCallbackTest {

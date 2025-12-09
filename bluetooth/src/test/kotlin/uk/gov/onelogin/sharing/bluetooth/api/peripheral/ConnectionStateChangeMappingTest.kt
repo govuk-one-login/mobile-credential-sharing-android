@@ -1,11 +1,11 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothProfile
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 
@@ -26,7 +26,7 @@ class ConnectionStateChangeMappingTest {
 
         val result = event.toGattServerEvent()
 
-        assertEquals(
+        Assert.assertEquals(
             GattServerEvent.Connected(ADDRESS),
             result
         )
@@ -42,7 +42,7 @@ class ConnectionStateChangeMappingTest {
 
         val result = event.toGattServerEvent()
 
-        assertEquals(
+        Assert.assertEquals(
             GattServerEvent.Disconnected(ADDRESS),
             result
         )
@@ -58,7 +58,7 @@ class ConnectionStateChangeMappingTest {
 
         val result = event.toGattServerEvent()
 
-        assertEquals(
+        Assert.assertEquals(
             GattServerEvent.UnsupportedEvent(
                 address = ADDRESS,
                 status = 42,

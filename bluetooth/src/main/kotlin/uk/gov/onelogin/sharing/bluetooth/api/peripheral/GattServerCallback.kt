@@ -1,10 +1,11 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 
-internal class GattServerCallback(private val gatGattEventEmitter: GattEventEmitter) :
+class GattServerCallback(private val gatGattEventEmitter: GattEventEmitter) :
     BluetoothGattServerCallback() {
     override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
         println("Address: ${device.address}")
