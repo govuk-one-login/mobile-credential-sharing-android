@@ -9,6 +9,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
@@ -37,7 +38,8 @@ class HolderWelcomeViewModelTest {
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocSessionManager },
-        dispatcher = mainDispatcherRule.testDispatcher
+        dispatcher = mainDispatcherRule.testDispatcher,
+        logger = SystemLogger()
     )
 
     @Test
@@ -155,11 +157,39 @@ class HolderWelcomeViewModelTest {
             viewModel.uiState.value.sessionState
         )
 
-        fakeMdocSession.emitState(MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE))
+        fakeMdocSession.emitState(
+            MdocSessionState.Error(
+                MdocSessionError.ADVERTISING_FAILED
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(
+            MdocSessionState.Error(
+                MdocSessionError.GATT_NOT_AVAILABLE
+            )
+        )
         advanceUntilIdle()
 
         assertEquals(
             MdocSessionState.Error(MdocSessionError.GATT_NOT_AVAILABLE),
+            viewModel.uiState.value.sessionState
+        )
+
+        fakeMdocSession.emitState(
+            MdocSessionState.Error(
+                MdocSessionError.BLUETOOTH_PERMISSION_MISSING
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Error(MdocSessionError.BLUETOOTH_PERMISSION_MISSING),
             viewModel.uiState.value.sessionState
         )
     }

@@ -5,6 +5,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.Base64
 import java.util.UUID
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
@@ -15,9 +16,10 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
  * Generates device engagement data for establishing a connection between mDoc holder
  * and a verifier.
  */
+
 @ContributesBinding(ViewModelScope::class)
 @Inject
-class EngagementGenerator : Engagement {
+class EngagementGenerator(private val logger: Logger) : Engagement {
 
     /**
      *   Creates an mDoc engagement structure and returns it as a Base64Url encoded string.
@@ -39,10 +41,12 @@ class EngagementGenerator : Engagement {
 
         val bytes = deviceEngagement.encode()
         val base64 = Base64.getUrlEncoder().encodeToString(bytes)
-        println(base64)
 
         // for testing purposes - remove when verifier built
-        decodeDeviceEngagement(base64)
+        decodeDeviceEngagement(
+            cborBase64Url = base64,
+            logger = logger
+        )
 
         return base64
     }

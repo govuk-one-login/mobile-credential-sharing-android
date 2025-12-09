@@ -10,6 +10,8 @@ import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestNullValue
 import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestStart
@@ -17,14 +19,17 @@ import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.Characteristic
 
 class BluetoothGattServerCallbackTest {
     private val fakeEmitter = FakeGattEventEmitter()
-    private val callback = GattServerCallback(fakeEmitter)
+    private val callback = GattServerCallback(
+        gatGattEventEmitter = fakeEmitter,
+        logger = SystemLogger()
+    )
     private val device = mockk<BluetoothDevice>()
     private val service = mockk<BluetoothGattService>()
 
     @Before
     fun setup() {
         fakeEmitter.events.clear()
-        every { device.address } returns "device-address"
+        every { device.address } returns DEVICE_ADDRESS
     }
 
     @Test
@@ -37,7 +42,7 @@ class BluetoothGattServerCallbackTest {
 
         assertEquals(1, fakeEmitter.events.size)
         val event = fakeEmitter.events.single() as GattEvent.ConnectionStateChange
-        assertEquals("device-address", event.device.address)
+        assertEquals(DEVICE_ADDRESS, event.device.address)
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
         assertEquals(BluetoothProfile.STATE_CONNECTED, event.newState)
     }
