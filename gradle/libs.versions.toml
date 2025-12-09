@@ -30,7 +30,7 @@ sonarqube = "7.1.0.6387" # https://github.com/SonarSource/sonar-scanner-gradle/r
 spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "0.36.1" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
-uk-gov-ui = "11.1.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
+uk-gov-ui = "11.2.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
