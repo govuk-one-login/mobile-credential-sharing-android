@@ -23,14 +23,15 @@ class HolderRoutesTest {
     @Test
     fun holderRoutesAreConfigured() {
         composeTestRule.setContent {
-            val controller = TestNavHostController(LocalContext.current)
+            val context = LocalContext.current
+            val controller = TestNavHostController(context)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
 
             NavHost(
                 navController = controller,
                 startDestination = HolderHomeRoute
             ) {
-                configureHolderRoutes()
+                configureHolderRoutes(context)
             }
         }
 

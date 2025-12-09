@@ -33,4 +33,6 @@ sealed interface GattEvent {
     }
 
     data class ServiceAdded(val status: Int, val service: BluetoothGattService?) : GattEvent
+
+    data object ConnectionStateStarted : GattEvent
 }

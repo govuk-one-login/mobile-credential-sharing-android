@@ -1,6 +1,7 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library
+        libs.plugins.templates.android.library,
+        libs.plugins.metro.di
     ).forEach { alias(it) }
 }
 
@@ -31,7 +32,11 @@ android {
 }
 
 dependencies {
-    implementation(projects.core)
+    listOf(
+        projects.core,
+        libs.metro.viewmodel.compose
+    ).forEach(::implementation)
+
     testImplementation(testFixtures(projects.core))
 }
 

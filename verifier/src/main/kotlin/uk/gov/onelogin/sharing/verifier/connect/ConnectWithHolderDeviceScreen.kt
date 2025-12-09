@@ -25,6 +25,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.R as coreR
@@ -48,7 +49,12 @@ fun ConnectWithHolderDeviceScreen(
         }
     )
 ) {
-    val engagementData = remember { decodeDeviceEngagement(base64EncodedEngagement) }
+    val engagementData = remember {
+        decodeDeviceEngagement(
+            base64EncodedEngagement,
+            logger = SystemLogger()
+        )
+    }
 
     LaunchedEffect(permissionState.status) {
         if (!permissionState.status.isGranted) {

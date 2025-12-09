@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.security.engagement
 
-import com.fasterxml.jackson.databind.json.JsonMapper
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import org.junit.Assert.assertThrows
@@ -35,10 +34,6 @@ class DeviceEngagementTest {
             expectedDeviceEngagement,
             actualNode
         )
-
-        val json = JsonMapper.builder().build()
-        val pretty = json.writerWithDefaultPrettyPrinter().writeValueAsString(actualNode)
-        println(pretty)
     }
 
     @Test

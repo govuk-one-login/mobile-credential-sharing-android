@@ -28,9 +28,9 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import java.util.UUID
-import uk.gov.onelogin.sharing.bluetooth.BluetoothStateManagerPrompt
-import uk.gov.onelogin.sharing.bluetooth.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
@@ -42,9 +42,7 @@ private const val QR_SIZE = 800
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun HolderWelcomeScreen(
-    viewModel: HolderWelcomeViewModel = HolderWelcomeViewModel.holderWelcomeViewModel()
-) {
+fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = metroViewModel()) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
 
@@ -67,7 +65,6 @@ fun HolderWelcomeScreen(
         onGrantedPermissions = {
             viewModel.updateBluetoothPermissions(true)
             DisposableEffect(Unit) {
-                viewModel.startAdvertising()
                 onDispose {
                     viewModel.stopAdvertising()
                 }
@@ -76,40 +73,25 @@ fun HolderWelcomeScreen(
     )
 
     if (contentState.hasBluetoothPermissions == true) {
-        BluetoothStateManagerPrompt {
-            when (it) {
-                BluetoothStatus.BLUETOOTH_ON -> viewModel.updateBluetoothState(
-                    BluetoothState.Enabled
-                )
-
-                BluetoothStatus.BLUETOOTH_OFF -> viewModel.updateBluetoothState(
-                    BluetoothState.Disabled
-                )
-
-                BluetoothStatus.INITIALIZING -> viewModel.updateBluetoothState(
-                    BluetoothState.Initializing
-                )
-            }
-        }
-
         HolderScreenContent(contentState)
     }
 }
 
 @Composable
 fun HolderScreenContent(contentState: HolderWelcomeUiState) {
-    when (contentState.bluetoothStatus) {
+    when (contentState.bluetoothState) {
         BluetoothState.Disabled -> {
-            println("User denied turning on bluetooth via prompt")
+            EnableBluetoothPrompt()
             BluetoothDisabledScreen()
         }
 
         BluetoothState.Enabled -> {
-            println("User turned bluetooth on via prompt")
             QrContent(contentState, Modifier)
         }
 
         BluetoothState.Initializing -> Unit
+
+        BluetoothState.Unknown -> Unit
     }
 }
 

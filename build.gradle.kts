@@ -3,6 +3,9 @@ val androidCompileSdk: Int by extra(36)
 val androidMinSdk: Int by extra(29)
 val androidTargetSdk: Int by extra(androidCompileSdk)
 
+// The initial aab published to the Play Store has a higher version number
+val versionCodeOffset = 10
+
 /**
  * The number of commits within the current git branch.
  *
@@ -14,7 +17,8 @@ val androidVersionCode: Int by extra {
             layout.projectDirectory.file("scripts/getCurrentVersionCode")
         )
     }.standardOutput.asText.map {
-        it.trim().toInt()
+        val count = it.trim().toInt()
+        count + versionCodeOffset
     }.getOrElse(1)
 }
 
@@ -43,6 +47,7 @@ val namespacePrefix: String by extra("uk.gov.onelogin.sharing")
 val githubRepositoryName: String by extra("mobile-credential-sharing-android")
 val mavenGroupId: String by extra(namespacePrefix)
 val buildLogicDir: String by extra("mobile-android-pipelines/buildLogic")
+val configDir: String by extra( "${rootProject.rootDir}/config")
 
 plugins {
     listOf(
@@ -51,6 +56,8 @@ plugins {
         libs.plugins.kotlin.jvm,
         libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
+        libs.plugins.kotlin.ksp,
+        libs.plugins.hilt.plugin,
         libs.plugins.kotlin.parcelize,
         libs.plugins.kotlin.serialization,
     ).forEach { plugin ->

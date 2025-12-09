@@ -3,3 +3,7 @@
 (?i)Gradle
 (?i)Mbps
 (?i)Roborazzi
+GOV
+ISO
+SDK
+TBC

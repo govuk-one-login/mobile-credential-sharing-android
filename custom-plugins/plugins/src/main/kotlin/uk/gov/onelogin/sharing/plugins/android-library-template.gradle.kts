@@ -62,12 +62,14 @@ dependencies {
         "androidx-test-espresso-intents",
         "androidx-test-rules",
         "androidx-ui-test-junit4",
+        "mockk"
     ).map { libs.findLibrary(it).get().get() }.forEach {
         testFixturesApi(it)
     }
 
     listOf(
         "android-baseline",
+        "uk-gov-logging",
         "uk-gov-ui",
     ).map { libs.findBundle(it).get() }.forEach {
         implementation(it)

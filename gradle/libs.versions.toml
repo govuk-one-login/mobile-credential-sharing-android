@@ -1,5 +1,5 @@
 [versions]
-activityCompose = "1.12.0" # https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
+activityCompose = "1.12.1" # https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
 agp = "8.13.1" # https://developer.android.com/build/releases/gradle-plugin
 androidx-browser = "1.9.0" # https://developer.android.com/jetpack/androidx/releases/browser
 androidx-navigation = "2.9.6" # https://developer.android.com/jetpack/androidx/releases/navigation
@@ -8,11 +8,12 @@ androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/and
 androidx-test-rules = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#rules-1.7.0
 androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#runner-1.7.0
 com-google-test-parameter-injector = "1.20" # https://github.com/google/TestParameterInjector
-compose-lint-rules = "0.4.28" # https://github.com/mrmans0n/compose-rules/releases/
-composeBom = "2025.11.01" # https://developer.android.com/jetpack/androidx/releases/compose
+compose-lint-rules = "0.5.1" # https://github.com/mrmans0n/compose-rules/releases/
+composeBom = "2025.12.00" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.17.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
 detekt = "1.23.8" # https://github.com/detekt/detekt/releases
 espressoCore = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#3.7.0
+hilt = "2.57.2" # https://github.com/google/dagger/releases
 jackson = "2.20.1" # https://github.com/FasterXML/jackson/wiki/Jackson-Releases
 jacoco = "0.8.14" # https://github.com/jacoco/jacoco/releases
 junit = "4.13.2" # https://github.com/junit-team/junit4/releases
@@ -21,12 +22,14 @@ kotlin-symbol-processing = "2.3.3" # https://github.com/google/ksp/releases ; up
 kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
-mockk = "1.14.6" # https://github.com/mockk/mockk/releases
+metro = "0.8.0"  # https://github.com/ZacSweers/Metro/releases
+mockk = "1.14.7" # https://github.com/mockk/mockk/releases
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.52.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.1.0.6387" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
+uk-gov-logging = "0.36.1" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
 uk-gov-ui = "11.1.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
@@ -54,7 +57,7 @@ androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 com-android-tools-build-gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 com-google-devtools-ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "kotlin-symbol-processing" }
-com-google-test-parameter-injector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "com-google-test-parameter-injector"}
+com-google-test-parameter-injector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "com-google-test-parameter-injector" }
 compose-rules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "compose-lint-rules" }
 compose-rules-ktlint = { module = "io.nlopez.compose.rules:ktlint", version.ref = "compose-lint-rules" }
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin", version.ref = "detekt" }
@@ -62,9 +65,12 @@ jackson-cbor = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-c
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 junit = { module = "junit:junit", version.ref = "junit" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+metro-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 org-jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
@@ -74,6 +80,9 @@ roborazzi-gradle = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-pl
 roborazzi-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
 sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
+uk-gov-logging-api = { module = "uk.gov.logging:logging-api", version.ref = "uk-gov-logging" }
+uk-gov-logging-impl = { module = "uk.gov.logging:logging-impl", version.ref = "uk-gov-logging" }
+uk-gov-logging-testdouble = { module = "uk.gov.logging:logging-testdouble", version.ref = "uk-gov-logging" }
 uk-gov-pipelines-plugins = { module = "uk.gov.pipelines:plugins" }
 uk-gov-ui-android-componentsv2 = { module = "uk.gov.android:componentsv2", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-componentsv2-camera = { module = "uk.gov.android:componentsv2-camera", version.ref = "uk-gov-ui" }
@@ -92,7 +101,7 @@ android-baseline = [
     "androidx-navigation-compose",
     "androidx-ui-graphics",
     "androidx-ui-tooling-preview",
-    "kotlinx-collections-immutable"
+    "kotlinx-collections-immutable",
 ]
 debug-tooling = [
     "androidx-ui-tooling",
@@ -123,6 +132,11 @@ screenshot-testing = [
     "roborazzi-compose",
     "roborazzi-rule",
 ]
+uk-gov-logging = [
+    "uk-gov-logging-api",
+    "uk-gov-logging-impl",
+    "uk-gov-logging-testdouble",
+]
 uk-gov-ui = [
     "uk-gov-ui-android-componentsv2",
     "uk-gov-ui-android-componentsv2-camera",
@@ -139,11 +153,14 @@ custom-language-config = { id = "uk.gov.onelogin.sharing.plugins.language.langua
 custom-managed-devices = { id = "uk.gov.onelogin.sharing.plugins.devices.gradle-managed-devices", version = "undefined" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 detekt-config = { id = "uk.gov.onelogin.sharing.plugins.lint.detekt-configuration", version = "undefined" }
+hilt-plugin = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "kotlin-symbol-processing" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+metro-di = { id = "dev.zacsweers.metro", version.ref = "metro" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 screenshot-testing = { id = "uk.gov.onelogin.sharing.plugins.testing.android-screenshot-testing", version = "undefined" }
 sonar-module-config = { id = "uk.gov.onelogin.sharing.plugins.sonar.sub-module-config", version = "undefined" }

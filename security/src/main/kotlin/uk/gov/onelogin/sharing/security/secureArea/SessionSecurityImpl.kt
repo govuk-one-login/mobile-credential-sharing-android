@@ -1,19 +1,28 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPairGenerator
 import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 /**
  * An implementation of [SessionSecurity] that handles cryptographic operations for a
  * secure mDoc sharing session.
  *
  * This implementation uses Elliptic Curve (EC) cryptography.
+ *
+ * @param logger An instance of [Logger] for logging events.
  */
-class SessionSecurityImpl : SessionSecurity {
+@ContributesBinding(ViewModelScope::class)
+@Inject
+class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
 
     /**
      * Generates a new, ephemeral Elliptic Curve (EC) key pair and returns the public key.
@@ -30,13 +39,13 @@ class SessionSecurityImpl : SessionSecurity {
         val ecSpec = ECGenParameterSpec(parameterSpec)
         keyPairGenerator.initialize(ecSpec)
         val keyPair = keyPairGenerator.generateKeyPair()
-        println(keyPair.public as ECPublicKey)
+        logger.debug(logTag, "Generated public key: ${keyPair.public}")
         keyPair.public as ECPublicKey
     } catch (e: NoSuchAlgorithmException) {
-        println(e.message)
+        logger.error(logTag, e.message ?: "No such algorithm exception", e)
         null
     } catch (e: InvalidAlgorithmParameterException) {
-        println(e.message)
+        logger.error(logTag, e.message ?: "Invalid algorithm parameter exception", e)
         null
     }
 }
