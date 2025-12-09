@@ -3,6 +3,9 @@ val androidCompileSdk: Int by extra(36)
 val androidMinSdk: Int by extra(29)
 val androidTargetSdk: Int by extra(androidCompileSdk)
 
+// The initial aab published to the Play Store has a higher version number
+val versionCodeOffset = 10
+
 /**
  * The number of commits within the current git branch.
  *
@@ -14,7 +17,8 @@ val androidVersionCode: Int by extra {
             layout.projectDirectory.file("scripts/getCurrentVersionCode")
         )
     }.standardOutput.asText.map {
-        it.trim().toInt()
+        val count = it.trim().toInt()
+        count + versionCodeOffset
     }.getOrElse(1)
 }
 
