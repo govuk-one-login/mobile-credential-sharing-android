@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
@@ -48,7 +49,8 @@ class AndroidGattServerManagerTest {
             context = context,
             bluetoothManager = bluetoothManager,
             gattServiceFactory = { fakeGattService },
-            permissionsChecker = fakePermissionChecker
+            permissionsChecker = fakePermissionChecker,
+            logger = SystemLogger()
         )
     }
 

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
@@ -20,6 +21,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.SessionManagerFactory
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
+import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
@@ -32,7 +34,8 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
-    private val mdocSessionManagerFactory: SessionManagerFactory,
+    mdocSessionManagerFactory: SessionManagerFactory,
+    private val logger: Logger,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     private val initialState = HolderWelcomeUiState()
@@ -59,16 +62,18 @@ class HolderWelcomeViewModel(
 
                 when (state) {
                     MdocSessionState.AdvertisingStarted ->
-                        println("Mdoc - Advertising Started UUID: ${_uiState.value.uuid}")
+                        logger.debug(
+                            logTag,
+                            "Mdoc - Advertising Started UUID: ${_uiState.value.uuid}"
+                        )
 
                     MdocSessionState.AdvertisingStopped -> {
                         sessionStartRequested = false
-                        println("Mdoc - Advertising Stopped")
+                        logger.debug(logTag, "Mdoc - Advertising Stopped")
                     }
 
-                    is MdocSessionState.Connected -> {
-                        println("Mdoc - Connected: ${state.address}")
-                    }
+                    is MdocSessionState.Connected ->
+                        logger.debug(logTag, "Mdoc - Connected: ${state.address}")
 
                     is MdocSessionState.Disconnected -> {
                         @RequiresImplementation(
@@ -83,7 +88,7 @@ class HolderWelcomeViewModel(
                                 )
                             ]
                         )
-                        println("Error Mdoc - Disconnected: ${state.address}")
+                        logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
                         _uiState.update { it.copy(showErrorScreen = true) }
                     }
 
@@ -94,16 +99,16 @@ class HolderWelcomeViewModel(
 
                     MdocSessionState.GattServiceStopped -> {
                         sessionStartRequested = false
-                        println("Mdoc - GattService Stopped")
+                        logger.debug(logTag, "Mdoc - GattService Stopped")
                     }
 
                     MdocSessionState.Idle -> {
                         sessionStartRequested = false
-                        println("Mdoc - Idle")
+                        logger.debug(logTag, "Mdoc - Idle")
                     }
 
                     is MdocSessionState.ServiceAdded ->
-                        println("Mdoc - Service Added: ${state.uuid}")
+                        logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
                 }
             }
         }
@@ -115,7 +120,7 @@ class HolderWelcomeViewModel(
                     BluetoothStatus.TURNING_OFF -> {
                         val wasDisabled = _uiState.value.bluetoothState == BluetoothState.Disabled
                         if (!wasDisabled) {
-                            println("Mdoc - Bluetooth switched OFF")
+                            logger.debug(logTag, "Mdoc - Bluetooth switched OFF")
                             _uiState.update {
                                 it.copy(bluetoothState = BluetoothState.Disabled)
                             }
@@ -123,20 +128,20 @@ class HolderWelcomeViewModel(
                     }
 
                     BluetoothStatus.TURNING_ON -> {
-                        println("Mdoc - Bluetooth initializing")
+                        logger.debug(logTag, "Mdoc - Bluetooth initializing")
                         _uiState.update {
                             it.copy(bluetoothState = BluetoothState.Initializing)
                         }
                     }
 
                     BluetoothStatus.ON -> {
-                        println("Mdoc - Bluetooth switched ON")
+                        logger.debug(logTag, "Mdoc - Bluetooth switched ON")
                         _uiState.update { it.copy(bluetoothState = BluetoothState.Enabled) }
                         startBleSession()
                     }
 
                     BluetoothStatus.UNKNOWN ->
-                        println("Mdoc - Bluetooth status unknown")
+                        logger.debug(logTag, "Mdoc - Bluetooth status unknown")
                 }
             }
         }
@@ -144,12 +149,14 @@ class HolderWelcomeViewModel(
 
     private fun handleError(reason: MdocSessionError) {
         when (reason) {
-            MdocSessionError.ADVERTISING_FAILED -> println("Mdoc - Error: Advertising failed")
+            MdocSessionError.ADVERTISING_FAILED ->
+                logger.debug(logTag, "Mdoc - Error: Advertising failed")
 
-            MdocSessionError.GATT_NOT_AVAILABLE -> println("Mdoc - Error: GATT not available")
+            MdocSessionError.GATT_NOT_AVAILABLE ->
+                logger.debug(logTag, "Mdoc - Error: GATT not available")
 
             MdocSessionError.BLUETOOTH_PERMISSION_MISSING ->
-                println("Mdoc - Error: Bluetooth permission missing")
+                logger.debug(logTag, "Mdoc - Error: Bluetooth permission missing")
         }
     }
 
@@ -180,6 +187,7 @@ class HolderWelcomeViewModel(
             !sessionStartRequested
 
         if (canStart) {
+            sessionStartRequested = true
             viewModelScope.launch {
                 mdocBleSession.start(state.uuid)
             }

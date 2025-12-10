@@ -14,12 +14,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
 fun ConnectWithHolderDeviceScreen(base64EncodedEngagement: String, modifier: Modifier = Modifier) {
-    val engagementData = remember { decodeDeviceEngagement(base64EncodedEngagement) }
+    val engagementData = remember {
+        decodeDeviceEngagement(
+            cborBase64Url = base64EncodedEngagement,
+            logger = SystemLogger()
+        )
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),

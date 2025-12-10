@@ -22,6 +22,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeDeniedPermissionsState
@@ -73,7 +74,8 @@ class HolderWelcomeScreenTest {
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocBleSession },
-        dispatcher = mainDispatcherRule.testDispatcher
+        dispatcher = mainDispatcherRule.testDispatcher,
+        logger = SystemLogger()
     )
 
     @Test
