@@ -7,6 +7,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
@@ -208,7 +209,7 @@ class HolderWelcomeScreenTest {
                 )
             )
         }
-        composeTestRule.onNodeWithText("An error has occurred")
+        composeTestRule.onNodeWithText("An error has occurred").assertIsDisplayed()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
