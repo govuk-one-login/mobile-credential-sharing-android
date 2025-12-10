@@ -2,9 +2,9 @@ package uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service
 
 import android.bluetooth.BluetoothGattCharacteristic
 import java.util.UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.CLIENT_2_SERVER_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.SERVER_2_CLIENT_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids.STATE_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.mdoc.GattUuids.CLIENT_2_SERVER_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.mdoc.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.mdoc.GattUuids.STATE_UUID
 
 /**
  * Mdoc service characteristics for the BLE GATT service as specified in
