@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.core.presentation
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -21,5 +22,6 @@ class ErrorScreenTest {
         }
 
         composeTestRule.onNodeWithText("An error has occurred").assertIsDisplayed()
+        composeTestRule.onNodeWithText("An error has occurred").assertExists()
     }
 }
