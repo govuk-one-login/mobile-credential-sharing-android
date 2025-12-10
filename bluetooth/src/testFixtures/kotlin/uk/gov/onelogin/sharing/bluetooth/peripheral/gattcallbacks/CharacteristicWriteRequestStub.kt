@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import io.mockk.every
 import io.mockk.mockk
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.mdoc.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 
 /**

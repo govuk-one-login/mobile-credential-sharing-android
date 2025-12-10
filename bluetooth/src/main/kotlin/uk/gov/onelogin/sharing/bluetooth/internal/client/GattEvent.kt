@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.client
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 
-sealed interface GattEvent {
+internal interface GattEvent {
     data class ConnectionStateChange(
         val gatt: BluetoothGatt,
         val status: Int,
