@@ -22,6 +22,14 @@ class ErrorScreenTest {
         }
 
         composeTestRule.onNodeWithText("An error has occurred").assertIsDisplayed()
+    }
+
+
+    @Test
+    fun screenWithTextAnErrorHasOccurredShouldExist() {
+        composeTestRule.setContent {
+            ErrorScreen(modifier = Modifier)
+        }
         composeTestRule.onNodeWithText("An error has occurred").assertExists()
     }
 }
