@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
-import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -22,6 +21,7 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HolderWelcomeViewModelTest {
@@ -379,5 +379,19 @@ class HolderWelcomeViewModelTest {
             1,
             fakeMdocSession.startCalls
         )
+    }
+
+    @Test
+    fun `showErrorScreen set to true when mdoc session disconnects`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.AdvertisingStarted)
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        advanceUntilIdle()
+
+        fakeMdocSession.emitState(MdocSessionState.Disconnected("123123"))
+
+        advanceUntilIdle()
+        assertEquals(true, viewModel.uiState.value.showErrorScreen)
     }
 }

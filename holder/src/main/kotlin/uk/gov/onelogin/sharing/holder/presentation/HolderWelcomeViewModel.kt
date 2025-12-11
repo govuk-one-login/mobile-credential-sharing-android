@@ -6,7 +6,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +14,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
@@ -25,6 +26,7 @@ import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import java.util.UUID
 
 @Inject
 @ViewModelKey(HolderWelcomeViewModel::class)
@@ -73,8 +75,22 @@ class HolderWelcomeViewModel(
                     is MdocSessionState.Connected ->
                         logger.debug(logTag, "Mdoc - Connected: ${state.address}")
 
-                    is MdocSessionState.Disconnected ->
-                        logger.debug(logTag, "Mdoc - Disconnected: ${state.address}")
+                    is MdocSessionState.Disconnected -> {
+                        @RequiresImplementation(
+                            details = [
+                                ImplementationDetail(
+                                    ticket = "DCMAW-16898",
+                                    description = "We may need to handle explicit bluetooth" +
+                                        "disconnection states to handle common error codes " +
+                                        "8, 19, 22 and 133. The function below will handle " +
+                                        "treat all disconnect states the same when connected " +
+                                        "to a device"
+                                )
+                            ]
+                        )
+                        logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
+                        _uiState.update { it.copy(showErrorScreen = true) }
+                    }
 
                     is MdocSessionState.Error -> {
                         sessionStartRequested = false
@@ -190,5 +206,6 @@ data class HolderWelcomeUiState(
     val sessionState: MdocSessionState = MdocSessionState.Idle,
     val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
-    val hasBluetoothPermissions: Boolean? = null
+    val hasBluetoothPermissions: Boolean? = null,
+    val showErrorScreen: Boolean = false
 )
