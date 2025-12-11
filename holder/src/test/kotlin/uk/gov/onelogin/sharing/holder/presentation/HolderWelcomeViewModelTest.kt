@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -21,7 +22,6 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HolderWelcomeViewModelTest {
