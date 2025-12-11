@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.advertising
+package uk.gov.onelogin.sharing.bluetooth.api.advertising
 
 import kotlinx.coroutines.flow.StateFlow
 
@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
  * The state of the advertiser can be observed via [state].
  * The start advertise result will indicate if the start advertising operation was successful.
  */
-internal interface BleAdvertiser {
+interface BleAdvertiser {
     /**
      * Start advertising with the given payload and parameters.
      *

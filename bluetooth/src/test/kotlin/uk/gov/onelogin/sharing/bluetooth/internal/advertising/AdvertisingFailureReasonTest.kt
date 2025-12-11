@@ -5,6 +5,8 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.toReason
 
 @RunWith(Parameterized::class)
 internal class AdvertisingFailureReasonToStringTest(

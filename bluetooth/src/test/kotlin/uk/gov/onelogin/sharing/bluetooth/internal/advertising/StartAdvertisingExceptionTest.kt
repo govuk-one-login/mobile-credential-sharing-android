@@ -4,6 +4,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
 
 @RunWith(Parameterized::class)
 internal class StartAdvertisingExceptionTest(
