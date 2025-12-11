@@ -5,7 +5,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
  *
  * @param code The byte code representing the state.
  */
-enum class MdocState(val code: Byte) {
+internal enum class MdocState(val code: Byte) {
     /**
      * The initial state, indicating the start of a session.
      */

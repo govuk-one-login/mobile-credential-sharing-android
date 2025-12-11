@@ -1,8 +1,8 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.holder.mdoc
 
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 
 /**
  * Responsible for orchestrating the BLE advertising and GATT service

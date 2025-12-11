@@ -10,6 +10,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.core.logger.logTag
