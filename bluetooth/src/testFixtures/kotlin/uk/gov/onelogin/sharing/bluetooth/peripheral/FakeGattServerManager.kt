@@ -3,8 +3,8 @@ package uk.gov.onelogin.sharing.bluetooth.peripheral
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerManager
 
 class FakeGattServerManager : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>()

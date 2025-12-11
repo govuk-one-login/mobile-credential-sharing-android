@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.bluetooth.ble
 
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingFailureReason
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingParameters
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 
 class FakeBleProvider : BleProvider {

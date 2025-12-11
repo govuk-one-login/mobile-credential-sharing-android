@@ -1,6 +1,7 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.advertising
+package uk.gov.onelogin.sharing.bluetooth.api.advertising
 
-import android.bluetooth.le.AdvertisingSetParameters
+import android.bluetooth.le.AdvertisingSetParameters.INTERVAL_HIGH
+import android.bluetooth.le.AdvertisingSetParameters.TX_POWER_MEDIUM
 
 /**
  * Holds the parameters for Bluetooth Low Energy (BLE) advertising.
@@ -9,14 +10,14 @@ import android.bluetooth.le.AdvertisingSetParameters
  * It provides a platform-agnostic way to configure these parameters.
  *
  * @param legacyMode Whether to use legacy advertising mode. Defaults to `false`.
- * @param interval The advertising interval. Defaults to [AdvertisingSetParameters.INTERVAL_HIGH].
+ * @param interval The advertising interval. Defaults to [INTERVAL_HIGH].
  * @param txPowerLevel The transmission power level. Defaults to
- * [AdvertisingSetParameters.TX_POWER_MEDIUM].
+ * [TX_POWER_MEDIUM].
  * @param connectable Whether the advertising is connectable. Defaults to `true`.
  */
 data class AdvertisingParameters(
     val legacyMode: Boolean = false,
-    val interval: Int = AdvertisingSetParameters.INTERVAL_HIGH,
-    val txPowerLevel: Int = AdvertisingSetParameters.TX_POWER_MEDIUM,
+    val interval: Int = INTERVAL_HIGH,
+    val txPowerLevel: Int = TX_POWER_MEDIUM,
     val connectable: Boolean = true
 )

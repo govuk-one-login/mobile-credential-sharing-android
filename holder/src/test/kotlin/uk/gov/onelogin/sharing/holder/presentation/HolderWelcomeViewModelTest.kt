@@ -10,12 +10,12 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.FakeMdocSessionManager
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
+import uk.gov.onelogin.sharing.holder.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
+import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
+import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub

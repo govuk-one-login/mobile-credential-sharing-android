@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.core
+package uk.gov.onelogin.sharing.bluetooth.api.core
 
 import kotlinx.coroutines.flow.Flow
 

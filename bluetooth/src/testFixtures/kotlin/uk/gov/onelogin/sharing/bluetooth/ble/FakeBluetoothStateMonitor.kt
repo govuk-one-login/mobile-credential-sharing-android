@@ -2,8 +2,8 @@ package uk.gov.onelogin.sharing.bluetooth.ble
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 
 class FakeBluetoothStateMonitor : BluetoothStateMonitor {
     private val _states = MutableSharedFlow<BluetoothStatus>(replay = 1)

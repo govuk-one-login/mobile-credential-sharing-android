@@ -1,9 +1,11 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.holder
 
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
+import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 
 class FakeMdocSessionManager(initialState: MdocSessionState = MdocSessionState.Idle) :
     MdocSessionManager {

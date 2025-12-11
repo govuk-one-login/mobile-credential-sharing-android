@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal
+package uk.gov.onelogin.sharing.holder.mdoc
 
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
@@ -6,17 +6,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionManager
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiseData
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerManager
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidMdocSessionManager(
@@ -119,7 +116,9 @@ internal class AndroidMdocSessionManager(
             }
 
             is GattServerEvent.Error ->
-                _state.value = MdocSessionState.Error(event.error)
+                _state.value = MdocSessionState.Error(
+                    MdocSessionError.fromGattError(event.error)
+                )
 
             is GattServerEvent.ServiceAdded ->
                 _state.value = MdocSessionState.ServiceAdded(event.service?.uuid)

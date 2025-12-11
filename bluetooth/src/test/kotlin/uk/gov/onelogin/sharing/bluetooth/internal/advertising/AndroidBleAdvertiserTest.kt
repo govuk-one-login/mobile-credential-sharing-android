@@ -13,6 +13,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule

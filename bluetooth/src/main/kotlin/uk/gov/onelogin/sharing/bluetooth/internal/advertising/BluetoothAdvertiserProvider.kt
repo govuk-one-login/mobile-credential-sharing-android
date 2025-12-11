@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
+
 /**
  * Provides a contract for starting and stopping Bluetooth advertising.
  *

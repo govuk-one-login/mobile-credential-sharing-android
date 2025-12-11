@@ -11,6 +11,8 @@ import android.os.Build
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidBluetoothStateMonitor(
