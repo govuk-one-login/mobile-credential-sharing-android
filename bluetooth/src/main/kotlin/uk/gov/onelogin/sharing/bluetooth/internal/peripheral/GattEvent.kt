@@ -1,9 +1,10 @@
-package uk.gov.onelogin.sharing.bluetooth.api.gatt.server
+package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothProfile
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
 
 sealed interface GattEvent {
     data class ConnectionStateChange(

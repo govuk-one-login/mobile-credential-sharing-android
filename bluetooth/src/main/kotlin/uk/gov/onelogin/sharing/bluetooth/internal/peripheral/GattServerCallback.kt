@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattEvent
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class GattServerCallback(

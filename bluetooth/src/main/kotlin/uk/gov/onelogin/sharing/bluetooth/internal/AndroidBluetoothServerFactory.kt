@@ -17,11 +17,29 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterPr
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
 
+/**
+ * An Android-specific implementation of the [BluetoothServerFactory] interface.
+ *
+ * This factory is responsible for creating and wiring together all the necessary components
+ * for a Bluetooth Low Energy (BLE) server, including the advertiser, GATT server, and state
+ * monitor.
+ *
+ * @param context The Android application context, used for accessing system services.
+ * @param logger An instance of [Logger] for logging events.
+ */
 @ContributesBinding(ViewModelScope::class)
 @Inject
 class AndroidBluetoothServerFactory(private val context: Context, private val logger: Logger) :
     BluetoothServerFactory {
 
+    /**
+     * Creates and returns a [BluetoothServerComponents] object, which contains all the
+     * fully configured components required to run a BLE server.
+     *
+     * @param scope The [CoroutineScope] in which the server components will operate.
+     * @return A [BluetoothServerComponents] instance containing the advertiser, GATT server,
+     * and Bluetooth state monitor.
+     */
     override fun createServer(scope: CoroutineScope): BluetoothServerComponents {
         val adapterProvider = AndroidBluetoothAdapterProvider(context)
 

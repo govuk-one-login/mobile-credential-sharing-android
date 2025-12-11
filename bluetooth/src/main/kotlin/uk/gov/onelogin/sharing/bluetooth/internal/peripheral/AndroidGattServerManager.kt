@@ -10,7 +10,6 @@ import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerManager
