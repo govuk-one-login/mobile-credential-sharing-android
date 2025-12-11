@@ -380,4 +380,18 @@ class HolderWelcomeViewModelTest {
             fakeMdocSession.startCalls
         )
     }
+
+    @Test
+    fun `showErrorScreen set to true when mdoc session disconnects`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.AdvertisingStarted)
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        advanceUntilIdle()
+
+        fakeMdocSession.emitState(MdocSessionState.Disconnected("123123"))
+
+        advanceUntilIdle()
+        assertEquals(true, viewModel.uiState.value.showErrorScreen)
+    }
 }

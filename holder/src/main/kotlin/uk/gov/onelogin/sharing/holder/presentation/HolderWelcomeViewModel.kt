@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
@@ -73,8 +75,22 @@ class HolderWelcomeViewModel(
                     is MdocSessionState.Connected ->
                         logger.debug(logTag, "Mdoc - Connected: ${state.address}")
 
-                    is MdocSessionState.Disconnected ->
-                        logger.debug(logTag, "Mdoc - Disconnected: ${state.address}")
+                    is MdocSessionState.Disconnected -> {
+                        @RequiresImplementation(
+                            details = [
+                                ImplementationDetail(
+                                    ticket = "DCMAW-16898",
+                                    description = "We may need to handle explicit bluetooth" +
+                                        "disconnection states to handle common error codes " +
+                                        "8, 19, 22 and 133. The function below will handle " +
+                                        "treat all disconnect states the same when connected " +
+                                        "to a device"
+                                )
+                            ]
+                        )
+                        logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
+                        _uiState.update { it.copy(showErrorScreen = true) }
+                    }
 
                     is MdocSessionState.Error -> {
                         sessionStartRequested = false
@@ -190,5 +206,6 @@ data class HolderWelcomeUiState(
     val sessionState: MdocSessionState = MdocSessionState.Idle,
     val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
-    val hasBluetoothPermissions: Boolean? = null
+    val hasBluetoothPermissions: Boolean? = null,
+    val showErrorScreen: Boolean = false
 )
