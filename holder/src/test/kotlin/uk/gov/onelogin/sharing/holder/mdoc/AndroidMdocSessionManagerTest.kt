@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal
+package uk.gov.onelogin.sharing.holder.mdoc
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattService
@@ -13,18 +13,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionState
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertiserState
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingError
-import uk.gov.onelogin.sharing.bluetooth.internal.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
+import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 
 class AndroidMdocSessionManagerTest {
 
@@ -221,7 +220,7 @@ class AndroidMdocSessionManagerTest {
 
             gattServerManager.emitEvent(
                 GattServerEvent.Error(
-                    MdocSessionError.GATT_NOT_AVAILABLE
+                    GattServerError.GATT_NOT_AVAILABLE
                 )
             )
             assertEquals(

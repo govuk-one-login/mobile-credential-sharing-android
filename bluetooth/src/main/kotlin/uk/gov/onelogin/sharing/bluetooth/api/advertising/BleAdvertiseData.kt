@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.advertising
+package uk.gov.onelogin.sharing.bluetooth.api.advertising
 
 import java.util.UUID
 

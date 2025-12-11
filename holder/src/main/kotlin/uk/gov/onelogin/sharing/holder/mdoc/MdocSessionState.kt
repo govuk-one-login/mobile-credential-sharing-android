@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.holder.mdoc
 
 import java.util.UUID
 
