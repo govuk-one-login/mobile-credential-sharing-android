@@ -16,8 +16,8 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.mockBluetoothDevice
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
@@ -74,7 +74,7 @@ class AndroidGattServerManagerTest {
             val event = awaitItem()
             assert(event is GattServerEvent.Error)
             assertEquals(
-                GattServerEvent.Error(MdocSessionError.GATT_NOT_AVAILABLE),
+                GattServerEvent.Error(GattServerError.GATT_NOT_AVAILABLE),
                 event
             )
 
@@ -247,7 +247,7 @@ class AndroidGattServerManagerTest {
 
             assertEquals(
                 GattServerEvent.Error(
-                    MdocSessionError.BLUETOOTH_PERMISSION_MISSING
+                    GattServerError.BLUETOOTH_PERMISSION_MISSING
                 ),
                 awaitItem()
             )

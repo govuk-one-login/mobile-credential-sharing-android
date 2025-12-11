@@ -1,7 +1,5 @@
-package uk.gov.onelogin.sharing.bluetooth.api
+package uk.gov.onelogin.sharing.holder.mdoc
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.junit.Assert.assertNotNull
@@ -11,8 +9,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.internal.AndroidMdocSessionManager
-import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
+import uk.gov.onelogin.sharing.holder.FakeBluetoothServerFactory
+import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 
 @RunWith(RobolectricTestRunner::class)
 class MdocSessionManagerFactoryTest {
@@ -20,13 +18,16 @@ class MdocSessionManagerFactoryTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val fakeBluetoothServerFactory = FakeBluetoothServerFactory()
     private val fakeLogger = SystemLogger()
     private val testScope = CoroutineScope(SupervisorJob() + dispatcherRule.testDispatcher)
 
     @Test
     fun `creates an instance of MdocSessionManager`() {
-        val sessionManager = MdocSessionManagerFactory(context, fakeLogger)
+        val sessionManager = MdocSessionManagerFactory(
+            bluetoothFactory = fakeBluetoothServerFactory,
+            logger = fakeLogger
+        )
             .create(testScope)
 
         assertNotNull(sessionManager)

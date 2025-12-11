@@ -10,11 +10,12 @@ import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.MdocSessionError
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
@@ -46,7 +47,7 @@ class AndroidGattServerManager(
         if (!permissionsChecker.hasPermission()) {
             _events.tryEmit(
                 GattServerEvent.Error(
-                    MdocSessionError.BLUETOOTH_PERMISSION_MISSING
+                    GattServerError.BLUETOOTH_PERMISSION_MISSING
                 )
             )
             return
@@ -61,7 +62,7 @@ class AndroidGattServerManager(
         )
 
         if (server == null) {
-            _events.tryEmit(GattServerEvent.Error(MdocSessionError.GATT_NOT_AVAILABLE))
+            _events.tryEmit(GattServerEvent.Error(GattServerError.GATT_NOT_AVAILABLE))
             return
         }
 

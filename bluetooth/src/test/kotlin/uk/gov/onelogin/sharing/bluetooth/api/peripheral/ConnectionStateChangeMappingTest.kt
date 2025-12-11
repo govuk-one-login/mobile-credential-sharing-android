@@ -7,7 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Test
-import uk.gov.onelogin.sharing.bluetooth.api.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
 
 private const val ADDRESS = "AA:BB:CC:DD:EE:FF"
 

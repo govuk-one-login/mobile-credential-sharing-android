@@ -14,6 +14,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
+import uk.gov.onelogin.sharing.bluetooth.api.advertising.toReason
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallbackStub
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 
