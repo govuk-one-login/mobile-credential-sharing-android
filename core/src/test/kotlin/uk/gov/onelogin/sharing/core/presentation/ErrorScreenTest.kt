@@ -24,7 +24,6 @@ class ErrorScreenTest {
         composeTestRule.onNodeWithText("An error has occurred").assertIsDisplayed()
     }
 
-
     @Test
     fun screenWithTextAnErrorHasOccurredShouldExist() {
         composeTestRule.setContent {
