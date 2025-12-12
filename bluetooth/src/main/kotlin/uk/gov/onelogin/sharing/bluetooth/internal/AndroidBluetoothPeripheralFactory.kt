@@ -7,8 +7,8 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineScope
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.BluetoothServerComponents
-import uk.gov.onelogin.sharing.bluetooth.api.BluetoothServerFactory
+import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralComponents
+import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBluetoothAdvertiserProvider
@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMoni
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
 
 /**
- * An Android-specific implementation of the [BluetoothServerFactory] interface.
+ * An Android-specific implementation of the [BluetoothPeripheralFactory] interface.
  *
  * This factory is responsible for creating and wiring together all the necessary components
  * for a Bluetooth Low Energy (BLE) server, including the advertiser, GATT server, and state
@@ -29,18 +29,18 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerMa
  */
 @ContributesBinding(ViewModelScope::class)
 @Inject
-class AndroidBluetoothServerFactory(private val context: Context, private val logger: Logger) :
-    BluetoothServerFactory {
+class AndroidBluetoothPeripheralFactory(private val context: Context, private val logger: Logger) :
+    BluetoothPeripheralFactory {
 
     /**
-     * Creates and returns a [BluetoothServerComponents] object, which contains all the
+     * Creates and returns a [BluetoothPeripheralComponents] object, which contains all the
      * fully configured components required to run a BLE server.
      *
      * @param scope The [CoroutineScope] in which the server components will operate.
-     * @return A [BluetoothServerComponents] instance containing the advertiser, GATT server,
+     * @return A [BluetoothPeripheralComponents] instance containing the advertiser, GATT server,
      * and Bluetooth state monitor.
      */
-    override fun createServer(scope: CoroutineScope): BluetoothServerComponents {
+    override fun create(scope: CoroutineScope): BluetoothPeripheralComponents {
         val adapterProvider = AndroidBluetoothAdapterProvider(context)
 
         val bleAdvertiser = AndroidBleAdvertiser(
@@ -64,9 +64,9 @@ class AndroidBluetoothServerFactory(private val context: Context, private val lo
             logger = logger
         )
 
-        return BluetoothServerComponents(
+        return BluetoothPeripheralComponents(
             advertiser = bleAdvertiser,
-            gattServer = gattServerManager,
+            gattServerManager = gattServerManager,
             bluetoothStateMonitor = bluetoothStateMonitor
         )
     }

@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
+package uk.gov.onelogin.sharing.core.mdoc
 
 import java.util.UUID
 
@@ -7,7 +7,7 @@ import java.util.UUID
  * ISO/IEC 18013-5:2021(E), Section 11.1.3.2 Service definition - Table 5
  *
  */
-internal object GattUuids {
+object GattUuids {
     /**
      * The UUID for the Client Characteristic Configuration Descriptor (CCCD).
      *
