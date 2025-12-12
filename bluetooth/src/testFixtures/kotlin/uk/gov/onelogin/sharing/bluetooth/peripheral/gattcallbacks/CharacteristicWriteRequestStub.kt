@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import io.mockk.every
 import io.mockk.mockk
-import uk.gov.onelogin.sharing.bluetooth.internal.mdoc.GattUuids
+import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 
 /**
@@ -28,7 +28,7 @@ object CharacteristicWriteRequestStub {
         val device: BluetoothDevice? = mockk(relaxed = true),
         val requestId: Int = 1,
         val characteristic: BluetoothGattCharacteristic? = mockk {
-            every { uuid } returns GattUuids.STATE_UUID
+            every { uuid } returns UUID.randomUUID()
         },
         val preparedWrite: Boolean = false,
         val responseNeeded: Boolean = true,

@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
-import uk.gov.onelogin.sharing.bluetooth.internal.mdoc.GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID
+import uk.gov.onelogin.sharing.core.mdoc.GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID
 
 internal object AndroidGattServiceBuilder {
     fun build(spec: GattServiceDefinition): BluetoothGattService {

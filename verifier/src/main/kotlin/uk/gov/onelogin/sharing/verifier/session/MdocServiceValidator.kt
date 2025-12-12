@@ -1,16 +1,14 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.client
+package uk.gov.onelogin.sharing.verifier.session
 
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
-import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.bluetooth.internal.mdoc.GattUuids
-import uk.gov.onelogin.sharing.core.logger.logTag
 import java.util.UUID
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.mdoc.GattUuids
 
-internal class MdocServiceValidator(
-    private val serviceUuids: GattUuids,
-    private val logger: Logger,
-): ServiceValidator {
+class MdocServiceValidator(private val serviceUuids: GattUuids, private val logger: Logger) :
+    ServiceValidator {
     override fun validate(service: BluetoothGattService): ValidationResult {
         val errors = mutableListOf<String>()
 

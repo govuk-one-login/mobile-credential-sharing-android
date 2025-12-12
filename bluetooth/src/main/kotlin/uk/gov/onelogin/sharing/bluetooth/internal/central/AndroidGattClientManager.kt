@@ -1,20 +1,23 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.client
+package uk.gov.onelogin.sharing.bluetooth.internal.central
 
+import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.content.Context
+import androidx.annotation.RequiresPermission
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.core.logger.logTag
-import java.util.UUID
 
 internal class AndroidGattClientManager(
     private val context: Context,
     private val permissionChecker: PermissionChecker,
-    private val mdocServiceValidator: ServiceValidator,
     private val logger: Logger
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
@@ -28,10 +31,7 @@ internal class AndroidGattClientManager(
         handleGattEvent(it)
     }
 
-    override fun connect(
-        device: BluetoothDevice,
-        serviceUuid: UUID
-    ) {
+    override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (!permissionChecker.hasPermission()) {
             _events.tryEmit(
                 GattClientEvent.Error(
@@ -62,20 +62,21 @@ internal class AndroidGattClientManager(
         }
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun disconnect() {
         bluetoothGatt?.disconnect()
         bluetoothGatt?.close()
         bluetoothGatt = null
     }
 
-    override fun writeState(command: MdocState) {
-        TODO("Not yet implemented")
+    override fun writeState(command: Byte) {
+        logger.debug(logTag, "Writing state: $command")
     }
 
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
             is GattEvent.ConnectionStateChange -> {
-
+                logger.debug(logTag, "Connection state changed: status: ${event.status}")
             }
 
             is GattEvent.ServicesDiscovered -> {
@@ -99,11 +100,9 @@ internal class AndroidGattClientManager(
                     return
                 }
 
-                val validationResult = mdocServiceValidator.validate(service)
-                when (validationResult) {
-                    ValidationResult.Success -> {}
-                    is ValidationResult.Failure -> {}
-                }
+                _events.tryEmit(
+                    GattClientEvent.ServicesDiscovered(service)
+                )
             }
         }
     }

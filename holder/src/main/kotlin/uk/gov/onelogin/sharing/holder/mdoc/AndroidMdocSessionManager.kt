@@ -12,8 +12,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidMdocSessionManager(

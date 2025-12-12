@@ -10,7 +10,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import uk.gov.onelogin.sharing.bluetooth.internal.mdoc.GattUuids
+import uk.gov.onelogin.sharing.core.mdoc.GattUuids
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidGattServiceBuilderTest {

@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.client
 
-import uk.gov.onelogin.sharing.bluetooth.internal.client.GattClientEventEmitter
-import uk.gov.onelogin.sharing.bluetooth.internal.client.GattEvent
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattClientEventEmitter
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattEvent
 
 internal class FakeClientEventEmitter : GattClientEventEmitter {
     val events = mutableListOf<GattEvent>()
@@ -9,5 +9,4 @@ internal class FakeClientEventEmitter : GattClientEventEmitter {
     override fun emit(event: GattEvent) {
         events.add(event)
     }
-
 }

@@ -3,14 +3,14 @@ package uk.gov.onelogin.sharing.bluetooth.api
 import kotlinx.coroutines.CoroutineScope
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 
-fun interface BluetoothServerFactory {
-    fun createServer(scope: CoroutineScope): BluetoothServerComponents
+fun interface BluetoothPeripheralFactory {
+    fun create(scope: CoroutineScope): BluetoothPeripheralComponents
 }
 
-data class BluetoothServerComponents(
+data class BluetoothPeripheralComponents(
     val advertiser: BleAdvertiser,
-    val gattServer: GattServerManager,
+    val gattServerManager: GattServerManager,
     val bluetoothStateMonitor: BluetoothStateMonitor
 )

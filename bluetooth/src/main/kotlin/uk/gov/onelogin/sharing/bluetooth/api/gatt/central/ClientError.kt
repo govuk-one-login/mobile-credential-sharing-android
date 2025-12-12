@@ -1,6 +1,6 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.client
+package uk.gov.onelogin.sharing.bluetooth.api.gatt.central
 
-internal enum class ClientError {
+enum class ClientError {
     SERVICE_DISCOVERED_ERROR,
 
     SERVICE_NOT_FOUND,

@@ -8,21 +8,22 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import java.util.UUID
+import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.client.FakeServiceValidator
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
-import java.util.UUID
-import kotlin.test.assertEquals
 
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
     private val bluetoothGatt = mockk<BluetoothGatt>(relaxed = true)
     private val fakePermissionChecker = FakePermissionChecker()
-    private val serviceValidator = FakeServiceValidator()
     private val logger = SystemLogger()
     private val uuid = UUID.randomUUID()
 
@@ -33,7 +34,6 @@ internal class AndroidGattClientManagerTest {
         manager = AndroidGattClientManager(
             context,
             fakePermissionChecker,
-            serviceValidator,
             logger
         )
     }
@@ -122,5 +122,4 @@ internal class AndroidGattClientManagerTest {
             )
         }
     }
-
 }
