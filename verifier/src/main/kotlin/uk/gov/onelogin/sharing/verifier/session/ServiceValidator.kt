@@ -1,9 +1,8 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.client
+package uk.gov.onelogin.sharing.verifier.session
 
 import android.bluetooth.BluetoothGattService
 
-internal interface ServiceValidator {
-
+fun interface ServiceValidator {
     fun validate(service: BluetoothGattService): ValidationResult
 }
 

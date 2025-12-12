@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.util
+package uk.gov.onelogin.sharing.core
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

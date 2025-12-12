@@ -3,11 +3,13 @@ package uk.gov.onelogin.sharing.bluetooth.internal.client
 import android.bluetooth.BluetoothGatt
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.client.FakeClientEventEmitter
-import kotlin.test.assertEquals
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattClientCallback
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattEvent
 
 class GattClientCallbackTest {
     private val fakeEmitter = FakeClientEventEmitter()
