@@ -1,6 +1,6 @@
 [versions]
 activityCompose = "1.12.1" # https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
-agp = "8.13.1" # https://developer.android.com/build/releases/gradle-plugin
+agp = "8.13.2" # https://developer.android.com/build/releases/gradle-plugin
 androidx-browser = "1.9.0" # https://developer.android.com/jetpack/androidx/releases/browser
 androidx-navigation = "2.9.6" # https://developer.android.com/jetpack/androidx/releases/navigation
 androidx-test-espresso = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#espresso-3.7.0
