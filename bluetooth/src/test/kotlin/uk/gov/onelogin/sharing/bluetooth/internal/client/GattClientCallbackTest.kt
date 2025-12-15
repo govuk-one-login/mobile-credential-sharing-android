@@ -48,7 +48,7 @@ class GattClientCallbackTest {
         assertEquals(1, fakeEmitter.events.size)
 
         val event = fakeEmitter.events.single() as GattEvent.ServicesDiscovered
-        assertEquals(DEVICE_ADDRESS, event.gatt.device.address)
+        assertEquals(DEVICE_ADDRESS, event.bluetoothGatt.device.address)
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
     }
 }

@@ -13,7 +13,6 @@ class FakeGattClientManager : GattClientManager {
 
     var connectCalls = 0
     var disconnectCalls = 0
-    var writeStateCalls = 0
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         connectCalls++
@@ -21,10 +20,6 @@ class FakeGattClientManager : GattClientManager {
 
     override fun disconnect() {
         disconnectCalls++
-    }
-
-    override fun writeState(command: Byte) {
-        writeStateCalls++
     }
 
     suspend fun emitEvent(event: GattClientEvent) {

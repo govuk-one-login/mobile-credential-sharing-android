@@ -26,5 +26,5 @@ internal interface GattEvent {
         }
     }
 
-    data class ServicesDiscovered(val gatt: BluetoothGatt, val status: Int) : GattEvent
+    data class ServicesDiscovered(val bluetoothGatt: BluetoothGatt, val status: Int) : GattEvent
 }

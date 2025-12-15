@@ -69,14 +69,10 @@ internal class AndroidGattClientManager(
         bluetoothGatt = null
     }
 
-    override fun writeState(command: Byte) {
-        logger.debug(logTag, "Writing state: $command")
-    }
-
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
             is GattEvent.ConnectionStateChange -> {
-                logger.debug(logTag, "Connection state changed: status: ${event.status}")
+                _events.tryEmit(event.toGattClientEvent())
             }
 
             is GattEvent.ServicesDiscovered -> {
@@ -90,7 +86,7 @@ internal class AndroidGattClientManager(
                     return
                 }
 
-                val service = event.gatt.getService(serviceUuid)
+                val service = event.bluetoothGatt.getService(serviceUuid)
                 if (service == null) {
                     _events.tryEmit(
                         GattClientEvent.Error(
