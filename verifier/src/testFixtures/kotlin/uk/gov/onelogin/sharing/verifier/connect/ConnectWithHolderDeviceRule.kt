@@ -151,8 +151,7 @@ class ConnectWithHolderDeviceRule(
         setContent {
             ConnectWithHolderDeviceScreen(
                 base64EncodedEngagement = renderState.base64EncodedEngagement!!,
-                modifier = modifier,
-                permissionState = renderState.permissionState!!
+                modifier = modifier
             )
         }
     }

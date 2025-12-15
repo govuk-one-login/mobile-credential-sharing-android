@@ -45,14 +45,7 @@ import uk.gov.onelogin.sharing.core.R as coreR
 fun ConnectWithHolderDeviceScreen(
     viewModel: SessionEstablishmentViewModel = metroViewModel(),
     base64EncodedEngagement: String,
-    modifier: Modifier = Modifier,
-    permissionState: PermissionState = rememberPermissionState(
-        permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Manifest.permission.BLUETOOTH_SCAN
-        } else {
-            Manifest.permission.BLUETOOTH
-        }
-    ),
+    modifier: Modifier = Modifier
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
@@ -99,7 +92,6 @@ fun ConnectWithHolderDeviceScreen(
         }
     }
 
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacingDouble)
@@ -113,7 +105,7 @@ fun ConnectWithHolderDeviceScreen(
         showBluetoothPermissionState(multiplePermissionsState, hasPreviouslyRequestedPermission)
         showBluetoothDeviceState { contentState.isBluetoothEnabled }
 
-        if (permissionState.status.isGranted && contentState.isBluetoothEnabled) {
+        if (multiplePermissionsState.allPermissionsGranted && contentState.isBluetoothEnabled) {
             showUuidsToScan(
                 engagementData?.deviceRetrievalMethods
             )
@@ -198,8 +190,7 @@ internal fun ConnectWithHolderDevicePreview(
     GdsTheme {
         ConnectWithHolderDeviceScreen(
             base64EncodedEngagement = state.base64EncodedEngagement!!,
-            modifier = modifier.background(Color.White),
-            permissionState = state.permissionState!!
+            modifier = modifier.background(Color.White)
         )
     }
 }
