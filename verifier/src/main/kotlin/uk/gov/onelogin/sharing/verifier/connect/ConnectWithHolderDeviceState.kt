@@ -13,7 +13,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
  */
 @OptIn(ExperimentalPermissionsApi::class)
 data class ConnectWithHolderDeviceState(
-    val adapter: BluetoothAdapterProvider,
-    val base64EncodedEngagement: String,
-    val permissionState: PermissionState
+    val adapter: BluetoothAdapterProvider? = null,
+    val isBluetoothEnabled: Boolean = false,
+    val base64EncodedEngagement: String? = null,
+    val permissionState: PermissionState? = null
 )

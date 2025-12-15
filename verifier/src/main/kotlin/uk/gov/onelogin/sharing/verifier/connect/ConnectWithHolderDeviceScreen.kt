@@ -10,45 +10,52 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProvider
-import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
-import uk.gov.onelogin.sharing.core.R as coreR
+import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun ConnectWithHolderDeviceScreen(
+    viewModel: SessionEstablishmentViewModel = metroViewModel(),
     base64EncodedEngagement: String,
     modifier: Modifier = Modifier,
-    bluetoothAdapter: BluetoothAdapterProvider =
-        AndroidBluetoothAdapterProvider(LocalContext.current),
     permissionState: PermissionState = rememberPermissionState(
         permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Manifest.permission.BLUETOOTH_CONNECT
+            Manifest.permission.BLUETOOTH_SCAN
         } else {
             Manifest.permission.BLUETOOTH
         }
-    )
+    ),
 ) {
+    val contentState by viewModel.uiState.collectAsStateWithLifecycle()
+
     val engagementData = remember {
         decodeDeviceEngagement(
             base64EncodedEngagement,
@@ -62,6 +69,36 @@ fun ConnectWithHolderDeviceScreen(
         }
     }
 
+    DisposableEffect(engagementData, permissionState.status) {
+        val uuidToScan = engagementData?.deviceRetrievalMethods
+            ?.firstNotNullOfOrNull { it.getPeripheralServerModeUuid() }
+
+        if (permissionState.status.isGranted &&
+            contentState.isBluetoothEnabled &&
+            uuidToScan != null
+        ) {
+            viewModel.scanForDevice(uuidToScan)
+        }
+        onDispose {
+            viewModel.stopScanning()
+        }
+    }
+    var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
+
+    val multiplePermissionsState = rememberMultiplePermissionsState(
+        permissions = buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                add(Manifest.permission.BLUETOOTH_CONNECT)
+                add(Manifest.permission.BLUETOOTH_ADVERTISE)
+                add(Manifest.permission.ACCESS_FINE_LOCATION)
+            } else {
+                add(Manifest.permission.BLUETOOTH)
+            }
+        }
+    ) {
+        hasPreviouslyRequestedPermission = true
+    }
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacingDouble)
@@ -72,15 +109,14 @@ fun ConnectWithHolderDeviceScreen(
         item {
             Text(base64EncodedEngagement)
         }
-        showBluetoothPermissionState(permissionState)
-        showBluetoothDeviceState(bluetoothAdapter::isEnabled)
+        showBluetoothPermissionState(multiplePermissionsState, hasPreviouslyRequestedPermission)
+        showBluetoothDeviceState { contentState.isBluetoothEnabled }
 
-        if (permissionState.status.isGranted && bluetoothAdapter.isEnabled()) {
+        if (permissionState.status.isGranted && contentState.isBluetoothEnabled) {
             showUuidsToScan(
                 engagementData?.deviceRetrievalMethods
             )
         }
-
         showEngagementData(engagementData)
     }
 }
@@ -103,21 +139,17 @@ private fun LazyListScope.showBluetoothDeviceState(isEnabled: () -> Boolean) {
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
-private fun LazyListScope.showBluetoothPermissionState(permissionState: PermissionState) {
+private fun LazyListScope.showBluetoothPermissionState(
+    multiplePermissionsState: MultiplePermissionsState,
+    hasPreviouslyRequestedPermission: Boolean
+) {
     item {
-        val permissionStateText = when {
-            permissionState.status.isGranted ->
-                coreR.string.granted
+        BluetoothPermissionPrompt(
+            multiplePermissionsState = multiplePermissionsState,
+            hasPreviouslyRequestedPermission = hasPreviouslyRequestedPermission
+        ) {
 
-            else -> coreR.string.denied
-        }.let { stringResource(it) }
-
-        Text(
-            stringResource(
-                R.string.connect_with_holder_permission_state,
-                permissionStateText
-            )
-        )
+        }
     }
 }
 
@@ -164,10 +196,9 @@ internal fun ConnectWithHolderDevicePreview(
 ) {
     GdsTheme {
         ConnectWithHolderDeviceScreen(
-            base64EncodedEngagement = state.base64EncodedEngagement,
-            bluetoothAdapter = state.adapter,
+            base64EncodedEngagement = state.base64EncodedEngagement!!,
             modifier = modifier.background(Color.White),
-            permissionState = state.permissionState
+            permissionState = state.permissionState!!
         )
     }
 }

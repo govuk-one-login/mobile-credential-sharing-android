@@ -1,24 +1,24 @@
 package uk.gov.onelogin.sharing.bluetooth.api.scanner
 
 import android.Manifest
+import android.bluetooth.le.ScanResult
 import androidx.annotation.RequiresPermission
+import kotlinx.coroutines.flow.Flow
 
 fun interface BluetoothScanner {
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
-    suspend fun scan(
+    fun scan(
         scanningPeriodMilliseconds: Long,
-        callback: ScannerCallback,
         peripheralServerModeUuids: List<ByteArray>
-    )
+    ): Flow<ScanResult>
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
-    suspend fun scan(
+    fun scan(
         scanningPeriodMilliseconds: Long,
         callback: ScannerCallback,
         vararg peripheralServerModeUuids: ByteArray
     ) = scan(
         scanningPeriodMilliseconds = scanningPeriodMilliseconds,
-        callback = callback,
         peripheralServerModeUuids = peripheralServerModeUuids.toList()
     )
 }

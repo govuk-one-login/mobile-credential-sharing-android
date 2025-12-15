@@ -62,7 +62,7 @@ class ConnectWithHolderDeviceRule(
             .assertExists()
             .assertIsDisplayed()
 
-        onNodeWithText(renderState.base64EncodedEngagement)
+        onNodeWithText(renderState.base64EncodedEngagement!!)
             .assertExists()
             .assertIsDisplayed()
     }
@@ -135,7 +135,7 @@ class ConnectWithHolderDeviceRule(
             .assertIsDisplayed()
 
         decodeDeviceEngagement(
-            renderState.base64EncodedEngagement,
+            renderState.base64EncodedEngagement!!,
             SystemLogger()
         )?.deviceRetrievalMethods?.forEach { deviceRetrievalMethodDto ->
             deviceRetrievalMethodDto.getPeripheralServerModeUuidString()?.let {
@@ -150,10 +150,9 @@ class ConnectWithHolderDeviceRule(
         update(state)
         setContent {
             ConnectWithHolderDeviceScreen(
-                bluetoothAdapter = renderState.adapter,
-                base64EncodedEngagement = renderState.base64EncodedEngagement,
+                base64EncodedEngagement = renderState.base64EncodedEngagement!!,
                 modifier = modifier,
-                permissionState = renderState.permissionState
+                permissionState = renderState.permissionState!!
             )
         }
     }

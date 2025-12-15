@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api.adapter
 
 import android.bluetooth.le.BluetoothLeAdvertiser
+import android.bluetooth.le.BluetoothLeScanner
 
 /**
  * Provides a contract for accessing the device's [android.bluetooth.BluetoothAdapter].
@@ -21,4 +22,6 @@ interface BluetoothAdapterProvider {
      * otherwise.
      */
     fun getAdvertiser(): BluetoothLeAdvertiser?
+
+    fun getLeScanner(): BluetoothLeScanner?
 }
