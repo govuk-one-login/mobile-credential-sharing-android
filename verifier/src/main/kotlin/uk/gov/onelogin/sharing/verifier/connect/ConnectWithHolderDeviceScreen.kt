@@ -55,34 +55,6 @@ fun ConnectWithHolderDeviceScreen(
     ),
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    val engagementData = remember {
-        decodeDeviceEngagement(
-            base64EncodedEngagement,
-            logger = SystemLogger()
-        )
-    }
-
-    LaunchedEffect(permissionState.status) {
-        if (!permissionState.status.isGranted) {
-            permissionState.launchPermissionRequest()
-        }
-    }
-
-    DisposableEffect(engagementData, permissionState.status) {
-        val uuidToScan = engagementData?.deviceRetrievalMethods
-            ?.firstNotNullOfOrNull { it.getPeripheralServerModeUuid() }
-
-        if (permissionState.status.isGranted &&
-            contentState.isBluetoothEnabled &&
-            uuidToScan != null
-        ) {
-            viewModel.scanForDevice(uuidToScan)
-        }
-        onDispose {
-            viewModel.stopScanning()
-        }
-    }
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
 
     val multiplePermissionsState = rememberMultiplePermissionsState(
@@ -98,6 +70,35 @@ fun ConnectWithHolderDeviceScreen(
     ) {
         hasPreviouslyRequestedPermission = true
     }
+
+    val engagementData = remember {
+        decodeDeviceEngagement(
+            base64EncodedEngagement,
+            logger = SystemLogger()
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        if (!multiplePermissionsState.allPermissionsGranted) {
+            multiplePermissionsState.launchMultiplePermissionRequest()
+        }
+    }
+
+    DisposableEffect(engagementData, multiplePermissionsState.allPermissionsGranted) {
+        val uuidToScan = engagementData?.deviceRetrievalMethods
+            ?.firstNotNullOfOrNull { it.getPeripheralServerModeUuid() }
+
+        if (multiplePermissionsState.allPermissionsGranted &&
+            contentState.isBluetoothEnabled &&
+            uuidToScan != null
+        ) {
+            viewModel.scanForDevice(uuidToScan)
+        }
+        onDispose {
+            viewModel.stopScanning()
+        }
+    }
+
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
