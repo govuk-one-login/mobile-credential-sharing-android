@@ -32,7 +32,7 @@ class HolderWelcomeViewModelTest {
 
     private fun createViewModel(
         mdocSessionManager: MdocSessionManager = FakeMdocSessionManager(),
-        engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
+        engagementGenerator: EnCgagement = FakeEngagementGenerator(data = dummyEngagementData),
         sessionSecurity: SessionSecurity = FakeSessionSecurity(publicKey = null)
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,

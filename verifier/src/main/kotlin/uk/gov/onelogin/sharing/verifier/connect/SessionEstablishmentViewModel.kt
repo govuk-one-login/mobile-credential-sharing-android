@@ -8,6 +8,7 @@ import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -65,6 +66,14 @@ class SessionEstablishmentViewModel(
                     "$exception"
                 )
             }
+        }
+    }
+
+    fun updatePermissions(multiplePermissionsState: MultiplePermissionsState){
+        _uiState.update {
+            it.copy(
+                multiplePermissionsState = multiplePermissionsState
+            )
         }
     }
 

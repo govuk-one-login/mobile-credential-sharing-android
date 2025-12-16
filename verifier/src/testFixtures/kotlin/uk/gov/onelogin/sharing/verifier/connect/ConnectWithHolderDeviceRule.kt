@@ -1,18 +1,23 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.Manifest
 import android.content.Context
 import android.content.res.Resources
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.core.R as coreR
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalPermissionsApi::class)
 class ConnectWithHolderDeviceRule(
@@ -146,11 +151,21 @@ class ConnectWithHolderDeviceRule(
     }
 
     fun render(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {
+
         update(state)
         setContent {
-            ConnectWithHolderDeviceScreen(
+            val engagementDataForPreview = remember {
+                decodeDeviceEngagement(
+                    state.base64EncodedEngagement!!,
+                    logger = SystemLogger()
+                )
+            }
+            ConnectWithHolderDeviceScreenContent(
                 base64EncodedEngagement = renderState.base64EncodedEngagement!!,
-                modifier = modifier,
+                hasPreviouslyRequestedPermission = true,
+                contentState = ConnectWithHolderDeviceState(),
+                engagementData = engagementDataForPreview,
+                updatePermissions = {}
             )
         }
     }

@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionState
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 
@@ -9,12 +10,13 @@ import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
  *
  * @param base64EncodedEngagement The CBOR string that's embedded within a valid digital credential
  * QR code.
- * @param permissionState The Android-powered device's bluetooth permission state.
+ * @param permissionSCtate The Android-powered device's bluetooth permission state.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 data class ConnectWithHolderDeviceState(
     val adapter: BluetoothAdapterProvider? = null,
     val isBluetoothEnabled: Boolean = false,
     val base64EncodedEngagement: String? = null,
-    val permissionState: PermissionState? = null
+    val permissionState: PermissionState? = null,
+    val multiplePermissionsState: MultiplePermissionsState? = null
 )

@@ -1,8 +1,10 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.Manifest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.undecodeableBarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
@@ -20,8 +22,22 @@ data object ConnectWithHolderDeviceStateStubs {
     val undecodableState = ConnectWithHolderDeviceState(
         adapter = FakeBluetoothAdapterProvider(isEnabled = false),
         base64EncodedEngagement = undecodeableBarcodeDataResult.data,
-        permissionState = FakePermissionState.Companion.bluetoothConnect(
-            status = PermissionStatus.Denied(shouldShowRationale = false)
+        multiplePermissionsState = FakeMultiplePermissionsState(
+            permissions = listOf(
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_CONNECT,
+                    status = PermissionStatus.Denied(shouldShowRationale = false)
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_SCAN,
+                    status = PermissionStatus.Denied(shouldShowRationale = false)
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                    status = PermissionStatus.Denied(shouldShowRationale = false)
+                ),
+            ),
+            onLaunchPermission = { }
         )
     )
 
@@ -34,9 +50,24 @@ data object ConnectWithHolderDeviceStateStubs {
     val decodableDeniedState = ConnectWithHolderDeviceState(
         adapter = FakeBluetoothAdapterProvider(isEnabled = false),
         base64EncodedEngagement = validBarcodeDataResult.data,
-        permissionState = FakePermissionState.Companion.bluetoothConnect(
-            status = PermissionStatus.Denied(shouldShowRationale = false)
+        multiplePermissionsState = FakeMultiplePermissionsState(
+            permissions = listOf(
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_CONNECT,
+                    status = PermissionStatus.Denied(shouldShowRationale = false)
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_SCAN,
+                    status = PermissionStatus.Denied(shouldShowRationale = false)
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                    status = PermissionStatus.Denied(shouldShowRationale = false)
+                ),
+            ),
+            onLaunchPermission = { }
         )
+
     )
 
     /**
@@ -48,8 +79,22 @@ data object ConnectWithHolderDeviceStateStubs {
     val decodableGrantedState = ConnectWithHolderDeviceState(
         adapter = FakeBluetoothAdapterProvider(isEnabled = false),
         base64EncodedEngagement = validBarcodeDataResult.data,
-        permissionState = FakePermissionState.Companion.bluetoothConnect(
-            status = PermissionStatus.Granted
+        multiplePermissionsState = FakeMultiplePermissionsState(
+            permissions = listOf(
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_CONNECT,
+                    status = PermissionStatus.Granted
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_SCAN,
+                    status = PermissionStatus.Granted
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                    status = PermissionStatus.Granted
+                ),
+            ),
+            onLaunchPermission = { }
         )
     )
 
@@ -62,8 +107,22 @@ data object ConnectWithHolderDeviceStateStubs {
     val validWithCorrectBluetoothSetup = ConnectWithHolderDeviceState(
         adapter = FakeBluetoothAdapterProvider(isEnabled = true),
         base64EncodedEngagement = validBarcodeDataResult.data,
-        permissionState = FakePermissionState.Companion.bluetoothConnect(
-            status = PermissionStatus.Granted
+        multiplePermissionsState = FakeMultiplePermissionsState(
+            permissions = listOf(
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_CONNECT,
+                    status = PermissionStatus.Granted
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_SCAN,
+                    status = PermissionStatus.Granted
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                    status = PermissionStatus.Granted
+                ),
+            ),
+            onLaunchPermission = { }
         )
     )
 }
