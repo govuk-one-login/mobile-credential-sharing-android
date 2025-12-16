@@ -11,9 +11,8 @@ class FakeBluetoothAdapterProvider(
     override fun isEnabled(): Boolean = isEnabled
 
     override fun getAdvertiser(): BluetoothLeAdvertiser? = advertiser
-    override fun getLeScanner(): BluetoothLeScanner? {
-        return null
-    }
+
+    override fun getLeScanner(): BluetoothLeScanner? = null
 
     fun setEnabled(enabled: Boolean) {
         isEnabled = enabled

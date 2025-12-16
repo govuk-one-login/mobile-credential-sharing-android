@@ -1,7 +1,9 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.Manifest
 import android.content.Context
 import androidx.annotation.Keep
+import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -32,7 +34,6 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
          */
         @OptIn(ExperimentalPermissionsApi::class)
         fun NavGraphBuilder.configureConnectWithHolderDeviceRoute(context: Context) {
-
             val graph = createGraphFactory<VerifierGraph.Factory>().create(
                 context
             )
@@ -44,7 +45,7 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
                     LocalMetroViewModelFactory provides graph.metroViewModelFactory
                 ) {
                     ConnectWithHolderDeviceScreen(
-                        base64EncodedEngagement = arguments.base64EncodedEngagement,
+                        base64EncodedEngagement = arguments.base64EncodedEngagement
                     )
                 }
             }

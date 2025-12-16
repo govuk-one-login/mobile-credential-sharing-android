@@ -1,14 +1,16 @@
 package uk.gov.onelogin.sharing.bluetooth.api.scanner
 
-import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
+import android.bluetooth.le.ScanResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
-import java.util.UUID
+import app.cash.turbine.test
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -18,8 +20,11 @@ import org.robolectric.shadows.ShadowBluetoothAdapter
 import org.robolectric.shadows.ShadowBluetoothLeScanner
 import org.robolectric.shadows.ShadowBluetoothManager
 import org.robolectric.shadows.ShadowLog
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
 import uk.gov.onelogin.sharing.core.rules.ShadowLogFile
+import java.util.UUID
+import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 @Config(
@@ -38,63 +43,53 @@ class AndroidBluetoothScannerTest {
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant()
 
-    lateinit var leScanner: BluetoothLeScanner
+    private lateinit var mockBluetoothAdapterProvider: BluetoothAdapterProvider
+    private lateinit var mockBluetoothLeScanner: BluetoothLeScanner
+    private lateinit var scanner: AndroidBluetoothScanner
 
     @Before
     fun setUp() {
-        leScanner =
-            (
-                ApplicationProvider
-                    .getApplicationContext<Context>()
-                    .getSystemService(Context.BLUETOOTH_SERVICE)
-                    as BluetoothManager
-                ).adapter.bluetoothLeScanner
+        mockBluetoothLeScanner = mockk(relaxed = true)
+        mockBluetoothAdapterProvider = mockk()
+
+        every { mockBluetoothAdapterProvider.getLeScanner() } returns mockBluetoothLeScanner
+
+        scanner = AndroidBluetoothScanner(mockBluetoothAdapterProvider)
     }
 
     @Test
-    fun timeoutsAreLoggedAsWarnings() = runTest {
-        val scanner = AndroidBluetoothScanner(
-            getBluetoothScanner = { leScanner }
-        )
-        scanner.scan(
-            scanningPeriodMilliseconds = -1L,
-            callback = ScannerCallback.of(),
-            peripheralServerModeUuids = listOf()
-        )
+    fun `scan callback's onResult sends item to flow`() = runTest {
+        val uuid = UUID.randomUUID().toBytes()
+        val mockScanResult = mockk<ScanResult>(relaxed = true)
+        val callbackSlot = slot<ScanCallback>()
 
-        testScheduler.advanceUntilIdle()
+        every {
+            mockBluetoothLeScanner.startScan(any<List<ScanFilter>>(), any(), capture(callbackSlot))
+        } returns Unit
 
-        assertTrue(
-            "Cannot find entry in log files: ${logFile.readLines()}",
-            "W/${AndroidBluetoothScanner::class.java.simpleName}: " +
-                "Timeout occurred when scanning for UUIDs."
-                in logFile
-        )
+        scanner.scan(uuid).test {
+
+            callbackSlot.captured.onScanResult(0, mockScanResult)
+            assertEquals(mockScanResult, awaitItem())
+        }
     }
 
     @Test
-    fun requestedUuidsAreLogged() = runTest {
-        val scanner = AndroidBluetoothScanner(
-            getBluetoothScanner = { leScanner }
-        )
-        val uuid = UUID.randomUUID()
-        val byteArray = uuid.toBytes()
-        val byteArrays = listOf(byteArray)
-        val uuidArrays = listOf(uuid)
+    fun `scan callback's onFailure returns ScannerFailure message`() = runTest {
+        val uuid = UUID.randomUUID().toBytes()
+        val callbackSlot = slot<ScanCallback>()
+        val expectedFailureCode = 1
+        val expectedMessage = ScannerFailure.ALREADY_STARTED_SCANNING
 
-        scanner.scan(
-            scanningPeriodMilliseconds = 10000L,
-            callback = ScannerCallback.of(),
-            peripheralServerModeUuids = byteArrays
-        )
+        every {
+            mockBluetoothLeScanner.startScan(any<List<ScanFilter>>(), any(), capture(callbackSlot))
+        } returns Unit
 
-        testScheduler.advanceUntilIdle()
+        scanner.scan(uuid).test {
+            callbackSlot.captured.onScanFailed(expectedFailureCode)
 
-        assertTrue(
-            "Cannot find entry in log files: ${logFile.readLines()}",
-            "D/${AndroidBluetoothScanner::class.java.simpleName}: " +
-                "Scanning for UUIDs: $uuidArrays"
-                in logFile
-        )
+            val error = awaitError()
+            assertEquals("Scan failed: $expectedMessage", error.message)
+        }
     }
 }

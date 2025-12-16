@@ -28,7 +28,8 @@ class ConnectWithHolderDeviceRouteTest {
     @Test
     fun verifyControllerNavigationExtensionFunction() = runTest {
         composeTestRule.setContent {
-            controller = TestNavHostController(LocalContext.current)
+            val context = LocalContext.current
+            controller = TestNavHostController(context)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
 
             NavHost(
@@ -37,13 +38,15 @@ class ConnectWithHolderDeviceRouteTest {
                     BarcodeDataResultStubs.invalidBarcodeDataResultOne.data
                 )
             ) {
-                configureConnectWithHolderDeviceRoute()
+                configureConnectWithHolderDeviceRoute(context)
                 configureScannedInvalidQrRoute()
             }
 
-            controller.navigateToConnectWithHolderDeviceRoute(
-                decodableDeniedState.base64EncodedEngagement
-            )
+            decodableDeniedState.base64EncodedEngagement?.let {
+                controller.navigateToConnectWithHolderDeviceRoute(
+                    it
+                )
+            }
         }
         composeTestRule.update(decodableDeniedState)
         composeTestRule.assertBasicInformationIsDisplayed()

@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.verifier
 
 import android.content.Context
 import androidx.annotation.Keep
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
@@ -35,9 +34,7 @@ data object VerifierRoutes {
      * @see configureVerifierScannerRoute
      * @see configureScannedInvalidQrRoute
      */
-    fun NavGraphBuilder.configureVerifierRoutes(
-        navController: NavController, context: Context
-    ) {
+    fun NavGraphBuilder.configureVerifierRoutes(navController: NavController, context: Context) {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
             configureVerifierScannerRoute(
                 onInvalidBarcode = {

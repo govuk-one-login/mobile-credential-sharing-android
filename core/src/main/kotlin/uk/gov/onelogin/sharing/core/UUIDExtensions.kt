@@ -11,14 +11,6 @@ object UUIDExtensions {
         return UUID(high, low)
     }
 
-    fun UUID.toByteArray(): ByteArray {
-        val buffer = ByteBuffer.wrap(ByteArray(16))
-        buffer.putLong(this.mostSignificantBits)
-        buffer.putLong(this.leastSignificantBits)
-        return buffer.array()
-    }
-
-
     fun UUID.toBytes(): ByteArray {
         val b = ByteBuffer.wrap(ByteArray(UUID_ARRAY_SIZE))
         b.putLong(mostSignificantBits)

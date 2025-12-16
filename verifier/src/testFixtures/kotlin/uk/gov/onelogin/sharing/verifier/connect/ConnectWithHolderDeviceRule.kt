@@ -10,7 +10,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.R as bluetoothR
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
@@ -151,7 +150,7 @@ class ConnectWithHolderDeviceRule(
         setContent {
             ConnectWithHolderDeviceScreen(
                 base64EncodedEngagement = renderState.base64EncodedEngagement!!,
-                modifier = modifier
+                modifier = modifier,
             )
         }
     }

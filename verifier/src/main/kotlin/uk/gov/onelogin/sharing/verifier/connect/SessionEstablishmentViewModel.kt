@@ -2,7 +2,9 @@
 
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.Manifest
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -21,8 +23,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
-import uk.gov.onelogin.sharing.core.UUIDExtensions.toByteArray
-import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 
 @Inject
 @ViewModelKey(SessionEstablishmentViewModel::class)
@@ -46,15 +46,10 @@ class SessionEstablishmentViewModel(
 
     fun scanForDevice(uuid: ByteArray) {
         scannerJob = viewModelScope.launch(Dispatchers.IO) {
-
-            val uuidConvert = uuid.toUUID()
-            val uuidBigEndian = uuidConvert.toByteArray()
-
             try {
-                withTimeout(30000L) {
+                withTimeout(SCAN_PERIOD) {
                     val scanFlow = scanner.scan(
-                        scanningPeriodMilliseconds = 30_000L,
-                        peripheralServerModeUuids = listOf(uuidBigEndian)
+                        peripheralServerModeUuid = uuid
                     )
 
                     val result = scanFlow.first()
@@ -65,10 +60,9 @@ class SessionEstablishmentViewModel(
                     )
                 }
             } catch (exception: TimeoutCancellationException) {
-                Log.w(
-                    SessionEstablishmentViewModel::class.java.simpleName,
-                    "Timeout occurred when scanning for UUIDs.",
-                    exception
+                Log.d(
+                    SessionEstablishmentViewModel::class.simpleName,
+                    "$exception"
                 )
             }
         }
@@ -83,5 +77,9 @@ class SessionEstablishmentViewModel(
         Log.d(SessionEstablishmentViewModel::class.simpleName, "VM cleared, stopping scanner")
         scannerJob?.cancel()
         super.onCleared()
+    }
+
+    companion object {
+        const val SCAN_PERIOD = 15_000L
     }
 }
