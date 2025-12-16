@@ -35,7 +35,7 @@ data object ConnectWithHolderDeviceStateStubs {
                 FakePermissionState(
                     permission = Manifest.permission.ACCESS_FINE_LOCATION,
                     status = PermissionStatus.Denied(shouldShowRationale = false)
-                ),
+                )
             ),
             onLaunchPermission = { }
         )
@@ -63,7 +63,7 @@ data object ConnectWithHolderDeviceStateStubs {
                 FakePermissionState(
                     permission = Manifest.permission.ACCESS_FINE_LOCATION,
                     status = PermissionStatus.Denied(shouldShowRationale = false)
-                ),
+                )
             ),
             onLaunchPermission = { }
         )
@@ -92,7 +92,7 @@ data object ConnectWithHolderDeviceStateStubs {
                 FakePermissionState(
                     permission = Manifest.permission.ACCESS_FINE_LOCATION,
                     status = PermissionStatus.Granted
-                ),
+                )
             ),
             onLaunchPermission = { }
         )
@@ -120,7 +120,7 @@ data object ConnectWithHolderDeviceStateStubs {
                 FakePermissionState(
                     permission = Manifest.permission.ACCESS_FINE_LOCATION,
                     status = PermissionStatus.Granted
-                ),
+                )
             ),
             onLaunchPermission = { }
         )

@@ -8,13 +8,13 @@ import android.bluetooth.le.BluetoothLeScanner
 import androidx.test.core.app.ApplicationProvider
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.test.assertEquals
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.BluetoothContext
-import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidBluetoothAdapterProviderTest {
@@ -51,7 +51,7 @@ class AndroidBluetoothAdapterProviderTest {
     }
 
     @Test
-    fun `returns LE scanner from adapter`(){
+    fun `returns LE scanner from adapter`() {
         every { mockAdapter.bluetoothLeScanner } returns mockLeScanner
         every { mockManager.adapter } returns mockAdapter
 

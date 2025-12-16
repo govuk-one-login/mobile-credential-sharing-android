@@ -10,6 +10,8 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import java.util.UUID
+import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -23,8 +25,6 @@ import org.robolectric.shadows.ShadowLog
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
 import uk.gov.onelogin.sharing.core.rules.ShadowLogFile
-import java.util.UUID
-import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 @Config(
@@ -68,7 +68,6 @@ class AndroidBluetoothScannerTest {
         } returns Unit
 
         scanner.scan(uuid).test {
-
             callbackSlot.captured.onScanResult(0, mockScanResult)
             assertEquals(mockScanResult, awaitItem())
         }

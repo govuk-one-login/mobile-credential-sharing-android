@@ -69,7 +69,7 @@ class SessionEstablishmentViewModel(
         }
     }
 
-    fun updatePermissions(multiplePermissionsState: MultiplePermissionsState){
+    fun updatePermissions(multiplePermissionsState: MultiplePermissionsState) {
         _uiState.update {
             it.copy(
                 multiplePermissionsState = multiplePermissionsState

@@ -28,18 +28,17 @@ import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.core.R as coreR
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun ConnectWithHolderDeviceScreen(
     base64EncodedEngagement: String,
-    modifier: Modifier = Modifier,
     viewModel: SessionEstablishmentViewModel = metroViewModel()
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -78,7 +77,6 @@ fun ConnectWithHolderDeviceScreen(
         val uuidToScan = engagementData?.deviceRetrievalMethods
             ?.firstNotNullOfOrNull { it.getPeripheralServerModeUuid() }
 
-
         contentState.multiplePermissionsState?.allPermissionsGranted.let {
             if (it == true && contentState.isBluetoothEnabled &&
                 uuidToScan != null
@@ -92,43 +90,44 @@ fun ConnectWithHolderDeviceScreen(
         }
     }
 
-    ConnectWithHolderDeviceScreenContent(
-        base64EncodedEngagement,
-        hasPreviouslyRequestedPermission,
-        contentState,
-        engagementData
-    )
+    BluetoothPermissionPrompt(
+        multiplePermissionsState,
+        hasPreviouslyRequestedPermission
+    ) {
+        ConnectWithHolderDeviceScreenContent(
+            base64EncodedEngagement = base64EncodedEngagement,
+            contentState = contentState,
+            engagementData = engagementData,
+            permissionsGranted = multiplePermissionsState.allPermissionsGranted
+        )
+    }
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ConnectWithHolderDeviceScreenContent(
     base64EncodedEngagement: String,
-    hasPreviouslyRequestedPermission: Boolean,
     contentState: ConnectWithHolderDeviceState,
-    engagementData: DeviceEngagementDto?
+    engagementData: DeviceEngagementDto?,
+    permissionsGranted: Boolean,
+    modifier: Modifier = Modifier
 ) {
-    BluetoothPermissionPrompt(
-        contentState.multiplePermissionsState,
-        hasPreviouslyRequestedPermission
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(spacingDouble)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(spacingDouble)
-        ) {
-            item {
-                Text(stringResource(R.string.connect_with_holder_heading))
-            }
-            item {
-                Text(base64EncodedEngagement)
-            }
-            showBluetoothDeviceState { contentState.isBluetoothEnabled }
-
-            if (contentState.multiplePermissionsState.allPermissionsGranted && contentState.isBluetoothEnabled) {
-                showUuidsToScan(engagementData?.deviceRetrievalMethods)
-            }
-            showEngagementData(engagementData)
+        item {
+            Text(stringResource(R.string.connect_with_holder_heading))
         }
+        item {
+            Text(base64EncodedEngagement)
+        }
+        showBluetoothDeviceState { contentState.isBluetoothEnabled }
+
+        if (permissionsGranted && contentState.isBluetoothEnabled) {
+            showUuidsToScan(engagementData?.deviceRetrievalMethods)
+        }
+        showEngagementData(engagementData)
     }
 }
 
@@ -186,8 +185,7 @@ private fun LazyListScope.showUuidsToScan(deviceRetrievalMethods: List<DeviceRet
 @Preview
 internal fun ConnectWithHolderDevicePreview(
     @PreviewParameter(ConnectWithHolderDevicePreviewParameters::class)
-    state: ConnectWithHolderDeviceState,
-    modifier: Modifier = Modifier
+    state: ConnectWithHolderDeviceState
 ) {
     val engagementDataForPreview = remember {
         decodeDeviceEngagement(
@@ -198,9 +196,9 @@ internal fun ConnectWithHolderDevicePreview(
     GdsTheme {
         ConnectWithHolderDeviceScreenContent(
             base64EncodedEngagement = state.base64EncodedEngagement!!,
-            hasPreviouslyRequestedPermission = true,
             contentState = ConnectWithHolderDeviceState(),
-            engagementData = engagementDataForPreview
+            engagementData = engagementDataForPreview,
+            permissionsGranted = true
         )
     }
 }

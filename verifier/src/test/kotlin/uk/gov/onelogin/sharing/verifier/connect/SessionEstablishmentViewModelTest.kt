@@ -9,13 +9,4 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 class SessionEstablishmentViewModelTest {
     @get:Rule
     val mainDispatcherRule = ConnectWithHolderDeviceRule(createComposeRule())
-
-    private fun createViewModel(
-        bluetoothAdapterProvider: FakeBluetoothAdapterProvider = FakeBluetoothAdapterProvider(true),
-        bluetoothScanner: BluetoothScanner = FakeAndroidBluetoothScanner()
-    ): SessionEstablishmentViewModel =
-        SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = bluetoothAdapterProvider,
-            scanner = bluetoothScanner
-        )
 }

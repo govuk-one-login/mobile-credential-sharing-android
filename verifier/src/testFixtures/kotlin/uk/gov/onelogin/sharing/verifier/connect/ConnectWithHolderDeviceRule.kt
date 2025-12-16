@@ -13,11 +13,11 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalPermissionsApi::class)
 class ConnectWithHolderDeviceRule(
@@ -151,7 +151,6 @@ class ConnectWithHolderDeviceRule(
     }
 
     fun render(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {
-
         update(state)
         setContent {
             val engagementDataForPreview = remember {
@@ -162,10 +161,9 @@ class ConnectWithHolderDeviceRule(
             }
             ConnectWithHolderDeviceScreenContent(
                 base64EncodedEngagement = renderState.base64EncodedEngagement!!,
-                hasPreviouslyRequestedPermission = true,
                 contentState = ConnectWithHolderDeviceState(),
                 engagementData = engagementDataForPreview,
-                updatePermissions = {}
+                permissionsGranted = true
             )
         }
     }
@@ -174,8 +172,7 @@ class ConnectWithHolderDeviceRule(
         update(state)
         setContent {
             ConnectWithHolderDevicePreview(
-                state = renderState,
-                modifier = modifier
+                state = renderState
             )
         }
     }
