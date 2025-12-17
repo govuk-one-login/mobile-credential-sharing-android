@@ -11,7 +11,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
 import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Companion.asUrlBarcodes
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
-import uk.gov.onelogin.sharing.core.rules.ShadowLogFile
+import uk.gov.onelogin.sharing.verifier.rules.ShadowLogFile
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultTwo

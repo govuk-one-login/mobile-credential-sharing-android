@@ -24,7 +24,6 @@ import org.robolectric.shadows.ShadowBluetoothManager
 import org.robolectric.shadows.ShadowLog
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
-import uk.gov.onelogin.sharing.core.rules.ShadowLogFile
 
 @RunWith(AndroidJUnit4::class)
 @Config(
@@ -36,10 +35,6 @@ import uk.gov.onelogin.sharing.core.rules.ShadowLogFile
     ]
 )
 class AndroidBluetoothScannerTest {
-
-    @get:Rule
-    val logFile = ShadowLogFile(fileName = this::class.java.simpleName)
-
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant()
 

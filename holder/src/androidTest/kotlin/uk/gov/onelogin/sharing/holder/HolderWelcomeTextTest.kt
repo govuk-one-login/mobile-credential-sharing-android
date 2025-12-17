@@ -23,7 +23,6 @@ class HolderWelcomeTextTest {
     private val testTag = "holderWelcomeText"
 
     @Test
-    @Ignore
     fun showsWelcomeText() {
         composeTestRule.setContent {
             HolderWelcomeText(

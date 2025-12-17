@@ -30,10 +30,6 @@ android {
     }
 }
 
-dependencies {
-    testFixturesImplementation(libs.org.robolectric)
-}
-
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(

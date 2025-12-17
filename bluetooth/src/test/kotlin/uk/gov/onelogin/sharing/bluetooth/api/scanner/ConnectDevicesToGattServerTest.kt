@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowBluetoothAdapter
 import org.robolectric.shadows.ShadowLog
-import uk.gov.onelogin.sharing.core.rules.ShadowLogFile
+import uk.gov.onelogin.sharing.bluetooth.rules.ShadowLogFile
 
 /**
  * Suppresses `DEPRECATION` due to the use of [ShadowBluetoothAdapter]'s method of obtaining a
