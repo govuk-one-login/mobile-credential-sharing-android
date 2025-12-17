@@ -48,6 +48,10 @@ class SessionEstablishmentViewModel(
 
     fun scanForDevice(uuid: ByteArray) {
         scannerJob = viewModelScope.launch(dispatcher) {
+            if (!_uiState.value.hasAllPermissions) {
+                return@launch
+            }
+
             try {
                 withTimeout(SCAN_PERIOD) {
                     val scanFlow = scanner.scan(
@@ -74,6 +78,14 @@ class SessionEstablishmentViewModel(
         _uiState.update {
             it.copy(
                 hasAllPermissions = hasAllPerms
+            )
+        }
+    }
+
+    fun updateHasRequestPermissions(requestedPerms: Boolean) {
+        _uiState.update {
+            it.copy(
+                hasRequestedPermissions = requestedPerms
             )
         }
     }

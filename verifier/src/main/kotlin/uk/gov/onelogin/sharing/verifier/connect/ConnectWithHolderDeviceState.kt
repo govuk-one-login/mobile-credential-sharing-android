@@ -14,5 +14,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 data class ConnectWithHolderDeviceState(
     val isBluetoothEnabled: Boolean = false,
     val base64EncodedEngagement: String? = null,
-    val hasAllPermissions: Boolean = false
+    val hasAllPermissions: Boolean = false,
+    val hasRequestedPermissions: Boolean = false
 )

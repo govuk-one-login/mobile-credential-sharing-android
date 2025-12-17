@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.verifier.connect
 import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,9 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,20 +22,15 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
-import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
@@ -57,14 +52,21 @@ fun ConnectWithHolderDeviceScreen(
                 add(Manifest.permission.BLUETOOTH)
             }
         }
-    )
+    ) {
+        viewModel.updateHasRequestPermissions(true)
+    }
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
-    var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
-
     val permissionsGranted = multiplePermissionsState.allPermissionsGranted
+
     LaunchedEffect(permissionsGranted) {
         viewModel.updatePermissions(permissionsGranted)
+    }
+
+    LaunchedEffect(Unit) {
+        if (!permissionsGranted) {
+            multiplePermissionsState.launchMultiplePermissionRequest()
+        }
     }
 
     val engagementData = remember {
@@ -74,17 +76,11 @@ fun ConnectWithHolderDeviceScreen(
         )
     }
 
-    LaunchedEffect(Unit) {
-        if (!multiplePermissionsState.allPermissionsGranted) {
-            multiplePermissionsState.launchMultiplePermissionRequest()
-        }
-    }
-
-    DisposableEffect(engagementData, multiplePermissionsState.allPermissionsGranted) {
+    DisposableEffect(engagementData, permissionsGranted) {
         val uuidToScan = engagementData?.deviceRetrievalMethods
             ?.firstNotNullOfOrNull { it.getPeripheralServerModeUuid() }
 
-        if (!multiplePermissionsState.allPermissionsGranted && contentState.isBluetoothEnabled &&
+        if (permissionsGranted && contentState.isBluetoothEnabled &&
             uuidToScan != null
         ) {
             viewModel.scanForDevice(uuidToScan)
@@ -95,33 +91,28 @@ fun ConnectWithHolderDeviceScreen(
         }
     }
 
-    BluetoothPermissionPrompt(
-        multiplePermissionsState,
-        hasPreviouslyRequestedPermission
-    ) {
-        viewModel.updatePermissions(true)
-    }
-
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(spacingDouble)
-    ) {
-        item {
-            Text(stringResource(R.string.connect_with_holder_heading))
+    Box(modifier = modifier.fillMaxSize()) {
+        ConnectWithHolderDeviceScreenContent(
+            base64EncodedEngagement = base64EncodedEngagement,
+            contentState = contentState,
+            engagementData = engagementData,
+            permissionsGranted = multiplePermissionsState.allPermissionsGranted,
+            modifier = Modifier
+        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            BluetoothPermissionPrompt(
+                multiplePermissionsState,
+                contentState.hasRequestedPermissions
+            ) {
+                viewModel.updatePermissions(true)
+            }
         }
-        item {
-            Text(base64EncodedEngagement)
-        }
-        showBluetoothDeviceState { contentState.isBluetoothEnabled }
-        showBluetoothPermissionState(multiplePermissionsState.allPermissionsGranted)
-        if (multiplePermissionsState.allPermissionsGranted && contentState.isBluetoothEnabled) {
-            showUuidsToScan(engagementData?.deviceRetrievalMethods)
-        }
-        showEngagementData(engagementData)
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ConnectWithHolderDeviceScreenContent(
     base64EncodedEngagement: String,

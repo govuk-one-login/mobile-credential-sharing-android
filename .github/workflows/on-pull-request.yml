@@ -73,9 +73,9 @@ jobs:
         run: |
           ./scripts/test/unit
 
-#      - name: Run instrumentation tests - needs investigating
-#        run: |
-#          ./scripts/test/instrumentation --no-configuration-cache
+      - name: Run instrumentation tests - needs investigating
+        run: |
+          ./scripts/test/instrumentation --no-configuration-cache
 
       - name: Sonar scan
         uses: ./mobile-android-pipelines/actions/sonar-scan

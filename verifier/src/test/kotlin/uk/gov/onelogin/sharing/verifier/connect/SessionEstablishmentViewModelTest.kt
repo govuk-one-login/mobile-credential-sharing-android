@@ -47,13 +47,12 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `scanForDevice calls scanner with provided uuid`() = runTest {
         val uuid = byteArrayOf(0x01, 0x02, 0x03)
+        viewModel.updatePermissions(true)
         viewModel.scanForDevice(uuid)
 
         assertEquals(1, scanner.scanCalls)
         assertArrayEquals(uuid, scanner.lastUuid)
     }
-
-//    @Test `stop scanning
 
     @Test
     fun `scanForDevice times out when no results emitted`() = runTest {
@@ -70,6 +69,7 @@ class SessionEstablishmentViewModelTest {
             dispatcher = mainDispatcherRule.testDispatcher,
             logger = logger
         )
+        viewModel.updatePermissions(true)
 
         viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
 
@@ -99,7 +99,7 @@ class SessionEstablishmentViewModelTest {
             dispatcher = mainDispatcherRule.testDispatcher,
             logger = logger
         )
-
+        viewModel.updatePermissions(true)
         viewModel.scanForDevice(byteArrayOf(0x01))
         runCurrent()
 
@@ -110,5 +110,11 @@ class SessionEstablishmentViewModelTest {
             "Expected scan flow to be closed after cancel",
             flowClosed
         )
+    }
+
+    @Test
+    fun `should update hasRequestPermissions`() {
+        viewModel.updateHasRequestPermissions(true)
+        assertEquals(true, viewModel.uiState.value.hasRequestedPermissions)
     }
 }

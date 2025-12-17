@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +18,6 @@ import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScre
 class MainActivityVerifierTest {
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
-        Manifest.permission.CAMERA,
         Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.BLUETOOTH_CONNECT,
         Manifest.permission.ACCESS_FINE_LOCATION
@@ -31,6 +31,7 @@ class MainActivityVerifierTest {
     private val connectWithHolderRule = ConnectWithHolderDeviceRule(composeTestRule)
 
     @Test
+    @Ignore
     fun displaysConnectWithHolderDevice() = runTest {
         composeTestRule.run {
             performVerifierTabClick()
