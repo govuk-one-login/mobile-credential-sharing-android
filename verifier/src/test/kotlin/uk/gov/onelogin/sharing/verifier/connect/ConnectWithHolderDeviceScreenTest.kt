@@ -110,47 +110,46 @@ class ConnectWithHolderDeviceScreenTest {
     }
 
     @Test
-    fun bluetoothPermissionIsGrantedButDeviceBluetoothIsDisabled() =
-        runTest {
-            val fakePermissionState = FakeMultiplePermissionsState(
-                permissions = listOf(
-                    FakePermissionState(
-                        permission = Manifest.permission.BLUETOOTH_CONNECT,
-                        status = PermissionStatus.Granted
-                    ),
-                    FakePermissionState(
-                        permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                        status = PermissionStatus.Granted
-                    ),
-                    FakePermissionState(
-                        permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                        status = PermissionStatus.Granted
-                    )
+    fun bluetoothPermissionIsGrantedButDeviceBluetoothIsDisabled() = runTest {
+        val fakePermissionState = FakeMultiplePermissionsState(
+            permissions = listOf(
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_CONNECT,
+                    status = PermissionStatus.Granted
                 ),
-                onLaunchPermission = {}
-            )
-            val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
-            val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
+                FakePermissionState(
+                    permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                    status = PermissionStatus.Granted
+                ),
+                FakePermissionState(
+                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                    status = PermissionStatus.Granted
+                )
+            ),
+            onLaunchPermission = {}
+        )
+        val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
+        val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
 
-            val testViewModel = SessionEstablishmentViewModel(
-                bluetoothAdapterProvider = fakeBluetoothProvider,
-                scanner = fakeBluetoothScanner
-            )
+        val testViewModel = SessionEstablishmentViewModel(
+            bluetoothAdapterProvider = fakeBluetoothProvider,
+            scanner = fakeBluetoothScanner
+        )
 
-            val stateForTest = decodableGrantedState
+        val stateForTest = decodableGrantedState
 
-            composeTestRule.waitForIdle()
+        composeTestRule.waitForIdle()
 
-            composeTestRule.run {
-                renderFunction(this, stateForTest, Modifier, testViewModel, fakePermissionState)
-                assertBasicInformationIsDisplayed()
-                assertErrorDoesNotExist()
-                assertDeviceEngagementDataIsDisplayed()
-                assertBluetoothPermissionIsGranted()
-                assertDeviceBluetoothIsDisabled()
-                assertIsNotSearchingForBluetoothDevices()
-            }
+        composeTestRule.run {
+            renderFunction(this, stateForTest, Modifier, testViewModel, fakePermissionState)
+            assertBasicInformationIsDisplayed()
+            assertErrorDoesNotExist()
+            assertDeviceEngagementDataIsDisplayed()
+            assertBluetoothPermissionIsGranted()
+            assertDeviceBluetoothIsDisabled()
+            assertIsNotSearchingForBluetoothDevices()
         }
+    }
 
     @Test
     fun bluetoothPermissionIsGranted() = runTest {

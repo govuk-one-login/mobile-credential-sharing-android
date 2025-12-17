@@ -32,6 +32,7 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
@@ -39,12 +40,12 @@ import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.core.R as coreR
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun ConnectWithHolderDeviceScreen(
     base64EncodedEngagement: String,
+    modifier: Modifier = Modifier,
     viewModel: SessionEstablishmentViewModel = metroViewModel(),
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
         permissions = buildList {
@@ -83,7 +84,8 @@ fun ConnectWithHolderDeviceScreen(
         val uuidToScan = engagementData?.deviceRetrievalMethods
             ?.firstNotNullOfOrNull { it.getPeripheralServerModeUuid() }
 
-        if (!multiplePermissionsState.allPermissionsGranted && contentState.isBluetoothEnabled && uuidToScan != null
+        if (!multiplePermissionsState.allPermissionsGranted && contentState.isBluetoothEnabled &&
+            uuidToScan != null
         ) {
             viewModel.scanForDevice(uuidToScan)
         }
@@ -101,7 +103,7 @@ fun ConnectWithHolderDeviceScreen(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacingDouble)
     ) {
         item {
@@ -117,7 +119,6 @@ fun ConnectWithHolderDeviceScreen(
         }
         showEngagementData(engagementData)
     }
-
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -221,34 +222,22 @@ private fun LazyListScope.showUuidsToScan(deviceRetrievalMethods: List<DeviceRet
 @Preview
 internal fun ConnectWithHolderDevicePreview(
     @PreviewParameter(ConnectWithHolderDevicePreviewParameters::class)
-    base64EncodedEngagement: String,
-    state: ConnectWithHolderDeviceState,
-    modifier: Modifier = Modifier
+    base64EncodedEngagement: String
 ) {
+    val engagementData = remember {
+        decodeDeviceEngagement(
+            base64EncodedEngagement,
+            logger = SystemLogger()
+        )
+    }
+
     GdsTheme {
-        ConnectWithHolderDeviceScreen(
+        ConnectWithHolderDeviceScreenContent(
             base64EncodedEngagement = base64EncodedEngagement,
-            viewModel = SessionEstablishmentViewModel(
-                bluetoothAdapterProvider = FakeBluetoothAdapterProvider(true),
-                scanner = FakeAndroidBluetoothScanner()
-            ),
-            multiplePermissionsState = FakeMultiplePermissionsState(
-                permissions = listOf(
-                    FakePermissionState(
-                        permission = Manifest.permission.BLUETOOTH_CONNECT,
-                        status = PermissionStatus.Granted
-                    ),
-                    FakePermissionState(
-                        permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                        status = PermissionStatus.Granted
-                    ),
-                    FakePermissionState(
-                        permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                        status = PermissionStatus.Granted
-                    ),
-                ),
-                onLaunchPermission = { }
-            )
+            contentState = ConnectWithHolderDeviceState(),
+            engagementData = engagementData,
+            permissionsGranted = true,
+            modifier = Modifier
         )
     }
 }

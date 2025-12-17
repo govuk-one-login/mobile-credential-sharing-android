@@ -11,10 +11,10 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalPermissionsApi::class)
 class ConnectWithHolderDeviceRule(
@@ -170,9 +170,7 @@ class ConnectWithHolderDeviceRule(
         update(state)
         setContent {
             ConnectWithHolderDevicePreview(
-                state = renderState,
-                base64EncodedEngagement = renderState.base64EncodedEngagement!!,
-                modifier = Modifier
+                base64EncodedEngagement = renderState.base64EncodedEngagement!!
             )
         }
     }
