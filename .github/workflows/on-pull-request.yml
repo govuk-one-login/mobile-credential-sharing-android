@@ -73,7 +73,7 @@ jobs:
         run: |
           ./scripts/test/unit
 
-      - name: Run instrumentation tests - needs investigating
+      - name: Run instrumentation tests
         run: |
           ./scripts/test/instrumentation --no-configuration-cache
 

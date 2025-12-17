@@ -4,5 +4,5 @@ import android.bluetooth.le.ScanResult
 import kotlinx.coroutines.flow.Flow
 
 interface BluetoothScanner {
-    fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanResult>
+    fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanEvent>
 }

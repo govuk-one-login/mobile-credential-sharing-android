@@ -2,7 +2,10 @@ package uk.gov.onelogin.sharing.verifier.connect
 
 import android.Manifest
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionStatus
@@ -17,6 +20,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvide
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
+import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
+import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
+import uk.gov.onelogin.sharing.security.DeviceEngagementStub.ENGAGEMENT_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableGrantedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.undecodableState
@@ -242,5 +248,36 @@ class ConnectWithHolderDeviceScreenTest {
             assertDeviceBluetoothIsEnabled()
             assertIsSearchingForBluetoothDevices()
         }
+    }
+
+    @Test
+    fun shouldShowErrorScreenWhenShowErrorScreenSetTrue() {
+        val errorState = ConnectWithHolderDeviceState(
+            showErrorScreen = true,
+            hasAllPermissions = true,
+            isBluetoothEnabled = true
+        )
+
+        composeTestRule.setContent {
+            ConnectWithHolderDeviceScreenContent(
+                base64EncodedEngagement = ENGAGEMENT_EXPECTED_BASE_64,
+                contentState = errorState,
+                engagementData = validDeviceEngagementDto,
+                permissionsGranted = true,
+                modifier = Modifier
+            )
+        }
+
+        composeTestRule.onNodeWithText("Generic error").isDisplayed()
+    }
+
+    @Test
+    fun connectWithHolderDevicePreviewRendersWithValidCbor() {
+        composeTestRule.setContent {
+            ConnectWithHolderDevicePreview(
+                base64EncodedEngagement = VALID_CBOR
+            )
+        }
+        composeTestRule.onNodeWithText("Successfully scanned QR code data:").assertIsDisplayed()
     }
 }

@@ -22,6 +22,7 @@ import kotlinx.coroutines.withTimeout
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @Inject
@@ -54,16 +55,21 @@ class SessionEstablishmentViewModel(
 
             try {
                 withTimeout(SCAN_PERIOD) {
-                    val scanFlow = scanner.scan(
-                        peripheralServerModeUuid = uuid
-                    )
+                    when (val scanResult = scanner.scan(uuid).first()) {
+                        is ScanEvent.DeviceFound -> {
+                            logger.debug(
+                                logTag,
+                                "Bluetooth device found: ${scanResult.deviceAddress}"
+                            )
+                        }
 
-                    val result = scanFlow.first()
-
-                    logger.debug(
-                        logTag,
-                        result.toString()
-                    )
+                        is ScanEvent.ScanFailed -> {
+                            _uiState.update {
+                                it.copy(showErrorScreen = true)
+                            }
+                            logger.debug(logTag, "Scan failed: ${scanResult.failure}")
+                        }
+                    }
                 }
             } catch (exception: TimeoutCancellationException) {
                 logger.debug(

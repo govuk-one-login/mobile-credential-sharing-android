@@ -15,5 +15,6 @@ data class ConnectWithHolderDeviceState(
     val isBluetoothEnabled: Boolean = false,
     val base64EncodedEngagement: String? = null,
     val hasAllPermissions: Boolean = false,
-    val hasRequestedPermissions: Boolean = false
+    val hasRequestedPermissions: Boolean = false,
+    val showErrorScreen: Boolean = false
 )

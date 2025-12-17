@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.scanner
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
@@ -13,6 +14,7 @@ import io.mockk.slot
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,37 +55,50 @@ class AndroidBluetoothScannerTest {
     }
 
     @Test
-    fun `scan callback's onResult sends item to flow`() = runTest {
+    fun `scan emits DeviceFound event`() = runTest {
         val uuid = UUID.randomUUID().toBytes()
-        val mockScanResult = mockk<ScanResult>(relaxed = true)
-        val callbackSlot = slot<ScanCallback>()
 
+        val mockDevice = mockk<BluetoothDevice>()
+        every { mockDevice.address } returns "AA:BB:CC:DD:EE:FF"
+
+        val mockScanResult = mockk<ScanResult>()
+        every { mockScanResult.device } returns mockDevice
+
+        val callbackSlot = slot<ScanCallback>()
         every {
             mockBluetoothLeScanner.startScan(any<List<ScanFilter>>(), any(), capture(callbackSlot))
         } returns Unit
 
-        scanner.scan(uuid).test {
+        val flow = scanner.scan(uuid)
+
+        flow.test {
             callbackSlot.captured.onScanResult(0, mockScanResult)
-            assertEquals(mockScanResult, awaitItem())
+
+            val emitted = awaitItem()
+
+            assertTrue(emitted is ScanEvent.DeviceFound)
+            assertEquals("AA:BB:CC:DD:EE:FF", (emitted as ScanEvent.DeviceFound).deviceAddress)
         }
     }
 
     @Test
-    fun `scan callback's onFailure returns ScannerFailure message`() = runTest {
+    fun `scan emits ScanFailed event`() = runTest {
         val uuid = UUID.randomUUID().toBytes()
         val callbackSlot = slot<ScanCallback>()
-        val expectedFailureCode = 1
-        val expectedMessage = ScannerFailure.ALREADY_STARTED_SCANNING
 
         every {
             mockBluetoothLeScanner.startScan(any<List<ScanFilter>>(), any(), capture(callbackSlot))
         } returns Unit
 
-        scanner.scan(uuid).test {
-            callbackSlot.captured.onScanFailed(expectedFailureCode)
+        val flow = scanner.scan(uuid)
 
-            val error = awaitError()
-            assertEquals("Scan failed: $expectedMessage", error.message)
+        flow.test {
+            callbackSlot.captured.onScanFailed(ScanCallback.SCAN_FAILED_ALREADY_STARTED)
+
+            val emitted = awaitItem()
+            val actualScannerFailure = (emitted as ScanEvent.ScanFailed).failure
+
+            assertEquals(ScannerFailure.ALREADY_STARTED_SCANNING, actualScannerFailure)
         }
     }
 }

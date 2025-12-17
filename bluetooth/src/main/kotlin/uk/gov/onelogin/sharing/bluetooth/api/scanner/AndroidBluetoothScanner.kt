@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.bluetooth.api.scanner
 import android.Manifest
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
 import android.util.Log
@@ -28,17 +27,18 @@ class AndroidBluetoothScanner(bluetoothLeScanner: BluetoothAdapterProvider) : Bl
     private var isScanning = false
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
-    override fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanResult> = callbackFlow {
+    override fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
         val callbackLogic = ScannerCallback.of(
             onResult = { _, result ->
                 Log.d(
                     AndroidBluetoothScanner::class.java.simpleName,
                     "Found device: ${result.device.address}"
                 )
-                trySend(result)
+                trySend(ScanEvent.DeviceFound(result.device.address))
             },
             onFailure = { failure ->
                 isScanning = false
+                trySend(ScanEvent.ScanFailed(failure))
                 cancel(CancellationException("Scan failed: $failure"))
             }
         )
