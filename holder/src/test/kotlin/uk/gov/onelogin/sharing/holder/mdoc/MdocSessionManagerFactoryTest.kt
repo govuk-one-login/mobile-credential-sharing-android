@@ -9,8 +9,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.holder.FakeBluetoothServerFactory
-import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
 
 @RunWith(RobolectricTestRunner::class)
 class MdocSessionManagerFactoryTest {

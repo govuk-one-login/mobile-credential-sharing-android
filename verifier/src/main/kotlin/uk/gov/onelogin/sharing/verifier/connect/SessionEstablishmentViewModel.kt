@@ -2,7 +2,6 @@
 
 package uk.gov.onelogin.sharing.verifier.connect
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -10,6 +9,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
@@ -19,15 +19,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 @Inject
 @ViewModelKey(SessionEstablishmentViewModel::class)
 @ContributesIntoMap(ViewModelScope::class)
 class SessionEstablishmentViewModel(
     private val bluetoothAdapterProvider: BluetoothAdapterProvider,
-    private val scanner: BluetoothScanner
+    private val scanner: BluetoothScanner,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val logger: Logger
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
@@ -43,7 +47,7 @@ class SessionEstablishmentViewModel(
     }
 
     fun scanForDevice(uuid: ByteArray) {
-        scannerJob = viewModelScope.launch(Dispatchers.IO) {
+        scannerJob = viewModelScope.launch(dispatcher) {
             try {
                 withTimeout(SCAN_PERIOD) {
                     val scanFlow = scanner.scan(
@@ -52,14 +56,14 @@ class SessionEstablishmentViewModel(
 
                     val result = scanFlow.first()
 
-                    Log.d(
-                        SessionEstablishmentViewModel::class.simpleName,
+                    logger.debug(
+                        logTag,
                         result.toString()
                     )
                 }
             } catch (exception: TimeoutCancellationException) {
-                Log.d(
-                    SessionEstablishmentViewModel::class.simpleName,
+                logger.debug(
+                    logTag,
                     "$exception"
                 )
             }
@@ -75,12 +79,12 @@ class SessionEstablishmentViewModel(
     }
 
     fun stopScanning() {
-        Log.d(SessionEstablishmentViewModel::class.simpleName, "Stopping scanner")
+        logger.debug(logTag, "Stopping scanner")
         scannerJob?.cancel()
     }
 
     override fun onCleared() {
-        Log.d(SessionEstablishmentViewModel::class.simpleName, "VM cleared, stopping scanner")
+        logger.debug(logTag, "VM cleared, stopping scanner")
         scannerJob?.cancel()
         super.onCleared()
     }
