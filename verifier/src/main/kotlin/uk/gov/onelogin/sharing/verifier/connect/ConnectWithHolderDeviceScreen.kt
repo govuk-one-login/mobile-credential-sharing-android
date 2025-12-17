@@ -21,30 +21,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
-import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun ConnectWithHolderDeviceScreen(
     base64EncodedEngagement: String,
-    viewModel: SessionEstablishmentViewModel = metroViewModel()
-) {
-    val contentState by viewModel.uiState.collectAsStateWithLifecycle()
-    var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
-
-    val multiplePermissionsState = rememberMultiplePermissionsState(
+    viewModel: SessionEstablishmentViewModel = metroViewModel(),
+    multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
         permissions = buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 add(Manifest.permission.BLUETOOTH_SCAN)
@@ -54,8 +56,14 @@ fun ConnectWithHolderDeviceScreen(
                 add(Manifest.permission.BLUETOOTH)
             }
         }
-    ) {
-        hasPreviouslyRequestedPermission = true
+    )
+) {
+    val contentState by viewModel.uiState.collectAsStateWithLifecycle()
+    var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
+
+    val permissionsGranted = multiplePermissionsState.allPermissionsGranted
+    LaunchedEffect(permissionsGranted) {
+        viewModel.updatePermissions(permissionsGranted)
     }
 
     val engagementData = remember {
@@ -66,23 +74,18 @@ fun ConnectWithHolderDeviceScreen(
     }
 
     LaunchedEffect(Unit) {
-        contentState.multiplePermissionsState?.allPermissionsGranted.let {
-            if (it == false) {
-                multiplePermissionsState.launchMultiplePermissionRequest()
-            }
+        if (!multiplePermissionsState.allPermissionsGranted) {
+            multiplePermissionsState.launchMultiplePermissionRequest()
         }
     }
 
-    DisposableEffect(engagementData, contentState.multiplePermissionsState?.allPermissionsGranted) {
+    DisposableEffect(engagementData, multiplePermissionsState.allPermissionsGranted) {
         val uuidToScan = engagementData?.deviceRetrievalMethods
             ?.firstNotNullOfOrNull { it.getPeripheralServerModeUuid() }
 
-        contentState.multiplePermissionsState?.allPermissionsGranted.let {
-            if (it == true && contentState.isBluetoothEnabled &&
-                uuidToScan != null
-            ) {
-                viewModel.scanForDevice(uuidToScan)
-            }
+        if (!multiplePermissionsState.allPermissionsGranted && contentState.isBluetoothEnabled && uuidToScan != null
+        ) {
+            viewModel.scanForDevice(uuidToScan)
         }
 
         onDispose {
@@ -94,13 +97,27 @@ fun ConnectWithHolderDeviceScreen(
         multiplePermissionsState,
         hasPreviouslyRequestedPermission
     ) {
-        ConnectWithHolderDeviceScreenContent(
-            base64EncodedEngagement = base64EncodedEngagement,
-            contentState = contentState,
-            engagementData = engagementData,
-            permissionsGranted = multiplePermissionsState.allPermissionsGranted
-        )
+        viewModel.updatePermissions(true)
     }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(spacingDouble)
+    ) {
+        item {
+            Text(stringResource(R.string.connect_with_holder_heading))
+        }
+        item {
+            Text(base64EncodedEngagement)
+        }
+        showBluetoothDeviceState { contentState.isBluetoothEnabled }
+        showBluetoothPermissionState(multiplePermissionsState.allPermissionsGranted)
+        if (multiplePermissionsState.allPermissionsGranted && contentState.isBluetoothEnabled) {
+            showUuidsToScan(engagementData?.deviceRetrievalMethods)
+        }
+        showEngagementData(engagementData)
+    }
+
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -123,7 +140,7 @@ fun ConnectWithHolderDeviceScreenContent(
             Text(base64EncodedEngagement)
         }
         showBluetoothDeviceState { contentState.isBluetoothEnabled }
-
+        showBluetoothPermissionState(permissionsGranted)
         if (permissionsGranted && contentState.isBluetoothEnabled) {
             showUuidsToScan(engagementData?.deviceRetrievalMethods)
         }
@@ -143,6 +160,25 @@ private fun LazyListScope.showBluetoothDeviceState(isEnabled: () -> Boolean) {
             stringResource(
                 R.string.connect_with_holder_bluetooth_state,
                 deviceBluetoothState
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+private fun LazyListScope.showBluetoothPermissionState(permissionState: Boolean) {
+    item {
+        val permissionStateText = when {
+            permissionState ->
+                coreR.string.granted
+
+            else -> coreR.string.denied
+        }.let { stringResource(it) }
+
+        Text(
+            stringResource(
+                R.string.connect_with_holder_permission_state,
+                permissionStateText
             )
         )
     }
@@ -185,20 +221,34 @@ private fun LazyListScope.showUuidsToScan(deviceRetrievalMethods: List<DeviceRet
 @Preview
 internal fun ConnectWithHolderDevicePreview(
     @PreviewParameter(ConnectWithHolderDevicePreviewParameters::class)
-    state: ConnectWithHolderDeviceState
+    base64EncodedEngagement: String,
+    state: ConnectWithHolderDeviceState,
+    modifier: Modifier = Modifier
 ) {
-    val engagementDataForPreview = remember {
-        decodeDeviceEngagement(
-            state.base64EncodedEngagement!!,
-            logger = SystemLogger()
-        )
-    }
     GdsTheme {
-        ConnectWithHolderDeviceScreenContent(
-            base64EncodedEngagement = state.base64EncodedEngagement!!,
-            contentState = ConnectWithHolderDeviceState(),
-            engagementData = engagementDataForPreview,
-            permissionsGranted = true
+        ConnectWithHolderDeviceScreen(
+            base64EncodedEngagement = base64EncodedEngagement,
+            viewModel = SessionEstablishmentViewModel(
+                bluetoothAdapterProvider = FakeBluetoothAdapterProvider(true),
+                scanner = FakeAndroidBluetoothScanner()
+            ),
+            multiplePermissionsState = FakeMultiplePermissionsState(
+                permissions = listOf(
+                    FakePermissionState(
+                        permission = Manifest.permission.BLUETOOTH_CONNECT,
+                        status = PermissionStatus.Granted
+                    ),
+                    FakePermissionState(
+                        permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                        status = PermissionStatus.Granted
+                    ),
+                    FakePermissionState(
+                        permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                        status = PermissionStatus.Granted
+                    ),
+                ),
+                onLaunchPermission = { }
+            )
         )
     }
 }

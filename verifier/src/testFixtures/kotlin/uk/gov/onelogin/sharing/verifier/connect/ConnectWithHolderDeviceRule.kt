@@ -1,23 +1,20 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
-import android.Manifest
 import android.content.Context
 import android.content.res.Resources
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.MultiplePermissionsState
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.core.R as coreR
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
+import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalPermissionsApi::class)
 class ConnectWithHolderDeviceRule(
@@ -142,28 +139,29 @@ class ConnectWithHolderDeviceRule(
             renderState.base64EncodedEngagement!!,
             SystemLogger()
         )?.deviceRetrievalMethods?.forEach { deviceRetrievalMethodDto ->
-            deviceRetrievalMethodDto.getPeripheralServerModeUuidString()?.let {
-                onNodeWithText("UUID: $it")
+            val uuid = deviceRetrievalMethodDto.getPeripheralServerModeUuid()?.toUUID()
+            if (uuid != null) {
+                onNodeWithText("UUID: $uuid")
                     .assertExists()
                     .assertIsDisplayed()
-            } ?: fail("Couldn't find peripheral server UUID!")
+            } else {
+                fail("Couldn't find peripheral server UUID!")
+            }
         } ?: fail("Couldn't decode device engagement DTO!")
     }
 
-    fun render(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {
+    fun render(
+        state: ConnectWithHolderDeviceState,
+        modifier: Modifier = Modifier,
+        viewModel: SessionEstablishmentViewModel,
+        permissionsState: MultiplePermissionsState
+    ) {
         update(state)
         setContent {
-            val engagementDataForPreview = remember {
-                decodeDeviceEngagement(
-                    state.base64EncodedEngagement!!,
-                    logger = SystemLogger()
-                )
-            }
-            ConnectWithHolderDeviceScreenContent(
+            ConnectWithHolderDeviceScreen(
                 base64EncodedEngagement = renderState.base64EncodedEngagement!!,
-                contentState = ConnectWithHolderDeviceState(),
-                engagementData = engagementDataForPreview,
-                permissionsGranted = true
+                viewModel = viewModel,
+                multiplePermissionsState = permissionsState
             )
         }
     }
@@ -172,7 +170,9 @@ class ConnectWithHolderDeviceRule(
         update(state)
         setContent {
             ConnectWithHolderDevicePreview(
-                state = renderState
+                state = renderState,
+                base64EncodedEngagement = renderState.base64EncodedEngagement!!,
+                modifier = Modifier
             )
         }
     }
