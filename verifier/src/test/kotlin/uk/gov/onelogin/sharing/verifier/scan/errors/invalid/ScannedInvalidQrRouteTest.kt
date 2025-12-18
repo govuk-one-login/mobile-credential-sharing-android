@@ -56,14 +56,15 @@ class ScannedInvalidQrRouteTest {
     @Test
     fun verifyControllerNavigationExtensionFunction() = runTest {
         composeTestRule.setContent {
-            controller = TestNavHostController(LocalContext.current)
+            val context = LocalContext.current
+            controller = TestNavHostController(context)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
 
             NavHost(
                 navController = controller,
                 startDestination = ConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
             ) {
-                configureConnectWithHolderDeviceRoute()
+                configureConnectWithHolderDeviceRoute(context)
                 configureScannedInvalidQrRoute()
             }
 

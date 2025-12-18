@@ -23,7 +23,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
-import uk.gov.onelogin.sharing.holder.util.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
 
 class AndroidMdocSessionManagerTest {
 

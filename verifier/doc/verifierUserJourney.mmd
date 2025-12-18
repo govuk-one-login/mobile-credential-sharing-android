@@ -11,3 +11,4 @@ flowchart LR
     VerifierScanner -->|Scan Digital credential QR code| isValidQr
     isValidQr -->|Invalid| ScannedInvalidQrScreen
     isValidQr -->|Valid| ConnectWithHolderDevice
+    ScannedInvalidQrScreen -->|Tap 'Try again'| VerifierScanner

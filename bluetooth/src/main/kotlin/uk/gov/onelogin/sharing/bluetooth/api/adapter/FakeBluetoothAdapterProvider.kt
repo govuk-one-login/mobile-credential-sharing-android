@@ -1,7 +1,7 @@
-package uk.gov.onelogin.sharing.bluetooth.ble
+package uk.gov.onelogin.sharing.bluetooth.api.adapter
 
 import android.bluetooth.le.BluetoothLeAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothAdapterProvider
+import android.bluetooth.le.BluetoothLeScanner
 
 class FakeBluetoothAdapterProvider(
     private var isEnabled: Boolean,
@@ -11,6 +11,8 @@ class FakeBluetoothAdapterProvider(
     override fun isEnabled(): Boolean = isEnabled
 
     override fun getAdvertiser(): BluetoothLeAdvertiser? = advertiser
+
+    override fun getLeScanner(): BluetoothLeScanner? = null
 
     fun setEnabled(enabled: Boolean) {
         isEnabled = enabled
