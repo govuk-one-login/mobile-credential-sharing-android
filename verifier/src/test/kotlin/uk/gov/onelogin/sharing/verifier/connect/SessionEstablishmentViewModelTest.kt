@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
@@ -22,6 +23,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SessionEstablishmentViewModelTest {
@@ -175,5 +179,35 @@ class SessionEstablishmentViewModelTest {
         viewModel = createViewModel(scanner)
         viewModel.updateHasRequestPermissions(true)
         assertEquals(true, viewModel.uiState.value.hasRequestedPermissions)
+    }
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Test
+    fun `should log permission granted when user allows all permissions`() {
+        viewModel = createViewModel(scanner)
+        viewModel.permissionLogger(fakePermissionStateGranted)
+
+        val logMessage = logger[0].message
+        assert(logMessage.contains("All required Bluetooth permissions have been granted"))
+    }
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Test
+    fun `should log permission permanently denied when user denies permissions completely`() {
+        viewModel = createViewModel(scanner)
+        viewModel.permissionLogger(fakePermissionStateDenied)
+
+        val logMessage = logger[0].message
+        assert(logMessage.contains("Bluetooth permissions were permanently denied"))
+    }
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Test
+    fun `should log permissions denied when user denied first time`() {
+        viewModel = createViewModel(scanner)
+        viewModel.permissionLogger(fakePermissionStateDeniedWithRationale)
+
+        val logMessage = logger[0].message
+        assert(logMessage.contains("Bluetooth permissions were denied"))
     }
 }

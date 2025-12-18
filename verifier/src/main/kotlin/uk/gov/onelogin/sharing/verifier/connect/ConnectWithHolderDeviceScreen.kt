@@ -60,9 +60,12 @@ fun ConnectWithHolderDeviceScreen(
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
     val permissionsGranted = multiplePermissionsState.allPermissionsGranted
-
-    LaunchedEffect(permissionsGranted) {
+    val permissionsStatus = multiplePermissionsState.permissions.map {
+        it.status
+    }
+    LaunchedEffect(permissionsStatus) {
         viewModel.updatePermissions(permissionsGranted)
+        viewModel.permissionLogger(multiplePermissionsState)
     }
 
     LaunchedEffect(Unit) {

@@ -23,16 +23,16 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 @ContributesBinding(ViewModelScope::class)
 @Inject
 class AndroidBluetoothScanner(
-    bluetoothAdapterProvider: BluetoothAdapterProvider,
+    val bluetoothAdapterProvider: BluetoothAdapterProvider,
     val logger: Logger
 ) : BluetoothScanner {
 
-    private val scanner = bluetoothAdapterProvider.getLeScanner()
     private var isScanning = false
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     @Suppress("LongMethod")
     override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
+        val scanner = bluetoothAdapterProvider.getLeScanner()
         lateinit var leScanCallback: ScanCallback
         when {
             isScanning -> {

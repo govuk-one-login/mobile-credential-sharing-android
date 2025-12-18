@@ -5,6 +5,7 @@ package uk.gov.onelogin.sharing.verifier.connect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -23,6 +24,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
+import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @Inject
@@ -96,14 +98,34 @@ class SessionEstablishmentViewModel(
         }
     }
 
+    fun permissionLogger(state: MultiplePermissionsState) {
+        when {
+            state.allPermissionsGranted -> logger.debug(
+                logTag,
+                "All required Bluetooth permissions have been granted"
+            )
+
+            state.isPermanentlyDenied() -> logger.debug(
+                logTag,
+                "Bluetooth permissions were permanently denied"
+            )
+
+            else -> {
+                logger.debug(logTag, "Bluetooth permissions were denied")
+            }
+        }
+    }
+
     fun stopScanning() {
-        logger.debug(logTag, "Stopping scanner")
-        scannerJob?.cancel()
+        if (scannerJob?.isActive == true) {
+            logger.debug(logTag, "Terminating session")
+            scannerJob?.cancel()
+        }
     }
 
     override fun onCleared() {
         logger.debug(logTag, "VM cleared, stopping scanner")
-        scannerJob?.cancel()
+        stopScanning()
         super.onCleared()
     }
 
