@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder
 
-import kotlinx.coroutines.CoroutineScope
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
@@ -16,10 +15,9 @@ class FakeBluetoothPeripheralFactory(
     private val stateMonitor: BluetoothStateMonitor = FakeBluetoothStateMonitor()
 ) : BluetoothPeripheralFactory {
 
-    override fun create(scope: CoroutineScope): BluetoothPeripheralComponents =
-        BluetoothPeripheralComponents(
-            advertiser = advertiser,
-            gattServerManager = gattServerManager,
-            bluetoothStateMonitor = stateMonitor
-        )
+    override fun create(): BluetoothPeripheralComponents = BluetoothPeripheralComponents(
+        advertiser = advertiser,
+        gattServerManager = gattServerManager,
+        bluetoothStateMonitor = stateMonitor
+    )
 }

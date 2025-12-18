@@ -72,7 +72,24 @@ internal class AndroidGattClientManager(
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
             is GattEvent.ConnectionStateChange -> {
-                _events.tryEmit(event.toGattClientEvent())
+                val address = event.gatt.device.address
+
+                val event = when {
+                    event.status == BluetoothGatt.GATT_SUCCESS &&
+                        event.newState == BluetoothGatt.STATE_CONNECTED ->
+                        GattClientEvent.Connected(address)
+
+                    event.newState == BluetoothGatt.STATE_DISCONNECTED ->
+                        GattClientEvent.Disconnected(address)
+
+                    else -> GattClientEvent.UnsupportedEvent(
+                        address,
+                        event.status,
+                        event.newState
+                    )
+                }
+
+                _events.tryEmit(event)
             }
 
             is GattEvent.ServicesDiscovered -> {

@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.bluetooth.internal
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import io.mockk.mockk
-import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -19,7 +18,6 @@ class AndroidBluetoothPeripheralFactoryTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val logger = mockk<Logger>(relaxed = true)
-    private val scope = TestScope()
 
     @Test
     fun `create returns Android peripheral components`() {
@@ -28,7 +26,7 @@ class AndroidBluetoothPeripheralFactoryTest {
             logger = logger
         )
 
-        val components = factory.create(scope)
+        val components = factory.create()
 
         assertNotNull(components.advertiser)
         assertNotNull(components.gattServerManager)

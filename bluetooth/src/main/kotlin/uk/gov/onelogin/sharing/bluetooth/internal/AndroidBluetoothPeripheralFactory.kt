@@ -5,7 +5,6 @@ import android.content.Context
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import kotlinx.coroutines.CoroutineScope
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralFactory
@@ -20,27 +19,16 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerMa
 /**
  * An Android-specific implementation of the [BluetoothPeripheralFactory] interface.
  *
- * This factory is responsible for creating and wiring together all the necessary components
- * for a Bluetooth Low Energy (BLE) server, including the advertiser, GATT server, and state
- * monitor.
+ * Creates all the necessary components for a BLE server.
  *
- * @param context The Android application context, used for accessing system services.
+ * @param context The Android application context.
  * @param logger An instance of [Logger] for logging events.
  */
 @ContributesBinding(ViewModelScope::class)
 @Inject
 class AndroidBluetoothPeripheralFactory(private val context: Context, private val logger: Logger) :
     BluetoothPeripheralFactory {
-
-    /**
-     * Creates and returns a [BluetoothPeripheralComponents] object, which contains all the
-     * fully configured components required to run a BLE server.
-     *
-     * @param scope The [CoroutineScope] in which the server components will operate.
-     * @return A [BluetoothPeripheralComponents] instance containing the advertiser, GATT server,
-     * and Bluetooth state monitor.
-     */
-    override fun create(scope: CoroutineScope): BluetoothPeripheralComponents {
+    override fun create(): BluetoothPeripheralComponents {
         val adapterProvider = AndroidBluetoothAdapterProvider(context)
 
         val bleAdvertiser = AndroidBleAdvertiser(

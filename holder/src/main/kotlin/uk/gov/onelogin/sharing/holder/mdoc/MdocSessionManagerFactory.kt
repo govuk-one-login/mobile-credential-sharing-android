@@ -20,7 +20,7 @@ class MdocSessionManagerFactory(
     private val logger: Logger
 ) : SessionManagerFactory {
     override fun create(scope: CoroutineScope): MdocSessionManager {
-        val components = bluetoothPeripheralFactory.create(scope)
+        val components = bluetoothPeripheralFactory.create()
 
         return AndroidMdocSessionManager(
             bleAdvertiser = components.advertiser,

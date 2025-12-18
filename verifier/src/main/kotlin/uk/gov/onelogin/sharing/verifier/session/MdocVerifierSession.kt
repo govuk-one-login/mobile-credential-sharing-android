@@ -43,12 +43,12 @@ class MdocVerifierSession(
      */
     override fun start(serviceId: UUID) {
         logger.debug(logTag, "Starting session")
-        _state.value = VerifierSessionState.Verifying
+        _state.value = VerifierSessionState.Starting
     }
 
     override fun stop() {
         logger.debug(logTag, "Stop session")
-        _state.value = VerifierSessionState.VerifyingStopped
+        _state.value = VerifierSessionState.Stopped
     }
 
     private fun handleGattClientEvents(event: GattClientEvent) {

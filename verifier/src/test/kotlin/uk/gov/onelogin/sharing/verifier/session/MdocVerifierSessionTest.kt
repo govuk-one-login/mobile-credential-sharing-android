@@ -52,7 +52,7 @@ class MdocVerifierSessionTest {
         assertTrue(logger.contains("Starting session"))
 
         session.state.test {
-            assertEquals(VerifierSessionState.Verifying, awaitItem())
+            assertEquals(VerifierSessionState.Starting, awaitItem())
         }
     }
 
@@ -63,7 +63,7 @@ class MdocVerifierSessionTest {
         assertTrue(logger.contains("Stop session"))
 
         session.state.test {
-            assertEquals(VerifierSessionState.VerifyingStopped, awaitItem())
+            assertEquals(VerifierSessionState.Stopped, awaitItem())
         }
     }
 
