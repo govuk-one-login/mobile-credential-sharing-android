@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.Errors

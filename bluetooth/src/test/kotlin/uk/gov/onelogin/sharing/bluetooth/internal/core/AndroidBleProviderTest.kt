@@ -2,9 +2,9 @@ package uk.gov.onelogin.sharing.bluetooth.internal.core
 
 import org.junit.Assert
 import org.junit.Test
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.ble.AdvertisingCallbackStub
-import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 

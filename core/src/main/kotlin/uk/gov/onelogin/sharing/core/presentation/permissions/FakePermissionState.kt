@@ -1,4 +1,6 @@
 package uk.gov.onelogin.sharing.core.presentation.permissions
+import android.Manifest
+import android.os.Build
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
@@ -18,4 +20,18 @@ data class FakePermissionState(
     private val onLaunchPermission: () -> Unit = {}
 ) : PermissionState {
     override fun launchPermissionRequest() = onLaunchPermission()
+
+    companion object {
+        @JvmStatic
+        fun bluetoothConnect(status: PermissionStatus, onLaunchPermission: () -> Unit = {}) =
+            FakePermissionState(
+                permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    Manifest.permission.BLUETOOTH_CONNECT
+                } else {
+                    Manifest.permission.BLUETOOTH
+                },
+                status = status,
+                onLaunchPermission = onLaunchPermission
+            )
+    }
 }

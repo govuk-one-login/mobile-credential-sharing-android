@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.bluetooth.BluetoothWelcomeTexts.BLUETOOTH_WELCOME_TEXT
 
 @RunWith(AndroidJUnit4::class)
-class BluetoothWelcomeTextTest {
+class BluetoothPermissionPromptTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()

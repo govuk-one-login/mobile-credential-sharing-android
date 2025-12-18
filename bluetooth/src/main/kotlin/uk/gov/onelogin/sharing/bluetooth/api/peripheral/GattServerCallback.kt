@@ -1,13 +1,14 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-internal class GattServerCallback(
+class GattServerCallback(
     private val gatGattEventEmitter: GattEventEmitter,
     private val logger: Logger
 ) : BluetoothGattServerCallback() {

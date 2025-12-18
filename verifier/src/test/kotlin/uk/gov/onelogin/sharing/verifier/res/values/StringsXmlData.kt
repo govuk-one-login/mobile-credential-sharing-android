@@ -42,6 +42,10 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Open app permissions",
         resourceId = R.string.open_app_permissions
     ),
+    SEARCHING_FOR_UUIDS(
+        expected = "Searching for UUIDs:",
+        resourceId = R.string.searching_for_uuids
+    ),
     SUCCESSFULLY_SCANNED_QR_CODE_DATA(
         expected = "Successfully scanned QR code data:",
         resourceId = R.string.successfully_scanned_qr_code_data

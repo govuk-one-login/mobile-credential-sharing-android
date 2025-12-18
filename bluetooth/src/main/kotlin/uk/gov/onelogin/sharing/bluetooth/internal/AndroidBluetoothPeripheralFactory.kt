@@ -8,11 +8,11 @@ import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralFactory
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
-import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
 

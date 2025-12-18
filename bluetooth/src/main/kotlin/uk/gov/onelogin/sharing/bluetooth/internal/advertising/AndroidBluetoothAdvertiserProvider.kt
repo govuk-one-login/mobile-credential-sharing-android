@@ -4,11 +4,11 @@ import android.bluetooth.le.AdvertisingSet
 import android.bluetooth.le.AdvertisingSetCallback
 import android.bluetooth.le.BluetoothLeAdvertiser
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.toReason
-import uk.gov.onelogin.sharing.bluetooth.internal.core.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.mapper.AdvertisingParametersMapper
 import uk.gov.onelogin.sharing.bluetooth.internal.mapper.BleAdvertiseDataMapper
 import uk.gov.onelogin.sharing.core.logger.logTag
