@@ -10,6 +10,8 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import java.util.UUID
+import kotlin.test.assertEquals
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -21,8 +23,6 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
-import java.util.UUID
-import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 class AndroidBluetoothScannerTest {
