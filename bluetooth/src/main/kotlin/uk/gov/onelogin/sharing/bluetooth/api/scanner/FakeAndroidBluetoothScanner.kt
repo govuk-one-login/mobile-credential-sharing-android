@@ -8,9 +8,9 @@ class FakeAndroidBluetoothScanner(val flow: Flow<ScanEvent> = MutableSharedFlow(
     var scanCalls = 0
     var lastUuid: ByteArray? = null
 
-    override fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanEvent> {
+    override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> {
         scanCalls++
-        lastUuid = peripheralServerModeUuid
+        lastUuid = serviceUuid
         return flow
     }
 }

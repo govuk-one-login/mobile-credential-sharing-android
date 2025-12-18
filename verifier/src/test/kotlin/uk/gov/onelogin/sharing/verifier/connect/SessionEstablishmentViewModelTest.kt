@@ -64,7 +64,7 @@ class SessionEstablishmentViewModelTest {
         val deviceAddress = "AA:BB:CC:DD:EE:FF"
 
         val scanner = object : BluetoothScanner {
-            override fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanEvent> = flowOf(
+            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = flowOf(
                 ScanEvent.DeviceFound(deviceAddress)
             )
         }
@@ -86,7 +86,7 @@ class SessionEstablishmentViewModelTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
         val scanner = object : BluetoothScanner {
-            override fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanEvent> = flowOf(
+            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = flowOf(
                 ScanEvent.ScanFailed(scanFailure)
             )
         }
@@ -108,7 +108,7 @@ class SessionEstablishmentViewModelTest {
         var flowClosed = false
 
         val scanner = object : BluetoothScanner {
-            override fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
+            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
                 awaitClose { flowClosed = true }
             }
         }
@@ -131,7 +131,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `scanForDevice times out when no results emitted`() = runTest {
         val scanner = object : BluetoothScanner {
-            override fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
+            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
                 awaitCancellation()
             }
         }
@@ -155,7 +155,7 @@ class SessionEstablishmentViewModelTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
         val scanner = object : BluetoothScanner {
-            override fun scan(peripheralServerModeUuid: ByteArray): Flow<ScanEvent> = flowOf(
+            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = flowOf(
                 ScanEvent.ScanFailed(scanFailure)
             )
         }

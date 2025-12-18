@@ -1,6 +1,10 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.Manifest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.undecodeableBarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
@@ -54,5 +58,41 @@ data object ConnectWithHolderDeviceStateStubs {
         isBluetoothEnabled = true,
         base64EncodedEngagement = validBarcodeDataResult.data,
         hasAllPermissions = true
+    )
+
+    val fakePermissionStateGranted = FakeMultiplePermissionsState(
+        permissions = listOf(
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_CONNECT,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                status = PermissionStatus.Granted
+            )
+        ),
+        onLaunchPermission = {}
+    )
+
+    val fakePermissionStateDenied = FakeMultiplePermissionsState(
+        permissions = listOf(
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_CONNECT,
+                status = PermissionStatus.Denied(false)
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                status = PermissionStatus.Denied(false)
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                status = PermissionStatus.Denied(false)
+            )
+        ),
+        onLaunchPermission = {}
     )
 }

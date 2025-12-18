@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 
 /**
  * Property bag data class for holding the [ConnectWithHolderDeviceScreen] composable UI state.

@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
-import android.Manifest
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
@@ -8,7 +7,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.PermissionStatus
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -18,13 +16,13 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.security.DeviceEngagementStub.ENGAGEMENT_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableGrantedState
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.undecodableState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.validWithCorrectBluetoothSetup
 
@@ -46,23 +44,6 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun cannotDecodeProvidedCborString() = runTest {
-        val fakePermissionState = FakeMultiplePermissionsState(
-            permissions = listOf(
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_CONNECT,
-                    status = PermissionStatus.Denied(false)
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                    status = PermissionStatus.Denied(false)
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                    status = PermissionStatus.Denied(false)
-                )
-            ),
-            onLaunchPermission = {}
-        )
         val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
         val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
 
@@ -73,7 +54,13 @@ class ConnectWithHolderDeviceScreenTest {
         )
 
         composeTestRule.run {
-            renderFunction(this, undecodableState, Modifier, testViewModel, fakePermissionState)
+            renderFunction(
+                this,
+                undecodableState,
+                Modifier,
+                testViewModel,
+                fakePermissionStateDenied
+            )
             assertBasicInformationIsDisplayed()
             assertErrorIsDisplayed()
             assertDeviceEngagementDataDoesNotExist()
@@ -85,30 +72,19 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun validCborExistsOnScreen() = runTest {
-        val fakePermissionState = FakeMultiplePermissionsState(
-            permissions = listOf(
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_CONNECT,
-                    status = PermissionStatus.Denied(false)
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                    status = PermissionStatus.Denied(false)
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                    status = PermissionStatus.Denied(false)
-                )
-            ),
-            onLaunchPermission = {}
-        )
         composeTestRule.run {
             val testViewModel = SessionEstablishmentViewModel(
                 bluetoothAdapterProvider = FakeBluetoothAdapterProvider(isEnabled = false),
                 scanner = FakeAndroidBluetoothScanner(),
                 logger = SystemLogger()
             )
-            renderFunction(this, decodableDeniedState, Modifier, testViewModel, fakePermissionState)
+            renderFunction(
+                this,
+                decodableDeniedState,
+                Modifier,
+                testViewModel,
+                fakePermissionStateDenied
+            )
             assertBasicInformationIsDisplayed()
             assertErrorDoesNotExist()
             assertDeviceEngagementDataIsDisplayed()
@@ -120,23 +96,6 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun bluetoothPermissionIsGrantedButDeviceBluetoothIsDisabled() = runTest {
-        val fakePermissionState = FakeMultiplePermissionsState(
-            permissions = listOf(
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_CONNECT,
-                    status = PermissionStatus.Granted
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                    status = PermissionStatus.Granted
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                    status = PermissionStatus.Granted
-                )
-            ),
-            onLaunchPermission = {}
-        )
         val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
         val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
 
@@ -151,7 +110,7 @@ class ConnectWithHolderDeviceScreenTest {
         composeTestRule.waitForIdle()
 
         composeTestRule.run {
-            renderFunction(this, stateForTest, Modifier, testViewModel, fakePermissionState)
+            renderFunction(this, stateForTest, Modifier, testViewModel, fakePermissionStateGranted)
             assertBasicInformationIsDisplayed()
             assertErrorDoesNotExist()
             assertDeviceEngagementDataIsDisplayed()
@@ -163,23 +122,6 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun bluetoothPermissionIsGranted() = runTest {
-        val fakePermissionState = FakeMultiplePermissionsState(
-            permissions = listOf(
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_CONNECT,
-                    status = PermissionStatus.Granted
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                    status = PermissionStatus.Granted
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                    status = PermissionStatus.Granted
-                )
-            ),
-            onLaunchPermission = {}
-        )
         val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
         val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
 
@@ -194,7 +136,7 @@ class ConnectWithHolderDeviceScreenTest {
                 decodableGrantedState,
                 Modifier,
                 testViewModel,
-                fakePermissionState
+                fakePermissionStateGranted
             )
             assertBasicInformationIsDisplayed()
             assertErrorDoesNotExist()
@@ -207,23 +149,6 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun grantedAndEnabledBluetoothWithValidCborStartsScanning() = runTest {
-        val fakePermissionState = FakeMultiplePermissionsState(
-            permissions = listOf(
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_CONNECT,
-                    status = PermissionStatus.Granted
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.BLUETOOTH_ADVERTISE,
-                    status = PermissionStatus.Granted
-                ),
-                FakePermissionState(
-                    permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                    status = PermissionStatus.Granted
-                )
-            ),
-            onLaunchPermission = {}
-        )
         val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = true)
         val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
 
@@ -239,7 +164,7 @@ class ConnectWithHolderDeviceScreenTest {
                 validWithCorrectBluetoothSetup,
                 Modifier,
                 testViewModel,
-                fakePermissionState
+                fakePermissionStateGranted
             )
             assertBasicInformationIsDisplayed()
             assertErrorDoesNotExist()
