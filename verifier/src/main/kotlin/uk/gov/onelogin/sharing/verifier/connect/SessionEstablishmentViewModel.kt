@@ -22,6 +22,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
@@ -34,7 +36,8 @@ class SessionEstablishmentViewModel(
     private val bluetoothAdapterProvider: BluetoothAdapterProvider,
     private val scanner: BluetoothScanner,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val logger: Logger
+    private val logger: Logger,
+    private val bluetoothStatusMonitor: BluetoothStateMonitor
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
@@ -46,6 +49,29 @@ class SessionEstablishmentViewModel(
             it.copy(
                 isBluetoothEnabled = bluetoothAdapterProvider.isEnabled()
             )
+        }
+
+        bluetoothStatusMonitor.start()
+        viewModelScope.launch {
+            bluetoothStatusMonitor.states.collect { bluetoothState ->
+                when (bluetoothState) {
+                    BluetoothStatus.ON -> {
+                        _uiState.update {
+                            it.copy(
+                                isBluetoothEnabled = true
+                            )
+                        }
+                    }
+
+                    else -> {
+                        _uiState.update {
+                            it.copy(
+                                isBluetoothEnabled = false
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
