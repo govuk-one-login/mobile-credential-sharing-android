@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="an_error_has_occurred">An error has occurred</string>
+
     <string name="denied">Denied</string>
     <string name="disabled">Disabled</string>
     <string name="enabled">Enabled</string>
