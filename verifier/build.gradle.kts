@@ -1,5 +1,6 @@
 plugins {
     listOf(
+        libs.plugins.metro.di,
         libs.plugins.templates.android.library
     ).forEach { alias(it) }
 }
@@ -31,10 +32,15 @@ android {
 }
 dependencies {
     listOf(
+        projects.bluetooth,
         projects.core,
         projects.models,
         projects.security
     ).forEach(::api)
+
+    listOf(
+        libs.metro.viewmodel.compose
+    ).forEach(::implementation)
 
     listOf(
         libs.com.google.test.parameter.injector,

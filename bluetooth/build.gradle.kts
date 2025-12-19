@@ -33,8 +33,11 @@ android {
 
 dependencies {
     listOf(
+        projects.core,
         libs.metro.viewmodel.compose
     ).forEach(::implementation)
+
+    testImplementation(testFixtures(projects.core))
 }
 
 mavenPublishingConfig {
@@ -49,9 +52,4 @@ mavenPublishingConfig {
             """.trimIndent()
         )
     }
-}
-
-dependencies {
-    listOf(projects.core)
-        .forEach(::implementation)
 }

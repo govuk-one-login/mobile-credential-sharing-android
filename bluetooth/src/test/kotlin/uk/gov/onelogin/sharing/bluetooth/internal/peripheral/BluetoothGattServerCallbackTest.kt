@@ -11,9 +11,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.FakeGattEventEmitter
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattEvent
-import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestNullValue
 import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestStart
 import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestUnknown

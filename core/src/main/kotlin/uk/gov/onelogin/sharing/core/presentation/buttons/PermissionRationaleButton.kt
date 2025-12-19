@@ -37,7 +37,7 @@ internal fun PermissionRationaleButtonPreview() {
     GdsTheme {
         Column(
             modifier = Modifier
-                .background(GdsLocalColorScheme.current.listBackground)
+                .background(GdsLocalColorScheme.current.rowBackground)
                 .padding(16.dp)
         ) {
             PermissionRationaleButton(

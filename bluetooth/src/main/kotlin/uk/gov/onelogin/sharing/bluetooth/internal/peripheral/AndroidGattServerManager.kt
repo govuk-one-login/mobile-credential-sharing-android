@@ -13,6 +13,9 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec

@@ -12,10 +12,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @RunWith(AndroidJUnit4::class)
 class ConnectWithHolderDeviceRouteTest {
@@ -28,7 +28,8 @@ class ConnectWithHolderDeviceRouteTest {
     @Test
     fun verifyControllerNavigationExtensionFunction() = runTest {
         composeTestRule.setContent {
-            controller = TestNavHostController(LocalContext.current)
+            val context = LocalContext.current
+            controller = TestNavHostController(context)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
 
             NavHost(
@@ -37,13 +38,17 @@ class ConnectWithHolderDeviceRouteTest {
                     BarcodeDataResultStubs.invalidBarcodeDataResultOne.data
                 )
             ) {
-                configureConnectWithHolderDeviceRoute()
+                configureConnectWithHolderDeviceRoute(context)
                 configureScannedInvalidQrRoute()
             }
 
-            controller.navigateToConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
+            decodableDeniedState.base64EncodedEngagement?.let {
+                controller.navigateToConnectWithHolderDeviceRoute(
+                    it
+                )
+            }
         }
-
-        composeTestRule.assertBasicInformationIsDisplayed(validBarcodeDataResult.data)
+        composeTestRule.update(decodableDeniedState)
+        composeTestRule.assertBasicInformationIsDisplayed()
     }
 }

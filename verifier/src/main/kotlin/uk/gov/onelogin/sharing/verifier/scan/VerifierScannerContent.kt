@@ -115,7 +115,7 @@ internal fun VerifierScannerContentPreview(
     GdsTheme {
         Column(
             modifier = Modifier
-                .background(GdsLocalColorScheme.current.listBackground)
+                .background(GdsLocalColorScheme.current.rowBackground)
                 .padding(spacingDouble)
         ) {
             VerifierScannerContent(

@@ -1,6 +1,6 @@
 [versions]
-activityCompose = "1.12.1" # https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
-agp = "8.13.1" # https://developer.android.com/build/releases/gradle-plugin
+activityCompose = "1.12.2" # https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
+agp = "8.13.2" # https://developer.android.com/build/releases/gradle-plugin
 androidx-browser = "1.9.0" # https://developer.android.com/jetpack/androidx/releases/browser
 androidx-navigation = "2.9.6" # https://developer.android.com/jetpack/androidx/releases/navigation
 androidx-test-espresso = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#espresso-3.7.0
@@ -8,8 +8,8 @@ androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/and
 androidx-test-rules = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#rules-1.7.0
 androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#runner-1.7.0
 com-google-test-parameter-injector = "1.20" # https://github.com/google/TestParameterInjector
-compose-lint-rules = "0.5.1" # https://github.com/mrmans0n/compose-rules/releases/
-composeBom = "2025.12.00" # https://developer.android.com/jetpack/androidx/releases/compose
+compose-lint-rules = "0.5.3" # https://github.com/mrmans0n/compose-rules/releases/
+composeBom = "2025.12.01" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.17.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
 detekt = "1.23.8" # https://github.com/detekt/detekt/releases
 espressoCore = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#3.7.0
@@ -18,19 +18,19 @@ jackson = "2.20.1" # https://github.com/FasterXML/jackson/wiki/Jackson-Releases
 jacoco = "0.8.14" # https://github.com/jacoco/jacoco/releases
 junit = "4.13.2" # https://github.com/junit-team/junit4/releases
 kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases
-kotlin-symbol-processing = "2.3.3" # https://github.com/google/ksp/releases ; update with 'kotlin'
+kotlin-symbol-processing = "2.3.4" # https://github.com/google/ksp/releases ; update with 'kotlin'
 kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
-metro = "0.8.2"  # https://github.com/ZacSweers/Metro/releases
+metro = "0.9.2"  # https://github.com/ZacSweers/Metro/releases
 mockk = "1.14.7" # https://github.com/mockk/mockk/releases
 robolectric = "4.16" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.52.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.1.0.6387" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
-uk-gov-logging = "0.36.1" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
-uk-gov-ui = "11.1.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
+uk-gov-logging = "0.38.0" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
+uk-gov-ui = "11.5.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
@@ -120,6 +120,7 @@ testing-unit = [
     "androidx-test-rules",
     "androidx-ui-test-junit4",
     "app-cash-turbine",
+    "com-google-test-parameter-injector",
     "kotlin-test",
     "mockk",
     "org-robolectric",

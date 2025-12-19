@@ -1,12 +1,18 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.content.Context
 import androidx.annotation.Keep
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 
 /**
@@ -24,12 +30,22 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
          * [NavGraphBuilder] extension function for configuring a work-in-progress navigation
          * target.
          */
-        fun NavGraphBuilder.configureConnectWithHolderDeviceRoute() {
+        @OptIn(ExperimentalPermissionsApi::class)
+        fun NavGraphBuilder.configureConnectWithHolderDeviceRoute(context: Context) {
+            val graph = createGraphFactory<VerifierGraph.Factory>().create(
+                context
+            )
+
             composable<ConnectWithHolderDeviceRoute> { navBackstackEntry ->
                 val arguments: ConnectWithHolderDeviceRoute = navBackstackEntry.toRoute()
-                ConnectWithHolderDeviceScreen(
-                    base64EncodedEngagement = arguments.base64EncodedEngagement
-                )
+
+                CompositionLocalProvider(
+                    LocalMetroViewModelFactory provides graph.metroViewModelFactory
+                ) {
+                    ConnectWithHolderDeviceScreen(
+                        base64EncodedEngagement = arguments.base64EncodedEngagement
+                    )
+                }
             }
         }
 
