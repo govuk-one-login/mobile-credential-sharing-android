@@ -14,12 +14,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralComponents
-import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
-import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.security.DeviceEngagementStub.ENGAGEMENT_EXPECTED_BASE_64

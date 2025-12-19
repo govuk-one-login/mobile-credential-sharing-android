@@ -81,12 +81,11 @@ class MdocVerifierSession(
 
             GattClientEvent.Connecting -> _state.value = VerifierSessionState.Connecting
 
-            is GattClientEvent.Connected -> {
-                val address = event.deviceAddress
-                _state.value = VerifierSessionState.Connected(address)
-            }
+            is GattClientEvent.Connected ->
+                _state.value = VerifierSessionState.Connected(event.deviceAddress)
 
-            is GattClientEvent.Disconnected -> _state.value = VerifierSessionState.Disconnected
+            is GattClientEvent.Disconnected ->
+                _state.value = VerifierSessionState.Disconnected(event.deviceAddress)
 
             is GattClientEvent.Error ->
                 _state.value =

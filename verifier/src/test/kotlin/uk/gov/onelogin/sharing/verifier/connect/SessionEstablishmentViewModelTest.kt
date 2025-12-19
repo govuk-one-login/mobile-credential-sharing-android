@@ -21,16 +21,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralComponents
-import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
-import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied

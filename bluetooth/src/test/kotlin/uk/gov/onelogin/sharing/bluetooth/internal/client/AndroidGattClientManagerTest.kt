@@ -8,6 +8,7 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import io.mockk.verifyCount
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -198,6 +199,8 @@ internal class AndroidGattClientManagerTest {
                 BluetoothGatt.GATT_SUCCESS,
                 BluetoothGatt.STATE_CONNECTED
             )
+
+            verify { bluetoothGatt.discoverServices() }
 
             assertEquals(
                 GattClientEvent.Connected(bluetoothGatt.device.address),

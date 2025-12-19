@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.session
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattService
 import app.cash.turbine.test
 import io.mockk.mockk
@@ -69,10 +70,8 @@ class MdocVerifierSessionTest {
     }
 
     @Test
-    fun `ServicesDiscovered triggers service validation`() = runTest {
+    fun `ServicesDiscovered and ValidationResult success triggers ServiceDiscovered`() = runTest {
         val service = mockk<BluetoothGattService>(relaxed = true)
-        serviceValidator.errors = mutableListOf()
-
         gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered(service))
 
         advanceUntilIdle()
@@ -81,6 +80,90 @@ class MdocVerifierSessionTest {
 
         session.state.test {
             assertEquals(VerifierSessionState.ServiceDiscovered, awaitItem())
+        }
+    }
+
+    @Test
+    fun `ServicesDiscovered and ValidationResult failure triggers Error`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        serviceValidator.errors = mutableListOf("error")
+        gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered(service))
+
+        advanceUntilIdle()
+
+        assertEquals(1, serviceValidator.calls)
+
+        session.state.test {
+            assertEquals(
+                VerifierSessionState.Error("[error]"),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `Connecting triggers Connecting verifier state`() = runTest {
+        gattClientManager.emitEvent(GattClientEvent.Connecting)
+
+        advanceUntilIdle()
+
+        session.state.test {
+            assertEquals(VerifierSessionState.Connecting, awaitItem())
+        }
+    }
+
+    @Test
+    fun `Connected triggers Connected verifier state`() = runTest {
+        val device = mockk<BluetoothDevice>(relaxed = true)
+
+        gattClientManager.emitEvent(
+            GattClientEvent.Connected(device.address)
+        )
+
+        advanceUntilIdle()
+
+        session.state.test {
+            assertEquals(
+                VerifierSessionState.Connected(device.address),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `Disconnected triggers Disconnected verifier state`() = runTest {
+        val device = mockk<BluetoothDevice>(relaxed = true)
+        serviceValidator.errors = mutableListOf()
+
+        gattClientManager.emitEvent(
+            GattClientEvent.Disconnected(device.address)
+        )
+
+        advanceUntilIdle()
+
+        session.state.test {
+            assertEquals(
+                VerifierSessionState.Disconnected(device.address),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `Gatt client Error triggers Error verifier state`() = runTest {
+        gattClientManager.emitEvent(
+            GattClientEvent.Error(ClientError.BLUETOOTH_PERMISSION_MISSING)
+        )
+
+        advanceUntilIdle()
+
+        session.state.test {
+            assertEquals(
+                VerifierSessionState.Error(
+                    ClientError.BLUETOOTH_PERMISSION_MISSING.toString()
+                ),
+                awaitItem()
+            )
         }
     }
 
