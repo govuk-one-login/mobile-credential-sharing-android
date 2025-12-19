@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
-import uk.gov.onelogin.sharing.bluetooth.client.FakeClientEventEmitter
+import uk.gov.onelogin.sharing.bluetooth.central.FakeClientEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattClientCallback
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattEvent
 

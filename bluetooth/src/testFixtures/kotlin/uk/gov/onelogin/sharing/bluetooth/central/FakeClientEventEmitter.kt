@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.client
+package uk.gov.onelogin.sharing.bluetooth.central
 
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattClientEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattEvent

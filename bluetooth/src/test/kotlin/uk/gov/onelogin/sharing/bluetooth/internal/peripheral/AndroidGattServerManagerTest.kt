@@ -237,7 +237,7 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `gatt server returns error if permissions are not granted`() = runTest {
-        fakePermissionChecker.hasPermission = false
+        fakePermissionChecker.hasPeripheralPermissions = false
         every {
             bluetoothManager.openGattServer(context, any())
         } returns gattServer

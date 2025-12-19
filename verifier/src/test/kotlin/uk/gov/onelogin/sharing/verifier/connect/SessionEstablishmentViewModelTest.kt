@@ -1,6 +1,10 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.bluetooth.BluetoothDevice
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import io.mockk.every
+import io.mockk.mockk
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
@@ -17,12 +21,18 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralComponents
+import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
+import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
@@ -35,6 +45,12 @@ class SessionEstablishmentViewModelTest {
     val bluetoothAdapterProvider = FakeBluetoothAdapterProvider(isEnabled = true)
     val scanner = FakeAndroidBluetoothScanner()
     val logger = SystemLogger()
+    val fakeBluetoothCentralFactory = BluetoothCentralFactory {
+        BluetoothCentralComponents(
+            gattClientManager = FakeGattClientManager(),
+            bluetoothStateMonitor = FakeBluetoothStateMonitor()
+        )
+    }
 
     lateinit var viewModel: SessionEstablishmentViewModel
 
@@ -42,7 +58,8 @@ class SessionEstablishmentViewModelTest {
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         scanner = scanner,
         dispatcher = mainDispatcherRule.testDispatcher,
-        logger = logger
+        logger = logger,
+        bluetoothCentralFactory = fakeBluetoothCentralFactory
     )
 
     @Test
@@ -65,24 +82,25 @@ class SessionEstablishmentViewModelTest {
 
     @Test
     fun `scanForDevice handles DeviceFound ScanEvent and logs it`() = runTest {
-        val deviceAddress = "AA:BB:CC:DD:EE:FF"
+        val bluetoothDevice = mockk<BluetoothDevice>()
+        every { bluetoothDevice.address } returns DEVICE_ADDRESS
 
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = flowOf(
-                ScanEvent.DeviceFound(deviceAddress)
-            )
+        val scanner = BluetoothScanner {
+            flowOf(ScanEvent.DeviceFound(bluetoothDevice))
         }
 
         val viewModel = createViewModel(scanner)
 
         viewModel.updatePermissions(true)
 
-        viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
+        val uuid = UUID.randomUUID()
+
+        viewModel.scanForDevice(uuid.toByteArray())
         runCurrent()
 
         val logMessage = logger[0].message
         assert(logMessage.contains("Bluetooth device found"))
-        assert(logMessage.contains(deviceAddress))
+        assert(logMessage.contains(bluetoothDevice.address))
     }
 
     @Test

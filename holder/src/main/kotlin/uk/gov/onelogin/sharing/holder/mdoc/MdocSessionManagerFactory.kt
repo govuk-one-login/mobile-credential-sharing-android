@@ -8,13 +8,13 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralFactory
 
 /**
- * A factory for creating a [uk.gov.onelogin.sharing.holder.mdoc.AndroidMdocSessionManager].
+ * A factory for creating a [AndroidMdocSessionManager].
  *
  * Encapsulates the creation and dependency wiring of the components
  * required for the BLE advertiser and GATT server.
  */
-@ContributesBinding(ViewModelScope::class)
 @Inject
+@ContributesBinding(ViewModelScope::class)
 class MdocSessionManagerFactory(
     private val bluetoothPeripheralFactory: BluetoothPeripheralFactory,
     private val logger: Logger

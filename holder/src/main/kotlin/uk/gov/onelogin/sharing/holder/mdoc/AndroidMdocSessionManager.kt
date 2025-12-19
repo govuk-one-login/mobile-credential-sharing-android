@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.holder.mdoc
 
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +19,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-internal class AndroidMdocSessionManager(
+@Inject
+@ContributesBinding(scope = ViewModelScope::class)
+class AndroidMdocSessionManager(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
     private val bluetoothStateMonitor: BluetoothStateMonitor,

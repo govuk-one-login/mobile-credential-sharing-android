@@ -44,7 +44,7 @@ class AndroidGattServerManager(
     override fun open(serviceUuid: UUID) {
         val gattService = gattServiceFactory(serviceUuid)
 
-        if (!permissionsChecker.hasPermission()) {
+        if (!permissionsChecker.hasPeripheralPermissions()) {
             _events.tryEmit(
                 GattServerEvent.Error(
                     GattServerError.BLUETOOTH_PERMISSION_MISSING

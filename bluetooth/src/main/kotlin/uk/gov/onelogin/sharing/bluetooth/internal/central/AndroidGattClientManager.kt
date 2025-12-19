@@ -32,7 +32,7 @@ internal class AndroidGattClientManager(
     }
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
-        if (!permissionChecker.hasPermission()) {
+        if (!permissionChecker.hasCentralPermissions()) {
             _events.tryEmit(
                 GattClientEvent.Error(
                     ClientError.BLUETOOTH_PERMISSION_MISSING
