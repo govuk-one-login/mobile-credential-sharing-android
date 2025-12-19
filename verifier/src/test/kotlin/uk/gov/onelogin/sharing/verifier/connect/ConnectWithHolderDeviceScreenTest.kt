@@ -16,6 +16,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
+import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.security.DeviceEngagementStub.ENGAGEMENT_EXPECTED_BASE_64
@@ -46,11 +47,12 @@ class ConnectWithHolderDeviceScreenTest {
     fun cannotDecodeProvidedCborString() = runTest {
         val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
         val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
-
+        val fakeBluetoothStateMonitor = FakeBluetoothStateMonitor()
         val testViewModel = SessionEstablishmentViewModel(
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
-            logger = SystemLogger()
+            logger = SystemLogger(),
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor()
         )
 
         composeTestRule.run {
@@ -76,7 +78,8 @@ class ConnectWithHolderDeviceScreenTest {
             val testViewModel = SessionEstablishmentViewModel(
                 bluetoothAdapterProvider = FakeBluetoothAdapterProvider(isEnabled = false),
                 scanner = FakeAndroidBluetoothScanner(),
-                logger = SystemLogger()
+                logger = SystemLogger(),
+                bluetoothStatusMonitor = FakeBluetoothStateMonitor()
             )
             renderFunction(
                 this,
@@ -102,7 +105,8 @@ class ConnectWithHolderDeviceScreenTest {
         val testViewModel = SessionEstablishmentViewModel(
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
-            logger = SystemLogger()
+            logger = SystemLogger(),
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor()
         )
 
         val stateForTest = decodableGrantedState
@@ -128,7 +132,8 @@ class ConnectWithHolderDeviceScreenTest {
         val testViewModel = SessionEstablishmentViewModel(
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
-            logger = SystemLogger()
+            logger = SystemLogger(),
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor()
         )
         composeTestRule.run {
             renderFunction(
@@ -155,7 +160,8 @@ class ConnectWithHolderDeviceScreenTest {
         val testViewModel = SessionEstablishmentViewModel(
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
-            logger = SystemLogger()
+            logger = SystemLogger(),
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor()
         )
 
         composeTestRule.run {
