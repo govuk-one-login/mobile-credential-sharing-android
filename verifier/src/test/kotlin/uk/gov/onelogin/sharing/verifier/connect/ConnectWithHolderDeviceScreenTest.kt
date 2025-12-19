@@ -203,6 +203,13 @@ class ConnectWithHolderDeviceScreenTest {
     }
 
     @Test
+    fun shouldRequestForBluetoothPromptIfPermissionsAreGranted(){
+        composeTestRule.setContent {
+
+        }
+    }
+
+    @Test
     fun connectWithHolderDevicePreviewRendersWithValidCbor() {
         composeTestRule.setContent {
             ConnectWithHolderDevicePreview(

@@ -18,10 +18,12 @@ import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
+import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
@@ -35,6 +37,7 @@ class SessionEstablishmentViewModelTest {
     val bluetoothAdapterProvider = FakeBluetoothAdapterProvider(isEnabled = true)
     val scanner = FakeAndroidBluetoothScanner()
     val logger = SystemLogger()
+    val fakeBluetoothStateMonitor = FakeBluetoothStateMonitor()
 
     lateinit var viewModel: SessionEstablishmentViewModel
 
@@ -42,7 +45,8 @@ class SessionEstablishmentViewModelTest {
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         scanner = scanner,
         dispatcher = mainDispatcherRule.testDispatcher,
-        logger = logger
+        logger = logger,
+        bluetoothStatusMonitor = fakeBluetoothStateMonitor
     )
 
     @Test
@@ -210,4 +214,24 @@ class SessionEstablishmentViewModelTest {
         val logMessage = logger[0].message
         assert(logMessage.contains("Bluetooth permissions were denied"))
     }
+
+    @Test
+    fun `should set isBluetoothEnabled state to off when prompt is denied`() =
+        runTest {
+            viewModel = createViewModel(scanner)
+
+            fakeBluetoothStateMonitor.emit(BluetoothStatus.OFF)
+
+            assertEquals(false, viewModel.uiState.value.isBluetoothEnabled)
+        }
+
+    @Test
+    fun `should set isBluetoothEnabled state to true when bluetooth enabled`() =
+        runTest {
+            viewModel = createViewModel(scanner)
+
+            fakeBluetoothStateMonitor.emit(BluetoothStatus.ON)
+
+            assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
+        }
 }
