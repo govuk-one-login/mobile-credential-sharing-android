@@ -36,6 +36,7 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
+import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SessionEstablishmentViewModelTest {
@@ -45,12 +46,7 @@ class SessionEstablishmentViewModelTest {
     val bluetoothAdapterProvider = FakeBluetoothAdapterProvider(isEnabled = true)
     val scanner = FakeAndroidBluetoothScanner()
     val logger = SystemLogger()
-    val fakeBluetoothCentralFactory = BluetoothCentralFactory {
-        BluetoothCentralComponents(
-            gattClientManager = FakeGattClientManager(),
-            bluetoothStateMonitor = FakeBluetoothStateMonitor()
-        )
-    }
+    val fakeVerifierSession = FakeVerifierSession()
 
     lateinit var viewModel: SessionEstablishmentViewModel
 
@@ -59,7 +55,7 @@ class SessionEstablishmentViewModelTest {
         scanner = scanner,
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = logger,
-        bluetoothCentralFactory = fakeBluetoothCentralFactory
+        verifierSessionFactory = { fakeVerifierSession }
     )
 
     @Test

@@ -22,20 +22,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
 
 @Inject
 @ViewModelKey(SessionEstablishmentViewModel::class)
 @ContributesIntoMap(ViewModelScope::class)
 class SessionEstablishmentViewModel(
     private val bluetoothAdapterProvider: BluetoothAdapterProvider,
-    bluetoothCentralFactory: BluetoothCentralFactory,
+    verifierSessionFactory: VerifierSessionFactory,
     private val scanner: BluetoothScanner,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val logger: Logger
@@ -44,8 +44,7 @@ class SessionEstablishmentViewModel(
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
     val uiState: StateFlow<ConnectWithHolderDeviceState> = _uiState
     private var scannerJob: Job? = null
-    private val components = bluetoothCentralFactory.create()
-    private val gattClientManager = components.gattClientManager
+    val mdocVerifierSession = verifierSessionFactory.create(viewModelScope)
 
     init {
         _uiState.update {
@@ -92,12 +91,12 @@ class SessionEstablishmentViewModel(
 
     private fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
         viewModelScope.launch(dispatcher) {
-            gattClientManager.events.collect {
-                logger.debug(logTag, "Gatt client event: $it")
+            mdocVerifierSession.state.collect {
+                logger.debug(logTag, "Session state: $it")
             }
         }
 
-        gattClientManager.connect(device, serviceUuid.toUUID())
+        mdocVerifierSession.connect(device, serviceUuid.toUUID())
     }
 
     fun updatePermissions(hasAllPerms: Boolean) {

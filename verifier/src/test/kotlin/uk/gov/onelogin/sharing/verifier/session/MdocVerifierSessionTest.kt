@@ -17,6 +17,7 @@ import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -85,7 +86,11 @@ class MdocVerifierSessionTest {
 
     @Test
     fun `non-ServicesDiscovered event logs Unhandled event`() = runTest {
-        val event = GattClientEvent.Error(ClientError.SERVICE_DISCOVERED_ERROR)
+        val event = GattClientEvent.UnsupportedEvent(
+            DEVICE_ADDRESS,
+            status = 999,
+            newState = 999
+        )
 
         gattClientManager.emitEvent(event)
 

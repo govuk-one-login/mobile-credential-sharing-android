@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.session
 
+import android.bluetooth.BluetoothDevice
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
@@ -28,6 +29,8 @@ interface VerifierSession {
      * @param serviceId The [UUID] of the service to connect to.
      */
     fun start(serviceId: UUID)
+
+    fun connect(device: BluetoothDevice, serviceUuid: UUID)
 
     /**
      * Stops the verifier session.

@@ -14,7 +14,6 @@ class MdocServiceValidatorTest {
 
     private val fakeLogger = SystemLogger()
     private val validator = MdocServiceValidator(
-        serviceUuids = GattUuids,
         logger = fakeLogger
     )
 

@@ -2,6 +2,9 @@ package uk.gov.onelogin.sharing.verifier.session
 
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -11,17 +14,17 @@ import uk.gov.onelogin.sharing.core.mdoc.GattUuids
  * Checks for the presence of mandatory characteristics defined in [GattUuids]
  * 11.1.3.2 Service definition - ISO 18013-5
  *
- * @param serviceUuids The collection of UUIDs defining the expected service and characteristics.
  * @param logger An instance of [Logger] for logging validation errors.
  */
-class MdocServiceValidator(private val serviceUuids: GattUuids, private val logger: Logger) :
-    ServiceValidator {
+@Inject
+@ContributesBinding(ViewModelScope::class)
+class MdocServiceValidator(private val logger: Logger) : ServiceValidator {
     override fun validate(service: BluetoothGattService): ValidationResult {
         val errors = mutableListOf<String>()
 
         validateCharacteristic(
             service = service,
-            uuid = serviceUuids.STATE_UUID,
+            uuid = GattUuids.STATE_UUID,
             name = "State",
             requiredProperties = listOf(
                 BluetoothGattCharacteristic.PROPERTY_NOTIFY,
@@ -32,7 +35,7 @@ class MdocServiceValidator(private val serviceUuids: GattUuids, private val logg
 
         validateCharacteristic(
             service = service,
-            uuid = serviceUuids.CLIENT_2_SERVER_UUID,
+            uuid = GattUuids.CLIENT_2_SERVER_UUID,
             name = "Client2Server",
             requiredProperties = listOf(
                 BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE
@@ -42,7 +45,7 @@ class MdocServiceValidator(private val serviceUuids: GattUuids, private val logg
 
         validateCharacteristic(
             service = service,
-            uuid = serviceUuids.SERVER_2_CLIENT_UUID,
+            uuid = GattUuids.SERVER_2_CLIENT_UUID,
             name = "Server2Client",
             requiredProperties = listOf(
                 BluetoothGattCharacteristic.PROPERTY_NOTIFY

@@ -69,18 +69,36 @@ internal class AndroidGattClientManager(
         bluetoothGatt = null
     }
 
+    private fun discoverServices() {
+        try {
+            bluetoothGatt?.discoverServices()
+        } catch (e: SecurityException) {
+            logger.error(logTag, "Security exception", e)
+            _events.tryEmit(
+                GattClientEvent.Error(ClientError.BLUETOOTH_PERMISSION_MISSING)
+            )
+        }
+    }
+
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
             is GattEvent.ConnectionStateChange -> {
                 val address = event.gatt.device.address
 
-                val event = when {
+                val clientEvent = when {
                     event.status == BluetoothGatt.GATT_SUCCESS &&
-                        event.newState == BluetoothGatt.STATE_CONNECTED ->
-                        GattClientEvent.Connected(address)
+                        event.newState == BluetoothGatt.STATE_CONNECTED -> {
+                        bluetoothGatt = event.gatt
 
-                    event.newState == BluetoothGatt.STATE_DISCONNECTED ->
+                        discoverServices()
+
+                        GattClientEvent.Connected(address)
+                    }
+
+                    event.newState == BluetoothGatt.STATE_DISCONNECTED -> {
+                        bluetoothGatt = null
                         GattClientEvent.Disconnected(address)
+                    }
 
                     else -> GattClientEvent.UnsupportedEvent(
                         address,
@@ -89,7 +107,7 @@ internal class AndroidGattClientManager(
                     )
                 }
 
-                _events.tryEmit(event)
+                _events.tryEmit(clientEvent)
             }
 
             is GattEvent.ServicesDiscovered -> {
