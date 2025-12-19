@@ -60,6 +60,36 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
+    fun `returns error if bluetooth gatt is null`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns null
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.BLUETOOTH_GATT_NOT_AVAILABLE
+                ),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
     fun `returns error if exception is thrown`() = runTest {
         every {
             bluetoothDevice.connectGatt(
@@ -85,10 +115,12 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.BLUETOOTH_GATT_NOT_AVAILABLE
+                    ClientError.BLUETOOTH_PERMISSION_MISSING
                 ),
                 awaitItem()
             )
+
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

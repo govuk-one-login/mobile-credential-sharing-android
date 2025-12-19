@@ -55,10 +55,18 @@ internal class AndroidGattClientManager(
             logger.error(logTag, "Security exception", e)
             _events.tryEmit(
                 GattClientEvent.Error(
-                    ClientError.BLUETOOTH_GATT_NOT_AVAILABLE
+                    ClientError.BLUETOOTH_PERMISSION_MISSING
                 )
             )
             null
+        }
+
+        if (bluetoothGatt == null) {
+            _events.tryEmit(
+                GattClientEvent.Error(
+                    ClientError.BLUETOOTH_GATT_NOT_AVAILABLE
+                )
+            )
         }
     }
 
