@@ -216,22 +216,20 @@ class SessionEstablishmentViewModelTest {
     }
 
     @Test
-    fun `should set isBluetoothEnabled state to off when prompt is denied`() =
-        runTest {
-            viewModel = createViewModel(scanner)
+    fun `should set isBluetoothEnabled state to off when prompt is denied`() = runTest {
+        viewModel = createViewModel(scanner)
 
-            fakeBluetoothStateMonitor.emit(BluetoothStatus.OFF)
+        fakeBluetoothStateMonitor.emit(BluetoothStatus.OFF)
 
-            assertEquals(false, viewModel.uiState.value.isBluetoothEnabled)
-        }
+        assertEquals(false, viewModel.uiState.value.isBluetoothEnabled)
+    }
 
     @Test
-    fun `should set isBluetoothEnabled state to true when bluetooth enabled`() =
-        runTest {
-            viewModel = createViewModel(scanner)
+    fun `should set isBluetoothEnabled state to true when bluetooth enabled`() = runTest {
+        viewModel = createViewModel(scanner)
 
-            fakeBluetoothStateMonitor.emit(BluetoothStatus.ON)
+        fakeBluetoothStateMonitor.emit(BluetoothStatus.ON)
 
-            assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
-        }
+        assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
+    }
 }

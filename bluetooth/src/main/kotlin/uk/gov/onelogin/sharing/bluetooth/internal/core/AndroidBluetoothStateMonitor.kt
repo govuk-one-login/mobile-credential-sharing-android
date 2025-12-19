@@ -20,10 +20,8 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(ViewModelScope::class)
 @Inject
-class AndroidBluetoothStateMonitor(
-    private val appContext: Context,
-    private val logger: Logger
-) : BluetoothStateMonitor {
+class AndroidBluetoothStateMonitor(private val appContext: Context, private val logger: Logger) :
+    BluetoothStateMonitor {
     private val _states = MutableSharedFlow<BluetoothStatus>(
         replay = 1
     )

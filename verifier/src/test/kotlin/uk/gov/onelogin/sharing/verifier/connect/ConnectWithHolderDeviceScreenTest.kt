@@ -5,10 +5,13 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.test.espresso.intent.Intents
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,6 +37,16 @@ class ConnectWithHolderDeviceScreenTest {
     @get:Rule
     val composeTestRule = ConnectWithHolderDeviceRule(createComposeRule())
 
+    @Before
+    fun setup() {
+        Intents.init()
+    }
+
+    @After
+    fun tearDown() {
+        Intents.release()
+    }
+
     @TestParameter(valuesProvider = ConnectWithHolderDeviceRenderProvider::class)
     lateinit var renderFunction: (
         ConnectWithHolderDeviceRule,
@@ -47,7 +60,6 @@ class ConnectWithHolderDeviceScreenTest {
     fun cannotDecodeProvidedCborString() = runTest {
         val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
         val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
-        val fakeBluetoothStateMonitor = FakeBluetoothStateMonitor()
         val testViewModel = SessionEstablishmentViewModel(
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
@@ -200,13 +212,6 @@ class ConnectWithHolderDeviceScreenTest {
         }
 
         composeTestRule.onNodeWithText("Generic error").isDisplayed()
-    }
-
-    @Test
-    fun shouldRequestForBluetoothPromptIfPermissionsAreGranted(){
-        composeTestRule.setContent {
-
-        }
     }
 
     @Test
