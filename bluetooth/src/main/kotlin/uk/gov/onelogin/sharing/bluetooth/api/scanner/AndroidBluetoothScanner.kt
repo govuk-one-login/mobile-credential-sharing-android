@@ -58,7 +58,7 @@ class AndroidBluetoothScanner(
                             logTag,
                             " Found device: ${result.device.address}"
                         )
-                        trySend(ScanEvent.DeviceFound(result.device.address))
+                        trySend(ScanEvent.DeviceFound(result.device))
                     },
                     onFailure = { failure ->
                         isScanning = false

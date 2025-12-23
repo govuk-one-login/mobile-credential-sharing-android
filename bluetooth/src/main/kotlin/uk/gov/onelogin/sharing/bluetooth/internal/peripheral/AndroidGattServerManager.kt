@@ -10,9 +10,9 @@ import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
@@ -44,7 +44,7 @@ class AndroidGattServerManager(
     override fun open(serviceUuid: UUID) {
         val gattService = gattServiceFactory(serviceUuid)
 
-        if (!permissionsChecker.hasPermission()) {
+        if (!permissionsChecker.hasPeripheralPermissions()) {
             _events.tryEmit(
                 GattServerEvent.Error(
                     GattServerError.BLUETOOTH_PERMISSION_MISSING

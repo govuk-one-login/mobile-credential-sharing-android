@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.holder.FakeBluetoothServerFactory
+import uk.gov.onelogin.sharing.holder.FakeBluetoothPeripheralFactory
 
 @RunWith(RobolectricTestRunner::class)
 class MdocSessionManagerFactoryTest {
@@ -18,14 +18,14 @@ class MdocSessionManagerFactoryTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
-    private val fakeBluetoothServerFactory = FakeBluetoothServerFactory()
+    private val fakeBluetoothServerFactory = FakeBluetoothPeripheralFactory()
     private val fakeLogger = SystemLogger()
     private val testScope = CoroutineScope(SupervisorJob() + dispatcherRule.testDispatcher)
 
     @Test
     fun `creates an instance of MdocSessionManager`() {
         val sessionManager = MdocSessionManagerFactory(
-            bluetoothFactory = fakeBluetoothServerFactory,
+            bluetoothPeripheralFactory = fakeBluetoothServerFactory,
             logger = fakeLogger
         )
             .create(testScope)

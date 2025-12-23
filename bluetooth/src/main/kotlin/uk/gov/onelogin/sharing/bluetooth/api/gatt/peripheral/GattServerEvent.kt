@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.gatt.server
+package uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral
 
 import android.bluetooth.BluetoothGattService
 

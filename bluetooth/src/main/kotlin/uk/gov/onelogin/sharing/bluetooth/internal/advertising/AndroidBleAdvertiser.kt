@@ -34,7 +34,7 @@ internal class AndroidBleAdvertiser(
     private var currentCallback: AdvertisingCallback? = null
 
     override fun isBluetoothEnabled() = bleProvider.isBluetoothEnabled()
-    override fun hasAdvertisePermission() = permissionChecker.hasPermission()
+    override fun hasAdvertisePermission() = permissionChecker.hasPeripheralPermissions()
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
         when {
@@ -43,7 +43,7 @@ internal class AndroidBleAdvertiser(
                     AdvertisingError.BLUETOOTH_DISABLED
                 )
 
-            !permissionChecker.hasPermission() ->
+            !permissionChecker.hasPeripheralPermissions() ->
                 throw StartAdvertisingException(
                     AdvertisingError.MISSING_PERMISSION
                 )

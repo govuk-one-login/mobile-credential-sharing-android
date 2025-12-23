@@ -6,14 +6,14 @@ import android.bluetooth.BluetoothProfile
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
-
-private const val ADDRESS = "AA:BB:CC:DD:EE:FF"
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 
 class ConnectionStateChangeMappingTest {
     private val device = mockk<BluetoothDevice> {
-        every { address } returns ADDRESS
+        every { address } returns DEVICE_ADDRESS
     }
 
     @Test
@@ -26,8 +26,8 @@ class ConnectionStateChangeMappingTest {
 
         val result = event.toGattServerEvent()
 
-        Assert.assertEquals(
-            GattServerEvent.Connected(ADDRESS),
+        assertEquals(
+            GattServerEvent.Connected(DEVICE_ADDRESS),
             result
         )
     }
@@ -42,8 +42,8 @@ class ConnectionStateChangeMappingTest {
 
         val result = event.toGattServerEvent()
 
-        Assert.assertEquals(
-            GattServerEvent.Disconnected(ADDRESS),
+        assertEquals(
+            GattServerEvent.Disconnected(DEVICE_ADDRESS),
             result
         )
     }
@@ -60,7 +60,7 @@ class ConnectionStateChangeMappingTest {
 
         Assert.assertEquals(
             GattServerEvent.UnsupportedEvent(
-                address = ADDRESS,
+                address = DEVICE_ADDRESS,
                 status = 42,
                 newState = 123
             ),

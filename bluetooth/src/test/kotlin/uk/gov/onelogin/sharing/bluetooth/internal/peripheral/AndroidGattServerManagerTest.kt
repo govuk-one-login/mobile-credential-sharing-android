@@ -16,8 +16,8 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.mockBluetoothDevice
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
@@ -237,7 +237,7 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `gatt server returns error if permissions are not granted`() = runTest {
-        fakePermissionChecker.hasPermission = false
+        fakePermissionChecker.hasPeripheralPermissions = false
         every {
             bluetoothManager.openGattServer(context, any())
         } returns gattServer

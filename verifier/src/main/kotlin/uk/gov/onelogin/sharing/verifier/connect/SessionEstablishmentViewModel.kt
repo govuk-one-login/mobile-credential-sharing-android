@@ -2,6 +2,7 @@
 
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -25,13 +26,16 @@ import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
+import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
 
 @Inject
 @ViewModelKey(SessionEstablishmentViewModel::class)
 @ContributesIntoMap(ViewModelScope::class)
 class SessionEstablishmentViewModel(
     private val bluetoothAdapterProvider: BluetoothAdapterProvider,
+    verifierSessionFactory: VerifierSessionFactory,
     private val scanner: BluetoothScanner,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val logger: Logger
@@ -40,6 +44,7 @@ class SessionEstablishmentViewModel(
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
     val uiState: StateFlow<ConnectWithHolderDeviceState> = _uiState
     private var scannerJob: Job? = null
+    val mdocVerifierSession = verifierSessionFactory.create(viewModelScope)
 
     init {
         _uiState.update {
@@ -61,8 +66,10 @@ class SessionEstablishmentViewModel(
                         is ScanEvent.DeviceFound -> {
                             logger.debug(
                                 logTag,
-                                "Bluetooth device found: ${scanResult.deviceAddress}"
+                                "Bluetooth device found: ${scanResult.device.address}"
                             )
+
+                            connect(scanResult.device, uuid)
                         }
 
                         is ScanEvent.ScanFailed -> {
@@ -80,6 +87,16 @@ class SessionEstablishmentViewModel(
                 )
             }
         }
+    }
+
+    private fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
+        viewModelScope.launch(dispatcher) {
+            mdocVerifierSession.state.collect {
+                logger.debug(logTag, "Session state: $it")
+            }
+        }
+
+        mdocVerifierSession.connect(device, serviceUuid.toUUID())
     }
 
     fun updatePermissions(hasAllPerms: Boolean) {
