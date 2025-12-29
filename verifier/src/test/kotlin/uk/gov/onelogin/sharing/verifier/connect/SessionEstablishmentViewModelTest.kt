@@ -5,6 +5,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
+import kotlin.test.assertFalse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
@@ -241,5 +242,25 @@ class SessionEstablishmentViewModelTest {
         fakeBluetoothStateMonitor.emit(BluetoothStatus.ON)
 
         assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
+    }
+
+    @Test
+    fun `should set bluetoothPromptResult true when prompt enabled`() {
+        viewModel = createViewModel(scanner)
+
+        viewModel.updateBluetoothPromptResult(true)
+        val logMessage = logger[0].message
+        assert(logMessage.contains("User enabled bluetooth via prompt"))
+        assertTrue(viewModel.uiState.value.bluetoothPromptResult)
+    }
+
+    @Test
+    fun `should set bluetoothPromptResult false when prompt denied`() {
+        viewModel = createViewModel(scanner)
+
+        viewModel.updateBluetoothPromptResult(false)
+        val logMessage = logger[0].message
+        assert(logMessage.contains("User cancelled bluetooth prompt"))
+        assertFalse(viewModel.uiState.value.bluetoothPromptResult)
     }
 }

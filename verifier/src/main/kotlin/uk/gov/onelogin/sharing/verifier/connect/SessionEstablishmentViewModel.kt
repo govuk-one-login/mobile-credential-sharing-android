@@ -60,7 +60,7 @@ class SessionEstablishmentViewModel(
         viewModelScope.launch {
             bluetoothStatusMonitor.states.collect { bluetoothState ->
                 when (bluetoothState) {
-                    BluetoothStatus.ON -> {
+                    BluetoothStatus.TURNING_ON -> {
                         _uiState.update {
                             it.copy(
                                 isBluetoothEnabled = true
@@ -69,14 +69,16 @@ class SessionEstablishmentViewModel(
                         logger.debug(logTag, "Device bluetooth was enabled")
                     }
 
-                    else -> {
+                    BluetoothStatus.OFF -> {
                         _uiState.update {
                             it.copy(
                                 isBluetoothEnabled = false
                             )
                         }
-                        logger.debug(logTag, "Cancelled bluetooth prompt")
+                        logger.debug(logTag, "Bluetooth turned off")
                     }
+
+                    else -> Unit
                 }
             }
         }
@@ -158,6 +160,26 @@ class SessionEstablishmentViewModel(
             else -> {
                 logger.debug(logTag, "Bluetooth permissions were denied")
             }
+        }
+    }
+
+    fun updateBluetoothPromptResult(promptResult: Boolean) {
+        if (promptResult) {
+            logger.debug(
+                logTag,
+                "User enabled bluetooth via prompt"
+            )
+        } else {
+            logger.debug(
+                logTag,
+                "User cancelled bluetooth prompt"
+            )
+        }
+
+        _uiState.update {
+            it.copy(
+                bluetoothPromptResult = promptResult
+            )
         }
     }
 
