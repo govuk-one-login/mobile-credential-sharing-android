@@ -61,7 +61,7 @@ internal class AndroidBleAdvertiserTest {
 
     @Test
     fun `has advertise permission returns false when provider does not have permissions`() {
-        permissionChecker.hasPermission = false
+        permissionChecker.hasPeripheralPermissions = false
         assert(!bleAdvertiser.hasAdvertisePermission())
     }
 
@@ -99,7 +99,7 @@ internal class AndroidBleAdvertiserTest {
 
     @Test
     fun `start fails when permission not granted`() = runTest {
-        permissionChecker.hasPermission = false
+        permissionChecker.hasPeripheralPermissions = false
 
         val exception = assertFailsWith<StartAdvertisingException> {
             bleAdvertiser.startAdvertise(

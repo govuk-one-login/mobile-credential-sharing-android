@@ -18,7 +18,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.util.ReflectionHelpers
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 
 @RunWith(RobolectricTestRunner::class)
 class BluetoothPermissionCheckerTest {
@@ -52,7 +51,7 @@ class BluetoothPermissionCheckerTest {
 
         val checker = BluetoothPermissionChecker(context)
 
-        assertTrue(checker.hasPermission())
+        assertTrue(checker.hasPeripheralPermissions())
 
         verify(exactly = 0) {
             ContextCompat.checkSelfPermission(any(), any())
@@ -83,7 +82,7 @@ class BluetoothPermissionCheckerTest {
 
         val checker = BluetoothPermissionChecker(context)
 
-        assertTrue(checker.hasPermission())
+        assertTrue(checker.hasPeripheralPermissions())
 
         verify(exactly = 1) {
             ContextCompat.checkSelfPermission(
@@ -110,7 +109,7 @@ class BluetoothPermissionCheckerTest {
 
         val checker = BluetoothPermissionChecker(context)
 
-        assertFalse(checker.hasPermission())
+        assertFalse(checker.hasPeripheralPermissions())
 
         verify(exactly = 1) {
             ContextCompat.checkSelfPermission(

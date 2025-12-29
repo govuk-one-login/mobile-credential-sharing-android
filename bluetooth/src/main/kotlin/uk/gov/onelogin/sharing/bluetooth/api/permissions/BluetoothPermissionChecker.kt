@@ -9,14 +9,26 @@ import androidx.core.content.ContextCompat
 
 @SuppressLint("NewApi")
 class BluetoothPermissionChecker(private val context: Context) : PermissionChecker {
-    override fun hasPermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        listOf(
-            Manifest.permission.BLUETOOTH_ADVERTISE,
-            Manifest.permission.BLUETOOTH_CONNECT
-        ).map { permission ->
-            ContextCompat.checkSelfPermission(context, permission)
-        }.all { PackageManager.PERMISSION_GRANTED == it }
-    } else {
-        true
-    }
+    override fun hasPeripheralPermissions(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            listOf(
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ).map { permission ->
+                ContextCompat.checkSelfPermission(context, permission)
+            }.all { PackageManager.PERMISSION_GRANTED == it }
+        } else {
+            true
+        }
+
+    override fun hasCentralPermissions(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            listOf(
+                Manifest.permission.BLUETOOTH_CONNECT
+            ).map { permission ->
+                ContextCompat.checkSelfPermission(context, permission)
+            }.all { PackageManager.PERMISSION_GRANTED == it }
+        } else {
+            true
+        }
 }

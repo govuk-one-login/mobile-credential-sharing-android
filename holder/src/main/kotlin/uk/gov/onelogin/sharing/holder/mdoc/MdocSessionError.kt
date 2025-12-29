@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.holder.mdoc
 
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.server.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 
 enum class MdocSessionError {
     ADVERTISING_FAILED,

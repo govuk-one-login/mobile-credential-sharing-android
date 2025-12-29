@@ -29,6 +29,7 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStub
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.undecodableState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.validWithCorrectBluetoothSetup
+import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(RobolectricTestParameterInjector::class)
@@ -56,6 +57,8 @@ class ConnectWithHolderDeviceScreenTest {
         MultiplePermissionsState
     ) -> Unit
 
+    val mdocVerifierSession = FakeVerifierSession()
+
     @Test
     fun cannotDecodeProvidedCborString() = runTest {
         val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
@@ -64,7 +67,8 @@ class ConnectWithHolderDeviceScreenTest {
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
             logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor()
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+            verifierSessionFactory = { mdocVerifierSession }
         )
 
         composeTestRule.run {
@@ -91,7 +95,8 @@ class ConnectWithHolderDeviceScreenTest {
                 bluetoothAdapterProvider = FakeBluetoothAdapterProvider(isEnabled = false),
                 scanner = FakeAndroidBluetoothScanner(),
                 logger = SystemLogger(),
-                bluetoothStatusMonitor = FakeBluetoothStateMonitor()
+                bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+                verifierSessionFactory = { mdocVerifierSession }
             )
             renderFunction(
                 this,
@@ -118,7 +123,8 @@ class ConnectWithHolderDeviceScreenTest {
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
             logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor()
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+            verifierSessionFactory = { mdocVerifierSession }
         )
 
         val stateForTest = decodableGrantedState
@@ -145,7 +151,8 @@ class ConnectWithHolderDeviceScreenTest {
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
             logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor()
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+            verifierSessionFactory = { mdocVerifierSession }
         )
         composeTestRule.run {
             renderFunction(
@@ -173,7 +180,8 @@ class ConnectWithHolderDeviceScreenTest {
             bluetoothAdapterProvider = fakeBluetoothProvider,
             scanner = fakeBluetoothScanner,
             logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor()
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+            verifierSessionFactory = { mdocVerifierSession }
         )
 
         composeTestRule.run {

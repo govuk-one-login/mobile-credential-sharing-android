@@ -22,6 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
 
 @RunWith(AndroidJUnit4::class)
@@ -46,7 +47,7 @@ class AndroidBluetoothScannerTest {
         val uuid = UUID.randomUUID().toBytes()
 
         val mockDevice = mockk<BluetoothDevice>()
-        every { mockDevice.address } returns "AA:BB:CC:DD:EE:FF"
+        every { mockDevice.address } returns DEVICE_ADDRESS
 
         val mockScanResult = mockk<ScanResult>()
         every { mockScanResult.device } returns mockDevice
@@ -64,7 +65,7 @@ class AndroidBluetoothScannerTest {
             val emitted = awaitItem()
 
             assertTrue(emitted is ScanEvent.DeviceFound)
-            assertEquals("AA:BB:CC:DD:EE:FF", (emitted as ScanEvent.DeviceFound).deviceAddress)
+            assertEquals(DEVICE_ADDRESS, (emitted as ScanEvent.DeviceFound).device.address)
         }
     }
 
