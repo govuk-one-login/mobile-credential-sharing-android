@@ -61,6 +61,7 @@ class SessionEstablishmentViewModel(
                                 isBluetoothEnabled = true
                             )
                         }
+                        logger.debug(logTag, "Device bluetooth was enabled")
                     }
 
                     else -> {
@@ -69,6 +70,7 @@ class SessionEstablishmentViewModel(
                                 isBluetoothEnabled = false
                             )
                         }
+                        logger.debug(logTag, "Cancelled bluetooth prompt")
                     }
                 }
             }
