@@ -215,7 +215,6 @@ class ConnectWithHolderDeviceScreenTest {
                 contentState = errorState,
                 engagementData = validDeviceEngagementDto,
                 permissionsGranted = true,
-                bluetoothPrompt = {},
                 modifier = Modifier
             )
         }
