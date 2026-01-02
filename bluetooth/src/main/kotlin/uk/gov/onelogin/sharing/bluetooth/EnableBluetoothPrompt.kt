@@ -15,7 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
  * permission.
  */
 @Composable
-fun EnableBluetoothPrompt(onResult: (Boolean) -> Unit = {}) {
+fun EnableBluetoothPrompt(isEnabled: Boolean = false, onResult: (Boolean) -> Unit = {}) {
     val resultLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -23,8 +23,10 @@ fun EnableBluetoothPrompt(onResult: (Boolean) -> Unit = {}) {
         onResult(enabled)
     }
 
-    LaunchedEffect(Unit) {
-        val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        resultLauncher.launch(intent)
+    LaunchedEffect(isEnabled) {
+        if (!isEnabled) {
+            val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            resultLauncher.launch(intent)
+        }
     }
 }
