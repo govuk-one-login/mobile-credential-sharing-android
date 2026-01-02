@@ -13,6 +13,7 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
+import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
 
 @Serializable
 @Parcelize
@@ -54,7 +55,8 @@ sealed class PrimaryTabDestination(val label: String) : Parcelable {
                             to ConnectWithHolderDeviceRoute(validBarcodeDataResult.data),
                         "Error: Scanned invalid barcode"
                             to ScannedInvalidQrRoute(invalidBarcodeDataResultOne.data),
-                        "QR Scanner" to VerifierScanRoute
+                        "QR Scanner" to VerifierScanRoute,
+                        "Verify Credential" to VerifyCredentialRoute
                     ).sortedBy { navPair -> navPair.first }
                         .toPersistentList(),
                     onNavigate = onNavigate

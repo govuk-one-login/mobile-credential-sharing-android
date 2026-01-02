@@ -13,6 +13,7 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifier
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
+import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute.configureVerifyCredentialRoute
 
 /**
  * Serializable data object that acts as a navigation route for the Wallet sharing verifier module.
@@ -36,6 +37,7 @@ data object VerifierRoutes {
      */
     fun NavGraphBuilder.configureVerifierRoutes(navController: NavController, context: Context) {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
+            configureVerifyCredentialRoute()
             configureVerifierScannerRoute(
                 onInvalidBarcode = {
                     navController.navigateToScannedInvalidQrRoute(uri = it)
