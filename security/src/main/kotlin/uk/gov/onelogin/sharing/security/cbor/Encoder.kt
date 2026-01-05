@@ -5,6 +5,7 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
+import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.BleOptionsSerializer
 import uk.gov.onelogin.sharing.security.cbor.serializers.CoseKeySerializer
 import uk.gov.onelogin.sharing.security.cbor.serializers.DeviceEngagementSerializer
@@ -12,6 +13,7 @@ import uk.gov.onelogin.sharing.security.cbor.serializers.DeviceRetrievalMethodSe
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCborSerializer
 import uk.gov.onelogin.sharing.security.cbor.serializers.SecuritySerializer
+import uk.gov.onelogin.sharing.security.cbor.serializers.SessionEstablishmentSerializer
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 /**
@@ -57,4 +59,12 @@ fun DeviceEngagement.encode(): ByteArray {
         CoseKey::class.java to CoseKeySerializer()
     )
     return this.encode(deviceEngagementSerializers)
+}
+
+fun Any.encode(): ByteArray {
+    val sessionSerializers: Map<Class<*>, StdSerializer<*>> = mapOf(
+        EmbeddedCbor::class.java to EmbeddedCborSerializer(),
+        SessionEstablishmentDto::class.java to SessionEstablishmentSerializer()
+    )
+    return this.encode(sessionSerializers)
 }
