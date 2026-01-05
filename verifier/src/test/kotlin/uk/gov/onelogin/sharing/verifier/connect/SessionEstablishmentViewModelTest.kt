@@ -243,24 +243,4 @@ class SessionEstablishmentViewModelTest {
 
         assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
     }
-
-    @Test
-    fun `should set bluetoothPromptResult true when prompt enabled`() {
-        viewModel = createViewModel(scanner)
-
-        viewModel.updateBluetoothPromptResult(true)
-        val logMessage = logger[0].message
-        assert(logMessage.contains("User enabled bluetooth via prompt"))
-        assertTrue(viewModel.uiState.value.bluetoothPromptResult)
-    }
-
-    @Test
-    fun `should set bluetoothPromptResult false when prompt denied`() {
-        viewModel = createViewModel(scanner)
-
-        viewModel.updateBluetoothPromptResult(false)
-        val logMessage = logger[0].message
-        assert(logMessage.contains("User cancelled bluetooth prompt"))
-        assertFalse(viewModel.uiState.value.bluetoothPromptResult)
-    }
 }

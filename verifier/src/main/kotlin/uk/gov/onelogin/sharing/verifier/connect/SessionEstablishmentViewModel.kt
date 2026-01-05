@@ -163,26 +163,6 @@ class SessionEstablishmentViewModel(
         }
     }
 
-    fun updateBluetoothPromptResult(promptResult: Boolean) {
-        if (promptResult) {
-            logger.debug(
-                logTag,
-                "User enabled bluetooth via prompt"
-            )
-        } else {
-            logger.debug(
-                logTag,
-                "User cancelled bluetooth prompt"
-            )
-        }
-
-        _uiState.update {
-            it.copy(
-                bluetoothPromptResult = promptResult
-            )
-        }
-    }
-
     fun stopScanning() {
         if (scannerJob?.isActive == true) {
             logger.debug(logTag, "Terminating session")

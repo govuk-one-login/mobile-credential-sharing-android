@@ -77,9 +77,7 @@ fun ConnectWithHolderDeviceScreen(
     }
 
     if (permissionsGranted) {
-        EnableBluetoothPrompt(
-            onResult = viewModel::updateBluetoothPromptResult
-        )
+        EnableBluetoothPrompt()
     }
 
     val engagementData = remember {
