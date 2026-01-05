@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.util.Base64
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
@@ -12,7 +13,6 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
-import java.util.Base64
 
 private const val TAG = "decodeDeviceEngagement"
 
@@ -44,7 +44,7 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
                 ImplementationDetail(
                     ticket = "N/A not captured",
                     description = "Create DTO -> Domain mapping functions for verifier to extract" +
-                            "deserialized device engagement message"
+                        "deserialized device engagement message"
                 )
             ]
         )
@@ -52,17 +52,17 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
         logger.debug(
             TAG,
             " - Security - Cipher Suite: " +
-                    "${deviceEngagement.security.cipherSuiteIdentifier}"
+                "${deviceEngagement.security.cipherSuiteIdentifier}"
         )
         logger.debug(
             TAG,
             " - Security - Ephemeral Public Key (as hex): " +
-                    "${deviceEngagement.security.ephemeralPublicKey}"
+                "${deviceEngagement.security.ephemeralPublicKey}"
         )
         logger.debug(
             TAG,
             " - Device Retrieval Methods: " +
-                    "${deviceEngagement.deviceRetrievalMethods}"
+                "${deviceEngagement.deviceRetrievalMethods}"
         )
 
         deviceEngagement
@@ -77,41 +77,32 @@ fun String.base64Decode(decoder: Base64.Decoder = Base64.getUrlDecoder()): ByteA
     decoder.decode(this)
 
 fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): SessionEstablishmentDto {
-   val mapper = ObjectMapper(CBORFactory()).apply {
+    val mapper = ObjectMapper(CBORFactory()).apply {
         registerModule(KotlinModule.Builder().build())
     }
 
-    try {
-        val rawDto = mapper.readValue(rawBytes, SessionEstablishmentDto::class.java)
+    val rawDto = mapper.readValue(rawBytes, SessionEstablishmentDto::class.java)
 
-        val eReaderKey = requireNotNull(rawDto.eReaderKey) {
-            "eReaderKey cannot be null after deserialization"
-        }
-
-        val data = requireNotNull(rawDto.data) {
-            "data cannot be null after deserialization"
-        }
-
-        val eReaderKeyBytes = eReaderKey.encode()
-
-        val sessionEstablishmentDto = SessionEstablishmentDto(
-            eReaderKey = EmbeddedCbor(eReaderKeyBytes),
-            data = data
-        )
-
-        logger.debug(
-            logger.logTag,
-            "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
-                    "data: ${sessionEstablishmentDto.data.toHexString()} "
-        )
-
-        return sessionEstablishmentDto
-    } catch (e: JsonProcessingException) {
-        logger.error(
-            logger.logTag,
-            "Failed to deserialize CBOR into SessionEstablishmentDto: ${e.message}",
-            e
-        )
-        throw IllegalArgumentException("Invalid CBOR data for SessionEstablishmentDto", e)
+    val eReaderKey = requireNotNull(rawDto.eReaderKey) {
+        "eReaderKey cannot be null after deserialization"
     }
+
+    val data = requireNotNull(rawDto.data) {
+        "data cannot be null after deserialization"
+    }
+
+    val eReaderKeyBytes = eReaderKey.encode()
+
+    val sessionEstablishmentDto = SessionEstablishmentDto(
+        eReaderKey = EmbeddedCbor(eReaderKeyBytes),
+        data = data
+    )
+
+    logger.debug(
+        logger.logTag,
+        "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
+            "data: ${sessionEstablishmentDto.data.toHexString()} "
+    )
+
+    return sessionEstablishmentDto
 }

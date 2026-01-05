@@ -8,10 +8,7 @@ import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 
 class SessionEstablishmentDeserializer : JsonDeserializer<SessionEstablishmentDto>() {
-    override fun deserialize(
-        p: JsonParser,
-        ctxt: DeserializationContext
-    ): SessionEstablishmentDto {
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): SessionEstablishmentDto {
         val root = p.codec.readTree<JsonNode>(p)
 
         require(root.isObject) { "Expected a CBOR map object" }
