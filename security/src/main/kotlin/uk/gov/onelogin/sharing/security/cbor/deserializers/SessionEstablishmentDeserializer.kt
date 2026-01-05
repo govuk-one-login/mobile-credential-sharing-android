@@ -13,10 +13,10 @@ class SessionEstablishmentDeserializer : JsonDeserializer<SessionEstablishmentDt
 
         require(root.isObject) { "Expected a CBOR map object" }
 
-        val eReaderKeyNode = root.get("eReaderKey")
+        val eReaderKeyNode = root["eReaderKey"]
         requireNotNull(eReaderKeyNode) { "Missing required field: 'eReaderKey'" }
 
-        val dataNode = root.get("data")
+        val dataNode = root["data"]
         requireNotNull(dataNode) { "Missing required field: 'data'" }
 
         val eReaderKeyBytes = eReaderKeyNode.binaryValue()
