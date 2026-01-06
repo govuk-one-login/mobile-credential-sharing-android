@@ -40,7 +40,6 @@ import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
-@Suppress("LongMethod")
 @OptIn(ExperimentalPermissionsApi::class)
 fun ConnectWithHolderDeviceScreen(
     base64EncodedEngagement: String,
