@@ -1,12 +1,10 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import uk.gov.android.ui.patterns.loadingscreen.LoadingScreen
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanner
