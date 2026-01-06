@@ -76,7 +76,7 @@ fun ConnectWithHolderDeviceScreen(
         }
     }
 
-    if (permissionsGranted) {
+    if (permissionsGranted && !contentState.isBluetoothEnabled) {
         EnableBluetoothPrompt()
     }
 

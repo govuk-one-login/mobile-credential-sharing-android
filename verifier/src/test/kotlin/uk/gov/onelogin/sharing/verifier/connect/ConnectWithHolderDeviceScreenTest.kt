@@ -1,11 +1,15 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import android.app.Activity
+import android.app.Instrumentation
+import android.bluetooth.BluetoothAdapter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -58,6 +62,88 @@ class ConnectWithHolderDeviceScreenTest {
     ) -> Unit
 
     val mdocVerifierSession = FakeVerifierSession()
+
+    @Test
+    fun `opens system Bluetooth alert when the Bluetooth is disabled`() = runTest {
+        val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
+        val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
+        val testViewModel = SessionEstablishmentViewModel(
+            bluetoothAdapterProvider = fakeBluetoothProvider,
+            scanner = fakeBluetoothScanner,
+            logger = SystemLogger(),
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+            verifierSessionFactory = { mdocVerifierSession }
+        )
+
+        composeTestRule.run {
+            renderFunction(
+                this,
+                undecodableState,
+                Modifier,
+                testViewModel,
+                fakePermissionStateGranted
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        Intents.intended(IntentMatchers.hasAction(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+        Intents.assertNoUnverifiedIntents()
+    }
+
+    @Test
+    fun `does not attempt to open system Bluetooth alert when Bluetooth is enabled`() = runTest {
+        val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = true)
+        val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
+        val testViewModel = SessionEstablishmentViewModel(
+            bluetoothAdapterProvider = fakeBluetoothProvider,
+            scanner = fakeBluetoothScanner,
+            logger = SystemLogger(),
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+            verifierSessionFactory = { mdocVerifierSession }
+        )
+
+        composeTestRule.run {
+            renderFunction(
+                this,
+                undecodableState,
+                Modifier,
+                testViewModel,
+                fakePermissionStateGranted
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        Intents.assertNoUnverifiedIntents()
+    }
+
+    @Test
+    fun `does not attempt to open system Bluetooth alert when permissions are not granted`() = runTest {
+        val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
+        val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
+        val testViewModel = SessionEstablishmentViewModel(
+            bluetoothAdapterProvider = fakeBluetoothProvider,
+            scanner = fakeBluetoothScanner,
+            logger = SystemLogger(),
+            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+            verifierSessionFactory = { mdocVerifierSession }
+        )
+
+        composeTestRule.run {
+            renderFunction(
+                this,
+                undecodableState,
+                Modifier,
+                testViewModel,
+                fakePermissionStateDenied
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        Intents.assertNoUnverifiedIntents()
+    }
 
     @Test
     fun cannotDecodeProvidedCborString() = runTest {
