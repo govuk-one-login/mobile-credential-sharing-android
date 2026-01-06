@@ -29,7 +29,6 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
@@ -37,7 +36,9 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButt
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.R.string.bluetooth_disconnected_unexpectedly
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
+import java.util.UUID
 
 private const val QR_SIZE = 800
 
@@ -81,7 +82,7 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = metroViewModel()) {
 @Composable
 fun HolderScreenContent(contentState: HolderWelcomeUiState) {
     if (contentState.showErrorScreen) {
-        ErrorScreen()
+        ErrorScreen(errorText = stringResource(bluetooth_disconnected_unexpectedly))
         return
     }
 
@@ -104,7 +105,7 @@ fun HolderScreenContent(contentState: HolderWelcomeUiState) {
 @OptIn(ExperimentalPermissionsApi::class)
 fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
     !perm.status.isGranted &&
-        !perm.status.shouldShowRationale
+            !perm.status.shouldShowRationale
 }
 
 @Composable
