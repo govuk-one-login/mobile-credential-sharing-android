@@ -119,31 +119,32 @@ class ConnectWithHolderDeviceScreenTest {
     }
 
     @Test
-    fun `does not attempt to open system Bluetooth alert when permissions are not granted`() = runTest {
-        val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
-        val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
-        val testViewModel = SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = fakeBluetoothProvider,
-            scanner = fakeBluetoothScanner,
-            logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-            verifierSessionFactory = { mdocVerifierSession }
-        )
-
-        composeTestRule.run {
-            renderFunction(
-                this,
-                undecodableState,
-                Modifier,
-                testViewModel,
-                fakePermissionStateDenied
+    fun `does not attempt to open system Bluetooth alert when permissions are not granted`() =
+        runTest {
+            val fakeBluetoothProvider = FakeBluetoothAdapterProvider(isEnabled = false)
+            val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
+            val testViewModel = SessionEstablishmentViewModel(
+                bluetoothAdapterProvider = fakeBluetoothProvider,
+                scanner = fakeBluetoothScanner,
+                logger = SystemLogger(),
+                bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+                verifierSessionFactory = { mdocVerifierSession }
             )
+
+            composeTestRule.run {
+                renderFunction(
+                    this,
+                    undecodableState,
+                    Modifier,
+                    testViewModel,
+                    fakePermissionStateDenied
+                )
+            }
+
+            composeTestRule.waitForIdle()
+
+            Intents.assertNoUnverifiedIntents()
         }
-
-        composeTestRule.waitForIdle()
-
-        Intents.assertNoUnverifiedIntents()
-    }
 
     @Test
     fun cannotDecodeProvidedCborString() = runTest {
