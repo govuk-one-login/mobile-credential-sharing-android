@@ -51,6 +51,7 @@ dependencies {
     listOf(
         libs.androidx.browser,
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
+        testFixtures(projects.bluetooth),
         testFixtures(projects.core)
     ).forEach(::testFixturesImplementation)
 

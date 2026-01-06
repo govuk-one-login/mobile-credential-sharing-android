@@ -86,9 +86,7 @@ class ConnectWithHolderDeviceScreenTest {
         }
 
         composeTestRule.waitForIdle()
-
-        Intents.intended(IntentMatchers.hasAction(BluetoothAdapter.ACTION_REQUEST_ENABLE))
-        Intents.assertNoUnverifiedIntents()
+        composeTestRule.assertBluetoothPromptIsDisplayed()
     }
 
     @Test
@@ -114,8 +112,7 @@ class ConnectWithHolderDeviceScreenTest {
         }
 
         composeTestRule.waitForIdle()
-
-        Intents.assertNoUnverifiedIntents()
+        composeTestRule.assertBluetoothPromptIsNotDisplayed()
     }
 
     @Test
@@ -142,8 +139,7 @@ class ConnectWithHolderDeviceScreenTest {
             }
 
             composeTestRule.waitForIdle()
-
-            Intents.assertNoUnverifiedIntents()
+            composeTestRule.assertBluetoothPromptIsNotDisplayed()
         }
 
     @Test

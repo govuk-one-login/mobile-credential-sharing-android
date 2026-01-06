@@ -11,6 +11,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPromptRule
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
@@ -84,6 +85,12 @@ class ConnectWithHolderDeviceRule(
         onNodeWithText(enabledDeviceBluetooth)
             .assertDoesNotExist()
     }
+
+    fun assertBluetoothPromptIsDisplayed() = EnableBluetoothPromptRule(this)
+        .assertIsDisplayed()
+
+    fun assertBluetoothPromptIsNotDisplayed() = EnableBluetoothPromptRule(this)
+        .assertIsNotDisplayed()
 
     fun assertDeviceBluetoothIsEnabled() {
         onNodeWithText(enabledDeviceBluetooth)
