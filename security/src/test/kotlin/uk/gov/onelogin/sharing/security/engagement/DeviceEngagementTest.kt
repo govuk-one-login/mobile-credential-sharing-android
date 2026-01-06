@@ -10,13 +10,13 @@ import uk.gov.onelogin.sharing.security.DeviceEngagementStub.deviceEngagementNod
 import uk.gov.onelogin.sharing.security.DeviceEngagementStub.deviceEngagementSerializers
 import uk.gov.onelogin.sharing.security.InvalidDeviceEngagementStub.INVALID_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.security.cbor.CborMapper
-import uk.gov.onelogin.sharing.security.cbor.encode
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 
 class DeviceEngagementTest {
 
     @Test
     fun `encode DeviceEngagement to expected base64 string`() {
-        val encoded = DEVICE_ENGAGEMENT.encode()
+        val encoded = DEVICE_ENGAGEMENT.encodeCbor()
         val base64 = Base64.getEncoder().encodeToString(encoded)
         assertEquals(ENGAGEMENT_EXPECTED_BASE_64, base64)
     }
@@ -24,7 +24,7 @@ class DeviceEngagementTest {
     @Test
     fun `encode DeviceEngagement to expected json structure`() {
         val mapper = CborMapper.create(deviceEngagementSerializers)
-        val cborBytes = DEVICE_ENGAGEMENT.encode()
+        val cborBytes = DEVICE_ENGAGEMENT.encodeCbor()
         val actualNode = mapper.readTree(cborBytes)
 
         val expectedDeviceEngagement = deviceEngagementNodes()
@@ -39,7 +39,7 @@ class DeviceEngagementTest {
     @Test
     fun `ensure DeviceEngagement builder fails when retrieval methods is not provided`() {
         assertThrows(ExceptionInInitializerError::class.java) {
-            INVALID_DEVICE_ENGAGEMENT.encode()
+            INVALID_DEVICE_ENGAGEMENT.encodeCbor()
         }
     }
 }
