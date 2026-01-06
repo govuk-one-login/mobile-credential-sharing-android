@@ -1,16 +1,22 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
+import android.content.Context
 import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 
 /**
  * Serialization object used as a navigation route. Maps to the [VerifyCredential] composable UI.
@@ -24,14 +30,22 @@ object VerifyCredentialRoute {
      * target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    fun NavGraphBuilder.configureVerifyCredentialRoute() {
+    fun NavGraphBuilder.configureVerifyCredentialRoute(context: Context) {
+        val graph = createGraphFactory<VerifierGraph.Factory>().create(
+            context
+        )
+
         composable<VerifyCredentialRoute> {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            CompositionLocalProvider(
+                LocalMetroViewModelFactory provides graph.metroViewModelFactory
             ) {
-                VerifyCredential()
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    VerifyCredential()
+                }
             }
         }
     }

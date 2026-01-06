@@ -4,17 +4,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.android.ui.patterns.loadingscreen.LoadingScreen
+import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
-import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanner
 
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
 @Composable
 fun VerifyCredential(
     modifier: Modifier = Modifier,
-    viewModel: VerifyCredentialViewModel = viewModel<VerifyCredentialViewModel>()
+    viewModel: VerifyCredentialViewModel = metroViewModel()
 ) {
     when (viewModel.uiState.collectAsStateWithLifecycle().value.preconditionsState) {
         is VerifyCredentialPreconditionsState.BluetoothAccessDenied -> {
