@@ -28,13 +28,8 @@ fun VerifyCredential(
         }
 
         is VerifyCredentialPreconditionsState.Met -> {
-            // decide which attributes will be requested for verification
-            // TODO: find ticket number for this work- DCMAW-XXXXX |
-
-            // then display scan screen
             VerifierScanner(
                 modifier = modifier
-                // why do we have different routes for the error pages?
             )
         }
     }
