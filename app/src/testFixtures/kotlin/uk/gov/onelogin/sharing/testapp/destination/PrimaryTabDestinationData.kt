@@ -7,6 +7,7 @@ object PrimaryTabDestinationData {
     val expectedVerifierMenuItems = listOf(
         "Connect with credential holder",
         "Error: Scanned invalid barcode",
-        "QR Scanner"
+        "QR Scanner",
+        "Verify Credential"
     )
 }
