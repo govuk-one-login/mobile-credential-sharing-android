@@ -13,7 +13,8 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanner
 @Composable
 fun VerifyCredential(
     modifier: Modifier = Modifier,
-    viewModel: VerifyCredentialViewModel = metroViewModel()
+    viewModel: VerifyCredentialViewModel = metroViewModel(),
+    scannerContent: @Composable () -> Unit = { VerifierScanner(modifier = modifier) }
 ) {
     when (viewModel.uiState.collectAsStateWithLifecycle().value.preconditionsState) {
         is VerifyCredentialPreconditionsState.BluetoothAccessDenied -> {
@@ -28,9 +29,7 @@ fun VerifyCredential(
         }
 
         is VerifyCredentialPreconditionsState.Met -> {
-            VerifierScanner(
-                modifier = modifier
-            )
+            scannerContent()
         }
     }
 }

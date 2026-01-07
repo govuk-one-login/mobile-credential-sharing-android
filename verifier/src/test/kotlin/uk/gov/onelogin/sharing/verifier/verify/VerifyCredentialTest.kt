@@ -1,6 +1,12 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.Test
@@ -52,15 +58,25 @@ class VerifyCredentialTest {
 
     @Test
     fun `scanner is displayed when prerequisites are met`() = runTest {
+        val fakeScannerTag = "fakeScanner"
+
         composeTestRule.setContent {
             VerifyCredential(
-                viewModel = viewModel
+                viewModel = viewModel,
+                scannerContent = {
+                    Box(
+                        Modifier.fillMaxSize()
+                            .testTag(fakeScannerTag)
+                    )
+                }
             )
         }
 
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
         composeTestRule.waitForIdle()
 
-        composeTestRule.assertScannerIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(fakeScannerTag)
+            .assertIsDisplayed()
     }
 }
