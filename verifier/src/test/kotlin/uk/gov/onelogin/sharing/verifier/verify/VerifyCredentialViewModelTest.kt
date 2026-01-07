@@ -39,6 +39,13 @@ class VerifyCredentialViewModelTest {
     }
 
     @Test
+    fun `stops observing bluetooth changes onCleared`() {
+        viewModel.onCleared()
+
+        assert(bluetoothStateMonitor.stopCalls == 1)
+    }
+
+    @Test
     fun `preconditions are met when Bluetooth status changes to ON`() {
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
 

@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.ContributesIntoMap
@@ -33,6 +34,13 @@ class VerifyCredentialViewModel(
                 updateBluetoothState(it)
             }
         }
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    public override fun onCleared() {
+        super.onCleared()
+
+        bluetoothStateMonitor.stop()
     }
 
     fun updateBluetoothState(status: BluetoothStatus) {
