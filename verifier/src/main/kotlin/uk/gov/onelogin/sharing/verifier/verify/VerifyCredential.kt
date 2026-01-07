@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanner
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
+@Suppress("ComposableLambdaParameterNaming")
 @Composable
 fun VerifyCredential(
     modifier: Modifier = Modifier,
