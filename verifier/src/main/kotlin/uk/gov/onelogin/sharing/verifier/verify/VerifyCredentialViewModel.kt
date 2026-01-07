@@ -37,7 +37,7 @@ class VerifyCredentialViewModel(
 
     fun updateBluetoothState(status: BluetoothStatus) {
         when (status) {
-            BluetoothStatus.ON, BluetoothStatus.TURNING_ON -> {
+            BluetoothStatus.ON -> {
                 logger.debug(
                     logTag,
                     "User enabled bluetooth via prompt"
@@ -45,7 +45,7 @@ class VerifyCredentialViewModel(
 
                 _uiState.update {
                     it.copy(
-                        preconditionsState = VerifyCredentialPreconditionsState.Met()
+                        preconditionsState = VerifyCredentialPreconditionsState.Met
                     )
                 }
             }
@@ -58,7 +58,7 @@ class VerifyCredentialViewModel(
 
                 _uiState.update {
                     it.copy(
-                        preconditionsState = VerifyCredentialPreconditionsState.BluetoothDisabled()
+                        preconditionsState = VerifyCredentialPreconditionsState.BluetoothDisabled
                     )
                 }
             }
@@ -68,5 +68,5 @@ class VerifyCredentialViewModel(
 
 data class VerifyCredentialUiState(
     val preconditionsState: VerifyCredentialPreconditionsState =
-        VerifyCredentialPreconditionsState.BluetoothDisabled()
+        VerifyCredentialPreconditionsState.BluetoothDisabled
 )

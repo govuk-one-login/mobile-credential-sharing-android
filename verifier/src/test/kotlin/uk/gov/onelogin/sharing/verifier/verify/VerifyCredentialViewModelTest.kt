@@ -34,22 +34,8 @@ class VerifyCredentialViewModelTest {
     }
 
     @Test
-    fun `preconditions are met when Bluetooth status changes to TURNING_ON`() {
-        bluetoothStateMonitor.emit(BluetoothStatus.TURNING_ON)
-
-        assert(
-            logger.contains(
-                LogEntry.Message(
-                    viewModel.logTag,
-                    "User enabled bluetooth via prompt"
-                )
-            )
-        )
-
-        assert(
-            viewModel.uiState.value.preconditionsState
-                is VerifyCredentialPreconditionsState.Met
-        )
+    fun `starts observing bluetooth changes on initialisation`() {
+        assert(bluetoothStateMonitor.startCalls == 1)
     }
 
     @Test

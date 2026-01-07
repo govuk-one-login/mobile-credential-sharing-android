@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
 sealed class VerifyCredentialPreconditionsState {
-    class BluetoothDisabled : VerifyCredentialPreconditionsState()
-    class BluetoothAccessDenied : VerifyCredentialPreconditionsState()
+    data object BluetoothDisabled : VerifyCredentialPreconditionsState()
+    data object BluetoothAccessDenied : VerifyCredentialPreconditionsState()
 
-    class Met : VerifyCredentialPreconditionsState()
+    data object Met : VerifyCredentialPreconditionsState()
 }
