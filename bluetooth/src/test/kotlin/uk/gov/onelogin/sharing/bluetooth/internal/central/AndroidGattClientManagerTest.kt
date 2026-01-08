@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import app.cash.turbine.test
 import io.mockk.every
@@ -19,6 +20,7 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
 internal class AndroidGattClientManagerTest {
@@ -280,6 +282,172 @@ internal class AndroidGattClientManagerTest {
                 GattClientEvent.Connected(bluetoothGatt.device.address),
                 awaitItem()
             )
+        }
+    }
+
+    @Test
+    fun `requests 512 max transmission unit when service discovery is successful`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onConnectionStateChange(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothGatt.STATE_CONNECTED
+            )
+
+            awaitItem()
+
+            verify { bluetoothGatt.requestMtu(512) }
+        }
+    }
+
+    @Test
+    fun `subscribes to state changes when service discovery is successful`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onConnectionStateChange(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothGatt.STATE_CONNECTED
+            )
+
+            awaitItem()
+
+            verify { bluetoothGatt.setCharacteristicNotification(any(), true) }
+        }
+    }
+
+    @Test
+    fun `subscribes to serverToClient messages when service discovery is successful`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onConnectionStateChange(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothGatt.STATE_CONNECTED
+            )
+
+            awaitItem()
+
+            verify { bluetoothGatt.setCharacteristicNotification(any(), true) }
+        }
+    }
+
+    @Test
+    fun `sets state to start when service discovery is successful`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onConnectionStateChange(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothGatt.STATE_CONNECTED
+            )
+
+            awaitItem()
+
+            verify {
+                bluetoothGatt.writeCharacteristic(
+                    any(),
+                    byteArrayOf(MdocState.START.code),
+                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                )
+            }
         }
     }
 

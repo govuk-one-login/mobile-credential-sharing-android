@@ -3,7 +3,10 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import android.content.Context
+import android.os.Build
 import androidx.annotation.RequiresPermission
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,6 +18,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidGattClientManager(
@@ -91,6 +95,47 @@ internal class AndroidGattClientManager(
         }
     }
 
+    private fun subscribeToCharacteristics(service: BluetoothGattService) {
+        try {
+            bluetoothGatt?.requestMtu(512)
+
+            val state = service
+                .getCharacteristic(GattUuids.STATE_UUID)
+
+            val serverToClient = service
+                .getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
+
+            // Subscribe to inbound messages
+            bluetoothGatt?.setCharacteristicNotification(state, true)
+            bluetoothGatt?.setCharacteristicNotification(serverToClient, true)
+
+            // Set the state value to start
+            val startValue = byteArrayOf(MdocState.START.code)
+            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                bluetoothGatt?.writeCharacteristic(
+                    state,
+                    startValue,
+                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                )
+            //} else {
+                // TODO: compile this without failure
+                // state.value = startValue
+                // bluetoothGatt?.writeCharacteristic(state)
+            //}
+
+            // Keep a reference to the `clientToServer` characteristic (outgoing communication
+            // channel) to allow us to send messages
+            val clientToServer = service
+                .getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID)
+
+        } catch (e: SecurityException) {
+            logger.error(logTag, "Security exception", e)
+            _events.tryEmit(
+                GattClientEvent.Error(ClientError.BLUETOOTH_PERMISSION_MISSING)
+            )
+        }
+    }
+
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
             is GattEvent.ConnectionStateChange -> {
@@ -149,6 +194,7 @@ internal class AndroidGattClientManager(
                         )
                     )
                 } else {
+                    subscribeToCharacteristics(service)
                     _events.tryEmit(GattClientEvent.ServicesDiscovered)
                 }
             }
