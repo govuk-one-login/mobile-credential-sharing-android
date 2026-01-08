@@ -3,12 +3,10 @@ package uk.gov.onelogin.sharing.verifier.verify
 import kotlin.test.Test
 import org.junit.Before
 import org.junit.Rule
-import uk.gov.logging.testdouble.LogEntry
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.logger.logTag
 
 class VerifyCredentialViewModelTest {
     @get:Rule

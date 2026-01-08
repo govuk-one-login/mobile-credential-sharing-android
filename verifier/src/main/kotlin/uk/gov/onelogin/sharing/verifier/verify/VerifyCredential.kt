@@ -5,15 +5,12 @@ import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import kotlinx.coroutines.flow.distinctUntilChanged
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
