@@ -6,10 +6,6 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerRule
 
 class VerifyCredentialRule(composeContentTestRule: ComposeContentTestRule) :
     ComposeContentTestRule by composeContentTestRule {
-    fun assertScannerIsDisplayed() = VerifierScannerRule(
-        this
-    ).assertPermissionGrantedTextIsDisplayed()
-
     fun assertBluetoothPromptIsDisplayed() = EnableBluetoothPromptRule(
         this
     ).assertIsDisplayed()

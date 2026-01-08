@@ -26,10 +26,10 @@ class VerifyCredentialViewModelTest {
     }
 
     @Test
-    fun `initial state is bluetooth disabled`() {
+    fun `initial state is idle`() {
         assert(
             viewModel.uiState.value.preconditionsState
-                is VerifyCredentialPreconditionsState.BluetoothDisabled
+                is VerifyCredentialPreconditionsState.Idle
         )
     }
 
@@ -46,17 +46,9 @@ class VerifyCredentialViewModelTest {
     }
 
     @Test
-    fun `preconditions are met when Bluetooth status changes to ON`() {
+    fun `preconditions are met when Bluetooth status changes to ON and permissions granted`() {
+        viewModel.onPermissionsChanged(true)
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
-
-        assert(
-            logger.contains(
-                LogEntry.Message(
-                    viewModel.logTag,
-                    "User enabled bluetooth via prompt"
-                )
-            )
-        )
 
         assert(
             viewModel.uiState.value.preconditionsState
@@ -65,21 +57,24 @@ class VerifyCredentialViewModelTest {
     }
 
     @Test
-    fun `preconditions are met when Bluetooth status changes to OFF`() {
+    fun `preconditions are not met when Bluetooth status changes to OFF`() {
+        viewModel.onPermissionsChanged(true)
         bluetoothStateMonitor.emit(BluetoothStatus.OFF)
-
-        assert(
-            logger.contains(
-                LogEntry.Message(
-                    viewModel.logTag,
-                    "User cancelled bluetooth prompt"
-                )
-            )
-        )
 
         assert(
             viewModel.uiState.value.preconditionsState
                 is VerifyCredentialPreconditionsState.BluetoothDisabled
+        )
+    }
+
+    @Test
+    fun `preconditions are not met when Permissions not granted`() {
+        viewModel.onPermissionsChanged(false)
+        bluetoothStateMonitor.emit(BluetoothStatus.ON)
+
+        assert(
+            viewModel.uiState.value.preconditionsState
+                is VerifyCredentialPreconditionsState.BluetoothAccessDenied
         )
     }
 }

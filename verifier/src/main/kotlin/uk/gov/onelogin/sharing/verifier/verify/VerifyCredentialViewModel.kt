@@ -9,6 +9,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
@@ -24,57 +25,78 @@ class VerifyCredentialViewModel(
     private val bluetoothStateMonitor: BluetoothStateMonitor
 ) : ViewModel() {
     private val initialState = VerifyCredentialUiState()
+    private var allGranted: Boolean? = null
+    private var bluetoothStatus: BluetoothStatus? = null
+
     private val _uiState = MutableStateFlow(initialState)
     val uiState: StateFlow<VerifyCredentialUiState> = _uiState
 
     init {
         bluetoothStateMonitor.start()
         viewModelScope.launch {
-            bluetoothStateMonitor.states.collect {
-                updateBluetoothState(it)
-            }
+            bluetoothStateMonitor.states
+                .distinctUntilChanged()
+                .collect { status ->
+                    bluetoothStatus = status
+                    checkPreconditions()
+                    logger.debug(logTag, "Bluetooth status: $status")
+                }
         }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onCleared() {
-        super.onCleared()
-
         bluetoothStateMonitor.stop()
+
+        super.onCleared()
     }
 
-    fun updateBluetoothState(status: BluetoothStatus) {
-        when (status) {
-            BluetoothStatus.ON -> {
-                logger.debug(
-                    logTag,
-                    "User enabled bluetooth via prompt"
-                )
-
-                _uiState.update {
-                    it.copy(
-                        preconditionsState = VerifyCredentialPreconditionsState.Met
-                    )
-                }
-            }
-
-            else -> {
-                logger.debug(
-                    logTag,
-                    "User cancelled bluetooth prompt"
-                )
-
-                _uiState.update {
-                    it.copy(
-                        preconditionsState = VerifyCredentialPreconditionsState.BluetoothDisabled
-                    )
-                }
-            }
+    fun onPermissionRequestLaunched() {
+        _uiState.update {
+            it.copy(
+                hasPreviouslyRequestedPermission = true
+            )
         }
+    }
+
+    fun onPermissionsChanged(allGranted: Boolean) {
+        logger.debug(logTag, "Permissions changed. allGranted=$allGranted")
+        this.allGranted = allGranted
+        checkPreconditions()
+    }
+
+    private fun checkPreconditions() {
+        val granted = allGranted
+        val bluetooth = bluetoothStatus
+
+        val newState = when {
+            granted == null ->
+                VerifyCredentialPreconditionsState.Idle
+
+            !granted ->
+                VerifyCredentialPreconditionsState.BluetoothAccessDenied
+
+            bluetooth == null ->
+                VerifyCredentialPreconditionsState.Idle
+
+            bluetooth == BluetoothStatus.ON ->
+                VerifyCredentialPreconditionsState.Met
+
+            else ->
+                VerifyCredentialPreconditionsState.BluetoothDisabled
+        }
+
+        setPreconditions(newState)
+    }
+
+    private fun setPreconditions(new: VerifyCredentialPreconditionsState) {
+        if (_uiState.value.preconditionsState == new) return
+        _uiState.update { it.copy(preconditionsState = new) }
     }
 }
 
 data class VerifyCredentialUiState(
+    val hasPreviouslyRequestedPermission: Boolean = false,
     val preconditionsState: VerifyCredentialPreconditionsState =
-        VerifyCredentialPreconditionsState.BluetoothDisabled
+        VerifyCredentialPreconditionsState.Idle
 )

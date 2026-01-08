@@ -67,7 +67,7 @@ data object ConnectWithHolderDeviceStateStubs {
                 status = PermissionStatus.Granted
             ),
             FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                permission = Manifest.permission.BLUETOOTH_SCAN,
                 status = PermissionStatus.Granted
             ),
             FakePermissionState(
@@ -85,7 +85,7 @@ data object ConnectWithHolderDeviceStateStubs {
                 status = PermissionStatus.Denied(false)
             ),
             FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                permission = Manifest.permission.BLUETOOTH_SCAN,
                 status = PermissionStatus.Denied(false)
             ),
             FakePermissionState(
@@ -103,7 +103,7 @@ data object ConnectWithHolderDeviceStateStubs {
                 status = PermissionStatus.Denied(true)
             ),
             FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                permission = Manifest.permission.BLUETOOTH_SCAN,
                 status = PermissionStatus.Denied(true)
             ),
             FakePermissionState(
