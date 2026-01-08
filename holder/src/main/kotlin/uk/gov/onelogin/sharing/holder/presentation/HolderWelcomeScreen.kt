@@ -80,14 +80,6 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewMod
     }
 
     when {
-        contentState.showEnableBluetoothPrompt && multiplePermissionsState.allPermissionsGranted -> {
-            ErrorScreen(errorText = stringResource(bluetooth_turned_off))
-            EnableBluetoothPrompt()
-        }
-        contentState.hasBluetoothPermissions == true -> {
-            HolderScreenContent(contentState)
-        }
-
         contentState.showErrorScreen -> {
             val errorText = when (contentState.bluetoothErrorType) {
                 BLUETOOTH_DISCONNECTED -> bluetooth_disconnected_unexpectedly
@@ -96,6 +88,14 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewMod
             }
 
             ErrorScreen(errorText = stringResource(errorText))
+        }
+
+        contentState.showEnableBluetoothPrompt && multiplePermissionsState.allPermissionsGranted -> {
+            EnableBluetoothPrompt(denialText = bluetooth_turned_off)
+        }
+
+        contentState.hasBluetoothPermissions == true -> {
+            HolderScreenContent(contentState)
         }
 
         else -> {

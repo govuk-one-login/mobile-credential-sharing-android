@@ -21,7 +21,6 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_TURNED_OFF
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
@@ -107,7 +106,13 @@ class HolderWelcomeViewModel(
                             ]
                         )
                         logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
-                        _uiState.update { it.copy(showErrorScreen = true) }
+                        _uiState.update {
+                            it.copy(
+                                showErrorScreen = true,
+                                bluetoothErrorType = BLUETOOTH_DISCONNECTED
+                            )
+                        }
+                        mdocBleSession.stop()
                     }
 
                     is MdocSessionState.Error -> {
