@@ -21,7 +21,6 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 class MdocVerifierSession(
     private val gattClientManager: GattClientManager,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
-    private val serviceValidator: ServiceValidator,
     private val logger: Logger,
     scope: CoroutineScope
 ) : VerifierSession {
@@ -67,17 +66,8 @@ class MdocVerifierSession(
 
     private fun handleGattClientEvents(event: GattClientEvent) {
         when (event) {
-            is GattClientEvent.ServicesDiscovered -> {
-                when (val validationResult = serviceValidator.validate(event.service)) {
-                    ValidationResult.Success ->
-                        _state.value = VerifierSessionState.ServiceDiscovered
-
-                    is ValidationResult.Failure ->
-                        _state.value = VerifierSessionState.Error(
-                            validationResult.errors.toString()
-                        )
-                }
-            }
+            is GattClientEvent.ServicesDiscovered ->
+                _state.value = VerifierSessionState.ServiceDiscovered
 
             GattClientEvent.Connecting -> _state.value = VerifierSessionState.Connecting
 

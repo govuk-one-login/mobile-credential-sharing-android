@@ -20,12 +20,15 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.validator.FakeServiceValidator
 
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
     private val bluetoothGatt = mockk<BluetoothGatt>(relaxed = true)
     private val fakePermissionChecker = FakePermissionChecker()
+
+    private val fakeServiceValidator = FakeServiceValidator()
     private val logger = SystemLogger()
     private val uuid = UUID.randomUUID()
 
@@ -36,6 +39,7 @@ internal class AndroidGattClientManagerTest {
         manager = AndroidGattClientManager(
             context,
             fakePermissionChecker,
+            fakeServiceValidator,
             logger
         )
     }
@@ -193,6 +197,45 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
+    fun `emits error when discovered service is not valid`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+        fakeServiceValidator.errors = mutableListOf("error")
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            assertEquals(
+                GattClientEvent.Connecting,
+                awaitItem()
+            )
+
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.INVALID_SERVICE
+                ),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
     fun `emits service connected when get service discovery is successful`() = runTest {
         val callbackSlot = slot<BluetoothGattCallback>()
 
@@ -222,7 +265,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.ServicesDiscovered(bluetoothGatt.getService(uuid)),
+                GattClientEvent.ServicesDiscovered,
                 awaitItem()
             )
 

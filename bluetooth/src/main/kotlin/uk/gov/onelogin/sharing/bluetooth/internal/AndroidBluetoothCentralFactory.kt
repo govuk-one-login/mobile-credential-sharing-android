@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 
 /**
  * An Android-specific implementation of the [BluetoothCentralFactory] interface.
@@ -21,14 +22,18 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMoni
  */
 @ContributesBinding(ViewModelScope::class)
 @Inject
-class AndroidBluetoothCentralFactory(private val context: Context, private val logger: Logger) :
-    BluetoothCentralFactory {
+class AndroidBluetoothCentralFactory(
+    private val context: Context,
+    private val serviceValidator: ServiceValidator,
+    private val logger: Logger
+) : BluetoothCentralFactory {
     override fun create(): BluetoothCentralComponents {
         val permissionChecker = BluetoothPermissionChecker(context)
 
         val gattClientManager = AndroidGattClientManager(
             context = context,
             permissionChecker = permissionChecker,
+            serviceValidator = serviceValidator,
             logger = logger
         )
 

@@ -17,6 +17,11 @@ enum class ClientError {
     SERVICE_NOT_FOUND,
 
     /**
+     * Indicates that the service did not include the expected characteristics
+     */
+    INVALID_SERVICE,
+
+    /**
      * Indicates that the necessary Bluetooth permissions are missing.
      */
     BLUETOOTH_PERMISSION_MISSING,

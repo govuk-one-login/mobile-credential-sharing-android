@@ -13,11 +13,14 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
+import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidGattClientManager(
     private val context: Context,
     private val permissionChecker: PermissionChecker,
+    private val serviceValidator: ServiceValidator,
     private val logger: Logger
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
@@ -139,9 +142,15 @@ internal class AndroidGattClientManager(
                     return
                 }
 
-                _events.tryEmit(
-                    GattClientEvent.ServicesDiscovered(service)
-                )
+                if (serviceValidator.validate(service) is ValidationResult.Failure) {
+                    _events.tryEmit(
+                        GattClientEvent.Error(
+                            ClientError.INVALID_SERVICE
+                        )
+                    )
+                } else {
+                    _events.tryEmit(GattClientEvent.ServicesDiscovered)
+                }
             }
         }
     }

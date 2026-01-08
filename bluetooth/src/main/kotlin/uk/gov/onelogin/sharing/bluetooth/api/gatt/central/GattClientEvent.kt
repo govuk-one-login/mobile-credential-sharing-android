@@ -6,7 +6,7 @@ sealed interface GattClientEvent {
     data object Connecting : GattClientEvent
     data class Connected(val deviceAddress: String) : GattClientEvent
     data class Disconnected(val deviceAddress: String) : GattClientEvent
-    data class ServicesDiscovered(val service: BluetoothGattService) : GattClientEvent
+    data object ServicesDiscovered : GattClientEvent
     data class Error(val error: ClientError) : GattClientEvent
 
     // use for any functionality that has not been implemented yet

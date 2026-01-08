@@ -1,6 +1,8 @@
-package uk.gov.onelogin.sharing.verifier.session
+package uk.gov.onelogin.sharing.bluetooth.validator
 
 import android.bluetooth.BluetoothGattService
+import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
+import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 
 class FakeServiceValidator : ServiceValidator {
     var errors = mutableListOf<String>()

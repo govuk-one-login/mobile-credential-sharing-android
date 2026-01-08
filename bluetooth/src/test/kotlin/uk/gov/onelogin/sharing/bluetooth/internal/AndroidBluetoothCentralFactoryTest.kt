@@ -11,17 +11,21 @@ import org.robolectric.RobolectricTestRunner
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.validator.FakeServiceValidator
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidBluetoothCentralFactoryTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
+
+    private val fakeServiceValidator = FakeServiceValidator()
     private val logger = mockk<Logger>(relaxed = true)
 
     @Test
     fun `create returns Android central components`() {
         val factory = AndroidBluetoothCentralFactory(
             context = context,
+            serviceValidator = fakeServiceValidator,
             logger = logger
         )
 

@@ -31,7 +31,6 @@ class MdocVerifierSessionTest {
 
     private val gattClientManager = FakeGattClientManager()
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
-    private val serviceValidator = FakeServiceValidator()
     private val logger = SystemLogger()
 
     private lateinit var session: MdocVerifierSession
@@ -41,7 +40,6 @@ class MdocVerifierSessionTest {
         session = MdocVerifierSession(
             gattClientManager = gattClientManager,
             bluetoothStateMonitor = bluetoothStateMonitor,
-            serviceValidator = serviceValidator,
             logger = logger,
             scope = TestScope(StandardTestDispatcher())
         )
@@ -70,34 +68,13 @@ class MdocVerifierSessionTest {
     }
 
     @Test
-    fun `ServicesDiscovered and ValidationResult success triggers ServiceDiscovered`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered(service))
+    fun `ServicesDiscovered triggers ServiceDiscovered`() = runTest {
+        gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered)
 
         advanceUntilIdle()
-
-        assertEquals(1, serviceValidator.calls)
 
         session.state.test {
             assertEquals(VerifierSessionState.ServiceDiscovered, awaitItem())
-        }
-    }
-
-    @Test
-    fun `ServicesDiscovered and ValidationResult failure triggers Error`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        serviceValidator.errors = mutableListOf("error")
-        gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered(service))
-
-        advanceUntilIdle()
-
-        assertEquals(1, serviceValidator.calls)
-
-        session.state.test {
-            assertEquals(
-                VerifierSessionState.Error("[error]"),
-                awaitItem()
-            )
         }
     }
 
@@ -133,7 +110,6 @@ class MdocVerifierSessionTest {
     @Test
     fun `Disconnected triggers Disconnected verifier state`() = runTest {
         val device = mockk<BluetoothDevice>(relaxed = true)
-        serviceValidator.errors = mutableListOf()
 
         gattClientManager.emitEvent(
             GattClientEvent.Disconnected(device.address)
