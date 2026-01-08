@@ -22,7 +22,6 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanner
 fun VerifyCredential(
     modifier: Modifier = Modifier,
     viewModel: VerifyCredentialViewModel = metroViewModel(),
-    scannerContent: @Composable () -> Unit = { VerifierScanner(modifier = modifier) },
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
         permissions = buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -35,7 +34,8 @@ fun VerifyCredential(
         }
     ) {
         viewModel.onPermissionRequestLaunched()
-    }
+    },
+    scannerContent: @Composable () -> Unit = { VerifierScanner(modifier = modifier) }
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
