@@ -9,7 +9,10 @@ import java.util.Base64
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
+import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
+import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 
 private const val TAG = "decodeDeviceEngagement"
 
@@ -72,3 +75,24 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
 
 fun String.base64Decode(decoder: Base64.Decoder = Base64.getUrlDecoder()): ByteArray =
     decoder.decode(this)
+
+fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): SessionEstablishmentDto {
+    val mapper = ObjectMapper(CBORFactory()).apply {
+        registerModule(KotlinModule.Builder().build())
+    }
+
+    val rawDto = mapper.readValue(rawBytes, SessionEstablishmentDto::class.java)
+
+    val sessionEstablishmentDto = SessionEstablishmentDto(
+        eReaderKey = EmbeddedCbor(rawDto.eReaderKey.encodeCbor()),
+        data = rawDto.data
+    )
+
+    logger.debug(
+        logger.logTag,
+        "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
+            "data: ${sessionEstablishmentDto.data.toHexString()} "
+    )
+
+    return sessionEstablishmentDto
+}

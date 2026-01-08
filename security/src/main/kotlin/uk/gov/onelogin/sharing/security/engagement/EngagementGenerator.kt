@@ -9,7 +9,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
-import uk.gov.onelogin.sharing.security.cbor.encode
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 /**
@@ -28,7 +28,7 @@ class EngagementGenerator(private val logger: Logger) : Engagement {
      *   data
      */
     override fun qrCodeEngagement(key: CoseKey, uuid: UUID): String {
-        val eDeviceKey = key.encode()
+        val eDeviceKey = key.encodeCbor()
         val securityObject = Security(
             cipherSuiteIdentifier = 1,
             eDeviceKeyBytes = eDeviceKey
@@ -39,7 +39,7 @@ class EngagementGenerator(private val logger: Logger) : Engagement {
             .ble(peripheralUuid = uuid)
             .build()
 
-        val bytes = deviceEngagement.encode()
+        val bytes = deviceEngagement.encodeCbor()
         val base64 = Base64.getUrlEncoder().encodeToString(bytes)
 
         // for testing purposes - remove when verifier built

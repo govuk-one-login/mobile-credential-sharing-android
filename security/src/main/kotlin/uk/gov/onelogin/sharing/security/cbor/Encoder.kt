@@ -5,6 +5,7 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
+import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.BleOptionsSerializer
 import uk.gov.onelogin.sharing.security.cbor.serializers.CoseKeySerializer
 import uk.gov.onelogin.sharing.security.cbor.serializers.DeviceEngagementSerializer
@@ -12,6 +13,7 @@ import uk.gov.onelogin.sharing.security.cbor.serializers.DeviceRetrievalMethodSe
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCborSerializer
 import uk.gov.onelogin.sharing.security.cbor.serializers.SecuritySerializer
+import uk.gov.onelogin.sharing.security.cbor.serializers.SessionEstablishmentSerializer
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 /**
@@ -21,7 +23,7 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
  * @param serializers A map of classes to the custom serializers they require for CBOR encoding.
  * @return A [ByteArray] containing the CBOR representation of the object.
  */
-private fun Any.encode(serializers: Map<Class<*>, StdSerializer<*>>): ByteArray {
+private fun Any.encodeCbor(serializers: Map<Class<*>, StdSerializer<*>>): ByteArray {
     val mapper = CborMapper.create(serializers)
     return mapper.writeValueAsBytes(this)
 }
@@ -32,11 +34,11 @@ private fun Any.encode(serializers: Map<Class<*>, StdSerializer<*>>): ByteArray 
  * @receiver the [CoseKey] object to be encoded.
  * @return A [ByteArray] containing the CBOR representation of the [CoseKey]
  */
-fun CoseKey.encode(): ByteArray {
+fun CoseKey.encodeCbor(): ByteArray {
     val coseKeySerializers: Map<Class<*>, StdSerializer<*>> = mapOf(
         CoseKey::class.java to CoseKeySerializer()
     )
-    return this.encode(coseKeySerializers)
+    return this.encodeCbor(coseKeySerializers)
 }
 
 /**
@@ -47,7 +49,7 @@ fun CoseKey.encode(): ByteArray {
  *  * @receiver the [DeviceEngagement] object to be encoded.
  *  * @return A [ByteArray] containing the CBOR representation of the [DeviceEngagement]
  */
-fun DeviceEngagement.encode(): ByteArray {
+fun DeviceEngagement.encodeCbor(): ByteArray {
     val deviceEngagementSerializers: Map<Class<*>, StdSerializer<*>> = mapOf(
         DeviceEngagement::class.java to DeviceEngagementSerializer(),
         DeviceRetrievalMethod::class.java to DeviceRetrievalMethodSerializer(),
@@ -56,5 +58,13 @@ fun DeviceEngagement.encode(): ByteArray {
         EmbeddedCbor::class.java to EmbeddedCborSerializer(),
         CoseKey::class.java to CoseKeySerializer()
     )
-    return this.encode(deviceEngagementSerializers)
+    return this.encodeCbor(deviceEngagementSerializers)
+}
+
+fun Any.encodeCbor(): ByteArray {
+    val sessionSerializers: Map<Class<*>, StdSerializer<*>> = mapOf(
+        EmbeddedCbor::class.java to EmbeddedCborSerializer(),
+        SessionEstablishmentDto::class.java to SessionEstablishmentSerializer()
+    )
+    return this.encodeCbor(sessionSerializers)
 }

@@ -5,13 +5,18 @@ import java.io.PrintStream
 import junit.framework.TestCase.assertTrue
 import kotlin.test.assertNull
 import org.junit.After
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.eReaderKeyHexFormat
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
 
 class DecoderTest {
 
@@ -59,5 +64,60 @@ class DecoderTest {
         assertTrue(actualErrorMessage.contains("Failed to deserialize CBOR:"))
 
         assertNull(result)
+    }
+
+    @Test
+    fun `decodeSessionEstablishmentModel decodes raw bytes into SessionEstablishmentDto`() {
+        val result = decodeSessionEstablishmentModel(
+            MOCK_SESSION_ESTABLISHMENT_DATA.hexToByteArray(),
+            logger
+        )
+
+        assertArrayEquals(
+            expectedSessionEstablishmentDto.eReaderKey.encoded,
+            result.eReaderKey.encoded
+        )
+        assertArrayEquals(expectedSessionEstablishmentDto.data, result.data)
+    }
+
+    @Test
+    fun `decodeSessionEstablishmentModel logs tagged eReaderKey in diagnostic hex format`() {
+        decodeSessionEstablishmentModel(
+            MOCK_SESSION_ESTABLISHMENT_DATA.hexToByteArray(),
+            logger
+        )
+
+        val actualReaderHexLog = outContent.toString()
+        assertTrue(actualReaderHexLog.contains(eReaderKeyHexFormat))
+    }
+
+    @Test
+    fun `decodeSessionEstablishmentModel with invalid CBOR throws exception`() {
+        val malformedBytes = byteArrayOf(0x01, 0x02, 0x03, 0x04)
+
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            decodeSessionEstablishmentModel(malformedBytes, logger)
+        }
+
+        assertEquals("Expected a CBOR map object", exception.message)
+
+        assertNull(exception.cause)
+
+        val loggedOutput = outContent.toString()
+        assertTrue(loggedOutput.isEmpty())
+    }
+
+    @Test
+    fun `empty cbor throws exception when deserializing session establishment model bytes`() {
+        val emptyMapCbor = byteArrayOf(0xA0.toByte())
+
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            decodeSessionEstablishmentModel(emptyMapCbor, logger)
+        }
+
+        assertEquals("Missing required field: 'eReaderKey'", exception.message)
+
+        val loggedError = outContent.toString()
+        assertTrue(loggedError.isEmpty())
     }
 }
