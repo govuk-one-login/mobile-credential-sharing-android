@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.validator.FakeServiceValidator
+import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidBluetoothCentralFactoryTest {

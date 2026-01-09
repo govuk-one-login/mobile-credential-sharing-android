@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.session
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGattService
 import app.cash.turbine.test
 import io.mockk.mockk
 import java.util.UUID
@@ -20,7 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.central.FakeGattClientManager
+import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 
 @OptIn(ExperimentalCoroutinesApi::class)

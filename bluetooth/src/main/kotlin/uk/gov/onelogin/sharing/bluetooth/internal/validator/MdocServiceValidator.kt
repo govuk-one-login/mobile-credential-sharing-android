@@ -7,8 +7,8 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.core.mdoc.GattUuids
 
 /**
  * Checks for the presence of mandatory characteristics defined in [GattUuids]

@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.client
+package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
@@ -18,9 +18,8 @@ import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
-import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
+import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.validator.FakeServiceValidator
 
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)

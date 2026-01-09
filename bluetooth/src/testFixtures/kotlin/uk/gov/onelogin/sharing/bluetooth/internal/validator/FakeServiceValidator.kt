@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.validator
+package uk.gov.onelogin.sharing.bluetooth.internal.validator
 
 import android.bluetooth.BluetoothGattService
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
