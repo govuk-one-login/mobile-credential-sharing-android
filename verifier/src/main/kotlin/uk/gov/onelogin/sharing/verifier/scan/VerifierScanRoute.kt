@@ -11,6 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
 
 /**
  * Serialization object used as a navigation route. Maps to the [VerifierScanner] composable UI.
@@ -44,6 +45,12 @@ object VerifierScanRoute {
 
     fun NavController.navigateToVerifierScanRoute() = navigate(VerifierScanRoute) {
         popUpTo<VerifierScanRoute> {
+            inclusive = true
+        }
+    }
+
+    fun NavController.navigateToVerifierScanFromRoot() = navigate(VerifierScanRoute) {
+        popUpTo<VerifyCredentialRoute> {
             inclusive = true
         }
     }

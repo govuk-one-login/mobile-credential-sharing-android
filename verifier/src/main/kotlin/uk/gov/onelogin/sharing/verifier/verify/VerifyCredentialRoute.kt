@@ -1,13 +1,15 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
-import android.content.Context
 import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -15,9 +17,10 @@ import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
+import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanFromRoot
 
 /**
- * Serialization object used as a navigation route. Maps to the [VerifyCredential] composable UI.
+ * Serialization object used as a navigation route. Maps to the [VerifyCredentialScreen] composable UI.
  */
 @Keep
 @Serializable
@@ -28,12 +31,15 @@ object VerifyCredentialRoute {
      * target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    fun NavGraphBuilder.configureVerifyCredentialRoute(context: Context) {
-        val graph = createGraphFactory<VerifierGraph.Factory>().create(
-            context
-        )
-
+    fun NavGraphBuilder.configureVerifyCredentialRoute(navController: NavController) {
         composable<VerifyCredentialRoute> {
+            val context = LocalContext.current
+            val graph = remember {
+                createGraphFactory<VerifierGraph.Factory>().create(
+                    context
+                )
+            }
+
             CompositionLocalProvider(
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory
             ) {
@@ -42,7 +48,9 @@ object VerifyCredentialRoute {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    VerifyCredential()
+                    VerifyCredentialScreen(
+                        navigateToScanner = { navController.navigateToVerifierScanFromRoot() }
+                    )
                 }
             }
         }

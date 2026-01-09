@@ -5,7 +5,7 @@ import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -14,13 +14,11 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScanner
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
 @Suppress("ComposableLambdaParameterNaming")
 @Composable
-fun VerifyCredential(
-    modifier: Modifier = Modifier,
+fun VerifyCredentialScreen(
     viewModel: VerifyCredentialViewModel = metroViewModel(),
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
         permissions = buildList {
@@ -35,8 +33,20 @@ fun VerifyCredential(
     ) {
         viewModel.onPermissionRequestLaunched()
     },
-    scannerContent: @Composable () -> Unit = { VerifierScanner(modifier = modifier) }
+    navigateToScanner: () -> Unit = {}
 ) {
+    val latestOnNavigateToScanner by rememberUpdatedState(navigateToScanner)
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                VerifyCredentialEvents.NavigateToScanner -> {
+                    println("Navigating to scanner")
+                    latestOnNavigateToScanner()
+                }
+            }
+        }
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(multiplePermissionsState.allPermissionsGranted) {
@@ -59,8 +69,6 @@ fun VerifyCredential(
             EnableBluetoothPrompt()
         }
 
-        VerifyCredentialPreconditionsState.Met -> {
-            scannerContent()
-        }
+        VerifyCredentialPreconditionsState.Met -> Unit
     }
 }

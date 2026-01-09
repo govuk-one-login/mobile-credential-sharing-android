@@ -7,7 +7,9 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
@@ -27,9 +29,13 @@ class VerifyCredentialViewModel(
     private val initialState = VerifyCredentialUiState()
     private var allGranted: Boolean? = null
     private var bluetoothStatus: BluetoothStatus? = null
+    private var hasNavigated = false
 
     private val _uiState = MutableStateFlow(initialState)
     val uiState: StateFlow<VerifyCredentialUiState> = _uiState
+
+    private val _events = MutableSharedFlow<VerifyCredentialEvents>()
+    val events: SharedFlow<VerifyCredentialEvents> = _events
 
     init {
         bluetoothStateMonitor.start()
@@ -86,10 +92,21 @@ class VerifyCredentialViewModel(
                 VerifyCredentialPreconditionsState.BluetoothDisabled
         }
 
+        if (newState == VerifyCredentialPreconditionsState.Met && !hasNavigated) {
+            hasNavigated = true
+            viewModelScope.launch {
+                _events.emit(VerifyCredentialEvents.NavigateToScanner)
+            }
+        }
+
         setPreconditions(newState)
     }
 
     private fun setPreconditions(new: VerifyCredentialPreconditionsState) {
+        logger.debug(
+            logTag,
+            "Setting preconditions from ${_uiState.value.preconditionsState} to $new"
+        )
         if (_uiState.value.preconditionsState == new) return
         _uiState.update { it.copy(preconditionsState = new) }
     }
@@ -100,3 +117,7 @@ data class VerifyCredentialUiState(
     val preconditionsState: VerifyCredentialPreconditionsState =
         VerifyCredentialPreconditionsState.Idle
 )
+
+sealed interface VerifyCredentialEvents {
+    data object NavigateToScanner : VerifyCredentialEvents
+}

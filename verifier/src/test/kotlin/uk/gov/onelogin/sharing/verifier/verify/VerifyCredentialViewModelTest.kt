@@ -1,6 +1,11 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
+import app.cash.turbine.test
 import kotlin.test.Test
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import uk.gov.logging.testdouble.SystemLogger
@@ -8,6 +13,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class VerifyCredentialViewModelTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
@@ -74,5 +80,37 @@ class VerifyCredentialViewModelTest {
             viewModel.uiState.value.preconditionsState
                 is VerifyCredentialPreconditionsState.BluetoothAccessDenied
         )
+    }
+
+    @Test
+    fun `emits NavigateToScanner event when preconditions are Met`() = runTest {
+        viewModel.events.test {
+            viewModel.onPermissionsChanged(true)
+            bluetoothStateMonitor.emit(BluetoothStatus.ON)
+
+            advanceUntilIdle()
+
+            assertEquals(VerifyCredentialEvents.NavigateToScanner, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `NavigateToScanner is emitted only once`() = runTest {
+        viewModel.events.test {
+            viewModel.onPermissionsChanged(true)
+            bluetoothStateMonitor.emit(BluetoothStatus.ON)
+            advanceUntilIdle()
+
+            assertEquals(VerifyCredentialEvents.NavigateToScanner, awaitItem())
+
+            bluetoothStateMonitor.emit(BluetoothStatus.ON)
+            viewModel.onPermissionsChanged(true)
+            bluetoothStateMonitor.emit(BluetoothStatus.ON)
+            advanceUntilIdle()
+
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }
