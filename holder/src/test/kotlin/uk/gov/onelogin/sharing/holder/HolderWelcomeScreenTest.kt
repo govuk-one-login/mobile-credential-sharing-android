@@ -9,7 +9,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -24,6 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeDeniedPermissionsState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
@@ -40,6 +43,7 @@ import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HolderWelcomeScreenTest {
     @get:Rule
@@ -75,7 +79,8 @@ class HolderWelcomeScreenTest {
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocBleSession },
         dispatcher = mainDispatcherRule.testDispatcher,
-        logger = SystemLogger()
+        logger = SystemLogger(),
+        savedStateHandle = SavedStateHandle()
     )
 
     @Test
@@ -86,7 +91,10 @@ class HolderWelcomeScreenTest {
                     qrData = "Fake90109jec",
                     bluetoothState = BluetoothState.Enabled,
                     hasBluetoothPermissions = true
-                )
+                ),
+                multiplePermissionsState = fakeGrantedPermissionsState,
+                hasPreviouslyRequestedPermission = true,
+                grantedAllPerms = {}
             )
         }
         composeTestRule.assertWelcomeTextIsDisplayed()
@@ -183,43 +191,75 @@ class HolderWelcomeScreenTest {
         )
     }
 
-    @Test
-    fun `holder screen shows bluetooth disabled screen when bluetooth is disabled`() {
-        composeTestRule.setContent {
-            HolderScreenContent(
-                contentState = HolderWelcomeUiState(
-                    bluetoothState = BluetoothState.Disabled,
-                    hasBluetoothPermissions = true
-                )
-            )
-        }
-
-        composeTestRule.assertBluetoothDisabledTextIsDisplayed()
-    }
-
-    @Test
-    fun displaysErrorScreenWhenShowErrorScreenIsTrue() {
-        composeTestRule.setContent {
-            HolderScreenContent(
-                contentState = HolderWelcomeUiState(
-                    bluetoothState = BluetoothState.Disabled,
-                    hasBluetoothPermissions = true,
-                    showErrorScreen = true
-                )
-            )
-        }
-        composeTestRule.onNodeWithText("An error has occurred").assertIsDisplayed()
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun displaysQrCode() = runTest {
         composeTestRule.apply {
             composeTestRule.viewModel.updateBluetoothPermissions(true)
-            render()
+            render(
+                state = HolderWelcomeUiState(
+                    qrData = "fakestring",
+                    hasBluetoothPermissions = true,
+                    bluetoothState = BluetoothState.Enabled
+                )
+            )
             advanceUntilIdle()
         }
         composeTestRule.assertQrCodeIsDisplayed()
+    }
+
+    @Test
+    fun showsErrorScreenWhenContentStateShowErrorScreenIsTrue() = runTest {
+        composeTestRule.apply {
+            render(
+                HolderWelcomeUiState(
+                    showErrorScreen = true,
+                    bluetoothErrorType = PERMISSIONS_MISSING,
+                    hasBluetoothPermissions = true
+                )
+            )
+        }
+
+        advanceUntilIdle()
+
+        composeTestRule.onNodeWithText("Bluetooth permissions were revoked during the session")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun shouldShowEnableBluetoothPromptWhenSetToTrueAndPermissionsSetTrue() = runTest {
+        composeTestRule.apply {
+            render(
+                HolderWelcomeUiState(
+                    showEnableBluetoothPrompt = true,
+                    hasBluetoothPermissions = true
+                )
+            )
+        }
+
+        advanceUntilIdle()
+
+        composeTestRule.onNodeWithTag(
+            "EnableBluetoothPrompt"
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun shouldNotShowEnableBluetoothPromptIfHasBluetoothPermissionsIsFalse() = runTest {
+        composeTestRule.apply {
+            render(
+                HolderWelcomeUiState(
+                    showEnableBluetoothPrompt = true,
+                    hasBluetoothPermissions = false
+                )
+            )
+        }
+
+        advanceUntilIdle()
+
+        composeTestRule.onNodeWithTag(
+            "EnableBluetoothPrompt"
+        ).assertDoesNotExist()
     }
 
     @Test

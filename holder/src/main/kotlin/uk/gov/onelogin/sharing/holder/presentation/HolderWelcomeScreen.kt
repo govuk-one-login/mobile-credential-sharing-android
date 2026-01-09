@@ -28,6 +28,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
+import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_TURNED_OFF
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
@@ -42,7 +43,6 @@ import uk.gov.onelogin.sharing.holder.R.string.bluetooth_disconnected_unexpected
 import uk.gov.onelogin.sharing.holder.R.string.bluetooth_permissions_revoked
 import uk.gov.onelogin.sharing.holder.R.string.bluetooth_turned_off
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
-import java.util.UUID
 
 private const val QR_SIZE = 800
 
@@ -68,7 +68,6 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewMod
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-
                 val granted = multiplePermissionsState.allPermissionsGranted
 
                 viewModel.updateBluetoothPermissions(granted)
@@ -79,6 +78,26 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewMod
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    HolderScreenContent(
+        contentState,
+        multiplePermissionsState,
+        hasPreviouslyRequestedPermission
+    ) { viewModel.updateBluetoothPermissions(true) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.onScreenDisposed()
+        }
+    }
+}
+
+@Composable
+fun HolderScreenContent(
+    contentState: HolderWelcomeUiState,
+    multiplePermissionsState: MultiplePermissionsState,
+    hasPreviouslyRequestedPermission: Boolean,
+    grantedAllPerms: () -> Unit
+) {
     when {
         contentState.showErrorScreen -> {
             val errorText = when (contentState.bluetoothErrorType) {
@@ -90,36 +109,31 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewMod
             ErrorScreen(errorText = stringResource(errorText))
         }
 
-        contentState.showEnableBluetoothPrompt && multiplePermissionsState.allPermissionsGranted -> {
+        contentState.showEnableBluetoothPrompt &&
+            contentState.hasBluetoothPermissions == true -> {
             EnableBluetoothPrompt(denialText = bluetooth_turned_off)
         }
 
         contentState.hasBluetoothPermissions == true -> {
-            HolderScreenContent(contentState)
+            QrContent(contentState)
         }
 
         else -> {
-
             BluetoothPermissionPrompt(
                 multiplePermissionsState = multiplePermissionsState,
                 hasPreviouslyRequestedPermission = hasPreviouslyRequestedPermission,
                 onGrantedPermissions = {
-                    viewModel.updateBluetoothPermissions(true)
+                    grantedAllPerms()
                 }
             )
         }
     }
 }
 
-@Composable
-fun HolderScreenContent(contentState: HolderWelcomeUiState) {
-    QrContent(contentState, Modifier)
-}
-
 @OptIn(ExperimentalPermissionsApi::class)
 fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
     !perm.status.isGranted &&
-            !perm.status.shouldShowRationale
+        !perm.status.shouldShowRationale
 }
 
 @Suppress("LongMethod", "ComposableLambdaParameterNaming")

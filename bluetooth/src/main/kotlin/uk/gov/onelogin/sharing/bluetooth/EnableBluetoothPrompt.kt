@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,8 +32,9 @@ import uk.gov.onelogin.sharing.core.R.string.denied
  */
 @Composable
 fun EnableBluetoothPrompt(
-    onResult: (Boolean) -> Unit = {},
-    denialText: Int = denied
+    modifier: Modifier = Modifier,
+    denialText: Int = denied,
+    onResult: (Boolean) -> Unit = {}
 ) {
     var showDeniedMessage by remember { mutableStateOf(false) }
 
@@ -51,15 +53,15 @@ fun EnableBluetoothPrompt(
         resultLauncher.launch(intent)
     }
 
-    if (showDeniedMessage) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .testTag("EnableBluetoothPrompt")
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (showDeniedMessage) {
             Text(
                 text = stringResource(denialText),
                 textAlign = TextAlign.Center

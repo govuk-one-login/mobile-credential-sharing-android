@@ -4,6 +4,6 @@
     <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
     <string name="open_app_permissions">Open app permissions</string>
     <string name="bluetooth_disconnected_unexpectedly">Bluetooth disconnected unexpectedly</string>
-    <string name="bluetooth_permissions_revoked">Bluetooth permisions were revoked during the session</string>
+    <string name="bluetooth_permissions_revoked">Bluetooth permissions were revoked during the session</string>
     <string name="bluetooth_turned_off">Bluetooth was turned off on holder device during session</string>
 </resources>
