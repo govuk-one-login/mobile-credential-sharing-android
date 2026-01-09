@@ -52,8 +52,7 @@ class HolderWelcomeViewModel(
     }
 
     private val initialState = HolderWelcomeUiState(
-        previouslyHadPermissions = savedStateHandle.get<Boolean>(PREVIOUSLY_HAD_PERMISSIONS_KEY)
-            ?: false
+        previouslyHadPermissions = savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] ?: false
     )
 
     private val _uiState = MutableStateFlow(initialState)
