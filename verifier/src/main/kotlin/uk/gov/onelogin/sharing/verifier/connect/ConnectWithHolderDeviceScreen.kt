@@ -102,22 +102,28 @@ fun ConnectWithHolderDeviceScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        ConnectWithHolderDeviceScreenContent(
-            base64EncodedEngagement = base64EncodedEngagement,
-            contentState = contentState,
-            engagementData = engagementData,
-            permissionsGranted = multiplePermissionsState.allPermissionsGranted,
-            modifier = Modifier
-        )
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
+        BluetoothPermissionPrompt(
+            multiplePermissionsState,
+            contentState.hasRequestedPermissions
         ) {
-            BluetoothPermissionPrompt(
-                multiplePermissionsState,
-                contentState.hasRequestedPermissions
-            ) {
-                viewModel.updatePermissions(true)
+            if (contentState.showErrorScreen) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Generic Error"
+                    )
+                }
+            } else {
+                ConnectWithHolderDeviceScreenContent(
+                    base64EncodedEngagement = base64EncodedEngagement,
+                    contentState = contentState,
+                    engagementData = engagementData,
+                    permissionsGranted = multiplePermissionsState.allPermissionsGranted,
+                    modifier = Modifier
+                )
             }
         }
     }
@@ -131,20 +137,6 @@ fun ConnectWithHolderDeviceScreenContent(
     permissionsGranted: Boolean,
     modifier: Modifier = Modifier
 ) {
-    if (contentState.showErrorScreen) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Generic Error"
-            )
-        }
-
-        return
-    }
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacingDouble)

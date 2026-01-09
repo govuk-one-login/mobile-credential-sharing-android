@@ -7,7 +7,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
  *
  * @param base64EncodedEngagement The CBOR string that's embedded within a valid digital credential
  * QR code.
- * @param permissionSCtate The Android-powered device's bluetooth permission state.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 data class ConnectWithHolderDeviceState(
@@ -17,3 +16,16 @@ data class ConnectWithHolderDeviceState(
     val hasRequestedPermissions: Boolean = false,
     val showErrorScreen: Boolean = false
 )
+
+sealed class DeviceState {
+    data class Loaded(
+        val isBluetoothEnabled: Boolean = false,
+        val base64EncodedEngagement: String? = null,
+        val hasAllPermissions: Boolean = false,
+        val hasRequestedPermissions: Boolean = false
+    ) : DeviceState()
+
+    data object BluetoothError : DeviceState()
+    data object GenericError : DeviceState()
+    data object RequiresPermissions : DeviceState()
+}

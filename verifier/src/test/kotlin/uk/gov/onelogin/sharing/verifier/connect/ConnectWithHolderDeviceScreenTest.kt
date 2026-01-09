@@ -160,12 +160,12 @@ class ConnectWithHolderDeviceScreenTest {
                 undecodableState,
                 Modifier,
                 testViewModel,
-                fakePermissionStateDenied
+                fakePermissionStateGranted
             )
             assertBasicInformationIsDisplayed()
             assertErrorIsDisplayed()
             assertDeviceEngagementDataDoesNotExist()
-            assertBluetoothPermissionIsDenied()
+            assertBluetoothPermissionIsGranted()
             assertDeviceBluetoothIsDisabled()
             assertIsNotSearchingForBluetoothDevices()
         }
@@ -186,12 +186,12 @@ class ConnectWithHolderDeviceScreenTest {
                 decodableDeniedState,
                 Modifier,
                 testViewModel,
-                fakePermissionStateDenied
+                fakePermissionStateGranted
             )
             assertBasicInformationIsDisplayed()
             assertErrorDoesNotExist()
             assertDeviceEngagementDataIsDisplayed()
-            assertBluetoothPermissionIsDenied()
+            assertBluetoothPermissionIsGranted()
             assertDeviceBluetoothIsDisabled()
             assertIsNotSearchingForBluetoothDevices()
         }

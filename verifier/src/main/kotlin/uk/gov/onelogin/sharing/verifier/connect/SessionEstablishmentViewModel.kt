@@ -60,6 +60,7 @@ class SessionEstablishmentViewModel(
         viewModelScope.launch {
             bluetoothStatusMonitor.states.collect { bluetoothState ->
                 when (bluetoothState) {
+                    BluetoothStatus.ON,
                     BluetoothStatus.TURNING_ON -> {
                         _uiState.update {
                             it.copy(
