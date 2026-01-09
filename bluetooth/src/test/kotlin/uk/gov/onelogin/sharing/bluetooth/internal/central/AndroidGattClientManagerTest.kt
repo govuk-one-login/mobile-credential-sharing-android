@@ -27,8 +27,8 @@ import org.robolectric.util.ReflectionHelpers
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
-import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
+import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
 @RunWith(RobolectricTestRunner::class)

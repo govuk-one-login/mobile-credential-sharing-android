@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.client
+package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import kotlin.test.assertEquals
 import org.junit.Test
