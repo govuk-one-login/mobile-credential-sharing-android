@@ -10,20 +10,17 @@ import android.os.Build
 import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyCount
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.util.ReflectionHelpers
+import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
@@ -44,28 +41,13 @@ internal class AndroidGattClientManagerTest {
 
     private lateinit var manager: AndroidGattClientManager
 
-    private var originalSdkInt: Int = Build.VERSION.SDK_INT
-
     @Before
     fun setup() {
-        originalSdkInt = Build.VERSION.SDK_INT
-        mockkStatic("androidx.core.content.ContextCompat")
-
         manager = AndroidGattClientManager(
             context,
             fakePermissionChecker,
             fakeServiceValidator,
             logger
-        )
-    }
-
-    @After
-    fun tearDown() {
-        unmockkStatic("androidx.core.content.ContextCompat")
-        ReflectionHelpers.setStaticField(
-            Build.VERSION::class.java,
-            "SDK_INT",
-            originalSdkInt
         )
     }
 
@@ -429,14 +411,9 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
     @Test
     fun `sets state to start when service discovery is successful - modern API`() = runTest {
-        ReflectionHelpers.setStaticField(
-            Build.VERSION::class.java,
-            "SDK_INT",
-            Build.VERSION_CODES.TIRAMISU
-        )
-
         val callbackSlot = slot<BluetoothGattCallback>()
 
         every {
@@ -474,15 +451,10 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Suppress("DEPRECATION")
+    @Config(sdk = [Build.VERSION_CODES.S])
     @Test
     fun `sets state to start when service discovery is successful - deprecated API version`() =
         runTest {
-            ReflectionHelpers.setStaticField(
-                Build.VERSION::class.java,
-                "SDK_INT",
-                Build.VERSION_CODES.S
-            )
-
             val callbackSlot = slot<BluetoothGattCallback>()
 
             every {
