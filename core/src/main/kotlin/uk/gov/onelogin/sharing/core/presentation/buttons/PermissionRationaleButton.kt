@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.core.presentation.buttons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -20,10 +21,15 @@ fun PermissionRationaleButton(
     launchPermission: () -> Unit = {}
 ) {
     Column(modifier = modifier) {
+        Text(
+            "Bluetooth permission were denied",
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
+
         GdsButton(
             modifier = Modifier.testTag("permissionRationaleButton"),
             text = text,
-            buttonType = ButtonTypeV2.Secondary(),
+            buttonType = ButtonTypeV2.Primary(),
             onClick = {
                 launchPermission()
             }

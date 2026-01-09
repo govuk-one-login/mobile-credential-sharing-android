@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.verifier.verify
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -17,11 +19,13 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @Inject
 @ViewModelKey(VerifyCredentialViewModel::class)
 @ContributesIntoMap(ViewModelScope::class)
+@OptIn(ExperimentalPermissionsApi::class)
 class VerifyCredentialViewModel(
     private val logger: Logger,
     private val bluetoothStateMonitor: BluetoothStateMonitor
@@ -65,10 +69,28 @@ class VerifyCredentialViewModel(
         }
     }
 
-    fun onPermissionsChanged(allGranted: Boolean) {
-        logger.debug(logTag, "Permissions changed. allGranted=$allGranted")
-        this.allGranted = allGranted
+    fun onPermissionsChanged(permissionsState: MultiplePermissionsState) {
+        logPermissions(permissionsState)
+        allGranted = permissionsState.allPermissionsGranted
         checkPreconditions()
+    }
+
+    private fun logPermissions(permissionsState: MultiplePermissionsState) {
+        when {
+            permissionsState.allPermissionsGranted -> logger.debug(
+                logTag,
+                "All required Bluetooth permissions have been granted"
+            )
+
+            permissionsState.isPermanentlyDenied() -> logger.debug(
+                logTag,
+                "Bluetooth permissions were permanently denied"
+            )
+
+            else -> {
+                logger.debug(logTag, "Bluetooth permissions were denied")
+            }
+        }
     }
 
     private fun checkPreconditions() {

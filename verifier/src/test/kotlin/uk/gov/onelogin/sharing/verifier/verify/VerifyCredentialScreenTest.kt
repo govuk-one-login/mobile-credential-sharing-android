@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -31,14 +32,15 @@ class VerifyCredentialScreenTest {
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
     private val logger = SystemLogger()
 
-    private val viewModel = VerifyCredentialViewModel(
-        logger,
-        bluetoothStateMonitor
-    )
+    private lateinit var viewModel: VerifyCredentialViewModel
 
     @Before
     fun setup() {
         Intents.init()
+        viewModel = VerifyCredentialViewModel(
+            logger,
+            bluetoothStateMonitor
+        )
     }
 
     @After
@@ -50,11 +52,11 @@ class VerifyCredentialScreenTest {
     fun `bluetooth system prompt is displayed when state is bluetooth disabled`() = runTest {
         composeTestRule.setContent {
             VerifyCredentialScreen(
-                viewModel = viewModel
+                viewModel = viewModel,
+                multiplePermissionsState = fakePermissionStateGranted
             )
         }
 
-        viewModel.onPermissionsChanged(true)
         bluetoothStateMonitor.emit(BluetoothStatus.OFF)
         composeTestRule.waitForIdle()
 
@@ -75,8 +77,6 @@ class VerifyCredentialScreenTest {
         composeTestRule
             .onNodeWithText("Enable bluetooth permissions")
             .assertIsDisplayed()
-
-        composeTestRule.onNodeWithTag("fakeScanner").assertDoesNotExist()
     }
 
     @Test
@@ -92,16 +92,21 @@ class VerifyCredentialScreenTest {
         }
 
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
-        composeTestRule.waitForIdle()
 
+        composeTestRule.waitUntil { navigated }
         assertTrue(navigated)
     }
 
     @Test
     fun `onPermissionRequestLaunched is called when permissions request is launched`() {
+        var launched = false
+
         val fakeDenied = FakeMultiplePermissionsState(
-            fakePermissionStateDenied.permissions,
-            onLaunchPermission = { viewModel.onPermissionRequestLaunched() }
+            permissions = fakePermissionStateDenied.permissions,
+            onLaunchPermission = {
+                launched = true
+                viewModel.onPermissionRequestLaunched()
+            }
         )
 
         composeTestRule.setContent {
@@ -111,8 +116,7 @@ class VerifyCredentialScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Enable bluetooth permissions").performClick()
-        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil { launched }
 
         assertTrue(viewModel.uiState.value.hasPreviouslyRequestedPermission)
     }

@@ -40,7 +40,6 @@ fun VerifyCredentialScreen(
         viewModel.events.collect { event ->
             when (event) {
                 VerifyCredentialEvents.NavigateToScanner -> {
-                    println("Navigating to scanner")
                     latestOnNavigateToScanner()
                 }
             }
@@ -49,8 +48,17 @@ fun VerifyCredentialScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(multiplePermissionsState.allPermissionsGranted) {
-        viewModel.onPermissionsChanged(multiplePermissionsState.allPermissionsGranted)
+    val permissionsStatus = multiplePermissionsState.permissions.map {
+        it.status
+    }
+    LaunchedEffect(permissionsStatus) {
+        viewModel.onPermissionsChanged(multiplePermissionsState)
+    }
+
+    LaunchedEffect(Unit) {
+        if (!multiplePermissionsState.allPermissionsGranted) {
+            multiplePermissionsState.launchMultiplePermissionRequest()
+        }
     }
 
     when (uiState.preconditionsState) {
@@ -60,9 +68,7 @@ fun VerifyCredentialScreen(
             BluetoothPermissionPrompt(
                 multiplePermissionsState,
                 hasPreviouslyRequestedPermission = uiState.hasPreviouslyRequestedPermission
-            ) {
-                viewModel.onPermissionsChanged(true)
-            }
+            ) {}
         }
 
         VerifyCredentialPreconditionsState.BluetoothDisabled -> {
