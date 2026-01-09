@@ -29,5 +29,15 @@ enum class ClientError {
     /**
      * Indicates that the Bluetooth GATT instance is not available or could not be obtained.
      */
-    BLUETOOTH_GATT_NOT_AVAILABLE
+    BLUETOOTH_GATT_NOT_AVAILABLE,
+
+    /**
+     * Indicates that the Bluetooth GATT client could not subscribe to characteristics for communication
+     */
+    FAILED_TO_SUBSCRIBE,
+
+    /**
+     * Indicates that the Bluetooth GATT client failed to set the state characteristic to 'Start'
+     */
+    FAILED_TO_START
 }

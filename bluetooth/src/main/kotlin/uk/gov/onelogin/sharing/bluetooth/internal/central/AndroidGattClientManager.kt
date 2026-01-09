@@ -84,9 +84,14 @@ internal class AndroidGattClientManager(
         bluetoothGatt = null
     }
 
-    private fun discoverServices() {
+    private fun handleGattEvent(event: GattEvent) {
         try {
-            bluetoothGatt?.discoverServices()
+            when (event) {
+                is GattEvent.ConnectionStateChange -> connectionChanged(event)
+                is GattEvent.ServicesDiscovered -> servicesDiscovered(event)
+                is GattEvent.MtuChange -> changedMtu(event)
+                is GattEvent.CharacteristicWrite -> characteristicWritten(event)
+            }
         } catch (e: SecurityException) {
             logger.error(logTag, "Security exception", e)
             _events.tryEmit(
@@ -95,15 +100,7 @@ internal class AndroidGattClientManager(
         }
     }
 
-    private fun handleGattEvent(event: GattEvent) {
-        when (event) {
-            is GattEvent.ConnectionStateChange -> connectionChanged(event)
-            is GattEvent.ServicesDiscovered -> servicesDiscovered(event)
-            is GattEvent.MtuChange -> changedMtu(event)
-            is GattEvent.CharacteristicWrite -> characteristicWritten(event)
-        }
-    }
-
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun connectionChanged(event: GattEvent.ConnectionStateChange) {
         val address = event.gatt.device.address
 
@@ -112,7 +109,7 @@ internal class AndroidGattClientManager(
                 event.newState == BluetoothGatt.STATE_CONNECTED -> {
                 bluetoothGatt = event.gatt
 
-                discoverServices()
+                bluetoothGatt?.discoverServices()
 
                 GattClientEvent.Connected(address)
             }
@@ -132,6 +129,7 @@ internal class AndroidGattClientManager(
         _events.tryEmit(clientEvent)
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun servicesDiscovered(event: GattEvent.ServicesDiscovered) {
         logger.debug(logTag, "Services discovered: status=${event.status}")
 
@@ -162,57 +160,82 @@ internal class AndroidGattClientManager(
             )
         } else {
             subscribeToCharacteristics(service)
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun subscribeToCharacteristics(service: BluetoothGattService) {
+        val gatt = bluetoothGatt.let { bluetoothGatt } ?: return
+
+        gatt.requestMtu(MtuValues.MAX_POSSIBLE)
+
+        val state = service
+            .getCharacteristic(GattUuids.STATE_UUID)
+
+        val serverToClient = service
+            .getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
+
+        // Subscribe to inbound messages
+        val success = gatt.setCharacteristicNotification(
+            state,
+            true
+        ) && gatt.setCharacteristicNotification(serverToClient, true)
+
+        if (success) {
+            logger.debug(logTag, "subscribed to bluetooth characteristic changes")
             _events.tryEmit(GattClientEvent.ServicesDiscovered)
+        } else {
+            logger.error(logTag, "Failed to subscribe to characteristics")
+
+            _events.tryEmit(
+                GattClientEvent.Error(
+                    ClientError.FAILED_TO_SUBSCRIBE
+                )
+            )
+
+            disconnect()
         }
     }
 
     @Suppress("DEPRECATION")
-    private fun subscribeToCharacteristics(service: BluetoothGattService) {
-        try {
-            bluetoothGatt?.requestMtu(MtuValues.MAX_POSSIBLE)
-            logger.debug(logTag, "MTU requested: ${MtuValues.MAX_POSSIBLE}")
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun changedMtu(event: GattEvent.MtuChange) {
+        val gatt = bluetoothGatt.let { bluetoothGatt } ?: return
+        logger.debug(logTag, "MTU negotiated: ${event.mtu}")
 
-            val state = service
-                .getCharacteristic(GattUuids.STATE_UUID)
+        val state = gatt
+            .getService(serviceUuid)
+            .getCharacteristic(GattUuids.STATE_UUID)
 
-            val serverToClient = service
-                .getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
-
-            // Subscribe to inbound messages
-            bluetoothGatt?.setCharacteristicNotification(state, true)
-            bluetoothGatt?.setCharacteristicNotification(serverToClient, true)
-
-            logger.debug(logTag, "subscribed to bluetooth characteristic changes")
-
-            // Set the state value to start
-            val startValue = byteArrayOf(MdocState.START.code)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                bluetoothGatt?.writeCharacteristic(
-                    state,
-                    startValue,
-                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-                )
-            } else {
-                state.value = startValue
-                bluetoothGatt?.writeCharacteristic(state)
-            }
-
-            // DCMAW-17385 | Verifier | Send SessionEstablishment over BLE
-            // Keep a reference to the `clientToServer` characteristic (outgoing communication
-            // channel) to allow us to send messages:
-            // val clientToServer = service
-            //    .getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID)
-        } catch (e: SecurityException) {
-            logger.error(logTag, "Security exception", e)
-            _events.tryEmit(
-                GattClientEvent.Error(ClientError.BLUETOOTH_PERMISSION_MISSING)
+        // Set the state value to start
+        val startValue = byteArrayOf(MdocState.START.code)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            bluetoothGatt?.writeCharacteristic(
+                state,
+                startValue,
+                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
             )
+        } else {
+            state.value = startValue
+            bluetoothGatt?.writeCharacteristic(state)
         }
     }
 
-    private fun changedMtu(event: GattEvent.MtuChange) {
-    }
-
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun characteristicWritten(event: GattEvent.CharacteristicWrite) {
+        if (event.status != BluetoothGatt.GATT_SUCCESS) {
+            logger.error(logTag, "Failed to write 'Start' state")
+            disconnect()
+
+            _events.tryEmit(
+                GattClientEvent.Error(
+                    ClientError.FAILED_TO_START
+                )
+            )
+
+            return
+        }
+
+        logger.debug(logTag, "Wrote value to characteristic: ${event.characteristic.uuid}")
     }
 }
