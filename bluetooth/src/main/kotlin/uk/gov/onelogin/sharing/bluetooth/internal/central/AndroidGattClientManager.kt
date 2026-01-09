@@ -95,7 +95,7 @@ internal class AndroidGattClientManager(
         }
     }
 
-    @Suppress("ForbiddenComment")
+    @Suppress("DEPRECATION", "ForbiddenComment")
     private fun subscribeToCharacteristics(service: BluetoothGattService) {
         try {
             bluetoothGatt?.requestMtu(MtuValues.MAX_POSSIBLE)
@@ -112,23 +112,21 @@ internal class AndroidGattClientManager(
 
             // Set the state value to start
             val startValue = byteArrayOf(MdocState.START.code)
-            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 bluetoothGatt?.writeCharacteristic(
                     state,
                     startValue,
                     BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
                 )
-            //} else {
-                // TODO: compile this without failure
-                // state.value = startValue
-                // bluetoothGatt?.writeCharacteristic(state)
-            //}
+            } else {
+                state.value = startValue
+                bluetoothGatt?.writeCharacteristic(state)
+            }
 
             // TODO: Keep a reference to the `clientToServer` characteristic (outgoing communication
             // channel) to allow us to send messages
             // val clientToServer = service
             //    .getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID)
-
         } catch (e: SecurityException) {
             logger.error(logTag, "Security exception", e)
             _events.tryEmit(

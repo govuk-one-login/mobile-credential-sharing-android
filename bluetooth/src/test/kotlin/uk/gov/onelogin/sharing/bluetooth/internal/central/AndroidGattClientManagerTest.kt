@@ -5,17 +5,24 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
+import android.os.Build
 import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyCount
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.util.ReflectionHelpers
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
@@ -23,6 +30,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
+@RunWith(RobolectricTestRunner::class)
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
@@ -35,13 +43,28 @@ internal class AndroidGattClientManagerTest {
 
     private lateinit var manager: AndroidGattClientManager
 
+    private var originalSdkInt: Int = Build.VERSION.SDK_INT
+
     @Before
     fun setup() {
+        originalSdkInt = Build.VERSION.SDK_INT
+        mockkStatic("androidx.core.content.ContextCompat")
+
         manager = AndroidGattClientManager(
             context,
             fakePermissionChecker,
             fakeServiceValidator,
             logger
+        )
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic("androidx.core.content.ContextCompat")
+        ReflectionHelpers.setStaticField(
+            Build.VERSION::class.java,
+            "SDK_INT",
+            originalSdkInt
         )
     }
 
@@ -361,7 +384,13 @@ internal class AndroidGattClientManagerTest {
 
             awaitItem()
 
-            verify { bluetoothGatt.setCharacteristicNotification(any(), true) }
+            // TODO : ensure this specifies state characteristic
+            verify {
+                bluetoothGatt.setCharacteristicNotification(
+                    any(),
+                    true
+                )
+            }
         }
     }
 
@@ -401,12 +430,24 @@ internal class AndroidGattClientManagerTest {
 
             awaitItem()
 
-            verify { bluetoothGatt.setCharacteristicNotification(any(), true) }
+            // TODO: ensure this specifies the serverToClient characteristic
+            verify {
+                bluetoothGatt.setCharacteristicNotification(
+                    any(),
+                    true
+                )
+            }
         }
     }
 
     @Test
-    fun `sets state to start when service discovery is successful`() = runTest {
+    fun `sets state to start when service discovery is successful - modern API`() = runTest {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION::class.java,
+            "SDK_INT",
+            Build.VERSION_CODES.TIRAMISU
+        )
+
         val callbackSlot = slot<BluetoothGattCallback>()
 
         every {
@@ -450,6 +491,57 @@ internal class AndroidGattClientManagerTest {
             }
         }
     }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `sets state to start when service discovery is successful - deprecated API version`() =
+        runTest {
+            ReflectionHelpers.setStaticField(
+                Build.VERSION::class.java,
+                "SDK_INT",
+                Build.VERSION_CODES.S
+            )
+
+            val callbackSlot = slot<BluetoothGattCallback>()
+
+            every {
+                bluetoothDevice.connectGatt(
+                    context,
+                    any(),
+                    capture(callbackSlot),
+                    any()
+                )
+            } returns bluetoothGatt
+
+            manager.events.test {
+                manager.connect(
+                    bluetoothDevice,
+                    uuid
+                )
+
+                skipItems(1)
+
+                callbackSlot.captured.onServicesDiscovered(
+                    bluetoothGatt,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+
+                skipItems(1)
+
+                callbackSlot.captured.onConnectionStateChange(
+                    bluetoothGatt,
+                    BluetoothGatt.GATT_SUCCESS,
+                    BluetoothGatt.STATE_CONNECTED
+                )
+
+                awaitItem()
+
+                // TODO: check state value is correctly set AND `state.value = startValue` is called
+                verify {
+                    bluetoothGatt.writeCharacteristic(any())
+                }
+            }
+        }
 
     @Test
     fun `emits service disconnected`() = runTest {
