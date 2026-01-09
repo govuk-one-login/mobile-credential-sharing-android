@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
-import java.util.UUID
 
 internal interface GattEvent {
     data class ConnectionStateChange(val gatt: BluetoothGatt, val status: Int, val newState: Int) :
