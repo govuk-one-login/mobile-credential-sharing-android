@@ -1,15 +1,11 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
-import android.app.Activity
-import android.app.Instrumentation
-import android.bluetooth.BluetoothAdapter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.espresso.intent.Intents
-import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.testing.junit.testparameterinjector.TestParameter
