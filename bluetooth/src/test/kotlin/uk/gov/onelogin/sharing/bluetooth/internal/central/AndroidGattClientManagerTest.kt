@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.os.Build
 import app.cash.turbine.test
@@ -336,15 +337,7 @@ internal class AndroidGattClientManagerTest {
 
             skipItems(1)
 
-            callbackSlot.captured.onConnectionStateChange(
-                bluetoothGatt,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothGatt.STATE_CONNECTED
-            )
-
-            awaitItem()
-
-            verify { bluetoothGatt.requestMtu(512) }
+            verify { bluetoothGatt.requestMtu(MtuValues.MAX_POSSIBLE) }
         }
     }
 
@@ -361,6 +354,12 @@ internal class AndroidGattClientManagerTest {
             )
         } returns bluetoothGatt
 
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
         manager.events.test {
             manager.connect(
                 bluetoothDevice,
@@ -376,18 +375,9 @@ internal class AndroidGattClientManagerTest {
 
             skipItems(1)
 
-            callbackSlot.captured.onConnectionStateChange(
-                bluetoothGatt,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothGatt.STATE_CONNECTED
-            )
-
-            awaitItem()
-
-            // TODO : ensure this specifies state characteristic
             verify {
                 bluetoothGatt.setCharacteristicNotification(
-                    any(),
+                    stateCharacteristic,
                     true
                 )
             }
@@ -407,6 +397,14 @@ internal class AndroidGattClientManagerTest {
             )
         } returns bluetoothGatt
 
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val serverToClientCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every {
+            service.getCharacteristic(GattUuids.STATE_UUID)
+        } returns serverToClientCharacteristic
+
         manager.events.test {
             manager.connect(
                 bluetoothDevice,
@@ -422,18 +420,9 @@ internal class AndroidGattClientManagerTest {
 
             skipItems(1)
 
-            callbackSlot.captured.onConnectionStateChange(
-                bluetoothGatt,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothGatt.STATE_CONNECTED
-            )
-
-            awaitItem()
-
-            // TODO: ensure this specifies the serverToClient characteristic
             verify {
                 bluetoothGatt.setCharacteristicNotification(
-                    any(),
+                    serverToClientCharacteristic,
                     true
                 )
             }
@@ -474,14 +463,6 @@ internal class AndroidGattClientManagerTest {
 
             skipItems(1)
 
-            callbackSlot.captured.onConnectionStateChange(
-                bluetoothGatt,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothGatt.STATE_CONNECTED
-            )
-
-            awaitItem()
-
             verify {
                 bluetoothGatt.writeCharacteristic(
                     any(),
@@ -513,6 +494,12 @@ internal class AndroidGattClientManagerTest {
                 )
             } returns bluetoothGatt
 
+            val service = mockk<BluetoothGattService>(relaxed = true)
+            every { bluetoothGatt.getService(any()) } returns service
+
+            val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+            every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
             manager.events.test {
                 manager.connect(
                     bluetoothDevice,
@@ -528,18 +515,8 @@ internal class AndroidGattClientManagerTest {
 
                 skipItems(1)
 
-                callbackSlot.captured.onConnectionStateChange(
-                    bluetoothGatt,
-                    BluetoothGatt.GATT_SUCCESS,
-                    BluetoothGatt.STATE_CONNECTED
-                )
-
-                awaitItem()
-
-                // TODO: check state value is correctly set AND `state.value = startValue` is called
-                verify {
-                    bluetoothGatt.writeCharacteristic(any())
-                }
+                verify { stateCharacteristic.setValue(byteArrayOf(MdocState.START.code)) }
+                verify { bluetoothGatt.writeCharacteristic(stateCharacteristic) }
             }
         }
 

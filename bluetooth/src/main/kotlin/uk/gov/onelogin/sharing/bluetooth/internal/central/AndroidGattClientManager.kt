@@ -16,9 +16,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidGattClientManager(
@@ -95,7 +95,7 @@ internal class AndroidGattClientManager(
         }
     }
 
-    @Suppress("DEPRECATION", "ForbiddenComment")
+    @Suppress("DEPRECATION")
     private fun subscribeToCharacteristics(service: BluetoothGattService) {
         try {
             bluetoothGatt?.requestMtu(MtuValues.MAX_POSSIBLE)
@@ -123,8 +123,9 @@ internal class AndroidGattClientManager(
                 bluetoothGatt?.writeCharacteristic(state)
             }
 
-            // TODO: Keep a reference to the `clientToServer` characteristic (outgoing communication
-            // channel) to allow us to send messages
+            // DCMAW-17385 | Verifier | Send SessionEstablishment over BLE
+            // Keep a reference to the `clientToServer` characteristic (outgoing communication
+            // channel) to allow us to send messages:
             // val clientToServer = service
             //    .getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID)
         } catch (e: SecurityException) {
