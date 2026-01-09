@@ -7,6 +7,6 @@ import uk.gov.onelogin.sharing.bluetooth.internal.central.MtuValues
 class MtuValuesTest {
     @Test
     fun `mtu value is correct`() {
-        assertEquals(509, MtuValues.MAX_POSSIBLE)
+        assertEquals(515, MtuValues.MAX_POSSIBLE)
     }
 }
