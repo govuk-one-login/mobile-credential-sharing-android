@@ -6,7 +6,6 @@ import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineScope
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
-import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 
 @Inject
 @ContributesBinding(ViewModelScope::class)

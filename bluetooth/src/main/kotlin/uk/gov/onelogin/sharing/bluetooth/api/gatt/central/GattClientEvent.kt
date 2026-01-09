@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.bluetooth.api.gatt.central
 
-import android.bluetooth.BluetoothGattService
-
 sealed interface GattClientEvent {
     data object Connecting : GattClientEvent
     data class Connected(val deviceAddress: String) : GattClientEvent
