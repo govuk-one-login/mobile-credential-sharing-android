@@ -95,10 +95,82 @@ internal class AndroidGattClientManager(
         }
     }
 
+    private fun handleGattEvent(event: GattEvent) {
+        when (event) {
+            is GattEvent.ConnectionStateChange -> connectionChanged(event)
+            is GattEvent.ServicesDiscovered -> servicesDiscovered(event)
+            is GattEvent.MtuChange -> changedMtu(event)
+            is GattEvent.CharacteristicWrite -> characteristicWritten(event)
+        }
+    }
+
+    private fun connectionChanged(event: GattEvent.ConnectionStateChange) {
+        val address = event.gatt.device.address
+
+        val clientEvent = when {
+            event.status == BluetoothGatt.GATT_SUCCESS &&
+                event.newState == BluetoothGatt.STATE_CONNECTED -> {
+                bluetoothGatt = event.gatt
+
+                discoverServices()
+
+                GattClientEvent.Connected(address)
+            }
+
+            event.newState == BluetoothGatt.STATE_DISCONNECTED -> {
+                bluetoothGatt = null
+                GattClientEvent.Disconnected(address)
+            }
+
+            else -> GattClientEvent.UnsupportedEvent(
+                address,
+                event.status,
+                event.newState
+            )
+        }
+
+        _events.tryEmit(clientEvent)
+    }
+
+    private fun servicesDiscovered(event: GattEvent.ServicesDiscovered) {
+        logger.debug(logTag, "Services discovered: status=${event.status}")
+
+        if (event.status != BluetoothGatt.GATT_SUCCESS) {
+            _events.tryEmit(
+                GattClientEvent.Error(
+                    ClientError.SERVICE_DISCOVERED_ERROR
+                )
+            )
+            return
+        }
+
+        val service = event.gatt.getService(serviceUuid)
+        if (service == null) {
+            _events.tryEmit(
+                GattClientEvent.Error(
+                    ClientError.SERVICE_NOT_FOUND
+                )
+            )
+            return
+        }
+
+        if (serviceValidator.validate(service) is ValidationResult.Failure) {
+            _events.tryEmit(
+                GattClientEvent.Error(
+                    ClientError.INVALID_SERVICE
+                )
+            )
+        } else {
+            subscribeToCharacteristics(service)
+            _events.tryEmit(GattClientEvent.ServicesDiscovered)
+        }
+    }
+
     @Suppress("DEPRECATION")
     private fun subscribeToCharacteristics(service: BluetoothGattService) {
         try {
             bluetoothGatt?.requestMtu(MtuValues.MAX_POSSIBLE)
+            logger.debug(logTag, "MTU requested: ${MtuValues.MAX_POSSIBLE}")
 
             val state = service
                 .getCharacteristic(GattUuids.STATE_UUID)
@@ -109,6 +181,8 @@ internal class AndroidGattClientManager(
             // Subscribe to inbound messages
             bluetoothGatt?.setCharacteristicNotification(state, true)
             bluetoothGatt?.setCharacteristicNotification(serverToClient, true)
+
+            logger.debug(logTag, "subscribed to bluetooth characteristic changes")
 
             // Set the state value to start
             val startValue = byteArrayOf(MdocState.START.code)
@@ -136,68 +210,9 @@ internal class AndroidGattClientManager(
         }
     }
 
-    private fun handleGattEvent(event: GattEvent) {
-        when (event) {
-            is GattEvent.ConnectionStateChange -> {
-                val address = event.gatt.device.address
+    private fun changedMtu(event: GattEvent.MtuChange) {
+    }
 
-                val clientEvent = when {
-                    event.status == BluetoothGatt.GATT_SUCCESS &&
-                        event.newState == BluetoothGatt.STATE_CONNECTED -> {
-                        bluetoothGatt = event.gatt
-
-                        discoverServices()
-
-                        GattClientEvent.Connected(address)
-                    }
-
-                    event.newState == BluetoothGatt.STATE_DISCONNECTED -> {
-                        bluetoothGatt = null
-                        GattClientEvent.Disconnected(address)
-                    }
-
-                    else -> GattClientEvent.UnsupportedEvent(
-                        address,
-                        event.status,
-                        event.newState
-                    )
-                }
-
-                _events.tryEmit(clientEvent)
-            }
-
-            is GattEvent.ServicesDiscovered -> {
-                logger.debug(logTag, "Services discovered: status=${event.status}")
-                if (event.status != BluetoothGatt.GATT_SUCCESS) {
-                    _events.tryEmit(
-                        GattClientEvent.Error(
-                            ClientError.SERVICE_DISCOVERED_ERROR
-                        )
-                    )
-                    return
-                }
-
-                val service = event.bluetoothGatt.getService(serviceUuid)
-                if (service == null) {
-                    _events.tryEmit(
-                        GattClientEvent.Error(
-                            ClientError.SERVICE_NOT_FOUND
-                        )
-                    )
-                    return
-                }
-
-                if (serviceValidator.validate(service) is ValidationResult.Failure) {
-                    _events.tryEmit(
-                        GattClientEvent.Error(
-                            ClientError.INVALID_SERVICE
-                        )
-                    )
-                } else {
-                    subscribeToCharacteristics(service)
-                    _events.tryEmit(GattClientEvent.ServicesDiscovered)
-                }
-            }
-        }
+    private fun characteristicWritten(event: GattEvent.CharacteristicWrite) {
     }
 }
