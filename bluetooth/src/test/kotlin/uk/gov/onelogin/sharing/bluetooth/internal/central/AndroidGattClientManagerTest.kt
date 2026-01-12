@@ -262,7 +262,7 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `requests 512 max transmission unit when service discovery is successful`() = runTest {
+    fun `requests max possible transmission unit when service discovery is successful`() = runTest {
         every {
             bluetoothGatt.setCharacteristicNotification(any(), true)
         } returns true
@@ -315,7 +315,7 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `emits error when state characteristic does not exist during subscription step`() = runTest {
+    fun `emits error when state characteristic does not exist during subscription`() = runTest {
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(any()) } returns service
         every { service.getCharacteristic(GattUuids.STATE_UUID) } returns null
@@ -347,29 +347,30 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `emits error when server to client characteristic does not exist during subscription step`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
-        every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns null
+    fun `emits error when server to client characteristic does not exist during subscription`() =
+        runTest {
+            val service = mockk<BluetoothGattService>(relaxed = true)
+            every { bluetoothGatt.getService(any()) } returns service
+            every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns null
 
-        testEvents { callbackSlot ->
-            callbackSlot.captured.onServicesDiscovered(
-                bluetoothGatt,
-                BluetoothGatt.GATT_SUCCESS
-            )
+            testEvents { callbackSlot ->
+                callbackSlot.captured.onServicesDiscovered(
+                    bluetoothGatt,
+                    BluetoothGatt.GATT_SUCCESS
+                )
 
-            assertEquals(
-                GattClientEvent.Error(
-                    ClientError.INVALID_SERVICE
-                ),
-                awaitItem()
-            )
+                assertEquals(
+                    GattClientEvent.Error(
+                        ClientError.INVALID_SERVICE
+                    ),
+                    awaitItem()
+                )
 
-            assert(
-                logger.contains("Gatt Service does not have a server to client characteristic")
-            )
+                assert(
+                    logger.contains("Gatt Service does not have a server to client characteristic")
+                )
+            }
         }
-    }
 
     @Test
     fun `subscribes to serverToClient messages when service discovery is successful`() = runTest {
@@ -565,8 +566,10 @@ internal class AndroidGattClientManagerTest {
     }
 
     private suspend fun testEvents(
-        validate: suspend TurbineTestContext<GattClientEvent>.(CapturingSlot<BluetoothGattCallback>
-        ) -> Unit,) {
+        validate: suspend TurbineTestContext<GattClientEvent>.(
+            CapturingSlot<BluetoothGattCallback>
+        ) -> Unit
+    ) {
         val callbackSlot = slot<BluetoothGattCallback>()
 
         every {
