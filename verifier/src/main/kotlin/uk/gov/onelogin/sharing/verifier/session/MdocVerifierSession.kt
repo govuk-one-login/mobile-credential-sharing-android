@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -77,9 +78,12 @@ class MdocVerifierSession(
             is GattClientEvent.Disconnected ->
                 _state.value = VerifierSessionState.Disconnected(event.deviceAddress)
 
-            is GattClientEvent.Error ->
-                _state.value =
-                    VerifierSessionState.Error(event.error.toString())
+            is GattClientEvent.Error -> {
+                _state.value = when (event.error) {
+                    ClientError.INVALID_SERVICE -> VerifierSessionState.Invalid
+                    else -> VerifierSessionState.Error(event.error.toString())
+                }
+            }
 
             is GattClientEvent.UnsupportedEvent -> {
                 logger.debug(logTag, "Unhandled event: $event")

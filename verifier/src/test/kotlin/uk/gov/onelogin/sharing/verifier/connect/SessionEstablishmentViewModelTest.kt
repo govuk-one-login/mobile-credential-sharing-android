@@ -189,7 +189,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `Connecting to invalid configuration emits an error state to the UI`() = runTest {
         fakeVerifierSession.updateState(
-            VerifierSessionState.Invalid("This is a unit test!")
+            VerifierSessionState.Invalid
         )
 
         val viewModel = createViewModel(DummyBluetoothScanner)

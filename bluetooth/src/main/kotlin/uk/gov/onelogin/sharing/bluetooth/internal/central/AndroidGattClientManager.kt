@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
@@ -16,7 +15,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.logger.logTag
-import kotlin.toString
+import java.util.UUID
 
 internal class AndroidGattClientManager(
     private val context: Context,
@@ -143,15 +142,13 @@ internal class AndroidGattClientManager(
                     return
                 }
 
-                if (serviceValidator.validate(service) is ValidationResult.Failure) {
-                    _events.tryEmit(
-                        GattClientEvent.Error(
-                            ClientError.INVALID_SERVICE
-                        )
-                    )
-                } else {
-                    _events.tryEmit(GattClientEvent.ServicesDiscovered)
-                }
+                when (serviceValidator.validate(service)) {
+                    ValidationResult.Success ->
+                        GattClientEvent.ServicesDiscovered
+
+                    is ValidationResult.Failure ->
+                        GattClientEvent.Error(ClientError.INVALID_SERVICE)
+                }.let(_events::tryEmit)
             }
         }
     }

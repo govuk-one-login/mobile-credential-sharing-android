@@ -15,5 +15,5 @@ sealed interface VerifierSessionState {
      *
      * This occurs due to [android.bluetooth.BluetoothGattCharacteristic] issues.
      */
-    data class Invalid(val message: String) : VerifierSessionState
+    data object Invalid : VerifierSessionState
 }
