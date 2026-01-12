@@ -378,6 +378,95 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
+    fun `emits error when state characteristic does not exist during subscription step`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns null
+
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.INVALID_SERVICE
+                ),
+                awaitItem()
+            )
+
+            assert(
+                logger.contains("Gatt Service does not have a state characteristic")
+            )
+        }
+    }
+
+
+    @Test
+    fun `emits error when server to client characteristic does not exist during subscription step`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns null
+
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.INVALID_SERVICE
+                ),
+                awaitItem()
+            )
+
+            assert(
+                logger.contains("Gatt Service does not have a server to client characteristic")
+            )
+        }
+    }
+
+    @Test
     fun `subscribes to serverToClient messages when service discovery is successful`() = runTest {
         val callbackSlot = slot<BluetoothGattCallback>()
 
@@ -466,6 +555,50 @@ internal class AndroidGattClientManagerTest {
                     BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
                 )
             }
+        }
+    }
+
+    @Test
+    fun `emits error when state characteristic does not exist when Mtu is agreed`() = runTest {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns null
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            callbackSlot.captured.onMtuChanged(
+                bluetoothGatt,
+                MtuValues.MAX_POSSIBLE,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.INVALID_SERVICE
+                ),
+                awaitItem()
+            )
+
+            assert(
+                logger.contains("Gatt Service does not have a state characteristic")
+            )
         }
     }
 

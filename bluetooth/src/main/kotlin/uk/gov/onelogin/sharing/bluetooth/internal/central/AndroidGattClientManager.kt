@@ -170,10 +170,16 @@ internal class AndroidGattClientManager(
         gatt.requestMtu(MtuValues.MAX_POSSIBLE)
 
         val state = service
-            .getCharacteristic(GattUuids.STATE_UUID)
+            .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
+            ClientError.INVALID_SERVICE,
+            "Gatt Service does not have a state characteristic"
+        )
 
         val serverToClient = service
-            .getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
+            .getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) ?: return handleError(
+            ClientError.INVALID_SERVICE,
+            "Gatt Service does not have a server to client characteristic"
+        )
 
         // Subscribe to inbound messages
         val success = gatt.setCharacteristicNotification(
@@ -185,15 +191,10 @@ internal class AndroidGattClientManager(
             logger.debug(logTag, "subscribed to bluetooth characteristic changes")
             _events.tryEmit(GattClientEvent.ServicesDiscovered)
         } else {
-            logger.error(logTag, "Failed to subscribe to characteristics")
-
-            _events.tryEmit(
-                GattClientEvent.Error(
-                    ClientError.FAILED_TO_SUBSCRIBE
-                )
+            handleError(
+                ClientError.FAILED_TO_SUBSCRIBE,
+                "Failed to subscribe to characteristics"
             )
-
-            disconnect()
         }
     }
 
@@ -205,37 +206,47 @@ internal class AndroidGattClientManager(
 
         val state = gatt
             .getService(serviceUuid)
-            .getCharacteristic(GattUuids.STATE_UUID)
+            .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
+            ClientError.INVALID_SERVICE,
+            "Gatt Service does not have a state characteristic"
+        )
 
         // Set the state value to start
         val startValue = byteArrayOf(MdocState.START.code)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            bluetoothGatt?.writeCharacteristic(
+            gatt.writeCharacteristic(
                 state,
                 startValue,
                 BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
             )
         } else {
             state.value = startValue
-            bluetoothGatt?.writeCharacteristic(state)
+            gatt.writeCharacteristic(state)
         }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun characteristicWritten(event: GattEvent.CharacteristicWrite) {
         if (event.status != BluetoothGatt.GATT_SUCCESS) {
-            logger.error(logTag, "Failed to write 'Start' state")
-            disconnect()
-
-            _events.tryEmit(
-                GattClientEvent.Error(
-                    ClientError.FAILED_TO_START
-                )
+            return handleError(
+                ClientError.FAILED_TO_START,
+                "Failed to write 'Start' state"
             )
-
-            return
         }
 
         logger.debug(logTag, "Wrote value to characteristic: ${event.characteristic.uuid}")
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleError(error: ClientError, reason: String) {
+        logger.error(logTag, reason)
+
+        _events.tryEmit(
+            GattClientEvent.Error(
+                error
+            )
+        )
+
+        disconnect()
     }
 }
