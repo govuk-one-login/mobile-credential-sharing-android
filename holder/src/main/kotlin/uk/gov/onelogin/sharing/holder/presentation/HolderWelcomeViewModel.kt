@@ -1,10 +1,16 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesIntoMap
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
+import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
@@ -14,6 +20,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
+import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
+import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
@@ -28,17 +37,24 @@ import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGOR
 import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
-@Inject
-@ViewModelKey(HolderWelcomeViewModel::class)
-@ContributesIntoMap(ViewModelScope::class)
+@AssistedInject
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
+    @Assisted private val savedStateHandle: SavedStateHandle,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
-    private val initialState = HolderWelcomeUiState()
+
+    companion object {
+        private const val PREVIOUSLY_HAD_PERMISSIONS_KEY = "previouslyHadPermissions"
+    }
+
+    private val initialState = HolderWelcomeUiState(
+        previouslyHadPermissions = savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] ?: false
+    )
+
     private val _uiState = MutableStateFlow(initialState)
     private val mdocBleSession: MdocSessionManager =
         mdocSessionManagerFactory.create(viewModelScope)
@@ -89,7 +105,14 @@ class HolderWelcomeViewModel(
                             ]
                         )
                         logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
-                        _uiState.update { it.copy(showErrorScreen = true) }
+                        _uiState.update {
+                            it.copy(
+                                connectedAddress = state.address,
+                                showErrorScreen = true,
+                                bluetoothErrorType = BLUETOOTH_DISCONNECTED
+                            )
+                        }
+                        stopAdvertising()
                     }
 
                     is MdocSessionState.Error -> {
@@ -122,21 +145,35 @@ class HolderWelcomeViewModel(
                         if (!wasDisabled) {
                             logger.debug(logTag, "Mdoc - Bluetooth switched OFF")
                             _uiState.update {
-                                it.copy(bluetoothState = BluetoothState.Disabled)
+                                it.copy(
+                                    showEnableBluetoothPrompt = true,
+                                    bluetoothState = BluetoothState.Disabled
+                                )
                             }
                         }
+                        stopAdvertising()
                     }
 
                     BluetoothStatus.TURNING_ON -> {
                         logger.debug(logTag, "Mdoc - Bluetooth initializing")
                         _uiState.update {
-                            it.copy(bluetoothState = BluetoothState.Initializing)
+                            it.copy(
+                                showEnableBluetoothPrompt = false,
+                                bluetoothState = BluetoothState.Initializing,
+                                showErrorScreen = false
+                            )
                         }
                     }
 
                     BluetoothStatus.ON -> {
                         logger.debug(logTag, "Mdoc - Bluetooth switched ON")
-                        _uiState.update { it.copy(bluetoothState = BluetoothState.Enabled) }
+                        _uiState.update {
+                            it.copy(
+                                showEnableBluetoothPrompt = false,
+                                bluetoothState = BluetoothState.Enabled,
+                                showErrorScreen = false
+                            )
+                        }
                         startBleSession()
                     }
 
@@ -166,12 +203,36 @@ class HolderWelcomeViewModel(
         }
     }
 
-    fun updateBluetoothPermissions(state: Boolean) {
-        _uiState.update {
-            it.copy(hasBluetoothPermissions = state)
+    fun updateBluetoothPermissions(granted: Boolean) {
+        val hadPermissionsPreviously = _uiState.value.previouslyHadPermissions
+        val shouldShowError = hadPermissionsPreviously && !granted
+        val grantedPermissionsForFirstTime = !hadPermissionsPreviously && granted
+
+        _uiState.update { state ->
+            state.copy(
+                hasBluetoothPermissions = granted,
+                previouslyHadPermissions = hadPermissionsPreviously || granted,
+                showErrorScreen = shouldShowError,
+                bluetoothErrorType = if (shouldShowError) {
+                    PERMISSIONS_MISSING
+                } else {
+                    BLUETOOTH_DISCONNECTED
+                }
+            )
         }
 
-        startBleSession()
+        if (shouldShowError) {
+            logger.debug(logTag, "Error - Permissions were revoked during the session")
+            stopAdvertising()
+        }
+
+        if (grantedPermissionsForFirstTime) {
+            savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] = true
+        }
+
+        if (granted) {
+            startBleSession()
+        }
     }
 
     private fun startBleSession() {
@@ -198,6 +259,31 @@ class HolderWelcomeViewModel(
         state.sessionState == MdocSessionState.Idle ||
             state.sessionState == MdocSessionState.AdvertisingStopped ||
             state.sessionState == MdocSessionState.GattServiceStopped
+
+    @AssistedFactory
+    @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
+    @ContributesIntoMap(ViewModelScope::class)
+    interface Factory : ViewModelAssistedFactory {
+        fun create(@Assisted savedStateHandle: SavedStateHandle): HolderWelcomeViewModel
+        override fun create(extras: CreationExtras): HolderWelcomeViewModel {
+            val savedStateHandle = extras.createSavedStateHandle()
+            return create(savedStateHandle)
+        }
+    }
+
+    fun onScreenDisposed() {
+        if (_uiState.value.sessionState is MdocSessionState.Connected) {
+            logger.debug(logTag, "Holder stopped advertising during session")
+        }
+        stopAdvertising()
+    }
+
+    override fun onCleared() {
+        viewModelScope.launch {
+            mdocBleSession.stop()
+        }
+        super.onCleared()
+    }
 }
 
 data class HolderWelcomeUiState(
@@ -207,5 +293,9 @@ data class HolderWelcomeUiState(
     val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
     val hasBluetoothPermissions: Boolean? = null,
-    val showErrorScreen: Boolean = false
+    val showErrorScreen: Boolean = false,
+    val bluetoothErrorType: BluetoothUiErrorTypes = BLUETOOTH_DISCONNECTED,
+    val previouslyHadPermissions: Boolean = false,
+    val showEnableBluetoothPrompt: Boolean = false,
+    val connectedAddress: String? = ""
 )

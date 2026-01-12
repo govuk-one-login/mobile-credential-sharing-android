@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalPermissionsApi::class)
+
 package uk.gov.onelogin.sharing.holder
 
 import android.content.Context
@@ -11,15 +13,16 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.holder.FakeMdocSessionManager
+import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
-import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
@@ -46,7 +49,7 @@ class HolderWelcomeScreenRule(
         permissionDeniedText = resources.getString(
             R.string.bluetooth_permission_permanently_denied
         ),
-        bluetoothDisabledText = resources.getString(R.string.bluetooth_disabled_error_text)
+        bluetoothDisabledText = resources.getString(R.string.bluetooth_turned_off)
     )
 
     val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
@@ -64,7 +67,8 @@ class HolderWelcomeScreenRule(
             engagementGenerator = fakeEngagementGenerator,
             mdocSessionManagerFactory = { mdocSessionManager },
             logger = SystemLogger(),
-            dispatcher = Dispatchers.Main
+            dispatcher = Dispatchers.Main,
+            savedStateHandle = SavedStateHandle()
         )
     }
 
@@ -100,14 +104,13 @@ class HolderWelcomeScreenRule(
     fun assertBluetoothDisabledTextIsDisplayed() =
         onNodeWithText(bluetoothDisabledText).assertIsDisplayed()
 
-    fun render() {
+    fun render(state: HolderWelcomeUiState) {
         setContent {
             HolderScreenContent(
-                contentState = HolderWelcomeUiState(
-                    qrData = "fakestring",
-                    hasBluetoothPermissions = true,
-                    bluetoothState = BluetoothState.Enabled
-                )
+                state,
+                multiplePermissionsState = fakeGrantedPermissionsState,
+                hasPreviouslyRequestedPermission = true,
+                grantedAllPerms = {}
             )
         }
     }

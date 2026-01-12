@@ -1,14 +1,13 @@
-package uk.gov.onelogin.sharing.verifier.session
+package uk.gov.onelogin.sharing.bluetooth.internal.validator
 
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.core.mdoc.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
 
 class MdocServiceValidatorTest {
 
@@ -38,8 +37,8 @@ class MdocServiceValidatorTest {
 
         val result = validator.validate(service)
 
-        assertEquals(ValidationResult.Success, result)
-        assertTrue(fakeLogger.size == 0)
+        Assert.assertEquals(ValidationResult.Success, result)
+        Assert.assertTrue(fakeLogger.size == 0)
     }
 
     @Test
@@ -59,21 +58,21 @@ class MdocServiceValidatorTest {
         val result = validator.validate(service)
 
         require(result is ValidationResult.Failure)
-        assertEquals(2, result.errors.size)
-        assertTrue(
+        Assert.assertEquals(2, result.errors.size)
+        Assert.assertTrue(
             result.errors.contains(
                 "Client2Server characteristic not found (${GattUuids.CLIENT_2_SERVER_UUID})"
             )
         )
-        assertTrue(
+        Assert.assertTrue(
             result.errors.contains(
                 "Server2Client characteristic not found (${GattUuids.SERVER_2_CLIENT_UUID})"
             )
         )
 
-        assertEquals(2, fakeLogger.size)
-        assertTrue(fakeLogger.contains("Missing required Client2Server characteristic"))
-        assertTrue(fakeLogger.contains("Missing required Server2Client characteristic"))
+        Assert.assertEquals(2, fakeLogger.size)
+        Assert.assertTrue(fakeLogger.contains("Missing required Client2Server characteristic"))
+        Assert.assertTrue(fakeLogger.contains("Missing required Server2Client characteristic"))
     }
 
     @Test
@@ -99,13 +98,13 @@ class MdocServiceValidatorTest {
         val result = validator.validate(service)
         require(result is ValidationResult.Failure)
 
-        assertTrue(
+        Assert.assertTrue(
             result.errors.contains(
                 "Server2Client characteristic missing property:" +
                     " ${BluetoothGattCharacteristic.PROPERTY_NOTIFY}"
             )
         )
 
-        assertEquals(1, fakeLogger.size)
+        Assert.assertEquals(1, fakeLogger.size)
     }
 }

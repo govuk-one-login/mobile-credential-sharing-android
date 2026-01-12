@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.session
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGattService
 import app.cash.turbine.test
 import io.mockk.mockk
 import java.util.UUID
@@ -20,7 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.central.FakeGattClientManager
+import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -31,7 +30,6 @@ class MdocVerifierSessionTest {
 
     private val gattClientManager = FakeGattClientManager()
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
-    private val serviceValidator = FakeServiceValidator()
     private val logger = SystemLogger()
 
     private lateinit var session: MdocVerifierSession
@@ -41,7 +39,6 @@ class MdocVerifierSessionTest {
         session = MdocVerifierSession(
             gattClientManager = gattClientManager,
             bluetoothStateMonitor = bluetoothStateMonitor,
-            serviceValidator = serviceValidator,
             logger = logger,
             scope = TestScope(StandardTestDispatcher())
         )
@@ -70,34 +67,13 @@ class MdocVerifierSessionTest {
     }
 
     @Test
-    fun `ServicesDiscovered and ValidationResult success triggers ServiceDiscovered`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered(service))
+    fun `ServicesDiscovered triggers ServiceDiscovered`() = runTest {
+        gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered)
 
         advanceUntilIdle()
-
-        assertEquals(1, serviceValidator.calls)
 
         session.state.test {
             assertEquals(VerifierSessionState.ServiceDiscovered, awaitItem())
-        }
-    }
-
-    @Test
-    fun `ServicesDiscovered and ValidationResult failure triggers Error`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        serviceValidator.errors = mutableListOf("error")
-        gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered(service))
-
-        advanceUntilIdle()
-
-        assertEquals(1, serviceValidator.calls)
-
-        session.state.test {
-            assertEquals(
-                VerifierSessionState.Invalid("[error]"),
-                awaitItem()
-            )
         }
     }
 
@@ -133,7 +109,6 @@ class MdocVerifierSessionTest {
     @Test
     fun `Disconnected triggers Disconnected verifier state`() = runTest {
         val device = mockk<BluetoothDevice>(relaxed = true)
-        serviceValidator.errors = mutableListOf()
 
         gattClientManager.emitEvent(
             GattClientEvent.Disconnected(device.address)

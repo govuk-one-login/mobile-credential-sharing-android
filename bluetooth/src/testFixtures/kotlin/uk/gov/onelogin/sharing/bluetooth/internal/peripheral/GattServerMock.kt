@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.peripheral
+package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.Manifest
 import android.bluetooth.BluetoothGattServer

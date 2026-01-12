@@ -37,7 +37,7 @@ dependencies {
         libs.metro.viewmodel.compose
     ).forEach(::implementation)
 
-    testImplementation(testFixtures(projects.core))
+    testImplementation(testFixtures(projects.bluetooth))
 }
 
 mavenPublishingConfig {

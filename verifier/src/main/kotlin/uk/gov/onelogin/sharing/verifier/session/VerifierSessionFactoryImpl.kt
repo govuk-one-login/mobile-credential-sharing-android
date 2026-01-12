@@ -11,7 +11,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
 @ContributesBinding(ViewModelScope::class)
 class VerifierSessionFactoryImpl(
     private val bluetoothCentralFactory: BluetoothCentralFactory,
-    private val serviceValidator: ServiceValidator,
     private val logger: Logger
 ) : VerifierSessionFactory {
     override fun create(scope: CoroutineScope): VerifierSession {
@@ -20,7 +19,6 @@ class VerifierSessionFactoryImpl(
         return MdocVerifierSession(
             gattClientManager = components.gattClientManager,
             bluetoothStateMonitor = components.bluetoothStateMonitor,
-            serviceValidator = serviceValidator,
             logger = logger,
             scope = scope
         )

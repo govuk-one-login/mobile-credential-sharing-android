@@ -11,14 +11,17 @@ import androidx.compose.ui.res.stringResource
 import uk.gov.onelogin.sharing.core.R
 
 @Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
+fun ErrorScreen(
+    modifier: Modifier = Modifier,
+    errorText: String = stringResource(R.string.an_error_has_occurred)
+) {
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.an_error_has_occurred)
+            text = errorText
         )
     }
 }

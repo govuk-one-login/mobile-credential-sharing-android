@@ -20,11 +20,11 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.mockBluetoothDevice
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerMock.setupNullGattServer
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerMock.setupOpenGattServer
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
-import uk.gov.onelogin.sharing.bluetooth.peripheral.GattServerMock.setupNullGattServer
-import uk.gov.onelogin.sharing.bluetooth.peripheral.GattServerMock.setupOpenGattServer
-import uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks.CharacteristicWriteRequestStub
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
 class AndroidGattServerManagerTest {

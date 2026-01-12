@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.peripheral.gattcallbacks
+package uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
@@ -15,9 +15,9 @@ object CharacteristicWriteRequestStub {
     /**
      * Holds the parameters for the `onCharacteristicWriteRequest` callback.
      *
-     * @param device The mocked client [android.bluetooth.BluetoothDevice] making the request.
+     * @param device The mocked client [BluetoothDevice] making the request.
      * @param requestId A sample request ID.
-     * @param characteristic The mocked [android.bluetooth.BluetoothGattCharacteristic] being written to.
+     * @param characteristic The mocked [BluetoothGattCharacteristic] being written to.
      * @param preparedWrite Simulates whether this is part of a prepared write sequence.
      * @param responseNeeded Simulates whether the client expects a response.
      * @param offset The data offset for the write operation.

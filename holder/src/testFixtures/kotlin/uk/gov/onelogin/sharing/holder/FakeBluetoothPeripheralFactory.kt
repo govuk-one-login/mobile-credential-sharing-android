@@ -7,7 +7,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.peripheral.FakeGattServerManager
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.FakeGattServerManager
 
 class FakeBluetoothPeripheralFactory(
     private val advertiser: BleAdvertiser = FakeBleAdvertiser(),

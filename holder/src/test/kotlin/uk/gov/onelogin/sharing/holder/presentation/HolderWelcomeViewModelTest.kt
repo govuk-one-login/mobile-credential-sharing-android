@@ -1,15 +1,19 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -39,7 +43,8 @@ class HolderWelcomeViewModelTest {
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocSessionManager },
         dispatcher = mainDispatcherRule.testDispatcher,
-        logger = SystemLogger()
+        logger = SystemLogger(),
+        savedStateHandle = SavedStateHandle()
     )
 
     @Test
@@ -140,7 +145,7 @@ class HolderWelcomeViewModelTest {
         advanceUntilIdle()
 
         assertEquals(
-            MdocSessionState.Disconnected(DEVICE_ADDRESS),
+            MdocSessionState.AdvertisingStopped,
             viewModel.uiState.value.sessionState
         )
     }
@@ -393,5 +398,51 @@ class HolderWelcomeViewModelTest {
 
         advanceUntilIdle()
         assertEquals(true, viewModel.uiState.value.showErrorScreen)
+    }
+
+    @Test
+    fun `bluetooth permissions granted initially and sets previouslyHadPermissions true`() =
+        runTest {
+            val viewModel = createViewModel()
+
+            viewModel.updateBluetoothPermissions(granted = true)
+
+            val state = viewModel.uiState.value
+
+            assertTrue(state.hasBluetoothPermissions!!)
+            assertTrue(state.previouslyHadPermissions)
+            assertFalse(state.showErrorScreen)
+        }
+
+    @Test
+    fun `bluetooth permissions revoked and error screen shown`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateBluetoothPermissions(granted = true)
+        assertTrue(viewModel.uiState.value.previouslyHadPermissions)
+
+        viewModel.updateBluetoothPermissions(granted = false)
+
+        val state = viewModel.uiState.value
+
+        assertFalse(state.hasBluetoothPermissions!!)
+        assertTrue(state.previouslyHadPermissions)
+        assertTrue(state.showErrorScreen)
+        assertEquals(BluetoothUiErrorTypes.PERMISSIONS_MISSING, state.bluetoothErrorType)
+    }
+
+    @Test
+    fun `error should not be shown if permissions initially not granted on start up`() = runTest {
+        val viewModel = createViewModel()
+
+        assertFalse(viewModel.uiState.value.previouslyHadPermissions)
+
+        viewModel.updateBluetoothPermissions(granted = false)
+
+        val state = viewModel.uiState.value
+
+        assertFalse(state.hasBluetoothPermissions!!)
+        assertFalse(state.previouslyHadPermissions)
+        assertFalse(state.showErrorScreen)
     }
 }
