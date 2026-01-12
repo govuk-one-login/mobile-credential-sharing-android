@@ -30,10 +30,10 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedWithRationale
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
@@ -215,7 +215,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `should log permission granted when user allows all permissions`() {
         viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(fakePermissionStateGranted)
+        viewModel.permissionLogger(bluetoothPermissionsGranted)
 
         val logMessage = logger[0].message
         assert(logMessage.contains("All required Bluetooth permissions have been granted"))
@@ -225,7 +225,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `should log permission permanently denied when user denies permissions completely`() {
         viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(fakePermissionStateDenied)
+        viewModel.permissionLogger(bluetoothPermissionsDenied)
 
         val logMessage = logger[0].message
         assert(logMessage.contains("Bluetooth permissions were permanently denied"))
@@ -235,7 +235,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `should log permissions denied when user denied first time`() {
         viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(fakePermissionStateDeniedWithRationale)
+        viewModel.permissionLogger(bluetoothPermissionsDeniedWithRationale)
 
         val logMessage = logger[0].message
         assert(logMessage.contains("Bluetooth permissions were denied"))

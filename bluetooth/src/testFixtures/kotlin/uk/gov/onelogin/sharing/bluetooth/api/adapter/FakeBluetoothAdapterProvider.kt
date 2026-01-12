@@ -17,4 +17,13 @@ class FakeBluetoothAdapterProvider(
     fun setEnabled(enabled: Boolean) {
         isEnabled = enabled
     }
+
+    companion object {
+        val disabledBluetoothAdapter = FakeBluetoothAdapterProvider(
+            isEnabled = false
+        )
+        val enabledBluetoothAdapter = FakeBluetoothAdapterProvider(
+            isEnabled = true
+        )
+    }
 }

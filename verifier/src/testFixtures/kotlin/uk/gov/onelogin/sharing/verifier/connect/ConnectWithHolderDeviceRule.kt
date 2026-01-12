@@ -125,10 +125,10 @@ class ConnectWithHolderDeviceRule(
             .assertIsDisplayed()
     }
 
-    fun assertErrorDoesNotExist() = onNodeWithText(decodeError)
+    fun assertDecodingErrorDoesNotExist() = onNodeWithText(decodeError)
         .assertDoesNotExist()
 
-    fun assertErrorIsDisplayed() = onNodeWithText(decodeError)
+    fun assertDecodingErrorIsDisplayed() = onNodeWithText(decodeError)
         .assertExists()
         .assertIsDisplayed()
 
@@ -167,17 +167,20 @@ class ConnectWithHolderDeviceRule(
         setContent {
             ConnectWithHolderDeviceScreen(
                 base64EncodedEngagement = renderState.base64EncodedEngagement!!,
+                modifier = modifier,
                 viewModel = viewModel,
                 multiplePermissionsState = permissionsState
             )
         }
     }
 
-    fun renderPreview(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {
+    fun renderPreview(
+        state: ConnectWithHolderDeviceState
+    ) {
         update(state)
         setContent {
             ConnectWithHolderDevicePreview(
-                base64EncodedEngagement = renderState.base64EncodedEngagement!!
+                base64EncodedEngagement = renderState.base64EncodedEngagement!!,
             )
         }
     }
