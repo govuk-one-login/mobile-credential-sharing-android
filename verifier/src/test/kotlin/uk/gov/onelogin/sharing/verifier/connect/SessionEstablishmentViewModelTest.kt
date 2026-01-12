@@ -215,7 +215,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `should log permission granted when user allows all permissions`() {
         viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(bluetoothPermissionsGranted)
+        viewModel.update(bluetoothPermissionsGranted)
 
         val logMessage = logger[0].message
         assert(logMessage.contains("All required Bluetooth permissions have been granted"))
@@ -225,7 +225,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `should log permission permanently denied when user denies permissions completely`() {
         viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(bluetoothPermissionsDenied)
+        viewModel.update(bluetoothPermissionsDenied)
 
         val logMessage = logger[0].message
         assert(logMessage.contains("Bluetooth permissions were permanently denied"))
@@ -235,7 +235,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `should log permissions denied when user denied first time`() {
         viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(bluetoothPermissionsDeniedWithRationale)
+        viewModel.update(bluetoothPermissionsDeniedWithRationale)
 
         val logMessage = logger[0].message
         assert(logMessage.contains("Bluetooth permissions were denied"))

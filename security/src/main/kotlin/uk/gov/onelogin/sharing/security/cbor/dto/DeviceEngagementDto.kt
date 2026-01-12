@@ -14,4 +14,8 @@ data class DeviceEngagementDto(
     @JsonProperty("2")
     @JsonDeserialize(using = DeviceRetrievalMethodsDeserializer::class)
     val deviceRetrievalMethods: List<DeviceRetrievalMethodDto>
-)
+) {
+    fun getFirstPeripheralServerModeUuid() = deviceRetrievalMethods.firstNotNullOfOrNull {
+        it.getPeripheralServerModeUuid()
+    }
+}

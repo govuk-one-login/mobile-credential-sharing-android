@@ -50,47 +50,8 @@ fun ConnectWithHolderDeviceScreen(
         viewModel.updateHasRequestPermissions(true)
     }
 ) {
+    viewModel.update(base64EncodedEngagement)
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
-    val permissionsGranted = multiplePermissionsState.allPermissionsGranted
-    val permissionsStatus = multiplePermissionsState.permissions.map {
-        it.status
-    }
-    LaunchedEffect(permissionsStatus) {
-        viewModel.updatePermissions(permissionsGranted)
-        viewModel.permissionLogger(multiplePermissionsState)
-    }
-
-    LaunchedEffect(Unit) {
-        if (!permissionsGranted) {
-            multiplePermissionsState.launchMultiplePermissionRequest()
-        }
-    }
-
-    if (permissionsGranted && !contentState.isBluetoothEnabled) {
-        EnableBluetoothPrompt()
-    }
-
-    val engagementData = remember {
-        decodeDeviceEngagement(
-            base64EncodedEngagement,
-            logger = SystemLogger()
-        )
-    }
-
-    DisposableEffect(engagementData, permissionsGranted) {
-        val uuidToScan = engagementData?.deviceRetrievalMethods
-            ?.firstNotNullOfOrNull { it.getPeripheralServerModeUuid() }
-
-        if (permissionsGranted && contentState.isBluetoothEnabled &&
-            uuidToScan != null
-        ) {
-            viewModel.scanForDevice(uuidToScan)
-        }
-
-        onDispose {
-            viewModel.stopScanning()
-        }
-    }
 
     Box(modifier = modifier.fillMaxSize()) {
         BluetoothPermissionPrompt(
@@ -108,26 +69,68 @@ fun ConnectWithHolderDeviceScreen(
                     )
                 }
             } else {
+                val engagementData: DeviceEngagementDto? by viewModel
+                    .engagementData.collectAsStateWithLifecycle()
+
                 ConnectWithHolderDeviceScreenContent(
                     base64EncodedEngagement = base64EncodedEngagement,
                     contentState = contentState,
                     engagementData = engagementData,
-                    permissionsGranted = multiplePermissionsState.allPermissionsGranted,
-                    modifier = Modifier
+                    multiplePermissionsState = multiplePermissionsState,
+                    modifier = Modifier,
+                    onUpdatePermissions = viewModel::update,
+                    onScanForDevice = viewModel::scanForDevice,
+                    onStopScanning = viewModel::stopScanning,
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ConnectWithHolderDeviceScreenContent(
     base64EncodedEngagement: String,
     contentState: ConnectWithHolderDeviceState,
     engagementData: DeviceEngagementDto?,
-    permissionsGranted: Boolean,
-    modifier: Modifier = Modifier
+    multiplePermissionsState: MultiplePermissionsState,
+    modifier: Modifier = Modifier,
+    onUpdatePermissions: (MultiplePermissionsState) -> Unit = {},
+    onScanForDevice: (ByteArray) -> Unit = {},
+    onStopScanning: () -> Unit = {},
 ) {
+    val permissionsGranted = multiplePermissionsState.allPermissionsGranted
+    val permissionsStatus = multiplePermissionsState.permissions.map {
+        it.status
+    }
+    LaunchedEffect(permissionsStatus) {
+        onUpdatePermissions(multiplePermissionsState)
+    }
+
+    LaunchedEffect(Unit) {
+        if (!permissionsGranted) {
+            multiplePermissionsState.launchMultiplePermissionRequest()
+        }
+    }
+
+    if (permissionsGranted && !contentState.isBluetoothEnabled) {
+        EnableBluetoothPrompt()
+    }
+
+    DisposableEffect(engagementData, permissionsGranted) {
+        val uuidToScan = engagementData?.getFirstPeripheralServerModeUuid()
+
+        if (permissionsGranted && contentState.isBluetoothEnabled &&
+            uuidToScan != null
+        ) {
+            onScanForDevice(uuidToScan)
+        }
+
+        onDispose {
+            onStopScanning()
+        }
+    }
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacingDouble)
@@ -214,11 +217,12 @@ private fun LazyListScope.showUuidsToScan(deviceRetrievalMethods: List<DeviceRet
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 @Preview
 internal fun ConnectWithHolderDevicePreview(
     @PreviewParameter(ConnectWithHolderDevicePreviewParameters::class)
-    base64EncodedEngagement: String
+    base64EncodedEngagement: String,
 ) {
     val engagementData = remember {
         decodeDeviceEngagement(
@@ -232,7 +236,9 @@ internal fun ConnectWithHolderDevicePreview(
             base64EncodedEngagement = base64EncodedEngagement,
             contentState = ConnectWithHolderDeviceState(),
             engagementData = engagementData,
-            permissionsGranted = true,
+            multiplePermissionsState = rememberMultiplePermissionsState(
+                permissions = PermissionChecker.advertiseFineLocationPermissions()
+            ) {},
             modifier = Modifier.background(Color.White)
         )
     }
