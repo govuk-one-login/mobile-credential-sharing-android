@@ -291,13 +291,6 @@ internal class AndroidGattClientManagerTest {
         every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
 
         testEvents { callbackSlot ->
-            manager.connect(
-                bluetoothDevice,
-                uuid
-            )
-
-            skipItems(1)
-
             callbackSlot.captured.onServicesDiscovered(
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS
@@ -321,13 +314,6 @@ internal class AndroidGattClientManagerTest {
         every { service.getCharacteristic(GattUuids.STATE_UUID) } returns null
 
         testEvents { callbackSlot ->
-            manager.connect(
-                bluetoothDevice,
-                uuid
-            )
-
-            skipItems(1)
-
             callbackSlot.captured.onServicesDiscovered(
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS
@@ -501,12 +487,10 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `emits error when start value cannot be written to state characteristic`() = runTest {
-        val characteristic = mockk<BluetoothGattCharacteristic>()
-
         testEvents { callbackSlot ->
             callbackSlot.captured.onCharacteristicWrite(
                 bluetoothGatt,
-                characteristic,
+                mockk(),
                 BluetoothGatt.GATT_FAILURE
             )
 
