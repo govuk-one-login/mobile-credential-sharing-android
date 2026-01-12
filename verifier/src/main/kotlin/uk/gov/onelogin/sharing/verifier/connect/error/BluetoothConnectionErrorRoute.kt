@@ -16,34 +16,29 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
     ticket = "DCMAW-17616",
     description = "Error handling for bluetooth connection errors"
 )
-data class BluetoothConnectionErrorRoute(
-    val title: String,
-) {
+data class BluetoothConnectionErrorRoute(val title: String) {
     companion object {
         /**
          * [NavGraphBuilder] extension function. Creates a navigation target for errors found when
          * attempting to decode digital credentials after scanning a QR code.
          */
         @OptIn(ExperimentalPermissionsApi::class)
-        fun NavGraphBuilder.configureBluetoothConnectionErrorRoute(
-            controller: NavController
-        ) {
+        fun NavGraphBuilder.configureBluetoothConnectionErrorRoute(controller: NavController) {
             composable<BluetoothConnectionErrorRoute> { navBackstackEntry ->
                 val arguments: BluetoothConnectionErrorRoute = navBackstackEntry.toRoute()
 
                 BluetoothConnectionErrorScreen(
                     title = arguments.title,
-                    onTryAgainClick = controller::popBackStack,
+                    onTryAgainClick = controller::popBackStack
                 )
             }
         }
 
-        fun NavController.navigateToBluetoothConnectionErrorRoute(
-            title: String
-        ) = navigate(BluetoothConnectionErrorRoute(title)) {
-            popUpTo<ConnectWithHolderDeviceRoute> {
-                inclusive = false
+        fun NavController.navigateToBluetoothConnectionErrorRoute(title: String) =
+            navigate(BluetoothConnectionErrorRoute(title)) {
+                popUpTo<ConnectWithHolderDeviceRoute> {
+                    inclusive = false
+                }
             }
-        }
     }
 }

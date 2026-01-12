@@ -11,7 +11,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
  * it.
  */
 object DummyBluetoothScanner : BluetoothScanner {
-    override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> {
+    override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> =
         throw IllegalStateException("This is a dummy object and shouldn't be used!")
-    }
 }

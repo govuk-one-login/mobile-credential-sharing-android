@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlin.test.assertNotNull
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -22,7 +23,6 @@ import uk.gov.onelogin.sharing.verifier.rules.ShadowLogFile
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
-import kotlin.test.assertNotNull
 
 @RunWith(AndroidJUnit4::class)
 @Config(
@@ -48,7 +48,7 @@ class ConnectWithHolderDeviceRouteTest {
             NavHost(
                 navController = controller,
                 startDestination = ConnectWithHolderDeviceRoute(
-                    validWithCorrectBluetoothSetup.base64EncodedEngagement!!,
+                    validWithCorrectBluetoothSetup.base64EncodedEngagement!!
                 )
             ) {
                 configureConnectWithHolderDeviceRoute(context)

@@ -31,7 +31,7 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     ),
     DID_NOT_SCAN_DIGITAL_CREDENTIAL_QR(
         expected = "The scanned QR code didn’t contain a digital credential. " +
-                "Please check the correct QR code to scan, then try again.",
+            "Please check the correct QR code to scan, then try again.",
         resourceId = R.string.did_not_scan_digital_credential_qr
     ),
     ENABLE_CAMERA_PERMISSION_TO_CONTINUE(

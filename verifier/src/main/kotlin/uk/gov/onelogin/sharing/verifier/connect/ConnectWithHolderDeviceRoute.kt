@@ -37,7 +37,7 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
         @OptIn(ExperimentalPermissionsApi::class)
         fun NavGraphBuilder.configureConnectWithHolderDeviceRoute(
             context: Context,
-            onFindError: (String) -> Unit = {},
+            onFindError: (String) -> Unit = {}
         ) {
             val graph = createGraphFactory<VerifierGraph.Factory>().create(
                 context

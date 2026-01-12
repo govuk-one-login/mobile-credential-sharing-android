@@ -21,7 +21,7 @@ import uk.gov.onelogin.sharing.verifier.R
 fun BluetoothConnectionErrorScreen(
     title: String,
     modifier: Modifier = Modifier,
-    onTryAgainClick: () -> Unit = {},
+    onTryAgainClick: () -> Unit = {}
 ) {
     ErrorScreen(
         modifier = modifier.fillMaxWidth(),

@@ -170,7 +170,7 @@ class SessionEstablishmentViewModelTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
         val scanner = BluetoothScanner.of(
-            ScanEvent.ScanFailed(scanFailure),
+            ScanEvent.ScanFailed(scanFailure)
         )
 
         val viewModel = createViewModel(scanner)
@@ -182,10 +182,9 @@ class SessionEstablishmentViewModelTest {
 
         assertEquals(
             ConnectWithHolderDeviceError.GenericError,
-            viewModel.uiState.value.showErrorScreen,
+            viewModel.uiState.value.showErrorScreen
         )
     }
-
 
     @Test
     fun `Connecting to invalid configuration emits an error state to the UI`() = runTest {
@@ -200,7 +199,7 @@ class SessionEstablishmentViewModelTest {
 
         assertEquals(
             ConnectWithHolderDeviceError.BluetoothConfigurationError,
-            viewModel.uiState.value.showErrorScreen,
+            viewModel.uiState.value.showErrorScreen
         )
     }
 

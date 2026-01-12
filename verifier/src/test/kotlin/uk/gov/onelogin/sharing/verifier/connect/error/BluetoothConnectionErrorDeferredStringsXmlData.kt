@@ -18,11 +18,11 @@ enum class BluetoothConnectionErrorDeferredStringsXmlData(
         resourceId = R.string.bluetooth_connection_error_generic
     ),
     BLUETOOTH_CONNECTION_ERROR_INVALID_CONFIGURATION(
-    defersTo = R.string.invalid_bluetooth_configuration,
-    resourceId = R.string.bluetooth_connection_error_invalid_configuration
+        defersTo = R.string.invalid_bluetooth_configuration,
+        resourceId = R.string.bluetooth_connection_error_invalid_configuration
     ),
     BLUETOOTH_CONNECTION_ERROR_TRY_AGAIN(
-    defersTo = R.string.try_again,
-    resourceId = R.string.bluetooth_connection_error_try_again
-    ),
+        defersTo = R.string.try_again,
+        resourceId = R.string.bluetooth_connection_error_try_again
+    )
 }

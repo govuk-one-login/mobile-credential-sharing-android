@@ -64,7 +64,7 @@ class ConnectWithHolderDeviceScreenTest {
                 undecodableState,
                 Modifier,
                 testViewModel,
-                bluetoothPermissionsGranted,
+                bluetoothPermissionsGranted
             )
         }
 
@@ -111,7 +111,7 @@ class ConnectWithHolderDeviceScreenTest {
                     undecodableState,
                     Modifier,
                     testViewModel,
-                    bluetoothPermissionsDenied,
+                    bluetoothPermissionsDenied
                 )
             }
 

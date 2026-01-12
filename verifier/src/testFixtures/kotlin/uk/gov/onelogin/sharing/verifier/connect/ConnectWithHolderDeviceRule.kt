@@ -13,10 +13,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPromptRule
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalPermissionsApi::class)
 class ConnectWithHolderDeviceRule(
@@ -34,7 +34,6 @@ class ConnectWithHolderDeviceRule(
     private lateinit var renderState: ConnectWithHolderDeviceState
 
     var capturedErrorState: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError
-
 
     constructor(
         composeContentTestRule: ComposeContentTestRule,
@@ -140,7 +139,7 @@ class ConnectWithHolderDeviceRule(
         assertEquals(
             "Expected error wasn't passed to the 'onFindError' lambda!",
             expected,
-            capturedErrorState,
+            capturedErrorState
         )
     }
 
@@ -174,7 +173,7 @@ class ConnectWithHolderDeviceRule(
         modifier: Modifier = Modifier,
         viewModel: SessionEstablishmentViewModel,
         permissionsState: MultiplePermissionsState,
-        onFindError: (ConnectWithHolderDeviceError) -> Unit = {},
+        onFindError: (ConnectWithHolderDeviceError) -> Unit = {}
     ) {
         update(state)
         setContent {
@@ -191,13 +190,11 @@ class ConnectWithHolderDeviceRule(
         }
     }
 
-    fun renderPreview(
-        state: ConnectWithHolderDeviceState
-    ) {
+    fun renderPreview(state: ConnectWithHolderDeviceState) {
         update(state)
         setContent {
             ConnectWithHolderDevicePreview(
-                base64EncodedEngagement = renderState.base64EncodedEngagement!!,
+                base64EncodedEngagement = renderState.base64EncodedEngagement!!
             )
         }
     }

@@ -51,20 +51,20 @@ class SessionEstablishmentViewModel(
     private val bluetoothStatusMonitor: BluetoothStateMonitor
 ) : ViewModel() {
 
-    private val _base64EncodedEngagement = MutableStateFlow<String?>(null)
+    private val base64EncodedEngagement = MutableStateFlow<String?>(null)
 
-    val engagementData: StateFlow<DeviceEngagementDto?> = _base64EncodedEngagement
+    val engagementData: StateFlow<DeviceEngagementDto?> = base64EncodedEngagement
         .map { engagement ->
             engagement?.let {
                 decodeDeviceEngagement(
                     it,
-                    logger = logger,
+                    logger = logger
                 )
             }
         }.stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Lazily,
-            null,
+            null
         )
 
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
@@ -193,7 +193,7 @@ class SessionEstablishmentViewModel(
     }
 
     fun update(base64EncodedEngagement: String) {
-        _base64EncodedEngagement.update { base64EncodedEngagement }
+        this.base64EncodedEngagement.update { base64EncodedEngagement }
     }
 
     fun update(state: MultiplePermissionsState) {

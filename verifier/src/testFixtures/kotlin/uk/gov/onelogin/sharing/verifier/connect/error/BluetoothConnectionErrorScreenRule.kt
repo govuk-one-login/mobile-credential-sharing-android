@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScre
 class BluetoothConnectionErrorScreenRule(
     composeContentTestRule: ComposeContentTestRule,
     private val button: String,
-    private val iconDescription: String,
+    private val iconDescription: String
 ) : ComposeContentTestRule by composeContentTestRule {
     private var tryAgainButtonClickCount = 0
 
@@ -39,7 +39,7 @@ class BluetoothConnectionErrorScreenRule(
     ) : this(
         button = resources.getString(R.string.bluetooth_connection_error_try_again),
         composeContentTestRule = composeContentTestRule,
-        iconDescription = resources.getString(ErrorScreenIcon.ErrorIcon.description),
+        iconDescription = resources.getString(ErrorScreenIcon.ErrorIcon.description)
     )
 
     fun assertErrorIconIsDisplayed() = onErrorIcon().assertIsDisplayed()

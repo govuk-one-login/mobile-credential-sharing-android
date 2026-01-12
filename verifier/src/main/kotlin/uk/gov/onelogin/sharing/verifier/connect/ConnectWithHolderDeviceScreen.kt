@@ -13,6 +13,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -30,12 +31,12 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.core.R as coreR
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
@@ -48,7 +49,7 @@ fun ConnectWithHolderDeviceScreen(
     ) {
         viewModel.updateHasRequestPermissions(true)
     },
-    onFindError: (ConnectWithHolderDeviceError) -> Unit = {},
+    onFindError: (ConnectWithHolderDeviceError) -> Unit = {}
 ) {
     viewModel.update(base64EncodedEngagement)
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,7 +77,7 @@ fun ConnectWithHolderDeviceScreen(
                         modifier = Modifier,
                         onUpdatePermissions = viewModel::update,
                         onScanForDevice = viewModel::scanForDevice,
-                        onStopScanning = viewModel::stopScanning,
+                        onStopScanning = viewModel::stopScanning
                     )
                 }
             }
@@ -94,14 +95,18 @@ fun ConnectWithHolderDeviceScreenContent(
     modifier: Modifier = Modifier,
     onUpdatePermissions: (MultiplePermissionsState) -> Unit = {},
     onScanForDevice: (ByteArray) -> Unit = {},
-    onStopScanning: () -> Unit = {},
+    onStopScanning: () -> Unit = {}
 ) {
+    val latestOnUpdatePermissions by rememberUpdatedState(onUpdatePermissions)
+    val latestOnScanForDevice by rememberUpdatedState(onScanForDevice)
+    val latestOnStopScanning by rememberUpdatedState(onStopScanning)
+
     val permissionsGranted = multiplePermissionsState.allPermissionsGranted
     val permissionsStatus = multiplePermissionsState.permissions.map {
         it.status
     }
     LaunchedEffect(permissionsStatus) {
-        onUpdatePermissions(multiplePermissionsState)
+        latestOnUpdatePermissions(multiplePermissionsState)
     }
 
     LaunchedEffect(Unit) {
@@ -120,11 +125,11 @@ fun ConnectWithHolderDeviceScreenContent(
         if (permissionsGranted && contentState.isBluetoothEnabled &&
             uuidToScan != null
         ) {
-            onScanForDevice(uuidToScan)
+            latestOnScanForDevice(uuidToScan)
         }
 
         onDispose {
-            onStopScanning()
+            latestOnStopScanning()
         }
     }
 
@@ -219,7 +224,7 @@ private fun LazyListScope.showUuidsToScan(deviceRetrievalMethods: List<DeviceRet
 @Preview
 internal fun ConnectWithHolderDevicePreview(
     @PreviewParameter(ConnectWithHolderDevicePreviewParameters::class)
-    base64EncodedEngagement: String,
+    base64EncodedEngagement: String
 ) {
     val engagementData = remember {
         decodeDeviceEngagement(

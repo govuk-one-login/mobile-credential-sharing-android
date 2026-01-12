@@ -4,13 +4,13 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.verifier.R
-import kotlin.test.Test
 
 @RunWith(RobolectricTestParameterInjector::class)
 class BluetoothConnectionErrorScreenTest {
@@ -25,7 +25,7 @@ class BluetoothConnectionErrorScreenTest {
     @Test
     fun rendersErrorScreen(
         @TestParameter(valuesProvider = BluetoothConnectionErrorTitlesProvider::class)
-        titleString: Int,
+        titleString: Int
     ) = runTest {
         errorScreenRule.run {
             render(title = resources.getString(titleString))
@@ -54,6 +54,6 @@ class BluetoothConnectionErrorScreenTest {
 class BluetoothConnectionErrorTitlesProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<Int> = listOf(
         R.string.bluetooth_connection_error_generic,
-        R.string.bluetooth_connection_error_invalid_configuration,
+        R.string.bluetooth_connection_error_invalid_configuration
     )
 }
