@@ -93,63 +93,59 @@ internal class AndroidGattClientManager(
 
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
-            is GattEvent.ConnectionStateChange -> {
-                val address = event.gatt.device.address
+            is GattEvent.ConnectionStateChange -> handleConnectionStateChangeEvent(event)
+            is GattEvent.ServicesDiscovered -> handleServicesDiscoveredEvent(event)
+        }.let(_events::tryEmit)
+    }
 
-                val clientEvent = when {
-                    event.status == BluetoothGatt.GATT_SUCCESS &&
-                        event.newState == BluetoothGatt.STATE_CONNECTED -> {
-                        bluetoothGatt = event.gatt
+    private fun handleServicesDiscoveredEvent(
+        event: GattEvent.ServicesDiscovered
+    ): GattClientEvent {
+        logger.debug(logTag, "Services discovered: status=${event.status}")
 
-                        discoverServices()
-
-                        GattClientEvent.Connected(address)
-                    }
-
-                    event.newState == BluetoothGatt.STATE_DISCONNECTED -> {
-                        bluetoothGatt = null
-                        GattClientEvent.Disconnected(address)
-                    }
-
-                    else -> GattClientEvent.UnsupportedEvent(
-                        address,
-                        event.status,
-                        event.newState
-                    )
-                }
-
-                _events.tryEmit(clientEvent)
-            }
-
-            is GattEvent.ServicesDiscovered -> {
-                logger.debug(logTag, "Services discovered: status=${event.status}")
-                if (event.status != BluetoothGatt.GATT_SUCCESS) {
-                    _events.tryEmit(
-                        GattClientEvent.Error(
-                            ClientError.SERVICE_DISCOVERED_ERROR
-                        )
-                    )
-                    return
-                }
-
-                val service = event.bluetoothGatt.getService(serviceUuid)
-                if (service == null) {
-                    _events.tryEmit(
-                        GattClientEvent.Error(
-                            ClientError.SERVICE_NOT_FOUND
-                        )
-                    )
-                    return
-                }
-
+        return if (event.status != BluetoothGatt.GATT_SUCCESS) {
+            GattClientEvent.Error(
+                ClientError.SERVICE_DISCOVERED_ERROR
+            )
+        } else {
+            event.bluetoothGatt.getService(serviceUuid)?.let { service ->
                 when (serviceValidator.validate(service)) {
-                    ValidationResult.Success ->
-                        GattClientEvent.ServicesDiscovered
+                    ValidationResult.Success -> GattClientEvent.ServicesDiscovered
 
-                    is ValidationResult.Failure ->
-                        GattClientEvent.Error(ClientError.INVALID_SERVICE)
-                }.let(_events::tryEmit)
+                    is ValidationResult.Failure -> GattClientEvent.Error(
+                        ClientError.INVALID_SERVICE
+                    )
+                }
+            } ?: GattClientEvent.Error(
+                ClientError.SERVICE_NOT_FOUND
+            )
+        }
+    }
+
+    private fun handleConnectionStateChangeEvent(
+        event: GattEvent.ConnectionStateChange
+    ): GattClientEvent {
+        val address = event.gatt.device.address
+        return when {
+            event.status == BluetoothGatt.GATT_SUCCESS &&
+                event.newState == BluetoothGatt.STATE_CONNECTED -> {
+                bluetoothGatt = event.gatt
+
+                discoverServices()
+
+                GattClientEvent.Connected(address)
             }
+
+            event.newState == BluetoothGatt.STATE_DISCONNECTED -> {
+                bluetoothGatt = null
+                GattClientEvent.Disconnected(address)
+            }
+
+            else -> GattClientEvent.UnsupportedEvent(
+                address,
+                event.status,
+                event.newState
+            )
         }
     }
 }

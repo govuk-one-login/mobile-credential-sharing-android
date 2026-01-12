@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.verifier.session
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -20,7 +21,6 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -71,7 +71,7 @@ class MdocVerifierSessionTest {
     @TestParameters(valuesProvider = GattClientEventsToVerifierSessionStates::class)
     fun `Converts Gatt events to session state events`(
         input: GattClientEvent,
-        expectedState: VerifierSessionState,
+        expectedState: VerifierSessionState
     ) = runTest {
         gattClientManager.emitEvent(input)
 
@@ -82,25 +82,23 @@ class MdocVerifierSessionTest {
             assertEquals(
                 "Session state doesn't match",
                 expectedState,
-                sessionState,
+                sessionState
             )
         }
     }
 
     @Test
-    fun `non-ServicesDiscovered event logs Unhandled event`() =
-        GattClientEvent.UnsupportedEvent(
-            DEVICE_ADDRESS,
-            status = 999,
-            newState = 999
-        ).let { event ->
-            `Converts Gatt events to session state events`(
-                input = event,
-                expectedState = VerifierSessionState.Error(
-                    "Unhandled event: $event"
-                )
+    fun `non-ServicesDiscovered event logs Unhandled event`() = GattClientEvent.UnsupportedEvent(
+        DEVICE_ADDRESS,
+        status = 999,
+        newState = 999
+    ).let { event ->
+        `Converts Gatt events to session state events`(
+            input = event,
+            expectedState = VerifierSessionState.Error(
+                "Unhandled event: $event"
             )
-            assertTrue("Unhandled event: $event" in logger)
-        }
+        )
+        assertTrue("Unhandled event: $event" in logger)
+    }
 }
-
