@@ -236,16 +236,6 @@ internal class AndroidGattClientManagerTest {
                 awaitItem()
             )
 
-            callbackSlot.captured.onServicesDiscovered(
-                bluetoothGatt,
-                BluetoothGatt.GATT_SUCCESS
-            )
-
-            assertEquals(
-                GattClientEvent.ServicesDiscovered,
-                awaitItem()
-            )
-
             callbackSlot.captured.onConnectionStateChange(
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS,
@@ -273,8 +263,6 @@ internal class AndroidGattClientManagerTest {
                 BluetoothGatt.GATT_SUCCESS
             )
 
-            skipItems(1)
-
             verify { bluetoothGatt.requestMtu(MtuValues.MAX_POSSIBLE) }
         }
     }
@@ -295,8 +283,6 @@ internal class AndroidGattClientManagerTest {
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS
             )
-
-            skipItems(1)
 
             verify {
                 bluetoothGatt.setCharacteristicNotification(
@@ -376,8 +362,6 @@ internal class AndroidGattClientManagerTest {
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS
             )
-
-            skipItems(1)
 
             verify {
                 bluetoothGatt.setCharacteristicNotification(

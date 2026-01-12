@@ -67,17 +67,6 @@ class MdocVerifierSessionTest {
     }
 
     @Test
-    fun `ServicesDiscovered triggers ServiceDiscovered`() = runTest {
-        gattClientManager.emitEvent(GattClientEvent.ServicesDiscovered)
-
-        advanceUntilIdle()
-
-        session.state.test {
-            assertEquals(VerifierSessionState.ServiceDiscovered, awaitItem())
-        }
-    }
-
-    @Test
     fun `Connecting triggers Connecting verifier state`() = runTest {
         gattClientManager.emitEvent(GattClientEvent.Connecting)
 
