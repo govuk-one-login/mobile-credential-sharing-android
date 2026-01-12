@@ -32,6 +32,7 @@ class ConnectWithHolderDeviceRule(
 ) : ComposeContentTestRule by composeContentTestRule {
 
     private lateinit var renderState: ConnectWithHolderDeviceState
+
     var capturedErrorState: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError
 
 

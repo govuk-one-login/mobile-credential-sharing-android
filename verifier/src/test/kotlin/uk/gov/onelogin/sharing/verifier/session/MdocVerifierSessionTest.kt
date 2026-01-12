@@ -95,7 +95,7 @@ class MdocVerifierSessionTest {
 
         session.state.test {
             assertEquals(
-                VerifierSessionState.Error("[error]"),
+                VerifierSessionState.Invalid("[error]"),
                 awaitItem()
             )
         }
