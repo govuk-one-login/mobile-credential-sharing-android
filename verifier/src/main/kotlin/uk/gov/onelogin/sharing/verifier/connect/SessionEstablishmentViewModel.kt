@@ -73,7 +73,7 @@ class SessionEstablishmentViewModel(
     val mdocVerifierSession = verifierSessionFactory.create(viewModelScope)
 
     init {
-        _uiState.update {
+        updateState {
             it.copy(
                 isBluetoothEnabled = bluetoothAdapterProvider.isEnabled()
             )
@@ -85,7 +85,7 @@ class SessionEstablishmentViewModel(
                 when (bluetoothState) {
                     BluetoothStatus.ON,
                     BluetoothStatus.TURNING_ON -> {
-                        _uiState.update {
+                        updateState {
                             it.copy(
                                 isBluetoothEnabled = true
                             )
@@ -94,7 +94,7 @@ class SessionEstablishmentViewModel(
                     }
 
                     BluetoothStatus.OFF -> {
-                        _uiState.update {
+                        updateState {
                             it.copy(
                                 isBluetoothEnabled = false
                             )
@@ -110,7 +110,7 @@ class SessionEstablishmentViewModel(
 
     fun scanForDevice(uuid: ByteArray) {
         scannerJob = viewModelScope.launch(dispatcher) {
-            if (!_uiState.value.hasAllPermissions) {
+            if (!uiState.value.hasAllPermissions) {
                 return@launch
             }
 
@@ -127,7 +127,7 @@ class SessionEstablishmentViewModel(
                         }
 
                         is ScanEvent.ScanFailed -> {
-                            _uiState.update {
+                            updateState {
                                 it.copy(showErrorScreen = ConnectWithHolderDeviceError.GenericError)
                             }
                             logger.debug(logTag, "Scan failed: ${scanResult.failure}")
@@ -154,7 +154,7 @@ class SessionEstablishmentViewModel(
 
                 else -> ConnectWithHolderDeviceError.NoError
             }.let { error ->
-                _uiState.update { it.copy(showErrorScreen = error) }
+                updateState { it.copy(showErrorScreen = error) }
             }
 
             logger.debug(logTag, "Session state: $sessionState")
@@ -164,7 +164,7 @@ class SessionEstablishmentViewModel(
     }
 
     fun updatePermissions(hasAllPerms: Boolean) {
-        _uiState.update {
+        updateState {
             it.copy(
                 hasAllPermissions = hasAllPerms
             )
@@ -172,7 +172,7 @@ class SessionEstablishmentViewModel(
     }
 
     fun updateHasRequestPermissions(requestedPerms: Boolean) {
-        _uiState.update {
+        updateState {
             it.copy(
                 hasRequestedPermissions = requestedPerms
             )
@@ -213,6 +213,10 @@ class SessionEstablishmentViewModel(
                 logger.debug(logTag, "Bluetooth permissions were denied")
             }
         }
+    }
+
+    fun updateState(updatedState: (ConnectWithHolderDeviceState) -> ConnectWithHolderDeviceState) {
+        _uiState.update(updatedState)
     }
 
     companion object {

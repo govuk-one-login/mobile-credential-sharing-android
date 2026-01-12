@@ -7,6 +7,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -244,15 +246,18 @@ class ConnectWithHolderDeviceScreenTest {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun shouldShowErrorScreenWhenShowErrorScreenSetTrue() = runTest {
+    fun `Lambdas pass the error state via LaunchedEffect`() = runTest {
         val testViewModel = SessionEstablishmentViewModel(
             bluetoothAdapterProvider = enabledBluetoothAdapter,
             scanner = fakeBluetoothScanner,
             logger = SystemLogger(),
             bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
             verifierSessionFactory = { mdocVerifierSession }
-        )
+        ).also {
+            it.updateState { genericErrorState }
+        }
 
         composeTestRule.run {
             render(
@@ -261,9 +266,11 @@ class ConnectWithHolderDeviceScreenTest {
                 testViewModel,
                 bluetoothPermissionsGranted
             )
-        }
 
-        composeTestRule.onNodeWithText("Generic error").isDisplayed()
+            awaitIdle()
+
+            assertErrorStateEquals(ConnectWithHolderDeviceError.GenericError)
+        }
     }
 
     @Test

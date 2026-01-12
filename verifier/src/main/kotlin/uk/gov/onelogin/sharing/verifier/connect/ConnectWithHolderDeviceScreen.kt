@@ -13,7 +13,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -48,7 +47,8 @@ fun ConnectWithHolderDeviceScreen(
         permissions = PermissionChecker.advertiseFineLocationPermissions()
     ) {
         viewModel.updateHasRequestPermissions(true)
-    }
+    },
+    onFindError: (ConnectWithHolderDeviceError) -> Unit = {},
 ) {
     viewModel.update(base64EncodedEngagement)
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -58,30 +58,27 @@ fun ConnectWithHolderDeviceScreen(
             multiplePermissionsState,
             contentState.hasRequestedPermissions
         ) {
-            if (contentState.showErrorScreen == ConnectWithHolderDeviceError.GenericError) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Generic Error"
+            when (contentState.showErrorScreen) {
+                ConnectWithHolderDeviceError.BluetoothConfigurationError,
+                ConnectWithHolderDeviceError.GenericError -> {
+                    onFindError(contentState.showErrorScreen)
+                }
+
+                else -> {
+                    val engagementData: DeviceEngagementDto? by viewModel
+                        .engagementData.collectAsStateWithLifecycle()
+
+                    ConnectWithHolderDeviceScreenContent(
+                        base64EncodedEngagement = base64EncodedEngagement,
+                        contentState = contentState,
+                        engagementData = engagementData,
+                        multiplePermissionsState = multiplePermissionsState,
+                        modifier = Modifier,
+                        onUpdatePermissions = viewModel::update,
+                        onScanForDevice = viewModel::scanForDevice,
+                        onStopScanning = viewModel::stopScanning,
                     )
                 }
-            } else {
-                val engagementData: DeviceEngagementDto? by viewModel
-                    .engagementData.collectAsStateWithLifecycle()
-
-                ConnectWithHolderDeviceScreenContent(
-                    base64EncodedEngagement = base64EncodedEngagement,
-                    contentState = contentState,
-                    engagementData = engagementData,
-                    multiplePermissionsState = multiplePermissionsState,
-                    modifier = Modifier,
-                    onUpdatePermissions = viewModel::update,
-                    onScanForDevice = viewModel::scanForDevice,
-                    onStopScanning = viewModel::stopScanning,
-                )
             }
         }
     }

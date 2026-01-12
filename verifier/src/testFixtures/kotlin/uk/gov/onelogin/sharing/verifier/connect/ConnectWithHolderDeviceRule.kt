@@ -9,13 +9,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
+import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPromptRule
-import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalPermissionsApi::class)
 class ConnectWithHolderDeviceRule(
@@ -31,6 +32,8 @@ class ConnectWithHolderDeviceRule(
 ) : ComposeContentTestRule by composeContentTestRule {
 
     private lateinit var renderState: ConnectWithHolderDeviceState
+    var capturedErrorState: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError
+
 
     constructor(
         composeContentTestRule: ComposeContentTestRule,
@@ -132,6 +135,14 @@ class ConnectWithHolderDeviceRule(
         .assertExists()
         .assertIsDisplayed()
 
+    fun assertErrorStateEquals(expected: ConnectWithHolderDeviceError) {
+        assertEquals(
+            "Expected error wasn't passed to the 'onFindError' lambda!",
+            expected,
+            capturedErrorState,
+        )
+    }
+
     fun assertIsNotSearchingForBluetoothDevices() {
         onNodeWithText(scanningForUuids)
             .assertDoesNotExist()
@@ -161,7 +172,8 @@ class ConnectWithHolderDeviceRule(
         state: ConnectWithHolderDeviceState,
         modifier: Modifier = Modifier,
         viewModel: SessionEstablishmentViewModel,
-        permissionsState: MultiplePermissionsState
+        permissionsState: MultiplePermissionsState,
+        onFindError: (ConnectWithHolderDeviceError) -> Unit = {},
     ) {
         update(state)
         setContent {
@@ -169,7 +181,11 @@ class ConnectWithHolderDeviceRule(
                 base64EncodedEngagement = renderState.base64EncodedEngagement!!,
                 modifier = modifier,
                 viewModel = viewModel,
-                multiplePermissionsState = permissionsState
+                multiplePermissionsState = permissionsState,
+                onFindError = {
+                    capturedErrorState = it
+                    onFindError(it)
+                }
             )
         }
     }
