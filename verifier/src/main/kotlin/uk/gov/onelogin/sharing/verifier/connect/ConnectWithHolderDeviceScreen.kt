@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
-import android.Manifest
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,13 +29,14 @@ import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
-import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
@@ -46,15 +45,7 @@ fun ConnectWithHolderDeviceScreen(
     modifier: Modifier = Modifier,
     viewModel: SessionEstablishmentViewModel = metroViewModel(),
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = buildList {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_SCAN)
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-                add(Manifest.permission.ACCESS_FINE_LOCATION)
-            } else {
-                add(Manifest.permission.BLUETOOTH)
-            }
-        }
+        permissions = PermissionChecker.advertiseFineLocationPermissions()
     ) {
         viewModel.updateHasRequestPermissions(true)
     }

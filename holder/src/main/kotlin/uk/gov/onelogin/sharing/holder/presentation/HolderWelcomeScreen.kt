@@ -31,6 +31,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
@@ -48,14 +49,7 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = metroViewModel()) {
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
 
     val multiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = buildList {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-                add(Manifest.permission.BLUETOOTH_ADVERTISE)
-            } else {
-                add(Manifest.permission.BLUETOOTH)
-            }
-        }
+        permissions = PermissionChecker.advertisePermissions()
     ) {
         hasPreviouslyRequestedPermission = true
     }
