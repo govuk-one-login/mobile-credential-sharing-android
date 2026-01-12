@@ -9,4 +9,11 @@ sealed interface VerifierSessionState {
     data class Disconnected(val address: String) : VerifierSessionState
     data object Stopped : VerifierSessionState
     data class Error(val message: String) : VerifierSessionState
+
+    /**
+     * [VerifierSessionState] implementation for when bluetooth configuration is incorrect.
+     *
+     * This occurs due to [android.bluetooth.BluetoothGattCharacteristic] issues.
+     */
+    data class Invalid(val message: String) : VerifierSessionState
 }

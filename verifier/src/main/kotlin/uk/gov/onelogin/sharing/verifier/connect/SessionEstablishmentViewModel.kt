@@ -31,6 +31,7 @@ import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
+import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @Inject
 @ViewModelKey(SessionEstablishmentViewModel::class)
@@ -105,7 +106,7 @@ class SessionEstablishmentViewModel(
 
                         is ScanEvent.ScanFailed -> {
                             _uiState.update {
-                                it.copy(showErrorScreen = true)
+                                it.copy(showErrorScreen = ConnectWithHolderDeviceError.GenericError)
                             }
                             logger.debug(logTag, "Scan failed: ${scanResult.failure}")
                         }
@@ -120,11 +121,21 @@ class SessionEstablishmentViewModel(
         }
     }
 
-    private fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
-        viewModelScope.launch(dispatcher) {
-            mdocVerifierSession.state.collect {
-                logger.debug(logTag, "Session state: $it")
+    internal fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
+        mdocVerifierSession.state.value.let { sessionState ->
+            when (sessionState) {
+                is VerifierSessionState.Invalid ->
+                    ConnectWithHolderDeviceError.BluetoothConfigurationError
+
+                is VerifierSessionState.Error ->
+                    ConnectWithHolderDeviceError.GenericError
+
+                else -> null
+            }?.let { error ->
+                _uiState.update { it.copy(showErrorScreen = error) }
             }
+
+            logger.debug(logTag, "Session state: $sessionState")
         }
 
         mdocVerifierSession.connect(device, serviceUuid.toUUID())

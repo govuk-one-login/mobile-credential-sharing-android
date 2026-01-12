@@ -73,7 +73,7 @@ class MdocVerifierSession(
                         _state.value = VerifierSessionState.ServiceDiscovered
 
                     is ValidationResult.Failure ->
-                        _state.value = VerifierSessionState.Error(
+                        _state.value = VerifierSessionState.Invalid(
                             validationResult.errors.toString()
                         )
                 }

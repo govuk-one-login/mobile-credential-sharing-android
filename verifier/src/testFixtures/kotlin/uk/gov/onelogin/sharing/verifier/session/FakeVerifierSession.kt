@@ -4,11 +4,16 @@ import android.bluetooth.BluetoothDevice
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 
-class FakeVerifierSession : VerifierSession {
+class FakeVerifierSession(
+    private val initialState: MutableStateFlow<VerifierSessionState> = MutableStateFlow(
+        VerifierSessionState.Idle
+    )
+) : VerifierSession {
     override val state: StateFlow<VerifierSessionState> =
-        MutableStateFlow(VerifierSessionState.Idle)
+        initialState
     override val bluetoothStatus: StateFlow<BluetoothStatus> = MutableStateFlow(BluetoothStatus.ON)
 
     var startCalls = 0
@@ -25,5 +30,9 @@ class FakeVerifierSession : VerifierSession {
 
     override fun stop() {
         stopCalls++
+    }
+
+    fun updateState(state: VerifierSessionState) {
+        initialState.update { state }
     }
 }

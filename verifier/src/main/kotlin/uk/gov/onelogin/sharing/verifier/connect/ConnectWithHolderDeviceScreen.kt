@@ -106,7 +106,7 @@ fun ConnectWithHolderDeviceScreen(
             multiplePermissionsState,
             contentState.hasRequestedPermissions
         ) {
-            if (contentState.showErrorScreen) {
+            if (contentState.showErrorScreen == ConnectWithHolderDeviceError.GenericError) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,

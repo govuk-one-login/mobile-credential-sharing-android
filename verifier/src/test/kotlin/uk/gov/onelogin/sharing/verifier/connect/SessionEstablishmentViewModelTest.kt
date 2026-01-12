@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.mockk.every
 import io.mockk.mockk
+import javolution.util.stripped.FastMap.logger
 import java.util.UUID
 import kotlin.test.assertFalse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,12 +31,15 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
+import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SessionEstablishmentViewModelTest {
@@ -82,9 +86,7 @@ class SessionEstablishmentViewModelTest {
         val bluetoothDevice = mockk<BluetoothDevice>()
         every { bluetoothDevice.address } returns DEVICE_ADDRESS
 
-        val scanner = BluetoothScanner {
-            flowOf(ScanEvent.DeviceFound(bluetoothDevice))
-        }
+        val scanner = BluetoothScanner.of(ScanEvent.DeviceFound(bluetoothDevice))
 
         val viewModel = createViewModel(scanner)
 
@@ -104,11 +106,9 @@ class SessionEstablishmentViewModelTest {
     fun `scanForDevice handles ScanFailure ScanEvent and logs it`() = runTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = flowOf(
-                ScanEvent.ScanFailed(scanFailure)
-            )
-        }
+        val scanner = BluetoothScanner.of(
+            ScanEvent.ScanFailed(scanFailure)
+        )
 
         val viewModel = createViewModel(scanner)
 
@@ -126,11 +126,11 @@ class SessionEstablishmentViewModelTest {
     fun `stopScanning logs and cancels an active scan job`() = runTest {
         var flowClosed = false
 
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
+        val scanner = BluetoothScanner.from(
+            callbackFlow {
                 awaitClose { flowClosed = true }
             }
-        }
+        )
 
         val viewModel = createViewModel(scanner)
 
@@ -149,11 +149,11 @@ class SessionEstablishmentViewModelTest {
 
     @Test
     fun `scanForDevice times out when no results emitted`() = runTest {
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
+        val scanner = BluetoothScanner.from(
+            callbackFlow {
                 awaitCancellation()
             }
-        }
+        )
 
         val viewModel = createViewModel(scanner)
         viewModel.updatePermissions(true)
@@ -173,11 +173,9 @@ class SessionEstablishmentViewModelTest {
     fun `scanForDevice on ScanEvent ScanFailure sets showErrorScreen true`() = runTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = flowOf(
-                ScanEvent.ScanFailed(scanFailure)
-            )
-        }
+        val scanner = BluetoothScanner.of(
+            ScanEvent.ScanFailed(scanFailure),
+        )
 
         val viewModel = createViewModel(scanner)
 
@@ -186,7 +184,28 @@ class SessionEstablishmentViewModelTest {
         viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
         runCurrent()
 
-        assertTrue(viewModel.uiState.value.showErrorScreen)
+        assertEquals(
+            ConnectWithHolderDeviceError.GenericError,
+            viewModel.uiState.value.showErrorScreen,
+        )
+    }
+
+
+    @Test
+    fun `Connecting to invalid configuration emits an error state to the UI`() = runTest {
+        fakeVerifierSession.updateState(
+            VerifierSessionState.Invalid("This is a unit test!")
+        )
+
+        val viewModel = createViewModel(DummyBluetoothScanner)
+
+        viewModel.connect(mockk(), UUID.randomUUID().toBytes())
+        runCurrent()
+
+        assertEquals(
+            ConnectWithHolderDeviceError.BluetoothConfigurationError,
+            viewModel.uiState.value.showErrorScreen,
+        )
     }
 
     @Test

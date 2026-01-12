@@ -283,7 +283,7 @@ class ConnectWithHolderDeviceScreenTest {
     @Test
     fun shouldShowErrorScreenWhenShowErrorScreenSetTrue() {
         val errorState = ConnectWithHolderDeviceState(
-            showErrorScreen = true,
+            showErrorScreen = ConnectWithHolderDeviceError.GenericError,
             hasAllPermissions = true,
             isBluetoothEnabled = true
         )
