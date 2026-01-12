@@ -4,15 +4,11 @@ import android.bluetooth.BluetoothDevice
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.mockk.every
 import io.mockk.mockk
-import javolution.util.stripped.FastMap.logger
 import java.util.UUID
-import kotlin.test.assertFalse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent

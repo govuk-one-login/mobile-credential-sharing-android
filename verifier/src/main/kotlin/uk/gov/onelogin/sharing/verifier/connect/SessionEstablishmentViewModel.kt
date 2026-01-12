@@ -130,8 +130,8 @@ class SessionEstablishmentViewModel(
                 is VerifierSessionState.Error ->
                     ConnectWithHolderDeviceError.GenericError
 
-                else -> null
-            }?.let { error ->
+                else -> ConnectWithHolderDeviceError.NoError
+            }.let { error ->
                 _uiState.update { it.copy(showErrorScreen = error) }
             }
 

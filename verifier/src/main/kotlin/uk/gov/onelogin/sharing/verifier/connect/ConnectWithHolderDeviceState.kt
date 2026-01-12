@@ -17,22 +17,6 @@ data class ConnectWithHolderDeviceState(
     val base64EncodedEngagement: String? = null,
     val hasAllPermissions: Boolean = false,
     val hasRequestedPermissions: Boolean = false,
-    val showErrorScreen: ConnectWithHolderDeviceError? = null
+    val showErrorScreen: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError,
 )
 
-/**
- * Sealed class for the different kinds of errors that appear within the
- * [ConnectWithHolderDeviceScreen] composable UI.
- */
-sealed class ConnectWithHolderDeviceError {
-    /**
-     * Declares that a mismatch occurred between the expected
-     * [android.bluetooth.BluetoothGattCharacteristic]s and those provided by the holder device.
-     */
-    data object BluetoothConfigurationError : ConnectWithHolderDeviceError()
-
-    /**
-     * Declares that an unknown error occurred when scanning for a bluetooth device.
-     */
-    data object GenericError : ConnectWithHolderDeviceError()
-}
