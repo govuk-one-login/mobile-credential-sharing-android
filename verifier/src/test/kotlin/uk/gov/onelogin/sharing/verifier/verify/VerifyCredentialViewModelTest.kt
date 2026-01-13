@@ -13,9 +13,9 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedWithRationale
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPermissionsApi::class)
 class VerifyCredentialViewModelTest {
@@ -55,7 +55,7 @@ class VerifyCredentialViewModelTest {
 
     @Test
     fun `preconditions are met when Bluetooth status changes to ON and permissions granted`() {
-        viewModel.onPermissionsChanged(fakePermissionStateGranted)
+        viewModel.onPermissionsChanged(bluetoothPermissionsGranted)
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
 
         assert(
@@ -68,7 +68,7 @@ class VerifyCredentialViewModelTest {
 
     @Test
     fun `preconditions are not met when Bluetooth status changes to OFF`() {
-        viewModel.onPermissionsChanged(fakePermissionStateGranted)
+        viewModel.onPermissionsChanged(bluetoothPermissionsGranted)
         bluetoothStateMonitor.emit(BluetoothStatus.OFF)
 
         assert(
@@ -79,7 +79,7 @@ class VerifyCredentialViewModelTest {
 
     @Test
     fun `preconditions are not met when Permissions denied first time`() {
-        viewModel.onPermissionsChanged(fakePermissionStateDeniedWithRationale)
+        viewModel.onPermissionsChanged(bluetoothPermissionsDeniedWithRationale)
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
 
         assert(
@@ -92,7 +92,7 @@ class VerifyCredentialViewModelTest {
 
     @Test
     fun `preconditions are not met when Permissions permanently denied`() {
-        viewModel.onPermissionsChanged(fakePermissionStateDenied)
+        viewModel.onPermissionsChanged(bluetoothPermissionsDenied)
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
 
         assert(
@@ -106,7 +106,7 @@ class VerifyCredentialViewModelTest {
     @Test
     fun `emits NavigateToScanner event when preconditions are Met`() = runTest {
         viewModel.events.test {
-            viewModel.onPermissionsChanged(fakePermissionStateGranted)
+            viewModel.onPermissionsChanged(bluetoothPermissionsGranted)
             bluetoothStateMonitor.emit(BluetoothStatus.ON)
 
             advanceUntilIdle()
@@ -119,14 +119,14 @@ class VerifyCredentialViewModelTest {
     @Test
     fun `NavigateToScanner is emitted only once`() = runTest {
         viewModel.events.test {
-            viewModel.onPermissionsChanged(fakePermissionStateGranted)
+            viewModel.onPermissionsChanged(bluetoothPermissionsGranted)
             bluetoothStateMonitor.emit(BluetoothStatus.ON)
             advanceUntilIdle()
 
             assertEquals(VerifyCredentialEvents.NavigateToScanner, awaitItem())
 
             bluetoothStateMonitor.emit(BluetoothStatus.ON)
-            viewModel.onPermissionsChanged(fakePermissionStateGranted)
+            viewModel.onPermissionsChanged(bluetoothPermissionsGranted)
             bluetoothStateMonitor.emit(BluetoothStatus.ON)
             advanceUntilIdle()
 

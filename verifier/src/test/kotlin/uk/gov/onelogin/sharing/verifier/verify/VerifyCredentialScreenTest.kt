@@ -2,14 +2,10 @@ package uk.gov.onelogin.sharing.verifier.verify
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -20,8 +16,9 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
+import kotlin.test.Test
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -53,7 +50,7 @@ class VerifyCredentialScreenTest {
         composeTestRule.setContent {
             VerifyCredentialScreen(
                 viewModel = viewModel,
-                multiplePermissionsState = fakePermissionStateGranted
+                multiplePermissionsState = bluetoothPermissionsGranted
             )
         }
 
@@ -68,7 +65,7 @@ class VerifyCredentialScreenTest {
         composeTestRule.setContent {
             VerifyCredentialScreen(
                 viewModel = viewModel,
-                multiplePermissionsState = fakePermissionStateDenied
+                multiplePermissionsState = bluetoothPermissionsDenied
             )
         }
 
@@ -86,7 +83,7 @@ class VerifyCredentialScreenTest {
         composeTestRule.setContent {
             VerifyCredentialScreen(
                 viewModel = viewModel,
-                multiplePermissionsState = fakePermissionStateGranted,
+                multiplePermissionsState = bluetoothPermissionsGranted,
                 navigateToScanner = { navigated = true }
             )
         }
@@ -102,7 +99,7 @@ class VerifyCredentialScreenTest {
         var launched = false
 
         val fakeDenied = FakeMultiplePermissionsState(
-            permissions = fakePermissionStateDenied.permissions,
+            permissions = bluetoothPermissionsDenied.permissions,
             onLaunchPermission = {
                 launched = true
                 viewModel.onPermissionRequestLaunched()
