@@ -29,48 +29,49 @@ private const val TAG = "decodeDeviceEngagement"
  * @param cborBase64Url The CBOR-encoded data represented as a Base64 URL string.
  * @param logger An instance of [Logger] for logging events.
  */
-fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagementDto? {
+fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagementDto? = try {
     val cborData = cborBase64Url.base64Decode()
 
     val cborMapper = ObjectMapper(CBORFactory()).apply {
         registerModule(KotlinModule.Builder().build())
     }
 
-    return try {
-        val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
-        logger.debug(TAG, "Successfully deserialized DeviceEngagementDto:")
-        @RequiresImplementation(
-            details = [
-                ImplementationDetail(
-                    ticket = "N/A not captured",
-                    description = "Create DTO -> Domain mapping functions for verifier to extract" +
-                        "deserialized device engagement message"
-                )
-            ]
-        )
-        logger.debug(TAG, " - Version: ${deviceEngagement.version}")
-        logger.debug(
-            TAG,
-            " - Security - Cipher Suite: " +
-                "${deviceEngagement.security.cipherSuiteIdentifier}"
-        )
-        logger.debug(
-            TAG,
-            " - Security - Ephemeral Public Key (as hex): " +
-                "${deviceEngagement.security.ephemeralPublicKey}"
-        )
-        logger.debug(
-            TAG,
-            " - Device Retrieval Methods: " +
-                "${deviceEngagement.deviceRetrievalMethods}"
-        )
+    val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
+    logger.debug(TAG, "Successfully deserialized DeviceEngagementDto:")
+    @RequiresImplementation(
+        details = [
+            ImplementationDetail(
+                ticket = "N/A not captured",
+                description = "Create DTO -> Domain mapping functions for verifier to extract" +
+                    "deserialized device engagement message"
+            )
+        ]
+    )
+    logger.debug(TAG, " - Version: ${deviceEngagement.version}")
+    logger.debug(
+        TAG,
+        " - Security - Cipher Suite: " +
+            "${deviceEngagement.security.cipherSuiteIdentifier}"
+    )
+    logger.debug(
+        TAG,
+        " - Security - Ephemeral Public Key (as hex): " +
+            "${deviceEngagement.security.ephemeralPublicKey}"
+    )
+    logger.debug(
+        TAG,
+        " - Device Retrieval Methods: " +
+            "${deviceEngagement.deviceRetrievalMethods}"
+    )
 
-        deviceEngagement
-    } catch (e: JsonProcessingException) {
-        // We need to send error status code 10 to the reader in the event of CBOR decoding errors
-        logger.debug(TAG, "Failed to deserialize CBOR: ${e.message}")
-        null
-    }
+    deviceEngagement
+} catch (e: JsonProcessingException) {
+    // We need to send error status code 10 to the reader in the event of CBOR decoding errors
+    logger.debug(TAG, "Failed to deserialize CBOR: ${e.message}")
+    null
+} catch (e: IllegalArgumentException) {
+    logger.debug(TAG, "Illegal parameters found: ${e.message}")
+    null
 }
 
 fun String.base64Decode(decoder: Base64.Decoder = Base64.getUrlDecoder()): ByteArray =
