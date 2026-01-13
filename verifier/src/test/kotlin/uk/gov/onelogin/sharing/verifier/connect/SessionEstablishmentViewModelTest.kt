@@ -2,6 +2,8 @@ package uk.gov.onelogin.sharing.verifier.connect
 
 import android.bluetooth.BluetoothDevice
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameters
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
@@ -15,12 +17,14 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.nullValue
+import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
@@ -33,6 +37,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedWithRationale
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
@@ -41,14 +46,20 @@ import uk.gov.onelogin.sharing.security.DecoderStub
 import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBase64EncodedEngagement
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBluetoothDisabled
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBluetoothEnabled
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasDeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.connect.SessionEstablishmentViewModelMatchers.hasUiState
+import uk.gov.onelogin.sharing.verifier.connect.parameters.BluetoothStatusesToEnabledFlag
+import uk.gov.onelogin.sharing.verifier.connect.parameters.EncodedEngagementToState
+import uk.gov.onelogin.sharing.verifier.connect.parameters.PermissionsToLogMessages
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.undecodeableBarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(TestParameterInjector::class)
 class SessionEstablishmentViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -223,83 +234,49 @@ class SessionEstablishmentViewModelTest {
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
-    fun `should log permission granted when user allows all permissions`() {
+    @TestParameters(valuesProvider = PermissionsToLogMessages::class)
+    fun `Permission updates are logged`(
+        input: FakeMultiplePermissionsState,
+        expectedMessage: String
+    ) {
         viewModel = createViewModel(scanner)
-        viewModel.update(bluetoothPermissionsGranted)
+        viewModel.update(input)
 
-        val logMessage = logger[0].message
-        assert(logMessage.contains("All required Bluetooth permissions have been granted"))
-    }
-
-    @OptIn(ExperimentalPermissionsApi::class)
-    @Test
-    fun `should log permission permanently denied when user denies permissions completely`() {
-        viewModel = createViewModel(scanner)
-        viewModel.update(bluetoothPermissionsDenied)
-
-        val logMessage = logger[0].message
-        assert(logMessage.contains("Bluetooth permissions were permanently denied"))
-    }
-
-    @OptIn(ExperimentalPermissionsApi::class)
-    @Test
-    fun `should log permissions denied when user denied first time`() {
-        viewModel = createViewModel(scanner)
-        viewModel.update(bluetoothPermissionsDeniedWithRationale)
-
-        val logMessage = logger[0].message
-        assert(logMessage.contains("Bluetooth permissions were denied"))
-    }
-
-    @Test
-    fun `should set isBluetoothEnabled state to off when prompt is denied`() = runTest {
-        viewModel = createViewModel(scanner)
-
-        fakeBluetoothStateMonitor.emit(BluetoothStatus.OFF)
-
-        assertEquals(false, viewModel.uiState.value.isBluetoothEnabled)
-    }
-
-    @Test
-    fun `should set isBluetoothEnabled state to true when bluetooth enabled`() = runTest {
-        viewModel = createViewModel(scanner)
-
-        fakeBluetoothStateMonitor.emit(BluetoothStatus.ON)
-
-        assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
-    }
-
-    @Test
-    fun `Updating the encoded data also updates the UI state`() = runTest {
-        viewModel = createViewModel(scanner)
-
-        viewModel.update(validBarcodeDataResult.data)
-
-        assertThat(
-            viewModel,
-            hasUiState(
-                allOf(
-                    hasBase64EncodedEngagement(validBarcodeDataResult.data),
-                    hasDeviceEngagementDto(validDeviceEngagementDto)
-                )
-            )
+        assertTrue(
+            "Couldn't find expected message in logger: $logger",
+            expectedMessage in logger
         )
     }
 
     @Test
-    fun `Engagement data stays as null when updating with invalid encoded data`() = runTest {
+    @TestParameters(valuesProvider = BluetoothStatusesToEnabledFlag::class)
+    fun `Bluetooth status maps to Bluetooth enablement flag`(
+        status: BluetoothStatus,
+        assertion: Matcher<ConnectWithHolderDeviceState>
+    ) = runTest {
         viewModel = createViewModel(scanner)
 
-        viewModel.update(undecodeableBarcodeDataResult.data)
+        fakeBluetoothStateMonitor.emit(status)
 
         assertThat(
             viewModel,
-            hasUiState(
-                allOf(
-                    hasBase64EncodedEngagement(undecodeableBarcodeDataResult.data),
-                    hasDeviceEngagementDto(nullValue(DeviceEngagementDto::class.java))
-                )
-            )
+            hasUiState(assertion)
+        )
+    }
+
+    @Test
+    @TestParameters(valuesProvider = EncodedEngagementToState::class)
+    fun `Updating encoded data affects the UI state`(
+        input: String,
+        assertion: Matcher<ConnectWithHolderDeviceState>
+    ) = runTest {
+        viewModel = createViewModel(scanner)
+
+        viewModel.update(input)
+
+        assertThat(
+            viewModel,
+            hasUiState(assertion)
         )
     }
 }

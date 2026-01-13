@@ -7,6 +7,7 @@ import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.connect.matchers.HasBase64EncodedEngagement
+import uk.gov.onelogin.sharing.verifier.connect.matchers.HasBluetoothEnabled
 import uk.gov.onelogin.sharing.verifier.connect.matchers.HasDeviceEngagementDto
 
 object ConnectWithHolderDeviceStateMatchers {
@@ -15,6 +16,11 @@ object ConnectWithHolderDeviceStateMatchers {
     fun hasBase64EncodedEngagement(
         matcher: Matcher<String>
     ): Matcher<ConnectWithHolderDeviceState> = HasBase64EncodedEngagement(matcher)
+
+    fun hasBluetoothDisabled() = hasBluetoothEnabled(false)
+
+    fun hasBluetoothEnabled(expected: Boolean = true): Matcher<ConnectWithHolderDeviceState> =
+        HasBluetoothEnabled(expected)
 
     fun hasDeviceEngagementDto(expected: DeviceEngagementDto) =
         hasDeviceEngagementDto(equalTo(expected))
