@@ -3,8 +3,13 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import android.content.Context
+import android.os.Build
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
+import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -15,12 +20,17 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
+@RunWith(RobolectricTestRunner::class)
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
@@ -129,25 +139,7 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `emits error when service discovery is not successful`() = runTest {
-        val callbackSlot = slot<BluetoothGattCallback>()
-
-        every {
-            bluetoothDevice.connectGatt(
-                context,
-                any(),
-                capture(callbackSlot),
-                any()
-            )
-        } returns bluetoothGatt
-
-        manager.events.test {
-            manager.connect(
-                bluetoothDevice,
-                uuid
-            )
-
-            skipItems(1)
-
+        testEvents { callbackSlot ->
             callbackSlot.captured.onServicesDiscovered(
                 bluetoothGatt,
                 BluetoothGatt.GATT_FAILURE
@@ -162,27 +154,9 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `emits service not found when get service discovery is not successful`() = runTest {
-        val callbackSlot = slot<BluetoothGattCallback>()
-
-        every {
-            bluetoothDevice.connectGatt(
-                context,
-                any(),
-                capture(callbackSlot),
-                any()
-            )
-        } returns bluetoothGatt
-
         every { bluetoothGatt.getService(any()) } returns null
 
-        manager.events.test {
-            manager.connect(
-                bluetoothDevice,
-                uuid
-            )
-
-            skipItems(1)
-
+        testEvents { callbackSlot ->
             callbackSlot.captured.onServicesDiscovered(
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS
@@ -247,6 +221,10 @@ internal class AndroidGattClientManagerTest {
             )
         } returns bluetoothGatt
 
+        every {
+            bluetoothGatt.setCharacteristicNotification(any(), true)
+        } returns true
+
         manager.events.test {
             manager.connect(
                 bluetoothDevice,
@@ -284,26 +262,252 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `emits service disconnected`() = runTest {
-        val callbackSlot = slot<BluetoothGattCallback>()
-
+    fun `requests max possible transmission unit when service discovery is successful`() = runTest {
         every {
-            bluetoothDevice.connectGatt(
-                context,
-                any(),
-                capture(callbackSlot),
-                any()
-            )
-        } returns bluetoothGatt
+            bluetoothGatt.setCharacteristicNotification(any(), true)
+        } returns true
 
-        manager.events.test {
-            manager.connect(
-                bluetoothDevice,
-                uuid
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
             )
 
             skipItems(1)
 
+            verify { bluetoothGatt.requestMtu(MtuValues.MAX_POSSIBLE) }
+        }
+    }
+
+    @Test
+    fun `subscribes to state changes when service discovery is successful`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every {
+            bluetoothGatt.setCharacteristicNotification(any(), true)
+        } returns true
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            skipItems(1)
+
+            verify {
+                bluetoothGatt.setCharacteristicNotification(
+                    stateCharacteristic,
+                    true
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `emits error when state characteristic does not exist during subscription`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns null
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.INVALID_SERVICE
+                ),
+                awaitItem()
+            )
+
+            assert(
+                logger.contains("Gatt Service does not have a state characteristic")
+            )
+        }
+    }
+
+    @Test
+    fun `emits error when server to client characteristic does not exist during subscription`() =
+        runTest {
+            val service = mockk<BluetoothGattService>(relaxed = true)
+            every { bluetoothGatt.getService(any()) } returns service
+            every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns null
+
+            testEvents { callbackSlot ->
+                callbackSlot.captured.onServicesDiscovered(
+                    bluetoothGatt,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+
+                assertEquals(
+                    GattClientEvent.Error(
+                        ClientError.INVALID_SERVICE
+                    ),
+                    awaitItem()
+                )
+
+                assert(
+                    logger.contains("Gatt Service does not have a server to client characteristic")
+                )
+            }
+        }
+
+    @Test
+    fun `subscribes to serverToClient messages when service discovery is successful`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every {
+            bluetoothGatt.setCharacteristicNotification(any(), true)
+        } returns true
+
+        val serverToClientCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every {
+            service.getCharacteristic(GattUuids.STATE_UUID)
+        } returns serverToClientCharacteristic
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            skipItems(1)
+
+            verify {
+                bluetoothGatt.setCharacteristicNotification(
+                    serverToClientCharacteristic,
+                    true
+                )
+            }
+        }
+    }
+
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    @Test
+    fun `sets state to start when Mtu is agreed - modern API`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onMtuChanged(
+                bluetoothGatt,
+                MtuValues.MAX_POSSIBLE,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            verify {
+                bluetoothGatt.writeCharacteristic(
+                    stateCharacteristic,
+                    byteArrayOf(MdocState.START.code),
+                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `emits error when state characteristic does not exist when Mtu is agreed`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns null
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onMtuChanged(
+                bluetoothGatt,
+                MtuValues.MAX_POSSIBLE,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.INVALID_SERVICE
+                ),
+                awaitItem()
+            )
+
+            assert(
+                logger.contains("Gatt Service does not have a state characteristic")
+            )
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    @Config(sdk = [Build.VERSION_CODES.S])
+    @Test
+    fun `sets state to start when Mtu is agreed - deprecated API version`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onMtuChanged(
+                bluetoothGatt,
+                MtuValues.MAX_POSSIBLE,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            verify { stateCharacteristic.setValue(byteArrayOf(MdocState.START.code)) }
+            verify { bluetoothGatt.writeCharacteristic(stateCharacteristic) }
+        }
+    }
+
+    @Test
+    fun `emits error when subscribing to characteristic fails`() = runTest {
+        every {
+            bluetoothGatt.setCharacteristicNotification(any(), true)
+        } returns false
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.FAILED_TO_SUBSCRIBE
+                ),
+                awaitItem()
+            )
+
+            verifyCount { bluetoothGatt.disconnect() }
+        }
+    }
+
+    @Test
+    fun `emits error when start value cannot be written to state characteristic`() = runTest {
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onCharacteristicWrite(
+                bluetoothGatt,
+                mockk(),
+                BluetoothGatt.GATT_FAILURE
+            )
+
+            assertEquals(
+                GattClientEvent.Error(
+                    ClientError.FAILED_TO_START
+                ),
+                awaitItem()
+            )
+
+            verifyCount { bluetoothGatt.disconnect() }
+        }
+    }
+
+    @Test
+    fun `emits service disconnected`() = runTest {
+        testEvents { callbackSlot ->
             callbackSlot.captured.onConnectionStateChange(
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS,
@@ -319,25 +523,7 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `emits unsupported event`() = runTest {
-        val callbackSlot = slot<BluetoothGattCallback>()
-
-        every {
-            bluetoothDevice.connectGatt(
-                context,
-                any(),
-                capture(callbackSlot),
-                any()
-            )
-        } returns bluetoothGatt
-
-        manager.events.test {
-            manager.connect(
-                bluetoothDevice,
-                uuid
-            )
-
-            skipItems(1)
-
+        testEvents { callbackSlot ->
             callbackSlot.captured.onConnectionStateChange(
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS,
@@ -361,5 +547,33 @@ internal class AndroidGattClientManagerTest {
 
         verifyCount { bluetoothGatt.disconnect() }
         verifyCount { bluetoothGatt.close() }
+    }
+
+    private suspend fun testEvents(
+        validate: suspend TurbineTestContext<GattClientEvent>.(
+            CapturingSlot<BluetoothGattCallback>
+        ) -> Unit
+    ) {
+        val callbackSlot = slot<BluetoothGattCallback>()
+
+        every {
+            bluetoothDevice.connectGatt(
+                context,
+                any(),
+                capture(callbackSlot),
+                any()
+            )
+        } returns bluetoothGatt
+
+        manager.events.test {
+            manager.connect(
+                bluetoothDevice,
+                uuid
+            )
+
+            skipItems(1)
+
+            validate(callbackSlot)
+        }
     }
 }

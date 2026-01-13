@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
 import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.assertEquals
@@ -45,7 +46,41 @@ class GattClientCallbackTest {
         assertEquals(1, fakeEmitter.events.size)
 
         val event = fakeEmitter.events.single() as GattEvent.ServicesDiscovered
-        assertEquals(DEVICE_ADDRESS, event.bluetoothGatt.device.address)
+        assertEquals(DEVICE_ADDRESS, event.gatt.device.address)
+        assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
+    }
+
+    @Test
+    fun `onMtuChanged emits MtuChange event`() {
+        callback.onMtuChanged(
+            gatt,
+            MtuValues.MAX_POSSIBLE,
+            BluetoothGatt.GATT_SUCCESS
+        )
+
+        assertEquals(1, fakeEmitter.events.size)
+
+        val event = fakeEmitter.events.single() as GattEvent.MtuChange
+        assertEquals(DEVICE_ADDRESS, event.gatt.device.address)
+        assertEquals(MtuValues.MAX_POSSIBLE, event.mtu)
+        assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
+    }
+
+    @Test
+    fun `onCharacteristicWrite emits CharacteristicWrite event`() {
+        val characteristic = mockk<BluetoothGattCharacteristic>()
+
+        callback.onCharacteristicWrite(
+            gatt,
+            characteristic,
+            BluetoothGatt.GATT_SUCCESS
+        )
+
+        assertEquals(1, fakeEmitter.events.size)
+
+        val event = fakeEmitter.events.single() as GattEvent.CharacteristicWrite
+        assertEquals(DEVICE_ADDRESS, event.gatt.device.address)
+        assertEquals(characteristic, event.characteristic)
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
     }
 }

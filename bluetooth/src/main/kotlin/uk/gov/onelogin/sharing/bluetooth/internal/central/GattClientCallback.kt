@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
 
 internal class GattClientCallback(private val gattEventEmitter: GattClientEventEmitter) :
     BluetoothGattCallback() {
@@ -20,6 +21,30 @@ internal class GattClientCallback(private val gattEventEmitter: GattClientEventE
         gattEventEmitter.emit(
             GattEvent.ServicesDiscovered(
                 gatt,
+                status
+            )
+        )
+    }
+
+    override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
+        gattEventEmitter.emit(
+            GattEvent.MtuChange(
+                gatt,
+                mtu,
+                status
+            )
+        )
+    }
+
+    override fun onCharacteristicWrite(
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        status: Int
+    ) {
+        gattEventEmitter.emit(
+            GattEvent.CharacteristicWrite(
+                gatt,
+                characteristic,
                 status
             )
         )
