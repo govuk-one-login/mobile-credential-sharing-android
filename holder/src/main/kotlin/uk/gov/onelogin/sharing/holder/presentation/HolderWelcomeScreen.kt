@@ -2,8 +2,6 @@
 
 package uk.gov.onelogin.sharing.holder.presentation
 
-import android.Manifest
-import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

@@ -50,7 +50,11 @@ interface PermissionChecker {
 
         @JvmStatic
         fun centralPermissions(): List<String> = listOf(
-            Manifest.permission.BLUETOOTH_CONNECT
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Manifest.permission.BLUETOOTH_CONNECT
+            } else {
+                Manifest.permission.BLUETOOTH
+            }
         )
     }
 }

@@ -66,13 +66,8 @@ fun ConnectWithHolderDeviceScreen(
                 }
 
                 else -> {
-                    val engagementData: DeviceEngagementDto? by viewModel
-                        .engagementData.collectAsStateWithLifecycle()
-
                     ConnectWithHolderDeviceScreenContent(
-                        base64EncodedEngagement = base64EncodedEngagement,
                         contentState = contentState,
-                        engagementData = engagementData,
                         multiplePermissionsState = multiplePermissionsState,
                         modifier = Modifier,
                         onUpdatePermissions = viewModel::update,
@@ -88,9 +83,7 @@ fun ConnectWithHolderDeviceScreen(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ConnectWithHolderDeviceScreenContent(
-    base64EncodedEngagement: String,
     contentState: ConnectWithHolderDeviceState,
-    engagementData: DeviceEngagementDto?,
     multiplePermissionsState: MultiplePermissionsState,
     modifier: Modifier = Modifier,
     onUpdatePermissions: (MultiplePermissionsState) -> Unit = {},
@@ -119,8 +112,8 @@ fun ConnectWithHolderDeviceScreenContent(
         EnableBluetoothPrompt()
     }
 
-    DisposableEffect(engagementData, permissionsGranted) {
-        val uuidToScan = engagementData?.getFirstPeripheralServerModeUuid()
+    DisposableEffect(contentState.engagementData, permissionsGranted) {
+        val uuidToScan = contentState.engagementData?.getFirstPeripheralServerModeUuid()
 
         if (permissionsGranted && contentState.isBluetoothEnabled &&
             uuidToScan != null
@@ -140,15 +133,19 @@ fun ConnectWithHolderDeviceScreenContent(
         item {
             Text(stringResource(R.string.connect_with_holder_heading))
         }
-        item {
-            Text(base64EncodedEngagement)
+
+        if (contentState.base64EncodedEngagement != null) {
+            item {
+                Text(contentState.base64EncodedEngagement)
+            }
         }
+
         showBluetoothDeviceState { contentState.isBluetoothEnabled }
         showBluetoothPermissionState(permissionsGranted)
         if (permissionsGranted && contentState.isBluetoothEnabled) {
-            showUuidsToScan(engagementData?.deviceRetrievalMethods)
+            showUuidsToScan(contentState.engagementData?.deviceRetrievalMethods)
         }
-        showEngagementData(engagementData)
+        showEngagementData(contentState.engagementData)
     }
 }
 
@@ -235,9 +232,10 @@ internal fun ConnectWithHolderDevicePreview(
 
     GdsTheme {
         ConnectWithHolderDeviceScreenContent(
-            base64EncodedEngagement = base64EncodedEngagement,
-            contentState = ConnectWithHolderDeviceState(),
-            engagementData = engagementData,
+            contentState = ConnectWithHolderDeviceState(
+                base64EncodedEngagement = base64EncodedEngagement,
+                engagementData = engagementData
+            ),
             multiplePermissionsState = rememberMultiplePermissionsState(
                 permissions = PermissionChecker.advertiseFineLocationPermissions()
             ) {},

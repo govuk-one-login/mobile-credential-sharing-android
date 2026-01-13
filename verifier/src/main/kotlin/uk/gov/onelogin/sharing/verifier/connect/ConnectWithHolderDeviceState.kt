@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 
 /**
  * Property bag data class for holding the [ConnectWithHolderDeviceScreen] composable UI state.
@@ -15,6 +16,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 data class ConnectWithHolderDeviceState(
     val isBluetoothEnabled: Boolean = false,
     val base64EncodedEngagement: String? = null,
+    val engagementData: DeviceEngagementDto? = null,
     val hasAllPermissions: Boolean = false,
     val hasRequestedPermissions: Boolean = false,
     val showErrorScreen: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError

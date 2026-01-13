@@ -16,14 +16,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.withTimeout
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
@@ -35,7 +31,6 @@ import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
@@ -52,20 +47,6 @@ class SessionEstablishmentViewModel(
 ) : ViewModel() {
 
     private val base64EncodedEngagement = MutableStateFlow<String?>(null)
-
-    val engagementData: StateFlow<DeviceEngagementDto?> = base64EncodedEngagement
-        .map { engagement ->
-            engagement?.let {
-                decodeDeviceEngagement(
-                    it,
-                    logger = logger
-                )
-            }
-        }.stateIn(
-            viewModelScope.plus(dispatcher),
-            SharingStarted.Lazily,
-            null
-        )
 
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
     val uiState: StateFlow<ConnectWithHolderDeviceState> = _uiState
@@ -193,7 +174,12 @@ class SessionEstablishmentViewModel(
     }
 
     fun update(base64EncodedEngagement: String) {
-        this.base64EncodedEngagement.update { base64EncodedEngagement }
+        this._uiState.update {
+            it.copy(
+                base64EncodedEngagement = base64EncodedEngagement,
+                engagementData = decodeDeviceEngagement(base64EncodedEngagement, logger)
+            )
+        }
     }
 
     fun update(state: MultiplePermissionsState) {

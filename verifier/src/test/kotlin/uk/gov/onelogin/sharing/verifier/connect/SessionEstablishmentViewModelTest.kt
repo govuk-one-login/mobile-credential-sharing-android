@@ -13,6 +13,9 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.nullValue
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -34,6 +37,14 @@ import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermiss
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedWithRationale
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
+import uk.gov.onelogin.sharing.security.DecoderStub
+import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
+import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBase64EncodedEngagement
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasDeviceEngagementDto
+import uk.gov.onelogin.sharing.verifier.connect.SessionEstablishmentViewModelMatchers.hasUiState
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.undecodeableBarcodeDataResult
+import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
@@ -256,5 +267,39 @@ class SessionEstablishmentViewModelTest {
         fakeBluetoothStateMonitor.emit(BluetoothStatus.ON)
 
         assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
+    }
+
+    @Test
+    fun `Updating the encoded data also updates the UI state`() = runTest {
+        viewModel = createViewModel(scanner)
+
+        viewModel.update(validBarcodeDataResult.data)
+
+        assertThat(
+            viewModel,
+            hasUiState(
+                allOf(
+                    hasBase64EncodedEngagement(validBarcodeDataResult.data),
+                    hasDeviceEngagementDto(validDeviceEngagementDto)
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Engagement data stays as null when updating with invalid encoded data`() = runTest {
+        viewModel = createViewModel(scanner)
+
+        viewModel.update(undecodeableBarcodeDataResult.data)
+
+        assertThat(
+            viewModel,
+            hasUiState(
+                allOf(
+                    hasBase64EncodedEngagement(undecodeableBarcodeDataResult.data),
+                    hasDeviceEngagementDto(nullValue(DeviceEngagementDto::class.java))
+                )
+            )
+        )
     }
 }
