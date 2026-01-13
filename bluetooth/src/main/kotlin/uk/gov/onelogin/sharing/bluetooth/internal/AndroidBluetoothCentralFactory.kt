@@ -9,6 +9,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
+import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 
@@ -29,11 +30,13 @@ class AndroidBluetoothCentralFactory(
 ) : BluetoothCentralFactory {
     override fun create(): BluetoothCentralComponents {
         val permissionChecker = BluetoothPermissionChecker(context)
+        val gattWriter = AndroidGattWriter()
 
         val gattClientManager = AndroidGattClientManager(
             context = context,
             permissionChecker = permissionChecker,
             serviceValidator = serviceValidator,
+            gattWriter = gattWriter,
             logger = logger
         )
 

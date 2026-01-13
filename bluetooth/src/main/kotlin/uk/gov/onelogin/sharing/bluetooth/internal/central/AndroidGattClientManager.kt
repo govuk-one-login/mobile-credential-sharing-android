@@ -3,10 +3,8 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.content.Context
-import android.os.Build
 import androidx.annotation.RequiresPermission
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,6 +23,7 @@ internal class AndroidGattClientManager(
     private val context: Context,
     private val permissionChecker: PermissionChecker,
     private val serviceValidator: ServiceValidator,
+    private val gattWriter: GattWriter,
     private val logger: Logger
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
@@ -212,16 +211,11 @@ internal class AndroidGattClientManager(
 
         // Set the state value to start
         val startValue = byteArrayOf(MdocState.START.code)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            gatt.writeCharacteristic(
-                state,
-                startValue,
-                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-            )
-        } else {
-            state.value = startValue
-            gatt.writeCharacteristic(state)
-        }
+        gattWriter.writeCharacteristic(
+            gatt = gatt,
+            characteristic = state,
+            value = startValue
+        )
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
