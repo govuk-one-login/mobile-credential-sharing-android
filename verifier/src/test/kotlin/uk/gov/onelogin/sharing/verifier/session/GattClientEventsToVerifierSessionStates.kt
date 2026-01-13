@@ -11,11 +11,6 @@ class GattClientEventsToVerifierSessionStates : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues> =
         listOf(
             Triple(
-                "GATT Services are discovered",
-                GattClientEvent.ServicesDiscovered,
-                VerifierSessionState.ServiceDiscovered
-            ),
-            Triple(
                 "GATT Services are connecting",
                 GattClientEvent.Connecting,
                 VerifierSessionState.Connecting

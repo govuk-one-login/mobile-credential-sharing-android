@@ -189,7 +189,6 @@ internal class AndroidGattClientManager(
 
         if (success) {
             logger.debug(logTag, "subscribed to bluetooth characteristic changes")
-            _events.tryEmit(GattClientEvent.ServicesDiscovered)
         } else {
             handleError(
                 ClientError.FAILED_TO_SUBSCRIBE,

@@ -67,9 +67,6 @@ class MdocVerifierSession(
 
     private fun handleGattClientEvents(event: GattClientEvent) {
         when (event) {
-            is GattClientEvent.ServicesDiscovered ->
-                _state.value = VerifierSessionState.ServiceDiscovered
-
             GattClientEvent.Connecting -> _state.value = VerifierSessionState.Connecting
 
             is GattClientEvent.Connected ->
