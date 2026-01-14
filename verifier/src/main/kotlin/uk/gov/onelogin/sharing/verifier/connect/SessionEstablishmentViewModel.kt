@@ -46,8 +46,6 @@ class SessionEstablishmentViewModel(
     private val bluetoothStatusMonitor: BluetoothStateMonitor
 ) : ViewModel() {
 
-    private val base64EncodedEngagement = MutableStateFlow<String?>(null)
-
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
     val uiState: StateFlow<ConnectWithHolderDeviceState> = _uiState
     private var scannerJob: Job? = null
