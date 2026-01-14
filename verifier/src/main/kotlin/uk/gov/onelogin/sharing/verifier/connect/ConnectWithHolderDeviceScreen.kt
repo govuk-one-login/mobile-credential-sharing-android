@@ -47,11 +47,11 @@ fun ConnectWithHolderDeviceScreen(
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
         permissions = PermissionChecker.advertiseFineLocationPermissions()
     ) {
-        viewModel.updateHasRequestPermissions(true)
+        viewModel.receive(ConnectWithHolderDeviceEvent.RequestedPermission(true))
     },
-    onFindError: (ConnectWithHolderDeviceError) -> Unit = {}
+    onConnectionError: (ConnectWithHolderDeviceError) -> Unit = {}
 ) {
-    viewModel.update(base64EncodedEngagement)
+    viewModel.receive(ConnectWithHolderDeviceEvent.UpdateEngagementData(base64EncodedEngagement))
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -62,7 +62,7 @@ fun ConnectWithHolderDeviceScreen(
             when (contentState.showErrorScreen) {
                 ConnectWithHolderDeviceError.BluetoothConfigurationError,
                 ConnectWithHolderDeviceError.GenericError -> {
-                    onFindError(contentState.showErrorScreen)
+                    onConnectionError(contentState.showErrorScreen)
                 }
 
                 else -> {
@@ -70,9 +70,7 @@ fun ConnectWithHolderDeviceScreen(
                         contentState = contentState,
                         multiplePermissionsState = multiplePermissionsState,
                         modifier = Modifier,
-                        onUpdatePermissions = viewModel::update,
-                        onScanForDevice = viewModel::scanForDevice,
-                        onStopScanning = viewModel::stopScanning
+                        onSendEvent = viewModel::receive
                     )
                 }
             }
@@ -86,20 +84,16 @@ fun ConnectWithHolderDeviceScreenContent(
     contentState: ConnectWithHolderDeviceState,
     multiplePermissionsState: MultiplePermissionsState,
     modifier: Modifier = Modifier,
-    onUpdatePermissions: (MultiplePermissionsState) -> Unit = {},
-    onScanForDevice: (ByteArray) -> Unit = {},
-    onStopScanning: () -> Unit = {}
+    onSendEvent: (ConnectWithHolderDeviceEvent) -> Unit = {}
 ) {
-    val latestOnUpdatePermissions by rememberUpdatedState(onUpdatePermissions)
-    val latestOnScanForDevice by rememberUpdatedState(onScanForDevice)
-    val latestOnStopScanning by rememberUpdatedState(onStopScanning)
+    val latestOnSendEvent by rememberUpdatedState(onSendEvent)
 
     val permissionsGranted = multiplePermissionsState.allPermissionsGranted
     val permissionsStatus = multiplePermissionsState.permissions.map {
         it.status
     }
     LaunchedEffect(permissionsStatus) {
-        latestOnUpdatePermissions(multiplePermissionsState)
+        latestOnSendEvent(ConnectWithHolderDeviceEvent.UpdatePermission(multiplePermissionsState))
     }
 
     LaunchedEffect(Unit) {
@@ -118,11 +112,11 @@ fun ConnectWithHolderDeviceScreenContent(
         if (permissionsGranted && contentState.isBluetoothEnabled &&
             uuidToScan != null
         ) {
-            latestOnScanForDevice(uuidToScan)
+            latestOnSendEvent(ConnectWithHolderDeviceEvent.StartScanning(uuidToScan))
         }
 
         onDispose {
-            latestOnStopScanning()
+            latestOnSendEvent(ConnectWithHolderDeviceEvent.StopScanning)
         }
     }
 

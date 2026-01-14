@@ -9,6 +9,7 @@ import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.connect.matchers.HasBase64EncodedEngagement
 import uk.gov.onelogin.sharing.verifier.connect.matchers.HasBluetoothEnabled
 import uk.gov.onelogin.sharing.verifier.connect.matchers.HasDeviceEngagementDto
+import uk.gov.onelogin.sharing.verifier.connect.matchers.HasPreviouslyRequestedPermission
 
 object ConnectWithHolderDeviceStateMatchers {
     fun hasBase64EncodedEngagement(expected: String) = hasBase64EncodedEngagement(equalTo(expected))
@@ -28,4 +29,10 @@ object ConnectWithHolderDeviceStateMatchers {
     fun hasDeviceEngagementDto(
         matcher: Matcher<DeviceEngagementDto>
     ): Matcher<ConnectWithHolderDeviceState> = HasDeviceEngagementDto(matcher)
+
+    fun hasNotPreviouslyRequestedPermission() = hasPreviouslyRequestedPermission(false)
+    fun hasPreviouslyRequestedPermission(
+        hasRequestedPermission: Boolean = true
+    ): Matcher<ConnectWithHolderDeviceState> =
+        HasPreviouslyRequestedPermission(hasRequestedPermission)
 }

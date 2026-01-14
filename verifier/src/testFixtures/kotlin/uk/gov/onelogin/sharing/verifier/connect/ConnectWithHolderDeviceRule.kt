@@ -182,7 +182,7 @@ class ConnectWithHolderDeviceRule(
                 modifier = modifier,
                 viewModel = viewModel,
                 multiplePermissionsState = permissionsState,
-                onFindError = {
+                onConnectionError = {
                     capturedErrorState = it
                     onFindError(it)
                 }

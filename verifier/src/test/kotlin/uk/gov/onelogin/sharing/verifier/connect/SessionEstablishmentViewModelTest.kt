@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.verifier.connect
 
 import android.bluetooth.BluetoothDevice
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
 import io.mockk.every
@@ -15,8 +16,6 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.allOf
-import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
@@ -25,11 +24,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.LogEntry
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner.StubData.dummyByteArray
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
@@ -38,23 +39,15 @@ import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedWithRationale
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
-import uk.gov.onelogin.sharing.security.DecoderStub
-import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBase64EncodedEngagement
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBluetoothDisabled
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.startScanningDummyServiceUuid
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBluetoothEnabled
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasDeviceEngagementDto
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasPreviouslyRequestedPermission
 import uk.gov.onelogin.sharing.verifier.connect.SessionEstablishmentViewModelMatchers.hasUiState
 import uk.gov.onelogin.sharing.verifier.connect.parameters.BluetoothStatusesToEnabledFlag
 import uk.gov.onelogin.sharing.verifier.connect.parameters.EncodedEngagementToState
 import uk.gov.onelogin.sharing.verifier.connect.parameters.PermissionsToLogMessages
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.undecodeableBarcodeDataResult
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
@@ -82,21 +75,28 @@ class SessionEstablishmentViewModelTest {
     )
 
     @Test
-    fun `init sets isBluetoothEnabled from adapter provider`() {
+    fun `init sets isBluetoothEnabled from adapter provider`(
+        @TestParameter isBluetoothEnabled: Boolean
+    ) {
+        bluetoothAdapterProvider.setEnabled(isBluetoothEnabled)
         viewModel = createViewModel(scanner)
-        bluetoothAdapterProvider.setEnabled(false)
-        assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
+        assertThat(
+            viewModel,
+            hasUiState(
+                hasBluetoothEnabled(isBluetoothEnabled)
+            )
+        )
     }
 
+    @OptIn(ExperimentalPermissionsApi::class)
     @Test
     fun `scanForDevice calls scanner with provided uuid`() = runTest {
-        val uuid = byteArrayOf(0x01, 0x02, 0x03)
         viewModel = createViewModel(scanner)
-        viewModel.updatePermissions(true)
-        viewModel.scanForDevice(uuid)
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
 
         assertEquals(1, scanner.scanCalls)
-        assertArrayEquals(uuid, scanner.lastUuid)
+        assertArrayEquals(dummyByteArray, scanner.lastUuid)
     }
 
     @Test
@@ -108,16 +108,18 @@ class SessionEstablishmentViewModelTest {
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.updatePermissions(true)
+        viewModel.receive(permissionUpdateGranted)
 
         val uuid = UUID.randomUUID()
 
-        viewModel.scanForDevice(uuid.toByteArray())
+        viewModel.receive(ConnectWithHolderDeviceEvent.StartScanning(uuid.toByteArray()))
         runCurrent()
 
-        val logMessage = logger[0].message
-        assert(logMessage.contains("Bluetooth device found"))
-        assert(logMessage.contains(bluetoothDevice.address))
+        assert(
+            "Bluetooth device found: $DEVICE_ADDRESS" in logger
+        ) {
+            "Didn't find expected message: $logger"
+        }
     }
 
     @Test
@@ -130,14 +132,15 @@ class SessionEstablishmentViewModelTest {
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.updatePermissions(true)
-
-        viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
         runCurrent()
 
-        val logMessage = logger[0].message
-        assert(logMessage.contains("Scan failed"))
-        assert(logMessage.contains(scanFailure.name))
+        assert(
+            "Scan failed: ${ScannerFailure.ALREADY_STARTED_SCANNING}" in logger
+        ) {
+            "Cannot find expected log message: $logger"
+        }
     }
 
     @Test
@@ -152,11 +155,12 @@ class SessionEstablishmentViewModelTest {
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.updatePermissions(true)
-        viewModel.scanForDevice(byteArrayOf(0x01))
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
+
         runCurrent()
 
-        viewModel.stopScanning()
+        viewModel.receive(ConnectWithHolderDeviceEvent.StopScanning)
         runCurrent()
 
         assertTrue(
@@ -174,17 +178,23 @@ class SessionEstablishmentViewModelTest {
         )
 
         val viewModel = createViewModel(scanner)
-        viewModel.updatePermissions(true)
-
-        viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
 
         runCurrent()
 
         advanceTimeBy(SessionEstablishmentViewModel.SCAN_PERIOD)
         advanceUntilIdle()
 
-        val logMessage = logger[0].message
-        assert(logMessage.contains("TimeoutCancellationException:"))
+        assert(
+            logger.any {
+                it is LogEntry.Message && it.message.startsWith(
+                    "kotlinx.coroutines.TimeoutCancellationException:"
+                )
+            }
+        ) {
+            "Cannot find expected error message: $logger"
+        }
     }
 
     @Test
@@ -197,9 +207,9 @@ class SessionEstablishmentViewModelTest {
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.updatePermissions(true)
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
 
-        viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
         runCurrent()
 
         assertEquals(
@@ -216,7 +226,12 @@ class SessionEstablishmentViewModelTest {
 
         val viewModel = createViewModel(DummyBluetoothScanner)
 
-        viewModel.connect(mockk(), UUID.randomUUID().toBytes())
+        viewModel.receive(
+            ConnectWithHolderDeviceEvent.ConnectToDevice(
+                mockk(),
+                UUID.randomUUID().toBytes()
+            )
+        )
         runCurrent()
 
         assertEquals(
@@ -226,10 +241,15 @@ class SessionEstablishmentViewModelTest {
     }
 
     @Test
-    fun `should update hasRequestPermissions`() {
+    fun `should update hasRequestPermissions`(@TestParameter hasRequestedPermission: Boolean) {
         viewModel = createViewModel(scanner)
-        viewModel.updateHasRequestPermissions(true)
-        assertEquals(true, viewModel.uiState.value.hasRequestedPermissions)
+        viewModel.receive(ConnectWithHolderDeviceEvent.RequestedPermission(hasRequestedPermission))
+        assertThat(
+            viewModel,
+            hasUiState(
+                hasPreviouslyRequestedPermission(hasRequestedPermission)
+            )
+        )
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
@@ -240,7 +260,7 @@ class SessionEstablishmentViewModelTest {
         expectedMessage: String
     ) {
         viewModel = createViewModel(scanner)
-        viewModel.update(input)
+        viewModel.receive(ConnectWithHolderDeviceEvent.UpdatePermission(input))
 
         assertTrue(
             "Couldn't find expected message in logger: $logger",
@@ -272,7 +292,9 @@ class SessionEstablishmentViewModelTest {
     ) = runTest {
         viewModel = createViewModel(scanner)
 
-        viewModel.update(input)
+        viewModel.receive(
+            ConnectWithHolderDeviceEvent.UpdateEngagementData(input)
+        )
 
         assertThat(
             viewModel,

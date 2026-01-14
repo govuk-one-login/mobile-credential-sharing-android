@@ -9,6 +9,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,15 +29,22 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
+import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.StartScanning
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.StopScanning
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.UpdateEngagementData
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.UpdatePermission
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @Inject
 @ViewModelKey(SessionEstablishmentViewModel::class)
-@ContributesIntoMap(ViewModelScope::class)
+@ContributesIntoMap(ViewModelScope::class, binding = binding<ViewModel>())
 class SessionEstablishmentViewModel(
     private val bluetoothAdapterProvider: BluetoothAdapterProvider,
     verifierSessionFactory: VerifierSessionFactory,
@@ -44,7 +52,8 @@ class SessionEstablishmentViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val logger: Logger,
     private val bluetoothStatusMonitor: BluetoothStateMonitor
-) : ViewModel() {
+) : ViewModel(),
+    Receiver<ConnectWithHolderDeviceEvent> {
 
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
     val uiState: StateFlow<ConnectWithHolderDeviceState> = _uiState
@@ -87,42 +96,7 @@ class SessionEstablishmentViewModel(
         }
     }
 
-    fun scanForDevice(uuid: ByteArray) {
-        scannerJob = viewModelScope.launch(dispatcher) {
-            if (!uiState.value.hasAllPermissions) {
-                return@launch
-            }
-
-            try {
-                withTimeout(SCAN_PERIOD) {
-                    when (val scanResult = scanner.scan(uuid).first()) {
-                        is ScanEvent.DeviceFound -> {
-                            logger.debug(
-                                logTag,
-                                "Bluetooth device found: ${scanResult.device.address}"
-                            )
-
-                            connect(scanResult.device, uuid)
-                        }
-
-                        is ScanEvent.ScanFailed -> {
-                            updateState {
-                                it.copy(showErrorScreen = ConnectWithHolderDeviceError.GenericError)
-                            }
-                            logger.debug(logTag, "Scan failed: ${scanResult.failure}")
-                        }
-                    }
-                }
-            } catch (exception: TimeoutCancellationException) {
-                logger.debug(
-                    logTag,
-                    "$exception"
-                )
-            }
-        }
-    }
-
-    internal fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
+    private fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
         mdocVerifierSession.state.value.let { sessionState ->
             when (sessionState) {
                 is VerifierSessionState.Invalid ->
@@ -142,23 +116,75 @@ class SessionEstablishmentViewModel(
         mdocVerifierSession.connect(device, serviceUuid.toUUID())
     }
 
-    fun updatePermissions(hasAllPerms: Boolean) {
-        updateState {
-            it.copy(
-                hasAllPermissions = hasAllPerms
-            )
+    /**
+     * @see connect
+     * @see updateHasRequestPermissions
+     * @see scanForDevice
+     * @see stopScanning
+     * @see updateEngagementData
+     * @see updatePermissions
+     */
+    override fun receive(event: ConnectWithHolderDeviceEvent) = when (event) {
+        is ConnectToDevice ->
+            connect(event.device, event.serviceUuid)
+
+        is RequestedPermission ->
+            updateHasRequestPermissions(event.hasRequestedPermission)
+
+        is StartScanning ->
+            scanForDevice(event.uuid)
+
+        is UpdateEngagementData ->
+            updateEngagementData(event.base64EncodedEngagement)
+
+        is UpdatePermission ->
+            updatePermissions(event.state)
+
+        StopScanning ->
+            stopScanning()
+    }
+
+    private fun scanForDevice(uuid: ByteArray) {
+        scannerJob = viewModelScope.launch(dispatcher) {
+            if (!uiState.value.hasAllPermissions) {
+                return@launch
+            }
+
+            try {
+                withTimeout(SCAN_PERIOD) {
+                    when (val scanResult = scanner.scan(uuid).first()) {
+                        is ScanEvent.DeviceFound -> {
+                            logger.debug(
+                                logTag,
+                                "Bluetooth device found: ${scanResult.device.address}"
+                            )
+
+                            receive(
+                                ConnectToDevice(
+                                    scanResult.device,
+                                    uuid
+                                )
+                            )
+                        }
+
+                        is ScanEvent.ScanFailed -> {
+                            updateState {
+                                it.copy(showErrorScreen = ConnectWithHolderDeviceError.GenericError)
+                            }
+                            logger.debug(logTag, "Scan failed: ${scanResult.failure}")
+                        }
+                    }
+                }
+            } catch (exception: TimeoutCancellationException) {
+                logger.debug(
+                    logTag,
+                    "$exception"
+                )
+            }
         }
     }
 
-    fun updateHasRequestPermissions(requestedPerms: Boolean) {
-        updateState {
-            it.copy(
-                hasRequestedPermissions = requestedPerms
-            )
-        }
-    }
-
-    fun stopScanning() {
+    private fun stopScanning() {
         if (scannerJob?.isActive == true) {
             logger.debug(logTag, "Terminating session")
             scannerJob?.cancel()
@@ -167,12 +193,12 @@ class SessionEstablishmentViewModel(
 
     override fun onCleared() {
         logger.debug(logTag, "VM cleared, stopping scanner")
-        stopScanning()
+        receive(StopScanning)
         super.onCleared()
     }
 
-    fun update(base64EncodedEngagement: String) {
-        this._uiState.update {
+    private fun updateEngagementData(base64EncodedEngagement: String) {
+        updateState {
             it.copy(
                 base64EncodedEngagement = base64EncodedEngagement,
                 engagementData = decodeDeviceEngagement(base64EncodedEngagement, logger)
@@ -180,23 +206,23 @@ class SessionEstablishmentViewModel(
         }
     }
 
-    fun update(state: MultiplePermissionsState) {
-        updatePermissions(state.allPermissionsGranted)
-        when {
-            state.allPermissionsGranted -> logger.debug(
-                logTag,
-                "All required Bluetooth permissions have been granted"
+    private fun updateHasRequestPermissions(requestedPerms: Boolean) {
+        updateState {
+            it.copy(
+                hasRequestedPermissions = requestedPerms
             )
-
-            state.isPermanentlyDenied() -> logger.debug(
-                logTag,
-                "Bluetooth permissions were permanently denied"
-            )
-
-            else -> {
-                logger.debug(logTag, "Bluetooth permissions were denied")
-            }
         }
+    }
+
+    private fun updatePermissions(state: MultiplePermissionsState) {
+        updateState {
+            it.copy(hasAllPermissions = state.allPermissionsGranted)
+        }
+        when {
+            state.allPermissionsGranted -> "All required Bluetooth permissions have been granted"
+            state.isPermanentlyDenied() -> "Bluetooth permissions were permanently denied"
+            else -> "Bluetooth permissions were denied"
+        }.let { logger.debug(logTag, it) }
     }
 
     fun updateState(updatedState: (ConnectWithHolderDeviceState) -> ConnectWithHolderDeviceState) {

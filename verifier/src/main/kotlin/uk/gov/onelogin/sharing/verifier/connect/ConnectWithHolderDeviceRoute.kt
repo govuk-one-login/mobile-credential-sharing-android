@@ -49,7 +49,7 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
                 ) {
                     ConnectWithHolderDeviceScreen(
                         base64EncodedEngagement = arguments.base64EncodedEngagement,
-                        onFindError = { error: ConnectWithHolderDeviceError ->
+                        onConnectionError = { error: ConnectWithHolderDeviceError ->
                             if (ConnectWithHolderDeviceError.BluetoothConfigurationError == error) {
                                 R.string.bluetooth_connection_error_invalid_configuration
                             } else {
