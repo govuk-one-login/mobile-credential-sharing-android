@@ -5,6 +5,8 @@ set -o errexit
 
 source "$(git rev-parse --show-toplevel)/scripts/env"
 
+echo "Git root: ${GIT_ROOT}"
+
 if command -v vale; then
   echo "Vale is already installed. Syncing..."
 else
@@ -13,4 +15,4 @@ else
 fi
 
 vale sync
-vale --no-wrap --config="${GIT_ROOT}/.vale.ini" "${GIT_ROOT}"
+vale --no-wrap --glob='!**/mobile-android-pipelines/**/*.*' --config="${GIT_ROOT}/.vale.ini" "${GIT_ROOT}/"
