@@ -15,5 +15,7 @@ data class ConnectWithHolderDeviceState(
     val base64EncodedEngagement: String? = null,
     val hasAllPermissions: Boolean = false,
     val hasRequestedPermissions: Boolean = false,
-    val showErrorScreen: Boolean = false
+    val showErrorScreen: Boolean = false,
+    val errorMessage: String? = null,
+    val connectionStateStarted: Boolean = false
 )

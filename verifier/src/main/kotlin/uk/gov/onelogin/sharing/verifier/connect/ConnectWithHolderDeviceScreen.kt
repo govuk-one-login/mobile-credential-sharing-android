@@ -138,7 +138,7 @@ fun ConnectWithHolderDeviceScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Generic Error"
+                text = contentState.errorMessage ?: stringResource(R.string.generic_error)
             )
         }
 

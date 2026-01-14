@@ -5,11 +5,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
-import kotlin.test.assertFalse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
@@ -36,6 +34,7 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStub
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
+import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SessionEstablishmentViewModelTest {
@@ -104,8 +103,8 @@ class SessionEstablishmentViewModelTest {
     fun `scanForDevice handles ScanFailure ScanEvent and logs it`() = runTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = flowOf(
+        val scanner = BluetoothScanner {
+            flowOf(
                 ScanEvent.ScanFailed(scanFailure)
             )
         }
@@ -126,8 +125,8 @@ class SessionEstablishmentViewModelTest {
     fun `stopScanning logs and cancels an active scan job`() = runTest {
         var flowClosed = false
 
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
+        val scanner = BluetoothScanner {
+            callbackFlow {
                 awaitClose { flowClosed = true }
             }
         }
@@ -149,8 +148,8 @@ class SessionEstablishmentViewModelTest {
 
     @Test
     fun `scanForDevice times out when no results emitted`() = runTest {
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
+        val scanner = BluetoothScanner {
+            callbackFlow {
                 awaitCancellation()
             }
         }
@@ -173,8 +172,8 @@ class SessionEstablishmentViewModelTest {
     fun `scanForDevice on ScanEvent ScanFailure sets showErrorScreen true`() = runTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
-        val scanner = object : BluetoothScanner {
-            override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = flowOf(
+        val scanner = BluetoothScanner {
+            flowOf(
                 ScanEvent.ScanFailed(scanFailure)
             )
         }
@@ -242,5 +241,57 @@ class SessionEstablishmentViewModelTest {
         fakeBluetoothStateMonitor.emit(BluetoothStatus.ON)
 
         assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
+    }
+
+    @Test
+    fun `test connection state started`() = runTest {
+        successfulScan()
+
+        fakeVerifierSession.emitState(VerifierSessionState.ConnectionStateStarted)
+
+        assertEquals(true, viewModel.uiState.value.connectionStateStarted)
+    }
+
+    @Test
+    fun `connection state is started and then disconnected`() = runTest {
+        successfulScan()
+
+        fakeVerifierSession.emitState(VerifierSessionState.ConnectionStateStarted)
+
+        assertEquals(true, viewModel.uiState.value.connectionStateStarted)
+
+        fakeVerifierSession.emitState(VerifierSessionState.Disconnected(DEVICE_ADDRESS))
+
+        assertEquals(true, viewModel.uiState.value.showErrorScreen)
+
+        assertEquals(1, fakeVerifierSession.stopCalls)
+    }
+
+    @Test
+    fun `connection is disconnected before state is started`() = runTest {
+        successfulScan()
+
+        fakeVerifierSession.emitState(VerifierSessionState.Disconnected(DEVICE_ADDRESS))
+
+        assertEquals(true, viewModel.uiState.value.showErrorScreen)
+
+        assertEquals(0, fakeVerifierSession.stopCalls)
+    }
+
+    private fun successfulScan() {
+        val bluetoothDevice = mockk<BluetoothDevice>()
+        every { bluetoothDevice.address } returns DEVICE_ADDRESS
+
+        val scanner = BluetoothScanner {
+            flowOf(ScanEvent.DeviceFound(bluetoothDevice))
+        }
+
+        viewModel = createViewModel(scanner)
+
+        viewModel.updatePermissions(true)
+
+        val uuid = UUID.randomUUID()
+
+        viewModel.scanForDevice(uuid.toByteArray())
     }
 }

@@ -7,6 +7,7 @@ sealed interface VerifierSessionState {
     data object Connecting : VerifierSessionState
     data class Connected(val address: String) : VerifierSessionState
     data class Disconnected(val address: String) : VerifierSessionState
+    data object ConnectionStateStarted : VerifierSessionState
     data object Stopped : VerifierSessionState
     data class Error(val message: String) : VerifierSessionState
 }

@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.content.Context
-import android.os.Build
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import io.mockk.CapturingSlot
@@ -17,16 +16,15 @@ import io.mockk.verify
 import io.mockk.verifyCount
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
@@ -44,15 +42,17 @@ internal class AndroidGattClientManagerTest {
 
     private lateinit var manager: AndroidGattClientManager
 
+    private fun createManager(gattWriter: GattWriter) = AndroidGattClientManager(
+        context,
+        fakePermissionChecker,
+        fakeServiceValidator,
+        gattWriter,
+        logger
+    )
+
     @Before
     fun setup() {
-        manager = AndroidGattClientManager(
-            context,
-            fakePermissionChecker,
-            fakeServiceValidator,
-            fakeGattWriter,
-            logger
-        )
+        manager = createManager(fakeGattWriter)
     }
 
     @Test
@@ -390,6 +390,32 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(1, fakeGattWriter.writes)
+
+            assertEquals(GattClientEvent.ConnectionStateStarted, awaitItem())
+        }
+    }
+
+    @Test
+    fun `does not set state to start when write characteristic fails`() = runTest {
+        val failingWriter = FakeGattWriter(false)
+        manager = createManager(failingWriter)
+
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onMtuChanged(
+                bluetoothGatt,
+                MtuValues.MAX_POSSIBLE,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            assertEquals(1, failingWriter.writes)
+
+            assertNotEquals(GattClientEvent.ConnectionStateStarted, awaitItem())
         }
     }
 

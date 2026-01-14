@@ -31,6 +31,7 @@ import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
+import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @Inject
 @ViewModelKey(SessionEstablishmentViewModel::class)
@@ -121,8 +122,31 @@ class SessionEstablishmentViewModel(
 
     private fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
         viewModelScope.launch(dispatcher) {
-            mdocVerifierSession.state.collect {
-                logger.debug(logTag, "Session state: $it")
+            mdocVerifierSession.state.collect { state ->
+                logger.debug(logTag, "Session state: $state")
+                when (state) {
+                    VerifierSessionState.ConnectionStateStarted -> {
+                        _uiState.update {
+                            it.copy(
+                                connectionStateStarted = true
+                            )
+                        }
+                    }
+
+                    is VerifierSessionState.Disconnected -> {
+                        _uiState.update {
+                            it.copy(
+                                showErrorScreen = true,
+                                errorMessage = "Bluetooth disconnected unexpectedly"
+                            )
+                        }
+                        if (_uiState.value.connectionStateStarted) {
+                            mdocVerifierSession.stop()
+                        }
+                    }
+
+                    else -> Unit
+                }
             }
         }
 

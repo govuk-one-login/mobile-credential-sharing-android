@@ -78,6 +78,7 @@ internal class AndroidGattClientManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun disconnect() {
+        logger.debug(logTag, "Disconnect GATT and clean up")
         bluetoothGatt?.disconnect()
         bluetoothGatt?.close()
         bluetoothGatt = null
@@ -211,11 +212,21 @@ internal class AndroidGattClientManager(
 
         // Set the state value to start
         val startValue = byteArrayOf(MdocState.START.code)
-        gattWriter.writeCharacteristic(
+        val writeSuccess = gattWriter.writeCharacteristic(
             gatt = gatt,
             characteristic = state,
             value = startValue
         )
+
+        if (writeSuccess) {
+            logger.debug(logTag, "Connection state = STARTED")
+            _events.tryEmit(GattClientEvent.ConnectionStateStarted)
+        } else {
+            handleError(
+                ClientError.FAILED_TO_START,
+                "Failed to write 'Start' state"
+            )
+        }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
