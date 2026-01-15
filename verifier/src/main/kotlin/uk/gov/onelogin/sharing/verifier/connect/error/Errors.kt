@@ -15,6 +15,9 @@ internal fun errorTitleRes(error: ConnectWithHolderDeviceError): Int = when (err
 
     ConnectWithHolderDeviceError.BluetoothConnectionError ->
         R.string.bluetooth_disconnected_unexpectedly
+
+    ConnectWithHolderDeviceError.BluetoothDisabledError ->
+        R.string.bluetooth_turned_off
 }
 
 internal fun errorTitle(context: Context, error: ConnectWithHolderDeviceError): String =

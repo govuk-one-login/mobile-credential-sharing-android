@@ -20,4 +20,9 @@ sealed interface ConnectWithHolderDeviceError {
      * Declares that a bluetooth connection error has occurred.
      */
     data object BluetoothConnectionError : ConnectWithHolderDeviceError
+
+    /**
+     * Declares that a bluetooth was switched off.
+     */
+    data object BluetoothDisabledError : ConnectWithHolderDeviceError
 }

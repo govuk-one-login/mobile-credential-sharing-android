@@ -77,7 +77,6 @@ class SessionEstablishmentViewModel(
 
         viewModelScope.launch {
             mdocVerifierSession.state.collect { sessionState ->
-                println("state = $sessionState")
                 when (sessionState) {
                     is VerifierSessionState.Invalid ->
                         _navEvents.tryEmit(
@@ -139,7 +138,16 @@ class SessionEstablishmentViewModel(
                                 isBluetoothEnabled = false
                             )
                         }
-                        logger.debug(logTag, "Bluetooth turned off")
+
+                        _navEvents.tryEmit(
+                            ConnectWithHolderDeviceNavEvent.NavigateToError(
+                                ConnectWithHolderDeviceError.BluetoothDisabledError
+                            )
+                        )
+
+                        mdocVerifierSession.stop()
+
+                        logger.debug(logTag, "Bluetooth turned off during session")
                     }
 
                     else -> Unit

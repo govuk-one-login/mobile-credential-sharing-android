@@ -281,6 +281,24 @@ class SessionEstablishmentViewModelTest {
     }
 
     @Test
+    fun `navigates to error screen when bluetooth is disabled`() = runTest {
+        viewModel = createViewModel(DummyBluetoothScanner)
+
+        viewModel.navEvents.test {
+            fakeBluetoothStateMonitor.emit(BluetoothStatus.OFF)
+
+            assertEquals(1, fakeVerifierSession.stopCalls)
+
+            assertEquals(
+                ConnectWithHolderDeviceNavEvent.NavigateToError(
+                    ConnectWithHolderDeviceError.BluetoothDisabledError
+                ),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
     fun `should update hasRequestPermissions`(@TestParameter hasRequestedPermission: Boolean) {
         viewModel = createViewModel(scanner)
         viewModel.receive(

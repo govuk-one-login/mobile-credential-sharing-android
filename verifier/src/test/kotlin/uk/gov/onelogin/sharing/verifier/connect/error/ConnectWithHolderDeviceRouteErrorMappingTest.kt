@@ -46,5 +46,9 @@ enum class ConnectWithHolderDeviceRouteErrorData(
     BLUETOOTH_CONNECTION_ERROR(
         errorRes = R.string.bluetooth_disconnected_unexpectedly,
         errorType = ConnectWithHolderDeviceError.BluetoothConnectionError
+    ),
+    BLUETOOTH_OFF_ERROR(
+        errorRes = R.string.bluetooth_turned_off,
+        errorType = ConnectWithHolderDeviceError.BluetoothDisabledError
     )
 }
