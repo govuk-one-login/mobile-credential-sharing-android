@@ -13,4 +13,15 @@ class FakeAndroidBluetoothScanner(val flow: Flow<ScanEvent> = MutableSharedFlow(
         lastUuid = serviceUuid
         return flow
     }
+
+    object StubData {
+        /**
+         * Byte array used within testing.
+         *
+         * As this byte array isn't a valid service UUID, developers are expected to utilise mocking
+         * frameworks to map this input into required information, such as a
+         * [android.bluetooth.BluetoothDevice].
+         */
+        val dummyByteArray = byteArrayOf(0x01, 0x02, 0x03)
+    }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bluetooth_connection_error_invalid_configuration" translatable="false">@string/invalid_bluetooth_configuration</string>
+    <string name="bluetooth_connection_error_generic" translatable="false">@string/could_not_decode_device_engagement</string>
+    <string name="bluetooth_connection_error_try_again" translatable="false">@string/try_again</string>
+</resources>

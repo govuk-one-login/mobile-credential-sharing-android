@@ -28,8 +28,8 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeDeniedPermissionsState
-import uk.gov.onelogin.sharing.holder.HolderWelcomeScreenPermissionsStub.fakeGrantedPermissionsState
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
@@ -92,7 +92,7 @@ class HolderWelcomeScreenTest {
                     bluetoothState = BluetoothState.Enabled,
                     hasBluetoothPermissions = true
                 ),
-                multiplePermissionsState = fakeGrantedPermissionsState,
+                multiplePermissionsState = bluetoothPermissionsGranted,
                 hasPreviouslyRequestedPermission = true,
                 grantedAllPerms = {}
             )
@@ -106,7 +106,7 @@ class HolderWelcomeScreenTest {
         val viewModel = createViewModel()
         composeTestRule.setContent {
             BluetoothPermissionPrompt(
-                multiplePermissionsState = fakeGrantedPermissionsState,
+                multiplePermissionsState = bluetoothPermissionsGranted,
                 hasPreviouslyRequestedPermission = true,
                 onGrantedPermissions = {
                     DisposableEffect(Unit) {
@@ -133,7 +133,7 @@ class HolderWelcomeScreenTest {
         composeTestRule.setContent {
             if (showContent) {
                 BluetoothPermissionPrompt(
-                    multiplePermissionsState = fakeGrantedPermissionsState,
+                    multiplePermissionsState = bluetoothPermissionsGranted,
                     hasPreviouslyRequestedPermission = true,
                     onGrantedPermissions = {
                         DisposableEffect(Unit) {
@@ -161,7 +161,7 @@ class HolderWelcomeScreenTest {
     @Test
     fun initiallyDisplaysEnablePermissionButtonBeforeRequestingPermissions() {
         composeTestRule.setContent {
-            val permissionsState = fakeDeniedPermissionsState
+            val permissionsState = bluetoothPermissionsDenied
             BluetoothPermissionPrompt(
                 multiplePermissionsState = permissionsState,
                 hasPreviouslyRequestedPermission = false

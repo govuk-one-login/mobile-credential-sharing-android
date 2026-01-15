@@ -34,7 +34,7 @@ class ShadowLogFile(private val fileName: String, private val fileExtension: Str
         super.after()
     }
 
-    override fun iterator(): Iterator<String> = loggingFile.readLines().iterator()
+    override fun iterator(): Iterator<String> = readLines().iterator()
 
     fun readLines(charset: Charset = Charsets.UTF_8) = loggingFile.readLines(charset)
 }

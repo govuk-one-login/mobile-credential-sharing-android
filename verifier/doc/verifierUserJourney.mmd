@@ -1,14 +1,17 @@
 flowchart LR
-    %% Node definitions
+%% Node definitions
     Start@{shape: terminal}
     VerifierScanner
     isValidQr{"Is valid QR?"}
     ScannedInvalidQrScreen
     ConnectWithHolderDevice
+    BluetoothConnectionErrorScreen
 
-    %% Node relationships
+%% Node relationships
     Start --> VerifierScanner
     VerifierScanner -->|Scan Digital credential QR code| isValidQr
     isValidQr -->|Invalid| ScannedInvalidQrScreen
     isValidQr -->|Valid| ConnectWithHolderDevice
     ScannedInvalidQrScreen -->|Tap 'Try again'| VerifierScanner
+    ConnectWithHolderDevice -->|Generic error| BluetoothConnectionErrorScreen
+    ConnectWithHolderDevice -->|Invalid bluetooth configuration| BluetoothConnectionErrorScreen

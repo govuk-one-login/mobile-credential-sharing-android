@@ -1,5 +1,8 @@
 # Mobile | Credential sharing | Android
 
+[![Merge to main workflow status](https://github.com/govuk-one-login/mobile-credential-sharing-android/actions/workflows/merge-to-main.yml/badge.svg)](https://github.com/govuk-one-login/mobile-credential-sharing-android/actions/workflows/merge-to-main.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=govuk-one-login_mobile-credential-sharing-android&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=govuk-one-login_mobile-credential-sharing-android)
+
 A reference implementation for sharing and verifying digital credentials.
 
 The current implementation includes a demo app and implements ISO 18013-5 for in-person Bluetooth presentation and verification.
@@ -10,10 +13,11 @@ Internal team members can find the team ways of working on Confluence.
 
 This repository contains packages for: 
 
-- [Models](./models): representing data models in Concise Binary Object Representation (CBOR) format
 - [Bluetooth](./bluetooth): sharing data over Bluetooth
-- [Security](./security): encryption and decryption of data for transit
+- [Core features](./core): Common capabilities across the code base
 - [Holder](./holder): securely share a credential with a verifier
+- [Models](./models): representing data models in Concise Binary Object Representation (CBOR) format
+- [Security](./security): encryption and decryption of data for transit
 - [Verifier](./verifier): securely receive and verify a credential from a holder
 
 

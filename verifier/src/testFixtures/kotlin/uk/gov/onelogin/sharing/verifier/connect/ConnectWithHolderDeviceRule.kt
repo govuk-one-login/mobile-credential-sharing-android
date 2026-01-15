@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
+import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPromptRule
@@ -31,6 +32,8 @@ class ConnectWithHolderDeviceRule(
 ) : ComposeContentTestRule by composeContentTestRule {
 
     private lateinit var renderState: ConnectWithHolderDeviceState
+
+    var capturedErrorState: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError
 
     constructor(
         composeContentTestRule: ComposeContentTestRule,
@@ -125,12 +128,20 @@ class ConnectWithHolderDeviceRule(
             .assertIsDisplayed()
     }
 
-    fun assertErrorDoesNotExist() = onNodeWithText(decodeError)
+    fun assertDecodingErrorDoesNotExist() = onNodeWithText(decodeError)
         .assertDoesNotExist()
 
-    fun assertErrorIsDisplayed() = onNodeWithText(decodeError)
+    fun assertDecodingErrorIsDisplayed() = onNodeWithText(decodeError)
         .assertExists()
         .assertIsDisplayed()
+
+    fun assertErrorStateEquals(expected: ConnectWithHolderDeviceError) {
+        assertEquals(
+            "Expected error wasn't passed to the 'onFindError' lambda!",
+            expected,
+            capturedErrorState
+        )
+    }
 
     fun assertIsNotSearchingForBluetoothDevices() {
         onNodeWithText(scanningForUuids)
@@ -161,19 +172,25 @@ class ConnectWithHolderDeviceRule(
         state: ConnectWithHolderDeviceState,
         modifier: Modifier = Modifier,
         viewModel: SessionEstablishmentViewModel,
-        permissionsState: MultiplePermissionsState
+        permissionsState: MultiplePermissionsState,
+        onFindError: (ConnectWithHolderDeviceError) -> Unit = {}
     ) {
         update(state)
         setContent {
             ConnectWithHolderDeviceScreen(
                 base64EncodedEngagement = renderState.base64EncodedEngagement!!,
+                modifier = modifier,
                 viewModel = viewModel,
-                multiplePermissionsState = permissionsState
+                multiplePermissionsState = permissionsState,
+                onConnectionError = {
+                    capturedErrorState = it
+                    onFindError(it)
+                }
             )
         }
     }
 
-    fun renderPreview(state: ConnectWithHolderDeviceState, modifier: Modifier = Modifier) {
+    fun renderPreview(state: ConnectWithHolderDeviceState) {
         update(state)
         setContent {
             ConnectWithHolderDevicePreview(

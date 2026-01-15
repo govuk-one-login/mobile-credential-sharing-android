@@ -2,8 +2,6 @@
 
 package uk.gov.onelogin.sharing.holder.presentation
 
-import android.Manifest
-import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,6 +31,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONN
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_TURNED_OFF
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
@@ -53,14 +52,7 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewMod
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     val multiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = buildList {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-                add(Manifest.permission.BLUETOOTH_ADVERTISE)
-            } else {
-                add(Manifest.permission.BLUETOOTH)
-            }
-        }
+        permissions = PermissionChecker.advertisePermissions()
     ) {
         hasPreviouslyRequestedPermission = true
     }

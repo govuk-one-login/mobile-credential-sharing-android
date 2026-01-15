@@ -2,6 +2,9 @@ package uk.gov.onelogin.sharing.verifier.connect
 
 import android.bluetooth.BluetoothDevice
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameters
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
@@ -9,34 +12,47 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.Matcher
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.LogEntry
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner.StubData.dummyByteArray
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDenied
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateDeniedWithRationale
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.fakePermissionStateGranted
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.startScanningDummyServiceUuid
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBluetoothEnabled
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasPreviouslyRequestedPermission
+import uk.gov.onelogin.sharing.verifier.connect.SessionEstablishmentViewModelMatchers.hasUiState
+import uk.gov.onelogin.sharing.verifier.connect.parameters.BluetoothStatusesToEnabledFlag
+import uk.gov.onelogin.sharing.verifier.connect.parameters.EncodedEngagementToState
+import uk.gov.onelogin.sharing.verifier.connect.parameters.PermissionsToLogMessages
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(TestParameterInjector::class)
 class SessionEstablishmentViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -59,21 +75,28 @@ class SessionEstablishmentViewModelTest {
     )
 
     @Test
-    fun `init sets isBluetoothEnabled from adapter provider`() {
+    fun `init sets isBluetoothEnabled from adapter provider`(
+        @TestParameter isBluetoothEnabled: Boolean
+    ) {
+        bluetoothAdapterProvider.setEnabled(isBluetoothEnabled)
         viewModel = createViewModel(scanner)
-        bluetoothAdapterProvider.setEnabled(false)
-        assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
+        assertThat(
+            viewModel,
+            hasUiState(
+                hasBluetoothEnabled(isBluetoothEnabled)
+            )
+        )
     }
 
+    @OptIn(ExperimentalPermissionsApi::class)
     @Test
     fun `scanForDevice calls scanner with provided uuid`() = runTest {
-        val uuid = byteArrayOf(0x01, 0x02, 0x03)
         viewModel = createViewModel(scanner)
-        viewModel.updatePermissions(true)
-        viewModel.scanForDevice(uuid)
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
 
         assertEquals(1, scanner.scanCalls)
-        assertArrayEquals(uuid, scanner.lastUuid)
+        assertArrayEquals(dummyByteArray, scanner.lastUuid)
     }
 
     @Test
@@ -81,63 +104,63 @@ class SessionEstablishmentViewModelTest {
         val bluetoothDevice = mockk<BluetoothDevice>()
         every { bluetoothDevice.address } returns DEVICE_ADDRESS
 
-        val scanner = BluetoothScanner {
-            flowOf(ScanEvent.DeviceFound(bluetoothDevice))
-        }
+        val scanner = BluetoothScanner.of(ScanEvent.DeviceFound(bluetoothDevice))
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.updatePermissions(true)
+        viewModel.receive(permissionUpdateGranted)
 
         val uuid = UUID.randomUUID()
 
-        viewModel.scanForDevice(uuid.toByteArray())
+        viewModel.receive(ConnectWithHolderDeviceEvent.StartScanning(uuid.toByteArray()))
         runCurrent()
 
-        val logMessage = logger[0].message
-        assert(logMessage.contains("Bluetooth device found"))
-        assert(logMessage.contains(bluetoothDevice.address))
+        assert(
+            "Bluetooth device found: $DEVICE_ADDRESS" in logger
+        ) {
+            "Didn't find expected message: $logger"
+        }
     }
 
     @Test
     fun `scanForDevice handles ScanFailure ScanEvent and logs it`() = runTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
-        val scanner = BluetoothScanner {
-            flowOf(
-                ScanEvent.ScanFailed(scanFailure)
-            )
-        }
+        val scanner = BluetoothScanner.of(
+            ScanEvent.ScanFailed(scanFailure)
+        )
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.updatePermissions(true)
-
-        viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
         runCurrent()
 
-        val logMessage = logger[0].message
-        assert(logMessage.contains("Scan failed"))
-        assert(logMessage.contains(scanFailure.name))
+        assert(
+            "Scan failed: ${ScannerFailure.ALREADY_STARTED_SCANNING}" in logger
+        ) {
+            "Cannot find expected log message: $logger"
+        }
     }
 
     @Test
     fun `stopScanning logs and cancels an active scan job`() = runTest {
         var flowClosed = false
 
-        val scanner = BluetoothScanner {
+        val scanner = BluetoothScanner.from(
             callbackFlow {
                 awaitClose { flowClosed = true }
             }
-        }
+        )
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.updatePermissions(true)
-        viewModel.scanForDevice(byteArrayOf(0x01))
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
+
         runCurrent()
 
-        viewModel.stopScanning()
+        viewModel.receive(ConnectWithHolderDeviceEvent.StopScanning)
         runCurrent()
 
         assertTrue(
@@ -148,150 +171,134 @@ class SessionEstablishmentViewModelTest {
 
     @Test
     fun `scanForDevice times out when no results emitted`() = runTest {
-        val scanner = BluetoothScanner {
+        val scanner = BluetoothScanner.from(
             callbackFlow {
                 awaitCancellation()
             }
-        }
+        )
 
         val viewModel = createViewModel(scanner)
-        viewModel.updatePermissions(true)
-
-        viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
 
         runCurrent()
 
         advanceTimeBy(SessionEstablishmentViewModel.SCAN_PERIOD)
         advanceUntilIdle()
 
-        val logMessage = logger[0].message
-        assert(logMessage.contains("TimeoutCancellationException:"))
+        assert(
+            logger.any {
+                it is LogEntry.Message && it.message.startsWith(
+                    "kotlinx.coroutines.TimeoutCancellationException:"
+                )
+            }
+        ) {
+            "Cannot find expected error message: $logger"
+        }
     }
 
     @Test
     fun `scanForDevice on ScanEvent ScanFailure sets showErrorScreen true`() = runTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
-        val scanner = BluetoothScanner {
-            flowOf(
-                ScanEvent.ScanFailed(scanFailure)
-            )
-        }
+        val scanner = BluetoothScanner.of(
+            ScanEvent.ScanFailed(scanFailure)
+        )
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.updatePermissions(true)
+        viewModel.receive(permissionUpdateGranted)
+        viewModel.receive(startScanningDummyServiceUuid)
 
-        viewModel.scanForDevice(byteArrayOf(0x01, 0x02, 0x03))
         runCurrent()
 
-        assertTrue(viewModel.uiState.value.showErrorScreen)
+        assertEquals(
+            ConnectWithHolderDeviceError.GenericError,
+            viewModel.uiState.value.showErrorScreen
+        )
     }
 
     @Test
-    fun `should update hasRequestPermissions`() {
+    fun `Connecting to invalid configuration emits an error state to the UI`() = runTest {
+        fakeVerifierSession.updateState(
+            VerifierSessionState.Invalid
+        )
+
+        val viewModel = createViewModel(DummyBluetoothScanner)
+
+        viewModel.receive(
+            ConnectWithHolderDeviceEvent.ConnectToDevice(
+                mockk(),
+                UUID.randomUUID().toBytes()
+            )
+        )
+        runCurrent()
+
+        assertEquals(
+            ConnectWithHolderDeviceError.BluetoothConfigurationError,
+            viewModel.uiState.value.showErrorScreen
+        )
+    }
+
+    @Test
+    fun `should update hasRequestPermissions`(@TestParameter hasRequestedPermission: Boolean) {
         viewModel = createViewModel(scanner)
-        viewModel.updateHasRequestPermissions(true)
-        assertEquals(true, viewModel.uiState.value.hasRequestedPermissions)
+        viewModel.receive(ConnectWithHolderDeviceEvent.RequestedPermission(hasRequestedPermission))
+        assertThat(
+            viewModel,
+            hasUiState(
+                hasPreviouslyRequestedPermission(hasRequestedPermission)
+            )
+        )
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
-    fun `should log permission granted when user allows all permissions`() {
+    @TestParameters(valuesProvider = PermissionsToLogMessages::class)
+    fun `Permission updates are logged`(
+        input: FakeMultiplePermissionsState,
+        expectedMessage: String
+    ) {
         viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(fakePermissionStateGranted)
+        viewModel.receive(ConnectWithHolderDeviceEvent.UpdatePermission(input))
 
-        val logMessage = logger[0].message
-        assert(logMessage.contains("All required Bluetooth permissions have been granted"))
-    }
-
-    @OptIn(ExperimentalPermissionsApi::class)
-    @Test
-    fun `should log permission permanently denied when user denies permissions completely`() {
-        viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(fakePermissionStateDenied)
-
-        val logMessage = logger[0].message
-        assert(logMessage.contains("Bluetooth permissions were permanently denied"))
-    }
-
-    @OptIn(ExperimentalPermissionsApi::class)
-    @Test
-    fun `should log permissions denied when user denied first time`() {
-        viewModel = createViewModel(scanner)
-        viewModel.permissionLogger(fakePermissionStateDeniedWithRationale)
-
-        val logMessage = logger[0].message
-        assert(logMessage.contains("Bluetooth permissions were denied"))
+        assertTrue(
+            "Couldn't find expected message in logger: $logger",
+            expectedMessage in logger
+        )
     }
 
     @Test
-    fun `should set isBluetoothEnabled state to off when prompt is denied`() = runTest {
+    @TestParameters(valuesProvider = BluetoothStatusesToEnabledFlag::class)
+    fun `Bluetooth status maps to Bluetooth enablement flag`(
+        status: BluetoothStatus,
+        assertion: Matcher<ConnectWithHolderDeviceState>
+    ) = runTest {
         viewModel = createViewModel(scanner)
 
-        fakeBluetoothStateMonitor.emit(BluetoothStatus.OFF)
+        fakeBluetoothStateMonitor.emit(status)
 
-        assertEquals(false, viewModel.uiState.value.isBluetoothEnabled)
+        assertThat(
+            viewModel,
+            hasUiState(assertion)
+        )
     }
 
     @Test
-    fun `should set isBluetoothEnabled state to true when bluetooth enabled`() = runTest {
+    @TestParameters(valuesProvider = EncodedEngagementToState::class)
+    fun `Updating encoded data affects the UI state`(
+        input: String,
+        assertion: Matcher<ConnectWithHolderDeviceState>
+    ) = runTest {
         viewModel = createViewModel(scanner)
 
-        fakeBluetoothStateMonitor.emit(BluetoothStatus.ON)
+        viewModel.receive(
+            ConnectWithHolderDeviceEvent.UpdateEngagementData(input)
+        )
 
-        assertEquals(true, viewModel.uiState.value.isBluetoothEnabled)
-    }
-
-    @Test
-    fun `test connection state started`() = runTest {
-        successfulScan()
-
-        fakeVerifierSession.emitState(VerifierSessionState.ConnectionStateStarted)
-
-        assertEquals(true, viewModel.uiState.value.connectionStateStarted)
-    }
-
-    @Test
-    fun `connection state is started and then disconnected`() = runTest {
-        successfulScan()
-
-        fakeVerifierSession.emitState(VerifierSessionState.ConnectionStateStarted)
-
-        assertEquals(true, viewModel.uiState.value.connectionStateStarted)
-
-        fakeVerifierSession.emitState(VerifierSessionState.Disconnected(DEVICE_ADDRESS))
-
-        assertEquals(true, viewModel.uiState.value.showErrorScreen)
-
-        assertEquals(1, fakeVerifierSession.stopCalls)
-    }
-
-    @Test
-    fun `connection is disconnected before state is started`() = runTest {
-        successfulScan()
-
-        fakeVerifierSession.emitState(VerifierSessionState.Disconnected(DEVICE_ADDRESS))
-
-        assertEquals(true, viewModel.uiState.value.showErrorScreen)
-
-        assertEquals(0, fakeVerifierSession.stopCalls)
-    }
-
-    private fun successfulScan() {
-        val bluetoothDevice = mockk<BluetoothDevice>()
-        every { bluetoothDevice.address } returns DEVICE_ADDRESS
-
-        val scanner = BluetoothScanner {
-            flowOf(ScanEvent.DeviceFound(bluetoothDevice))
-        }
-
-        viewModel = createViewModel(scanner)
-
-        viewModel.updatePermissions(true)
-
-        val uuid = UUID.randomUUID()
-
-        viewModel.scanForDevice(uuid.toByteArray())
+        assertThat(
+            viewModel,
+            hasUiState(assertion)
+        )
     }
 }

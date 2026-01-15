@@ -60,57 +60,10 @@ data object ConnectWithHolderDeviceStateStubs {
         hasAllPermissions = true
     )
 
-    val fakePermissionStateGranted = FakeMultiplePermissionsState(
-        permissions = listOf(
-            FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_CONNECT,
-                status = PermissionStatus.Granted
-            ),
-            FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_SCAN,
-                status = PermissionStatus.Granted
-            ),
-            FakePermissionState(
-                permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                status = PermissionStatus.Granted
-            )
-        ),
-        onLaunchPermission = {}
-    )
-
-    val fakePermissionStateDenied = FakeMultiplePermissionsState(
-        permissions = listOf(
-            FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_CONNECT,
-                status = PermissionStatus.Denied(false)
-            ),
-            FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_SCAN,
-                status = PermissionStatus.Denied(false)
-            ),
-            FakePermissionState(
-                permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                status = PermissionStatus.Denied(false)
-            )
-        ),
-        onLaunchPermission = {}
-    )
-
-    val fakePermissionStateDeniedWithRationale = FakeMultiplePermissionsState(
-        permissions = listOf(
-            FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_CONNECT,
-                status = PermissionStatus.Denied(true)
-            ),
-            FakePermissionState(
-                permission = Manifest.permission.BLUETOOTH_SCAN,
-                status = PermissionStatus.Denied(true)
-            ),
-            FakePermissionState(
-                permission = Manifest.permission.ACCESS_FINE_LOCATION,
-                status = PermissionStatus.Denied(true)
-            )
-        ),
-        onLaunchPermission = {}
+    val genericErrorState = ConnectWithHolderDeviceState(
+        base64EncodedEngagement = validBarcodeDataResult.data,
+        showErrorScreen = ConnectWithHolderDeviceError.GenericError,
+        hasAllPermissions = true,
+        isBluetoothEnabled = true
     )
 }

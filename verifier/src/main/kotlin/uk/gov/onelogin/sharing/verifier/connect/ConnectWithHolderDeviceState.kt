@@ -3,22 +3,26 @@ package uk.gov.onelogin.sharing.verifier.connect
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
+import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 
 /**
  * Property bag data class for holding the [ConnectWithHolderDeviceScreen] composable UI state.
  *
  * @param base64EncodedEngagement The CBOR string that's embedded within a valid digital credential
  * QR code.
- * @param permissionSCtate The Android-powered device's bluetooth permission state.
+ * @param showErrorScreen Used for navigating away from [ConnectWithHolderDeviceScreen] when the
+ * parameter isn't null. Defaults to null, meaning that the User should be shown
+ * [ConnectWithHolderDeviceScreen].
  */
 @OptIn(ExperimentalPermissionsApi::class)
 data class ConnectWithHolderDeviceState(
     val isBluetoothEnabled: Boolean = false,
     val base64EncodedEngagement: String? = null,
+    val engagementData: DeviceEngagementDto? = null,
     val hasAllPermissions: Boolean = false,
     val hasRequestedPermissions: Boolean = false,
-    val showErrorScreen: Boolean = false,
     val connectionStateStarted: Boolean = false,
     val previouslyHadPermissions: Boolean = false,
-    val bluetoothErrorType: BluetoothUiErrorTypes = BLUETOOTH_DISCONNECTED
+    val bluetoothErrorType: BluetoothUiErrorTypes = BLUETOOTH_DISCONNECTED,
+    val showErrorScreen: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError
 )
