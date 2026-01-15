@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.security.engagement
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.util.Base64
+import java.util.UUID
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
@@ -11,8 +13,6 @@ import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
-import java.util.Base64
-import java.util.UUID
 
 /**
  * Generates device engagement data for establishing a connection between mDoc holder

@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.security
 
+import kotlin.test.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
-import kotlin.test.assertEquals
 
 class MapperTest {
 
@@ -13,6 +13,9 @@ class MapperTest {
         val sessionEstablishmentModel = validSessionEstablishmentDto.toSessionEstablishment()
 
         assertEquals(expectedSessionEstablishmentDto.data, sessionEstablishmentModel.data)
-        assertEquals(expectedSessionEstablishmentDto.eReaderKey.encoded, sessionEstablishmentModel.eReaderKey)
+        assertEquals(
+            expectedSessionEstablishmentDto.eReaderKey.encoded,
+            sessionEstablishmentModel.eReaderKey
+        )
     }
 }
