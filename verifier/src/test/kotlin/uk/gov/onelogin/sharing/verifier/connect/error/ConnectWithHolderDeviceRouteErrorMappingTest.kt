@@ -50,5 +50,9 @@ enum class ConnectWithHolderDeviceRouteErrorData(
     BLUETOOTH_OFF_ERROR(
         errorRes = R.string.bluetooth_turned_off,
         errorType = ConnectWithHolderDeviceError.BluetoothDisabledError
+    ),
+    BLUETOOTH_PERMISSIONS_ERROR(
+        errorRes = R.string.bluetooth_permissions_revoked,
+        errorType = ConnectWithHolderDeviceError.BluetoothPermissionsError
     )
 }

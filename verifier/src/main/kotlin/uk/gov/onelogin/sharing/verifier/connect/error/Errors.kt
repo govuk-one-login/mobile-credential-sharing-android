@@ -18,6 +18,9 @@ internal fun errorTitleRes(error: ConnectWithHolderDeviceError): Int = when (err
 
     ConnectWithHolderDeviceError.BluetoothDisabledError ->
         R.string.bluetooth_turned_off
+
+    ConnectWithHolderDeviceError.BluetoothPermissionsError ->
+        R.string.bluetooth_permissions_revoked
 }
 
 internal fun errorTitle(context: Context, error: ConnectWithHolderDeviceError): String =

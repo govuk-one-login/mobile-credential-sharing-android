@@ -30,7 +30,6 @@ import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
@@ -71,17 +70,12 @@ fun ConnectWithHolderDeviceScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        BluetoothPermissionPrompt(
-            multiplePermissionsState,
-            contentState.hasRequestedPermissions
-        ) {
-            ConnectWithHolderDeviceScreenContent(
-                contentState = contentState,
-                multiplePermissionsState = multiplePermissionsState,
-                modifier = Modifier,
-                onSendEvent = viewModel::receive
-            )
-        }
+        ConnectWithHolderDeviceScreenContent(
+            contentState = contentState,
+            multiplePermissionsState = multiplePermissionsState,
+            modifier = Modifier,
+            onSendEvent = viewModel::receive
+        )
     }
 }
 

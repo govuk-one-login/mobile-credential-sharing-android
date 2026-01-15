@@ -4,6 +4,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -18,6 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider.Companion.disabledBluetoothAdapter
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider.Companion.enabledBluetoothAdapter
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
@@ -39,6 +41,19 @@ class ConnectWithHolderDeviceScreenTest {
     @get:Rule
     val composeTestRule = ConnectWithHolderDeviceRule(createComposeRule())
 
+    private lateinit var testViewModel: SessionEstablishmentViewModel
+
+    fun createViewModel(
+        bluetoothAdapterProvider: BluetoothAdapterProvider = enabledBluetoothAdapter
+    ): SessionEstablishmentViewModel = SessionEstablishmentViewModel(
+        bluetoothAdapterProvider = bluetoothAdapterProvider,
+        scanner = fakeBluetoothScanner,
+        logger = SystemLogger(),
+        bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
+        verifierSessionFactory = { mdocVerifierSession },
+        savedStateHandle = SavedStateHandle()
+    )
+
     @Before
     fun setup() {
         Intents.init()
@@ -54,14 +69,7 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun `opens system Bluetooth alert when the Bluetooth is disabled`() = runTest {
-        val testViewModel = SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = disabledBluetoothAdapter,
-            scanner = fakeBluetoothScanner,
-            logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-            verifierSessionFactory = { mdocVerifierSession }
-        )
-
+        testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
         composeTestRule.run {
             render(
                 undecodableState,
@@ -77,13 +85,7 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun `does not attempt to open system Bluetooth alert when Bluetooth is enabled`() = runTest {
-        val testViewModel = SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = enabledBluetoothAdapter,
-            scanner = fakeBluetoothScanner,
-            logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-            verifierSessionFactory = { mdocVerifierSession }
-        )
+        testViewModel = createViewModel()
 
         composeTestRule.run {
             render(
@@ -101,13 +103,7 @@ class ConnectWithHolderDeviceScreenTest {
     @Test
     fun `does not attempt to open system Bluetooth alert when permissions are not granted`() =
         runTest {
-            val testViewModel = SessionEstablishmentViewModel(
-                bluetoothAdapterProvider = disabledBluetoothAdapter,
-                scanner = fakeBluetoothScanner,
-                logger = SystemLogger(),
-                bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-                verifierSessionFactory = { mdocVerifierSession }
-            )
+            testViewModel = createViewModel()
 
             composeTestRule.run {
                 render(
@@ -124,13 +120,7 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun cannotDecodeProvidedCborString() = runTest {
-        val testViewModel = SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = disabledBluetoothAdapter,
-            scanner = fakeBluetoothScanner,
-            logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-            verifierSessionFactory = { mdocVerifierSession }
-        )
+        testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
 
         composeTestRule.run {
             render(
@@ -151,13 +141,7 @@ class ConnectWithHolderDeviceScreenTest {
     @Test
     fun validCborExistsOnScreen() = runTest {
         composeTestRule.run {
-            val testViewModel = SessionEstablishmentViewModel(
-                bluetoothAdapterProvider = disabledBluetoothAdapter,
-                scanner = fakeBluetoothScanner,
-                logger = SystemLogger(),
-                bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-                verifierSessionFactory = { mdocVerifierSession }
-            )
+            testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
             render(
                 decodableDeniedState,
                 Modifier,
@@ -175,13 +159,7 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun bluetoothPermissionIsGrantedButDeviceBluetoothIsDisabled() = runTest {
-        val testViewModel = SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = disabledBluetoothAdapter,
-            scanner = fakeBluetoothScanner,
-            logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-            verifierSessionFactory = { mdocVerifierSession }
-        )
+        testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
 
         val stateForTest = decodableGrantedState
 
@@ -200,13 +178,7 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun bluetoothPermissionIsGranted() = runTest {
-        val testViewModel = SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = disabledBluetoothAdapter,
-            scanner = fakeBluetoothScanner,
-            logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-            verifierSessionFactory = { mdocVerifierSession }
-        )
+        testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
         composeTestRule.run {
             render(
                 decodableGrantedState,
@@ -225,13 +197,7 @@ class ConnectWithHolderDeviceScreenTest {
 
     @Test
     fun grantedAndEnabledBluetoothWithValidCborStartsScanning() = runTest {
-        val testViewModel = SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = enabledBluetoothAdapter,
-            scanner = fakeBluetoothScanner,
-            logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-            verifierSessionFactory = { mdocVerifierSession }
-        )
+        testViewModel = createViewModel()
 
         composeTestRule.run {
             render(
@@ -252,13 +218,7 @@ class ConnectWithHolderDeviceScreenTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `LaunchedEffect collects navEvents and calls onConnectionError`() = runTest {
-        val testViewModel = SessionEstablishmentViewModel(
-            bluetoothAdapterProvider = enabledBluetoothAdapter,
-            scanner = fakeBluetoothScanner,
-            logger = SystemLogger(),
-            bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-            verifierSessionFactory = { mdocVerifierSession }
-        )
+        testViewModel = createViewModel()
 
         composeTestRule.run {
             var receivedError: ConnectWithHolderDeviceError? = null

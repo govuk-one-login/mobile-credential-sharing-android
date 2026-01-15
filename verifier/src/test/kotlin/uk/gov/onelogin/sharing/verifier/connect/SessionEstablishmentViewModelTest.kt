@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
 import android.bluetooth.BluetoothDevice
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -40,10 +41,12 @@ import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.startScanningDummyServiceUuid
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasBluetoothEnabled
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers.hasPreviouslyRequestedPermission
+import uk.gov.onelogin.sharing.verifier.connect.SessionEstablishmentViewModel.Companion.PREVIOUSLY_HAD_PERMISSIONS_KEY
 import uk.gov.onelogin.sharing.verifier.connect.SessionEstablishmentViewModelMatchers.hasUiState
 import uk.gov.onelogin.sharing.verifier.connect.parameters.BluetoothStatusesToEnabledFlag
 import uk.gov.onelogin.sharing.verifier.connect.parameters.EncodedEngagementToState
@@ -65,13 +68,17 @@ class SessionEstablishmentViewModelTest {
 
     lateinit var viewModel: SessionEstablishmentViewModel
 
-    private fun createViewModel(scanner: BluetoothScanner) = SessionEstablishmentViewModel(
+    private fun createViewModel(
+        scanner: BluetoothScanner,
+        savedStateHandle: SavedStateHandle = SavedStateHandle()
+    ) = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         scanner = scanner,
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = logger,
         bluetoothStatusMonitor = fakeBluetoothStateMonitor,
-        verifierSessionFactory = { fakeVerifierSession }
+        verifierSessionFactory = { fakeVerifierSession },
+        savedStateHandle = savedStateHandle
     )
 
     @Test
@@ -292,6 +299,29 @@ class SessionEstablishmentViewModelTest {
             assertEquals(
                 ConnectWithHolderDeviceNavEvent.NavigateToError(
                     ConnectWithHolderDeviceError.BluetoothDisabledError
+                ),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `navigates to error screen when permissions are revoked`() = runTest {
+        viewModel = createViewModel(
+            DummyBluetoothScanner,
+            SavedStateHandle(
+                mapOf(PREVIOUSLY_HAD_PERMISSIONS_KEY to true)
+            )
+        )
+
+        viewModel.navEvents.test {
+            viewModel.receive(permissionUpdateDenied)
+
+            assertEquals(1, fakeVerifierSession.stopCalls)
+
+            assertEquals(
+                ConnectWithHolderDeviceNavEvent.NavigateToError(
+                    ConnectWithHolderDeviceError.BluetoothPermissionsError
                 ),
                 awaitItem()
             )

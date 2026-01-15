@@ -22,7 +22,12 @@ sealed interface ConnectWithHolderDeviceError {
     data object BluetoothConnectionError : ConnectWithHolderDeviceError
 
     /**
-     * Declares that a bluetooth was switched off.
+     * Declares that a bluetooth has been disabled.
      */
     data object BluetoothDisabledError : ConnectWithHolderDeviceError
+
+    /**
+     * Declares that a bluetooth permissions have been denied.
+     */
+    data object BluetoothPermissionsError : ConnectWithHolderDeviceError
 }
