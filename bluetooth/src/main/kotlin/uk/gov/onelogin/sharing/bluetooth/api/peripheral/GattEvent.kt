@@ -33,6 +33,14 @@ sealed interface GattEvent {
     }
 
     data class ServiceAdded(val status: Int, val service: BluetoothGattService?) : GattEvent
+    data class MessageReceived(val byteArray: ByteArray) : GattEvent {
+        override fun equals(other: Any?): Boolean {
+            val other = other as? MessageReceived ?: return false
+            return this.byteArray.contentEquals(other.byteArray)
+        }
+
+        override fun hashCode(): Int = byteArray.contentHashCode()
+    }
 
     data object ConnectionStateStarted : GattEvent
 }

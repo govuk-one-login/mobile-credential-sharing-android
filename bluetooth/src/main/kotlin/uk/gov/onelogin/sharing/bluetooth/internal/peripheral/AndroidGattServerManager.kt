@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 class AndroidGattServerManager(
     private val context: Context,
@@ -61,6 +62,8 @@ class AndroidGattServerManager(
             )
         )
 
+        logger.debug(logTag, "starting server: $server")
+
         if (server == null) {
             _events.tryEmit(GattServerEvent.Error(GattServerError.GATT_NOT_AVAILABLE))
             return
@@ -81,21 +84,28 @@ class AndroidGattServerManager(
 
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
-            is GattEvent.ConnectionStateChange ->
-                _events.tryEmit(event.toGattServerEvent())
-
-            is GattEvent.ServiceAdded -> {
-                _events.tryEmit(
-                    GattServerEvent.ServiceAdded(
-                        event.status,
-                        event.service
-                    )
-                )
-            }
-
-            GattEvent.ConnectionStateStarted -> {
-                _events.tryEmit(GattServerEvent.SessionStarted)
-            }
+            is GattEvent.ConnectionStateChange -> handleConnectionStateChange(event)
+            is GattEvent.ConnectionStateStarted -> handleConnectionStateStarted()
+            is GattEvent.ServiceAdded -> handleServiceAdded(event)
+            is GattEvent.MessageReceived -> Unit
         }
+    }
+
+    private fun handleConnectionStateChange(event: GattEvent.ConnectionStateChange) {
+        _events.tryEmit(event.toGattServerEvent())
+    }
+
+    private fun handleServiceAdded(event: GattEvent.ServiceAdded) {
+        _events.tryEmit(
+            GattServerEvent.ServiceAdded(
+                event.status,
+                event.service
+            )
+        )
+    }
+
+    private fun handleConnectionStateStarted() {
+        // state characteristic was set to `start` by the remote device
+        _events.tryEmit(GattServerEvent.SessionStarted)
     }
 }

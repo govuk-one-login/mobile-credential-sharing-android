@@ -134,7 +134,7 @@ class AndroidMdocSessionManager(
             is GattServerEvent.UnsupportedEvent ->
                 logger.error(
                     logTag,
-                    "Mdoc - UUnsupported event - status: ${event.status} new state: ${event.newState}"
+                    "Mdoc - Unsupported event - status: ${event.status} new state: ${event.newState}"
                 )
 
             GattServerEvent.SessionStarted -> {

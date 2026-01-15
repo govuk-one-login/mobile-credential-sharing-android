@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 
 /**
@@ -25,15 +26,15 @@ object CharacteristicWriteRequestStub {
      */
 
     data class OnCharacteristicWriteRequestArgs(
-        val device: BluetoothDevice? = mockk(relaxed = true),
+        val device: BluetoothDevice = mockk(relaxed = true),
         val requestId: Int = 1,
-        val characteristic: BluetoothGattCharacteristic? = mockk {
+        val characteristic: BluetoothGattCharacteristic = mockk {
             every { uuid } returns UUID.randomUUID()
         },
         val preparedWrite: Boolean = false,
         val responseNeeded: Boolean = true,
         val offset: Int = 0,
-        val value: ByteArray?
+        val value: ByteArray
     )
 
     /**
@@ -41,6 +42,9 @@ object CharacteristicWriteRequestStub {
      */
 
     fun writeRequestStart() = OnCharacteristicWriteRequestArgs(
+        characteristic = mockk {
+            every { uuid } returns GattUuids.STATE_UUID
+        },
         value = byteArrayOf(MdocState.START.code)
     )
 
@@ -53,10 +57,21 @@ object CharacteristicWriteRequestStub {
     )
 
     /**
-     * Creates a stub for `onCharacteristicWriteRequest` with a null value.
+     * Creates a stub for `onCharacteristicWriteRequest` with an empty value.
      */
 
-    fun writeRequestNullValue() = OnCharacteristicWriteRequestArgs(
-        value = null
+    fun writeRequestEmptyValue() = OnCharacteristicWriteRequestArgs(
+        value = byteArrayOf()
+    )
+
+    /**
+     * Creates a stub for `onChararacteristicWriteRequest` with message segment
+     * received from remote device
+     */
+    fun writeRequestMessage(message: ByteArray) = OnCharacteristicWriteRequestArgs(
+        characteristic = mockk {
+            every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+        },
+        value = message
     )
 }
