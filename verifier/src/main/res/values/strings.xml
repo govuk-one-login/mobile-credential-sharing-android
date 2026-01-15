@@ -12,5 +12,8 @@
     <string name="searching_for_uuids">Searching for UUIDs:</string>
     <string name="successfully_scanned_qr_code_data">Successfully scanned QR code data:</string>
     <string name="try_again">Try again</string>
-    <string name="generic_error">Generic error</string>
+
+    <string name="bluetooth_disconnected_unexpectedly">Bluetooth disconnected unexpectedly</string>
+    <string name="bluetooth_permissions_revoked">Bluetooth permissions were revoked during the session</string>
+    <string name="bluetooth_turned_off">Bluetooth was turned off on verifier device during session</string>
 </resources>

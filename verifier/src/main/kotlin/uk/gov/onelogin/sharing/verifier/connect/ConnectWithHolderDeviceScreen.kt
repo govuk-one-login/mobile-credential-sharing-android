@@ -30,6 +30,9 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
+import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_TURNED_OFF
+import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.core.R as coreR
@@ -38,6 +41,10 @@ import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.verifier.R.string.bluetooth_disconnected_unexpectedly
+import uk.gov.onelogin.sharing.verifier.R.string.bluetooth_permissions_revoked
+import uk.gov.onelogin.sharing.verifier.R.string.bluetooth_turned_off
+import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
@@ -132,15 +139,14 @@ fun ConnectWithHolderDeviceScreenContent(
     modifier: Modifier = Modifier
 ) {
     if (contentState.showErrorScreen) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = contentState.errorMessage ?: stringResource(R.string.generic_error)
-            )
+
+        val errorText = when (contentState.bluetoothErrorType) {
+            BLUETOOTH_DISCONNECTED -> bluetooth_disconnected_unexpectedly
+            PERMISSIONS_MISSING -> bluetooth_permissions_revoked
+            BLUETOOTH_TURNED_OFF -> bluetooth_turned_off
         }
+
+        ErrorScreen(errorText = stringResource(errorText))
 
         return
     }
