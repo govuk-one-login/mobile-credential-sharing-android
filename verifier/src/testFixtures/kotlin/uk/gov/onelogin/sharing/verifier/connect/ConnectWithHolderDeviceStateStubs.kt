@@ -62,7 +62,6 @@ data object ConnectWithHolderDeviceStateStubs {
 
     val genericErrorState = ConnectWithHolderDeviceState(
         base64EncodedEngagement = validBarcodeDataResult.data,
-        showErrorScreen = ConnectWithHolderDeviceError.GenericError,
         hasAllPermissions = true,
         isBluetoothEnabled = true
     )

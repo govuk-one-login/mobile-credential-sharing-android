@@ -51,29 +51,36 @@ fun ConnectWithHolderDeviceScreen(
     },
     onConnectionError: (ConnectWithHolderDeviceError) -> Unit = {}
 ) {
-    viewModel.receive(ConnectWithHolderDeviceEvent.UpdateEngagementData(base64EncodedEngagement))
+    val latestOnConnectionError by rememberUpdatedState(onConnectionError)
+
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(base64EncodedEngagement) {
+        viewModel.receive(
+            ConnectWithHolderDeviceEvent.UpdateEngagementData(base64EncodedEngagement)
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.navEvents.collect {
+            when (it) {
+                is ConnectWithHolderDeviceNavEvent.NavigateToError ->
+                    latestOnConnectionError(it.error)
+            }
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         BluetoothPermissionPrompt(
             multiplePermissionsState,
             contentState.hasRequestedPermissions
         ) {
-            when (contentState.showErrorScreen) {
-                ConnectWithHolderDeviceError.BluetoothConfigurationError,
-                ConnectWithHolderDeviceError.GenericError -> {
-                    onConnectionError(contentState.showErrorScreen)
-                }
-
-                else -> {
-                    ConnectWithHolderDeviceScreenContent(
-                        contentState = contentState,
-                        multiplePermissionsState = multiplePermissionsState,
-                        modifier = Modifier,
-                        onSendEvent = viewModel::receive
-                    )
-                }
-            }
+            ConnectWithHolderDeviceScreenContent(
+                contentState = contentState,
+                multiplePermissionsState = multiplePermissionsState,
+                modifier = Modifier,
+                onSendEvent = viewModel::receive
+            )
         }
     }
 }

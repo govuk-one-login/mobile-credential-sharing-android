@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
+import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.navigateToBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanRoute
@@ -50,7 +51,9 @@ data object VerifierRoutes {
             configureScannedInvalidQrRoute(
                 onTryAgainClick = { navController.navigateToVerifierScanRoute() }
             )
-            configureConnectWithHolderDeviceRoute(context)
+            configureConnectWithHolderDeviceRoute(context) {
+                navController.navigateToBluetoothConnectionErrorRoute(title = it)
+            }
             configureBluetoothConnectionErrorRoute(controller = navController)
         }
     }

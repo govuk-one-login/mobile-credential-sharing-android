@@ -16,7 +16,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -57,6 +59,12 @@ class SessionEstablishmentViewModel(
 
     private val _uiState = MutableStateFlow(ConnectWithHolderDeviceState())
     val uiState: StateFlow<ConnectWithHolderDeviceState> = _uiState
+
+    private val _navEvents = MutableSharedFlow<ConnectWithHolderDeviceNavEvent>(
+        extraBufferCapacity = 1
+    )
+    val navEvents: SharedFlow<ConnectWithHolderDeviceNavEvent> = _navEvents
+
     private var scannerJob: Job? = null
     val mdocVerifierSession = verifierSessionFactory.create(viewModelScope)
 
@@ -65,6 +73,50 @@ class SessionEstablishmentViewModel(
             it.copy(
                 isBluetoothEnabled = bluetoothAdapterProvider.isEnabled()
             )
+        }
+
+        viewModelScope.launch {
+            mdocVerifierSession.state.collect { sessionState ->
+                println("state = $sessionState")
+                when (sessionState) {
+                    is VerifierSessionState.Invalid ->
+                        _navEvents.tryEmit(
+                            ConnectWithHolderDeviceNavEvent.NavigateToError(
+                                ConnectWithHolderDeviceError.BluetoothConfigurationError
+                            )
+                        )
+
+                    is VerifierSessionState.Error ->
+                        _navEvents.tryEmit(
+                            ConnectWithHolderDeviceNavEvent.NavigateToError(
+                                ConnectWithHolderDeviceError.GenericError
+                            )
+                        )
+
+                    is VerifierSessionState.Connected ->
+                        updateState {
+                            it.copy(
+                                connectionStateStarted = true
+                            )
+                        }
+
+                    is VerifierSessionState.Disconnected -> {
+                        val started = _uiState.value.connectionStateStarted
+                        if (started) {
+                            mdocVerifierSession.stop()
+                        }
+                        _navEvents.tryEmit(
+                            ConnectWithHolderDeviceNavEvent.NavigateToError(
+                                ConnectWithHolderDeviceError.BluetoothConnectionError
+                            )
+                        )
+                    }
+
+                    else -> Unit
+                }
+
+                logger.debug(logTag, "Session state: $sessionState")
+            }
         }
 
         bluetoothStatusMonitor.start()
@@ -97,22 +149,6 @@ class SessionEstablishmentViewModel(
     }
 
     private fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
-        mdocVerifierSession.state.value.let { sessionState ->
-            when (sessionState) {
-                is VerifierSessionState.Invalid ->
-                    ConnectWithHolderDeviceError.BluetoothConfigurationError
-
-                is VerifierSessionState.Error ->
-                    ConnectWithHolderDeviceError.GenericError
-
-                else -> ConnectWithHolderDeviceError.NoError
-            }.let { error ->
-                updateState { it.copy(showErrorScreen = error) }
-            }
-
-            logger.debug(logTag, "Session state: $sessionState")
-        }
-
         mdocVerifierSession.connect(device, serviceUuid.toUUID())
     }
 
@@ -146,10 +182,6 @@ class SessionEstablishmentViewModel(
 
     private fun scanForDevice(uuid: ByteArray) {
         scannerJob = viewModelScope.launch(dispatcher) {
-            if (!uiState.value.hasAllPermissions) {
-                return@launch
-            }
-
             try {
                 withTimeout(SCAN_PERIOD) {
                     when (val scanResult = scanner.scan(uuid).first()) {
@@ -168,9 +200,11 @@ class SessionEstablishmentViewModel(
                         }
 
                         is ScanEvent.ScanFailed -> {
-                            updateState {
-                                it.copy(showErrorScreen = ConnectWithHolderDeviceError.GenericError)
-                            }
+                            _navEvents.tryEmit(
+                                ConnectWithHolderDeviceNavEvent.NavigateToError(
+                                    ConnectWithHolderDeviceError.GenericError
+                                )
+                            )
                             logger.debug(logTag, "Scan failed: ${scanResult.failure}")
                         }
                     }
@@ -225,7 +259,9 @@ class SessionEstablishmentViewModel(
         }.let { logger.debug(logTag, it) }
     }
 
-    fun updateState(updatedState: (ConnectWithHolderDeviceState) -> ConnectWithHolderDeviceState) {
+    private fun updateState(
+        updatedState: (ConnectWithHolderDeviceState) -> ConnectWithHolderDeviceState
+    ) {
         _uiState.update(updatedState)
     }
 

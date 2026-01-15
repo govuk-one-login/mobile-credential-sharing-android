@@ -13,7 +13,7 @@ import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
-import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.verifier.connect.error.errorTitle
 import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 
@@ -50,11 +50,7 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
                     ConnectWithHolderDeviceScreen(
                         base64EncodedEngagement = arguments.base64EncodedEngagement,
                         onConnectionError = { error: ConnectWithHolderDeviceError ->
-                            if (ConnectWithHolderDeviceError.BluetoothConfigurationError == error) {
-                                R.string.bluetooth_connection_error_invalid_configuration
-                            } else {
-                                R.string.bluetooth_connection_error_generic
-                            }.let(context::getString)
+                            errorTitle(context, error)
                                 .let(onFindError::invoke)
                                 .also {
                                     Log.w(

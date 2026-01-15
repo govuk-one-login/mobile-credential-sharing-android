@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
 import android.bluetooth.BluetoothDevice
+import app.cash.turbine.test
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -37,7 +38,6 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
@@ -198,7 +198,7 @@ class SessionEstablishmentViewModelTest {
     }
 
     @Test
-    fun `scanForDevice on ScanEvent ScanFailure sets showErrorScreen true`() = runTest {
+    fun `scanForDevice on ScanEvent ScanFailure navigates to generic error screen`() = runTest {
         val scanFailure = ScannerFailure.ALREADY_STARTED_SCANNING
 
         val scanner = BluetoothScanner.of(
@@ -207,43 +207,87 @@ class SessionEstablishmentViewModelTest {
 
         val viewModel = createViewModel(scanner)
 
-        viewModel.receive(permissionUpdateGranted)
-        viewModel.receive(startScanningDummyServiceUuid)
+        viewModel.navEvents.test {
+            viewModel.receive(permissionUpdateGranted)
+            viewModel.receive(startScanningDummyServiceUuid)
 
-        runCurrent()
-
-        assertEquals(
-            ConnectWithHolderDeviceError.GenericError,
-            viewModel.uiState.value.showErrorScreen
-        )
+            assertEquals(
+                ConnectWithHolderDeviceNavEvent.NavigateToError(
+                    ConnectWithHolderDeviceError.GenericError
+                ),
+                awaitItem()
+            )
+        }
     }
 
     @Test
-    fun `Connecting to invalid configuration emits an error state to the UI`() = runTest {
-        fakeVerifierSession.updateState(
-            VerifierSessionState.Invalid
-        )
+    fun `Connecting to invalid configuration navigates to Bluetooth Configuration Error screen`() =
+        runTest {
+            viewModel = createViewModel(DummyBluetoothScanner)
+            viewModel.navEvents.test {
+                fakeVerifierSession.updateState(
+                    VerifierSessionState.Invalid
+                )
 
-        val viewModel = createViewModel(DummyBluetoothScanner)
+                assertEquals(
+                    ConnectWithHolderDeviceNavEvent.NavigateToError(
+                        ConnectWithHolderDeviceError.BluetoothConfigurationError
+                    ),
+                    awaitItem()
+                )
+            }
+        }
 
-        viewModel.receive(
-            ConnectWithHolderDeviceEvent.ConnectToDevice(
-                mockk(),
-                UUID.randomUUID().toBytes()
+    @Test
+    fun `navigates to error screen when bluetooth disconnects during session`() = runTest {
+        viewModel = createViewModel(DummyBluetoothScanner)
+        viewModel.navEvents.test {
+            fakeVerifierSession.updateState(
+                VerifierSessionState.Connected(DEVICE_ADDRESS)
             )
-        )
-        runCurrent()
 
-        assertEquals(
-            ConnectWithHolderDeviceError.BluetoothConfigurationError,
-            viewModel.uiState.value.showErrorScreen
-        )
+            fakeVerifierSession.updateState(
+                VerifierSessionState.Disconnected(DEVICE_ADDRESS)
+            )
+
+            assertEquals(1, fakeVerifierSession.stopCalls)
+
+            assertEquals(
+                ConnectWithHolderDeviceNavEvent.NavigateToError(
+                    ConnectWithHolderDeviceError.BluetoothConnectionError
+                ),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `navigates to error screen when bluetooth disconnects before session starts`() = runTest {
+        viewModel = createViewModel(DummyBluetoothScanner)
+        viewModel.navEvents.test {
+            fakeVerifierSession.updateState(
+                VerifierSessionState.Disconnected(DEVICE_ADDRESS)
+            )
+
+            assertEquals(0, fakeVerifierSession.stopCalls)
+
+            assertEquals(
+                ConnectWithHolderDeviceNavEvent.NavigateToError(
+                    ConnectWithHolderDeviceError.BluetoothConnectionError
+                ),
+                awaitItem()
+            )
+        }
     }
 
     @Test
     fun `should update hasRequestPermissions`(@TestParameter hasRequestedPermission: Boolean) {
         viewModel = createViewModel(scanner)
-        viewModel.receive(ConnectWithHolderDeviceEvent.RequestedPermission(hasRequestedPermission))
+        viewModel.receive(
+            ConnectWithHolderDeviceEvent.RequestedPermission(
+                hasRequestedPermission
+            )
+        )
         assertThat(
             viewModel,
             hasUiState(

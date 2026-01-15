@@ -4,6 +4,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -11,6 +12,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,6 +30,7 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStub
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.undecodableState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.validWithCorrectBluetoothSetup
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
+import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -248,28 +251,34 @@ class ConnectWithHolderDeviceScreenTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `Lambdas pass the error state via LaunchedEffect`() = runTest {
+    fun `LaunchedEffect collects navEvents and calls onConnectionError`() = runTest {
         val testViewModel = SessionEstablishmentViewModel(
             bluetoothAdapterProvider = enabledBluetoothAdapter,
             scanner = fakeBluetoothScanner,
             logger = SystemLogger(),
             bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
             verifierSessionFactory = { mdocVerifierSession }
-        ).also {
-            it.updateState { genericErrorState }
-        }
+        )
 
         composeTestRule.run {
+            var receivedError: ConnectWithHolderDeviceError? = null
+
             render(
                 genericErrorState,
                 Modifier,
                 testViewModel,
-                bluetoothPermissionsGranted
+                bluetoothPermissionsGranted,
+                onFindError = { receivedError = it }
             )
 
-            awaitIdle()
+            mdocVerifierSession.updateState(VerifierSessionState.Error("test"))
 
-            assertErrorStateEquals(ConnectWithHolderDeviceError.GenericError)
+            waitForIdle()
+
+            assertEquals(
+                ConnectWithHolderDeviceError.GenericError,
+                receivedError
+            )
         }
     }
 

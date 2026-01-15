@@ -17,7 +17,7 @@ sealed interface ConnectWithHolderDeviceError {
     data object GenericError : ConnectWithHolderDeviceError
 
     /**
-     * 'Null-object' state for [ConnectWithHolderDeviceError], meaning that there's no error.
+     * Declares that a bluetooth connection error has occurred.
      */
-    data object NoError : ConnectWithHolderDeviceError
+    data object BluetoothConnectionError : ConnectWithHolderDeviceError
 }

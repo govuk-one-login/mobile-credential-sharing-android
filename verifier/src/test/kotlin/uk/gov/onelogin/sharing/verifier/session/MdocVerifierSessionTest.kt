@@ -57,17 +57,6 @@ class MdocVerifierSessionTest {
     }
 
     @Test
-    fun `stop logs Stop session`() = runTest {
-        session.stop()
-
-        assertTrue(logger.contains("Stop session"))
-
-        session.state.test {
-            assertEquals(VerifierSessionState.Stopped, awaitItem())
-        }
-    }
-
-    @Test
     @TestParameters(valuesProvider = GattClientEventsToVerifierSessionStates::class)
     fun `Converts Gatt events to session state events`(
         input: GattClientEvent,

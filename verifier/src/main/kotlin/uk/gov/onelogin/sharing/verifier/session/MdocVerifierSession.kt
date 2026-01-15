@@ -62,7 +62,6 @@ class MdocVerifierSession(
 
     override fun stop() {
         logger.debug(logTag, "Stop session")
-        _state.value = VerifierSessionState.Stopped
         gattClientManager.disconnect()
     }
 

@@ -1,8 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 
 /**
@@ -22,7 +20,5 @@ data class ConnectWithHolderDeviceState(
     val hasAllPermissions: Boolean = false,
     val hasRequestedPermissions: Boolean = false,
     val connectionStateStarted: Boolean = false,
-    val previouslyHadPermissions: Boolean = false,
-    val bluetoothErrorType: BluetoothUiErrorTypes = BLUETOOTH_DISCONNECTED,
-    val showErrorScreen: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError
+    val previouslyHadPermissions: Boolean = false
 )

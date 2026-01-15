@@ -33,8 +33,6 @@ class ConnectWithHolderDeviceRule(
 
     private lateinit var renderState: ConnectWithHolderDeviceState
 
-    var capturedErrorState: ConnectWithHolderDeviceError = ConnectWithHolderDeviceError.NoError
-
     constructor(
         composeContentTestRule: ComposeContentTestRule,
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
@@ -135,14 +133,6 @@ class ConnectWithHolderDeviceRule(
         .assertExists()
         .assertIsDisplayed()
 
-    fun assertErrorStateEquals(expected: ConnectWithHolderDeviceError) {
-        assertEquals(
-            "Expected error wasn't passed to the 'onFindError' lambda!",
-            expected,
-            capturedErrorState
-        )
-    }
-
     fun assertIsNotSearchingForBluetoothDevices() {
         onNodeWithText(scanningForUuids)
             .assertDoesNotExist()
@@ -183,7 +173,6 @@ class ConnectWithHolderDeviceRule(
                 viewModel = viewModel,
                 multiplePermissionsState = permissionsState,
                 onConnectionError = {
-                    capturedErrorState = it
                     onFindError(it)
                 }
             )
