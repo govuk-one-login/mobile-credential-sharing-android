@@ -17,6 +17,8 @@ import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.eReaderKeyHexFormat
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingDataParameter
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingEReader
 
 class DecoderTest {
 
@@ -99,25 +101,41 @@ class DecoderTest {
             decodeSessionEstablishmentModel(malformedBytes, logger)
         }
 
-        assertEquals("Expected a CBOR map object", exception.message)
-
-        assertNull(exception.cause)
-
-        val loggedOutput = outContent.toString()
-        assertTrue(loggedOutput.isEmpty())
+        assertTrue(exception is IllegalArgumentException)
+        assert(exception.message!!.contains(CborErrors.DECODING_ERROR.errorMessage))
     }
 
     @Test
     fun `empty cbor throws exception when deserializing session establishment model bytes`() {
         val emptyMapCbor = byteArrayOf(0xA0.toByte())
-
         val exception = assertThrows(IllegalArgumentException::class.java) {
             decodeSessionEstablishmentModel(emptyMapCbor, logger)
         }
 
-        assertEquals("Missing required field: 'eReaderKey'", exception.message)
+        assertTrue(exception is IllegalArgumentException)
+        assert(exception.message!!.contains(CborErrors.PARSING_ERROR.errorMessage))
+    }
 
-        val loggedError = outContent.toString()
-        assertTrue(loggedError.isEmpty())
+    @Test
+    fun `CBOR missing eReaderKey should throw session establishment status 12 exception`() {
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            decodeSessionEstablishmentModel(invalidCborMissingEReader.hexToByteArray(), logger)
+        }
+
+        assertTrue(exception is IllegalArgumentException)
+        assert(exception.message!!.contains(CborErrors.PARSING_ERROR.errorMessage))
+    }
+
+    @Test
+    fun `CBOR missing data parameter should throw session establishment status 12 exception`() {
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            decodeSessionEstablishmentModel(
+                invalidCborMissingDataParameter.hexToByteArray(),
+                logger
+            )
+        }
+
+        assertTrue(exception is IllegalArgumentException)
+        assert(exception.message!!.contains(CborErrors.PARSING_ERROR.errorMessage))
     }
 }

@@ -76,23 +76,30 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
 fun String.base64Decode(decoder: Base64.Decoder = Base64.getUrlDecoder()): ByteArray =
     decoder.decode(this)
 
-fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): SessionEstablishmentDto {
-    val mapper = ObjectMapper(CBORFactory()).apply {
-        registerModule(KotlinModule.Builder().build())
+fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): SessionEstablishmentDto =
+    try {
+        val mapper = ObjectMapper(CBORFactory()).apply {
+            registerModule(KotlinModule.Builder().build())
+        }
+
+        val rawDto = mapper.readValue(rawBytes, SessionEstablishmentDto::class.java)
+        requireNotNull(rawDto) {
+            CborErrors.DECODING_ERROR.errorMessage
+        }
+
+        val sessionEstablishmentDto = SessionEstablishmentDto(
+            eReaderKey = EmbeddedCbor(rawDto.eReaderKey.encodeCbor()),
+            data = rawDto.data
+        )
+
+        logger.debug(
+            logger.logTag,
+            "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
+                "data: ${sessionEstablishmentDto.data.toHexString()} "
+        )
+
+        sessionEstablishmentDto
+    } catch (e: IllegalArgumentException) {
+        logger.debug(logger.logTag, e.message.toString())
+        throw e
     }
-
-    val rawDto = mapper.readValue(rawBytes, SessionEstablishmentDto::class.java)
-
-    val sessionEstablishmentDto = SessionEstablishmentDto(
-        eReaderKey = EmbeddedCbor(rawDto.eReaderKey.encodeCbor()),
-        data = rawDto.data
-    )
-
-    logger.debug(
-        logger.logTag,
-        "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
-            "data: ${sessionEstablishmentDto.data.toHexString()} "
-    )
-
-    return sessionEstablishmentDto
-}
