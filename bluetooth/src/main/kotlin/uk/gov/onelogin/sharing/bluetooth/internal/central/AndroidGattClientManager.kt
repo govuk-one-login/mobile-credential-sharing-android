@@ -152,6 +152,7 @@ internal class AndroidGattClientManager(
         }
 
         if (serviceValidator.validate(service) is ValidationResult.Failure) {
+            logger.debug(logTag, "Incompatible mDL service: missing characteristics")
             _events.tryEmit(
                 GattClientEvent.Error(
                     ClientError.INVALID_SERVICE
