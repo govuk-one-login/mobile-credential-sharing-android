@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
+import uk.gov.onelogin.sharing.security.cbor.CborErrors
 import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 
@@ -14,13 +15,19 @@ class SessionEstablishmentDeserializer : JsonDeserializer<SessionEstablishmentDt
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): SessionEstablishmentDto {
         val root = p.codec.readTree<JsonNode>(p)
 
-        require(root.isObject) { "Expected a CBOR map object" }
+        require(root.isObject) {
+            CborErrors.DECODING_ERROR.errorMessage
+        }
 
         val eReaderKeyNode = root[E_READER_KEY]
-        requireNotNull(eReaderKeyNode) { "Missing required field: 'eReaderKey'" }
+        requireNotNull(eReaderKeyNode) {
+            CborErrors.PARSING_ERROR.errorMessage
+        }
 
         val dataNode = root[SESSION_ESTABLISHMENT_DATA]
-        requireNotNull(dataNode) { "Missing required field: 'data'" }
+        requireNotNull(dataNode) {
+            CborErrors.PARSING_ERROR.errorMessage
+        }
 
         val eReaderKeyBytes = eReaderKeyNode.binaryValue()
         val dataBytes = dataNode.binaryValue()

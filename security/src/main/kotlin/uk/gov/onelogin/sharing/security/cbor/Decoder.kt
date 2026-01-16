@@ -29,70 +29,78 @@ private const val TAG = "decodeDeviceEngagement"
  * @param cborBase64Url The CBOR-encoded data represented as a Base64 URL string.
  * @param logger An instance of [Logger] for logging events.
  */
-fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagementDto? {
+fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagementDto? = try {
     val cborData = cborBase64Url.base64Decode()
 
     val cborMapper = ObjectMapper(CBORFactory()).apply {
         registerModule(KotlinModule.Builder().build())
     }
 
-    return try {
-        val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
-        logger.debug(TAG, "Successfully deserialized DeviceEngagementDto:")
-        @RequiresImplementation(
-            details = [
-                ImplementationDetail(
-                    ticket = "N/A not captured",
-                    description = "Create DTO -> Domain mapping functions for verifier to extract" +
-                        "deserialized device engagement message"
-                )
-            ]
-        )
-        logger.debug(TAG, " - Version: ${deviceEngagement.version}")
-        logger.debug(
-            TAG,
-            " - Security - Cipher Suite: " +
-                "${deviceEngagement.security.cipherSuiteIdentifier}"
-        )
-        logger.debug(
-            TAG,
-            " - Security - Ephemeral Public Key (as hex): " +
-                "${deviceEngagement.security.ephemeralPublicKey}"
-        )
-        logger.debug(
-            TAG,
-            " - Device Retrieval Methods: " +
-                "${deviceEngagement.deviceRetrievalMethods}"
-        )
+    val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
+    logger.debug(TAG, "Successfully deserialized DeviceEngagementDto:")
+    @RequiresImplementation(
+        details = [
+            ImplementationDetail(
+                ticket = "N/A not captured",
+                description = "Create DTO -> Domain mapping functions for verifier to extract" +
+                    "deserialized device engagement message"
+            )
+        ]
+    )
+    logger.debug(TAG, " - Version: ${deviceEngagement.version}")
+    logger.debug(
+        TAG,
+        " - Security - Cipher Suite: " +
+            "${deviceEngagement.security.cipherSuiteIdentifier}"
+    )
+    logger.debug(
+        TAG,
+        " - Security - Ephemeral Public Key (as hex): " +
+            "${deviceEngagement.security.ephemeralPublicKey}"
+    )
+    logger.debug(
+        TAG,
+        " - Device Retrieval Methods: " +
+            "${deviceEngagement.deviceRetrievalMethods}"
+    )
 
-        deviceEngagement
-    } catch (e: JsonProcessingException) {
-        // We need to send error status code 10 to the reader in the event of CBOR decoding errors
-        logger.debug(TAG, "Failed to deserialize CBOR: ${e.message}")
-        null
-    }
+    deviceEngagement
+} catch (e: JsonProcessingException) {
+    // We need to send error status code 10 to the reader in the event of CBOR decoding errors
+    logger.debug(TAG, "Failed to deserialize CBOR: ${e.message}")
+    null
+} catch (e: IllegalArgumentException) {
+    logger.debug(TAG, "Illegal parameters found: ${e.message}")
+    null
 }
 
 fun String.base64Decode(decoder: Base64.Decoder = Base64.getUrlDecoder()): ByteArray =
     decoder.decode(this)
 
-fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): SessionEstablishmentDto {
-    val mapper = ObjectMapper(CBORFactory()).apply {
-        registerModule(KotlinModule.Builder().build())
+fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): SessionEstablishmentDto =
+    try {
+        val mapper = ObjectMapper(CBORFactory()).apply {
+            registerModule(KotlinModule.Builder().build())
+        }
+
+        val rawDto = mapper.readValue(rawBytes, SessionEstablishmentDto::class.java)
+        requireNotNull(rawDto) {
+            CborErrors.DECODING_ERROR.errorMessage
+        }
+
+        val sessionEstablishmentDto = SessionEstablishmentDto(
+            eReaderKey = EmbeddedCbor(rawDto.eReaderKey.encodeCbor()),
+            data = rawDto.data
+        )
+
+        logger.debug(
+            logger.logTag,
+            "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
+                "data: ${sessionEstablishmentDto.data.toHexString()} "
+        )
+
+        sessionEstablishmentDto
+    } catch (e: IllegalArgumentException) {
+        logger.debug(logger.logTag, e.message.toString())
+        throw e
     }
-
-    val rawDto = mapper.readValue(rawBytes, SessionEstablishmentDto::class.java)
-
-    val sessionEstablishmentDto = SessionEstablishmentDto(
-        eReaderKey = EmbeddedCbor(rawDto.eReaderKey.encodeCbor()),
-        data = rawDto.data
-    )
-
-    logger.debug(
-        logger.logTag,
-        "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
-            "data: ${sessionEstablishmentDto.data.toHexString()} "
-    )
-
-    return sessionEstablishmentDto
-}
