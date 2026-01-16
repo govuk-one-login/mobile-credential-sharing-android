@@ -25,5 +25,6 @@ internal object AdvertisingParametersMapper {
             .setInterval(parameters.interval)
             .setTxPowerLevel(parameters.txPowerLevel)
             .setConnectable(parameters.connectable)
+            .setScannable(parameters.scannable)
             .build()
 }

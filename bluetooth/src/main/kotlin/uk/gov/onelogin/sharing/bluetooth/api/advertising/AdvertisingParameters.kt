@@ -16,8 +16,9 @@ import android.bluetooth.le.AdvertisingSetParameters.TX_POWER_MEDIUM
  * @param connectable Whether the advertising is connectable. Defaults to `true`.
  */
 data class AdvertisingParameters(
-    val legacyMode: Boolean = false,
+    val legacyMode: Boolean = true,
     val interval: Int = INTERVAL_HIGH,
     val txPowerLevel: Int = TX_POWER_MEDIUM,
-    val connectable: Boolean = true
+    val connectable: Boolean = true,
+    val scannable: Boolean = true
 )
