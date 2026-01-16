@@ -71,11 +71,16 @@ class GattServerCallback(
                     LAST_PART -> {
                         messages.remove(characteristic.uuid)
 
+                        val fullMessage = previousMessages + newMessage
+
                         gatGattEventEmitter.emit(
-                            GattEvent.MessageReceived(previousMessages + newMessage)
+                            GattEvent.MessageReceived(fullMessage)
                         )
 
-                        logger.debug(logTag, "received message: $message")
+                        val fullMessageString = fullMessage
+                            .joinToString { BYTE_TO_HEX_FORMAT.format(it) }
+
+                        logger.debug(logTag, "received message: $fullMessageString")
                     }
 
                     else -> {
