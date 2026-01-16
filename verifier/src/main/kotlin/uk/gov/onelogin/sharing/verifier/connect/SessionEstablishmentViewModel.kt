@@ -119,6 +119,7 @@ class SessionEstablishmentViewModel(
                         }
 
                     is VerifierSessionState.Disconnected -> {
+                        logger.debug(logTag, "Bluetooth connection dropped")
                         val started = _uiState.value.connectionStateStarted
                         if (started) {
                             mdocVerifierSession.stop()
@@ -295,6 +296,7 @@ class SessionEstablishmentViewModel(
         }
 
         if (shouldShowError) {
+            logger.debug(logTag, "Bluetooth app permissions revoked during session")
             _navEvents.tryEmit(
                 ConnectWithHolderDeviceNavEvent.NavigateToError(
                     ConnectWithHolderDeviceError.BluetoothPermissionsError

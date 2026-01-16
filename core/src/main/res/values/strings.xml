@@ -6,4 +6,8 @@
     <string name="disabled">Disabled</string>
     <string name="enabled">Enabled</string>
     <string name="granted">Granted</string>
+
+    <!-- Bluetooth connection errors -->
+    <string name="bluetooth_disconnected_unexpectedly">Bluetooth disconnected unexpectedly</string>
+    <string name="bluetooth_permissions_revoked">Bluetooth permissions were revoked during the session</string>
 </resources>

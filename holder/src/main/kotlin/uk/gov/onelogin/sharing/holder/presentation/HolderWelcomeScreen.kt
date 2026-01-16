@@ -32,15 +32,15 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_TURNED_
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.core.R.string.bluetooth_disconnected_unexpectedly
+import uk.gov.onelogin.sharing.core.R.string.bluetooth_permissions_revoked
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.holder.R.string.bluetooth_disconnected_unexpectedly
-import uk.gov.onelogin.sharing.holder.R.string.bluetooth_permissions_revoked
-import uk.gov.onelogin.sharing.holder.R.string.bluetooth_turned_off
+import uk.gov.onelogin.sharing.holder.R.string.bluetooth_turned_off_holder
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 
 private const val QR_SIZE = 800
@@ -95,7 +95,7 @@ fun HolderScreenContent(
             val errorText = when (contentState.bluetoothErrorType) {
                 BLUETOOTH_DISCONNECTED -> bluetooth_disconnected_unexpectedly
                 PERMISSIONS_MISSING -> bluetooth_permissions_revoked
-                BLUETOOTH_TURNED_OFF -> bluetooth_turned_off
+                BLUETOOTH_TURNED_OFF -> bluetooth_turned_off_holder
             }
 
             ErrorScreen(errorText = stringResource(errorText))
@@ -103,7 +103,7 @@ fun HolderScreenContent(
 
         contentState.showEnableBluetoothPrompt &&
             contentState.hasBluetoothPermissions == true -> {
-            EnableBluetoothPrompt(denialText = bluetooth_turned_off)
+            EnableBluetoothPrompt(denialText = bluetooth_turned_off_holder)
         }
 
         contentState.hasBluetoothPermissions == true -> {

@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.verifier.R
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceError
 
@@ -44,15 +45,15 @@ enum class ConnectWithHolderDeviceRouteErrorData(
         errorType = ConnectWithHolderDeviceError.GenericError
     ),
     BLUETOOTH_CONNECTION_ERROR(
-        errorRes = R.string.bluetooth_disconnected_unexpectedly,
+        errorRes = coreR.string.bluetooth_disconnected_unexpectedly,
         errorType = ConnectWithHolderDeviceError.BluetoothConnectionError
     ),
     BLUETOOTH_OFF_ERROR(
-        errorRes = R.string.bluetooth_turned_off,
+        errorRes = R.string.bluetooth_turned_off_verifier,
         errorType = ConnectWithHolderDeviceError.BluetoothDisabledError
     ),
     BLUETOOTH_PERMISSIONS_ERROR(
-        errorRes = R.string.bluetooth_permissions_revoked,
+        errorRes = coreR.string.bluetooth_permissions_revoked,
         errorType = ConnectWithHolderDeviceError.BluetoothPermissionsError
     )
 }

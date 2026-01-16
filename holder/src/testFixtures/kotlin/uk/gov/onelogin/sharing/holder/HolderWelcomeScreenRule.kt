@@ -49,7 +49,7 @@ class HolderWelcomeScreenRule(
         permissionDeniedText = resources.getString(
             R.string.bluetooth_permission_permanently_denied
         ),
-        bluetoothDisabledText = resources.getString(R.string.bluetooth_turned_off)
+        bluetoothDisabledText = resources.getString(R.string.bluetooth_turned_off_holder)
     )
 
     val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
