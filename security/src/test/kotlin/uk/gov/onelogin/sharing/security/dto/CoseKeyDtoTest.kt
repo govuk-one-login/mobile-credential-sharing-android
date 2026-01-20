@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
 import uk.gov.onelogin.sharing.security.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.security.cose.Cose
 import uk.gov.onelogin.sharing.security.cose.CoseKey
@@ -17,13 +17,13 @@ class CoseKeyDtoTest {
 
     @Before
     fun setup() {
-        genKey = generateValidKeyPair()!!
+        genKey = generateValidPublicKeyPair()!!
         coseKey = CoseKey.generateCoseKey(genKey)
     }
 
     @Test
     fun `equals should return true for instances with same values`() {
-        val genKey = generateValidKeyPair()
+        val genKey = generateValidPublicKeyPair()
         val coseKey = CoseKey.generateCoseKey(genKey!!)
 
         val dto1 = CoseKeyDto(

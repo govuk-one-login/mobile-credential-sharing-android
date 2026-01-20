@@ -1,13 +1,13 @@
 package uk.gov.onelogin.sharing.security
 
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
 import uk.gov.onelogin.sharing.security.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.security.cbor.dto.SecurityDto
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 object SecurityDeserializerStub {
 
-    private val keyPair = generateValidKeyPair()
+    private val keyPair = generateValidPublicKeyPair()
     private val coseKey = CoseKey.generateCoseKey(keyPair!!)
 
     val expectedCoseKey = CoseKeyDto(

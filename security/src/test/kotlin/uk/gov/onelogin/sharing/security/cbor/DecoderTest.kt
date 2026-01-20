@@ -2,7 +2,11 @@ package uk.gov.onelogin.sharing.security.cbor
 
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
+import java.security.InvalidKeyException
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 import junit.framework.TestCase.assertTrue
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
@@ -19,6 +23,11 @@ import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.eReaderKeyHexFo
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingDataParameter
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingEReader
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidUnsupportedKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
+import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 class DecoderTest {
 
@@ -151,5 +160,60 @@ class DecoderTest {
 
         assertTrue(actualErrorMessage.contains("Illegal parameter"))
         assertNull(result)
+    }
+
+    @Test
+    fun `should generate the same shared secret on holder and reader`() {
+        val readerKeyPair = generateValidKeyPair()
+        val holderKeyPair = generateValidKeyPair()
+
+        val eReaderSharedSecret = getSharedSecret(
+            readerKeyPair?.private as ECPrivateKey,
+            holderKeyPair?.public as ECPublicKey
+        )
+
+        val holderSharedSecret = getSharedSecret(
+            holderKeyPair.private as ECPrivateKey,
+            readerKeyPair.public as ECPublicKey
+        )
+
+        assertArrayEquals(eReaderSharedSecret, holderSharedSecret)
+    }
+
+    @Test
+    fun `should throw error if unsupported curve used to create shared secret`() {
+        val readerKeyPair = generateValidKeyPair()
+        val holderKeyPair = generateValidUnsupportedKeyPair()
+
+        assertThrows(InvalidKeyException::class.java) {
+            getSharedSecret(
+                holderKeyPair?.private as ECPrivateKey,
+                readerKeyPair?.public as ECPublicKey
+            )
+        }
+        val actualErrorMessage = outContent.toString()
+
+        assert(actualErrorMessage.contains("Unable to create shared secret"))
+    }
+
+    @Test
+    fun `should use eReaderKey from sessionEstablishment model to generate shared secret`() {
+        val holderKeyPair = generateValidKeyPair()
+
+        val sessionEstablishment = decodeSessionEstablishmentModel(
+            MOCK_SESSION_ESTABLISHMENT_DATA.hexToByteArray(),
+            logger
+        ).toSessionEstablishment()
+
+        val untagReaderKey = getUntaggedCoseKey(sessionEstablishment.eReaderKey)
+
+        val eReaderKeyPublicKey = CoseKey.parseEReaderPublicKey(untagReaderKey)
+
+        val sharedSecret = getSharedSecret(
+            holderKeyPair?.private as ECPrivateKey,
+            eReaderKeyPublicKey
+        )
+
+        assertNotNull(sharedSecret)
     }
 }

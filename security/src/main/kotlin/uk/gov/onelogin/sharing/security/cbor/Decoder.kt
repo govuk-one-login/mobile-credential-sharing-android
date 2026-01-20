@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.security.cbor
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -104,3 +105,14 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
         logger.debug(logger.logTag, e.message.toString())
         throw e
     }
+
+fun getUntaggedCoseKey(tagged: ByteArray): ByteArray {
+    val cborMapper = ObjectMapper(CBORFactory())
+
+    val tree = cborMapper.readTree(tagged)
+
+    val keyNode = tree as? BinaryNode
+        ?: throw IllegalArgumentException("Expected tag 24 containing binary COSE_Key")
+
+    return keyNode.binaryValue()
+}

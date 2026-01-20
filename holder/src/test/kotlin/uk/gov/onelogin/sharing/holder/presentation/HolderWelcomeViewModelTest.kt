@@ -37,7 +37,7 @@ class HolderWelcomeViewModelTest {
     private fun createViewModel(
         mdocSessionManager: MdocSessionManager = FakeMdocSessionManager(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
-        sessionSecurity: SessionSecurity = FakeSessionSecurity(publicKey = null)
+        sessionSecurity: SessionSecurity = FakeSessionSecurity(keyPair = null)
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
@@ -61,7 +61,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `sets qr code data when key is generated`() = runTest {
         val dummyPublicKey = SessionSecurityTestStub.generateValidKeyPair()
-        val fakeSessionSecurity = FakeSessionSecurity(publicKey = dummyPublicKey)
+        val fakeSessionSecurity = FakeSessionSecurity(keyPair = dummyPublicKey!!)
         val viewModel = createViewModel(sessionSecurity = fakeSessionSecurity)
 
         advanceUntilIdle()

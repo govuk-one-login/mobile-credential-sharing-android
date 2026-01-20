@@ -1,7 +1,16 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
+import java.security.KeyPair
+import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
+import uk.gov.logging.api.Logger
 
-fun interface SessionSecurity {
-    fun generateEcPublicKey(algorithm: String, parameterSpec: String): ECPublicKey?
+interface SessionSecurity {
+    fun generateEcKeyPair(algorithm: String, parameterSpec: String): KeyPair?
+
+    fun generateSharedSecret(
+        holderKey: ECPrivateKey,
+        eReaderKey: ECPublicKey,
+        logger: Logger
+    ): ByteArray
 }

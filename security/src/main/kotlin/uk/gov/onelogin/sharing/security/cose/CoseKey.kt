@@ -1,7 +1,14 @@
 package uk.gov.onelogin.sharing.security.cose
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 import java.math.BigInteger
+import java.security.AlgorithmParameters
+import java.security.KeyFactory
 import java.security.interfaces.ECPublicKey
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.ECPublicKeySpec
 
 /**
  * Represents a COSE Key, specifically formatted for Elliptic Curve keys (EC2).
@@ -67,6 +74,29 @@ data class CoseKey(
             } else {
                 bytes.copyOfRange(bytes.size - THIRTY_TWO_BYTES, bytes.size)
             }
+        }
+
+        fun parseEReaderPublicKey(eReaderBytes: ByteArray): ECPublicKey {
+            val cborMapper = CBORMapper()
+            val node = cborMapper.readTree(eReaderBytes) as? ObjectNode
+                ?: throw IllegalArgumentException("Invalid COSE key")
+
+            val xBytesRaw = node.get("-2")?.binaryValue()
+            val yBytesRaw = node.get("-3")?.binaryValue()
+
+            val xBytes = padEcCoordinatesTo32Bytes(BigInteger(1, xBytesRaw))
+            val yBytes = padEcCoordinatesTo32Bytes(BigInteger(1, yBytesRaw))
+
+            val x = BigInteger(1, xBytes)
+            val y = BigInteger(1, yBytes)
+
+            val params = AlgorithmParameters.getInstance("EC").apply {
+                init(ECGenParameterSpec("secp256r1"))
+            }
+            val ecSpec = params.getParameterSpec(java.security.spec.ECParameterSpec::class.java)
+
+            val pubSpec = ECPublicKeySpec(ECPoint(x, y), ecSpec)
+            return KeyFactory.getInstance("EC").generatePublic(pubSpec) as ECPublicKey
         }
     }
 }

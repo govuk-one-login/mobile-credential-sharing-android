@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.holder.QrCodeGenerator.INVALID_QR_CODE_DATA
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_DATA
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_SIZE
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.BASE64_ENCODED_DEVICE_ENGAGEMENT
@@ -70,7 +70,7 @@ class QrCodeImageTest {
         val mdocUri = Engagement { _, _ -> BASE64_ENCODED_DEVICE_ENGAGEMENT }
 
         composeTestRule.setContent {
-            val key = generateValidKeyPair()
+            val key = generateValidPublicKeyPair()
             val coseKey = CoseKey.generateCoseKey(key!!)
 
             QrCodeImage(

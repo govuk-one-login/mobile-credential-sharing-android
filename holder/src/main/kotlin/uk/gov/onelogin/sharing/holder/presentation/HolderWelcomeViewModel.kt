@@ -12,6 +12,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -64,8 +65,8 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            val pubKey = sessionSecurity.generateEcPublicKey(EC_ALGORITHM, EC_PARAMETER_SPEC)
-            val key = pubKey?.let { CoseKey.generateCoseKey(it) }
+            val keyPair = sessionSecurity.generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
+            val key = keyPair?.let { CoseKey.generateCoseKey(it.public as ECPublicKey) }
             if (key != null) {
                 val engagement = engagementGenerator.qrCodeEngagement(key, _uiState.value.uuid)
                 _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }

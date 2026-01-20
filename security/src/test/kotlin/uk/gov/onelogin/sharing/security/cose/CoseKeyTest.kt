@@ -1,16 +1,22 @@
 package uk.gov.onelogin.sharing.security.cose
 
 import java.math.BigInteger
+import kotlin.test.assertNotNull
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
+import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
+import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
+import uk.gov.onelogin.sharing.security.cbor.getUntaggedCoseKey
+import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 class CoseKeyTest {
 
     @Test
     fun `should convert EcPublicKey to CoseKey with key type EC2`() {
-        val keyPair = generateValidKeyPair()
+        val keyPair = generateValidPublicKeyPair()
         val coseKey = CoseKey.generateCoseKey(keyPair!!)
 
         assertEquals(Cose.KEY_TYPE_EC2, coseKey.keyType)
@@ -18,7 +24,7 @@ class CoseKeyTest {
 
     @Test
     fun `should convert EcPublicKey to CoseKey with curve P-256`() {
-        val keyPair = generateValidKeyPair()
+        val keyPair = generateValidPublicKeyPair()
         val coseKey = CoseKey.generateCoseKey(keyPair!!)
 
         assertEquals(Cose.CURVE_P256, coseKey.curve)
@@ -26,7 +32,7 @@ class CoseKeyTest {
 
     @Test
     fun `should convert EcPublicKey to CoseKey with 32 byte length X coordinates`() {
-        val keyPair = generateValidKeyPair()
+        val keyPair = generateValidPublicKeyPair()
         val coseKey = CoseKey.generateCoseKey(keyPair!!)
 
         assertEquals(32, coseKey.x.size)
@@ -34,7 +40,7 @@ class CoseKeyTest {
 
     @Test
     fun `should convert EcPublicKey to CoseKey with 32 byte length Y coordinates`() {
-        val keyPair = generateValidKeyPair()
+        val keyPair = generateValidPublicKeyPair()
         val coseKey = CoseKey.generateCoseKey(keyPair!!)
 
         assertEquals(32, coseKey.y.size)
@@ -67,5 +73,19 @@ class CoseKeyTest {
 
         val expected = ByteArray(29) { 0 } + smallByteArray
         assertArrayEquals(expected, result)
+    }
+
+    @Test
+    fun `parseEReaderPublicKey with valid key returns ECPublicKey`() {
+        val sessionEstablishment = decodeSessionEstablishmentModel(
+            MOCK_SESSION_ESTABLISHMENT_DATA.hexToByteArray(),
+            SystemLogger()
+        ).toSessionEstablishment()
+
+        val untagReaderKey = getUntaggedCoseKey(sessionEstablishment.eReaderKey)
+
+        val resultPublicKey = CoseKey.parseEReaderPublicKey(untagReaderKey)
+
+        assertNotNull(resultPublicKey)
     }
 }
