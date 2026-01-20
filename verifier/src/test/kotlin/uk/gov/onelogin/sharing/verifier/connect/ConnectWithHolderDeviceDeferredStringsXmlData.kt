@@ -22,7 +22,7 @@ enum class ConnectWithHolderDeviceDeferredStringsXmlData(
         resourceId = R.string.connect_with_holder_decoded_data
     ),
     CONNECT_WITH_HOLDER_DECODE_ERROR(
-        defersTo = R.string.could_not_decode_device_engagement,
+        defersTo = R.string.generic_error,
         resourceId = R.string.connect_with_holder_error_decode
     ),
     CONNECT_WITH_HOLDER_HEADING(

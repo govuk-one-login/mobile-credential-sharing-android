@@ -13,7 +13,7 @@ enum class BluetoothConnectionErrorDeferredStringsXmlData(
     @param:StringRes val resourceId: Int
 ) {
     BLUETOOTH_CONNECTION_ERROR_GENERIC(
-        defersTo = R.string.could_not_decode_device_engagement,
+        defersTo = R.string.generic_error,
         resourceId = R.string.bluetooth_connection_error_generic
     ),
     BLUETOOTH_CONNECTION_ERROR_INVALID_CONFIGURATION(
