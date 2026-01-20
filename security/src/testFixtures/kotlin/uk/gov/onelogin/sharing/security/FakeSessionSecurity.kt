@@ -9,12 +9,7 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 class FakeSessionSecurity(private val keyPair: KeyPair?) : SessionSecurity {
 
     // Returns the public key for engagement
-    override fun generateEcKeyPair(
-        algorithm: String,
-        parameterSpec: String
-    ): KeyPair? {
-        return keyPair
-    }
+    override fun generateEcKeyPair(algorithm: String, parameterSpec: String): KeyPair? = keyPair
     override fun generateSharedSecret(
         holderKey: ECPrivateKey,
         eReaderKey: ECPublicKey,

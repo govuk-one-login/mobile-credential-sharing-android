@@ -53,6 +53,19 @@ class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
         null
     }
 
+    /**
+     * Generates a shared secret using the Elliptic Curve Diffie-Hellman (ECDH) key agreement protocol.
+     *
+     * This method takes the holder's private key and the eReader's public key to compute a
+     * common secret that can be used to derive symmetric keys for encrypting communication.
+     *
+     * @param holderKey The private key of the key holder.
+     * @param eReaderKey The public key of the reader.
+     * @param logger A [Logger] instance for logging debug information in case of an error.
+     * @return A [ByteArray] containing the computed shared secret.
+     * @throws InvalidKeyException if the provided keys are invalid or incompatible for ECDH,
+     *         wrapping the original exception.
+     */
     override fun generateSharedSecret(
         holderKey: ECPrivateKey,
         eReaderKey: ECPublicKey,

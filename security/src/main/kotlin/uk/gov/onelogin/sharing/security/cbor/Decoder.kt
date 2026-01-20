@@ -106,6 +106,14 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
         throw e
     }
 
+/**
+ * Extracts a raw COSE_Key from a CBOR-tagged byte string.
+
+ * @param tagged The input [ByteArray] containing the CBOR-tagged (tag 24) COSE_Key.
+ * @return The raw, untagged [ByteArray] of the COSE_Key.
+ * @throws IllegalArgumentException if the input data is not a CBOR structure
+ *         containing tag 24.
+ */
 fun getUntaggedCoseKey(tagged: ByteArray): ByteArray {
     val cborMapper = ObjectMapper(CBORFactory())
 

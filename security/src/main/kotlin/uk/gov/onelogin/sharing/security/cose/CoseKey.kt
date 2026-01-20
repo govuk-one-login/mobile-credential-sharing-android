@@ -76,6 +76,15 @@ data class CoseKey(
             }
         }
 
+        /**
+         * Parses a COSE public key from its CBOR byte representation into a standard
+         * [ECPublicKey] object.
+         *
+         * @param eReaderBytes The raw [ByteArray] of the CBOR-encoded COSE public key.
+         * @return An [ECPublicKey] instance corresponding to the input bytes.
+         * @throws IllegalArgumentException if the input is not a valid CBOR object, or if the
+         *         X or Y coordinates are missing from the COSE key structure.
+         */
         fun parseEReaderPublicKey(eReaderBytes: ByteArray): ECPublicKey {
             val cborMapper = CBORMapper()
             val node = cborMapper.readTree(eReaderBytes) as? ObjectNode
