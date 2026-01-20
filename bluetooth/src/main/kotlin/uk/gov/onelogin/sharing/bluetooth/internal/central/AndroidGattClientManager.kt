@@ -78,6 +78,7 @@ internal class AndroidGattClientManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun disconnect() {
+        logger.debug(logTag, "Disconnect GATT client")
         bluetoothGatt?.disconnect()
         bluetoothGatt?.close()
         bluetoothGatt = null

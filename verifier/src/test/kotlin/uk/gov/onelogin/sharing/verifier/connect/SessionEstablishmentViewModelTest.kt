@@ -246,6 +246,24 @@ class SessionEstablishmentViewModelTest {
         }
 
     @Test
+    fun `Failed to find GATT service navigates to Bluetooth Configuration Error screen`() =
+        runTest {
+            viewModel = createViewModel(DummyBluetoothScanner)
+            viewModel.navEvents.test {
+                fakeVerifierSession.updateState(
+                    VerifierSessionState.ServiceNotFound
+                )
+
+                assertEquals(
+                    ConnectWithHolderDeviceNavEvent.NavigateToError(
+                        ConnectWithHolderDeviceError.BluetoothConfigurationError
+                    ),
+                    awaitItem()
+                )
+            }
+        }
+
+    @Test
     fun `navigates to error screen when bluetooth disconnects during session`() = runTest {
         viewModel = createViewModel(DummyBluetoothScanner)
         viewModel.navEvents.test {

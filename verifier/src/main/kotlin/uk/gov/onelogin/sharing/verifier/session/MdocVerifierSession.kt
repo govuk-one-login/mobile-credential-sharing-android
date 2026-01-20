@@ -76,8 +76,10 @@ class MdocVerifierSession(
                 _state.value = VerifierSessionState.Disconnected(event.deviceAddress)
 
             is GattClientEvent.Error -> {
+                stop()
                 _state.value = when (event.error) {
                     ClientError.INVALID_SERVICE -> VerifierSessionState.Invalid
+                    ClientError.SERVICE_NOT_FOUND -> VerifierSessionState.ServiceNotFound
                     else -> VerifierSessionState.Error(event.error.toString())
                 }
             }
