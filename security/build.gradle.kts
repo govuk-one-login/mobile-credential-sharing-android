@@ -47,6 +47,10 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
+        libs.com.google.test.parameter.injector
+    ).forEach(::testFixturesApi)
+
+    listOf(
         libs.jackson.cbor,
         projects.security,
         projects.models

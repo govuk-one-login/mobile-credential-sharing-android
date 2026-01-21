@@ -1,15 +1,19 @@
 package uk.gov.onelogin.sharing.security.cbor
 
 import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.core.exc.StreamReadException
+import com.fasterxml.jackson.databind.DatabindException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.io.IOException
 import java.util.Base64
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptDecoderImpl
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
@@ -74,9 +78,18 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
     null
 }
 
+@Throws(
+    IllegalArgumentException::class
+)
 fun String.base64Decode(decoder: Base64.Decoder = Base64.getUrlDecoder()): ByteArray =
     decoder.decode(this)
 
+@Throws(
+    IllegalArgumentException::class,
+    IOException::class,
+    StreamReadException::class,
+    DatabindException::class
+)
 fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): SessionEstablishmentDto =
     try {
         val mapper = ObjectMapper(CBORFactory()).apply {
@@ -104,3 +117,18 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
         logger.debug(logger.logTag, e.message.toString())
         throw e
     }
+
+@Throws(
+    IllegalArgumentException::class,
+    IOException::class,
+    StreamReadException::class,
+    DatabindException::class
+)
+fun deriveSessionTranscript(
+    cborBase64Url: String,
+    sessionEstablishmentBytes: ByteArray,
+    logger: Logger
+): ByteArray = SessionTranscriptDecoderImpl(logger).deriveSessionTranscript(
+    cborBase64Url = cborBase64Url,
+    sessionEstablishmentBytes = sessionEstablishmentBytes
+)

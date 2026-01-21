@@ -12,7 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
-import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
+import uk.gov.onelogin.sharing.security.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.eReaderKeyHexFormat
@@ -43,7 +43,7 @@ class DecoderTest {
     @Test
     fun `successfully decodes device engagement from base64 url cbor`() {
         val result = decodeDeviceEngagement(
-            cborBase64Url = VALID_CBOR,
+            cborBase64Url = VALID_ENCODED_DEVICE_ENGAGEMENT,
             logger = logger
         )
 

@@ -18,7 +18,7 @@ class DeviceEngagementDtoTest {
         val cborFactory = CBORFactory()
         val cborMapper = ObjectMapper(cborFactory)
 
-        val cborData = Base64.getUrlDecoder().decode(DecoderStub.VALID_CBOR)
+        val cborData = Base64.getUrlDecoder().decode(DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT)
 
         val actualDto: DeviceEngagementDto = cborMapper.readValue(cborData)
 
