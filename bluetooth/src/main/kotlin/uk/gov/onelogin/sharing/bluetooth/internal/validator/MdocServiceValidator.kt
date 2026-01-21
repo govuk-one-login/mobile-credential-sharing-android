@@ -69,14 +69,14 @@ class MdocServiceValidator(private val logger: Logger) : ServiceValidator {
     ): BluetoothGattCharacteristic? {
         val characteristic = service.getCharacteristic(uuid)
         if (characteristic == null) {
-            logger.error(logTag, "Missing required $name characteristic")
+            logger.debug(logTag, "Missing required $name characteristic")
             errors.add("$name characteristic not found ($uuid)")
             return null
         }
 
         requiredProperties.forEach { property ->
             if (!characteristic.hasProperty(property)) {
-                logger.error(
+                logger.debug(
                     logTag,
                     "$name characteristic missing required property: $property"
                 )

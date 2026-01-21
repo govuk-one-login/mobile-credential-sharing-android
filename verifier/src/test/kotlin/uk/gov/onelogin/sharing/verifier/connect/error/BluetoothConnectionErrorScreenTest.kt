@@ -54,6 +54,6 @@ class BluetoothConnectionErrorScreenTest {
 class BluetoothConnectionErrorTitlesProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<Int> = listOf(
         R.string.bluetooth_connection_error_generic,
-        R.string.bluetooth_connection_error_invalid_configuration
+        R.string.bluetooth_connection_error_failed
     )
 }

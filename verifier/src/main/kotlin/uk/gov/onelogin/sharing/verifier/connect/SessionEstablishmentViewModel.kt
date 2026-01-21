@@ -97,7 +97,8 @@ class SessionEstablishmentViewModel(
         viewModelScope.launch {
             mdocVerifierSession.state.collect { sessionState ->
                 when (sessionState) {
-                    is VerifierSessionState.Invalid ->
+                    VerifierSessionState.Invalid,
+                    VerifierSessionState.ServiceNotFound ->
                         _navEvents.tryEmit(
                             ConnectWithHolderDeviceNavEvent.NavigateToError(
                                 ConnectWithHolderDeviceError.BluetoothConfigurationError
