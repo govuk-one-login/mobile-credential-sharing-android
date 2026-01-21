@@ -28,18 +28,19 @@ interface PermissionChecker {
 
     companion object {
         @JvmStatic
-        fun advertiseFineLocationPermissions(): List<String> = buildList {
+        fun centralPermissions(): List<String> = buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 add(Manifest.permission.BLUETOOTH_SCAN)
                 add(Manifest.permission.BLUETOOTH_CONNECT)
                 add(Manifest.permission.ACCESS_FINE_LOCATION)
             } else {
+                add(Manifest.permission.ACCESS_FINE_LOCATION)
                 add(Manifest.permission.BLUETOOTH)
             }
         }
 
         @JvmStatic
-        fun advertisePermissions(): List<String> = buildList {
+        fun peripheralPermissions(): List<String> = buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 add(Manifest.permission.BLUETOOTH_CONNECT)
                 add(Manifest.permission.BLUETOOTH_ADVERTISE)
@@ -47,14 +48,5 @@ interface PermissionChecker {
                 add(Manifest.permission.BLUETOOTH)
             }
         }
-
-        @JvmStatic
-        fun centralPermissions(): List<String> = listOf(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Manifest.permission.BLUETOOTH_CONNECT
-            } else {
-                Manifest.permission.BLUETOOTH
-            }
-        )
     }
 }

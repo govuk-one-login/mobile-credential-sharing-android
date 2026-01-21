@@ -44,7 +44,8 @@ fun ConnectWithHolderDeviceScreen(
     modifier: Modifier = Modifier,
     viewModel: SessionEstablishmentViewModel = metroViewModel(),
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = PermissionChecker.advertiseFineLocationPermissions()
+        permissions = PermissionChecker.centralPermissions()
+
     ) {
         viewModel.receive(ConnectWithHolderDeviceEvent.RequestedPermission(true))
     },
@@ -232,7 +233,7 @@ internal fun ConnectWithHolderDevicePreview(
                 engagementData = engagementData
             ),
             multiplePermissionsState = rememberMultiplePermissionsState(
-                permissions = PermissionChecker.advertiseFineLocationPermissions()
+                permissions = PermissionChecker.centralPermissions()
             ) {},
             modifier = Modifier.background(Color.White)
         )

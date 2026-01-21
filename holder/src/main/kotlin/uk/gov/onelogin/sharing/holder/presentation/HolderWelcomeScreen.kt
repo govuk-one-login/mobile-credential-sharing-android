@@ -52,7 +52,7 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewMod
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     val multiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = PermissionChecker.advertisePermissions()
+        permissions = PermissionChecker.peripheralPermissions()
     ) {
         hasPreviouslyRequestedPermission = true
     }

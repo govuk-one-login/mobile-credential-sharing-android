@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
-import android.Manifest
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,6 +11,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker.Companion.centralPermissions
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
@@ -21,15 +20,8 @@ import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
 fun VerifyCredentialScreen(
     viewModel: VerifyCredentialViewModel = metroViewModel(),
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = buildList {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_SCAN)
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-                add(Manifest.permission.ACCESS_FINE_LOCATION)
-            } else {
-                add(Manifest.permission.BLUETOOTH)
-            }
-        }
+        permissions = centralPermissions()
+
     ) {
         viewModel.onPermissionRequestLaunched()
     },
