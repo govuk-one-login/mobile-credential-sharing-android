@@ -27,7 +27,6 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
         cborBase64Url: String,
         sessionEstablishmentBytes: ByteArray
     ): ByteArray {
-        val logTag = "deriveSessionTranscript"
         val logMessageSuffix = "from encoded device engagement and eReader bytes"
 
         return try {
