@@ -15,8 +15,6 @@ import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
  * session establishment data into a session transcript.
  */
 class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscriptDecoder {
-    private val logMessageSuffix = "from encoded device engagement and eReader bytes"
-
     @Throws(
         IllegalArgumentException::class,
         IOException::class,
@@ -26,30 +24,26 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
     override fun deriveSessionTranscript(
         cborBase64Url: String,
         sessionEstablishmentBytes: ByteArray
-    ): ByteArray {
-        val logMessageSuffix = "from encoded device engagement and eReader bytes"
+    ): ByteArray = try {
+        val result = deriveSessionTranscriptBytes(
+            cborBase64Url = cborBase64Url,
+            sessionEstablishmentBytes = sessionEstablishmentBytes
+        )
 
-        return try {
-            val result = deriveSessionTranscriptBytes(
-                cborBase64Url = cborBase64Url,
-                sessionEstablishmentBytes = sessionEstablishmentBytes
-            )
-
-            EmbeddedCbor(result).encodeCbor().also {
-                logger.debug(
-                    logTag,
-                    "Successfully derived session transcript $logMessageSuffix"
-                )
-            }
-        } catch (exception: IllegalArgumentException) {
-            logger.error(
+        EmbeddedCbor(result).encodeCbor().also {
+            logger.debug(
                 logTag,
-                "Cannot derive session transcript $logMessageSuffix",
-                exception
+                "Successfully derived session transcript $LOG_MESSAGE_SUFFIX"
             )
-
-            throw exception
         }
+    } catch (exception: IllegalArgumentException) {
+        logger.error(
+            logTag,
+            "Cannot derive session transcript $LOG_MESSAGE_SUFFIX",
+            exception
+        )
+
+        throw exception
     }
 
     /**
@@ -87,7 +81,7 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
         ).also {
             logger.debug(
                 this.logTag,
-                "Created session transcript array $logMessageSuffix"
+                "Created session transcript array $LOG_MESSAGE_SUFFIX"
             )
         }.forEach { element ->
             element?.let {
@@ -95,5 +89,9 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
             }
         }
         return result
+    }
+
+    companion object {
+        private const val LOG_MESSAGE_SUFFIX = "from encoded device engagement and eReader bytes"
     }
 }

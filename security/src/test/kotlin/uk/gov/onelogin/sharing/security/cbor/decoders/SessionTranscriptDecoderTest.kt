@@ -11,8 +11,8 @@ import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.LogEntry
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.security.DecoderStub.validSessionTranscript
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
+import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptStub.validSessionTranscript
 
 @RunWith(TestParameterInjector::class)
 class SessionTranscriptDecoderTest
