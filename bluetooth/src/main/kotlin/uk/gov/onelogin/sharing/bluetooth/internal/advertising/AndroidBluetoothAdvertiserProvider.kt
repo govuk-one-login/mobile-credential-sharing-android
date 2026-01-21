@@ -1,8 +1,10 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
+import android.Manifest
 import android.bluetooth.le.AdvertisingSet
 import android.bluetooth.le.AdvertisingSetCallback
 import android.bluetooth.le.BluetoothLeAdvertiser
+import androidx.annotation.RequiresPermission
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
@@ -61,6 +63,7 @@ internal class AndroidBluetoothAdvertiserProvider(
         }
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
     override fun stopAdvertisingSet() {
         try {
             advertiser?.stopAdvertisingSet(currentCallback)
