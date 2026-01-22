@@ -9,6 +9,8 @@ import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 
 /**
  * Represents a COSE Key, specifically formatted for Elliptic Curve keys (EC2).
@@ -77,13 +79,15 @@ data class CoseKey(
         }
 
         /**
-         * Parses a COSE public key from its CBOR byte representation into a standard
-         * [ECPublicKey] object.
+         * Parses a CBOR-encoded COSE key to extract the raw elliptic curve (EC) point.
          *
-         * @param eReaderBytes The raw [ByteArray] of the CBOR-encoded COSE public key.
-         * @return An [ECPublicKey] instance corresponding to the input bytes.
-         * @throws IllegalArgumentException if the input is not a valid CBOR object, or if the
-         *         X or Y coordinates are missing from the COSE key structure.
+         * This function decodes the provided byte array, expecting it to be a valid
+         * COSE_Key structure.
+         *
+         * @param eReaderBytes The byte array representing the raw, untagged COSE_Key.
+         * @return The parsed [ECPoint] containing the x and y coordinates.
+         * @throws IllegalArgumentException if the provided byte array is not a valid COSE key
+         * or if the coordinate fields are missing.
          */
         private fun parseEReaderPublicKey(eReaderBytes: ByteArray): ECPoint {
             val cborMapper = CBORMapper()
@@ -102,14 +106,23 @@ data class CoseKey(
             return ECPoint(x, y)
         }
 
+        /**
+         * Constructs a standard Java [ECPublicKey] from a raw, CBOR-encoded COSE_Key.
+         *
+         * This function orchestrates the conversion by first parsing the raw COSE key bytes
+         * into an [ECPoint] and then using the Java Security Library to generate a [ECPublicKey].
+         *
+         * @param eReaderBytes The byte array representing the raw, untagged COSE_Key.
+         * @return A fully constructed [ECPublicKey] instance.
+         */
         fun getEReaderKeyFromParsedCoseKey(eReaderBytes: ByteArray): ECPublicKey {
             val parsedKey = parseEReaderPublicKey(eReaderBytes)
-            val params = AlgorithmParameters.getInstance("EC").apply {
-                init(ECGenParameterSpec("secp256r1"))
+            val params = AlgorithmParameters.getInstance(EC_ALGORITHM).apply {
+                init(ECGenParameterSpec(EC_PARAMETER_SPEC))
             }
             val ecSpec = params.getParameterSpec(java.security.spec.ECParameterSpec::class.java)
             val pubSpec = ECPublicKeySpec(parsedKey, ecSpec)
-            return KeyFactory.getInstance("EC").generatePublic(pubSpec) as ECPublicKey
+            return KeyFactory.getInstance(EC_ALGORITHM).generatePublic(pubSpec) as ECPublicKey
         }
     }
 }

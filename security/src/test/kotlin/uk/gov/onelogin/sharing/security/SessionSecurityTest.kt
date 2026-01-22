@@ -20,7 +20,7 @@ class SessionSecurityTest {
     @Test
     fun `generates public key using EC algorithm`() {
         val publicKey = generateValidPublicKeyPair()
-        assertEquals(ALGORITHM, publicKey?.algorithm)
+        assertEquals(ALGORITHM, publicKey.algorithm)
     }
 
     @Test

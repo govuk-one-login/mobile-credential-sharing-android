@@ -17,14 +17,14 @@ class CoseKeyDtoTest {
 
     @Before
     fun setup() {
-        genKey = generateValidPublicKeyPair()!!
+        genKey = generateValidPublicKeyPair()
         coseKey = CoseKey.generateCoseKey(genKey)
     }
 
     @Test
     fun `equals should return true for instances with same values`() {
         val genKey = generateValidPublicKeyPair()
-        val coseKey = CoseKey.generateCoseKey(genKey!!)
+        val coseKey = CoseKey.generateCoseKey(genKey)
 
         val dto1 = CoseKeyDto(
             keyType = Cose.KEY_TYPE_EC2,

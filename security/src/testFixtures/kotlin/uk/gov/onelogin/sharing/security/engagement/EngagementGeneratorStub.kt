@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.security.engagement
 
+import java.util.UUID
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
 import uk.gov.onelogin.sharing.security.cose.CoseKey
-import java.util.UUID
 
 /**
  * Test fake to be used by other classes if required

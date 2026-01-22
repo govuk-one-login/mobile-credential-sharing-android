@@ -18,6 +18,7 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
+import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.eReaderKeyHexFormat
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
@@ -27,6 +28,8 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKey
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidUnsupportedKeyPair
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
 import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 class DecoderTest {
@@ -163,17 +166,23 @@ class DecoderTest {
     }
 
     @Test
-    fun `should generate the same shared secret on holder and reader`() {
-        val readerKeyPair = generateValidKeyPair()
-        val holderKeyPair = generateValidKeyPair()
+    fun `should generate the same shared secret for for holder and verifier session`() {
+        val holderSession = FakeSessionSecurity()
+        val readerSession = FakeSessionSecurity()
+
+        val readerKeyPair = readerSession.generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
+        val holderKeyPair = holderSession.generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
+
+        val readerPrivateKey = readerSession.getSessionPrivateKey()
+        val holderPrivateKey = holderSession.getSessionPrivateKey()
 
         val eReaderSharedSecret = getSharedSecret(
-            readerKeyPair?.private as ECPrivateKey,
-            holderKeyPair?.public as ECPublicKey
+            readerPrivateKey,
+            holderKeyPair.public as ECPublicKey
         )
 
         val holderSharedSecret = getSharedSecret(
-            holderKeyPair.private as ECPrivateKey,
+            holderPrivateKey,
             readerKeyPair.public as ECPublicKey
         )
 

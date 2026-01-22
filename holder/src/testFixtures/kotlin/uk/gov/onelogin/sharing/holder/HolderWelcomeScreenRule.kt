@@ -27,7 +27,6 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 
@@ -52,8 +51,7 @@ class HolderWelcomeScreenRule(
         bluetoothDisabledText = resources.getString(R.string.bluetooth_turned_off_holder)
     )
 
-    val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
-    val dummyPublicKey = SessionSecurityTestStub.generateValidKeyPair()
+    private val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
     private val fakeSessionSecurity = FakeSessionSecurity()
     private val fakeEngagementGenerator = FakeEngagementGenerator(
         data = "${Engagement.QR_CODE_SCHEME}TEST_QR"
