@@ -121,6 +121,12 @@ class GattServerCallback(
         )
     }
 
+    override fun onMtuChanged(device: BluetoothDevice?, mtu: Int) {
+        gatGattEventEmitter.emit(
+            GattEvent.MtuChanged(device, mtu)
+        )
+    }
+
     companion object {
         private const val BYTE_TO_HEX_FORMAT = "%02X"
 

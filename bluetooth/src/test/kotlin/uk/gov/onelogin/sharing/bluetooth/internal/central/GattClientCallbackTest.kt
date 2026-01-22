@@ -8,6 +8,7 @@ import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 
 class GattClientCallbackTest {
     private val fakeEmitter = FakeClientEventEmitter()
@@ -54,7 +55,7 @@ class GattClientCallbackTest {
     fun `onMtuChanged emits MtuChange event`() {
         callback.onMtuChanged(
             gatt,
-            MtuValues.MAX_POSSIBLE,
+            MtuValues.MAX_MTU,
             BluetoothGatt.GATT_SUCCESS
         )
 
@@ -62,7 +63,7 @@ class GattClientCallbackTest {
 
         val event = fakeEmitter.events.single() as GattEvent.MtuChange
         assertEquals(DEVICE_ADDRESS, event.gatt.device.address)
-        assertEquals(MtuValues.MAX_POSSIBLE, event.mtu)
+        assertEquals(MtuValues.MAX_MTU, event.mtu)
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
     }
 

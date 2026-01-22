@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -40,6 +41,7 @@ class AndroidGattServerManager(
     private val eventEmitter = GattEventEmitter {
         handleGattEvent(it)
     }
+    private var mtu = MIN_MTU
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open(serviceUuid: UUID) {
@@ -88,6 +90,7 @@ class AndroidGattServerManager(
             is GattEvent.ConnectionStateStarted -> handleConnectionStateStarted()
             is GattEvent.ServiceAdded -> handleServiceAdded(event)
             is GattEvent.MessageReceived -> Unit
+            is GattEvent.MtuChanged -> mtu = event.mtu
         }
     }
 

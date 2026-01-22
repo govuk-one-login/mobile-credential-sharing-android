@@ -25,6 +25,7 @@ import org.robolectric.RobolectricTestRunner
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
@@ -265,7 +266,7 @@ internal class AndroidGattClientManagerTest {
                 BluetoothGatt.GATT_SUCCESS
             )
 
-            verify { bluetoothGatt.requestMtu(MtuValues.MAX_POSSIBLE) }
+            verify { bluetoothGatt.requestMtu(MtuValues.MAX_MTU) }
         }
     }
 
@@ -385,7 +386,7 @@ internal class AndroidGattClientManagerTest {
         testEvents { callbackSlot ->
             callbackSlot.captured.onMtuChanged(
                 bluetoothGatt,
-                MtuValues.MAX_POSSIBLE,
+                MtuValues.MAX_MTU,
                 BluetoothGatt.GATT_SUCCESS
             )
 
@@ -409,7 +410,7 @@ internal class AndroidGattClientManagerTest {
         testEvents { callbackSlot ->
             callbackSlot.captured.onMtuChanged(
                 bluetoothGatt,
-                MtuValues.MAX_POSSIBLE,
+                MtuValues.MAX_MTU,
                 BluetoothGatt.GATT_SUCCESS
             )
 
@@ -428,7 +429,7 @@ internal class AndroidGattClientManagerTest {
         testEvents { callbackSlot ->
             callbackSlot.captured.onMtuChanged(
                 bluetoothGatt,
-                MtuValues.MAX_POSSIBLE,
+                MtuValues.MAX_MTU,
                 BluetoothGatt.GATT_SUCCESS
             )
 

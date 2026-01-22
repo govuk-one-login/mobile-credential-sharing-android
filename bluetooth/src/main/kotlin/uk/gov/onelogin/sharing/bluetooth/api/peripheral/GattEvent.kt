@@ -43,4 +43,6 @@ sealed interface GattEvent {
     }
 
     data object ConnectionStateStarted : GattEvent
+
+    data class MtuChanged(val device: BluetoothDevice?, val mtu: Int) : GattEvent
 }

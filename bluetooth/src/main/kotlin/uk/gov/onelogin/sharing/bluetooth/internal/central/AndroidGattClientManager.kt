@@ -14,6 +14,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
@@ -36,6 +38,7 @@ internal class AndroidGattClientManager(
     private val eventEmitter = GattClientEventEmitter {
         handleGattEvent(it)
     }
+    private var mtu = MIN_MTU
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (!permissionChecker.hasCentralPermissions()) {
@@ -168,7 +171,10 @@ internal class AndroidGattClientManager(
     private fun subscribeToCharacteristics(service: BluetoothGattService) {
         val gatt = bluetoothGatt.let { bluetoothGatt } ?: return
 
-        gatt.requestMtu(MtuValues.MAX_POSSIBLE)
+        // requests maximum but a lower MTU could be negotiated between devices
+        // this is ignored in android >= 14 - It always requests 517
+        val mtuRequestResult = gatt.requestMtu(MtuValues.MAX_MTU)
+        logger.debug(logTag, "Request max MTU result: $mtuRequestResult")
 
         val state = service
             .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
@@ -203,6 +209,7 @@ internal class AndroidGattClientManager(
     private fun changedMtu(event: GattEvent.MtuChange) {
         val gatt = bluetoothGatt.let { bluetoothGatt } ?: return
         logger.debug(logTag, "MTU negotiated: ${event.mtu}")
+        mtu = event.mtu
 
         val state = gatt
             .getService(serviceUuid)
