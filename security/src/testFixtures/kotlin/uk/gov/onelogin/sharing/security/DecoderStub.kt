@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.security
 
-import uk.gov.onelogin.sharing.security.DecoderStub.VALID_CBOR
+import uk.gov.onelogin.sharing.security.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.security.cbor.dto.BleOptionsDto
 import uk.gov.onelogin.sharing.security.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
@@ -8,17 +8,18 @@ import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.security.cbor.dto.SecurityDto
 
 object DecoderStub {
-    const val VALID_CBOR =
+    const val VALID_ENCODED_DEVICE_ENGAGEMENT =
         "vwBjMS4wAZ8B2BhYTL8BAiABIVggk7wmKUmR5q-ozZGB1uPAKfi8upiiA8JC88Ilgg8EaqoiWCA8Qib" +
             "6bCfaav-5A8QvfCEceATx1H9HR_Kj2ZnNeyxZLf__Ap-fAgG_APUB9ApQERERESIiMzNERFVVVVVVVf____8="
+
     const val INVALID_CBOR =
         "gg8EaqoiWCA8Qib6bCfaav-5A8QvfCEceATx1H9HR_Kj2ZnNeyxZLf__Ap-fAgG_APUB9A" +
             "pQERERESIiMzNERFVVVVVVVf____8="
 
-    const val VALID_MDOC_URI = "mdoc:$VALID_CBOR"
+    const val VALID_MDOC_URI = "mdoc:$VALID_ENCODED_DEVICE_ENGAGEMENT"
 
     /**
-     * [DeviceEngagementDto] representation of the [VALID_CBOR] property.
+     * [DeviceEngagementDto] representation of the [VALID_ENCODED_DEVICE_ENGAGEMENT] property.
      */
     val validDeviceEngagementDto = DeviceEngagementDto(
         version = "1.0",

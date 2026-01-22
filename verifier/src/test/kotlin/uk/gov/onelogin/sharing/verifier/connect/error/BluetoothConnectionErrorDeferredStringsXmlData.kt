@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.connect.error
 
 import androidx.annotation.StringRes
-import uk.gov.onelogin.sharing.bluetooth.R as bluetoothR
 import uk.gov.onelogin.sharing.verifier.R
 
 /**
@@ -14,12 +13,12 @@ enum class BluetoothConnectionErrorDeferredStringsXmlData(
     @param:StringRes val resourceId: Int
 ) {
     BLUETOOTH_CONNECTION_ERROR_GENERIC(
-        defersTo = R.string.could_not_decode_device_engagement,
+        defersTo = R.string.generic_error,
         resourceId = R.string.bluetooth_connection_error_generic
     ),
     BLUETOOTH_CONNECTION_ERROR_INVALID_CONFIGURATION(
-        defersTo = R.string.invalid_bluetooth_configuration,
-        resourceId = R.string.bluetooth_connection_error_invalid_configuration
+        defersTo = R.string.bluetooth_connection_failed,
+        resourceId = R.string.bluetooth_connection_error_failed
     ),
     BLUETOOTH_CONNECTION_ERROR_TRY_AGAIN(
         defersTo = R.string.try_again,

@@ -15,4 +15,9 @@ sealed interface VerifierSessionState {
      * This occurs due to [android.bluetooth.BluetoothGattCharacteristic] issues.
      */
     data object Invalid : VerifierSessionState
+
+    /**
+     * This occurs when the service is not found on the connected device.
+     */
+    data object ServiceNotFound : VerifierSessionState
 }

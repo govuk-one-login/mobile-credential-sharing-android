@@ -36,6 +36,11 @@ class GattClientEventsToVerifierSessionStates : TestParametersValuesProvider() {
                 "Invalid GATT Service configuration is a separate session state",
                 GattClientEvent.Error(ClientError.INVALID_SERVICE),
                 VerifierSessionState.Invalid
+            ),
+            Triple(
+                "GATT service not found",
+                GattClientEvent.Error(ClientError.SERVICE_NOT_FOUND),
+                VerifierSessionState.ServiceNotFound
             )
         ).map { (name, input, expectedState) ->
             TestParameters.TestParametersValues.builder()

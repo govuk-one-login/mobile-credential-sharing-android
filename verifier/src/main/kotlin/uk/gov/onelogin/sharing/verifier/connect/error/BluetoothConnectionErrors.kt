@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceError
 @StringRes
 internal fun errorTitleRes(error: ConnectWithHolderDeviceError): Int = when (error) {
     ConnectWithHolderDeviceError.BluetoothConfigurationError ->
-        R.string.bluetooth_connection_error_invalid_configuration
+        R.string.bluetooth_connection_error_failed
 
     ConnectWithHolderDeviceError.GenericError ->
         R.string.bluetooth_connection_error_generic

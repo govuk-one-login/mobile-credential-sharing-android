@@ -78,6 +78,7 @@ internal class AndroidGattClientManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun disconnect() {
+        logger.debug(logTag, "Disconnect GATT client")
         bluetoothGatt?.disconnect()
         bluetoothGatt?.close()
         bluetoothGatt = null
@@ -152,6 +153,7 @@ internal class AndroidGattClientManager(
         }
 
         if (serviceValidator.validate(service) is ValidationResult.Failure) {
+            logger.debug(logTag, "Incompatible mDL service: missing characteristics")
             _events.tryEmit(
                 GattClientEvent.Error(
                     ClientError.INVALID_SERVICE

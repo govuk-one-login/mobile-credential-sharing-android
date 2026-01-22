@@ -21,9 +21,9 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Cannot use the scanned QR code",
         resourceId = R.string.cannot_use_the_scanned_qr
     ),
-    COULD_NOT_DECODE_DEVICE_ENGAGEMENT(
-        expected = "Couldn’t decode device engagement!",
-        resourceId = R.string.could_not_decode_device_engagement
+    GENERIC_ERROR(
+        expected = "Generic error",
+        resourceId = R.string.generic_error
     ),
     DECODED_DEVICE_ENGAGEMENT_DATA(
         expected = "Decoded device engagement data:",
@@ -38,9 +38,9 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Please enable the camera permission to continue.",
         resourceId = R.string.enable_camera_permission_to_continue
     ),
-    INVALID_BLUETOOTH_CONFIGURATION(
-        expected = "Invalid Bluetooth configuration",
-        resourceId = R.string.invalid_bluetooth_configuration
+    BLUETOOTH_CONNECTION_FAILED(
+        expected = "Bluetooth connection failed",
+        resourceId = R.string.bluetooth_connection_failed
     ),
     OPEN_APP_PERMISSIONS(
         expected = "Open app permissions",

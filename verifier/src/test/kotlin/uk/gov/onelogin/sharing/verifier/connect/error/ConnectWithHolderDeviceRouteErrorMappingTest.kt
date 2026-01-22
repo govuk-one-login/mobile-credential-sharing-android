@@ -37,7 +37,7 @@ enum class ConnectWithHolderDeviceRouteErrorData(
     val errorType: ConnectWithHolderDeviceError
 ) {
     BLUETOOTH_CONFIGURATION(
-        errorRes = R.string.bluetooth_connection_error_invalid_configuration,
+        errorRes = R.string.bluetooth_connection_error_failed,
         errorType = ConnectWithHolderDeviceError.BluetoothConfigurationError
     ),
     BLUETOOTH_GENERIC_ERROR(
