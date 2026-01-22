@@ -6,8 +6,7 @@ object MtuValues {
      * Since Android 14 the system will always request value 517 ignoring the requested value
      * https://developer.android.com/about/versions/14/behavior-changes-all#mtu-set-to-517
      *
-     * This is still useful for older versions of Android so that we get the max size
-     *
+     * This is still useful for older versions of Android to request the max size
      */
     const val MAX_MTU = 517
 
@@ -22,9 +21,9 @@ object MtuValues {
 
     /**
      * Calculates the maximum number of data bytes that can be sent in a single Bluetooth LE
-     * packet (chunk) for a given Maximum Transmission Unit (MTU).
+     * chunk for a given Maximum Transmission Unit (MTU).
      *
-     * This takes into account the Bluetooth attribute protocol (ATT) header overhead and
+     * It takes into account the Bluetooth attribute protocol (ATT) header overhead and
      * enforces the maximum length constraints defined by the Bluetooth Core Specification.
      *
      * @param mtu The negotiated MTU size. Must be between [MIN_MTU] and [MAX_MTU].

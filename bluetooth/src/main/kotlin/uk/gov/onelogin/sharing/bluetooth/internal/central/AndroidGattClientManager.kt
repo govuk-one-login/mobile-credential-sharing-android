@@ -173,8 +173,8 @@ internal class AndroidGattClientManager(
 
         // requests maximum but a lower MTU could be negotiated between devices
         // this is ignored in android >= 14 - It always requests 517
-        val mtuRequestResult = gatt.requestMtu(MtuValues.MAX_MTU)
-        logger.debug(logTag, "Request max MTU result: $mtuRequestResult")
+        val mtuRequestSuccess = gatt.requestMtu(MtuValues.MAX_MTU)
+        logger.debug(logTag, "Request max MTU success: $mtuRequestSuccess")
 
         val state = service
             .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(

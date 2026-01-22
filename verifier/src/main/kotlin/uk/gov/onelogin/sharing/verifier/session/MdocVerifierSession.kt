@@ -79,6 +79,8 @@ class MdocVerifierSession(
                 stop()
                 _state.value = when (event.error) {
                     ClientError.INVALID_SERVICE -> VerifierSessionState.Invalid
+                    ClientError.FAILED_TO_SUBSCRIBE -> VerifierSessionState.Invalid
+                    ClientError.FAILED_TO_START -> VerifierSessionState.Invalid
                     ClientError.SERVICE_NOT_FOUND -> VerifierSessionState.ServiceNotFound
                     else -> VerifierSessionState.Error(event.error.toString())
                 }
