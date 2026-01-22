@@ -22,7 +22,6 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
@@ -37,7 +36,7 @@ class HolderWelcomeViewModelTest {
     private fun createViewModel(
         mdocSessionManager: MdocSessionManager = FakeMdocSessionManager(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
-        sessionSecurity: SessionSecurity = FakeSessionSecurity(keyPair = null)
+        sessionSecurity: SessionSecurity = FakeSessionSecurity()
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,
@@ -52,7 +51,7 @@ class HolderWelcomeViewModelTest {
         val viewModel = createViewModel()
 
         val state = viewModel.uiState.value
-        assertNull(state.qrData)
+        assertNotNull(state.qrData)
         assertEquals(MdocSessionState.Idle, state.sessionState)
         assertNull(state.lastErrorMessage)
         assertNotNull(state.uuid)
@@ -60,8 +59,7 @@ class HolderWelcomeViewModelTest {
 
     @Test
     fun `sets qr code data when key is generated`() = runTest {
-        val dummyPublicKey = SessionSecurityTestStub.generateValidKeyPair()
-        val fakeSessionSecurity = FakeSessionSecurity(keyPair = dummyPublicKey!!)
+        val fakeSessionSecurity = FakeSessionSecurity()
         val viewModel = createViewModel(sessionSecurity = fakeSessionSecurity)
 
         advanceUntilIdle()

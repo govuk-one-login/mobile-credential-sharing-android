@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.security.cbor
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -11,6 +10,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.cbor.decoders.DeriveUntaggedCborImpl
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
@@ -106,21 +106,5 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
         throw e
     }
 
-/**
- * Extracts a raw COSE_Key from a CBOR-tagged byte string.
-
- * @param tagged The input [ByteArray] containing the CBOR-tagged (tag 24) COSE_Key.
- * @return The raw, untagged [ByteArray] of the COSE_Key.
- * @throws IllegalArgumentException if the input data is not a CBOR structure
- *         containing tag 24.
- */
-fun getUntaggedCoseKey(tagged: ByteArray): ByteArray {
-    val cborMapper = ObjectMapper(CBORFactory())
-
-    val tree = cborMapper.readTree(tagged)
-
-    val keyNode = tree as? BinaryNode
-        ?: throw IllegalArgumentException("Expected tag 24 containing binary COSE_Key")
-
-    return keyNode.binaryValue()
-}
+fun deriveUntaggedCbor(tagged: ByteArray): ByteArray =
+    DeriveUntaggedCborImpl().deriveUntaggedCbor(tagged)

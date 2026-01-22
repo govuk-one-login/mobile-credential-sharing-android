@@ -85,13 +85,13 @@ data class CoseKey(
          * @throws IllegalArgumentException if the input is not a valid CBOR object, or if the
          *         X or Y coordinates are missing from the COSE key structure.
          */
-        fun parseEReaderPublicKey(eReaderBytes: ByteArray): ECPublicKey {
+        private fun parseEReaderPublicKey(eReaderBytes: ByteArray): ECPoint {
             val cborMapper = CBORMapper()
             val node = cborMapper.readTree(eReaderBytes) as? ObjectNode
                 ?: throw IllegalArgumentException("Invalid COSE key")
 
-            val xBytesRaw = node.get("-2")?.binaryValue()
-            val yBytesRaw = node.get("-3")?.binaryValue()
+            val xBytesRaw = node["-2"]?.binaryValue()
+            val yBytesRaw = node["-3"]?.binaryValue()
 
             val xBytes = padEcCoordinatesTo32Bytes(BigInteger(1, xBytesRaw))
             val yBytes = padEcCoordinatesTo32Bytes(BigInteger(1, yBytesRaw))
@@ -99,12 +99,16 @@ data class CoseKey(
             val x = BigInteger(1, xBytes)
             val y = BigInteger(1, yBytes)
 
+            return ECPoint(x, y)
+        }
+
+        fun getEReaderKeyFromParsedCoseKey(eReaderBytes: ByteArray): ECPublicKey {
+            val parsedKey = parseEReaderPublicKey(eReaderBytes)
             val params = AlgorithmParameters.getInstance("EC").apply {
                 init(ECGenParameterSpec("secp256r1"))
             }
             val ecSpec = params.getParameterSpec(java.security.spec.ECParameterSpec::class.java)
-
-            val pubSpec = ECPublicKeySpec(ECPoint(x, y), ecSpec)
+            val pubSpec = ECPublicKeySpec(parsedKey, ecSpec)
             return KeyFactory.getInstance("EC").generatePublic(pubSpec) as ECPublicKey
         }
     }

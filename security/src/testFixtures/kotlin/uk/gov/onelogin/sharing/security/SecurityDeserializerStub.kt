@@ -8,7 +8,7 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
 object SecurityDeserializerStub {
 
     private val keyPair = generateValidPublicKeyPair()
-    private val coseKey = CoseKey.generateCoseKey(keyPair!!)
+    private val coseKey = CoseKey.generateCoseKey(keyPair)
 
     val expectedCoseKey = CoseKeyDto(
         keyType = 2,

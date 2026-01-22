@@ -54,9 +54,7 @@ class HolderWelcomeScreenRule(
 
     val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
     val dummyPublicKey = SessionSecurityTestStub.generateValidKeyPair()
-    private val fakeSessionSecurity = FakeSessionSecurity(
-        keyPair = dummyPublicKey!!
-    )
+    private val fakeSessionSecurity = FakeSessionSecurity()
     private val fakeEngagementGenerator = FakeEngagementGenerator(
         data = "${Engagement.QR_CODE_SCHEME}TEST_QR"
     )

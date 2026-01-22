@@ -74,7 +74,7 @@ class HolderWelcomeScreenTest {
     private fun createViewModel(
         mdocBleSession: FakeMdocSessionManager = FakeMdocSessionManager(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
-        sessionSecurity: SessionSecurity = FakeSessionSecurity(keyPair = null)
+        sessionSecurity: SessionSecurity = FakeSessionSecurity()
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         sessionSecurity = sessionSecurity,
         engagementGenerator = engagementGenerator,

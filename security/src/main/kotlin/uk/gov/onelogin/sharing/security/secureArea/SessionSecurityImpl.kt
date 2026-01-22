@@ -15,6 +15,9 @@ import java.security.spec.ECGenParameterSpec
 import javax.crypto.KeyAgreement
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 
 /**
  * An implementation of [SessionSecurity] that handles cryptographic operations for a
@@ -27,6 +30,8 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 @ContributesBinding(ViewModelScope::class)
 @Inject
 class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
+
+    private lateinit var sessionKeyPair: KeyPair
 
     /**
      * Generates a new, ephemeral Elliptic Curve (EC) key pair and returns the public key.
@@ -44,6 +49,7 @@ class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
         keyPairGenerator.initialize(ecSpec)
         val keyPair = keyPairGenerator.generateKeyPair()
         logger.debug(logTag, "Generated EC key pair: ${keyPair.public}")
+        sessionKeyPair = keyPair
         keyPair
     } catch (e: NoSuchAlgorithmException) {
         logger.error(logTag, e.message ?: "No such algorithm exception", e)
@@ -81,4 +87,12 @@ class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
             throw InvalidKeyException("Unexpected Exception", e)
         }
     }
+
+    override fun generateSessionPublicKey(): CoseKey {
+        generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
+
+        return CoseKey.generateCoseKey(sessionKeyPair.public as ECPublicKey)
+    }
+
+    override fun getSessionPrivateKey(): ECPrivateKey = sessionKeyPair.private as ECPrivateKey
 }

@@ -12,7 +12,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -32,10 +31,7 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
-import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
 @AssistedInject
@@ -65,10 +61,12 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            val keyPair = sessionSecurity.generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
-            val key = keyPair?.let { CoseKey.generateCoseKey(it.public as ECPublicKey) }
-            if (key != null) {
-                val engagement = engagementGenerator.qrCodeEngagement(key, _uiState.value.uuid)
+            val publicKey = sessionSecurity.generateSessionPublicKey()
+            publicKey.let { coseKey ->
+                val engagement = engagementGenerator.qrCodeEngagement(
+                    coseKey,
+                    _uiState.value.uuid
+                )
                 _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
             }
         }
