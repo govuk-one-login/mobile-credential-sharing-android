@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.security.cbor.decoders
 
-interface DeriveUntaggedCbor {
+fun interface DeriveUntaggedCbor {
     /**
      * Extracts a raw ByteArray from a CBOR-tagged byte string.
      *
