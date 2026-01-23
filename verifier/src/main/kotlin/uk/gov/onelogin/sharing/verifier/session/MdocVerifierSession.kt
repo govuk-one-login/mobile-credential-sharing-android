@@ -81,7 +81,9 @@ class MdocVerifierSession(
                     ClientError.INVALID_SERVICE,
                     ClientError.FAILED_TO_SUBSCRIBE,
                     ClientError.FAILED_TO_START -> VerifierSessionState.Invalid
+
                     ClientError.SERVICE_NOT_FOUND -> VerifierSessionState.ServiceNotFound
+
                     else -> VerifierSessionState.Error(event.error.toString())
                 }
             }
