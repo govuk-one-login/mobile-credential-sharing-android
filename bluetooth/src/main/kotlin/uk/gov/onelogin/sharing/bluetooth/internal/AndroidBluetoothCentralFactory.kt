@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.internal
 
 import android.content.Context
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralComponents
@@ -22,7 +21,6 @@ import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
  * @param logger An instance of [Logger] for logging events.
  */
 @ContributesBinding(ViewModelScope::class)
-@Inject
 class AndroidBluetoothCentralFactory(
     private val context: Context,
     private val serviceValidator: ServiceValidator,

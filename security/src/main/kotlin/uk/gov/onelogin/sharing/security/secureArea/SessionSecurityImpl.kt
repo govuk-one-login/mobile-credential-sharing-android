@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPairGenerator
@@ -21,7 +20,6 @@ import uk.gov.onelogin.sharing.core.logger.logTag
  * @param logger An instance of [Logger] for logging events.
  */
 @ContributesBinding(ViewModelScope::class)
-@Inject
 class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
 
     /**

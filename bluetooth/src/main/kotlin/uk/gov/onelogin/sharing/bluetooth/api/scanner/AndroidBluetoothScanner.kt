@@ -7,7 +7,6 @@ import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
 import androidx.annotation.RequiresPermission
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.concurrent.CancellationException
 import kotlinx.coroutines.cancel
@@ -21,7 +20,6 @@ import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(ViewModelScope::class)
-@Inject
 class AndroidBluetoothScanner(
     val bluetoothAdapterProvider: BluetoothAdapterProvider,
     val logger: Logger

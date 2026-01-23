@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.bluetooth.internal.validator
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import uk.gov.logging.api.Logger
@@ -16,7 +15,6 @@ import uk.gov.onelogin.sharing.core.logger.logTag
  *
  * @param logger An instance of [Logger] for logging validation errors.
  */
-@Inject
 @ContributesBinding(ViewModelScope::class)
 class MdocServiceValidator(private val logger: Logger) : ServiceValidator {
     override fun validate(service: BluetoothGattService): ValidationResult {

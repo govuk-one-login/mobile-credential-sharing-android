@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.verifier.session
 
 import android.bluetooth.BluetoothDevice
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +16,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@Inject
 @ContributesBinding(ViewModelScope::class)
 class MdocVerifierSession(
     private val gattClientManager: GattClientManager,
