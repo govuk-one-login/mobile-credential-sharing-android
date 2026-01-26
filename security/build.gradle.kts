@@ -42,6 +42,7 @@ dependencies {
         libs.jackson.core,
         libs.jackson.kotlin,
         libs.metro.viewmodel.compose,
+        libs.kotlinx.io.bytestring,
         projects.core,
         projects.models
     ).forEach(::implementation)
