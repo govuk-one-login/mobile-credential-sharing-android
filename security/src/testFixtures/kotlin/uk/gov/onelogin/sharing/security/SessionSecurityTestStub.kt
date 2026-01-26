@@ -1,20 +1,30 @@
 package uk.gov.onelogin.sharing.security
 
+import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
+import uk.gov.onelogin.sharing.security.secureArea.keys.EcKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
-import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
 object SessionSecurityTestStub {
     const val ALGORITHM = "EC"
     const val PARAMETER_SPEC = "secp256r1"
     const val UNSUPPORTED_PARAMETER_SPEC = "secp384r1"
 
-    val sessionSecurity = SessionSecurityImpl(SystemLogger())
+    private val securityLogger = SystemLogger()
+
+    val keyPairGenerator = EcKeyGenerator(securityLogger)
+    val secretGenerator = EcdhSharedSecretGenerator(securityLogger)
+
+    val sessionSecurity = SessionSecurityImpl(
+        keyPairGenerator = keyPairGenerator,
+        secretGenerator = secretGenerator,
+    )
 
     fun generateValidPublicKeyPair(): ECPublicKey {
         val publicKey = sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
@@ -53,6 +63,5 @@ object SessionSecurityTestStub {
         sessionSecurity.generateSharedSecret(
             holderPrivateKey,
             readerPublicKey,
-            SystemLogger()
         )
 }

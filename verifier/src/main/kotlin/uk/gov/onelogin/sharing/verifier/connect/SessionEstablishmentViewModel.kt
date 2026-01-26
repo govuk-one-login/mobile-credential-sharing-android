@@ -132,6 +132,10 @@ class SessionEstablishmentViewModel(
                         )
                     }
 
+                    is VerifierSessionState.ConnectionStateStarted -> {
+                        // DCMAW-17376: Obtain keys here
+                    }
+
                     else -> Unit
                 }
 
