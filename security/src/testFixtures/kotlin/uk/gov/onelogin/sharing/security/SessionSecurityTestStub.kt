@@ -50,8 +50,6 @@ object SessionSecurityTestStub {
         )
 
     fun generateSessionKey(
-        sharedKey: ByteArray = byteArrayOf(),
-        sessionTranscriptBytes: ByteArray = byteArrayOf(),
         role: String
     ): ByteArray = if (role == "SKReader") {
         "58d277d8719e62a1561d248f403f477e9e6c37bf5d5fc5126f8f4c727c22dfc9"
