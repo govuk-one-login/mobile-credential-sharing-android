@@ -21,7 +21,7 @@ class GenerateSaltTest {
     }
 
     @Test
-    fun `when session transcript is identical but with extra appended bytes, bytearray does not match test reference`() {
+    fun `when session transcript has extra appended bytes, bytearray does not match test reference`() {
         val salt = generateSalt(validSessionTranscript + byteArrayOf(BYTE_ZERO))
         assert(!salt.contentEquals(VALID_SALT_BYTES))
     }

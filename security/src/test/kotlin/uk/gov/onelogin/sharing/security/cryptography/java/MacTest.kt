@@ -5,16 +5,6 @@ import uk.gov.onelogin.sharing.security.util.getByteArrayFromFile
 import kotlin.test.assertContentEquals
 
 class MacTest {
-    val BSB_BYTES = getByteArrayFromFile(
-        BINARY_PACKAGE_PATH,
-        "testBSB.bin"
-    )
-
-    val PRK_BYTES = getByteArrayFromFile(
-        BINARY_PACKAGE_PATH,
-        "testPseudoRandomKey.bin"
-    )
-
     @Test
     fun `generated message authentication code bytes matches stored test bytes`() {
         val messageAuthenticationCode = mac(
@@ -28,7 +18,7 @@ class MacTest {
     @Test
     fun `when prk bytes are changed, message authentication code bytes do not match`() {
         val messageAuthenticationCode = mac(
-            PRK_BYTES.apply {
+            PRK_BYTES.copyOf().apply {
                 set(0, 0x00)
             },
             BSB_BYTES
@@ -41,7 +31,7 @@ class MacTest {
     fun `when bsb bytes are changed, message authentication code bytes do not match`() {
         val messageAuthenticationCode = mac(
             PRK_BYTES,
-            BSB_BYTES.apply {
+            BSB_BYTES.copyOf().apply {
                 set(0, 0x00)
             }
         )
@@ -56,6 +46,16 @@ class MacTest {
         val VALID_MESSAGE_AUTHENTICATION_CODE_BYTES = getByteArrayFromFile(
             BINARY_PACKAGE_PATH,
             "validMessageAuthenticationCode.bin"
+        )
+
+        val BSB_BYTES = getByteArrayFromFile(
+            BINARY_PACKAGE_PATH,
+            "testBSB.bin"
+        )
+
+        val PRK_BYTES = getByteArrayFromFile(
+            BINARY_PACKAGE_PATH,
+            "testPseudoRandomKey.bin"
         )
     }
 }

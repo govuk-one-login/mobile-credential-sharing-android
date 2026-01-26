@@ -4,8 +4,8 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.util.getByteArrayFromFile
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
@@ -40,7 +40,7 @@ class HkdfKeyGenerationTest {
     }
 
     @Test
-    fun `when generating key from shared key, salt and role as SkReader, and ikm bytes are changed, bytes do not match binary file resource`() {
+    fun `when generating key and ikm bytes are changed, bytes do not match binary file resource`() {
         val holderSession = FakeSessionSecurity()
         val readerSession = FakeSessionSecurity()
 
@@ -62,7 +62,7 @@ class HkdfKeyGenerationTest {
     }
 
     @Test
-    fun `when generating key from shared key, salt and role as SkReader, and salt bytes are changed, bytes do not match binary file resource`() {
+    fun `when generating key and salt bytes are changed, bytes do not match binary file resource`() {
         val generatedHkdfKey = hkdfKeyGeneration(
             SHARED_SECRET_BYTES,
             VALID_SALT_BYTES.apply {
@@ -89,7 +89,8 @@ class HkdfKeyGenerationTest {
 
     private companion object {
 
-        const val BINARY_PACKAGE_PATH = "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cryptography/java/"
+        const val BINARY_PACKAGE_PATH =
+            "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cryptography/java/"
 
         val VALID_SALT_BYTES = getByteArrayFromFile(
             BINARY_PACKAGE_PATH,

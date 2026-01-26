@@ -9,8 +9,8 @@ import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_PARAMETER_SPEC
 
 /**
  * Represents a COSE Key, specifically formatted for Elliptic Curve keys (EC2).

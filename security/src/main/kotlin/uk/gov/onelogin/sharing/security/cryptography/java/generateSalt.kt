@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.security.cryptography.java
 
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.JVM_DIGEST_ALGORITHM_NAME
+import uk.gov.onelogin.sharing.security.cryptography.Constants.JVM_DIGEST_ALGORITHM_NAME
 import java.security.MessageDigest
 
 /**

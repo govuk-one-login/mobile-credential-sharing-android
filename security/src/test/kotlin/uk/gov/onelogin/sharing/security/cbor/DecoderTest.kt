@@ -28,8 +28,8 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKey
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidUnsupportedKeyPair
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
 import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 class DecoderTest {

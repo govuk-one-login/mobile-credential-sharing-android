@@ -8,8 +8,8 @@ import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.java.generateSalt
 import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_PARAMETER_SPEC
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
 import java.security.KeyPair

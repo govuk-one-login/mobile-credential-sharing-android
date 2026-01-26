@@ -10,8 +10,8 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getKeyParameter
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
 import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptStub.validSessionTranscript
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.security.util.getByteArrayFromFile
 import java.security.InvalidAlgorithmParameterException

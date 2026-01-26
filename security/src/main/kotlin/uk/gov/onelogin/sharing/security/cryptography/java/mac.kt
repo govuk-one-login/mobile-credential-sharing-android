@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.security.cryptography.java
 
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.MAC_ALGORITHM_ID
+import uk.gov.onelogin.sharing.security.cryptography.Constants.MAC_ALGORITHM_ID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
