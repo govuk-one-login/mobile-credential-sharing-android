@@ -1,13 +1,13 @@
 package uk.gov.onelogin.sharing.security
 
+import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
-import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 
 object SessionSecurityTestStub {
     const val ALGORITHM = "EC"
@@ -19,16 +19,6 @@ object SessionSecurityTestStub {
     fun generateValidPublicKeyPair(): ECPublicKey {
         val publicKey = sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
         return publicKey?.public as ECPublicKey
-    }
-
-    fun generateInvalidKeyPair(): ECPublicKey? {
-        val keyPair = sessionSecurity.generateEcKeyPair("INVALID_ALGO", "INVALID_SPEC")
-        return keyPair?.public as? ECPublicKey
-    }
-
-    fun generateInvalidKeyPairWithValidAlgorithm(): ECPublicKey? {
-        val keyPair = sessionSecurity.generateEcKeyPair(ALGORITHM, "INVALID_SPEC")
-        return keyPair?.public as? ECPublicKey
     }
 
     fun getKeyParameter(): ECParameterSpec {
@@ -49,10 +39,23 @@ object SessionSecurityTestStub {
         return keyPair
     }
 
-    fun getSharedSecret(holderPrivateKey: ECPrivateKey, readerPublicKey: ECPublicKey): ByteArray =
+    fun getSharedSecret(
+        holderPrivateKey: ECPrivateKey,
+        readerPublicKey: ECPublicKey
+    ): ByteArray =
         sessionSecurity.generateSharedSecret(
             holderPrivateKey,
             readerPublicKey,
             SystemLogger()
         )
+
+    fun generateSessionKey(
+        sharedKey: ByteArray = byteArrayOf(),
+        sessionTranscriptBytes: ByteArray = byteArrayOf(),
+        role: String
+    ): ByteArray = if (role == "SKReader") {
+        "58d277d8719e62a1561d248f403f477e9e6c37bf5d5fc5126f8f4c727c22dfc9"
+    } else {
+        "81d170e07fbdac93c1a676242c2576124a380d87bb73ed9ce4834de2272cf409"
+    }.hexToByteArray()
 }

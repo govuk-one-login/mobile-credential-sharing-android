@@ -2,6 +2,14 @@ package uk.gov.onelogin.sharing.security.secureArea
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
+import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.cryptography.java.generateSalt
+import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
 import java.security.KeyPair
@@ -12,11 +20,6 @@ import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import javax.crypto.KeyAgreement
-import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 
 /**
  * An implementation of [SessionSecurity] that handles cryptographic operations for a
@@ -93,4 +96,37 @@ class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
     }
 
     override fun getSessionPrivateKey(): ECPrivateKey = sessionKeyPair.private as ECPrivateKey
+
+    /**
+     * Generates a single session key from a given shared secret key, a generated cryptographic
+     * salt created from the SessionTranscriptBytes and a string containing the
+     * corresponding role: "SkReader" and "SkDevice"
+     *
+     * Session keys are generated deterministically by each party, and used in the subsequent
+     * encryption and decryption of messages between devices
+     *
+     * @return [ByteArray] object representing the session key
+     */
+
+    override fun deriveSessionKey(
+        sharedKey: ByteArray,
+        sessionTranscriptBytes: ByteArray,
+        role: String
+    ): ByteArray {
+
+        if (role != "SKReader" && role != "SKDevice") {
+            val errorMessage = "Invalid role string (status 10) supplied: $role"
+            logger.debug(logTag, errorMessage)
+            throw InvalidAlgorithmParameterException(errorMessage)
+        }
+
+        val salt = generateSalt(sessionTranscriptBytes)
+        val roleAsBytes = role.encodeCbor()
+
+        return hkdfKeyGeneration(
+            sharedKey,
+            salt,
+            roleAsBytes
+        )
+    }
 }

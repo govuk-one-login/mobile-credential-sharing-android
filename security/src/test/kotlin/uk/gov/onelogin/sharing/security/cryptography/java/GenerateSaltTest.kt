@@ -14,7 +14,7 @@ class GenerateSaltTest {
 
     @Test
     fun `when session transcript changes, bytearray does not match test reference`() {
-        val salt = generateSalt(validSessionTranscript.apply {
+        val salt = generateSalt(validSessionTranscript.copyOf().apply {
             set(FIRST_BYTE, BYTE_ZERO)
         })
         assert(!salt.contentEquals(VALID_SALT_BYTES))

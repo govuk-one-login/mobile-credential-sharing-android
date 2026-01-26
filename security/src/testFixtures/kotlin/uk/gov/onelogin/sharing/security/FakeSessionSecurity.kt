@@ -1,11 +1,11 @@
 package uk.gov.onelogin.sharing.security
 
-import java.security.KeyPair
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import java.security.KeyPair
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 
 class FakeSessionSecurity : SessionSecurity {
 
@@ -29,4 +29,10 @@ class FakeSessionSecurity : SessionSecurity {
     }
 
     override fun getSessionPrivateKey(): ECPrivateKey = sessionKeyPair.private as ECPrivateKey
+
+    override fun deriveSessionKey(
+        sharedKey: ByteArray,
+        sessionTranscriptBytes: ByteArray,
+        role: String
+    ): ByteArray = byteArrayOf()
 }

@@ -18,4 +18,10 @@ interface SessionSecurity {
     fun generateSessionPublicKey(): CoseKey
 
     fun getSessionPrivateKey(): ECPrivateKey
+
+    fun deriveSessionKey(
+        sharedKey: ByteArray,
+        sessionTranscriptBytes: ByteArray,
+        role: String,
+    ): ByteArray
 }
