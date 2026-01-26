@@ -2,8 +2,6 @@ package uk.gov.onelogin.sharing.security.cose
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 import java.math.BigInteger
 import java.security.AlgorithmParameters
 import java.security.KeyFactory
@@ -11,6 +9,8 @@ import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
+import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
 
 const val THIRTY_TWO_BYTES = 32
 const val THIRTY_THREE_BYTES = 33

@@ -1,8 +1,8 @@
-package uk.gov.onelogin.sharing.security.secureArea.keys
+package uk.gov.onelogin.sharing.security.secureArea
 
-import uk.gov.onelogin.sharing.security.cose.CoseKey
 import java.security.KeyPair
 import java.security.interfaces.ECPrivateKey
+import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 /**
  * Collection of interfaces that expose specific cryptographic behaviours.
@@ -15,21 +15,22 @@ sealed interface KeyGenerator {
      * @see PrivateKeyGenerator
      * @see PublicKeyGenerator
      */
-    interface Complete : KeyPairGenerator, PrivateKeyGenerator, PublicKeyGenerator
+    interface Complete :
+        KeyPairGenerator,
+        PrivateKeyGenerator,
+        PublicKeyGenerator
 
     /**
      * Creates [java.security.KeyPair] instances for use in the code base.
      */
     fun interface KeyPairGenerator {
         /**
-         * Generates a new, ephemeral Elliptic Curve (EC) key pair.
+         * Generates a new, ephemeral key pair.
          *
          * The public key is intended to be shared with the verifier application as part of the
          * device engagement process.
          *
-         * @return A [java.security.KeyPair] object containing a
-         * [java.security.interfaces.ECPublicKey] and [java.security.interfaces.ECPrivateKey].
-         * Returns null when an error occurs.
+         * @return A [java.security.KeyPair] object used when communicating between devices.
          */
         fun generateEcKeyPair(algorithm: String, parameterSpec: String): KeyPair?
     }

@@ -12,8 +12,5 @@ fun interface SharedSecretGenerator {
      * @param eReaderKey The public key of the reader.
      * @return A [ByteArray] containing the computed shared secret.
      */
-    fun generateSharedSecret(
-        holderKey: ECPrivateKey,
-        eReaderKey: ECPublicKey,
-    ): ByteArray
+    fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray
 }

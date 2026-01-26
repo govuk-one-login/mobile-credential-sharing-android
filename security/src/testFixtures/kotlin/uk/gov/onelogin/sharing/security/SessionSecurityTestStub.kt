@@ -1,15 +1,17 @@
 package uk.gov.onelogin.sharing.security
 
-import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
-import uk.gov.onelogin.sharing.security.secureArea.keys.EcKeyGenerator
-import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
+import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
+import uk.gov.onelogin.sharing.security.secureArea.keypair.EcKeyPairGenerator
+import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
 
 object SessionSecurityTestStub {
     const val ALGORITHM = "EC"
@@ -18,12 +20,14 @@ object SessionSecurityTestStub {
 
     private val securityLogger = SystemLogger()
 
-    val keyPairGenerator = EcKeyGenerator(securityLogger)
+    val keyPairGenerator = EcKeyPairGenerator(securityLogger)
     val secretGenerator = EcdhSharedSecretGenerator(securityLogger)
 
     val sessionSecurity = SessionSecurityImpl(
         keyPairGenerator = keyPairGenerator,
-        secretGenerator = secretGenerator,
+        privateKeyGenerator = EcPrivateKeyGenerator(keyPairGenerator),
+        publicKeyGenerator = EcPublicCoseKeyGenerator(keyPairGenerator),
+        secretGenerator = secretGenerator
     )
 
     fun generateValidPublicKeyPair(): ECPublicKey {
@@ -62,6 +66,6 @@ object SessionSecurityTestStub {
     fun getSharedSecret(holderPrivateKey: ECPrivateKey, readerPublicKey: ECPublicKey): ByteArray =
         sessionSecurity.generateSharedSecret(
             holderPrivateKey,
-            readerPublicKey,
+            readerPublicKey
         )
 }

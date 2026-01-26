@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
-import uk.gov.onelogin.sharing.security.secureArea.keys.KeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.secret.SharedSecretGenerator
 
 /**

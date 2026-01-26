@@ -2,17 +2,15 @@ package uk.gov.onelogin.sharing.security.secureArea.secret
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.core.logger.logTag
 import java.security.InvalidKeyException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import javax.crypto.KeyAgreement
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(ViewModelScope::class)
-class EcdhSharedSecretGenerator(
-    private val logger: Logger,
-) : SharedSecretGenerator {
+class EcdhSharedSecretGenerator(private val logger: Logger) : SharedSecretGenerator {
     /**
      * Generates a shared secret using the Elliptic Curve Diffie-Hellman (ECDH) key agreement
      * protocol.
@@ -27,10 +25,7 @@ class EcdhSharedSecretGenerator(
      * @throws java.security.InvalidKeyException if the provided keys are invalid or incompatible for ECDH,
      *         wrapping the original exception.
      */
-    override fun generateSharedSecret(
-        holderKey: ECPrivateKey,
-        eReaderKey: ECPublicKey,
-    ): ByteArray {
+    override fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray {
         try {
             val keyAgreement = KeyAgreement.getInstance("ECDH")
             keyAgreement.init(holderKey)
