@@ -65,7 +65,7 @@ object CharacteristicWriteRequestStub {
     )
 
     /**
-     * Creates a stub for `onChararacteristicWriteRequest` with message segment
+     * Creates a stub for `onCharacteristicWriteRequest` with message segment
      * received from remote device
      */
     fun writeRequestMessage(message: ByteArray) = OnCharacteristicWriteRequestArgs(

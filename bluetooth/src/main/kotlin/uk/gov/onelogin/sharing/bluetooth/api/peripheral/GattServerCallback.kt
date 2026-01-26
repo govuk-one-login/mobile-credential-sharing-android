@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import java.util.UUID
@@ -89,6 +90,28 @@ class GattServerCallback(
                 }
             }
         }
+    }
+
+    override fun onDescriptorWriteRequest(
+        device: BluetoothDevice?,
+        requestId: Int,
+        descriptor: BluetoothGattDescriptor?,
+        preparedWrite: Boolean,
+        responseNeeded: Boolean,
+        offset: Int,
+        value: ByteArray?
+    ) {
+        gatGattEventEmitter.emit(
+            GattEvent.DescriptorWriteRequest(
+                device,
+                requestId,
+                descriptor,
+                preparedWrite,
+                responseNeeded,
+                offset,
+                value
+            )
+        )
     }
 
     private fun handleStateUpdate(device: BluetoothDevice, value: ByteArray) {
