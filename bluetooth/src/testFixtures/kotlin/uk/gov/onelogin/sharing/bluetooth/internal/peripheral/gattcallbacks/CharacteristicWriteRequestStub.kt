@@ -2,10 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
-import io.mockk.every
-import io.mockk.mockk
-import java.util.UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 
 /**
@@ -26,11 +22,9 @@ object CharacteristicWriteRequestStub {
      */
 
     data class OnCharacteristicWriteRequestArgs(
-        val device: BluetoothDevice = mockk(relaxed = true),
+        val device: BluetoothDevice,
         val requestId: Int = 1,
-        val characteristic: BluetoothGattCharacteristic = mockk {
-            every { uuid } returns UUID.randomUUID()
-        },
+        val characteristic: BluetoothGattCharacteristic,
         val preparedWrite: Boolean = false,
         val responseNeeded: Boolean = true,
         val offset: Int = 0,
@@ -41,10 +35,12 @@ object CharacteristicWriteRequestStub {
      * Creates a stub for `onCharacteristicWriteRequest` with the `START` command.
      */
 
-    fun writeRequestStart() = OnCharacteristicWriteRequestArgs(
-        characteristic = mockk {
-            every { uuid } returns GattUuids.STATE_UUID
-        },
+    fun writeRequestStart(
+        bluetoothDevice: BluetoothDevice,
+        characteristic: BluetoothGattCharacteristic
+    ) = OnCharacteristicWriteRequestArgs(
+        device = bluetoothDevice,
+        characteristic = characteristic,
         value = byteArrayOf(MdocState.START.code)
     )
 
@@ -52,7 +48,12 @@ object CharacteristicWriteRequestStub {
      * Creates a stub for `onCharacteristicWriteRequest` with an unknown command.
      */
 
-    fun writeRequestUnknown() = OnCharacteristicWriteRequestArgs(
+    fun writeRequestUnknown(
+        bluetoothDevice: BluetoothDevice,
+        characteristic: BluetoothGattCharacteristic
+    ) = OnCharacteristicWriteRequestArgs(
+        device = bluetoothDevice,
+        characteristic = characteristic,
         value = byteArrayOf(0xFF.toByte())
     )
 
@@ -60,7 +61,12 @@ object CharacteristicWriteRequestStub {
      * Creates a stub for `onCharacteristicWriteRequest` with an empty value.
      */
 
-    fun writeRequestEmptyValue() = OnCharacteristicWriteRequestArgs(
+    fun writeRequestEmptyValue(
+        bluetoothDevice: BluetoothDevice,
+        characteristic: BluetoothGattCharacteristic
+    ) = OnCharacteristicWriteRequestArgs(
+        device = bluetoothDevice,
+        characteristic = characteristic,
         value = byteArrayOf()
     )
 
@@ -68,10 +74,13 @@ object CharacteristicWriteRequestStub {
      * Creates a stub for `onCharacteristicWriteRequest` with message segment
      * received from remote device
      */
-    fun writeRequestMessage(message: ByteArray) = OnCharacteristicWriteRequestArgs(
-        characteristic = mockk {
-            every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
-        },
+    fun writeRequestMessage(
+        bluetoothDevice: BluetoothDevice,
+        characteristic: BluetoothGattCharacteristic,
+        message: ByteArray
+    ) = OnCharacteristicWriteRequestArgs(
+        device = bluetoothDevice,
+        characteristic = characteristic,
         value = message
     )
 }

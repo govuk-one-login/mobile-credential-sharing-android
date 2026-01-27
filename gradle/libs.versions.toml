@@ -112,6 +112,7 @@ testing-instrumentation = [
     "androidx-navigation-testing",
     "androidx-test-rules",
     "androidx-ui-test-junit4",
+    "androidx-test-espresso-intents"
 ]
 testing-unit = [
     "junit",

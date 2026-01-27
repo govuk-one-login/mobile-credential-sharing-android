@@ -48,7 +48,7 @@ dependencies {
 
     listOf(
         libs.com.google.test.parameter.injector
-    ).forEach(::testFixturesApi)
+    ).forEach(::testFixturesImplementation)
 
     listOf(
         libs.jackson.cbor,

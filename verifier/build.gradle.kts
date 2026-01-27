@@ -46,7 +46,7 @@ dependencies {
     listOf(
         libs.com.google.test.parameter.injector,
         testFixtures(projects.security)
-    ).forEach(::testFixturesApi)
+    ).forEach(::testFixturesImplementation)
 
     implementation(libs.androidx.browser)
     listOf(

@@ -1,13 +1,21 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
+import android.Manifest
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import androidx.annotation.RequiresPermission
 import app.cash.turbine.test
+import io.mockk.CapturingSlot
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import kotlin.test.Test
@@ -18,9 +26,7 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
-import uk.gov.onelogin.sharing.bluetooth.ble.mockBluetoothDevice
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerMock.setupNullGattServer
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerMock.setupOpenGattServer
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
@@ -30,7 +36,10 @@ import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothManager = mockk<BluetoothManager>(relaxed = true)
-    private val device = mockBluetoothDevice()
+    private val device = mockk<BluetoothDevice>().also {
+        every { it.address } returns DEVICE_ADDRESS
+    }
+    private val descriptor = mockk<BluetoothGattDescriptor>()
     private val fakeGattService = AndroidGattServiceBuilder.build(
         GattServiceDefinition(
             UUID.randomUUID(),
@@ -187,7 +196,12 @@ class AndroidGattServerManagerTest {
         manager.open(uuid)
 
         manager.events.test {
-            CharacteristicWriteRequestStub.writeRequestStart().run {
+            CharacteristicWriteRequestStub.writeRequestStart(
+                bluetoothDevice = device,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.STATE_UUID
+                }
+            ).run {
                 callbackSlot.captured.onCharacteristicWriteRequest(
                     device,
                     requestId,
@@ -214,7 +228,10 @@ class AndroidGattServerManagerTest {
 
         manager.open(uuid)
 
-        val args = OnDescriptorWriteRequestArgs()
+        val args = OnDescriptorWriteRequestArgs(
+            device = device,
+            descriptor = descriptor
+        )
         callbackSlot.captured.invokeDescriptorWriteCallback(args)
 
         verify(exactly = 1) {
@@ -235,7 +252,11 @@ class AndroidGattServerManagerTest {
         manager.open(uuid)
 
         callbackSlot.captured.invokeDescriptorWriteCallback(
-            OnDescriptorWriteRequestArgs(responseNeeded = false)
+            OnDescriptorWriteRequestArgs(
+                device = device,
+                descriptor = descriptor,
+                responseNeeded = false
+            )
         )
 
         verify(exactly = 0) {
@@ -295,13 +316,32 @@ class AndroidGattServerManagerTest {
         args: OnDescriptorWriteRequestArgs
     ) {
         onDescriptorWriteRequest(
-            args.device,
+            device,
             args.requestId,
-            args.descriptor,
+            descriptor,
             args.preparedWrite,
             args.responseNeeded,
             args.offset,
             args.value
         )
+    }
+
+    private fun setupOpenGattServer(
+        bluetoothManager: BluetoothManager,
+        context: Context,
+        gattServer: BluetoothGattServer = mockk(relaxed = true)
+    ): Pair<CapturingSlot<BluetoothGattServerCallback>, BluetoothGattServer> {
+        val callbackSlot = slot<BluetoothGattServerCallback>()
+        every {
+            bluetoothManager.openGattServer(context, capture(callbackSlot))
+        } returns gattServer
+        return callbackSlot to gattServer
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun setupNullGattServer(bluetoothManager: BluetoothManager, context: Context) {
+        every {
+            bluetoothManager.openGattServer(context, any())
+        } returns null
     }
 }

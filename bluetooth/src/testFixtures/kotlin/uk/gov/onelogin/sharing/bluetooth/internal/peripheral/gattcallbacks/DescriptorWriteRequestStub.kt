@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattDescriptor
-import io.mockk.mockk
 
 /**
  * A stub object for providing mock arguments used in GATT descriptor write requests.
@@ -21,9 +20,9 @@ object DescriptorWriteRequestStub {
      * @property value The value to be written to the descriptor.
      */
     data class OnDescriptorWriteRequestArgs(
-        val device: BluetoothDevice = mockk(relaxed = true),
+        val device: BluetoothDevice,
         val requestId: Int = 1,
-        val descriptor: BluetoothGattDescriptor = mockk(),
+        val descriptor: BluetoothGattDescriptor,
         val offset: Int = 0,
         val preparedWrite: Boolean = false,
         val responseNeeded: Boolean = true,
