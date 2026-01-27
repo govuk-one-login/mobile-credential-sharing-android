@@ -7,7 +7,9 @@ enum class MdocSessionError {
 
     GATT_NOT_AVAILABLE,
 
-    BLUETOOTH_PERMISSION_MISSING;
+    BLUETOOTH_PERMISSION_MISSING,
+
+    DESCRIPTOR_WRITE_REQUEST_FAILED;
 
     companion object {
         fun fromGattError(gattServerError: GattServerError): MdocSessionError =
@@ -15,6 +17,7 @@ enum class MdocSessionError {
                 GattServerError.ADVERTISING_FAILED -> ADVERTISING_FAILED
                 GattServerError.GATT_NOT_AVAILABLE -> GATT_NOT_AVAILABLE
                 GattServerError.BLUETOOTH_PERMISSION_MISSING -> BLUETOOTH_PERMISSION_MISSING
+                GattServerError.DESCRIPTOR_WRITE_REQUEST_FAILED -> DESCRIPTOR_WRITE_REQUEST_FAILED
             }
     }
 }

@@ -29,20 +29,4 @@ object DescriptorWriteRequestStub {
         val responseNeeded: Boolean = true,
         val value: ByteArray = byteArrayOf()
     )
-
-    /**
-     * Creates a stub for a descriptor write request where a response is needed.
-     *
-     * @return [OnDescriptorWriteRequestArgs] with [OnDescriptorWriteRequestArgs.responseNeeded] set to `true`.
-     */
-    fun onDescriptorWriteRequestWithResponseNeeded(): OnDescriptorWriteRequestArgs =
-        OnDescriptorWriteRequestArgs()
-
-    /**
-     * Creates a stub for a descriptor write request where no response is needed.
-     *
-     * @return [OnDescriptorWriteRequestArgs] with [OnDescriptorWriteRequestArgs.responseNeeded] set to `false`.
-     */
-    fun onDescriptorWriteRequestWithNoResponseNeeded(): OnDescriptorWriteRequestArgs =
-        OnDescriptorWriteRequestArgs(responseNeeded = false)
 }

@@ -101,8 +101,26 @@ class GattServerCallback(
         offset: Int,
         value: ByteArray?
     ) {
-        gatGattEventEmitter.emit(
-            GattEvent.DescriptorWriteRequest(
+        val event: GattEvent.DescriptorWriteRequest = when {
+            device == null -> GattEvent.DescriptorWriteRequest.Invalid(
+                requestId,
+                responseNeeded,
+                GattEvent.DescriptorWriteRequest.Invalid.Reason.NullDevice
+            )
+
+            descriptor == null -> GattEvent.DescriptorWriteRequest.Invalid(
+                requestId,
+                responseNeeded,
+                GattEvent.DescriptorWriteRequest.Invalid.Reason.NullDescriptor
+            )
+
+            value == null -> GattEvent.DescriptorWriteRequest.Invalid(
+                requestId,
+                responseNeeded,
+                GattEvent.DescriptorWriteRequest.Invalid.Reason.EmptyValue
+            )
+
+            else -> GattEvent.DescriptorWriteRequest.Valid(
                 device,
                 requestId,
                 descriptor,
@@ -111,7 +129,9 @@ class GattServerCallback(
                 offset,
                 value
             )
-        )
+        }
+
+        gatGattEventEmitter.emit(event)
     }
 
     private fun handleStateUpdate(device: BluetoothDevice, value: ByteArray) {

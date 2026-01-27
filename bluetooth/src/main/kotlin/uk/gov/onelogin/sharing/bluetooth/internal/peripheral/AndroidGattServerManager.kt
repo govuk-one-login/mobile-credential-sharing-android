@@ -120,14 +120,32 @@ class AndroidGattServerManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleDescriptorWriteRequest(event: GattEvent.DescriptorWriteRequest) {
-        if (event.responseNeeded) {
-            gattServer?.sendResponse(
-                event.device,
-                event.requestId,
-                BluetoothGatt.GATT_SUCCESS,
-                event.offset,
-                event.value
-            )
+        when (event) {
+            is GattEvent.DescriptorWriteRequest.Invalid -> {
+                _events.tryEmit(
+                    GattServerEvent.Error(
+                        GattServerError.DESCRIPTOR_WRITE_REQUEST_FAILED
+                    )
+                )
+                logger.error(logTag, "Invalid descriptor write request: ${event.reason}")
+            }
+
+            is GattEvent.DescriptorWriteRequest.Valid ->
+                if (event.responseNeeded) {
+                    gattServer?.sendResponse(
+                        event.device,
+                        event.requestId,
+                        BluetoothGatt.GATT_SUCCESS,
+                        event.offset,
+                        event.value
+                    )
+                } else {
+                    logger.debug(
+                        logTag,
+                        "Received descriptor write requests " +
+                            "- response not needed"
+                    )
+                }
         }
     }
 }

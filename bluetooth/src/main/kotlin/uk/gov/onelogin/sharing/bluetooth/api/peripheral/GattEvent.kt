@@ -47,13 +47,20 @@ sealed interface GattEvent {
 
     data class MtuChanged(val device: BluetoothDevice?, val mtu: Int) : GattEvent
 
-    data class DescriptorWriteRequest(
-        val device: BluetoothDevice?,
-        val requestId: Int,
-        val descriptor: BluetoothGattDescriptor?,
-        val preparedWrite: Boolean,
-        val responseNeeded: Boolean,
-        val offset: Int,
-        val value: ByteArray?
-    ) : GattEvent
+    sealed interface DescriptorWriteRequest : GattEvent {
+        data class Valid(
+            val device: BluetoothDevice,
+            val requestId: Int,
+            val descriptor: BluetoothGattDescriptor,
+            val preparedWrite: Boolean,
+            val responseNeeded: Boolean,
+            val offset: Int,
+            val value: ByteArray
+        ) : DescriptorWriteRequest
+
+        data class Invalid(val requestId: Int, val responseNeeded: Boolean, val reason: Reason) :
+            DescriptorWriteRequest {
+            enum class Reason { NullDevice, NullDescriptor, EmptyValue }
+        }
+    }
 }

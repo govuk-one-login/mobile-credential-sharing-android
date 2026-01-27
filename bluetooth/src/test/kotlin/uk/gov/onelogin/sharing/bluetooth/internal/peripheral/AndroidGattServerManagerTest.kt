@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
@@ -21,8 +22,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.mockBluetoothDevice
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerMock.setupNullGattServer
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerMock.setupOpenGattServer
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.onDescriptorWriteRequestWithNoResponseNeeded
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.onDescriptorWriteRequestWithResponseNeeded
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
@@ -186,18 +186,18 @@ class AndroidGattServerManagerTest {
 
         manager.open(uuid)
 
-        val args = CharacteristicWriteRequestStub.writeRequestStart()
-
         manager.events.test {
-            callbackSlot.captured.onCharacteristicWriteRequest(
-                args.device,
-                args.requestId,
-                args.characteristic,
-                args.preparedWrite,
-                args.responseNeeded,
-                args.offset,
-                args.value
-            )
+            CharacteristicWriteRequestStub.writeRequestStart().run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
 
             assertEquals(
                 GattServerEvent.SessionStarted,
@@ -214,19 +214,10 @@ class AndroidGattServerManagerTest {
 
         manager.open(uuid)
 
-        val args = onDescriptorWriteRequestWithResponseNeeded()
+        val args = OnDescriptorWriteRequestArgs()
+        callbackSlot.captured.invokeDescriptorWriteCallback(args)
 
-        callbackSlot.captured.onDescriptorWriteRequest(
-            args.device,
-            args.requestId,
-            args.descriptor,
-            args.preparedWrite,
-            args.responseNeeded,
-            args.offset,
-            args.value
-        )
-
-        verify {
+        verify(exactly = 1) {
             gattServer.sendResponse(
                 args.device,
                 args.requestId,
@@ -243,25 +234,17 @@ class AndroidGattServerManagerTest {
 
         manager.open(uuid)
 
-        val args = onDescriptorWriteRequestWithNoResponseNeeded()
-
-        callbackSlot.captured.onDescriptorWriteRequest(
-            args.device,
-            args.requestId,
-            args.descriptor,
-            args.preparedWrite,
-            args.responseNeeded,
-            args.offset,
-            args.value
+        callbackSlot.captured.invokeDescriptorWriteCallback(
+            OnDescriptorWriteRequestArgs(responseNeeded = false)
         )
 
         verify(exactly = 0) {
             gattServer.sendResponse(
-                args.device,
-                args.requestId,
-                BluetoothGatt.GATT_SUCCESS,
-                args.offset,
-                args.value
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
             )
         }
     }
@@ -306,5 +289,19 @@ class AndroidGattServerManagerTest {
                 awaitItem()
             )
         }
+    }
+
+    private fun BluetoothGattServerCallback.invokeDescriptorWriteCallback(
+        args: OnDescriptorWriteRequestArgs
+    ) {
+        onDescriptorWriteRequest(
+            args.device,
+            args.requestId,
+            args.descriptor,
+            args.preparedWrite,
+            args.responseNeeded,
+            args.offset,
+            args.value
+        )
     }
 }
