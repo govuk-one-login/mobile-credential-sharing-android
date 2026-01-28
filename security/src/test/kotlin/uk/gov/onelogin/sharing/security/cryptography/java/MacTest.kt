@@ -1,11 +1,11 @@
 package uk.gov.onelogin.sharing.security.cryptography.java
 
+import kotlin.test.assertContentEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.BSB_BYTES
 import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.PRK_BYTES
 import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.VALID_MESSAGE_AUTHENTICATION_CODE_BYTES
 import uk.gov.onelogin.sharing.security.util.getByteArrayFromFile
-import kotlin.test.assertContentEquals
 
 class MacTest {
     @Test

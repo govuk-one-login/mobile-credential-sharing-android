@@ -22,7 +22,7 @@ interface SessionSecurity {
     fun deriveSessionKey(
         sharedKey: ByteArray,
         sessionTranscriptBytes: ByteArray,
-        role: DeviceRole,
+        role: DeviceRole
     ): ByteArray
 
     companion object {

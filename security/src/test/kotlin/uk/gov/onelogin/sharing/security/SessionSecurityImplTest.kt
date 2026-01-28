@@ -1,7 +1,10 @@
 package uk.gov.onelogin.sharing.security
 
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
+import kotlin.test.assertContentEquals
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.ALGORITHM
@@ -16,10 +19,6 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.Dev
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole.VERIFIER
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.security.util.getByteArrayFromFile
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
-import kotlin.test.assertContentEquals
-
 
 class SessionSecurityImplTest {
     val stubLogger = SystemLogger()
@@ -130,7 +129,7 @@ class SessionSecurityImplTest {
 
         val sharedSecret = getSharedSecret(
             holderKeyPair.private as ECPrivateKey,
-            readerKeyPair.public as ECPublicKey,
+            readerKeyPair.public as ECPublicKey
         )
 
         val skDeviceKey = sessionSecurity.deriveSessionKey(

@@ -12,11 +12,7 @@ import uk.gov.onelogin.sharing.security.cryptography.Constants.HKDF_KEY_SIZE
  * @return A [ByteArray] object representing a deterministic session key
  */
 
-fun hkdfKeyGeneration(
-    ikm: ByteArray,
-    salt: ByteArray,
-    info: ByteArray?,
-): ByteArray {
+fun hkdfKeyGeneration(ikm: ByteArray, salt: ByteArray, info: ByteArray?): ByteArray {
     val prk = mac(salt, ikm)
     val result = ByteArray(HKDF_KEY_SIZE)
     var ctr = 1

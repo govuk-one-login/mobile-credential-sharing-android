@@ -170,8 +170,14 @@ class DecoderTest {
         val holderSession = FakeSessionSecurity()
         val readerSession = FakeSessionSecurity()
 
-        val readerKeyPair = readerSession.generateEcKeyPair(ELLIPTIC_CURVE_ALGORITHM, ELLIPTIC_CURVE_PARAMETER_SPEC)
-        val holderKeyPair = holderSession.generateEcKeyPair(ELLIPTIC_CURVE_ALGORITHM, ELLIPTIC_CURVE_PARAMETER_SPEC)
+        val readerKeyPair = readerSession.generateEcKeyPair(
+            ELLIPTIC_CURVE_ALGORITHM,
+            ELLIPTIC_CURVE_PARAMETER_SPEC
+        )
+        val holderKeyPair = holderSession.generateEcKeyPair(
+            ELLIPTIC_CURVE_ALGORITHM,
+            ELLIPTIC_CURVE_PARAMETER_SPEC
+        )
 
         val readerPrivateKey = readerSession.getSessionPrivateKey()
         val holderPrivateKey = holderSession.getSessionPrivateKey()

@@ -2,15 +2,6 @@ package uk.gov.onelogin.sharing.security.secureArea
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.security.cbor.encodeCbor
-import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
-import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
-import uk.gov.onelogin.sharing.security.cryptography.java.generateSalt
-import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
 import java.security.KeyPair
@@ -21,6 +12,15 @@ import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import javax.crypto.KeyAgreement
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
+import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.java.generateSalt
+import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole
 
 /**
  * An implementation of [SessionSecurity] that handles cryptographic operations for a

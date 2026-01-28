@@ -122,7 +122,9 @@ data class CoseKey(
             }
             val ecSpec = params.getParameterSpec(java.security.spec.ECParameterSpec::class.java)
             val pubSpec = ECPublicKeySpec(parsedKey, ecSpec)
-            return KeyFactory.getInstance(ELLIPTIC_CURVE_ALGORITHM).generatePublic(pubSpec) as ECPublicKey
+            return KeyFactory.getInstance(
+                ELLIPTIC_CURVE_ALGORITHM
+            ).generatePublic(pubSpec) as ECPublicKey
         }
     }
 }

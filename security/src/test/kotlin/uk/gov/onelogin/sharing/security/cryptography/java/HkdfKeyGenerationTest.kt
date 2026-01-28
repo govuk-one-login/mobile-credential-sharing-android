@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.security.cryptography.java
 
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
+import kotlin.test.assertContentEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
@@ -10,9 +13,6 @@ import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.SHARED_SECR
 import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.VALID_HKDF_DEVICE_KEY
 import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.VALID_HKDF_READER_KEY
 import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.VALID_SALT_BYTES
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
-import kotlin.test.assertContentEquals
 
 class HkdfKeyGenerationTest {
 
@@ -38,7 +38,6 @@ class HkdfKeyGenerationTest {
             skReaderAsBytes
         )
 
-
         assertContentEquals(generatedHkdfKey, VALID_HKDF_READER_KEY)
     }
 
@@ -58,7 +57,7 @@ class HkdfKeyGenerationTest {
 
         val sharedSecret = getSharedSecret(
             holderKeyPair.private as ECPrivateKey,
-            readerKeyPair.public as ECPublicKey,
+            readerKeyPair.public as ECPublicKey
         )
 
         val generatedHkdfKey = hkdfKeyGeneration(
@@ -74,12 +73,11 @@ class HkdfKeyGenerationTest {
     fun `when generating key and salt changed, bytes do not match binary file resource`() {
         val generatedHkdfKey = hkdfKeyGeneration(
             SHARED_SECRET_BYTES,
-            VALID_SALT_BYTES.apply {
+            VALID_SALT_BYTES.copyOf().apply {
                 set(0, 0x00)
             },
             skReaderAsBytes
         )
-
 
         assert(!generatedHkdfKey.contentEquals(VALID_HKDF_READER_KEY))
     }
@@ -91,7 +89,6 @@ class HkdfKeyGenerationTest {
             VALID_SALT_BYTES,
             skReaderAsBytes
         )
-
 
         assert(!generatedHkdfKey.contentEquals(VALID_HKDF_DEVICE_KEY))
     }
