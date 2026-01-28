@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.1.0/schemas/schema.json",
+  "services": [
+    {
+      "service-tag": "wallet-sharing",
+      "quality-gates": [
+        {
+          "check-types": [
+            "code style and linting",
+            "integration",
+            "unit",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Verify code base when pull request is published/updated",
+            "path": "jobs.unit_tests_job"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting",
+            "integration",
+            "unit",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/merge-to-main.yml",
+            "name": "Android validation and publish to play store",
+            "path": "jobs.validate"
+          },
+          "phase": "production",
+          "provider": "GitHub"
+        }
+      ]
+    }
+  ]
+}
