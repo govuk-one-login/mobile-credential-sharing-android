@@ -6,10 +6,11 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.cryptography.java.generateSalt
 import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
-import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
 import java.security.KeyPair
@@ -90,7 +91,7 @@ class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
     }
 
     override fun generateSessionPublicKey(): CoseKey {
-        generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
+        generateEcKeyPair(ELLIPTIC_CURVE_ALGORITHM, ELLIPTIC_CURVE_PARAMETER_SPEC)
 
         return CoseKey.generateCoseKey(sessionKeyPair.public as ECPublicKey)
     }
@@ -111,17 +112,13 @@ class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
     override fun deriveSessionKey(
         sharedKey: ByteArray,
         sessionTranscriptBytes: ByteArray,
-        role: String
+        role: DeviceRole
     ): ByteArray {
-
-        if (role != "SKReader" && role != "SKDevice") {
-            val errorMessage = "Invalid role string (status 10) supplied: $role"
-            logger.debug(logTag, errorMessage)
-            throw InvalidAlgorithmParameterException(errorMessage)
-        }
-
         val salt = generateSalt(sessionTranscriptBytes)
-        val roleAsBytes = role.encodeCbor()
+        val roleAsBytes = when (role) {
+            DeviceRole.VERIFIER -> "SKReader"
+            DeviceRole.HOLDER -> "SKDevice"
+        }.encodeCbor()
 
         return hkdfKeyGeneration(
             sharedKey,

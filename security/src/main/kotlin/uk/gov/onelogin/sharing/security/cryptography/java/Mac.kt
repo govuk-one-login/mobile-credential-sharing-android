@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.security.cryptography.java
 
-import uk.gov.onelogin.sharing.security.cryptography.Constants.MAC_ALGORITHM_ID
+import uk.gov.onelogin.sharing.security.cryptography.Constants.MAC_ALGORITHM_SHA256
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -17,7 +17,7 @@ fun mac(
     key: ByteArray,
     message: ByteArray
 ): ByteArray {
-    return Mac.getInstance(MAC_ALGORITHM_ID).run {
+    return Mac.getInstance(MAC_ALGORITHM_SHA256).run {
         init(SecretKeySpec(key, ""))
         update(message)
         doFinal()

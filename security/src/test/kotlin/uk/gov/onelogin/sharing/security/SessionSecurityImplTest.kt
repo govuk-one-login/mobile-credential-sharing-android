@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.security
 
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
-import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.ALGORITHM
@@ -10,11 +9,13 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getKeyParameter
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
 import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptStub.validSessionTranscript
-import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.cryptography.Constants.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.SHARED_SECRET_BYTES
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole.HOLDER
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole.VERIFIER
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.security.util.getByteArrayFromFile
-import java.security.InvalidAlgorithmParameterException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import kotlin.test.assertContentEquals
@@ -26,20 +27,28 @@ class SessionSecurityImplTest {
 
     @Test
     fun `generates valid public key`() {
-        val publicKey = sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
+        val publicKey = sessionSecurity.generateEcKeyPair(
+            ALGORITHM,
+            PARAMETER_SPEC
+        )
         assertNotNull(publicKey)
     }
 
     @Test
     fun `generates public key using EC algorithm`() {
-        val publicKey = sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
+        val publicKey = sessionSecurity.generateEcKeyPair(
+            ALGORITHM,
+            PARAMETER_SPEC
+        )
         assertEquals(ALGORITHM, publicKey?.public?.algorithm)
     }
 
     @Test
     fun `generates key with secp256r1 curve`() {
-        val publicKey =
-            sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)?.public as ECPublicKey
+        val publicKey = sessionSecurity.generateEcKeyPair(
+            ALGORITHM,
+            PARAMETER_SPEC
+        )?.public as ECPublicKey
 
         val expectedParams = getKeyParameter()
 
@@ -71,22 +80,22 @@ class SessionSecurityImplTest {
     }
 
     @Test
-    fun `generates correct session key from a given sharedKey and sessiontranscript with role SkReader`() {
+    fun `generates correct session key from a given sharedKey with role SkReader`() {
         val skReaderKey = sessionSecurity.deriveSessionKey(
             SHARED_SECRET_BYTES,
             validSessionTranscript,
-            SK_READER_ROLE
+            VERIFIER
         )
 
         assertContentEquals(skReaderKey, VALID_SKREADER_BYTES)
     }
 
     @Test
-    fun `generates correct session key from a given sharedKey and sessiontranscript with role SkDevice`() {
+    fun `generates correct session key from a given sharedKey with role SkDevice`() {
         val skDeviceKey = sessionSecurity.deriveSessionKey(
             SHARED_SECRET_BYTES,
             validSessionTranscript,
-            SK_DEVICE_ROLE
+            HOLDER
         )
 
         assertContentEquals(skDeviceKey, VALID_SKDEVICE_BYTES)
@@ -99,7 +108,7 @@ class SessionSecurityImplTest {
             validSessionTranscript.copyOf().apply {
                 set(0, 0x00)
             },
-            SK_DEVICE_ROLE
+            HOLDER
         )
 
         assert(!skDeviceKey.contentEquals(VALID_SKDEVICE_BYTES))
@@ -110,8 +119,14 @@ class SessionSecurityImplTest {
         val holderSession = FakeSessionSecurity()
         val readerSession = FakeSessionSecurity()
 
-        val readerKeyPair = readerSession.generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
-        val holderKeyPair = holderSession.generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
+        val readerKeyPair = readerSession.generateEcKeyPair(
+            ELLIPTIC_CURVE_ALGORITHM,
+            ELLIPTIC_CURVE_PARAMETER_SPEC
+        )
+        val holderKeyPair = holderSession.generateEcKeyPair(
+            ELLIPTIC_CURVE_ALGORITHM,
+            ELLIPTIC_CURVE_PARAMETER_SPEC
+        )
 
         val sharedSecret = getSharedSecret(
             holderKeyPair.private as ECPrivateKey,
@@ -121,7 +136,7 @@ class SessionSecurityImplTest {
         val skDeviceKey = sessionSecurity.deriveSessionKey(
             sharedSecret,
             validSessionTranscript,
-            SK_DEVICE_ROLE
+            HOLDER
         )
 
         assert(!skDeviceKey.contentEquals(VALID_SKDEVICE_BYTES))
@@ -132,45 +147,18 @@ class SessionSecurityImplTest {
         val skReaderKey = sessionSecurity.deriveSessionKey(
             SHARED_SECRET_BYTES,
             validSessionTranscript,
-            SK_DEVICE_ROLE
+            HOLDER
         )
 
-        assert(!skReaderKey.contentEquals( VALID_SKREADER_BYTES))
-    }
-
-    @Test
-    fun `derive session key throws exception when an invalid role is supplied and logs error`() {
-        assertThrows(InvalidAlgorithmParameterException::class.java) {
-            sessionSecurity.deriveSessionKey(
-                SHARED_SECRET_BYTES,
-                validSessionTranscript,
-                INVALID_ROLE
-            )
-        }
-
-        assert(
-            INVALID_ROLE_ERROR_MESSAGE in stubLogger
-        )
+        assert(!skReaderKey.contentEquals(VALID_SKREADER_BYTES))
     }
 
     private companion object {
-        const val SK_READER_ROLE = "SKReader"
-        const val SK_DEVICE_ROLE = "SKDevice"
-        const val INVALID_ROLE = "SKNull"
-        const val INVALID_ROLE_ERROR_MESSAGE =
-            "Invalid role string (status 10) supplied: $INVALID_ROLE"
         const val INVALID_ALGORITHM = "INVALID_ALGO"
         const val INVALID_SPEC = "INVALID_SPEC"
 
-        const val CRYPTO_BINARY_PACKAGE_PATH =
-            "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cryptography/java/"
         const val SECURITY_BINARY_PACKAGE_PATH =
             "src/testFixtures/resources/uk/gov/onelogin/sharing/security/"
-
-        val SHARED_SECRET_BYTES = getByteArrayFromFile(
-            CRYPTO_BINARY_PACKAGE_PATH,
-            "exampleSharedSecret.bin"
-        )
 
         val VALID_SKREADER_BYTES = getByteArrayFromFile(
             SECURITY_BINARY_PACKAGE_PATH,

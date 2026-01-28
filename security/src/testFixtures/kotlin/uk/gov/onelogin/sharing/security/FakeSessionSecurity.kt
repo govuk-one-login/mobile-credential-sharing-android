@@ -33,6 +33,6 @@ class FakeSessionSecurity : SessionSecurity {
     override fun deriveSessionKey(
         sharedKey: ByteArray,
         sessionTranscriptBytes: ByteArray,
-        role: String
+        role: SessionSecurity.Companion.DeviceRole
     ): ByteArray = byteArrayOf()
 }

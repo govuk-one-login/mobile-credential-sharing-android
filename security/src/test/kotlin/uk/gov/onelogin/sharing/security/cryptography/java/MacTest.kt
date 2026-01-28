@@ -1,6 +1,9 @@
 package uk.gov.onelogin.sharing.security.cryptography.java
 
 import org.junit.Test
+import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.BSB_BYTES
+import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.PRK_BYTES
+import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.VALID_MESSAGE_AUTHENTICATION_CODE_BYTES
 import uk.gov.onelogin.sharing.security.util.getByteArrayFromFile
 import kotlin.test.assertContentEquals
 
@@ -37,25 +40,5 @@ class MacTest {
         )
 
         assert(!messageAuthenticationCode.contentEquals(VALID_MESSAGE_AUTHENTICATION_CODE_BYTES))
-    }
-
-    private companion object {
-        const val BINARY_PACKAGE_PATH =
-            "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cryptography/java/"
-
-        val VALID_MESSAGE_AUTHENTICATION_CODE_BYTES = getByteArrayFromFile(
-            BINARY_PACKAGE_PATH,
-            "validMessageAuthenticationCode.bin"
-        )
-
-        val BSB_BYTES = getByteArrayFromFile(
-            BINARY_PACKAGE_PATH,
-            "testBSB.bin"
-        )
-
-        val PRK_BYTES = getByteArrayFromFile(
-            BINARY_PACKAGE_PATH,
-            "testPseudoRandomKey.bin"
-        )
     }
 }

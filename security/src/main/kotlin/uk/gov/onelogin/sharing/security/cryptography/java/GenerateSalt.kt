@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.security.cryptography.java
 
-import uk.gov.onelogin.sharing.security.cryptography.Constants.JVM_DIGEST_ALGORITHM_NAME
+import uk.gov.onelogin.sharing.security.cryptography.Constants.HASH_ALGORITHM_SHA256
 import java.security.MessageDigest
 
 /**
@@ -11,5 +11,5 @@ import java.security.MessageDigest
 fun generateSalt(
     byteArray: ByteArray
 ): ByteArray {
-    return MessageDigest.getInstance(JVM_DIGEST_ALGORITHM_NAME).digest(byteArray)
+    return MessageDigest.getInstance(HASH_ALGORITHM_SHA256).digest(byteArray)
 }

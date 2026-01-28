@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.security
 
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -50,10 +52,9 @@ object SessionSecurityTestStub {
         )
 
     fun generateSessionKey(
-        role: String
-    ): ByteArray = if (role == "SKReader") {
-        "58d277d8719e62a1561d248f403f477e9e6c37bf5d5fc5126f8f4c727c22dfc9"
-    } else {
-        "81d170e07fbdac93c1a676242c2576124a380d87bb73ed9ce4834de2272cf409"
+        role: DeviceRole
+    ): ByteArray = when(role) {
+        DeviceRole.VERIFIER -> "58d277d8719e62a1561d248f403f477e9e6c37bf5d5fc5126f8f4c727c22dfc9"
+        DeviceRole.HOLDER -> "81d170e07fbdac93c1a676242c2576124a380d87bb73ed9ce4834de2272cf409"
     }.hexToByteArray()
 }

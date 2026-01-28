@@ -22,6 +22,13 @@ interface SessionSecurity {
     fun deriveSessionKey(
         sharedKey: ByteArray,
         sessionTranscriptBytes: ByteArray,
-        role: String,
+        role: DeviceRole,
     ): ByteArray
+
+    companion object {
+        enum class DeviceRole {
+            VERIFIER,
+            HOLDER
+        }
+    }
 }
