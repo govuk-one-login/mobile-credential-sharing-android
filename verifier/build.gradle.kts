@@ -35,7 +35,8 @@ dependencies {
         projects.bluetooth,
         projects.core,
         projects.models,
-        projects.security
+        projects.security,
+        projects.orchestration
     ).forEach(::api)
 
     listOf(
