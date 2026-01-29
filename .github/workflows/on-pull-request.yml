@@ -15,14 +15,15 @@ concurrency:
 env:
   GITHUB_ACTOR: ${{ github.actor }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  runs-on: ubuntu-latest
 
 permissions:
   packages: read
 
 jobs:
   conventional_commits:
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Verify Conventional commit standards against latest git tag
@@ -30,7 +31,9 @@ jobs:
         shell: bash
 
   prose_linting:
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run vale prose linting
@@ -41,7 +44,9 @@ jobs:
           version: latest
 
   gradle_linting:
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run linting associated with Gradle
@@ -49,7 +54,9 @@ jobs:
           ./scripts/lint/gradle
 
   unit-tests:
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run unit tests
@@ -57,7 +64,9 @@ jobs:
           ./scripts/test/unit
 
   instrumentation-tests:
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run instrumentation tests
@@ -65,7 +74,9 @@ jobs:
           ./scripts/test/instrumentation --no-configuration-cache
 
   sonar-scan:
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Sonar scan
