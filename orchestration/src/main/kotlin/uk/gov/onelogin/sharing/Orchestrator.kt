@@ -1,6 +1,20 @@
 package uk.gov.onelogin.sharing
 
-fun interface Orchestrator {
+import uk.gov.onelogin.sharing.core.Receiver
 
-    fun start(): Boolean
+
+interface Orchestrator: Receiver<OrchestratorEvent> {
+
+    fun start()
+
+    fun cancel()
+}
+
+
+sealed interface OrchestratorEvent {
+
+    sealed interface HolderOrchestratorEvent: OrchestratorEvent {
+        data object Start: HolderOrchestratorEvent
+        data object Cancel: HolderOrchestratorEvent
+    }
 }

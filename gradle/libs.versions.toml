@@ -21,6 +21,7 @@ kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases
 kotlin-symbol-processing = "2.3.5" # https://github.com/google/ksp/releases ; update with 'kotlin'
 kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 kotlinx-bytestring = "0.8.2"
+kotlinx-coroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
 ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
 metro = "0.10.2"  # https://github.com/ZacSweers/Metro/releases
@@ -68,6 +69,8 @@ jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin"
 junit = { module = "junit:junit", version.ref = "junit" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin" }
 kotlinx-io-bytestring = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-bytestring", version.ref = "kotlinx-bytestring" }
