@@ -19,10 +19,12 @@ runs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
+        shell: bash
 
     - name: Install linux packages
       run: |
         ./scripts/installLinuxPackages
+        shell: bash
 
     - name: Setup GitHub Runner workflow
       uses: ./mobile-android-pipelines/actions/setup-runner
@@ -33,3 +35,4 @@ runs:
     - name: Install homebrew packages
       run: |
         brew bundle
+        shell: bash
