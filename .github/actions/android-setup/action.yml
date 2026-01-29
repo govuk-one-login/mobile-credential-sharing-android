@@ -16,15 +16,16 @@ runs:
       uses: ./mobile-android-pipelines/actions/clean-workspace
 
     - name: Configure git User
+      shell: bash
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        shell: bash
 
     - name: Install linux packages
+      shell: bash
       run: |
         ./scripts/installLinuxPackages
-        shell: bash
+  
 
     - name: Setup GitHub Runner workflow
       uses: ./mobile-android-pipelines/actions/setup-runner
@@ -33,6 +34,6 @@ runs:
         jdk-version: "21"
 
     - name: Install homebrew packages
+      shell: bash
       run: |
         brew bundle
-        shell: bash
