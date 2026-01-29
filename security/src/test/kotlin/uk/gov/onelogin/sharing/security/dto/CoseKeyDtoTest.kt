@@ -1,14 +1,14 @@
 package uk.gov.onelogin.sharing.security.dto
 
-import java.security.interfaces.ECPublicKey
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.security.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.security.cose.Cose
 import uk.gov.onelogin.sharing.security.cose.CoseKey
+import java.security.interfaces.ECPublicKey
 
 class CoseKeyDtoTest {
 
@@ -17,13 +17,13 @@ class CoseKeyDtoTest {
 
     @Before
     fun setup() {
-        genKey = generateValidPublicKeyPair()
+        genKey = generateValidPublicKey()
         coseKey = CoseKey.generateCoseKey(genKey)
     }
 
     @Test
     fun `equals should return true for instances with same values`() {
-        val genKey = generateValidPublicKeyPair()
+        val genKey = generateValidPublicKey()
         val coseKey = CoseKey.generateCoseKey(genKey)
 
         val dto1 = CoseKeyDto(

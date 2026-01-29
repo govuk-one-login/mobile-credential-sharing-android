@@ -1,18 +1,14 @@
-package uk.gov.onelogin.sharing.security.secureArea.key
+package uk.gov.onelogin.sharing.security.secureArea.keypair
 
-import java.security.KeyPair
+import org.junit.Assert.assertThrows
+import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.ALGORITHM
+import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.keyPairWithNullEntries
+import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.keyPairWithPublicKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.junit.Assert.assertThrows
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.ALGORITHM
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.PARAMETER_SPEC
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
-import uk.gov.onelogin.sharing.security.secureArea.keypair.MemorisedKeyGenerator
 
 class MemorisedKeyGeneratorTest {
-
-    private val keyPairWithNullEntries = KeyPair(null, null)
-    private val keyPairWithPublicKey = KeyPair(generateValidPublicKeyPair(), null)
     private var keyPairGenerator = FakeKeyPairGenerator(
         keyPairWithNullEntries,
         keyPairWithPublicKey

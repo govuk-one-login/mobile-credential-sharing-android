@@ -10,7 +10,6 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
-import java.util.UUID
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,10 +18,11 @@ import uk.gov.onelogin.sharing.holder.QrCodeGenerator.INVALID_QR_CODE_DATA
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_DATA
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_SIZE
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.BASE64_ENCODED_DEVICE_ENGAGEMENT
+import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
 class QrCodeImageTest {
@@ -70,7 +70,7 @@ class QrCodeImageTest {
         val mdocUri = Engagement { _, _ -> BASE64_ENCODED_DEVICE_ENGAGEMENT }
 
         composeTestRule.setContent {
-            val key = generateValidPublicKeyPair()
+            val key = generateValidPublicKey()
             val coseKey = CoseKey.generateCoseKey(key!!)
 
             QrCodeImage(

@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.security.engagement
 
-import java.util.UUID
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.security.cose.CoseKey
+import java.util.UUID
 
 /**
  * Test fake to be used by other classes if required
@@ -19,7 +19,7 @@ object EngagementGeneratorStub {
         BASE64_ENCODED_DEVICE_ENGAGEMENT
     }
     val encodedEngagement: String = fakeEngagement.qrCodeEngagement(
-        key = CoseKey.generateCoseKey(generateValidPublicKeyPair()!!),
+        key = CoseKey.generateCoseKey(generateValidPublicKey()!!),
         uuid = qrCodeEngagementUuid
     )
 }

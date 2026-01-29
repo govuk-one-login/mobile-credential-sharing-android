@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.security.secureArea.secret
 
+import java.security.KeyPair
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 
@@ -13,4 +14,11 @@ fun interface SharedSecretGenerator {
      * @return A [ByteArray] containing the computed shared secret.
      */
     fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray
+
+    fun generateSharedSecret(
+        keyPair: KeyPair
+    ) = generateSharedSecret(
+        holderKey = keyPair.private as ECPrivateKey,
+        eReaderKey = keyPair.public as ECPublicKey,
+    )
 }
