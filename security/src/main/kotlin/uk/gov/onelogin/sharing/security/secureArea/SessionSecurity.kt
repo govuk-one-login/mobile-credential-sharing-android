@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
 import uk.gov.onelogin.sharing.security.secureArea.secret.SharedSecretGenerator
+import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
 
 /**
  * Wrapper interface for holding cryptographic operations throughout a User's session.
@@ -9,18 +10,5 @@ interface SessionSecurity :
     KeyGenerator.KeyPairGenerator,
     KeyGenerator.PrivateKeyGenerator,
     KeyGenerator.PublicKeyGenerator,
-    SharedSecretGenerator {
-
-    fun deriveSessionKey(
-        sharedKey: ByteArray,
-        sessionTranscriptBytes: ByteArray,
-        role: DeviceRole
-    ): ByteArray
-
-    companion object {
-        enum class DeviceRole {
-            VERIFIER,
-            HOLDER
-        }
-    }
-}
+    SessionKeyGenerator,
+    SharedSecretGenerator

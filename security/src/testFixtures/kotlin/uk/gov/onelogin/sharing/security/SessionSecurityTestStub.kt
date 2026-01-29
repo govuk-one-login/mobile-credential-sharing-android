@@ -1,18 +1,19 @@
 package uk.gov.onelogin.sharing.security
 
+import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
+import uk.gov.onelogin.sharing.security.secureArea.keypair.EcKeyPairGenerator
+import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
+import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
-import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
-import uk.gov.onelogin.sharing.security.secureArea.keypair.EcKeyPairGenerator
-import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
-import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGenerator
-import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
 
 object SessionSecurityTestStub {
     const val ALGORITHM = "EC"
@@ -28,7 +29,8 @@ object SessionSecurityTestStub {
         keyPairGenerator = keyPairGenerator,
         privateKeyGenerator = EcPrivateKeyGenerator(keyPairGenerator),
         publicKeyGenerator = EcPublicCoseKeyGenerator(keyPairGenerator),
-        secretGenerator = secretGenerator
+        secretGenerator = secretGenerator,
+        sessionKeyGenerator = HkdfSessionKeyGenerator(securityLogger)
     )
 
     fun generateValidPublicKeyPair(): ECPublicKey {

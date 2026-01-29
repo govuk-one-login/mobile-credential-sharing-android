@@ -1,36 +1,18 @@
-package uk.gov.onelogin.sharing.security.secureArea
+package uk.gov.onelogin.sharing.security.secureArea.session
 
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cryptography.java.generateSalt
 import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
-import uk.gov.onelogin.sharing.security.secureArea.secret.SharedSecretGenerator
-import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
-/**
- * An implementation of [SessionSecurity] that handles cryptographic operations for a
- * secure mDoc sharing session via .
- *
- * Uses interface delegation to provide the necessary features.
- */
-@ContributesBinding(ViewModelScope::class, binding = binding<SessionSecurity>())
-class SessionSecurityImpl(
-    keyPairGenerator: KeyGenerator.KeyPairGenerator,
-    privateKeyGenerator: KeyGenerator.PrivateKeyGenerator,
-    publicKeyGenerator: KeyGenerator.PublicKeyGenerator,
-    secretGenerator: SharedSecretGenerator,
-    sessionKeyGenerator: SessionKeyGenerator,
-) : SessionSecurity,
-    KeyGenerator.Complete,
-    KeyGenerator.KeyPairGenerator by keyPairGenerator,
-    KeyGenerator.PrivateKeyGenerator by privateKeyGenerator,
-    KeyGenerator.PublicKeyGenerator by publicKeyGenerator,
-    SessionKeyGenerator by sessionKeyGenerator,
-    SharedSecretGenerator by secretGenerator {
-
+@ContributesBinding(ViewModelScope::class)
+class HkdfSessionKeyGenerator(
+    private val logger: Logger
+) : SessionKeyGenerator {
     /**
      * Generates a single session key from a given shared secret key, a generated cryptographic
      * salt created from the SessionTranscriptBytes and a string containing the
@@ -50,12 +32,22 @@ class SessionSecurityImpl(
         val roleAsBytes = when (role) {
             DeviceRole.VERIFIER -> "SKReader"
             DeviceRole.HOLDER -> "SKDevice"
-        }.encodeCbor()
+        }.encodeCbor().also {
+            logger.debug(
+                logTag,
+                "Encoded session role as bytes: ${it.decodeToString()}"
+            )
+        }
 
         return hkdfKeyGeneration(
             sharedKey,
             salt,
             roleAsBytes
-        )
+        ).also {
+            logger.debug(
+                logTag,
+                "Generated HKDF session key"
+            )
+        }
     }
 }
