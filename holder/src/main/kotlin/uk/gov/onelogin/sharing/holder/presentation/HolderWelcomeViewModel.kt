@@ -193,6 +193,9 @@ class HolderWelcomeViewModel(
 
             MdocSessionError.BLUETOOTH_PERMISSION_MISSING ->
                 logger.debug(logTag, "Mdoc - Error: Bluetooth permission missing")
+
+            MdocSessionError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
+                logger.debug(logTag, "Mdoc - Error: Descriptor write request failed")
         }
     }
 

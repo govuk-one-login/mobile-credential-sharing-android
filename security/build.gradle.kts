@@ -42,13 +42,14 @@ dependencies {
         libs.jackson.core,
         libs.jackson.kotlin,
         libs.metro.viewmodel.compose,
+        libs.kotlinx.io.bytestring,
         projects.core,
         projects.models
     ).forEach(::implementation)
 
     listOf(
         libs.com.google.test.parameter.injector
-    ).forEach(::testFixturesApi)
+    ).forEach(::testFixturesImplementation)
 
     listOf(
         libs.jackson.cbor,

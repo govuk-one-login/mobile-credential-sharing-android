@@ -7,6 +7,7 @@ import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.security.secureArea.keypair.EcKeyPairGenerator
 import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
@@ -35,16 +36,6 @@ object SessionSecurityTestStub {
         return publicKey?.public as ECPublicKey
     }
 
-    fun generateInvalidKeyPair(): ECPublicKey? {
-        val keyPair = sessionSecurity.generateEcKeyPair("INVALID_ALGO", "INVALID_SPEC")
-        return keyPair?.public as? ECPublicKey
-    }
-
-    fun generateInvalidKeyPairWithValidAlgorithm(): ECPublicKey? {
-        val keyPair = sessionSecurity.generateEcKeyPair(ALGORITHM, "INVALID_SPEC")
-        return keyPair?.public as? ECPublicKey
-    }
-
     fun getKeyParameter(): ECParameterSpec {
         val keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM)
         keyPairGenerator.initialize(
@@ -68,4 +59,9 @@ object SessionSecurityTestStub {
             holderPrivateKey,
             readerPublicKey
         )
+
+    fun generateSessionKey(role: DeviceRole): ByteArray = when (role) {
+        DeviceRole.VERIFIER -> "58d277d8719e62a1561d248f403f477e9e6c37bf5d5fc5126f8f4c727c22dfc9"
+        DeviceRole.HOLDER -> "81d170e07fbdac93c1a676242c2576124a380d87bb73ed9ce4834de2272cf409"
+    }.hexToByteArray()
 }

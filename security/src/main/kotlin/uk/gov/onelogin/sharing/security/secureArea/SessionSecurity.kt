@@ -9,4 +9,18 @@ interface SessionSecurity :
     KeyGenerator.KeyPairGenerator,
     KeyGenerator.PrivateKeyGenerator,
     KeyGenerator.PublicKeyGenerator,
-    SharedSecretGenerator
+    SharedSecretGenerator {
+
+    fun deriveSessionKey(
+        sharedKey: ByteArray,
+        sessionTranscriptBytes: ByteArray,
+        role: DeviceRole
+    ): ByteArray
+
+    companion object {
+        enum class DeviceRole {
+            VERIFIER,
+            HOLDER
+        }
+    }
+}

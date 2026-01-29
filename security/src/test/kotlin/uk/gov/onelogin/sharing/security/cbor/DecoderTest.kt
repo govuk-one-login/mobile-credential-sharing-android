@@ -28,8 +28,8 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKey
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidUnsupportedKeyPair
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
 import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 class DecoderTest {
@@ -170,8 +170,14 @@ class DecoderTest {
         val holderSession = FakeSessionSecurity()
         val readerSession = FakeSessionSecurity()
 
-        val readerKeyPair = readerSession.generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
-        val holderKeyPair = holderSession.generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
+        val readerKeyPair = readerSession.generateEcKeyPair(
+            ELLIPTIC_CURVE_ALGORITHM,
+            ELLIPTIC_CURVE_PARAMETER_SPEC
+        )
+        val holderKeyPair = holderSession.generateEcKeyPair(
+            ELLIPTIC_CURVE_ALGORITHM,
+            ELLIPTIC_CURVE_PARAMETER_SPEC
+        )
 
         val readerPrivateKey = readerSession.getSessionPrivateKey()
         val holderPrivateKey = holderSession.getSessionPrivateKey()
