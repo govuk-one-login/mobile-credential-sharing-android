@@ -17,58 +17,58 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   runs-on: ubuntu-latest
 
-§permissions:
-    packages: read
+permissions:
+  packages: read
 
 jobs:
   conventional_commits:
     steps:
       - name: Setup
-        uses: ./.github/workflows/android-setup-action
+        uses: ./.github/actions/android-setup
       - name: Verify Conventional commit standards against latest git tag
         run: cog check -l
         shell: bash
 
   prose_linting:
     steps:
-    - name: Setup
-      uses: ./.github/workflows/android-setup-action
-    - name: Run vale prose linting
-      uses: errata-ai/vale-action@d89dee975228ae261d22c15adcd03578634d429c # v2.1.1
-      with:
-        fail_on_error: true
-        reporter: github-pr-check
-        version: latest
+      - name: Setup
+        uses: ./.github/actions/android-setup
+      - name: Run vale prose linting
+        uses: errata-ai/vale-action@d89dee975228ae261d22c15adcd03578634d429c # v2.1.1
+        with:
+          fail_on_error: true
+          reporter: github-pr-check
+          version: latest
 
   gradle_linting:
     steps:
-    - name: Setup
-      uses: ./.github/workflows/android-setup-action
-    - name: Run linting associated with Gradle
-      run: |
-        ./scripts/lint/gradle
+      - name: Setup
+        uses: ./.github/actions/android-setup
+      - name: Run linting associated with Gradle
+        run: |
+          ./scripts/lint/gradle
 
   unit-tests:
-   steps:
-    - name: Setup
-      uses: ./.github/workflows/android-setup-action
-    - name: Run unit tests
-      run: |
-        ./scripts/test/unit
+    steps:
+      - name: Setup
+        uses: ./.github/actions/android-setup
+      - name: Run unit tests
+        run: |
+          ./scripts/test/unit
 
   instrumentation-tests:
-   steps:
-    - name: Setup
-      uses: ./.github/workflows/android-setup-action
-    - name: Run instrumentation tests
-      run: |
-        ./scripts/test/instrumentation --no-configuration-cache
+    steps:
+      - name: Setup
+        uses: ./.github/actions/android-setup
+      - name: Run instrumentation tests
+        run: |
+          ./scripts/test/instrumentation --no-configuration-cache
 
   sonar-scan:
-   steps:
-    - name: Setup
-      uses: ./.github/workflows/android-setup-action
-    - name: Sonar scan
-      uses: ./mobile-android-pipelines/actions/sonar-scan
-      with:
-        sonar-token: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Setup
+        uses: ./.github/actions/android-setup
+      - name: Sonar scan
+        uses: ./mobile-android-pipelines/actions/sonar-scan
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
