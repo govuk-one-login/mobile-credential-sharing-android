@@ -44,6 +44,7 @@ listOf(
     ":models",
     ":security",
     ":verifier",
+    ":orchestration",
 ).forEach(::include)
 
 /**

@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import java.util.UUID
@@ -89,6 +90,48 @@ class GattServerCallback(
                 }
             }
         }
+    }
+
+    override fun onDescriptorWriteRequest(
+        device: BluetoothDevice?,
+        requestId: Int,
+        descriptor: BluetoothGattDescriptor?,
+        preparedWrite: Boolean,
+        responseNeeded: Boolean,
+        offset: Int,
+        value: ByteArray?
+    ) {
+        val event: GattEvent.DescriptorWriteRequest = when {
+            device == null -> GattEvent.DescriptorWriteRequest.Invalid(
+                requestId,
+                responseNeeded,
+                GattEvent.DescriptorWriteRequest.Invalid.Reason.NullDevice
+            )
+
+            descriptor == null -> GattEvent.DescriptorWriteRequest.Invalid(
+                requestId,
+                responseNeeded,
+                GattEvent.DescriptorWriteRequest.Invalid.Reason.NullDescriptor
+            )
+
+            value == null -> GattEvent.DescriptorWriteRequest.Invalid(
+                requestId,
+                responseNeeded,
+                GattEvent.DescriptorWriteRequest.Invalid.Reason.EmptyValue
+            )
+
+            else -> GattEvent.DescriptorWriteRequest.Valid(
+                device,
+                requestId,
+                descriptor,
+                preparedWrite,
+                responseNeeded,
+                offset,
+                value
+            )
+        }
+
+        gatGattEventEmitter.emit(event)
     }
 
     private fun handleStateUpdate(device: BluetoothDevice, value: ByteArray) {

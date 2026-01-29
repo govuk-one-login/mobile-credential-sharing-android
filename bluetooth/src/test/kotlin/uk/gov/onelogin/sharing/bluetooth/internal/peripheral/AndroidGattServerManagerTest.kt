@@ -1,13 +1,12 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattServer
+import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import app.cash.turbine.test
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
@@ -23,6 +22,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.mockBluetoothDevice
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerMock.setupNullGattServer
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerMock.setupOpenGattServer
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
@@ -30,7 +30,6 @@ import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothManager = mockk<BluetoothManager>(relaxed = true)
-    private val gattServer = mockk<BluetoothGattServer>(relaxed = true)
     private val device = mockBluetoothDevice()
     private val fakeGattService = AndroidGattServiceBuilder.build(
         GattServiceDefinition(
@@ -187,18 +186,18 @@ class AndroidGattServerManagerTest {
 
         manager.open(uuid)
 
-        val args = CharacteristicWriteRequestStub.writeRequestStart()
-
         manager.events.test {
-            callbackSlot.captured.onCharacteristicWriteRequest(
-                args.device,
-                args.requestId,
-                args.characteristic,
-                args.preparedWrite,
-                args.responseNeeded,
-                args.offset,
-                args.value
-            )
+            CharacteristicWriteRequestStub.writeRequestStart().run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
 
             assertEquals(
                 GattServerEvent.SessionStarted,
@@ -206,6 +205,47 @@ class AndroidGattServerManagerTest {
             )
 
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `sends success response if response is needed`() {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+
+        val args = OnDescriptorWriteRequestArgs()
+        callbackSlot.captured.invokeDescriptorWriteCallback(args)
+
+        verify(exactly = 1) {
+            gattServer.sendResponse(
+                args.device,
+                args.requestId,
+                BluetoothGatt.GATT_SUCCESS,
+                args.offset,
+                args.value
+            )
+        }
+    }
+
+    @Test
+    fun `does not send success response if response is not needed`() {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+
+        callbackSlot.captured.invokeDescriptorWriteCallback(
+            OnDescriptorWriteRequestArgs(responseNeeded = false)
+        )
+
+        verify(exactly = 0) {
+            gattServer.sendResponse(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
         }
     }
 
@@ -238,9 +278,6 @@ class AndroidGattServerManagerTest {
     @Test
     fun `gatt server returns error if permissions are not granted`() = runTest {
         fakePermissionChecker.hasPeripheralPermissions = false
-        every {
-            bluetoothManager.openGattServer(context, any())
-        } returns gattServer
 
         manager.events.test {
             manager.open(uuid)
@@ -252,5 +289,19 @@ class AndroidGattServerManagerTest {
                 awaitItem()
             )
         }
+    }
+
+    private fun BluetoothGattServerCallback.invokeDescriptorWriteCallback(
+        args: OnDescriptorWriteRequestArgs
+    ) {
+        onDescriptorWriteRequest(
+            args.device,
+            args.requestId,
+            args.descriptor,
+            args.preparedWrite,
+            args.responseNeeded,
+            args.offset,
+            args.value
+        )
     }
 }
