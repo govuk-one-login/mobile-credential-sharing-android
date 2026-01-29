@@ -7,9 +7,9 @@
         {
           "check-types": [
             "code style and linting",
-            "integration",
             "unit",
-            "unit test coverage"
+            "unit test coverage",
+            "vulnerability detection"
           ],
           "config": {
             "file": ".github/workflows/on-pull-request.yml",
@@ -22,16 +22,16 @@
         {
           "check-types": [
             "code style and linting",
-            "integration",
             "unit",
-            "unit test coverage"
+            "unit test coverage",
+            "vulnerability detection"
           ],
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
             "name": "Android validation and publish to play store",
             "path": "jobs.validate"
           },
-          "phase": "production",
+          "phase": "build",
           "provider": "GitHub"
         }
       ]
