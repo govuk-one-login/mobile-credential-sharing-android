@@ -1,0 +1,68 @@
+name: Android PR checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  merge_group:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  env:
+    GITHUB_ACTOR: ${{ github.actor }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  runs-on: ubuntu-latest
+  permissions:
+    packages: read
+
+jobs:
+  conventional_commits:
+    steps:
+      - name: Setup
+        uses: ./.github/workflows/android-setup-action
+      - name: Verify Conventional commit standards against latest git tag
+        run: cog check -l
+        shell: bash
+
+  prose_linting:
+    - name: Setup
+      uses: ./.github/workflows/android-setup-action
+    - name: Run vale prose linting
+      uses: errata-ai/vale-action@d89dee975228ae261d22c15adcd03578634d429c # v2.1.1
+      with:
+        fail_on_error: true
+        reporter: github-pr-check
+        version: latest
+
+  gradle_linting:
+    - name: Setup
+      uses: ./.github/workflows/android-setup-action
+    - name: Run linting associated with Gradle
+      run: |
+        ./scripts/lint/gradle
+
+  unit-tests:
+    - name: Setup
+      uses: ./.github/workflows/android-setup-action
+    - name: Run unit tests
+      run: |
+        ./scripts/test/unit
+
+  instrumentation-tests:
+    - name: Setup
+      uses: ./.github/workflows/android-setup-action
+    - name: Run instrumentation tests
+      run: |
+        ./scripts/test/instrumentation --no-configuration-cache
+
+  sonar-scan:
+    - name: Setup
+      uses: ./.github/workflows/android-setup-action
+    - name: Sonar scan
+      uses: ./mobile-android-pipelines/actions/sonar-scan
+      with:
+        sonar-token: ${{ secrets.SONAR_TOKEN }}
