@@ -5,6 +5,7 @@ import com.google.testing.junit.testparameterinjector.TestParameters
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.keypair.FakeKeyPairGenerator
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
@@ -21,8 +22,10 @@ class EcPrivateKeyGeneratorTest {
         FakeKeyPairGenerator(keyPair)
     }
 
+    private val logger = SystemLogger()
+
     private val generator by lazy {
-        EcPrivateKeyGenerator(keyPairGenerator)
+        EcPrivateKeyGenerator(keyPairGenerator, logger)
     }
 
     @Test
@@ -31,6 +34,10 @@ class EcPrivateKeyGeneratorTest {
             keyPair!!.private,
             generator.getSessionPrivateKey()
         )
+
+        assert("Obtained EC Private key from KeyPairGenerator" in logger) {
+            "Couldn't find expected message in logs: $logger"
+        }
     }
 
     @Test

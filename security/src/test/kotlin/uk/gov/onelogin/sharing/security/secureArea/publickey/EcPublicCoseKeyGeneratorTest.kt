@@ -5,6 +5,7 @@ import com.google.testing.junit.testparameterinjector.TestParameters
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.secureArea.keypair.FakeKeyPairGenerator
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
@@ -21,17 +22,23 @@ class EcPublicCoseKeyGeneratorTest {
     private val keyPairGenerator by lazy {
         FakeKeyPairGenerator(keyPair)
     }
+    private val logger = SystemLogger()
 
     private val generator by lazy {
-        EcPublicCoseKeyGenerator(keyPairGenerator)
+        EcPublicCoseKeyGenerator(keyPairGenerator, logger)
     }
 
     @Test
     fun `Valid CoseKeys obtained from generator`() = runTest {
+        val expected = CoseKey.generateCoseKey(keyPair!!.public as ECPublicKey)
         assertEquals(
-            CoseKey.generateCoseKey(keyPair!!.public as ECPublicKey),
+            expected,
             generator.generateSessionPublicKey(),
         )
+
+        assert("Converted EC public key to CoseKey: $expected" in logger) {
+            "Couldn't find expected message in logs: $logger"
+        }
     }
 
     @Test

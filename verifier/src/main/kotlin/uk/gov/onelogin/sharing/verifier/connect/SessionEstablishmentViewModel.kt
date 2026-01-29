@@ -40,6 +40,8 @@ import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
+import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
@@ -136,7 +138,12 @@ class SessionEstablishmentViewModel(
                     }
 
                     is VerifierSessionState.ConnectionStateStarted -> {
-                        val publicKey = generateSessionPublicKey()
+                        generateSessionPublicKey().let(CoseKey::encodeCbor).also {
+                            logger.debug(
+                                logTag,
+                                "Encoded public CoseKey into EReaderKeyBytes"
+                            )
+                        }
                     }
 
                     else -> Unit

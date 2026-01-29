@@ -24,12 +24,15 @@ object SessionSecurityTestStub {
     val keyPairGenerator = EcKeyPairGenerator(securityLogger)
     val secretGenerator = EcdhSharedSecretGenerator(securityLogger)
 
+    val privateKeyGenerator = EcPrivateKeyGenerator(keyPairGenerator, securityLogger)
+    val publicKeyGenerator = EcPublicCoseKeyGenerator(keyPairGenerator, securityLogger)
+    val sessionKeyGenerator = HkdfSessionKeyGenerator(securityLogger)
     val sessionSecurity = SessionSecurityImpl(
         keyPairGenerator = keyPairGenerator,
-        privateKeyGenerator = EcPrivateKeyGenerator(keyPairGenerator),
-        publicKeyGenerator = EcPublicCoseKeyGenerator(keyPairGenerator),
+        privateKeyGenerator = privateKeyGenerator,
+        publicKeyGenerator = publicKeyGenerator,
         secretGenerator = secretGenerator,
-        sessionKeyGenerator = HkdfSessionKeyGenerator(securityLogger)
+        sessionKeyGenerator = sessionKeyGenerator
     )
 
     fun generateValidPrivateKey(): ECPrivateKey {

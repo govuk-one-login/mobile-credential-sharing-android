@@ -59,7 +59,8 @@ dependencies {
     listOf(
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.core),
-        testFixtures(projects.bluetooth)
+        testFixtures(projects.bluetooth),
+        testFixtures(projects.security),
     ).forEach(::testImplementation)
 }
 
