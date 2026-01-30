@@ -80,8 +80,9 @@ dependencies {
 
     listOf(
         projects.holder,
-        projects.verifier
-    ).forEach(::api)
+        projects.verifier,
+        projects.sdk
+    ).forEach(::implementation)
 
     listOf(
         libs.bundles.debug.tooling
@@ -92,6 +93,8 @@ dependencies {
         libs.bundles.android.baseline,
         libs.bundles.uk.gov.ui,
         libs.hilt.android,
+        libs.uk.gov.logging.impl,
+        libs.uk.gov.logging.api,
         testFixtures(projects.verifier)
     ).forEach(::implementation)
     ksp(libs.hilt.compiler)
@@ -107,12 +110,14 @@ dependencies {
     listOf(
         platform(libs.androidx.compose.bom),
         libs.androidx.navigation.testing,
-        libs.bundles.android.baseline
+        libs.bundles.android.baseline,
+        testFixtures(projects.sdk)
     ).forEach(::testFixturesImplementation)
 
     listOf(
         platform(libs.androidx.compose.bom),
         libs.bundles.testing.unit,
-        testFixtures(projects.holder)
+        testFixtures(projects.holder),
+        testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 }

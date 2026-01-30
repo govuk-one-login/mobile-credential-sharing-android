@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder
 
+import SharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
@@ -31,7 +32,10 @@ class HolderRoutesTest {
                 navController = controller,
                 startDestination = HolderHomeRoute
             ) {
-                configureHolderRoutes(context)
+                configureHolderRoutes(
+                    context,
+                    appGraph = SharingAppGraphStub()
+                )
             }
         }
 

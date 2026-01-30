@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.testapp
 
+import SharingAppGraphStub
+import SharingSdkStub
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -63,6 +65,7 @@ class MainActivityRule(composeTestRule: ComposeContentTestRule) :
             controller.navigatorProvider.addNavigator(ComposeNavigator())
 
             MainActivityContent(
+                sdk = SharingSdkStub(SharingAppGraphStub()),
                 currentTab = currentTabDestination,
                 startDestination = startDestination,
                 navController = controller,

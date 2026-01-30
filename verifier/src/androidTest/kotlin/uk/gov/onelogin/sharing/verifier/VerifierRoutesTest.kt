@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier
 
+import SharingAppGraphStub
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -13,6 +14,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.di.SharingAppGraph
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
@@ -88,7 +90,11 @@ class VerifierRoutesTest {
             navController = controller,
             startDestination = VerifierRoutes
         ) {
-            configureVerifierRoutes(navController = controller, context = context)
+            configureVerifierRoutes(
+                navController = controller,
+                context = context,
+                appGraph = SharingAppGraphStub()
+            )
         }
         postConfiguration()
     }

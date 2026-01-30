@@ -42,9 +42,10 @@ listOf(
     ":core",
     ":holder",
     ":models",
+    ":orchestration",
+    ":sdk",
     ":security",
     ":verifier",
-    ":orchestration",
 ).forEach(::include)
 
 /**

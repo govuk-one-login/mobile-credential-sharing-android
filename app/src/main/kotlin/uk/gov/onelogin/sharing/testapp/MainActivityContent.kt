@@ -15,10 +15,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.collections.immutable.toPersistentList
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.SharingSdk
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
+import uk.gov.onelogin.sharing.uk.gov.onelogin.sharing.testapp.preview.PreviewSharingSdk
 
 @Composable
 fun MainActivityContent(
+    sdk: SharingSdk,
     currentTab: PrimaryTabDestination,
     navController: NavHostController,
     startDestination: Any,
@@ -49,7 +52,8 @@ fun MainActivityContent(
         ) {
             AppNavHost(
                 navController = navController,
-                startDestination = startDestination
+                startDestination = startDestination,
+                appGraph = sdk.appGraph
             )
         }
     }
@@ -63,6 +67,7 @@ internal fun MainActivityContentPreview(
 ) {
     GdsTheme {
         MainActivityContent(
+            sdk = PreviewSharingSdk(),
             navController = rememberNavController(),
             currentTab = currentTabDestination,
             startDestination = currentTabDestination

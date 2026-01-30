@@ -13,6 +13,7 @@ import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.di.SharingAppGraph
 import uk.gov.onelogin.sharing.verifier.connect.error.errorTitle
 import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
@@ -35,10 +36,12 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
         @OptIn(ExperimentalPermissionsApi::class)
         fun NavGraphBuilder.configureConnectWithHolderDeviceRoute(
             context: Context,
+            appGraph: SharingAppGraph,
             onFindError: (String) -> Unit = {}
         ) {
             val graph = createGraphFactory<VerifierGraph.Factory>().create(
-                context
+                context = context,
+                appGraph = appGraph
             )
 
             composable<ConnectWithHolderDeviceRoute> { navBackstackEntry ->

@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.connect.error
 
+import SharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
@@ -53,7 +54,10 @@ class BluetoothConnectionErrorRouteTest {
                         validBarcodeDataResult.data
                     )
                 ) {
-                    configureConnectWithHolderDeviceRoute(context)
+                    configureConnectWithHolderDeviceRoute(
+                        context = context,
+                        appGraph = SharingAppGraphStub()
+                    )
                     configureBluetoothConnectionErrorRoute(controller = controller)
                 }
             }

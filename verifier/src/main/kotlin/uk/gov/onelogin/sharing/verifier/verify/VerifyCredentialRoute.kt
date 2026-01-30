@@ -16,6 +16,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.di.SharingAppGraph
 import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanFromRoot
 
@@ -31,11 +32,15 @@ object VerifyCredentialRoute {
      * target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    fun NavGraphBuilder.configureVerifyCredentialRoute(navController: NavController) {
+    fun NavGraphBuilder.configureVerifyCredentialRoute(
+        navController: NavController,
+        appGraph: SharingAppGraph
+    ) {
         composable<VerifyCredentialRoute> {
             val context = LocalContext.current
             val graph = remember {
                 createGraphFactory<VerifierGraph.Factory>().create(
+                    appGraph,
                     context
                 )
             }

@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.di.SharingAppGraph
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
@@ -37,9 +38,16 @@ data object VerifierRoutes {
      * @see configureVerifierScannerRoute
      * @see configureScannedInvalidQrRoute
      */
-    fun NavGraphBuilder.configureVerifierRoutes(navController: NavController, context: Context) {
+    fun NavGraphBuilder.configureVerifierRoutes(
+        navController: NavController,
+        context: Context,
+        appGraph: SharingAppGraph
+    ) {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
-            configureVerifyCredentialRoute(navController)
+            configureVerifyCredentialRoute(
+                navController,
+                appGraph
+            )
             configureVerifierScannerRoute(
                 onInvalidBarcode = {
                     navController.navigateToScannedInvalidQrRoute(uri = it)
@@ -51,7 +59,7 @@ data object VerifierRoutes {
             configureScannedInvalidQrRoute(
                 onTryAgainClick = { navController.navigateToVerifierScanRoute() }
             )
-            configureConnectWithHolderDeviceRoute(context) {
+            configureConnectWithHolderDeviceRoute(context, appGraph) {
                 navController.navigateToBluetoothConnectionErrorRoute(title = it)
             }
             configureBluetoothConnectionErrorRoute(controller = navController)
