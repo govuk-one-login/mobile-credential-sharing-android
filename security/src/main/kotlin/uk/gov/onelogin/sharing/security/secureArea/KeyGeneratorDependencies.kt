@@ -19,5 +19,8 @@ interface KeyGeneratorDependencies {
      */
     @Provides
     fun providesKeyPairGenerator(logger: Logger): KeyGenerator.KeyPairGenerator =
-        MemorisedKeyGenerator(EcKeyPairGenerator(logger))
+        MemorisedKeyGenerator(
+            generator = EcKeyPairGenerator(logger),
+            logger = logger,
+        )
 }

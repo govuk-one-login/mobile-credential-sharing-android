@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.security.secureArea.keypair
 
 import org.junit.Assert.assertThrows
+import uk.gov.logging.api.Logger
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.ALGORITHM
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.keyPairWithNullEntries
@@ -14,8 +16,10 @@ class MemorisedKeyGeneratorTest {
         keyPairWithPublicKey
     )
 
+    private val logger = SystemLogger()
+
     private val generator by lazy {
-        MemorisedKeyGenerator(keyPairGenerator)
+        MemorisedKeyGenerator(keyPairGenerator, logger)
     }
 
     @Test
@@ -25,6 +29,12 @@ class MemorisedKeyGeneratorTest {
             keyPairWithNullEntries,
             performJourney()
         )
+        assert("Generated new session KeyPair" in logger) {
+            "Didn't find expected message in logs: $logger"
+        }
+        assert("Using stored session KeyPair" !in logger) {
+            "Found unexpected message in logs: $logger"
+        }
 
         assertThrows(
             "Backing implementation should've been exhausted!",
@@ -37,6 +47,9 @@ class MemorisedKeyGeneratorTest {
             keyPairWithNullEntries,
             performJourney()
         )
+        assert("Using stored session KeyPair" in logger) {
+            "Didn't find expected message in logs: $logger"
+        }
     }
 
     @Test
@@ -60,6 +73,9 @@ class MemorisedKeyGeneratorTest {
         )
 
         generator.reset()
+        assert("" in logger) {
+            "Didn't find expected message in logs: $logger"
+        }
 
         assertEquals(
             keyPairWithPublicKey,
@@ -80,4 +96,6 @@ class MemorisedKeyGeneratorTest {
     }
 
     private fun performJourney() = generator.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
+    private fun expectedMessageNotFound(logger: Logger) =
+        "Didn't find expected message in logs: $logger"
 }
