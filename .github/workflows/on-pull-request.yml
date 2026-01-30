@@ -53,7 +53,7 @@ jobs:
         run: |
           ./scripts/lint/gradle
 
-  unit-tests:
+  unit_tests_job:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
