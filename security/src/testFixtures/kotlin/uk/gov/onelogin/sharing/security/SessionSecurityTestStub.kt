@@ -1,5 +1,11 @@
 package uk.gov.onelogin.sharing.security
 
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.ECParameterSpec
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.security.secureArea.keypair.EcKeyPairGenerator
@@ -11,12 +17,6 @@ import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGene
 import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
-import java.security.spec.ECGenParameterSpec
-import java.security.spec.ECParameterSpec
 
 object SessionSecurityTestStub {
     private val securityLogger = SystemLogger()

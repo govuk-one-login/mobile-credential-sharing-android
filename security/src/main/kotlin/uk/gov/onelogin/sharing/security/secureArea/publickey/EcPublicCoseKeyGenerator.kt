@@ -2,13 +2,13 @@ package uk.gov.onelogin.sharing.security.secureArea.publickey
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.security.interfaces.ECPublicKey
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
-import java.security.interfaces.ECPublicKey
 
 /**
  * [KeyGenerator.PublicKeyGenerator] implementation that calls the underlying [keyPairGenerator]
@@ -20,7 +20,7 @@ import java.security.interfaces.ECPublicKey
 @ContributesBinding(ViewModelScope::class)
 class EcPublicCoseKeyGenerator(
     private val keyPairGenerator: KeyGenerator.KeyPairGenerator,
-    private val logger: Logger,
+    private val logger: Logger
 ) : KeyGenerator.PublicKeyGenerator {
     override fun generateSessionPublicKey(): CoseKey = keyPairGenerator.generateEcKeyPair(
         ELLIPTIC_CURVE_ALGORITHM,

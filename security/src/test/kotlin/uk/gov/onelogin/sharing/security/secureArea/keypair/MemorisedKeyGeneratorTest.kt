@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.security.secureArea.keypair
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import org.junit.Assert.assertThrows
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
@@ -7,8 +9,6 @@ import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.keyPairWithNullEntries
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.keyPairWithPublicKey
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class MemorisedKeyGeneratorTest {
     private var keyPairGenerator = FakeKeyPairGenerator(
@@ -30,7 +30,7 @@ class MemorisedKeyGeneratorTest {
             performJourney()
         )
         assert("Generated new session KeyPair" in logger) {
-            "Didn't find expected message in logs: $logger"
+            expectedMessageNotFound(logger)
         }
         assert("Using stored session KeyPair" !in logger) {
             "Found unexpected message in logs: $logger"
@@ -48,7 +48,7 @@ class MemorisedKeyGeneratorTest {
             performJourney()
         )
         assert("Using stored session KeyPair" in logger) {
-            "Didn't find expected message in logs: $logger"
+            expectedMessageNotFound(logger)
         }
     }
 
@@ -73,8 +73,8 @@ class MemorisedKeyGeneratorTest {
         )
 
         generator.reset()
-        assert("" in logger) {
-            "Didn't find expected message in logs: $logger"
+        assert("Cleared session KeyPair" in logger) {
+            expectedMessageNotFound(logger)
         }
 
         assertEquals(

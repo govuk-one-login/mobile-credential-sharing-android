@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
+import java.util.UUID
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,7 +23,6 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPub
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.BASE64_ENCODED_DEVICE_ENGAGEMENT
-import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
 class QrCodeImageTest {

@@ -18,7 +18,7 @@ class SessionSecurityImpl(
     privateKeyGenerator: KeyGenerator.PrivateKeyGenerator,
     publicKeyGenerator: KeyGenerator.PublicKeyGenerator,
     secretGenerator: SharedSecretGenerator,
-    sessionKeyGenerator: SessionKeyGenerator,
+    sessionKeyGenerator: SessionKeyGenerator
 ) : SessionSecurity,
     KeyGenerator.Complete,
     KeyGenerator.KeyPairGenerator by keyPairGenerator,

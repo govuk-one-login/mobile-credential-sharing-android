@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.security.cose
 
+import java.math.BigInteger
+import kotlin.test.assertNotNull
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -9,8 +11,6 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPub
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
-import java.math.BigInteger
-import kotlin.test.assertNotNull
 
 class CoseKeyTest {
 

@@ -2,6 +2,9 @@ package uk.gov.onelogin.sharing.security.secureArea.privatekey
 
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
+import java.security.KeyPair
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
@@ -9,9 +12,6 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.keypair.FakeKeyPairGenerator
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
-import java.security.KeyPair
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @RunWith(TestParameterInjector::class)
 class EcPrivateKeyGeneratorTest {
@@ -52,4 +52,3 @@ class EcPrivateKeyGeneratorTest {
         }
     }
 }
-

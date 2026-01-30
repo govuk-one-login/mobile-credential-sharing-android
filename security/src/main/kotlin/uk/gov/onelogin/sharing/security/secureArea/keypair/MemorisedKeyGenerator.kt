@@ -3,11 +3,11 @@ package uk.gov.onelogin.sharing.security.secureArea.keypair
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.security.KeyPair
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
-import java.security.KeyPair
 
 /**
  * [KeyGenerator.KeyPairGenerator] decorator implementation that primarily defers to the provided
@@ -18,9 +18,8 @@ import java.security.KeyPair
 @ContributesIntoSet(ViewModelScope::class, binding = binding<Resettable>())
 class MemorisedKeyGenerator(
     private val generator: KeyGenerator.KeyPairGenerator,
-    private val logger: Logger,
-) :
-    KeyGenerator.KeyPairGenerator,
+    private val logger: Logger
+) : KeyGenerator.KeyPairGenerator,
     Resettable {
     /**
      * The last successfully generated [java.security.KeyPair].

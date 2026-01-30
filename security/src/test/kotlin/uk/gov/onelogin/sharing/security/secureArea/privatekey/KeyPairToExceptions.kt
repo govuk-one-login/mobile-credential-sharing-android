@@ -9,12 +9,12 @@ class KeyPairToExceptions : TestParametersValuesProvider() {
         Triple(
             "Null Keys",
             KeyPairGeneratorStubs.keyPairWithNullEntries,
-            NullPointerException::class.java,
+            NullPointerException::class.java
         ),
         Triple(
             "Invalid Key class (RSA)",
             KeyPairGeneratorStubs.rsaKeyPair,
-            ClassCastException::class.java,
+            ClassCastException::class.java
         )
     )
 
@@ -26,5 +26,4 @@ class KeyPairToExceptions : TestParametersValuesProvider() {
                 .addParameter("expectedExceptionClass", expectedExceptionClass)
                 .build()
         }
-
 }

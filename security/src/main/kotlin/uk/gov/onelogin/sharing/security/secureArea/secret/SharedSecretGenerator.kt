@@ -15,10 +15,8 @@ fun interface SharedSecretGenerator {
      */
     fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray
 
-    fun generateSharedSecret(
-        keyPair: KeyPair
-    ) = generateSharedSecret(
+    fun generateSharedSecret(keyPair: KeyPair) = generateSharedSecret(
         holderKey = keyPair.private as ECPrivateKey,
-        eReaderKey = keyPair.public as ECPublicKey,
+        eReaderKey = keyPair.public as ECPublicKey
     )
 }

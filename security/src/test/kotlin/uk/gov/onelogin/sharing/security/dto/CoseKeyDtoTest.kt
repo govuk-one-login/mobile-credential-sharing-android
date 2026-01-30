@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.security.dto
 
+import java.security.interfaces.ECPublicKey
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
@@ -8,7 +9,6 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPub
 import uk.gov.onelogin.sharing.security.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.security.cose.Cose
 import uk.gov.onelogin.sharing.security.cose.CoseKey
-import java.security.interfaces.ECPublicKey
 
 class CoseKeyDtoTest {
 

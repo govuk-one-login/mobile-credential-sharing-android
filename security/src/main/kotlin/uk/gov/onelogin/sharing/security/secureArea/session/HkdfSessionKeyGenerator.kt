@@ -10,9 +10,7 @@ import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
 @ContributesBinding(ViewModelScope::class)
-class HkdfSessionKeyGenerator(
-    private val logger: Logger
-) : SessionKeyGenerator {
+class HkdfSessionKeyGenerator(private val logger: Logger) : SessionKeyGenerator {
     /**
      * Generates a single session key from a given shared secret key, a generated cryptographic
      * salt created from the SessionTranscriptBytes and a string containing the

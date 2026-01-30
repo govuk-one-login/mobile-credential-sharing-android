@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.security.secureArea.keypair
 
+import java.security.KeyPair
+import java.security.KeyPairGenerator
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPrivateKey
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
-import java.security.KeyPair
-import java.security.KeyPairGenerator
 
 object KeyPairGeneratorStubs {
     const val ALGORITHM = "EC"

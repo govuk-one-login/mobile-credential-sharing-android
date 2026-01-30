@@ -1,13 +1,13 @@
 package uk.gov.onelogin.sharing.security.secureArea.secret
 
+import kotlin.test.Test
+import kotlin.test.assertNotNull
+import kotlin.test.fail
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.rsaKeyPair
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
-import kotlin.test.Test
-import kotlin.test.assertNotNull
-import kotlin.test.fail
 
 class EcdhSharedSecretGeneratorTest {
     private val logger = SystemLogger()
@@ -15,6 +15,7 @@ class EcdhSharedSecretGeneratorTest {
     private val generator by lazy {
         EcdhSharedSecretGenerator(logger)
     }
+
     @Test
     fun `Can generate shared secrets`() = runTest {
         val result = try {

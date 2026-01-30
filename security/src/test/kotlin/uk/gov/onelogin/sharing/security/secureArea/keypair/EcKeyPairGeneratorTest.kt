@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.security.secureArea.keypair
 
+import java.security.interfaces.ECPublicKey
 import junit.framework.TestCase
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
@@ -8,7 +9,6 @@ import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.INVALID_ALGORITHM
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.INVALID_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.PARAMETER_SPEC
-import java.security.interfaces.ECPublicKey
 
 class EcKeyPairGeneratorTest {
     val stubLogger = SystemLogger()

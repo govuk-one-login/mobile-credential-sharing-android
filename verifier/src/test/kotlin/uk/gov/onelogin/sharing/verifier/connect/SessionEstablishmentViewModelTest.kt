@@ -9,6 +9,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
 import io.mockk.every
 import io.mockk.mockk
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.awaitClose
@@ -54,7 +55,6 @@ import uk.gov.onelogin.sharing.verifier.connect.parameters.EncodedEngagementToSt
 import uk.gov.onelogin.sharing.verifier.connect.parameters.PermissionsToLogMessages
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
-import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -73,7 +73,7 @@ class SessionEstablishmentViewModelTest {
     private fun createViewModel(
         scanner: BluetoothScanner,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        sessionSecurity: SessionSecurity = SessionSecurityTestStub.sessionSecurity,
+        sessionSecurity: SessionSecurity = SessionSecurityTestStub.sessionSecurity
     ) = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         scanner = scanner,
@@ -82,7 +82,7 @@ class SessionEstablishmentViewModelTest {
         bluetoothStatusMonitor = fakeBluetoothStateMonitor,
         verifierSessionFactory = { fakeVerifierSession },
         savedStateHandle = savedStateHandle,
-        sessionSecurity = sessionSecurity,
+        sessionSecurity = sessionSecurity
     )
 
     @Test

@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
-import uk.gov.onelogin.sharing.security.cose.CoseKey
 import java.security.KeyPair
 import java.security.interfaces.ECPrivateKey
+import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 /**
  * Collection of interfaces that expose specific cryptographic behaviours.

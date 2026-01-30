@@ -49,7 +49,7 @@ class ConnectWithHolderDeviceScreenTest {
         bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
         verifierSessionFactory = { mdocVerifierSession },
         savedStateHandle = SavedStateHandle(),
-        sessionSecurity = sessionSecurity,
+        sessionSecurity = sessionSecurity
     )
 
     @Before

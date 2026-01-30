@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.security.secureArea.session
 
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
+import kotlin.test.assertContentEquals
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
@@ -12,9 +15,6 @@ import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.C
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGeneratorStubs.VALID_SKDEVICE_BYTES
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGeneratorStubs.VALID_SKREADER_BYTES
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
-import kotlin.test.assertContentEquals
 
 class HkdfSessionKeyGeneratorTest {
 

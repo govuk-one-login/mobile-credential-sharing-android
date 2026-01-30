@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 @ViewModelKey(VerifierScannerViewModel::class)
 class VerifierScannerViewModel(
     state: VerifierScannerState.Complete,
-    private val resettable: Set<Resettable>,
+    private val resettable: Set<Resettable>
 ) : ViewModel(),
     VerifierScannerState.Complete by state {
 
