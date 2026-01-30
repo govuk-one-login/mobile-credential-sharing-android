@@ -55,7 +55,7 @@ class VerifierScannerGrantedTest {
                     VerifierScanner(
                         modifier = Modifier,
                         onInvalidBarcode = {},
-                        onValidBarcode = {},
+                        onValidBarcode = {}
                     )
                 }
             }
@@ -82,7 +82,7 @@ class VerifierScannerGrantedTest {
                             permission = Manifest.permission.CAMERA
                         ),
                         onInvalidBarcode = {},
-                        onValidBarcode = {},
+                        onValidBarcode = {}
                     )
                 }
             }

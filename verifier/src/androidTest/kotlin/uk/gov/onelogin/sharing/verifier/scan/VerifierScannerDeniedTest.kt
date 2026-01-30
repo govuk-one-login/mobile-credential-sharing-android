@@ -53,7 +53,7 @@ class VerifierScannerDeniedTest {
                     VerifierScanner(
                         modifier = Modifier,
                         onInvalidBarcode = {},
-                        onValidBarcode = {},
+                        onValidBarcode = {}
                     )
                 }
             }
@@ -77,7 +77,9 @@ class VerifierScannerDeniedTest {
                 ) {
                     VerifierScanner(
                         modifier = Modifier,
-                        permissionState = rememberPermissionState(permission = Manifest.permission.CAMERA),
+                        permissionState = rememberPermissionState(
+                            permission = Manifest.permission.CAMERA
+                        ),
                         onInvalidBarcode = {},
                         onValidBarcode = {}
                     )

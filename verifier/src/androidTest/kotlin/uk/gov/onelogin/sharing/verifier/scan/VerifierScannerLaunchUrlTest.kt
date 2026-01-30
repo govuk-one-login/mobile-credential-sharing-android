@@ -89,7 +89,7 @@ class VerifierScannerLaunchUrlTest {
         model: VerifierScannerViewModel,
         modifier: Modifier = Modifier,
         onInvalidBarcode: (String) -> Unit = {},
-        onValidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
     ) {
         composeTestRule.setContent {
             val context = LocalContext.current

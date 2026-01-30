@@ -41,7 +41,7 @@ class VerifierScannerRule(
     composeTestRule: ComposeContentTestRule,
     private val openAppSettingsText: String,
     private val permissionDeniedText: String,
-    private val permissionGrantedText: String,
+    private val permissionGrantedText: String
 ) : ComposeContentTestRule by composeTestRule {
 
     /**
@@ -49,7 +49,7 @@ class VerifierScannerRule(
      */
     constructor(
         composeTestRule: ComposeContentTestRule,
-        resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources,
+        resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
     ) : this(
         composeTestRule = composeTestRule,
         openAppSettingsText = resources.getString(R.string.open_app_permissions),
@@ -109,7 +109,7 @@ class VerifierScannerRule(
         permissionState: @Composable () -> PermissionState,
         modifier: Modifier = Modifier,
         onInvalidBarcode: (String) -> Unit = {},
-        onValidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
     ) {
         setContent {
             val context = LocalContext.current

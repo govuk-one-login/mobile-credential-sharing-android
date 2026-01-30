@@ -50,7 +50,7 @@ dependencies {
 
     listOf(
         libs.com.google.test.parameter.injector,
-        testFixtures(projects.security),
+        testFixtures(projects.security)
     ).forEach(::testFixturesImplementation)
 
     implementation(libs.androidx.browser)
@@ -59,7 +59,7 @@ dependencies {
         libs.metro.viewmodel.compose,
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.bluetooth),
-        testFixtures(projects.core),
+        testFixtures(projects.core)
     ).forEach(::testFixturesImplementation)
 
     listOf(
