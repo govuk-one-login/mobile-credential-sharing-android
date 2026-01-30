@@ -6,15 +6,76 @@
       "quality-gates": [
         {
           "check-types": [
-            "code style and linting",
+            "code style and linting"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Verify conventional commit standards",
+            "path": "jobs.conventional_commits"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Prose linting",
+            "path": "jobs.prose_linting"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Gradle linting",
+            "path": "jobs.gradle_linting"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
             "unit",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Unit tests",
+            "path": "jobs.unit_tests_job"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "unit",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Instrumentation tests",
+            "path": "jobs.instrumentation_tests"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting",
             "unit test coverage",
             "vulnerability detection"
           ],
           "config": {
             "file": ".github/workflows/on-pull-request.yml",
-            "name": "Verify code base when pull request is published/updated",
-            "path": "jobs.unit_tests_job"
+            "name": "SonarCloud Scan",
+            "path": "jobs.sonar_scan"
           },
           "phase": "pre-merge",
           "provider": "GitHub"
