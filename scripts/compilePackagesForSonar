@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Exit immediately if a simple command exits with a non-zero status
+# see also: the 'set' command within the 'Shell Builtin Commands' section of `man bash`
+set -o errexit
+
+# Script to assemble project packages before SonarCloud Scan.
+# Skips running the unit tests for the `release` build type.
+./gradlew build -x test -x packageRelease

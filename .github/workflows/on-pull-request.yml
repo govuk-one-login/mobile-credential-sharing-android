@@ -23,7 +23,6 @@ jobs:
   conventional_commits:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Verify Conventional commit standards against latest git tag
@@ -33,7 +32,6 @@ jobs:
   prose_linting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run vale prose linting
@@ -46,7 +44,6 @@ jobs:
   gradle_linting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run linting associated with Gradle
@@ -56,7 +53,6 @@ jobs:
   unit_tests_job:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run unit tests
@@ -72,7 +68,6 @@ jobs:
   instrumentation_tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run instrumentation tests
@@ -83,7 +78,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: unit_tests_job
     steps:
-      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Download unit test coverage
@@ -91,7 +85,8 @@ jobs:
         with:
           name: unit-test-coverage
       - name: Assemble for Sonar scan
-        run: ./gradlew build -x test -x packageRelease
+        run: |
+          ./scripts/compilePackagesForSonar
       - name: Sonar scan
         uses: ./mobile-android-pipelines/actions/sonar-scan
         with:
