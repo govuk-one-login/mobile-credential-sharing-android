@@ -90,6 +90,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: unit-test-coverage
+      - name: Assemble for Sonar scan
+        run: ./gradlew build -x test -x packageRelease
       - name: Sonar scan
         uses: ./mobile-android-pipelines/actions/sonar-scan
         with:
