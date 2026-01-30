@@ -64,7 +64,8 @@ class HolderWelcomeScreenRule(
             mdocSessionManagerFactory = { mdocSessionManager },
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            resettable = emptySet()
         )
     }
 
