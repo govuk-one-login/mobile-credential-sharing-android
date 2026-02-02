@@ -8,7 +8,7 @@ import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
 
 /**
  * An implementation of [SessionSecurity] that handles cryptographic operations for a
- * secure mDoc sharing session via .
+ * secure mDoc sharing session.
  *
  * Uses interface delegation to provide the necessary features.
  */
