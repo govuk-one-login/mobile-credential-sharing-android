@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothProfile
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
@@ -45,4 +46,21 @@ sealed interface GattEvent {
     data object ConnectionStateStarted : GattEvent
 
     data class MtuChanged(val device: BluetoothDevice?, val mtu: Int) : GattEvent
+
+    sealed interface DescriptorWriteRequest : GattEvent {
+        data class Valid(
+            val device: BluetoothDevice,
+            val requestId: Int,
+            val descriptor: BluetoothGattDescriptor,
+            val preparedWrite: Boolean,
+            val responseNeeded: Boolean,
+            val offset: Int,
+            val value: ByteArray
+        ) : DescriptorWriteRequest
+
+        data class Invalid(val requestId: Int, val responseNeeded: Boolean, val reason: Reason) :
+            DescriptorWriteRequest {
+            enum class Reason { NullDevice, NullDescriptor, EmptyValue }
+        }
+    }
 }

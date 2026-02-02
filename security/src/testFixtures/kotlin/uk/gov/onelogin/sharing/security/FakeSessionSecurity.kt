@@ -29,4 +29,10 @@ class FakeSessionSecurity : SessionSecurity {
     }
 
     override fun getSessionPrivateKey(): ECPrivateKey = sessionKeyPair.private as ECPrivateKey
+
+    override fun deriveSessionKey(
+        sharedKey: ByteArray,
+        sessionTranscriptBytes: ByteArray,
+        role: SessionSecurity.Companion.DeviceRole
+    ): ByteArray = byteArrayOf()
 }

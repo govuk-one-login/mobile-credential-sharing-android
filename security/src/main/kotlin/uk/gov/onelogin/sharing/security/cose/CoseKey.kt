@@ -9,8 +9,8 @@ import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 
 /**
  * Represents a COSE Key, specifically formatted for Elliptic Curve keys (EC2).
@@ -117,12 +117,14 @@ data class CoseKey(
          */
         fun getEReaderKeyFromParsedCoseKey(eReaderBytes: ByteArray): ECPublicKey {
             val parsedKey = parseEReaderPublicKey(eReaderBytes)
-            val params = AlgorithmParameters.getInstance(EC_ALGORITHM).apply {
-                init(ECGenParameterSpec(EC_PARAMETER_SPEC))
+            val params = AlgorithmParameters.getInstance(ELLIPTIC_CURVE_ALGORITHM).apply {
+                init(ECGenParameterSpec(ELLIPTIC_CURVE_PARAMETER_SPEC))
             }
             val ecSpec = params.getParameterSpec(java.security.spec.ECParameterSpec::class.java)
             val pubSpec = ECPublicKeySpec(parsedKey, ecSpec)
-            return KeyFactory.getInstance(EC_ALGORITHM).generatePublic(pubSpec) as ECPublicKey
+            return KeyFactory.getInstance(
+                ELLIPTIC_CURVE_ALGORITHM
+            ).generatePublic(pubSpec) as ECPublicKey
         }
     }
 }

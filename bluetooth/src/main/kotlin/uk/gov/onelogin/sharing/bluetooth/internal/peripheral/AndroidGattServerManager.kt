@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
@@ -38,6 +40,8 @@ class AndroidGattServerManager(
     )
     override val events: SharedFlow<GattServerEvent> = _events
     private var gattServer: BluetoothGattServer? = null
+
+    @SuppressLint("MissingPermission")
     private val eventEmitter = GattEventEmitter {
         handleGattEvent(it)
     }
@@ -84,6 +88,7 @@ class AndroidGattServerManager(
         _events.tryEmit(GattServerEvent.ServiceStopped)
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleGattEvent(event: GattEvent) {
         when (event) {
             is GattEvent.ConnectionStateChange -> handleConnectionStateChange(event)
@@ -91,6 +96,7 @@ class AndroidGattServerManager(
             is GattEvent.ServiceAdded -> handleServiceAdded(event)
             is GattEvent.MessageReceived -> Unit
             is GattEvent.MtuChanged -> mtu = event.mtu
+            is GattEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
         }
     }
 
@@ -110,5 +116,36 @@ class AndroidGattServerManager(
     private fun handleConnectionStateStarted() {
         // state characteristic was set to `start` by the remote device
         _events.tryEmit(GattServerEvent.SessionStarted)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleDescriptorWriteRequest(event: GattEvent.DescriptorWriteRequest) {
+        when (event) {
+            is GattEvent.DescriptorWriteRequest.Invalid -> {
+                _events.tryEmit(
+                    GattServerEvent.Error(
+                        GattServerError.DESCRIPTOR_WRITE_REQUEST_FAILED
+                    )
+                )
+                logger.error(logTag, "Invalid descriptor write request: ${event.reason}")
+            }
+
+            is GattEvent.DescriptorWriteRequest.Valid ->
+                if (event.responseNeeded) {
+                    gattServer?.sendResponse(
+                        event.device,
+                        event.requestId,
+                        BluetoothGatt.GATT_SUCCESS,
+                        event.offset,
+                        event.value
+                    )
+                } else {
+                    logger.debug(
+                        logTag,
+                        "Received descriptor write requests " +
+                            "- response not needed"
+                    )
+                }
+        }
     }
 }

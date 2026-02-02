@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.FakeGattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestEmptyValue
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestStart
@@ -68,17 +69,22 @@ class BluetoothGattServerCallbackTest {
 
     @Test
     fun `onCharacteristicWriteRequest 0x01 should emit ConnectionStateStarted event`() {
-        val args = writeRequestStart()
-
-        callback.onCharacteristicWriteRequest(
-            device = args.device,
-            requestId = args.requestId,
-            characteristic = args.characteristic,
-            preparedWrite = args.preparedWrite,
-            responseNeeded = args.responseNeeded,
-            offset = args.offset,
-            value = args.value
-        )
+        writeRequestStart(
+            bluetoothDevice = device,
+            characteristic = mockk {
+                every { uuid } returns GattUuids.STATE_UUID
+            }
+        ).run {
+            callback.onCharacteristicWriteRequest(
+                device = device,
+                requestId = requestId,
+                characteristic = characteristic,
+                preparedWrite = preparedWrite,
+                responseNeeded = responseNeeded,
+                offset = offset,
+                value = value
+            )
+        }
 
         assertEquals(1, fakeEmitter.events.size)
         assertEquals(
@@ -89,51 +95,67 @@ class BluetoothGattServerCallbackTest {
 
     @Test
     fun `onCharacteristicWriteRequest unknown opcode should not emit event`() {
-        val args = writeRequestUnknown()
-
-        callback.onCharacteristicWriteRequest(
-            device = args.device,
-            requestId = args.requestId,
-            characteristic = args.characteristic,
-            preparedWrite = args.preparedWrite,
-            responseNeeded = args.responseNeeded,
-            offset = args.offset,
-            value = args.value
-        )
+        writeRequestUnknown(
+            bluetoothDevice = device,
+            characteristic = mockk {
+                every { uuid } returns UUID.randomUUID()
+            }
+        ).run {
+            callback.onCharacteristicWriteRequest(
+                device = device,
+                requestId = requestId,
+                characteristic = characteristic,
+                preparedWrite = preparedWrite,
+                responseNeeded = responseNeeded,
+                offset = offset,
+                value = value
+            )
+        }
 
         assertEquals(0, fakeEmitter.events.size)
     }
 
     @Test
     fun `onCharacteristicWriteRequest empty opcode should not emit event`() {
-        val args = writeRequestEmptyValue()
-
-        callback.onCharacteristicWriteRequest(
-            device = args.device,
-            requestId = args.requestId,
-            characteristic = args.characteristic,
-            preparedWrite = args.preparedWrite,
-            responseNeeded = args.responseNeeded,
-            offset = args.offset,
-            value = args.value
-        )
+        writeRequestEmptyValue(
+            bluetoothDevice = device,
+            characteristic = mockk {
+                every { uuid } returns UUID.randomUUID()
+            }
+        ).run {
+            callback.onCharacteristicWriteRequest(
+                device = device,
+                requestId = requestId,
+                characteristic = characteristic,
+                preparedWrite = preparedWrite,
+                responseNeeded = responseNeeded,
+                offset = offset,
+                value = value
+            )
+        }
 
         assertEquals(0, fakeEmitter.events.size)
     }
 
     @Test
     fun `emits event when receiving single-part message`() {
-        val args = writeRequestMessage(message = FINAL_PART_MESSAGE)
-
-        callback.onCharacteristicWriteRequest(
-            device = args.device,
-            requestId = args.requestId,
-            characteristic = args.characteristic,
-            preparedWrite = args.preparedWrite,
-            responseNeeded = args.responseNeeded,
-            offset = args.offset,
-            value = args.value
-        )
+        writeRequestMessage(
+            bluetoothDevice = device,
+            characteristic = mockk {
+                every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+            },
+            message = FINAL_PART_MESSAGE
+        ).run {
+            callback.onCharacteristicWriteRequest(
+                device = device,
+                requestId = requestId,
+                characteristic = characteristic,
+                preparedWrite = preparedWrite,
+                responseNeeded = responseNeeded,
+                offset = offset,
+                value = value
+            )
+        }
 
         assertEquals(1, fakeEmitter.events.size)
         assertEquals(
@@ -144,47 +166,65 @@ class BluetoothGattServerCallbackTest {
 
     @Test
     fun `emits no event when receiving first part of single-part message`() {
-        val args = writeRequestMessage(message = NON_FINAL_PART_MESSAGE)
-
-        callback.onCharacteristicWriteRequest(
-            device = args.device,
-            requestId = args.requestId,
-            characteristic = args.characteristic,
-            preparedWrite = args.preparedWrite,
-            responseNeeded = args.responseNeeded,
-            offset = args.offset,
-            value = args.value
-        )
+        writeRequestMessage(
+            bluetoothDevice = device,
+            characteristic = mockk {
+                every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+            },
+            message = NON_FINAL_PART_MESSAGE
+        ).run {
+            callback.onCharacteristicWriteRequest(
+                device = device,
+                requestId = requestId,
+                characteristic = characteristic,
+                preparedWrite = preparedWrite,
+                responseNeeded = responseNeeded,
+                offset = offset,
+                value = value
+            )
+        }
 
         assertEquals(0, fakeEmitter.events.size)
     }
 
     @Test
     fun `emits event containing whole message when receiving a multi-part message`() {
-        val firstPart = writeRequestMessage(message = NON_FINAL_PART_MESSAGE)
-
-        callback.onCharacteristicWriteRequest(
-            device = firstPart.device,
-            requestId = firstPart.requestId,
-            characteristic = firstPart.characteristic,
-            preparedWrite = firstPart.preparedWrite,
-            responseNeeded = firstPart.responseNeeded,
-            offset = firstPart.offset,
-            value = firstPart.value
-        )
+        writeRequestMessage(
+            bluetoothDevice = device,
+            characteristic = mockk {
+                every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+            },
+            message = NON_FINAL_PART_MESSAGE
+        ).run {
+            callback.onCharacteristicWriteRequest(
+                device = device,
+                requestId = requestId,
+                characteristic = characteristic,
+                preparedWrite = preparedWrite,
+                responseNeeded = responseNeeded,
+                offset = offset,
+                value = value
+            )
+        }
         assertEquals(0, fakeEmitter.events.size)
 
-        val secondPart = writeRequestMessage(message = FINAL_PART_MESSAGE)
-
-        callback.onCharacteristicWriteRequest(
-            device = secondPart.device,
-            requestId = secondPart.requestId,
-            characteristic = secondPart.characteristic,
-            preparedWrite = secondPart.preparedWrite,
-            responseNeeded = secondPart.responseNeeded,
-            offset = secondPart.offset,
-            value = secondPart.value
-        )
+        writeRequestMessage(
+            bluetoothDevice = device,
+            characteristic = mockk {
+                every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+            },
+            message = FINAL_PART_MESSAGE
+        ).run {
+            callback.onCharacteristicWriteRequest(
+                device = device,
+                requestId = requestId,
+                characteristic = characteristic,
+                preparedWrite = preparedWrite,
+                responseNeeded = responseNeeded,
+                offset = offset,
+                value = value
+            )
+        }
 
         assertEquals(1, fakeEmitter.events.size)
         assertEquals(

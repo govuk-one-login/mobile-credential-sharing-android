@@ -18,4 +18,17 @@ interface SessionSecurity {
     fun generateSessionPublicKey(): CoseKey
 
     fun getSessionPrivateKey(): ECPrivateKey
+
+    fun deriveSessionKey(
+        sharedKey: ByteArray,
+        sessionTranscriptBytes: ByteArray,
+        role: DeviceRole
+    ): ByteArray
+
+    companion object {
+        enum class DeviceRole {
+            VERIFIER,
+            HOLDER
+        }
+    }
 }

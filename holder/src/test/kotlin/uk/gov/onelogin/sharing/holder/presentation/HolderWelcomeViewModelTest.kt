@@ -195,6 +195,18 @@ class HolderWelcomeViewModelTest {
             MdocSessionState.Error(MdocSessionError.BLUETOOTH_PERMISSION_MISSING),
             viewModel.uiState.value.sessionState
         )
+
+        fakeMdocSession.emitState(
+            MdocSessionState.Error(
+                MdocSessionError.DESCRIPTOR_WRITE_REQUEST_FAILED
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            MdocSessionState.Error(MdocSessionError.DESCRIPTOR_WRITE_REQUEST_FAILED),
+            viewModel.uiState.value.sessionState
+        )
     }
 
     @Test

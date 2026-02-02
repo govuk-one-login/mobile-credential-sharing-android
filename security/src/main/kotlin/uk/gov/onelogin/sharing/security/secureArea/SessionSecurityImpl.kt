@@ -14,9 +14,13 @@ import java.security.spec.ECGenParameterSpec
 import javax.crypto.KeyAgreement
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_ALGORITHM
-import uk.gov.onelogin.sharing.security.engagement.EngagementAlgorithms.EC_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.java.generateSalt
+import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole
 
 /**
  * An implementation of [SessionSecurity] that handles cryptographic operations for a
@@ -87,10 +91,39 @@ class SessionSecurityImpl(private val logger: Logger) : SessionSecurity {
     }
 
     override fun generateSessionPublicKey(): CoseKey {
-        generateEcKeyPair(EC_ALGORITHM, EC_PARAMETER_SPEC)
+        generateEcKeyPair(ELLIPTIC_CURVE_ALGORITHM, ELLIPTIC_CURVE_PARAMETER_SPEC)
 
         return CoseKey.generateCoseKey(sessionKeyPair.public as ECPublicKey)
     }
 
     override fun getSessionPrivateKey(): ECPrivateKey = sessionKeyPair.private as ECPrivateKey
+
+    /**
+     * Generates a single session key from a given shared secret key, a generated cryptographic
+     * salt created from the SessionTranscriptBytes and a string containing the
+     * corresponding role: "SkReader" and "SkDevice"
+     *
+     * Session keys are generated deterministically by each party, and used in the subsequent
+     * encryption and decryption of messages between devices
+     *
+     * @return [ByteArray] object representing the session key
+     */
+
+    override fun deriveSessionKey(
+        sharedKey: ByteArray,
+        sessionTranscriptBytes: ByteArray,
+        role: DeviceRole
+    ): ByteArray {
+        val salt = generateSalt(sessionTranscriptBytes)
+        val roleAsBytes = when (role) {
+            DeviceRole.VERIFIER -> "SKReader"
+            DeviceRole.HOLDER -> "SKDevice"
+        }.encodeCbor()
+
+        return hkdfKeyGeneration(
+            sharedKey,
+            salt,
+            roleAsBytes
+        )
+    }
 }

@@ -35,7 +35,8 @@ dependencies {
         projects.bluetooth,
         projects.core,
         projects.models,
-        projects.security
+        projects.security,
+        projects.orchestration
     ).forEach(::api)
 
     listOf(
@@ -45,7 +46,7 @@ dependencies {
     listOf(
         libs.com.google.test.parameter.injector,
         testFixtures(projects.security)
-    ).forEach(::testFixturesApi)
+    ).forEach(::testFixturesImplementation)
 
     implementation(libs.androidx.browser)
     listOf(
