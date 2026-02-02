@@ -43,7 +43,7 @@ class HolderWelcomeViewModel(
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
-    resettable: Set<Resettable>,
+    private val resettable: Set<Resettable>,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
@@ -287,6 +287,7 @@ class HolderWelcomeViewModel(
     override fun onCleared() {
         viewModelScope.launch {
             mdocBleSession.stop()
+            resettable.forEach(Resettable::reset)
         }
         super.onCleared()
     }
