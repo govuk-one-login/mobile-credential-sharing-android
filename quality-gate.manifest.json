@@ -1,0 +1,101 @@
+{
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.1.0/schemas/schema.json",
+  "services": [
+    {
+      "service-tag": "mobile-credential-sharing-android",
+      "quality-gates": [
+        {
+          "check-types": [
+            "code style and linting"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Verify conventional commit standards",
+            "path": "jobs.conventional_commits"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Prose linting",
+            "path": "jobs.prose_linting"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Gradle linting",
+            "path": "jobs.gradle_linting"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "unit",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Unit tests",
+            "path": "jobs.unit_tests_job"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "unit",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "Instrumentation tests",
+            "path": "jobs.instrumentation_tests"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting",
+            "unit test coverage",
+            "vulnerability detection"
+          ],
+          "config": {
+            "file": ".github/workflows/on-pull-request.yml",
+            "name": "SonarCloud Scan",
+            "path": "jobs.sonar_scan"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting",
+            "unit",
+            "unit test coverage",
+            "vulnerability detection"
+          ],
+          "config": {
+            "file": ".github/workflows/merge-to-main.yml",
+            "name": "Android validation and publish to play store",
+            "path": "jobs.validate"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        }
+      ]
+    }
+  ]
+}
