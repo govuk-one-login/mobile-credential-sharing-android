@@ -49,4 +49,3 @@ class DeviceRequestModelTest {
         assertEquals(6, modelNamespaces.size)
     }
 }
-
