@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.testapp
 
+import CredentialSharingSdkStub
 import SharingAppGraphStub
-import SharingSdkStub
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -61,23 +61,31 @@ class MainActivityRule(composeTestRule: ComposeContentTestRule) :
         onUpdateTabDestination: (PrimaryTabDestination) -> Unit = {}
     ) {
         setContent {
-            controller = TestNavHostController(LocalContext.current)
-            controller.navigatorProvider.addNavigator(ComposeNavigator())
+            controller = TestNavHostController(LocalContext.current).apply {
+                navigatorProvider.addNavigator(ComposeNavigator())
+            }
 
-            MainActivityContent(
-                sdk = SharingSdkStub(SharingAppGraphStub()),
+            MainActivityContentUi(
                 currentTab = currentTabDestination,
-                startDestination = startDestination,
-                navController = controller,
-                modifier = Modifier.testTag("mainActivityContent"),
-                onUpdateTabDestination = onUpdateTabDestination
+                onSelectTab = { destination: PrimaryTabDestination ->
+                    controller.navigate(destination)
+                    onUpdateTabDestination(destination)
+                },
+                navHost = { hostModifier ->
+                    AppNavHost(
+                        navController = controller,
+                        startDestination = startDestination,
+                        modifier = hostModifier,
+                        appGraph = SharingAppGraphStub()
+                    )
+                }
             )
         }
     }
 
     fun renderPreview(currentTabDestination: PrimaryTabDestination) {
         setContent {
-            MainActivityContentPreview(
+            MainActivityContentUiPreview(
                 currentTabDestination = currentTabDestination
             )
         }

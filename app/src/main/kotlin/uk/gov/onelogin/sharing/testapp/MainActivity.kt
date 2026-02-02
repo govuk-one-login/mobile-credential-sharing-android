@@ -13,7 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.SharingSdk
+import uk.gov.onelogin.sharing.CredentialSharingSdk
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 
 @AndroidEntryPoint
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainActivityViewModel by viewModels()
 
     @Inject
-    lateinit var sharingSdk: SharingSdk
+    lateinit var credentialSharingSdk: CredentialSharingSdk
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
             GdsTheme {
                 MainActivityContent(
-                    sdk = sharingSdk,
+                    appGraph = credentialSharingSdk.appGraph,
                     currentTab = currentTab,
                     navController = navController,
                     startDestination = startDestination,

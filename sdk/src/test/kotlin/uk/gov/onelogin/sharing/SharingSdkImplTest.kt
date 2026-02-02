@@ -9,13 +9,13 @@ import uk.gov.logging.testdouble.SystemLogger
 
 class SharingSdkImplTest {
     private lateinit var logger: Logger
-    private lateinit var sdk: SharingSdkImpl
+    private lateinit var sdk: CredentialSharingSdkImpl
 
     @Before
     fun setUp() {
         logger = SystemLogger()
 
-        sdk = SharingSdkImpl(
+        sdk = CredentialSharingSdkImpl(
             logger = logger,
             applicationContext = mockk()
         )

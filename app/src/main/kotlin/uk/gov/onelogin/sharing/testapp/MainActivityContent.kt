@@ -12,21 +12,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.collections.immutable.toPersistentList
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.SharingSdk
+import uk.gov.onelogin.sharing.di.SharingAppGraph
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
-import uk.gov.onelogin.sharing.uk.gov.onelogin.sharing.testapp.preview.PreviewSharingSdk
 
 @Composable
 fun MainActivityContent(
-    sdk: SharingSdk,
+    appGraph: SharingAppGraph,
     currentTab: PrimaryTabDestination,
     navController: NavHostController,
     startDestination: Any,
     modifier: Modifier = Modifier,
     onUpdateTabDestination: (PrimaryTabDestination) -> Unit = {}
+) {
+    MainActivityContentUi(
+        currentTab = currentTab,
+        modifier = modifier,
+        onSelectTab = { destination ->
+            navController.navigate(destination)
+            onUpdateTabDestination(destination)
+        },
+        navHost = {
+            AppNavHost(
+                navController = navController,
+                startDestination = startDestination,
+                appGraph = appGraph
+            )
+        }
+    )
+}
+
+@Composable
+fun MainActivityContentUi(
+    currentTab: PrimaryTabDestination,
+    modifier: Modifier = Modifier,
+    onSelectTab: (PrimaryTabDestination) -> Unit = {},
+    navHost: @Composable (Modifier) -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
@@ -34,12 +56,8 @@ fun MainActivityContent(
             TestWrapperTopBar(
                 destinations = PrimaryTabDestination.entries().toPersistentList(),
                 currentDestination = currentTab,
-                modifier = Modifier
-                    .statusBarsPadding(),
-                updateCurrentDestination = {
-                    navController.navigate(it)
-                    onUpdateTabDestination(it)
-                }
+                modifier = Modifier.statusBarsPadding(),
+                updateCurrentDestination = onSelectTab
             )
         }
     ) { contentPadding ->
@@ -50,27 +68,22 @@ fun MainActivityContent(
                 .waterfallPadding()
                 .padding(contentPadding)
         ) {
-            AppNavHost(
-                navController = navController,
-                startDestination = startDestination,
-                appGraph = sdk.appGraph
-            )
+            navHost(Modifier.fillMaxSize())
         }
     }
 }
 
 @Composable
 @Preview
-internal fun MainActivityContentPreview(
+internal fun MainActivityContentUiPreview(
     @PreviewParameter(MainActivityContentPreviewParameters::class)
     currentTabDestination: PrimaryTabDestination
 ) {
     GdsTheme {
-        MainActivityContent(
-            sdk = PreviewSharingSdk(),
-            navController = rememberNavController(),
+        MainActivityContentUi(
             currentTab = currentTabDestination,
-            startDestination = currentTabDestination
+            onSelectTab = {},
+            navHost = {}
         )
     }
 }
