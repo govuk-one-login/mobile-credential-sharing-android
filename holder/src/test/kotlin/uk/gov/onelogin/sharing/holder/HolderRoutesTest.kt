@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.holder
 
-import SharingAppGraphStub
+import CredentialSharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
@@ -34,7 +34,7 @@ class HolderRoutesTest {
             ) {
                 configureHolderRoutes(
                     context,
-                    appGraph = SharingAppGraphStub()
+                    appGraph = CredentialSharingAppGraphStub()
                 )
             }
         }

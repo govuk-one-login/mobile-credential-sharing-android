@@ -12,13 +12,16 @@ import androidx.navigation.compose.composable
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
-import uk.gov.onelogin.sharing.di.SharingAppGraph
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.holder.di.HolderGraph
 
 @Serializable
 object HolderHomeRoute {
 
-    fun NavGraphBuilder.configureHolderWelcomeScreen(context: Context, appGraph: SharingAppGraph) {
+    fun NavGraphBuilder.configureHolderWelcomeScreen(
+        context: Context,
+        appGraph: CredentialSharingAppGraph
+    ) {
         val graph = createGraphFactory<HolderGraph.Factory>()
             .create(
                 appGraph,

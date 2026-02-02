@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
-import SharingAppGraphStub
+import CredentialSharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
@@ -15,7 +15,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
-import uk.gov.onelogin.sharing.di.SharingAppGraph
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.validWithCorrectBluetoothSetup
 import uk.gov.onelogin.sharing.verifier.rules.ShadowLogFile
@@ -50,7 +49,7 @@ class ConnectWithHolderDeviceRouteTest {
             ) {
                 configureConnectWithHolderDeviceRoute(
                     context = context,
-                    appGraph = SharingAppGraphStub()
+                    appGraph = CredentialSharingAppGraphStub()
                 )
                 configureScannedInvalidQrRoute()
             }

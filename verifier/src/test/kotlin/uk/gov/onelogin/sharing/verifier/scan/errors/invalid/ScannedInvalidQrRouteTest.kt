@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan.errors.invalid
 
-import SharingAppGraphStub
+import CredentialSharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
@@ -67,7 +67,7 @@ class ScannedInvalidQrRouteTest {
             ) {
                 configureConnectWithHolderDeviceRoute(
                     context = context,
-                    appGraph = SharingAppGraphStub()
+                    appGraph = CredentialSharingAppGraphStub()
                 )
                 configureScannedInvalidQrRoute()
             }

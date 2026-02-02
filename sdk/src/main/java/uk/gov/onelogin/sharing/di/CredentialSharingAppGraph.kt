@@ -7,11 +7,14 @@ import dev.zacsweers.metro.Provides
 import uk.gov.logging.api.Logger
 
 @DependencyGraph(AppScope::class)
-fun interface SharingAppGraph {
+fun interface CredentialSharingAppGraph {
 
     @DependencyGraph.Factory
     fun interface Factory {
-        fun create(@Provides applicationContext: Context, @Provides logger: Logger): SharingAppGraph
+        fun create(
+            @Provides applicationContext: Context,
+            @Provides logger: Logger
+        ): CredentialSharingAppGraph
     }
 
     fun logger(): Logger

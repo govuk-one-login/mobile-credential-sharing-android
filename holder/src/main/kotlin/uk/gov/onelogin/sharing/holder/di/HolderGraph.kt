@@ -6,7 +6,7 @@ import dev.zacsweers.metro.Includes
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import uk.gov.onelogin.sharing.di.SharingAppGraph
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 
 @DependencyGraph(ViewModelScope::class)
 interface HolderGraph : ViewModelGraph {
@@ -14,6 +14,9 @@ interface HolderGraph : ViewModelGraph {
 
     @DependencyGraph.Factory
     fun interface Factory {
-        fun create(@Includes appGraph: SharingAppGraph, @Provides context: Context): HolderGraph
+        fun create(
+            @Includes appGraph: CredentialSharingAppGraph,
+            @Provides context: Context
+        ): HolderGraph
     }
 }

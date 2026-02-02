@@ -6,14 +6,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import uk.gov.onelogin.sharing.di.SharingAppGraph
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination.Companion.configureTestAppRoutes
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 
 @Composable
 fun AppNavHost(
-    appGraph: SharingAppGraph,
+    appGraph: CredentialSharingAppGraph,
     startDestination: Any,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()

@@ -1,10 +1,7 @@
 package uk.gov.onelogin.sharing.testapp
 
-import CredentialSharingSdkStub
-import SharingAppGraphStub
-import androidx.compose.ui.Modifier
+import CredentialSharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
@@ -76,7 +73,7 @@ class MainActivityRule(composeTestRule: ComposeContentTestRule) :
                         navController = controller,
                         startDestination = startDestination,
                         modifier = hostModifier,
-                        appGraph = SharingAppGraphStub()
+                        appGraph = CredentialSharingAppGraphStub()
                     )
                 }
             )

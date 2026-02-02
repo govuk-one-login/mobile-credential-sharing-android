@@ -12,12 +12,14 @@ import uk.gov.onelogin.sharing.CredentialSharingSdkImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
-object SharingSdkModule {
+object CredentialSharingSdkModule {
     @Provides
     @Singleton
-    fun provideSharingSdk(application: Application, logger: Logger): CredentialSharingSdk =
-        CredentialSharingSdkImpl(
-            applicationContext = application,
-            logger = logger
-        )
+    fun provideCredentialSharingSdk(
+        application: Application,
+        logger: Logger
+    ): CredentialSharingSdk = CredentialSharingSdkImpl(
+        applicationContext = application,
+        logger = logger
+    )
 }

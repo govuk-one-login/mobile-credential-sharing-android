@@ -6,7 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
-import uk.gov.onelogin.sharing.di.SharingAppGraph
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
@@ -41,7 +41,7 @@ data object VerifierRoutes {
     fun NavGraphBuilder.configureVerifierRoutes(
         navController: NavController,
         context: Context,
-        appGraph: SharingAppGraph
+        appGraph: CredentialSharingAppGraph
     ) {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
             configureVerifyCredentialRoute(

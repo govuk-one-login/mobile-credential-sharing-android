@@ -14,12 +14,12 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.navigation.NavHostController
 import kotlinx.collections.immutable.toPersistentList
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.di.SharingAppGraph
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 
 @Composable
 fun MainActivityContent(
-    appGraph: SharingAppGraph,
+    appGraph: CredentialSharingAppGraph,
     currentTab: PrimaryTabDestination,
     navController: NavHostController,
     startDestination: Any,

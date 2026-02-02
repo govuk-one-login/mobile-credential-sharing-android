@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.testapp
 
-import SharingAppGraphStub
+import CredentialSharingAppGraphStub
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -30,7 +30,7 @@ class AppNavHostRule(private val composeTestRule: ComposeContentTestRule) :
             controller.navigatorProvider.addNavigator(ComposeNavigator())
 
             AppNavHost(
-                appGraph = SharingAppGraphStub(),
+                appGraph = CredentialSharingAppGraphStub(),
                 modifier = modifier.testTag("appNavHost"),
                 navController = controller,
                 startDestination = startDestination
@@ -41,7 +41,7 @@ class AppNavHostRule(private val composeTestRule: ComposeContentTestRule) :
     fun renderWithoutController(startDestination: Any, modifier: Modifier = Modifier) {
         setContent {
             AppNavHost(
-                appGraph = SharingAppGraphStub(),
+                appGraph = CredentialSharingAppGraphStub(),
                 modifier = modifier.testTag("appNavHost"),
                 startDestination = startDestination
             )
