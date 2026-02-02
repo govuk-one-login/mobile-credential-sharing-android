@@ -11,8 +11,6 @@ interface VerifierGraph : ViewModelGraph {
 
     @DependencyGraph.Factory
     fun interface Factory {
-        fun create(
-            @Includes appGraph: CredentialSharingAppGraph,
-        ): VerifierGraph
+        fun create(@Includes appGraph: CredentialSharingAppGraph): VerifierGraph
     }
 }

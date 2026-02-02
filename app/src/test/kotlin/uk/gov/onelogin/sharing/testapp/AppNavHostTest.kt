@@ -7,9 +7,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.presentation.HolderHomeRoute
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 
 @RunWith(AndroidJUnit4::class)
 class AppNavHostTest {

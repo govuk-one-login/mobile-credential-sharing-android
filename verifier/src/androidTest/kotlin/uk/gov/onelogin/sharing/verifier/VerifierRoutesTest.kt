@@ -8,6 +8,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
@@ -84,6 +85,9 @@ class VerifierRoutesTest {
         val context = LocalContext.current
         controller = TestNavHostController(context)
         controller.navigatorProvider.addNavigator(ComposeNavigator())
+        val appGraph = CredentialSharingAppGraphStub(
+            applicationContext = ApplicationProvider.getApplicationContext()
+        )
 
         NavHost(
             navController = controller,
@@ -91,8 +95,7 @@ class VerifierRoutesTest {
         ) {
             configureVerifierRoutes(
                 navController = controller,
-                context = context,
-                appGraph = CredentialSharingAppGraphStub()
+                appGraph = appGraph
             )
         }
         postConfiguration()

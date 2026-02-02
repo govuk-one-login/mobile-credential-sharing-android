@@ -17,9 +17,7 @@ import uk.gov.onelogin.sharing.holder.di.HolderGraph
 @Serializable
 object HolderHomeRoute {
 
-    fun NavGraphBuilder.configureHolderWelcomeScreen(
-        appGraph: CredentialSharingAppGraph
-    ) {
+    fun NavGraphBuilder.configureHolderWelcomeScreen(appGraph: CredentialSharingAppGraph) {
         val graph = createGraphFactory<HolderGraph.Factory>()
             .create(
                 appGraph

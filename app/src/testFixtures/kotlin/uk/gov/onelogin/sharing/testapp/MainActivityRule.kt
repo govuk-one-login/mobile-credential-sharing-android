@@ -16,13 +16,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
+import androidx.test.core.app.ApplicationProvider
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 
 class MainActivityRule(composeTestRule: ComposeContentTestRule) :
     ComposeContentTestRule by composeTestRule {
 
     private lateinit var controller: TestNavHostController
-
     private val lazyColumnTestTag = "menuItems"
 
     fun assertMenuItem(menuText: String): SemanticsNodeInteraction {
@@ -57,6 +57,10 @@ class MainActivityRule(composeTestRule: ComposeContentTestRule) :
         startDestination: Any,
         onUpdateTabDestination: (PrimaryTabDestination) -> Unit = {}
     ) {
+        val appGraph = CredentialSharingAppGraphStub(
+            ApplicationProvider.getApplicationContext()
+        )
+
         setContent {
             controller = TestNavHostController(LocalContext.current).apply {
                 navigatorProvider.addNavigator(ComposeNavigator())
@@ -70,10 +74,10 @@ class MainActivityRule(composeTestRule: ComposeContentTestRule) :
                 },
                 navHost = { hostModifier ->
                     AppNavHost(
-                        navController = controller,
+                        appGraph = appGraph,
                         startDestination = startDestination,
                         modifier = hostModifier,
-                        appGraph = CredentialSharingAppGraphStub()
+                        navController = controller
                     )
                 }
             )

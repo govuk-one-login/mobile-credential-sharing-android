@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -21,6 +22,10 @@ class HolderRoutesTest {
         composeTestRule = createComposeRule()
     )
 
+    val appGraph = CredentialSharingAppGraphStub(
+        applicationContext = ApplicationProvider.getApplicationContext()
+    )
+
     @Test
     fun holderRoutesAreConfigured() {
         composeTestRule.setContent {
@@ -32,10 +37,7 @@ class HolderRoutesTest {
                 navController = controller,
                 startDestination = HolderHomeRoute
             ) {
-                configureHolderRoutes(
-                    context,
-                    appGraph = CredentialSharingAppGraphStub()
-                )
+                configureHolderRoutes(appGraph)
             }
         }
 

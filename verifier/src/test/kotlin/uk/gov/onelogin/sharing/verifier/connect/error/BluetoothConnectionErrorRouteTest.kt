@@ -7,6 +7,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -30,6 +31,10 @@ class BluetoothConnectionErrorRouteTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun verifyControllerNavigationExtensionFunction() = runTest {
+        val appGraph = CredentialSharingAppGraphStub(
+            applicationContext = ApplicationProvider.getApplicationContext()
+        )
+
         composeTestRule.run {
             setContent {
                 val context = LocalContext.current
@@ -42,10 +47,7 @@ class BluetoothConnectionErrorRouteTest {
                         validBarcodeDataResult.data
                     )
                 ) {
-                    configureConnectWithHolderDeviceRoute(
-                        context = context,
-                        appGraph = CredentialSharingAppGraphStub()
-                    )
+                    configureConnectWithHolderDeviceRoute(appGraph = appGraph)
                     configureBluetoothConnectionErrorRoute(controller = controller)
                 }
             }

@@ -7,6 +7,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
@@ -56,6 +57,10 @@ class ScannedInvalidQrRouteTest {
 
     @Test
     fun verifyControllerNavigationExtensionFunction() = runTest {
+        val appGraph = CredentialSharingAppGraphStub(
+            applicationContext = ApplicationProvider.getApplicationContext()
+        )
+
         composeTestRule.setContent {
             val context = LocalContext.current
             controller = TestNavHostController(context)
@@ -65,10 +70,7 @@ class ScannedInvalidQrRouteTest {
                 navController = controller,
                 startDestination = ConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
             ) {
-                configureConnectWithHolderDeviceRoute(
-                    context = context,
-                    appGraph = CredentialSharingAppGraphStub()
-                )
+                configureConnectWithHolderDeviceRoute(appGraph = appGraph)
                 configureScannedInvalidQrRoute()
             }
 

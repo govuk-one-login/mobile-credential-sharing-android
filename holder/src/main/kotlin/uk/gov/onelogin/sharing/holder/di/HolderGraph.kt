@@ -13,8 +13,6 @@ interface HolderGraph : ViewModelGraph {
 
     @DependencyGraph.Factory
     fun interface Factory {
-        fun create(
-            @Includes appGraph: CredentialSharingAppGraph,
-        ): HolderGraph
+        fun create(@Includes appGraph: CredentialSharingAppGraph): HolderGraph
     }
 }

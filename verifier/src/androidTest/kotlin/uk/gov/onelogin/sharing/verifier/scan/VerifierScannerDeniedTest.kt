@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
+import CredentialSharingAppGraphStub
 import android.Manifest
 import android.content.Context
 import android.content.res.Resources
@@ -27,6 +28,9 @@ class VerifierScannerDeniedTest {
 
     private val resources: Resources =
         ApplicationProvider.getApplicationContext<Context>().resources
+    private val appGraph = CredentialSharingAppGraphStub(
+        applicationContext = ApplicationProvider.getApplicationContext()
+    )
 
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant()
@@ -41,10 +45,10 @@ class VerifierScannerDeniedTest {
     fun permissionDeniedTextIsShown() = runTest {
         composeTestRule.run {
             setContent {
-                val context = LocalContext.current
-
                 val graph = remember {
-                    createGraphFactory<VerifierGraph.Factory>().create(context)
+                    createGraphFactory<VerifierGraph.Factory>().create(
+                        appGraph = appGraph
+                    )
                 }
 
                 CompositionLocalProvider(
@@ -66,10 +70,10 @@ class VerifierScannerDeniedTest {
     fun permissionDeniedTextRenderedWithPermissionState() = runTest {
         composeTestRule.run {
             setContent {
-                val context = LocalContext.current
-
                 val graph = remember {
-                    createGraphFactory<VerifierGraph.Factory>().create(context)
+                    createGraphFactory<VerifierGraph.Factory>().create(
+                        appGraph = appGraph
+                    )
                 }
 
                 CompositionLocalProvider(

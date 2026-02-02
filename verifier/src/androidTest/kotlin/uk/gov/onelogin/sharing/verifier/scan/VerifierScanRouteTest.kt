@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
+import CredentialSharingAppGraphStub
 import android.content.Context
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -29,6 +30,7 @@ class VerifierScanRouteTest {
     lateinit var controller: TestNavHostController
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+    private val appGraph = CredentialSharingAppGraphStub(context)
 
     @Test
     fun verifyNavGraphEntry() = runTest {
@@ -40,7 +42,7 @@ class VerifierScanRouteTest {
                 navController = controller,
                 startDestination = VerifierScanRoute
             ) {
-                configureVerifierScannerRoute(context = context)
+                configureVerifierScannerRoute(appGraph = appGraph)
             }
         }
 
@@ -57,7 +59,7 @@ class VerifierScanRouteTest {
                 navController = controller,
                 startDestination = ScannedInvalidQrRoute(invalidBarcodeDataResultOne.data)
             ) {
-                configureVerifierScannerRoute(context = context)
+                configureVerifierScannerRoute(appGraph = appGraph)
                 configureScannedInvalidQrRoute()
             }
 

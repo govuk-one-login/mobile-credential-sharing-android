@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
-import android.content.Context
 import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
 
@@ -32,15 +32,13 @@ object VerifierScanRoute {
      */
     @OptIn(ExperimentalPermissionsApi::class)
     fun NavGraphBuilder.configureVerifierScannerRoute(
-        context: Context,
+        appGraph: CredentialSharingAppGraph,
         onInvalidBarcode: (String) -> Unit = {},
         onValidBarcode: (String) -> Unit = {}
     ) {
         composable<VerifierScanRoute> {
             val graph = remember {
-                createGraphFactory<VerifierGraph.Factory>().create(
-                    context
-                )
+                createGraphFactory<VerifierGraph.Factory>().create(appGraph)
             }
 
             CompositionLocalProvider(

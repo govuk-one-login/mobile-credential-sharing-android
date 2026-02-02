@@ -33,7 +33,8 @@ android {
 dependencies {
     listOf(
         libs.metro.viewmodel.compose,
-        testFixtures(projects.security)
+        testFixtures(projects.security),
+        testFixtures(projects.sdk)
     ).forEach(::androidTestImplementation)
 
     listOf(
@@ -57,7 +58,8 @@ dependencies {
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),
-        testFixtures(projects.security)
+        testFixtures(projects.security),
+        testFixtures(projects.sdk)
     ).forEach(::testFixturesImplementation)
 
     listOf(
@@ -67,10 +69,6 @@ dependencies {
         testFixtures(projects.security),
         testFixtures(projects.sdk)
     ).forEach(::testImplementation)
-
-    listOf(
-        testFixtures(projects.sdk)
-    ).forEach(::androidTestImplementation)
 }
 
 mavenPublishingConfig {

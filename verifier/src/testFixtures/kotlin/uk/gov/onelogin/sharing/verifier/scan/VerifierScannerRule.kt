@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
+import CredentialSharingAppGraphStub
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -8,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
@@ -111,11 +111,15 @@ class VerifierScannerRule(
         onInvalidBarcode: (String) -> Unit = {},
         onValidBarcode: (String) -> Unit = {}
     ) {
-        setContent {
-            val context = LocalContext.current
+        val appGraph = CredentialSharingAppGraphStub(
+            applicationContext = ApplicationProvider.getApplicationContext()
+        )
 
+        setContent {
             val graph = remember {
-                createGraphFactory<VerifierGraph.Factory>().create(context)
+                createGraphFactory<VerifierGraph.Factory>().create(
+                    appGraph = appGraph
+                )
             }
 
             CompositionLocalProvider(
