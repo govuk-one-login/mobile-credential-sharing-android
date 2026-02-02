@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.testapp
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -18,15 +17,13 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
-    val context = LocalContext.current
-
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
         configureTestAppRoutes(onNavigate = navController::navigate)
-        configureHolderRoutes(context, appGraph)
-        configureVerifierRoutes(navController = navController, context, appGraph)
+        configureHolderRoutes(appGraph)
+        configureVerifierRoutes(navController = navController, appGraph)
     }
 }

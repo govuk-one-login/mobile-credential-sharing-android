@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,13 +18,11 @@ import uk.gov.onelogin.sharing.holder.di.HolderGraph
 object HolderHomeRoute {
 
     fun NavGraphBuilder.configureHolderWelcomeScreen(
-        context: Context,
         appGraph: CredentialSharingAppGraph
     ) {
         val graph = createGraphFactory<HolderGraph.Factory>()
             .create(
-                appGraph,
-                context
+                appGraph
             )
 
         composable<HolderHomeRoute> {

@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier
 
-import android.content.Context
 import androidx.annotation.Keep
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -40,7 +39,6 @@ data object VerifierRoutes {
      */
     fun NavGraphBuilder.configureVerifierRoutes(
         navController: NavController,
-        context: Context,
         appGraph: CredentialSharingAppGraph
     ) {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
@@ -59,7 +57,7 @@ data object VerifierRoutes {
             configureScannedInvalidQrRoute(
                 onTryAgainClick = { navController.navigateToVerifierScanRoute() }
             )
-            configureConnectWithHolderDeviceRoute(context, appGraph) {
+            configureConnectWithHolderDeviceRoute(appGraph) {
                 navController.navigateToBluetoothConnectionErrorRoute(title = it)
             }
             configureBluetoothConnectionErrorRoute(controller = navController)

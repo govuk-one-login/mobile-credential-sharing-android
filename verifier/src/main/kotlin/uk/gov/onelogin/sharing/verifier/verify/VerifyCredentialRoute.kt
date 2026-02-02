@@ -8,7 +8,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -37,11 +36,9 @@ object VerifyCredentialRoute {
         appGraph: CredentialSharingAppGraph
     ) {
         composable<VerifyCredentialRoute> {
-            val context = LocalContext.current
             val graph = remember {
                 createGraphFactory<VerifierGraph.Factory>().create(
-                    appGraph,
-                    context
+                    appGraph
                 )
             }
 
