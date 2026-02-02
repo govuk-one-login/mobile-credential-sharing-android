@@ -24,6 +24,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -35,12 +36,14 @@ import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
 @AssistedInject
+@Suppress("LongParameterList")
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
+    private val resettable: Set<Resettable>,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
@@ -61,6 +64,7 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
+            resettable.forEach(Resettable::reset)
             val publicKey = sessionSecurity.generateSessionPublicKey()
             publicKey.let { coseKey ->
                 val engagement = engagementGenerator.qrCodeEngagement(
@@ -283,6 +287,7 @@ class HolderWelcomeViewModel(
     override fun onCleared() {
         viewModelScope.launch {
             mdocBleSession.stop()
+            resettable.forEach(Resettable::reset)
         }
         super.onCleared()
     }

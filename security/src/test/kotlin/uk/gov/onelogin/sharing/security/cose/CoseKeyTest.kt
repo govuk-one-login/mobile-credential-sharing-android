@@ -7,7 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKeyPair
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
@@ -16,7 +16,7 @@ class CoseKeyTest {
 
     @Test
     fun `should convert EcPublicKey to CoseKey with key type EC2`() {
-        val keyPair = generateValidPublicKeyPair()
+        val keyPair = generateValidPublicKey()
         val coseKey = CoseKey.generateCoseKey(keyPair)
 
         assertEquals(Cose.KEY_TYPE_EC2, coseKey.keyType)
@@ -24,7 +24,7 @@ class CoseKeyTest {
 
     @Test
     fun `should convert EcPublicKey to CoseKey with curve P-256`() {
-        val keyPair = generateValidPublicKeyPair()
+        val keyPair = generateValidPublicKey()
         val coseKey = CoseKey.generateCoseKey(keyPair)
 
         assertEquals(Cose.CURVE_P256, coseKey.curve)
@@ -32,7 +32,7 @@ class CoseKeyTest {
 
     @Test
     fun `should convert EcPublicKey to CoseKey with 32 byte length X coordinates`() {
-        val keyPair = generateValidPublicKeyPair()
+        val keyPair = generateValidPublicKey()
         val coseKey = CoseKey.generateCoseKey(keyPair)
 
         assertEquals(32, coseKey.x.size)
@@ -40,7 +40,7 @@ class CoseKeyTest {
 
     @Test
     fun `should convert EcPublicKey to CoseKey with 32 byte length Y coordinates`() {
-        val keyPair = generateValidPublicKeyPair()
+        val keyPair = generateValidPublicKey()
         val coseKey = CoseKey.generateCoseKey(keyPair)
 
         assertEquals(32, coseKey.y.size)

@@ -47,6 +47,7 @@ data object VerifierRoutes {
                 appGraph
             )
             configureVerifierScannerRoute(
+                context = context,
                 onInvalidBarcode = {
                     navController.navigateToScannedInvalidQrRoute(uri = it)
                 },

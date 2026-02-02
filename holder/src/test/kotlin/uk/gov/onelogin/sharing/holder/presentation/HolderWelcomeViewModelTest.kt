@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.holder.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
@@ -33,6 +34,8 @@ class HolderWelcomeViewModelTest {
 
     private val dummyEngagementData = "ENGAGEMENT_DATA"
 
+    private var hasResetElements = false
+
     private fun createViewModel(
         mdocSessionManager: MdocSessionManager = FakeMdocSessionManager(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
@@ -43,7 +46,10 @@ class HolderWelcomeViewModelTest {
         mdocSessionManagerFactory = { mdocSessionManager },
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
-        savedStateHandle = SavedStateHandle()
+        savedStateHandle = SavedStateHandle(),
+        resettable = setOf(
+            Resettable { hasResetElements = true }
+        )
     )
 
     @Test
@@ -55,6 +61,7 @@ class HolderWelcomeViewModelTest {
         assertEquals(MdocSessionState.Idle, state.sessionState)
         assertNull(state.lastErrorMessage)
         assertNotNull(state.uuid)
+        assertTrue(hasResetElements)
     }
 
     @Test

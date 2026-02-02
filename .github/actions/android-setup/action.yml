@@ -1,0 +1,32 @@
+name: Android Environment Setup
+runs:
+  using: "composite"
+  steps:
+    - name: Free disk space
+      uses: ./mobile-android-pipelines/actions/clean-runner-fast
+
+    - name: Clean workspace
+      uses: ./mobile-android-pipelines/actions/clean-workspace
+
+    - name: Configure git User
+      shell: bash
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+
+    - name: Install linux packages
+      shell: bash
+      run: |
+        ./scripts/installLinuxPackages
+  
+
+    - name: Setup GitHub Runner workflow
+      uses: ./mobile-android-pipelines/actions/setup-runner
+      with:
+        gradle-cache-disabled: "false"
+        jdk-version: "21"
+
+    - name: Install homebrew packages
+      shell: bash
+      run: |
+        brew bundle

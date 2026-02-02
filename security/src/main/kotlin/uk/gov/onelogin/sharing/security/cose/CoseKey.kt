@@ -12,6 +12,9 @@ import java.security.spec.ECPublicKeySpec
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 
+const val THIRTY_TWO_BYTES = 32
+const val THIRTY_THREE_BYTES = 33
+
 /**
  * Represents a COSE Key, specifically formatted for Elliptic Curve keys (EC2).
  * This data class holds the essential parameters required to represent an
@@ -22,16 +25,34 @@ import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PA
  * @param x The 32-byte array representing the x-coordinate of the public key.
  * @param y The 32-byte array representing the y-coordinate of the public key.
  */
-
-const val THIRTY_TWO_BYTES = 32
-const val THIRTY_THREE_BYTES = 33
-
 data class CoseKey(
     val keyType: Long = Cose.KEY_TYPE_EC2,
     val curve: Long,
     val x: ByteArray,
     val y: ByteArray
 ) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CoseKey
+
+        if (keyType != other.keyType) return false
+        if (curve != other.curve) return false
+        if (!x.contentEquals(other.x)) return false
+        if (!y.contentEquals(other.y)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = keyType.hashCode()
+        result = 31 * result + curve.hashCode()
+        result = 31 * result + x.contentHashCode()
+        result = 31 * result + y.contentHashCode()
+        return result
+    }
 
     /**
      * This function extracts the X and Y coordinates from the given public key,

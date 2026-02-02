@@ -15,7 +15,7 @@ class EngagementGeneratorTest {
 
     @Test
     fun `generates base 64 encoded string for device engagement`() {
-        val key = SessionSecurityTestStub.generateValidPublicKeyPair()
+        val key = SessionSecurityTestStub.generateValidPublicKey()
         val coseKey = CoseKey.generateCoseKey(key)
 
         val engagementString = engagementGenerator.qrCodeEngagement(coseKey, qrCodeEngagementUuid)

@@ -3,18 +3,26 @@ package uk.gov.onelogin.sharing.verifier.scan
 import android.Manifest
 import android.content.Context
 import android.content.res.Resources
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 
 @RunWith(AndroidJUnit4::class)
+@OptIn(ExperimentalPermissionsApi::class)
 class VerifierScannerDeniedTest {
 
     private val resources: Resources =
@@ -32,7 +40,23 @@ class VerifierScannerDeniedTest {
     @Test
     fun permissionDeniedTextIsShown() = runTest {
         composeTestRule.run {
-            render()
+            setContent {
+                val context = LocalContext.current
+
+                val graph = remember {
+                    createGraphFactory<VerifierGraph.Factory>().create(context)
+                }
+
+                CompositionLocalProvider(
+                    LocalMetroViewModelFactory provides graph.metroViewModelFactory
+                ) {
+                    VerifierScanner(
+                        modifier = Modifier,
+                        onInvalidBarcode = {},
+                        onValidBarcode = {}
+                    )
+                }
+            }
             assertPermissionDeniedButtonIsDisplayed()
         }
     }
@@ -41,9 +65,27 @@ class VerifierScannerDeniedTest {
     @Test
     fun permissionDeniedTextRenderedWithPermissionState() = runTest {
         composeTestRule.run {
-            render(permissionState = {
-                rememberPermissionState(permission = Manifest.permission.CAMERA)
-            })
+            setContent {
+                val context = LocalContext.current
+
+                val graph = remember {
+                    createGraphFactory<VerifierGraph.Factory>().create(context)
+                }
+
+                CompositionLocalProvider(
+                    LocalMetroViewModelFactory provides graph.metroViewModelFactory
+                ) {
+                    VerifierScanner(
+                        modifier = Modifier,
+                        permissionState = rememberPermissionState(
+                            permission = Manifest.permission.CAMERA
+                        ),
+                        onInvalidBarcode = {},
+                        onValidBarcode = {}
+                    )
+                }
+            }
+
             assertPermissionDeniedButtonIsDisplayed()
         }
     }

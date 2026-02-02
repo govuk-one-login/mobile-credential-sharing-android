@@ -41,6 +41,8 @@ import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
+import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.startScanningDummyServiceUuid
@@ -70,7 +72,8 @@ class SessionEstablishmentViewModelTest {
 
     private fun createViewModel(
         scanner: BluetoothScanner,
-        savedStateHandle: SavedStateHandle = SavedStateHandle()
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        sessionSecurity: SessionSecurity = SessionSecurityTestStub.sessionSecurity
     ) = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         scanner = scanner,
@@ -78,7 +81,8 @@ class SessionEstablishmentViewModelTest {
         logger = logger,
         bluetoothStatusMonitor = fakeBluetoothStateMonitor,
         verifierSessionFactory = { fakeVerifierSession },
-        savedStateHandle = savedStateHandle
+        savedStateHandle = savedStateHandle,
+        sessionSecurity = sessionSecurity
     )
 
     @Test
@@ -360,6 +364,19 @@ class SessionEstablishmentViewModelTest {
                 hasPreviouslyRequestedPermission(hasRequestedPermission)
             )
         )
+    }
+
+    @Test
+    fun `Creates KeyPair instance when bluetooth connection starts`() = runTest {
+        viewModel = createViewModel(scanner)
+        fakeVerifierSession.updateState(VerifierSessionState.ConnectionStateStarted)
+        runCurrent()
+
+        assert(
+            "Encoded public CoseKey into EReaderKeyBytes" in logger
+        ) {
+            "Cannot find expected message in logs: $logger"
+        }
     }
 
     @OptIn(ExperimentalPermissionsApi::class)

@@ -32,6 +32,11 @@ android {
 }
 dependencies {
     listOf(
+        libs.metro.viewmodel.compose,
+        testFixtures(projects.security)
+    ).forEach(::androidTestImplementation)
+
+    listOf(
         projects.bluetooth,
         projects.core,
         projects.models,
@@ -48,6 +53,7 @@ dependencies {
     listOf(
         libs.androidx.browser,
         libs.com.google.test.parameter.injector,
+        libs.metro.viewmodel.compose,
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),
@@ -58,6 +64,7 @@ dependencies {
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.core),
         testFixtures(projects.bluetooth),
+        testFixtures(projects.security),
         testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 

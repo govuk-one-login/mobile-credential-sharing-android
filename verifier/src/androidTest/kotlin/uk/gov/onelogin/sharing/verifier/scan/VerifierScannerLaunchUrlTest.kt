@@ -2,11 +2,18 @@ package uk.gov.onelogin.sharing.verifier.scan
 
 import android.content.Context
 import android.content.res.Resources
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert
@@ -14,14 +21,20 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
+import uk.gov.onelogin.sharing.verifier.scan.state.CompleteVerifierScannerState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
 
 @RunWith(AndroidJUnit4::class)
+@OptIn(ExperimentalPermissionsApi::class)
 class VerifierScannerLaunchUrlTest {
 
-    private val model = VerifierScannerViewModel()
-    private val resources: Resources =
-        ApplicationProvider.getApplicationContext<Context>().resources
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val model = VerifierScannerViewModel(
+        state = CompleteVerifierScannerState(),
+        resettable = emptySet()
+    )
+    private val resources: Resources = context.resources
 
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant()
@@ -69,6 +82,32 @@ class VerifierScannerLaunchUrlTest {
             testScheduler.advanceUntilIdle()
 
             Assert.assertTrue(hasNavigatedViaInvalidBarcode)
+        }
+    }
+
+    private fun render(
+        model: VerifierScannerViewModel,
+        modifier: Modifier = Modifier,
+        onInvalidBarcode: (String) -> Unit = {},
+        onValidBarcode: (String) -> Unit = {}
+    ) {
+        composeTestRule.setContent {
+            val context = LocalContext.current
+
+            val graph = remember {
+                createGraphFactory<VerifierGraph.Factory>().create(context)
+            }
+
+            CompositionLocalProvider(
+                LocalMetroViewModelFactory provides graph.metroViewModelFactory
+            ) {
+                VerifierScanner(
+                    modifier = modifier,
+                    viewModel = model,
+                    onInvalidBarcode = onInvalidBarcode,
+                    onValidBarcode = onValidBarcode
+                )
+            }
         }
     }
 }
