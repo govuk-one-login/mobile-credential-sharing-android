@@ -11,8 +11,8 @@ import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.PARAMETER_SPEC
 
 class EcKeyPairGeneratorTest {
-    val stubLogger = SystemLogger()
-    val keyPairGenerator = EcKeyPairGenerator(stubLogger)
+    private val stubLogger = SystemLogger()
+    private val keyPairGenerator = EcKeyPairGenerator(stubLogger)
 
     @Test
     fun `generates valid public key`() {
@@ -21,6 +21,10 @@ class EcKeyPairGeneratorTest {
             PARAMETER_SPEC
         )
         TestCase.assertNotNull(publicKey)
+
+        assert("Generated EC key pair: ${publicKey?.public}" in stubLogger) {
+            "Cannot find expected message in logs: $stubLogger"
+        }
     }
 
     @Test
