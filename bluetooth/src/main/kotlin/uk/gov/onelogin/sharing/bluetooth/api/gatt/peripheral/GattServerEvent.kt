@@ -9,6 +9,7 @@ sealed interface GattServerEvent {
     data object SessionStarted : GattServerEvent
     data object ServiceStopped : GattServerEvent
     data class Error(val error: GattServerError) : GattServerEvent
+    data object SessionEnd: GattServerEvent
 
     // use for any functionality that has not been implemented yet
     data class UnsupportedEvent(val address: String, val status: Int, val newState: Int) :

@@ -141,6 +141,14 @@ class AndroidMdocSessionManager(
                     "Mdoc - Connection has been setup successfully - session state started"
                 )
             }
+
+            GattServerEvent.SessionEnd -> {
+                gattServerManager.close()
+                logger.error(
+                    logTag,
+                    "Mdoc - Session end command was received. Closing connection"
+                )
+            }
         }
     }
 }

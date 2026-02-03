@@ -145,6 +145,11 @@ class GattServerCallback(
                 gatGattEventEmitter.emit(GattEvent.ConnectionStateStarted)
             }
 
+            MdocState.END -> {
+                logger.debug(logTag, "Received END command from ${device.address}")
+                gatGattEventEmitter.emit(GattEvent.SessionEnd)
+            }
+
             null -> {
                 logger.debug(
                     logTag,

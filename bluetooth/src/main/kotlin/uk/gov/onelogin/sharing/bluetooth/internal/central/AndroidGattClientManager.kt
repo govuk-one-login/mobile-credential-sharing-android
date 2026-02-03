@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
@@ -20,6 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.logger.logTag
+import java.util.UUID
 
 internal class AndroidGattClientManager(
     private val context: Context,
@@ -94,6 +94,7 @@ internal class AndroidGattClientManager(
                 is GattEvent.ServicesDiscovered -> servicesDiscovered(event)
                 is GattEvent.MtuChange -> changedMtu(event)
                 is GattEvent.CharacteristicWrite -> characteristicWritten(event)
+                is GattEvent.SessionEnd -> sessionEnd()
             }
         } catch (e: SecurityException) {
             logger.error(logTag, "Security exception", e)
@@ -109,7 +110,7 @@ internal class AndroidGattClientManager(
 
         val clientEvent = when {
             event.status == BluetoothGatt.GATT_SUCCESS &&
-                event.newState == BluetoothGatt.STATE_CONNECTED -> {
+                    event.newState == BluetoothGatt.STATE_CONNECTED -> {
                 bluetoothGatt = event.gatt
 
                 bluetoothGatt?.discoverServices()
@@ -260,5 +261,11 @@ internal class AndroidGattClientManager(
         )
 
         disconnect()
+    }
+
+    private fun sessionEnd() {
+        _events.tryEmit(
+            GattClientEvent.SessionEnd
+        )
     }
 }

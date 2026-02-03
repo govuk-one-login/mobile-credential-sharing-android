@@ -11,4 +11,6 @@ sealed interface GattClientEvent {
     // use for any functionality that has not been implemented yet
     data class UnsupportedEvent(val address: String, val status: Int, val newState: Int) :
         GattClientEvent
+
+    data object SessionEnd : GattClientEvent
 }

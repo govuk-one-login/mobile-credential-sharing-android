@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
@@ -23,6 +22,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
+import java.util.UUID
 
 class AndroidGattServerManager(
     private val context: Context,
@@ -97,6 +97,7 @@ class AndroidGattServerManager(
             is GattEvent.MessageReceived -> Unit
             is GattEvent.MtuChanged -> mtu = event.mtu
             is GattEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
+            is GattEvent.SessionEnd -> handleSessionEnd()
         }
     }
 
@@ -143,9 +144,13 @@ class AndroidGattServerManager(
                     logger.debug(
                         logTag,
                         "Received descriptor write requests " +
-                            "- response not needed"
+                                "- response not needed"
                     )
                 }
         }
+    }
+
+    private fun handleSessionEnd() {
+        _events.tryEmit(GattServerEvent.SessionEnd)
     }
 }
