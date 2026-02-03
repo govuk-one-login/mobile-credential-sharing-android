@@ -13,8 +13,8 @@ import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PA
 import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.SHARED_SECRET_BYTES
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.HOLDER
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
-import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGeneratorStubs.VALID_SKDEVICE_BYTES
-import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGeneratorStubs.VALID_SKREADER_BYTES
+import uk.gov.onelogin.sharing.security.secureArea.session.SessionStubs.VALID_SKDEVICE_BYTES
+import uk.gov.onelogin.sharing.security.secureArea.session.SessionStubs.VALID_SKREADER_BYTES
 
 class HkdfSessionKeyGeneratorTest {
 

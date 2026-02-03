@@ -3,11 +3,13 @@ package uk.gov.onelogin.sharing.security.secureArea.session
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cryptography.Constants.AES_256_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.AES_256_NONCE_LENGTH
 import uk.gov.onelogin.sharing.security.cryptography.Constants.AES_256_TRANSFORMATION
 import uk.gov.onelogin.sharing.security.cryptography.createNistInitialisationVector
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
+import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -58,13 +60,27 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
                 )
             }
             decryptionCounter += 1
-
-
-//            logger.
+            logger.debug(logTag, "successful decryption")
             return decryptedData
-        } catch (e: Exception) {
-            // logger
-            throw Exception()
+        } catch (e: AEADBadTagException) {
+            logger.debug(logTag, "session termination: status code 20")
+
+            e.message?.let {
+                if (it.contains(TAG_MISMATCH_MESSAGE)) {
+                    logger.debug(logTag, "session decryption error: authentication tag invalid")
+                } else if (it.contains(INPUT_SHORT_MESSAGE)) {
+                    logger.debug(
+                        logTag,
+                        "session decryption error: payload too short for AES-256-GCM"
+                    )
+                }
+            }
+            throw e
         }
+    }
+
+    private companion object {
+        const val TAG_MISMATCH_MESSAGE = "Tag mismatch"
+        const val INPUT_SHORT_MESSAGE = "Input data too short"
     }
 }
