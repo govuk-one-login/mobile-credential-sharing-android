@@ -9,8 +9,8 @@ class DeviceRequestModelTest {
 
     @Test
     fun `DeviceRequest model instantiates with example data`() {
-        val mdlDocType = "org.iso.18013.5.1"
-        val mdlNameSpace = "org.iso.18013.5.1.mDL"
+        val mdlNameSpace = "org.iso.18013.5.1"
+        val mdlDocType = "org.iso.18013.5.1.mDL"
 
         val requestedData = mapOf(
             "family_name" to true,
