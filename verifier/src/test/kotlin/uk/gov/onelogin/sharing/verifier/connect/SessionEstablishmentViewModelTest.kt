@@ -42,7 +42,18 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
+import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
+import uk.gov.onelogin.sharing.security.secureArea.keypair.FakeKeyPairGenerator
+import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
+import uk.gov.onelogin.sharing.security.secureArea.keypair.MemorisedKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
+import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.startScanningDummyServiceUuid
@@ -368,12 +379,32 @@ class SessionEstablishmentViewModelTest {
 
     @Test
     fun `Creates KeyPair instance when bluetooth connection starts`() = runTest {
-        viewModel = createViewModel(scanner)
+        val generator = MemorisedKeyGenerator(
+            FakeKeyPairGenerator(validKeyPair),
+            logger,
+        )
+        val publicKeyGenerator = EcPublicCoseKeyGenerator(generator, logger)
+        val expectedCoseKey = publicKeyGenerator.generateSessionPublicKey()
+            .let(CoseKey::encodeCbor)
+            .let(::EmbeddedCbor)
+            .encodeCbor()
+
+        viewModel = createViewModel(
+            scanner = scanner,
+            sessionSecurity = SessionSecurityImpl(
+                keyPairGenerator = generator,
+                privateKeyGenerator = EcPrivateKeyGenerator(generator, logger),
+                publicKeyGenerator = publicKeyGenerator,
+                secretGenerator = EcdhSharedSecretGenerator(logger),
+                sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
+            )
+        )
         fakeVerifierSession.updateState(VerifierSessionState.ConnectionStateStarted)
         runCurrent()
 
         assert(
-            "Encoded public CoseKey into EReaderKeyBytes" in logger
+            "Encoded public CoseKey into EReaderKeyBytes: ${expectedCoseKey.toHexString()}"
+                in logger
         ) {
             "Cannot find expected message in logs: $logger"
         }
