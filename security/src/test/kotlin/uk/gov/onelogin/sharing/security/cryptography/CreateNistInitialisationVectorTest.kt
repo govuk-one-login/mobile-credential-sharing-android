@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.security.cryptography
 
-import org.junit.Test
 import kotlin.test.assertContentEquals
+import org.junit.Test
 
 class CreateNistInitialisationVectorTest {
     @Test

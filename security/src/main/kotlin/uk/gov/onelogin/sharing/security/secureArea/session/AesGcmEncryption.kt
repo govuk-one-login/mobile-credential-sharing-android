@@ -2,6 +2,10 @@ package uk.gov.onelogin.sharing.security.secureArea.session
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import javax.crypto.AEADBadTagException
+import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cryptography.Constants.AES_256_ALGORITHM
@@ -9,10 +13,6 @@ import uk.gov.onelogin.sharing.security.cryptography.Constants.AES_256_NONCE_LEN
 import uk.gov.onelogin.sharing.security.cryptography.Constants.AES_256_TRANSFORMATION
 import uk.gov.onelogin.sharing.security.cryptography.createNistInitialisationVector
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
-import javax.crypto.AEADBadTagException
-import javax.crypto.Cipher
-import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.SecretKeySpec
 
 @ContributesBinding(ViewModelScope::class)
 class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
@@ -32,11 +32,7 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
      * @return [ByteArray] object representing the plaintext decrypted response
      */
 
-    override fun decryptPayload(
-        key: ByteArray,
-        data: ByteArray,
-        role: DeviceRole
-    ): ByteArray {
+    override fun decryptPayload(key: ByteArray, data: ByteArray, role: DeviceRole): ByteArray {
         val nistInitialisationVector = createNistInitialisationVector(
             role.nistInitialisationVectorIdentifier,
             decryptionCounter.toUInt()

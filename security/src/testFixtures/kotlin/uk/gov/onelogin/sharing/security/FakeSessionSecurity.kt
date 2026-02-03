@@ -34,9 +34,6 @@ class FakeSessionSecurity : SessionSecurity {
         role: DeviceRole
     ): ByteArray = byteArrayOf()
 
-    override fun decryptPayload(
-        key: ByteArray,
-        data: ByteArray,
-        role: DeviceRole
-    ): ByteArray = byteArrayOf()
+    override fun decryptPayload(key: ByteArray, data: ByteArray, role: DeviceRole): ByteArray =
+        byteArrayOf()
 }

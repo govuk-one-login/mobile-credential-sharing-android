@@ -1,14 +1,14 @@
 package uk.gov.onelogin.sharing.security.secureArea.session
 
+import javax.crypto.AEADBadTagException
+import kotlin.test.assertContentEquals
+import kotlin.test.assertFailsWith
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateSessionKey
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionStubs.VALID_DECRYPTED_DATA_BYTES
-import javax.crypto.AEADBadTagException
-import kotlin.test.assertContentEquals
-import kotlin.test.assertFailsWith
 
 class AesGcmEncryptionTest {
 
