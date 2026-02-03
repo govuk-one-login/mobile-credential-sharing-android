@@ -45,6 +45,7 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.cose.DefaultCoseKeyToString
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.security.secureArea.keypair.FakeKeyPairGenerator
@@ -93,7 +94,8 @@ class SessionEstablishmentViewModelTest {
         bluetoothStatusMonitor = fakeBluetoothStateMonitor,
         verifierSessionFactory = { fakeVerifierSession },
         savedStateHandle = savedStateHandle,
-        sessionSecurity = sessionSecurity
+        sessionSecurity = sessionSecurity,
+        coseKeyConverter = DefaultCoseKeyToString(),
     )
 
     @Test

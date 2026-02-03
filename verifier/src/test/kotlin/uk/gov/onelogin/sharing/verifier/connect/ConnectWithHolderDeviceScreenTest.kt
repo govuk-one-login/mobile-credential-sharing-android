@@ -23,6 +23,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.sessionSecurity
+import uk.gov.onelogin.sharing.security.cose.DefaultCoseKeyToString
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableGrantedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.genericErrorState
@@ -41,7 +42,7 @@ class ConnectWithHolderDeviceScreenTest {
     private lateinit var testViewModel: SessionEstablishmentViewModel
 
     fun createViewModel(
-        bluetoothAdapterProvider: BluetoothAdapterProvider = enabledBluetoothAdapter
+        bluetoothAdapterProvider: BluetoothAdapterProvider = enabledBluetoothAdapter,
     ): SessionEstablishmentViewModel = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         scanner = fakeBluetoothScanner,
@@ -49,7 +50,8 @@ class ConnectWithHolderDeviceScreenTest {
         bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
         verifierSessionFactory = { mdocVerifierSession },
         savedStateHandle = SavedStateHandle(),
-        sessionSecurity = sessionSecurity
+        sessionSecurity = sessionSecurity,
+        coseKeyConverter = DefaultCoseKeyToString(),
     )
 
     @Before
