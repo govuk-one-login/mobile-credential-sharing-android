@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
 import uk.gov.onelogin.sharing.security.secureArea.secret.SharedSecretGenerator
+import uk.gov.onelogin.sharing.security.secureArea.session.SessionEncryption
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
 
 /**
@@ -11,4 +12,5 @@ interface SessionSecurity :
     KeyGenerator.PrivateKeyGenerator,
     KeyGenerator.PublicKeyGenerator,
     SessionKeyGenerator,
-    SharedSecretGenerator
+    SharedSecretGenerator,
+    SessionEncryption

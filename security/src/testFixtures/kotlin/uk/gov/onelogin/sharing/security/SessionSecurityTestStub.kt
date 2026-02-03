@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs
 import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
+import uk.gov.onelogin.sharing.security.secureArea.session.AesGcmEncryption
 import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
@@ -27,12 +28,14 @@ object SessionSecurityTestStub {
     val privateKeyGenerator = EcPrivateKeyGenerator(keyPairGenerator, securityLogger)
     val publicKeyGenerator = EcPublicCoseKeyGenerator(keyPairGenerator, securityLogger)
     val sessionKeyGenerator = HkdfSessionKeyGenerator(securityLogger)
+    val sessionEncryption = AesGcmEncryption(securityLogger)
     val sessionSecurity = SessionSecurityImpl(
         keyPairGenerator = keyPairGenerator,
         privateKeyGenerator = privateKeyGenerator,
         publicKeyGenerator = publicKeyGenerator,
         secretGenerator = secretGenerator,
-        sessionKeyGenerator = sessionKeyGenerator
+        sessionKeyGenerator = sessionKeyGenerator,
+        sessionEncryption = sessionEncryption
     )
 
     fun generateValidPrivateKey(): ECPrivateKey {

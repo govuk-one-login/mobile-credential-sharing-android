@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.security.secureArea.session
 
-fun interface SessionKeyGenerator {
+interface SessionKeyGenerator {
     /**
      * Generates a single session key from a given [sharedKey], a generated cryptographic
      * salt created from the [sessionTranscriptBytes] and a string containing the
@@ -18,9 +18,18 @@ fun interface SessionKeyGenerator {
     ): ByteArray
 
     companion object {
-        enum class DeviceRole {
-            VERIFIER,
-            HOLDER
+        enum class DeviceRole(
+            val hdkfRoleAsString: String,
+            val nistInitialisationVectorIdentifier: UInt
+        ) {
+            VERIFIER(
+                "SKReader",
+                0x00000000U
+            ),
+            HOLDER(
+                "SKDevice",
+                0x00000001U
+            )
         }
     }
 }
