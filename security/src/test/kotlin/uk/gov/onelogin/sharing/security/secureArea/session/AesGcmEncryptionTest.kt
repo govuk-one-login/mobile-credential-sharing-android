@@ -1,24 +1,31 @@
 package uk.gov.onelogin.sharing.security.secureArea.session
 
-import javax.crypto.AEADBadTagException
-import kotlin.test.assertContentEquals
-import kotlin.test.assertFailsWith
+import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateSessionKey
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionStubs.VALID_DECRYPTED_DATA_BYTES
+import javax.crypto.AEADBadTagException
+import kotlin.test.assertContentEquals
+import kotlin.test.assertFailsWith
 
 class AesGcmEncryptionTest {
 
-    private val logger = SystemLogger()
+    private lateinit var logger: SystemLogger
 
-    private val aesEncryption = AesGcmEncryption(logger)
+    private lateinit var aesEncryption: AesGcmEncryption
+
+    @Before
+    fun setup() {
+        logger = SystemLogger()
+        aesEncryption = AesGcmEncryption(logger)
+    }
 
     @Test
     fun `when correct key and role supplied, decryption matches given byte array`() {
-        val data = expectedSessionEstablishmentDto.data
+        val data = expectedSessionEstablishmentDto.data.copyOf()
         val readerSk = generateSessionKey(DeviceRole.VERIFIER)
 
         assertContentEquals(
@@ -35,7 +42,7 @@ class AesGcmEncryptionTest {
 
     @Test
     fun `when incorrect key supplied, decryption does not match given byte array`() {
-        val data = expectedSessionEstablishmentDto.data
+        val data = expectedSessionEstablishmentDto.data.copyOf()
         val holderSk = generateSessionKey(DeviceRole.HOLDER)
 
         assertFailsWith(AEADBadTagException::class) {
