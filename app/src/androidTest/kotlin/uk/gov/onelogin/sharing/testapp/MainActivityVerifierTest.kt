@@ -9,6 +9,7 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.testapp.di.createTestGraph
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRule
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerRule
@@ -23,9 +24,15 @@ class MainActivityVerifierTest {
     )
 
     @get:Rule
-    val composeTestRule = MainActivityRule(createAndroidComposeRule<MainActivity>())
+    val composeTestRule = MainActivityRule(
+        composeTestRule = createAndroidComposeRule<MainActivity>(),
+        appGraph = createTestGraph()
+    )
 
-    private val verifierScannerRule = VerifierScannerRule(composeTestRule)
+    private val verifierScannerRule = VerifierScannerRule(
+        composeTestRule,
+        appGraph = createTestGraph()
+    )
     private val scannedInvalidQrRule = ScannedInvalidQrScreenRule(composeTestRule)
     private val connectWithHolderRule = ConnectWithHolderDeviceRule(composeTestRule)
 

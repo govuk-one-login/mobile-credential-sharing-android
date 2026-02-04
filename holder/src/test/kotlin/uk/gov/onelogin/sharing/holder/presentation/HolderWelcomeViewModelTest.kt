@@ -22,6 +22,7 @@ import uk.gov.onelogin.sharing.holder.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
@@ -49,7 +50,8 @@ class HolderWelcomeViewModelTest {
         savedStateHandle = SavedStateHandle(),
         resettable = setOf(
             Resettable { hasResetElements = true }
-        )
+        ),
+        orchestrator = FakeOrchestrator()
     )
 
     @Test

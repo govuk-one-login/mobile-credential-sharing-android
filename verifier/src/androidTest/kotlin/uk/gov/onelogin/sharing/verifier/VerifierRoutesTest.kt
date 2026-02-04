@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier
 
-import CredentialSharingAppGraphStub
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -8,7 +7,6 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
@@ -17,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.verifier.di.createTestGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerRule
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
@@ -29,6 +28,7 @@ class VerifierRoutesTest {
 
     @get:Rule
     val composeTestRule = VerifierScannerRule(
+        appGraph = createTestGraph(),
         composeTestRule = createComposeRule()
     )
 
@@ -85,9 +85,6 @@ class VerifierRoutesTest {
         val context = LocalContext.current
         controller = TestNavHostController(context)
         controller.navigatorProvider.addNavigator(ComposeNavigator())
-        val appGraph = CredentialSharingAppGraphStub(
-            applicationContext = ApplicationProvider.getApplicationContext()
-        )
 
         NavHost(
             navController = controller,
@@ -95,7 +92,7 @@ class VerifierRoutesTest {
         ) {
             configureVerifierRoutes(
                 navController = controller,
-                appGraph = appGraph
+                appGraph = createTestGraph()
             )
         }
         postConfiguration()

@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.testapp
 
-import CredentialSharingAppGraphStub
 import android.content.Context
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -11,12 +10,14 @@ import androidx.navigation.toRoute
 import androidx.test.core.app.ApplicationProvider
 import kotlin.reflect.KClass
 import org.junit.Assert.assertNotNull
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 
-class AppNavHostRule(private val composeTestRule: ComposeContentTestRule) :
-    ComposeContentTestRule by composeTestRule {
+class AppNavHostRule(
+    private val composeTestRule: ComposeContentTestRule,
+    private val appGraph: CredentialSharingAppGraph
+) : ComposeContentTestRule by composeTestRule {
     private lateinit var controller: TestNavHostController
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val appGraph = CredentialSharingAppGraphStub(context)
 
     fun <T : Any> assertCurrentRoute(klass: KClass<T>): T {
         val result = controller.currentBackStackEntry?.toRoute<T>(klass)

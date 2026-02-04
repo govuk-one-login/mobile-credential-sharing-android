@@ -22,8 +22,18 @@ android {
 
 dependencies {
     listOf(
+        projects.orchestration,
         projects.core
     ).forEach(::implementation)
+}
+
+dependencies {
+    listOf(
+        projects.core,
+        projects.orchestration,
+        libs.metro.runtime,
+        testFixtures(projects.orchestration)
+    ).forEach(::testFixturesImplementation)
 }
 
 mavenPublishingConfig {

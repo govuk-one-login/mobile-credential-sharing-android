@@ -15,6 +15,7 @@ listOf(
     "kotlin-serialization",
     "custom-language.config",
     "custom-managed.devices",
+    "metro-di",
     "roborazzi",
     "screenshot-testing",
     "android-lint.config",

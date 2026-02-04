@@ -1,16 +1,15 @@
 package uk.gov.onelogin.sharing.holder
 
-import CredentialSharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.di.createTestGraph
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.presentation.HolderHomeRoute
 
@@ -20,10 +19,6 @@ class HolderRoutesTest {
     @get:Rule
     val composeTestRule = HolderWelcomeScreenRule(
         composeTestRule = createComposeRule()
-    )
-
-    val appGraph = CredentialSharingAppGraphStub(
-        applicationContext = ApplicationProvider.getApplicationContext()
     )
 
     @Test
@@ -37,7 +32,7 @@ class HolderRoutesTest {
                 navController = controller,
                 startDestination = HolderHomeRoute
             ) {
-                configureHolderRoutes(appGraph)
+                configureHolderRoutes(createTestGraph())
             }
         }
 
