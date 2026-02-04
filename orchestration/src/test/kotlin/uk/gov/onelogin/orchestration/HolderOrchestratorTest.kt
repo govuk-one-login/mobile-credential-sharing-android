@@ -1,24 +1,24 @@
 package uk.gov.onelogin.orchestration
 
-import kotlin.test.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.logging.testdouble.SystemLogger
 
 class HolderOrchestratorTest {
+    private val logger = SystemLogger()
 
     @Test
     fun `test start called`() {
-        val orchestrator = FakeOrchestrator()
+        val orchestrator = HolderOrchestrator(logger)
         orchestrator.start()
 
-        assertEquals(1, orchestrator.startCount)
+        assert(logger.contains("start orchestration"))
     }
 
     @Test
     fun `test cancel called`() {
-        val orchestrator = FakeOrchestrator()
+        val orchestrator = HolderOrchestrator(logger)
         orchestrator.cancel()
 
-        assertEquals(1, orchestrator.cancelCount)
+        assert(logger.contains("cancel orchestration"))
     }
 }

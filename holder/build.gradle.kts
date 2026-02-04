@@ -1,7 +1,6 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library,
-        libs.plugins.metro.di
+        libs.plugins.templates.android.library
     ).forEach { alias(it) }
 }
 
@@ -56,7 +55,6 @@ dependencies {
         libs.zxing.core,
         projects.bluetooth,
         projects.core,
-        projects.orchestration,
         projects.security,
         projects.sdk
     ).forEach(::implementation)

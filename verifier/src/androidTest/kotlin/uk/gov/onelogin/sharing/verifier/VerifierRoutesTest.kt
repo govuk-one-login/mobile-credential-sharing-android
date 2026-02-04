@@ -25,10 +25,11 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.v
 
 @RunWith(AndroidJUnit4::class)
 class VerifierRoutesTest {
+    private val appGraph = createTestGraph()
 
     @get:Rule
     val composeTestRule = VerifierScannerRule(
-        appGraph = createTestGraph(),
+        appGraph = appGraph,
         composeTestRule = createComposeRule()
     )
 
@@ -92,7 +93,7 @@ class VerifierRoutesTest {
         ) {
             configureVerifierRoutes(
                 navController = controller,
-                appGraph = createTestGraph()
+                appGraph = appGraph
             )
         }
         postConfiguration()

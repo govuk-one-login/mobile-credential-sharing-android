@@ -6,7 +6,7 @@ import org.junit.Test
 
 class ExampleInstrumentedTest {
     @Test
-    fun dummyTest() {
+    fun deleteOnceMeaningfulInstrumentationTestsExist() {
         assertEquals(
             "uk.gov.onelogin.sharing.orchestration.test",
             InstrumentationRegistry.getInstrumentation().context.packageName

@@ -1,6 +1,5 @@
 plugins {
     listOf(
-        libs.plugins.metro.di,
         libs.plugins.templates.android.library
     ).forEach { alias(it) }
 }

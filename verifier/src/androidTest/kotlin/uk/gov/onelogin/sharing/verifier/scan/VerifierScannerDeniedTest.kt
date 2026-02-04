@@ -24,7 +24,6 @@ import uk.gov.onelogin.sharing.verifier.di.createTestGraph
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalPermissionsApi::class)
 class VerifierScannerDeniedTest {
-
     private val resources: Resources =
         ApplicationProvider.getApplicationContext<Context>().resources
     private val appGraph = createTestGraph()
@@ -36,7 +35,7 @@ class VerifierScannerDeniedTest {
     val composeTestRule = VerifierScannerRule(
         resources = resources,
         composeTestRule = createComposeRule(),
-        appGraph = createTestGraph()
+        appGraph = appGraph
     )
 
     @Test

@@ -17,6 +17,8 @@ import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScre
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityVerifierTest {
+    private val appGraph = createTestGraph()
+
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
         Manifest.permission.BLUETOOTH_SCAN,
@@ -26,12 +28,12 @@ class MainActivityVerifierTest {
     @get:Rule
     val composeTestRule = MainActivityRule(
         composeTestRule = createAndroidComposeRule<MainActivity>(),
-        appGraph = createTestGraph()
+        appGraph = appGraph
     )
 
     private val verifierScannerRule = VerifierScannerRule(
         composeTestRule,
-        appGraph = createTestGraph()
+        appGraph = appGraph
     )
     private val scannedInvalidQrRule = ScannedInvalidQrScreenRule(composeTestRule)
     private val connectWithHolderRule = ConnectWithHolderDeviceRule(composeTestRule)

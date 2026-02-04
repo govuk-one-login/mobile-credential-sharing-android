@@ -1,6 +1,5 @@
 plugins {
     listOf(
-        libs.plugins.metro.di,
         libs.plugins.templates.android.library
     ).forEach { alias(it) }
 }
@@ -35,23 +34,6 @@ dependencies {
     listOf(
         projects.core
     ).forEach(::implementation)
-
-    listOf(
-        libs.kotlinx.coroutines
-    ).forEach(::api)
-
-    listOf(
-        libs.junit,
-        libs.kotlinx.coroutines.test
-    ).forEach(::testImplementation)
-
-    listOf(
-        projects.core
-    ).forEach(::testFixturesImplementation)
-}
-
-jacoco {
-    toolVersion = libs.versions.jacoco.get()
 }
 
 mavenPublishingConfig {

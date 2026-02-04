@@ -35,6 +35,7 @@ class VerifierScannerLaunchUrlTest {
         resettable = emptySet()
     )
     private val resources: Resources = context.resources
+    private val appGraph = createTestGraph()
 
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant()
@@ -53,7 +54,7 @@ class VerifierScannerLaunchUrlTest {
     val composeTestRule = VerifierScannerRule(
         resources = resources,
         composeTestRule = createComposeRule(),
-        appGraph = createTestGraph()
+        appGraph = appGraph
     )
 
     @Test
@@ -95,7 +96,7 @@ class VerifierScannerLaunchUrlTest {
         composeTestRule.setContent {
             val graph = remember {
                 createGraphFactory<VerifierGraph.Factory>().create(
-                    appGraph = createTestGraph()
+                    appGraph = appGraph
                 )
             }
 

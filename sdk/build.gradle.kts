@@ -1,6 +1,5 @@
 plugins {
     listOf(
-        libs.plugins.metro.di,
         libs.plugins.templates.android.library
     ).forEach { alias(it) }
 }
@@ -22,9 +21,8 @@ android {
 
 dependencies {
     listOf(
-        projects.orchestration,
-        projects.core
-    ).forEach(::implementation)
+        projects.orchestration
+    ).forEach(::api)
 }
 
 dependencies {
