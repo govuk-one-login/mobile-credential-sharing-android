@@ -56,13 +56,15 @@ dependencies {
         libs.zxing.core,
         projects.bluetooth,
         projects.core,
-        projects.security
+        projects.security,
+        projects.sdk
     ).forEach(::implementation)
 
     listOf(
         testFixtures(projects.bluetooth),
         testFixtures(projects.security),
-        testFixtures(projects.core)
+        testFixtures(projects.core),
+        testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 
     listOf(

@@ -7,10 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.verifier.scan.callbacks.VerifierScannerBarcodeScanCallback
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 @Composable
 fun VerifierScanner(
     modifier: Modifier = Modifier,
-    viewModel: VerifierScannerViewModel = viewModel<VerifierScannerViewModel>(),
+    viewModel: VerifierScannerViewModel = metroViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     permissionState: PermissionState = rememberPermissionState(Manifest.permission.CAMERA) {
         viewModel.update(!it)

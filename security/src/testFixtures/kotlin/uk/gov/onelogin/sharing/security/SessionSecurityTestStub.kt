@@ -7,17 +7,40 @@ import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity.Companion.DeviceRole
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
+import uk.gov.onelogin.sharing.security.secureArea.keypair.EcKeyPairGenerator
+import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.ALGORITHM
+import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.UNSUPPORTED_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
+import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
 object SessionSecurityTestStub {
-    const val ALGORITHM = "EC"
-    const val PARAMETER_SPEC = "secp256r1"
-    const val UNSUPPORTED_PARAMETER_SPEC = "secp384r1"
+    private val securityLogger = SystemLogger()
 
-    val sessionSecurity = SessionSecurityImpl(SystemLogger())
+    val keyPairGenerator = EcKeyPairGenerator(securityLogger)
+    val secretGenerator = EcdhSharedSecretGenerator(securityLogger)
 
-    fun generateValidPublicKeyPair(): ECPublicKey {
+    val privateKeyGenerator = EcPrivateKeyGenerator(keyPairGenerator, securityLogger)
+    val publicKeyGenerator = EcPublicCoseKeyGenerator(keyPairGenerator, securityLogger)
+    val sessionKeyGenerator = HkdfSessionKeyGenerator(securityLogger)
+    val sessionSecurity = SessionSecurityImpl(
+        keyPairGenerator = keyPairGenerator,
+        privateKeyGenerator = privateKeyGenerator,
+        publicKeyGenerator = publicKeyGenerator,
+        secretGenerator = secretGenerator,
+        sessionKeyGenerator = sessionKeyGenerator
+    )
+
+    fun generateValidPrivateKey(): ECPrivateKey {
+        val keyPair = sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
+        return keyPair?.private as ECPrivateKey
+    }
+
+    fun generateValidPublicKey(): ECPublicKey {
         val publicKey = sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
         return publicKey?.public as ECPublicKey
     }
@@ -43,8 +66,7 @@ object SessionSecurityTestStub {
     fun getSharedSecret(holderPrivateKey: ECPrivateKey, readerPublicKey: ECPublicKey): ByteArray =
         sessionSecurity.generateSharedSecret(
             holderPrivateKey,
-            readerPublicKey,
-            SystemLogger()
+            readerPublicKey
         )
 
     fun generateSessionKey(role: DeviceRole): ByteArray = when (role) {

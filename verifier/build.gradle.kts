@@ -32,34 +32,42 @@ android {
 }
 dependencies {
     listOf(
+        libs.metro.viewmodel.compose,
+        testFixtures(projects.security),
+        testFixtures(projects.sdk)
+    ).forEach(::androidTestImplementation)
+
+    listOf(
         projects.bluetooth,
         projects.core,
         projects.models,
         projects.security,
-        projects.orchestration
+        projects.orchestration,
+        projects.sdk
     ).forEach(::api)
 
     listOf(
         libs.metro.viewmodel.compose
     ).forEach(::implementation)
 
-    listOf(
-        libs.com.google.test.parameter.injector,
-        testFixtures(projects.security)
-    ).forEach(::testFixturesImplementation)
-
     implementation(libs.androidx.browser)
     listOf(
         libs.androidx.browser,
+        libs.com.google.test.parameter.injector,
+        libs.metro.viewmodel.compose,
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.bluetooth),
-        testFixtures(projects.core)
+        testFixtures(projects.core),
+        testFixtures(projects.security),
+        testFixtures(projects.sdk)
     ).forEach(::testFixturesImplementation)
 
     listOf(
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.core),
-        testFixtures(projects.bluetooth)
+        testFixtures(projects.bluetooth),
+        testFixtures(projects.security),
+        testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 }
 

@@ -40,6 +40,9 @@ import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
+import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.StartScanning
@@ -58,9 +61,11 @@ class SessionEstablishmentViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val logger: Logger,
     private val bluetoothStatusMonitor: BluetoothStateMonitor,
+    private val sessionSecurity: SessionSecurity,
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel(),
-    Receiver<ConnectWithHolderDeviceEvent> {
+    Receiver<ConnectWithHolderDeviceEvent>,
+    SessionSecurity by sessionSecurity {
     private val initialState = ConnectWithHolderDeviceState(
         previouslyHadPermissions = savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] ?: false
     )
@@ -130,6 +135,15 @@ class SessionEstablishmentViewModel(
                                 ConnectWithHolderDeviceError.BluetoothConnectionError
                             )
                         )
+                    }
+
+                    is VerifierSessionState.ConnectionStateStarted -> {
+                        generateSessionPublicKey().let(CoseKey::encodeCbor).also {
+                            logger.debug(
+                                logTag,
+                                "Encoded public CoseKey into EReaderKeyBytes"
+                            )
+                        }
                     }
 
                     else -> Unit

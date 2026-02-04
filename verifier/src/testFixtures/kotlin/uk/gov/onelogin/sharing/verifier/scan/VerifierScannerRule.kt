@@ -1,10 +1,13 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
+import CredentialSharingAppGraphStub
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assert
@@ -22,9 +25,12 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasFlags
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
+import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import org.hamcrest.CoreMatchers.allOf
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertions.hasState
 
 /**
@@ -94,38 +100,10 @@ class VerifierScannerRule(
 
     fun performPermissionDeniedClick() = onPermissionDeniedButton().performClick()
 
-    @OptIn(ExperimentalPermissionsApi::class)
-    fun render(
-        modifier: Modifier = Modifier,
-        onInvalidBarcode: (String) -> Unit = {},
-        onValidBarcode: (String) -> Unit = {}
-    ) {
-        setContent {
-            VerifierScanner(
-                modifier = modifier,
-                onInvalidBarcode = onInvalidBarcode,
-                onValidBarcode = onValidBarcode
-            )
-        }
-    }
-
-    @OptIn(ExperimentalPermissionsApi::class)
-    fun render(
-        model: VerifierScannerViewModel,
-        modifier: Modifier = Modifier,
-        onInvalidBarcode: (String) -> Unit = {},
-        onValidBarcode: (String) -> Unit = {}
-    ) {
-        setContent {
-            VerifierScanner(
-                modifier = modifier,
-                viewModel = model,
-                onInvalidBarcode = onInvalidBarcode,
-                onValidBarcode = onValidBarcode
-            )
-        }
-    }
-
+    /**
+     * Due to issues with the metro dependency injection framework's compiler, don't use this
+     * in android instrumentation tests.
+     */
     @OptIn(ExperimentalPermissionsApi::class)
     fun render(
         permissionState: @Composable () -> PermissionState,
@@ -133,13 +111,27 @@ class VerifierScannerRule(
         onInvalidBarcode: (String) -> Unit = {},
         onValidBarcode: (String) -> Unit = {}
     ) {
+        val appGraph = CredentialSharingAppGraphStub(
+            applicationContext = ApplicationProvider.getApplicationContext()
+        )
+
         setContent {
-            VerifierScanner(
-                modifier = modifier,
-                permissionState = permissionState(),
-                onInvalidBarcode = onInvalidBarcode,
-                onValidBarcode = onValidBarcode
-            )
+            val graph = remember {
+                createGraphFactory<VerifierGraph.Factory>().create(
+                    appGraph = appGraph
+                )
+            }
+
+            CompositionLocalProvider(
+                LocalMetroViewModelFactory provides graph.metroViewModelFactory
+            ) {
+                VerifierScanner(
+                    modifier = modifier,
+                    permissionState = permissionState(),
+                    onInvalidBarcode = onInvalidBarcode,
+                    onValidBarcode = onValidBarcode
+                )
+            }
         }
     }
 }

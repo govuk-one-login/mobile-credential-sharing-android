@@ -1,11 +1,13 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
+import CredentialSharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.test.runTest
@@ -35,6 +37,10 @@ class ConnectWithHolderDeviceRouteTest {
 
     @Test
     fun verifyControllerNavigationExtensionFunction() = runTest {
+        val appGraph = CredentialSharingAppGraphStub(
+            applicationContext = ApplicationProvider.getApplicationContext()
+        )
+
         composeTestRule.setContent {
             val context = LocalContext.current
             controller = TestNavHostController(context)
@@ -46,7 +52,7 @@ class ConnectWithHolderDeviceRouteTest {
                     validWithCorrectBluetoothSetup.base64EncodedEngagement!!
                 )
             ) {
-                configureConnectWithHolderDeviceRoute(context)
+                configureConnectWithHolderDeviceRoute(appGraph = appGraph)
                 configureScannedInvalidQrRoute()
             }
         }

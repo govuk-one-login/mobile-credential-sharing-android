@@ -80,7 +80,8 @@ class HolderWelcomeScreenTest {
         mdocSessionManagerFactory = { mdocBleSession },
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
-        savedStateHandle = SavedStateHandle()
+        savedStateHandle = SavedStateHandle(),
+        resettable = emptySet()
     )
 
     @Test

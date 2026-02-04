@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.core.logger
+package uk.gov.onelogin.sharing.testapp.logger
 
 import uk.gov.logging.api.CrashLogger
 

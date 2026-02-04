@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier
 
+import CredentialSharingAppGraphStub
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -7,6 +8,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
@@ -83,12 +85,18 @@ class VerifierRoutesTest {
         val context = LocalContext.current
         controller = TestNavHostController(context)
         controller.navigatorProvider.addNavigator(ComposeNavigator())
+        val appGraph = CredentialSharingAppGraphStub(
+            applicationContext = ApplicationProvider.getApplicationContext()
+        )
 
         NavHost(
             navController = controller,
             startDestination = VerifierRoutes
         ) {
-            configureVerifierRoutes(navController = controller, context = context)
+            configureVerifierRoutes(
+                navController = controller,
+                appGraph = appGraph
+            )
         }
         postConfiguration()
     }

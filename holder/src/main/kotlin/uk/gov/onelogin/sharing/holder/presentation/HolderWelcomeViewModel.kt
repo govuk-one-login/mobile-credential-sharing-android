@@ -12,6 +12,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -32,15 +34,16 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import java.util.UUID
 
 @AssistedInject
+@Suppress("LongParameterList")
 class HolderWelcomeViewModel(
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
+    private val resettable: Set<Resettable>,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
@@ -61,6 +64,7 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
+            resettable.forEach(Resettable::reset)
             val publicKey = sessionSecurity.generateSessionPublicKey()
             publicKey.let { coseKey ->
                 val engagement = engagementGenerator.qrCodeEngagement(
@@ -96,10 +100,10 @@ class HolderWelcomeViewModel(
                                 ImplementationDetail(
                                     ticket = "DCMAW-16898",
                                     description = "We may need to handle explicit bluetooth" +
-                                            "disconnection states to handle common error codes " +
-                                            "8, 19, 22 and 133. The function below will handle " +
-                                            "treat all disconnect states the same when connected " +
-                                            "to a device"
+                                        "disconnection states to handle common error codes " +
+                                        "8, 19, 22 and 133. The function below will handle " +
+                                        "treat all disconnect states the same when connected " +
+                                        "to a device"
                                 )
                             ]
                         )
@@ -244,10 +248,10 @@ class HolderWelcomeViewModel(
         val bluetoothOn = state.bluetoothState == BluetoothState.Enabled
 
         val canStart = !sessionStartRequested &&
-                hasPermissions &&
-                bluetoothOn &&
-                canStartNewSession(state) &&
-                !sessionStartRequested
+            hasPermissions &&
+            bluetoothOn &&
+            canStartNewSession(state) &&
+            !sessionStartRequested
 
         if (canStart) {
             sessionStartRequested = true
@@ -259,8 +263,8 @@ class HolderWelcomeViewModel(
 
     private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
         state.sessionState == MdocSessionState.Idle ||
-                state.sessionState == MdocSessionState.AdvertisingStopped ||
-                state.sessionState == MdocSessionState.GattServiceStopped
+            state.sessionState == MdocSessionState.AdvertisingStopped ||
+            state.sessionState == MdocSessionState.GattServiceStopped
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
@@ -283,6 +287,7 @@ class HolderWelcomeViewModel(
     override fun onCleared() {
         viewModelScope.launch {
             mdocBleSession.stop()
+            resettable.forEach(Resettable::reset)
             logger.debug(logTag, "onCleared called")
         }
         super.onCleared()

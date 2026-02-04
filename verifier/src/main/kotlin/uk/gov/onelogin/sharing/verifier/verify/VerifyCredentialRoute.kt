@@ -8,7 +8,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -16,6 +15,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanFromRoot
 
@@ -31,12 +31,14 @@ object VerifyCredentialRoute {
      * target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    fun NavGraphBuilder.configureVerifyCredentialRoute(navController: NavController) {
+    fun NavGraphBuilder.configureVerifyCredentialRoute(
+        navController: NavController,
+        appGraph: CredentialSharingAppGraph
+    ) {
         composable<VerifyCredentialRoute> {
-            val context = LocalContext.current
             val graph = remember {
                 createGraphFactory<VerifierGraph.Factory>().create(
-                    context
+                    appGraph
                 )
             }
 
