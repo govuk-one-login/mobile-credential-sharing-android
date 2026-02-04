@@ -86,6 +86,10 @@ class AndroidMdocSessionManager(
         bluetoothStateMonitor.stop()
     }
 
+    override fun endSession() {
+
+    }
+
     private fun handleAdvertiserState(state: AdvertiserState) {
         when (state) {
             AdvertiserState.Started ->

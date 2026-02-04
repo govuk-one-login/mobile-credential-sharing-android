@@ -18,6 +18,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
@@ -152,5 +153,14 @@ class AndroidGattServerManager(
 
     private fun handleSessionEnd() {
         _events.tryEmit(GattServerEvent.SessionEnd)
+    }
+
+    override fun endServerSession() {
+        val server = gattServer ?: return
+        val gattService = gattServiceFactory(serviceUuid)
+        val stateCharacteristic = service?.getCharacteristic(SERVER_2_CLIENT_UUID)
+
+        stateCharacteristic.value = endCommand
+        server.notifyCharacteristicChanged(device, stateCharacteristic, false)
     }
 }
