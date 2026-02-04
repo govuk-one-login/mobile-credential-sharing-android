@@ -36,6 +36,11 @@ class HolderSessionImplTest {
                         "cannot transition to: ${transition::class.java.simpleName}"
             )
         )
+
+        assertThat(
+            session,
+            hasCurrentState(HolderSessionState.NotStarted)
+        )
     }
 
     @Test
@@ -52,15 +57,20 @@ class HolderSessionImplTest {
                     "Cannot find applicable transitions for current state: NotStarted"
                 ),
             )
+
+            assertThat(
+                session,
+                hasCurrentState(HolderSessionState.NotStarted)
+            )
         }
 
     @Test
     fun `Can successfully transition to a valid state`() = runTest {
-        session.transitionTo(HolderSessionState.Complete.Cancelled)
+        session.transitionTo(HolderSessionState.Initialising)
 
         assertThat(
             session,
-            hasCurrentState(HolderSessionState.Complete.Cancelled)
+            hasCurrentState(HolderSessionState.Initialising)
         )
     }
 }

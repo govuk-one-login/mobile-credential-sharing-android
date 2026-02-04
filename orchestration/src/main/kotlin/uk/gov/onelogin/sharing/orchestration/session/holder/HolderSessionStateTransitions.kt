@@ -7,4 +7,17 @@ import kotlin.reflect.KClass
  * applicable [HolderSessionState].
  */
 typealias HolderSessionStateTransitions =
-    Map<KClass<out HolderSessionState>, Set<KClass<out HolderSessionState>>>
+        Map<KClass<out HolderSessionState>, Set<KClass<out HolderSessionState>>>
+
+/**
+ * The [HolderSessionStateTransitions] [Map] containing [HolderSessionState] classes as keys.
+ * The provided values are then a [Set] of applicable [HolderSessionState]s.
+ *
+ * @sample HolderSessionImpl.transitionTo
+ */
+val validHolderTransitions: HolderSessionStateTransitions = mapOf(
+    HolderSessionState.NotStarted::class to setOf(
+        HolderSessionState.Initialising::class,
+    ),
+    HolderSessionState.Initialising::class to setOf(),
+)
