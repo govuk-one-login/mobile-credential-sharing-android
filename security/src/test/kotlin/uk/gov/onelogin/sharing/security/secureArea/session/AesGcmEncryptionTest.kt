@@ -61,10 +61,10 @@ class AesGcmEncryptionTest {
                 readerSk,
                 data,
                 DeviceRole.VERIFIER
-            ).contentEquals(
-                VALID_DECRYPTED_DATA_BYTES
             )
         }
+
+        assertLogFailure()
     }
 
     @Test
@@ -82,8 +82,7 @@ class AesGcmEncryptionTest {
             )
         }
 
-        assert("session termination: status code 20" in logger)
-        assert("session decryption error: authentication tag invalid" in logger)
+        assertLogFailure()
     }
 
     @Test
@@ -101,8 +100,7 @@ class AesGcmEncryptionTest {
             )
         }
 
-        assert("session termination: status code 20" in logger)
-        assert("session decryption error: authentication tag invalid" in logger)
+        assertLogFailure()
     }
 
     @Test
@@ -118,7 +116,11 @@ class AesGcmEncryptionTest {
             )
         }
 
+        assertLogFailure()
+    }
+
+    private fun assertLogFailure() {
         assert("session termination: status code 20" in logger)
-        assert("session decryption error: payload too short for AES-256-GCM" in logger)
+        assert("session decryption error" in logger)
     }
 }

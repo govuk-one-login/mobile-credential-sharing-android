@@ -60,17 +60,7 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
             return decryptedData
         } catch (e: AEADBadTagException) {
             logger.debug(logTag, "session termination: status code 20")
-
-            e.message?.let {
-                if (it.contains(TAG_MISMATCH_MESSAGE)) {
-                    logger.debug(logTag, "session decryption error: authentication tag invalid")
-                } else if (it.contains(INPUT_SHORT_MESSAGE)) {
-                    logger.debug(
-                        logTag,
-                        "session decryption error: payload too short for AES-256-GCM"
-                    )
-                }
-            }
+            logger.debug(logTag, "session decryption error")
             throw e
         }
     }
