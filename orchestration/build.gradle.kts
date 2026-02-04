@@ -10,12 +10,14 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.com.google.test.parameter.injector,
         libs.junit,
     ).forEach(::testFixturesApi)
 
     listOf(
-        libs.junit,
         libs.app.cash.turbine,
+        libs.com.google.test.parameter.injector,
+        libs.junit,
         libs.kotlinx.coroutines.test,
     ).forEach(::testImplementation)
 }

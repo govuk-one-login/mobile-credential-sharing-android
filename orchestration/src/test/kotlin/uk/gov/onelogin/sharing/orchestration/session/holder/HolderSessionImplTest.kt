@@ -1,23 +1,30 @@
 package uk.gov.onelogin.sharing.orchestration.session.holder
 
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameters
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionMatchers.hasCurrentState
 
+@RunWith(TestParameterInjector::class)
 class HolderSessionImplTest {
 
-    private var mutableState: MutableStateFlow<HolderSessionState> =
-        MutableStateFlow(HolderSessionState.NotStarted)
-    private var validTransitions = HolderSessionImpl.validTransitions
+    private var initialState: HolderSessionState = HolderSessionState.NotStarted
+
+    private val stateFlow: MutableStateFlow<HolderSessionState> by lazy {
+        MutableStateFlow(initialState)
+    }
+    private var validTransitions = validHolderTransitions
 
     private val session by lazy {
         HolderSessionImpl(
-            internalState = mutableState,
+            internalState = stateFlow,
             transitionMap = validTransitions,
         )
     }
@@ -65,12 +72,17 @@ class HolderSessionImplTest {
         }
 
     @Test
-    fun `Can successfully transition to a valid state`() = runTest {
-        session.transitionTo(HolderSessionState.Initialising)
+    @TestParameters(valuesProvider = ValidHolderSessionStateTransitions::class)
+    fun `Can successfully transition to a valid state`(
+        initial: HolderSessionState,
+        transition: HolderSessionState,
+    ) = runTest {
+        initialState = initial
+        session.transitionTo(transition)
 
         assertThat(
             session,
-            hasCurrentState(HolderSessionState.Initialising)
+            hasCurrentState(transition)
         )
     }
 }
