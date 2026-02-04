@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.session.holder
 
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,7 +10,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionMatchers.hasCurrentState
 
 @RunWith(TestParameterInjector::class)
@@ -30,8 +30,12 @@ class HolderSessionImplTest {
     }
 
     @Test
-    fun `IllegalStateExceptions occur when performing invalid transitions`() = runTest {
-        val transition = HolderSessionState.Complete.Success(DeviceResponse)
+    @TestParameters(valuesProvider = InvalidHolderSessionStateTransitions::class)
+    fun `IllegalStateExceptions occur when performing invalid transitions`(
+        initial: HolderSessionState,
+        transition: HolderSessionState,
+    ) = runTest {
+        initialState = initial
         val exception = assertThrows(IllegalStateException::class.java) {
             session.transitionTo(transition)
         }
@@ -40,42 +44,45 @@ class HolderSessionImplTest {
             exception.message,
             equalTo(
                 "Current state (${session.currentState.value::class.java.simpleName}) " +
-                    "cannot transition to: ${transition::class.java.simpleName}"
+                        "cannot transition to: ${transition::class.java.simpleName}"
             )
         )
 
         assertThat(
             session,
-            hasCurrentState(HolderSessionState.NotStarted)
+            hasCurrentState(initial)
         )
     }
 
     @Test
-    fun `IllegalStateExceptions occur when the current state has no transitions available`() =
-        runTest {
-            validTransitions = mapOf()
-            val exception = assertThrows(IllegalStateException::class.java) {
-                session.transitionTo(HolderSessionState.Initialising)
-            }
-
-            assertThat(
-                exception.message,
-                equalTo(
-                    "Cannot find applicable transitions for current state: NotStarted"
-                )
-            )
-
-            assertThat(
-                session,
-                hasCurrentState(HolderSessionState.NotStarted)
-            )
+    fun `IllegalStateExceptions occur when the current state has no transitions available`(
+        @TestParameter(valuesProvider = HolderSessionStatesWithoutTransition::class)
+        state: HolderSessionState,
+    ) = runTest {
+        initialState = state
+        val exception = assertThrows(IllegalStateException::class.java) {
+            session.transitionTo(state)
         }
+
+        assertThat(
+            exception.message,
+            equalTo(
+                "Cannot find applicable transitions for current state: " +
+                        state::class.java.simpleName
+            )
+        )
+
+        assertThat(
+            session,
+            hasCurrentState(state)
+        )
+    }
 
     @Test
     @TestParameters(valuesProvider = ValidHolderSessionStateTransitions::class)
     fun `Can successfully transition to a valid state`(
         initial: HolderSessionState,
-        transition: HolderSessionState
+        transition: HolderSessionState,
     ) = runTest {
         initialState = initial
         session.transitionTo(transition)

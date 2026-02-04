@@ -2,19 +2,17 @@ package uk.gov.onelogin.sharing.orchestration.session.holder
 
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
-import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
-import uk.gov.onelogin.sharing.orchestration.session.SessionError
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Cancelled
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Failed
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Success
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Connecting
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Initialising
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.NotStarted
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.PresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.ReadyToPresent
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.RequestReceived
+import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionStateStubs.preflightEmptyPermissions
+import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionStateStubs.successStub
+import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionStateStubs.userCancellation
+import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionStateStubs.userJourneyFailure
 
 class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
@@ -27,13 +25,6 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         }
 
     companion object {
-        private val userCancellation = Cancelled
-        private val dummySessionError = SessionError(
-            "This isn't used in HolderSessionState tests",
-            Exception()
-        )
-        private val userJourneyFailure = Failed(dummySessionError)
-        private val preflightEmptyPermissions = Preflight(setOf())
         private val preflightTransitions = listOf(
             "User cancels during permission request" to userCancellation,
             "User permanently denies requested permissions" to userJourneyFailure,
@@ -91,7 +82,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val processingResponseTransitions = listOf(
             "User cancels the journey whilst validating the response" to userCancellation,
             "Failure occurs when validating the Verifier response" to userJourneyFailure,
-            "User completes the Holder User journey" to Success(DeviceResponse)
+            "User completes the Holder User journey" to successStub
         ).map { (testName, transition) ->
             Triple(
                 testName,
