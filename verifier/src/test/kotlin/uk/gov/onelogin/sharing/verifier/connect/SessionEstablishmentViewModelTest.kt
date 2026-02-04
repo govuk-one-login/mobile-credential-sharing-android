@@ -95,7 +95,7 @@ class SessionEstablishmentViewModelTest {
         verifierSessionFactory = { fakeVerifierSession },
         savedStateHandle = savedStateHandle,
         sessionSecurity = sessionSecurity,
-        coseKeyConverter = DefaultCoseKeyToString(),
+        coseKeyConverter = DefaultCoseKeyToString()
     )
 
     @Test
@@ -383,7 +383,7 @@ class SessionEstablishmentViewModelTest {
     fun `Creates KeyPair instance when bluetooth connection starts`() = runTest {
         val generator = MemorisedKeyGenerator(
             FakeKeyPairGenerator(validKeyPair),
-            logger,
+            logger
         )
         val publicKeyGenerator = EcPublicCoseKeyGenerator(generator, logger)
         val expectedCoseKey = publicKeyGenerator.generateSessionPublicKey()

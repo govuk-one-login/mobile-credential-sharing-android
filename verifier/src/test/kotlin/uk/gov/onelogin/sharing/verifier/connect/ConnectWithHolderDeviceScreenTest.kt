@@ -42,7 +42,7 @@ class ConnectWithHolderDeviceScreenTest {
     private lateinit var testViewModel: SessionEstablishmentViewModel
 
     fun createViewModel(
-        bluetoothAdapterProvider: BluetoothAdapterProvider = enabledBluetoothAdapter,
+        bluetoothAdapterProvider: BluetoothAdapterProvider = enabledBluetoothAdapter
     ): SessionEstablishmentViewModel = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         scanner = fakeBluetoothScanner,
@@ -51,7 +51,7 @@ class ConnectWithHolderDeviceScreenTest {
         verifierSessionFactory = { mdocVerifierSession },
         savedStateHandle = SavedStateHandle(),
         sessionSecurity = sessionSecurity,
-        coseKeyConverter = DefaultCoseKeyToString(),
+        coseKeyConverter = DefaultCoseKeyToString()
     )
 
     @Before
