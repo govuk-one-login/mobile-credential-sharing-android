@@ -141,11 +141,11 @@ class SessionEstablishmentViewModel(
                         generateSessionPublicKey()
                             .also {
                                 val paddedPublicKey = coseKeyConverter.convert(it)
-                            logger.debug(
-                                logTag,
-                                "Encoded public CoseKey into EReaderKeyBytes: $paddedPublicKey"
-                            )
-                        }
+                                logger.debug(
+                                    logTag,
+                                    "Encoded public CoseKey into EReaderKeyBytes: $paddedPublicKey"
+                                )
+                            }
                     }
 
                     else -> Unit
