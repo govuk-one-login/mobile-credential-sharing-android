@@ -17,7 +17,7 @@ import uk.gov.logging.testdouble.SystemLogger
  * @param applicationContext The [Context] to be used in the graph. Defaults to the application
  * context provided by [ApplicationProvider].
  * @param logger The [Logger] implementation to be used. Defaults to [SystemLogger].
- * @return A configured [CredentialSharingAppGraph] ready for testing.
+ * @return A configured [CredentialSharingAppGraph]
  */
 fun createTestGraph(
     applicationContext: Context = ApplicationProvider.getApplicationContext(),

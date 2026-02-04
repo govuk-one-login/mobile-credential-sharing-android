@@ -76,6 +76,7 @@ class HolderWelcomeViewModel(
                 _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
             }
 
+            // this doesn't do anything at the moment
             orchestrator.start()
         }
 
