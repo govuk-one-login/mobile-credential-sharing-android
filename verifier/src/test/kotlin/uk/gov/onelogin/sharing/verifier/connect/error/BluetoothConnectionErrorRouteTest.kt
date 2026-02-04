@@ -1,13 +1,11 @@
 package uk.gov.onelogin.sharing.verifier.connect.error
 
-import CredentialSharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -19,6 +17,7 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.navigateToBluetoothConnectionErrorRoute
+import uk.gov.onelogin.sharing.verifier.di.createTestGraph
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @RunWith(AndroidJUnit4::class)
@@ -31,10 +30,6 @@ class BluetoothConnectionErrorRouteTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun verifyControllerNavigationExtensionFunction() = runTest {
-        val appGraph = CredentialSharingAppGraphStub(
-            applicationContext = ApplicationProvider.getApplicationContext()
-        )
-
         composeTestRule.run {
             setContent {
                 val context = LocalContext.current
@@ -47,7 +42,7 @@ class BluetoothConnectionErrorRouteTest {
                         validBarcodeDataResult.data
                     )
                 ) {
-                    configureConnectWithHolderDeviceRoute(appGraph = appGraph)
+                    configureConnectWithHolderDeviceRoute(appGraph = createTestGraph())
                     configureBluetoothConnectionErrorRoute(controller = controller)
                 }
             }

@@ -30,73 +30,73 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val userCancellation = Cancelled
         private val dummySessionError = SessionError(
             "This isn't used in HolderSessionState tests",
-            Exception(),
+            Exception()
         )
         private val userJourneyFailure = Failed(dummySessionError)
         private val preflightEmptyPermissions = Preflight(setOf())
         private val preflightTransitions = listOf(
             "User cancels during permission request" to userCancellation,
             "User permanently denies requested permissions" to userJourneyFailure,
-            "User allows all requested permissions" to ReadyToPresent,
+            "User allows all requested permissions" to ReadyToPresent
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 preflightEmptyPermissions,
-                transition,
+                transition
             )
         }
         private val readyToPresentTransitions = listOf(
             "User cancels whilst generating QR code is shown" to userCancellation,
             "QR generation fails" to userJourneyFailure,
-            "Generated QR code gets shown to the User" to PresentingEngagement,
+            "Generated QR code gets shown to the User" to PresentingEngagement
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 ReadyToPresent,
-                transition,
+                transition
             )
         }
         private val presentingEngagementTransitions = listOf(
             "User cancels from the QR code screen" to userCancellation,
-            "QR code handshake completes" to Connecting,
+            "QR code handshake completes" to Connecting
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 PresentingEngagement,
-                transition,
+                transition
             )
         }
         private val connectingTransitions = listOf(
             "User cancels whilst connecting with Verifier device" to userCancellation,
             "Connection with verifier device cannot be established" to userJourneyFailure,
-            "Receives Verifier device's data transfer request" to RequestReceived,
+            "Receives Verifier device's data transfer request" to RequestReceived
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 Connecting,
-                transition,
+                transition
             )
         }
         private val requestReceivedTransitions = listOf(
             "User cancels the data transfer request" to userCancellation,
             "Data transfer disconnects before completion" to userJourneyFailure,
-            "Holder device begins processing the response" to ProcessingResponse,
+            "Holder device begins processing the response" to ProcessingResponse
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 RequestReceived,
-                transition,
+                transition
             )
         }
         private val processingResponseTransitions = listOf(
             "User cancels the journey whilst validating the response" to userCancellation,
             "Failure occurs when validating the Verifier response" to userJourneyFailure,
-            "User completes the Holder User journey" to Success(DeviceResponse),
+            "User completes the Holder User journey" to Success(DeviceResponse)
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 ProcessingResponse,
-                transition,
+                transition
             )
         }
 
@@ -104,18 +104,18 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             Triple(
                 "Holder session begins initialising",
                 NotStarted,
-                Initialising,
+                Initialising
             ),
             Triple(
                 "Holder session requests permissions",
                 Initialising,
-                preflightEmptyPermissions,
-            ),
+                preflightEmptyPermissions
+            )
         ) + preflightTransitions +
-                readyToPresentTransitions +
-                presentingEngagementTransitions +
-                connectingTransitions +
-                requestReceivedTransitions +
-                processingResponseTransitions
+            readyToPresentTransitions +
+            presentingEngagementTransitions +
+            connectingTransitions +
+            requestReceivedTransitions +
+            processingResponseTransitions
     }
 }

@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
@@ -44,6 +45,7 @@ class HolderWelcomeViewModel(
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val resettable: Set<Resettable>,
+    private val orchestrator: Orchestrator,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
@@ -73,6 +75,9 @@ class HolderWelcomeViewModel(
                 )
                 _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
             }
+
+            // this doesn't do anything at the moment
+            orchestrator.start()
         }
 
         viewModelScope.launch {

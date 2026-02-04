@@ -40,23 +40,22 @@ class ValidHolderTransitionsTest {
     @Test
     fun `Certain states can transition`(
         @TestParameter(valuesProvider = TransitionableHolderSessionStates::class)
-        state: KClass<out HolderSessionState>,
+        state: KClass<out HolderSessionState>
     ) = runTest {
         assertThat(
             validHolderTransitions[state],
-            notNullValue(),
+            notNullValue()
         )
     }
 
     @Test
     fun `Completed states cannot transition`(
         @TestParameter(valuesProvider = HolderSessionStatesWithoutTransition::class)
-        state: KClass<out HolderSessionState>,
+        state: KClass<out HolderSessionState>
     ) = runTest {
         assertThat(
             validHolderTransitions[state],
-            nullValue(),
+            nullValue()
         )
     }
 }
-

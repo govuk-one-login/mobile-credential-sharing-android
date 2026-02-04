@@ -1,13 +1,11 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
-import CredentialSharingAppGraphStub
 import android.Manifest
 import android.content.Context
 import android.content.res.Resources
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -21,16 +19,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
+import uk.gov.onelogin.sharing.verifier.di.createTestGraph
 
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalPermissionsApi::class)
 class VerifierScannerDeniedTest {
-
     private val resources: Resources =
         ApplicationProvider.getApplicationContext<Context>().resources
-    private val appGraph = CredentialSharingAppGraphStub(
-        applicationContext = ApplicationProvider.getApplicationContext()
-    )
+    private val appGraph = createTestGraph()
 
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant()
@@ -38,7 +34,8 @@ class VerifierScannerDeniedTest {
     @get:Rule
     val composeTestRule = VerifierScannerRule(
         resources = resources,
-        composeTestRule = createComposeRule()
+        composeTestRule = createComposeRule(),
+        appGraph = appGraph
     )
 
     @Test

@@ -1,7 +1,6 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library,
-        libs.plugins.metro.di
+        libs.plugins.templates.android.library
     ).forEach { alias(it) }
 }
 
@@ -61,10 +60,11 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
+        projects.sdk,
         testFixtures(projects.bluetooth),
         testFixtures(projects.security),
         testFixtures(projects.core),
-        testFixtures(projects.sdk)
+        testFixtures(projects.orchestration)
     ).forEach(::testImplementation)
 
     listOf(
@@ -72,6 +72,7 @@ dependencies {
         projects.security,
         testFixtures(projects.bluetooth),
         testFixtures(projects.security),
-        testFixtures(projects.core)
+        testFixtures(projects.core),
+        testFixtures(projects.orchestration)
     ).forEach(::testFixturesImplementation)
 }

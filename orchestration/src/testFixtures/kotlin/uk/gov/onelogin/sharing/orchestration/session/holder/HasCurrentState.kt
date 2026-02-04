@@ -7,9 +7,8 @@ import org.hamcrest.TypeSafeMatcher
 /**
  * Custom [HolderSession] hamcrest [Matcher] that asserts against [HolderSession.currentState].
  */
-class HasCurrentState(
-    private val matcher: Matcher<HolderSessionState>
-) : TypeSafeMatcher<HolderSession>() {
+class HasCurrentState(private val matcher: Matcher<HolderSessionState>) :
+    TypeSafeMatcher<HolderSession>() {
 
     override fun describeTo(description: Description?) {
         matcher.describeTo(description)

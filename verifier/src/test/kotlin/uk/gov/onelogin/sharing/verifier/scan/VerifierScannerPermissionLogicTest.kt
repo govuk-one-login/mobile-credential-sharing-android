@@ -17,6 +17,7 @@ import org.junit.runner.RunWith
 import uk.gov.android.ui.componentsv2.permission.PermissionScreen
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.verifier.di.createTestGraph
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -26,6 +27,7 @@ class VerifierScannerPermissionLogicTest {
 
     @get:Rule
     val composeTestRule = VerifierScannerRule(
+        appGraph = createTestGraph(),
         resources = resources,
         composeTestRule = createComposeRule()
     )

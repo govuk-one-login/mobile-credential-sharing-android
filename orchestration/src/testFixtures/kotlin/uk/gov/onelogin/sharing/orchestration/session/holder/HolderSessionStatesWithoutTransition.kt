@@ -9,7 +9,7 @@ class HolderSessionStatesWithoutTransition : TestParameterValuesProvider() {
         val inputs = listOf(
             HolderSessionState.Complete.Cancelled::class,
             HolderSessionState.Complete.Failed::class,
-            HolderSessionState.Complete.Success::class,
+            HolderSessionState.Complete.Success::class
         )
     }
 }

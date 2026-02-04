@@ -32,12 +32,12 @@ sealed class HolderSessionState {
      * The User's completed the [Preflight] validations, so the device is ready to
      * present encoded engagement data for the verifying device.
      */
-    data object ReadyToPresent: HolderSessionState()
+    data object ReadyToPresent : HolderSessionState()
 
     /**
      * The holder device is now showing encoded engagement data.
      */
-    data object PresentingEngagement: HolderSessionState()
+    data object PresentingEngagement : HolderSessionState()
 
     /**
      * State for when the Android-powered device is connecting with another device.
@@ -50,20 +50,18 @@ sealed class HolderSessionState {
      * State for when a successful connection occurs, allowing the User to consent to data being
      * shared with the Verifying device.
      */
-    data object RequestReceived: HolderSessionState()
+    data object RequestReceived : HolderSessionState()
 
     /**
      * State for when the consenting User is generating the proof before completing the
      * Holder User journey.
      */
-    data object ProcessingResponse: HolderSessionState()
+    data object ProcessingResponse : HolderSessionState()
 
     /**
      * State for when a User has finished a digital credential verification journey.
      */
-    sealed class Complete(
-        val reason: String
-    ) : HolderSessionState() {
+    sealed class Complete(val reason: String) : HolderSessionState() {
         /**
          * The User has completed a digital credential verification journey without un-resolvable
          * errors occurring.

@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.update
 class HolderSessionImpl(
     private val internalState: MutableStateFlow<HolderSessionState> =
         MutableStateFlow(HolderSessionState.NotStarted),
-    private val transitionMap: HolderSessionStateTransitions = validHolderTransitions,
+    private val transitionMap: HolderSessionStateTransitions = validHolderTransitions
 ) : HolderSession {
 
     override val currentState: StateFlow<HolderSessionState> = internalState
@@ -26,12 +26,12 @@ class HolderSessionImpl(
     override fun transitionTo(state: HolderSessionState) {
         val availableTransitions = checkNotNull(transitionMap[currentState.value::class]) {
             "Cannot find applicable transitions for current state: " +
-                    currentState.value::class.java.simpleName
+                currentState.value::class.java.simpleName
         }
 
         check(state::class in availableTransitions) {
             "Current state (${currentState.value::class.java.simpleName}) cannot transition to: " +
-                    state::class.java.simpleName
+                state::class.java.simpleName
         }
 
         internalState.update { state }

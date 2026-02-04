@@ -1,41 +1,57 @@
 plugins {
     listOf(
-        libs.plugins.templates.kotlin.library
+        libs.plugins.templates.android.library
     ).forEach { alias(it) }
+}
+
+val androidCompileSdk: Int by rootProject.extra
+val androidMinSdk: Int by rootProject.extra
+val namespacePrefix: String by rootProject.extra
+
+android {
+    namespace = "$namespacePrefix.orchestration"
+    compileSdk = androidCompileSdk
+
+    defaultConfig {
+        minSdk = androidMinSdk
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
 }
 
 dependencies {
     listOf(
-        libs.kotlinx.coroutines.core,
+        libs.kotlinx.coroutines.core
     ).forEach(::api)
 
     listOf(
+        projects.core
+    ).forEach(::implementation)
+
+    listOf(
         libs.com.google.test.parameter.injector,
-        libs.junit,
+        libs.junit
     ).forEach(::testFixturesApi)
 
     listOf(
         libs.app.cash.turbine,
         libs.com.google.test.parameter.injector,
         libs.junit,
-        libs.kotlinx.coroutines.test,
+        libs.kotlinx.coroutines.test
     ).forEach(::testImplementation)
 }
 
-jacoco {
-    toolVersion = libs.versions.jacoco.get()
-}
-
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-}
-tasks.jacocoTestReport {
-    dependsOn(tasks.test) // tests are required to run before generating the report
-    reports {
-        html.required = true
-        xml.required = true
-    }
-}
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set("GOV.UK One Login Wallet Sharing: Digital Credential Orchestrator")

@@ -12,7 +12,10 @@ import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 @RunWith(AndroidJUnit4::class)
 class AppNavHostTest {
     @get:Rule
-    val navHostRule = AppNavHostRule(createComposeRule())
+    val navHostRule = AppNavHostRule(
+        composeTestRule = createComposeRule(),
+        appGraph = createTestGraph()
+    )
 
     @Test
     fun holderStartDestination() = runTest {

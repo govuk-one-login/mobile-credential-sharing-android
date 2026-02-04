@@ -15,7 +15,7 @@ class TransitionableHolderSessionStates : TestParameterValuesProvider() {
             HolderSessionState.PresentingEngagement::class,
             HolderSessionState.Connecting::class,
             HolderSessionState.RequestReceived::class,
-            HolderSessionState.ProcessingResponse::class,
+            HolderSessionState.ProcessingResponse::class
         )
     }
 }

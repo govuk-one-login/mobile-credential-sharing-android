@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.R
  * applicable [HolderSessionState].
  */
 typealias HolderSessionStateTransitions =
-        Map<KClass<out HolderSessionState>, Set<KClass<out HolderSessionState>>>
+    Map<KClass<out HolderSessionState>, Set<KClass<out HolderSessionState>>>
 
 /**
  * Convenience [Set] for containing both User journey completion error types
@@ -27,7 +27,7 @@ typealias HolderSessionStateTransitions =
  */
 private val fullErrorHandling: Set<KClass<out HolderSessionState>> = setOf(
     Cancelled::class,
-    Failed::class,
+    Failed::class
 )
 
 /**
@@ -38,28 +38,28 @@ private val fullErrorHandling: Set<KClass<out HolderSessionState>> = setOf(
  */
 val validHolderTransitions: HolderSessionStateTransitions = mapOf(
     NotStarted::class to setOf(
-        Initialising::class,
+        Initialising::class
     ),
     Initialising::class to setOf(
-        Preflight::class,
+        Preflight::class
     ),
     Preflight::class to setOf(
-        ReadyToPresent::class,
+        ReadyToPresent::class
     ) + fullErrorHandling,
     ReadyToPresent::class to setOf(
-        PresentingEngagement::class,
+        PresentingEngagement::class
     ) + fullErrorHandling,
     PresentingEngagement::class to setOf(
         Connecting::class,
-        Cancelled::class,
+        Cancelled::class
     ),
     Connecting::class to setOf(
-        RequestReceived::class,
+        RequestReceived::class
     ) + fullErrorHandling,
     RequestReceived::class to setOf(
-        ProcessingResponse::class,
+        ProcessingResponse::class
     ) + fullErrorHandling,
     ProcessingResponse::class to setOf(
-        Success::class,
-    ) + fullErrorHandling,
+        Success::class
+    ) + fullErrorHandling
 )

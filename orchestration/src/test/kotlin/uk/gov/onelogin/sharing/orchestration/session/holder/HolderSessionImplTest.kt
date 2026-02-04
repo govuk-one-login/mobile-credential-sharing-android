@@ -25,7 +25,7 @@ class HolderSessionImplTest {
     private val session by lazy {
         HolderSessionImpl(
             internalState = stateFlow,
-            transitionMap = validTransitions,
+            transitionMap = validTransitions
         )
     }
 
@@ -40,7 +40,7 @@ class HolderSessionImplTest {
             exception.message,
             equalTo(
                 "Current state (${session.currentState.value::class.java.simpleName}) " +
-                        "cannot transition to: ${transition::class.java.simpleName}"
+                    "cannot transition to: ${transition::class.java.simpleName}"
             )
         )
 
@@ -62,7 +62,7 @@ class HolderSessionImplTest {
                 exception.message,
                 equalTo(
                     "Cannot find applicable transitions for current state: NotStarted"
-                ),
+                )
             )
 
             assertThat(
@@ -75,7 +75,7 @@ class HolderSessionImplTest {
     @TestParameters(valuesProvider = ValidHolderSessionStateTransitions::class)
     fun `Can successfully transition to a valid state`(
         initial: HolderSessionState,
-        transition: HolderSessionState,
+        transition: HolderSessionState
     ) = runTest {
         initialState = initial
         session.transitionTo(transition)

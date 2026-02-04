@@ -38,6 +38,7 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
@@ -81,7 +82,8 @@ class HolderWelcomeScreenTest {
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),
-        resettable = emptySet()
+        resettable = emptySet(),
+        orchestrator = FakeOrchestrator()
     )
 
     @Test
