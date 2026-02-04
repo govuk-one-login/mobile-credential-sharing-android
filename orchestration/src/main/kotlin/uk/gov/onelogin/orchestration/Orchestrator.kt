@@ -5,6 +5,6 @@ interface Orchestrator {
     fun start()
 
     fun cancel()
-}
 
-interface HolderOrchestrator : Orchestrator
+    interface Holder : Orchestrator
+}

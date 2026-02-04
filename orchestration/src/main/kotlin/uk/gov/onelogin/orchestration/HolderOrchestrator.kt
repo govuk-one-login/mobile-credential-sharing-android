@@ -5,14 +5,13 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator>())
 @Inject
-class HolderOrchestratorImpl(logger: Logger) : HolderOrchestrator {
+class HolderOrchestrator(private val logger: Logger) : Orchestrator.Holder {
 
-    private val session: Session = HolderSession(logger)
+    override fun start() = logger.debug(logTag, "start orchestration")
 
-    override fun start() = session.transitionToState("started")
-
-    override fun cancel() = session.transitionToState("cancel")
+    override fun cancel() = logger.debug(logTag, "cancel orchestration")
 }

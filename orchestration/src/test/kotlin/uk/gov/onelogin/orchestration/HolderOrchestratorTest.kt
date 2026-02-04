@@ -4,7 +4,7 @@ import kotlin.test.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
-class HolderOrchestratorImplTest {
+class HolderOrchestratorTest {
 
     @Test
     fun `test start called`() {
