@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.security.secureArea.session
 
+import javax.crypto.AEADBadTagException
+import kotlin.test.assertContentEquals
+import kotlin.test.assertFailsWith
 import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
@@ -7,9 +10,6 @@ import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSession
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateSessionKey
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionStubs.VALID_DECRYPTED_DATA_BYTES
-import javax.crypto.AEADBadTagException
-import kotlin.test.assertContentEquals
-import kotlin.test.assertFailsWith
 
 class AesGcmEncryptionTest {
 
@@ -38,6 +38,33 @@ class AesGcmEncryptionTest {
         )
 
         assert("successful decryption" in logger)
+    }
+
+    @Test
+    fun `when correct key and role supplied, and decryption ran again, bytes do not match`() {
+        val data = expectedSessionEstablishmentDto.data.copyOf()
+        val readerSk = generateSessionKey(DeviceRole.VERIFIER)
+
+        assertContentEquals(
+            VALID_DECRYPTED_DATA_BYTES,
+            aesEncryption.decryptPayload(
+                readerSk,
+                data,
+                DeviceRole.VERIFIER
+            )
+        )
+
+        assert("successful decryption" in logger)
+
+        assertFailsWith(AEADBadTagException::class) {
+            aesEncryption.decryptPayload(
+                readerSk,
+                data,
+                DeviceRole.VERIFIER
+            ).contentEquals(
+                VALID_DECRYPTED_DATA_BYTES
+            )
+        }
     }
 
     @Test
