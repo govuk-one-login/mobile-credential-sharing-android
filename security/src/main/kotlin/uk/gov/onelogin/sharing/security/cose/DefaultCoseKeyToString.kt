@@ -13,8 +13,9 @@ class DefaultCoseKeyToString : CoseKeyToString {
     /**
      * @return A hexadecimal string. This is the [EmbeddedCbor] padding of the provided [CoseKey].
      */
-    override fun convert(key: CoseKey): String = key.encodeCbor()
-        .let(::EmbeddedCbor)
-        .encodeCbor()
-        .toHexString()
+    override fun convert(key: CoseKey): String =
+        key.encodeCbor()
+            .let(::EmbeddedCbor)
+            .encodeCbor()
+            .toHexString()
 }
