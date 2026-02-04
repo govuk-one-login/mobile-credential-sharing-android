@@ -11,6 +11,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProv
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBluetoothAdvertiserProvider
+import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBleProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
@@ -24,7 +25,10 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerMa
  * @param logger An instance of [Logger] for logging events.
  */
 @ContributesBinding(ViewModelScope::class)
-class AndroidBluetoothPeripheralFactory(private val context: Context, private val logger: Logger) :
+class AndroidBluetoothPeripheralFactory(
+    private val context: Context, private val logger: Logger,
+    private val gattWriter: AndroidGattWriter
+) :
     BluetoothPeripheralFactory {
     override fun create(): BluetoothPeripheralComponents {
         val adapterProvider = AndroidBluetoothAdapterProvider(context)
@@ -42,7 +46,8 @@ class AndroidBluetoothPeripheralFactory(private val context: Context, private va
             context = context,
             bluetoothManager = context.getSystemService(BluetoothManager::class.java),
             permissionsChecker = BluetoothPermissionChecker(context),
-            logger = logger
+            logger = logger,
+            gattWriter = gattWriter
         )
 
         val bluetoothStateMonitor = AndroidBluetoothStateMonitor(

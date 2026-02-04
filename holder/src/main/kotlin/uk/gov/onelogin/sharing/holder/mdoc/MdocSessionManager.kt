@@ -36,5 +36,5 @@ interface MdocSessionManager {
      */
     suspend fun stop()
 
-    fun sendSessionEnd()
+    fun notifySessionEnd(serviceUuid: UUID)
 }

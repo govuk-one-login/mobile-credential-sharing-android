@@ -17,6 +17,10 @@ class FakeGattServerManager : GattServerManager {
         openCalls++
     }
 
+    override fun endServerSession(serviceUuid: UUID) {
+        TODO("Not yet implemented")
+    }
+
     override fun close() {
         closeCalls++
     }

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.content.Context
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,6 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
@@ -34,7 +36,8 @@ class AndroidGattServerManager(
         )
     },
     private val permissionsChecker: PermissionChecker,
-    private val logger: Logger
+    private val logger: Logger,
+    private val gattWriter: AndroidGattWriter
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
@@ -155,12 +158,23 @@ class AndroidGattServerManager(
         _events.tryEmit(GattServerEvent.SessionEnd)
     }
 
-    override fun endServerSession() {
+    override fun endServerSession(serviceUuid: UUID) {
         val server = gattServer ?: return
-        val gattService = gattServiceFactory(serviceUuid)
-        val stateCharacteristic = service?.getCharacteristic(SERVER_2_CLIENT_UUID)
+        val gattService = server.getService(serviceUuid)
+        val characteristic = gattService.getCharacteristic(SERVER_2_CLIENT_UUID)
+        val connectedDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
 
-        stateCharacteristic.value = endCommand
-        server.notifyCharacteristicChanged(device, stateCharacteristic, false)
+        val endValue = byteArrayOf(MdocState.END.code)
+
+        for (device in connectedDevices) {
+            gattWriter.notifyClient(
+                server = server,
+                device = device,
+                characteristic = characteristic,
+                value = endValue
+            )
+        }
+
+        logger.debug(logTag, "endServerSession function called with END code")
     }
 }

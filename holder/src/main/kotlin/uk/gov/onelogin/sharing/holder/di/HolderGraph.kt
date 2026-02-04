@@ -7,6 +7,8 @@ import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.logging.api.Logger
 import uk.gov.logging.impl.AndroidLogger
+import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattWriter
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
 import uk.gov.onelogin.sharing.core.logger.SystemCrashLogger
 
 @DependencyGraph(ViewModelScope::class)
@@ -17,6 +19,9 @@ interface HolderGraph : ViewModelGraph {
     fun provideLogger(): Logger = AndroidLogger(
         SystemCrashLogger()
     )
+
+    @Provides
+    fun provideGattWriter(): GattWriter = AndroidGattWriter()
 
     @DependencyGraph.Factory
     fun interface Factory {

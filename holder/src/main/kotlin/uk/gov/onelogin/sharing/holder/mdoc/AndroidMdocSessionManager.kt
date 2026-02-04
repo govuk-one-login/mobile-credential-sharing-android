@@ -86,8 +86,8 @@ class AndroidMdocSessionManager(
         bluetoothStateMonitor.stop()
     }
 
-    override fun endSession() {
-
+    override fun notifySessionEnd(serviceUuid: UUID) {
+        gattServerManager.endServerSession(serviceUuid)
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {
