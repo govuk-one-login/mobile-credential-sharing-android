@@ -6,7 +6,17 @@ plugins {
 
 dependencies {
     listOf(
-        libs.junit
+        libs.kotlinx.coroutines.core,
+    ).forEach(::api)
+
+    listOf(
+        libs.junit,
+    ).forEach(::testFixturesApi)
+
+    listOf(
+        libs.junit,
+        libs.app.cash.turbine,
+        libs.kotlinx.coroutines.test,
     ).forEach(::testImplementation)
 }
 
