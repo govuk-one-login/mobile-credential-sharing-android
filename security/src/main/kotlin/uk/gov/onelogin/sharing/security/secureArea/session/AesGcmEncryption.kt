@@ -64,9 +64,4 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
             throw e
         }
     }
-
-    private companion object {
-        const val TAG_MISMATCH_MESSAGE = "Tag mismatch"
-        const val INPUT_SHORT_MESSAGE = "Input data too short"
-    }
 }
