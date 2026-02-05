@@ -15,11 +15,6 @@ sealed class HolderSessionState {
     data object NotStarted : HolderSessionState()
 
     /**
-     * State for when a User has just begun a digital credential verification journey.
-     */
-    data object Initialising : HolderSessionState()
-
-    /**
      * State for when a User is ensuring all necessary steps to perform a digital credential
      * verification journey are complete.
      *
@@ -44,7 +39,7 @@ sealed class HolderSessionState {
      *
      * The digital credential transfers between devices during this state.
      */
-    object Connecting : HolderSessionState()
+    data object Connecting : HolderSessionState()
 
     /**
      * State for when a successful connection occurs, allowing the User to consent to data being

@@ -5,7 +5,6 @@ import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.C
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Success
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Connecting
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Initialising
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.PresentingEngagement
@@ -38,9 +37,6 @@ private val fullErrorHandling: Set<KClass<out HolderSessionState>> = setOf(
  */
 val validHolderTransitions: HolderSessionStateTransitions = mapOf(
     NotStarted::class to setOf(
-        Initialising::class
-    ),
-    Initialising::class to setOf(
         Preflight::class
     ),
     Preflight::class to setOf(

@@ -51,12 +51,13 @@ class HolderSessionImpl(
         }
 
         internalState.update { previousState ->
-            logger.debug(
-                logTag,
-                "Transitioned from '${previousState::class.java.simpleName}' to " +
-                    "'${state::class.java.simpleName}'"
-            )
-            state
+            state.also {
+                logger.debug(
+                    logTag,
+                    "Transitioned from '${previousState::class.java.simpleName}' to " +
+                        "'${state::class.java.simpleName}'"
+                )
+            }
         }
     }
 }

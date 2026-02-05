@@ -1,8 +1,10 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder
+package uk.gov.onelogin.sharing.orchestration.session.holder.matchers
 
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
+import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSession
+import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 
 /**
  * Custom [HolderSession] hamcrest [Matcher] that asserts against [HolderSession.currentState].

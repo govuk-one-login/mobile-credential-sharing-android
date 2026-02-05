@@ -11,7 +11,10 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionMatchers.hasCurrentState
+import uk.gov.onelogin.sharing.orchestration.session.holder.data.HolderSessionStatesWithoutTransition
+import uk.gov.onelogin.sharing.orchestration.session.holder.data.InvalidHolderSessionStateTransitions
+import uk.gov.onelogin.sharing.orchestration.session.holder.data.ValidHolderSessionStateTransitions
+import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionMatchers.hasCurrentState
 
 @RunWith(TestParameterInjector::class)
 class HolderSessionImplTest {
