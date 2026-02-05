@@ -19,7 +19,7 @@ class ValidHolderTransitionsTest {
 
         assertThat(
             "The total number of transitions don't match! " +
-                    "Is there a need to update the transition state table?",
+                "Is there a need to update the transition state table?",
             transitionTotal,
             equalTo(ValidHolderSessionStateTransitions.inputs.size)
         )
@@ -31,7 +31,7 @@ class ValidHolderTransitionsTest {
 
         assertThat(
             "The number of session states that can transition doesn't match! " +
-                    "Is there a need to update the transitionable state table?",
+                "Is there a need to update the transitionable state table?",
             transitionableStateCount,
             equalTo(TransitionableHolderSessionStates.inputs.size)
         )
@@ -40,11 +40,11 @@ class ValidHolderTransitionsTest {
     @Test
     fun `Certain states can transition`(
         @TestParameter(valuesProvider = TransitionableHolderSessionStates::class)
-        state: KClass<out HolderSessionState>,
+        state: KClass<out HolderSessionState>
     ) = runTest {
         assertThat(
             "There should have been available transitions for the provided state: " +
-                    state.simpleName,
+                state.simpleName,
             validHolderTransitions[state],
             notNullValue()
         )
@@ -53,11 +53,11 @@ class ValidHolderTransitionsTest {
     @Test
     fun `Completed states cannot transition`(
         @TestParameter(valuesProvider = HolderSessionStatesWithoutTransition::class)
-        state: HolderSessionState,
+        state: HolderSessionState
     ) = runTest {
         assertThat(
             "There should be no available transitions for the provided state: " +
-                    state::class.java.simpleName,
+                state::class.java.simpleName,
             validHolderTransitions[state::class],
             nullValue()
         )

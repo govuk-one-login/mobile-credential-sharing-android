@@ -12,7 +12,7 @@ class HolderSessionStatesWithoutTransition : TestParameterValuesProvider() {
         val inputs = listOf(
             userCancellation,
             userJourneyFailure,
-            successStub,
+            successStub
         )
     }
 }

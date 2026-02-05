@@ -39,7 +39,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             ProcessingResponse,
             successStub,
             userCancellation,
-            userJourneyFailure,
+            userJourneyFailure
         ).map {
             NotStarted to it
         }
@@ -53,7 +53,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             ProcessingResponse,
             successStub,
             userCancellation,
-            userJourneyFailure,
+            userJourneyFailure
         ).map {
             Initialising to it
         }
@@ -65,7 +65,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             Connecting,
             RequestReceived,
             ProcessingResponse,
-            successStub,
+            successStub
         ).map {
             preflightEmptyPermissions to it
         }
@@ -77,7 +77,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             Connecting,
             RequestReceived,
             ProcessingResponse,
-            successStub,
+            successStub
         ).map {
             ReadyToPresent to it
         }
@@ -90,7 +90,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             RequestReceived,
             ProcessingResponse,
             successStub,
-            userJourneyFailure,
+            userJourneyFailure
         ).map {
             PresentingEngagement to it
         }
@@ -102,7 +102,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             PresentingEngagement,
             Connecting,
             ProcessingResponse,
-            successStub,
+            successStub
         ).map {
             Connecting to it
         }
@@ -114,7 +114,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             PresentingEngagement,
             Connecting,
             RequestReceived,
-            successStub,
+            successStub
         ).map {
             RequestReceived to it
         }
@@ -125,19 +125,19 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             ReadyToPresent,
             PresentingEngagement,
             Connecting,
-            RequestReceived,
+            RequestReceived
         ).map {
             ProcessingResponse to it
         }
 
         val inputs: List<Pair<HolderSessionState, HolderSessionState>> =
             notStartedTransitions +
-                    initialisingTransitions +
-                    preflightTransitions +
-                    readyToPresentTransitions +
-                    presentingEngagementTransitions +
-                    connectingTransitions +
-                    requestReceivedTransitions +
-                    processingResponseTransitions
+                initialisingTransitions +
+                preflightTransitions +
+                readyToPresentTransitions +
+                presentingEngagementTransitions +
+                connectingTransitions +
+                requestReceivedTransitions +
+                processingResponseTransitions
     }
 }
