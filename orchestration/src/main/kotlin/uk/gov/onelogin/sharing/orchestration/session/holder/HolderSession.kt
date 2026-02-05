@@ -1,12 +1,13 @@
 package uk.gov.onelogin.sharing.orchestration.session.holder
 
 import kotlinx.coroutines.flow.StateFlow
+import uk.gov.onelogin.sharing.core.Resettable
 
 /**
  * Abstraction for containing high-level information about the current position in the User journey
  * for sharing digital credentials with verifying devices.
  */
-interface HolderSession {
+interface HolderSession : Resettable {
     /**
      * The current position of the User within the User journey.
      */

@@ -32,10 +32,6 @@ android {
 
 dependencies {
     listOf(
-        libs.kotlinx.coroutines.core
-    ).forEach(::api)
-
-    listOf(
         projects.core
     ).forEach(::api)
 
@@ -43,13 +39,6 @@ dependencies {
         libs.com.google.test.parameter.injector,
         libs.junit
     ).forEach(::testFixturesApi)
-
-    listOf(
-        libs.app.cash.turbine,
-        libs.com.google.test.parameter.injector,
-        libs.junit,
-        libs.kotlinx.coroutines.test
-    ).forEach(::testImplementation)
 }
 
 mavenPublishingConfig {

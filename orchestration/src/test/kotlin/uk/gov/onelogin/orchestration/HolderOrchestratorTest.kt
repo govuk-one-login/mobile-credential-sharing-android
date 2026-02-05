@@ -8,7 +8,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.orchestration.HolderOrchestratorMatchers.hasSession
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.CancellableHolderSessionStates
@@ -26,8 +25,20 @@ class HolderOrchestratorTest {
     private val startOrchestratorErrorLog = "Cannot start orchestration"
     private val startOrchestratorSuccessLog = "start orchestration"
 
+    private var initialState: HolderSessionState = HolderSessionState.NotStarted
+
+    private val session by lazy {
+        HolderSessionImpl(
+            logger = logger,
+            internalState = MutableStateFlow(initialState)
+        )
+    }
+
     private val orchestrator by lazy {
-        HolderOrchestrator(logger = logger)
+        HolderOrchestrator(
+            logger = logger,
+            session = session
+        )
     }
 
     @Test
@@ -38,8 +49,8 @@ class HolderOrchestratorTest {
         assert(startOrchestratorErrorLog !in logger)
 
         assertThat(
-            orchestrator,
-            hasSession(inPreflight())
+            session,
+            inPreflight()
         )
     }
 
@@ -51,8 +62,8 @@ class HolderOrchestratorTest {
 
         assert(startOrchestratorErrorLog in logger)
         assertThat(
-            orchestrator,
-            hasSession(inPreflight())
+            session,
+            inPreflight()
         )
     }
 
@@ -61,19 +72,14 @@ class HolderOrchestratorTest {
         @TestParameter(valuesProvider = UncancellableHolderSessionStates::class)
         state: HolderSessionState
     ) = runTest {
-        orchestrator.update(
-            HolderSessionImpl(
-                logger = logger,
-                internalState = MutableStateFlow(state)
-            )
-        )
+        initialState = state
         orchestrator.cancel()
 
         assert(cancelOrchestratorErrorLog in logger)
         assert(cancelOrchestratorSuccessLog !in logger)
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(state))
+            session,
+            hasCurrentState(state)
         )
     }
 
@@ -82,20 +88,14 @@ class HolderOrchestratorTest {
         @TestParameter(valuesProvider = CancellableHolderSessionStates::class)
         state: HolderSessionState
     ) = runTest {
-        orchestrator.update(
-            HolderSessionImpl(
-                logger = logger,
-                internalState = MutableStateFlow(state)
-            )
-        )
-
+        initialState = state
         orchestrator.cancel()
 
         assert(cancelOrchestratorSuccessLog in logger)
         assert(cancelOrchestratorErrorLog !in logger)
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(isCancelled()))
+            session,
+            hasCurrentState(isCancelled())
         )
     }
 
@@ -107,8 +107,8 @@ class HolderOrchestratorTest {
 
         assert(resetOrchestratorSessionLog in logger)
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(HolderSessionState.NotStarted))
+            session,
+            hasCurrentState(HolderSessionState.NotStarted)
         )
     }
 }
