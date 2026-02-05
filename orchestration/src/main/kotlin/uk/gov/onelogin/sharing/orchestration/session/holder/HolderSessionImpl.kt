@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.orchestration.session.holder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 
 /**
  * Implementation of [HolderSessionState] that utilises a backing [MutableStateFlow] for the
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.update
  * [validHolderTransitions].
  */
 class HolderSessionImpl(
+    private val logger: Logger,
     private val internalState: MutableStateFlow<HolderSessionState> =
         MutableStateFlow(HolderSessionState.NotStarted),
     private val transitionMap: HolderSessionStateTransitions = validHolderTransitions
@@ -24,16 +27,36 @@ class HolderSessionImpl(
     override val currentState: StateFlow<HolderSessionState> = internalState
 
     override fun transitionTo(state: HolderSessionState) {
-        val availableTransitions = checkNotNull(transitionMap[currentState.value::class]) {
-            "Cannot find applicable transitions for current state: " +
-                currentState.value::class.java.simpleName
+        try {
+            val availableTransitions = checkNotNull(
+                transitionMap[currentState.value::class]
+            ) {
+                "Cannot find applicable transitions for current state: " +
+                    currentState.value::class.java.simpleName
+            }
+
+            check(state::class in availableTransitions) {
+                "Current state (${currentState.value::class.java.simpleName}) " +
+                    "cannot transition to: ${state::class.java.simpleName}"
+            }
+        } catch (exception: IllegalStateException) {
+            logger.error(
+                logTag,
+                "Cannot transition from '${currentState.value::class.java.simpleName}' " +
+                    "to '${state::class.java.simpleName}'",
+                exception
+            )
+
+            throw exception
         }
 
-        check(state::class in availableTransitions) {
-            "Current state (${currentState.value::class.java.simpleName}) cannot transition to: " +
-                state::class.java.simpleName
+        internalState.update { previousState ->
+            logger.debug(
+                logTag,
+                "Transitioned from '${previousState::class.java.simpleName}' to " +
+                    "'${state::class.java.simpleName}'"
+            )
+            state
         }
-
-        internalState.update { state }
     }
 }

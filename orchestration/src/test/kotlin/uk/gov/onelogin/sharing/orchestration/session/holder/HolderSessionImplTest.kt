@@ -10,6 +10,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionMatchers.hasCurrentState
 
 @RunWith(TestParameterInjector::class)
@@ -22,8 +23,10 @@ class HolderSessionImplTest {
     }
     private var validTransitions = validHolderTransitions
 
+    private val logger = SystemLogger()
     private val session by lazy {
         HolderSessionImpl(
+            logger = logger,
             internalState = stateFlow,
             transitionMap = validTransitions
         )
@@ -52,6 +55,11 @@ class HolderSessionImplTest {
             session,
             hasCurrentState(initial)
         )
+
+        assert(
+            "Cannot transition from '${initial::class.java.simpleName}' " +
+                "to '${transition::class.java.simpleName}'" in logger
+        )
     }
 
     @Test
@@ -76,6 +84,11 @@ class HolderSessionImplTest {
             session,
             hasCurrentState(state)
         )
+
+        assert(
+            "Cannot transition from '${state::class.java.simpleName}' " +
+                "to '${state::class.java.simpleName}'" in logger
+        )
     }
 
     @Test
@@ -90,6 +103,11 @@ class HolderSessionImplTest {
         assertThat(
             session,
             hasCurrentState(transition)
+        )
+
+        assert(
+            "Transitioned from '${initial::class.java.simpleName}' to " +
+                "'${transition::class.java.simpleName}'" in logger
         )
     }
 }
