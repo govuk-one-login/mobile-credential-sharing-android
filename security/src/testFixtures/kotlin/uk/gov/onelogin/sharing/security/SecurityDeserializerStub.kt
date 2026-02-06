@@ -3,18 +3,21 @@ package uk.gov.onelogin.sharing.security
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.security.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.security.cbor.dto.SecurityDto
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
+import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 
 object SecurityDeserializerStub {
 
     private val keyPair = generateValidPublicKey()
-    private val coseKey = CoseKey.generateCoseKey(keyPair)
+    val validCoseKey = CoseKey.generateCoseKey(keyPair)
+    val embeddedCoseKey = EmbeddedCbor(validCoseKey.encodeCbor())
 
     val expectedCoseKey = CoseKeyDto(
         keyType = 2,
         curve = 1,
-        x = coseKey.x,
-        y = coseKey.y
+        x = validCoseKey.x,
+        y = validCoseKey.y
     )
 
     val expectedSecurityDto = SecurityDto(
