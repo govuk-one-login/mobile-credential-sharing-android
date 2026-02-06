@@ -297,14 +297,19 @@ class HolderWelcomeViewModel(
         }
     }
 
-    fun onBackPressed() {
-        mdocBleSession.notifySessionEnd(_uiState.value.uuid)
-    }
-
     fun onScreenDisposed() {
-        if (_uiState.value.sessionState is MdocSessionState.Connected) {
-            logger.debug(logTag, "Holder stopped advertising during session")
-        }
+        @RequiresImplementation(
+            details = [
+                ImplementationDetail(
+                    ticket = "UI",
+                    description = "We don't have an explicit back button or way to test this atm" +
+                        "so will send end command onNavBack to test closing the connection" +
+                        "for now."
+                )
+            ]
+        )
+        mdocBleSession.notifySessionEnd(_uiState.value.uuid)
+        logger.debug(logTag, "Holder stopped advertising during session")
     }
 
     override fun onCleared() {
