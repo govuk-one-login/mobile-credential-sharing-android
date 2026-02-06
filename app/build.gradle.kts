@@ -17,7 +17,8 @@ plugins {
         libs.plugins.test.coverage,
         libs.plugins.sonar.module.config,
         libs.plugins.kotlin.ksp,
-        libs.plugins.hilt.plugin
+        libs.plugins.hilt.plugin,
+        libs.plugins.metro.di
     ).forEach { alias(it) }
 }
 
@@ -75,7 +76,8 @@ dependencies {
     listOf(
         platform(libs.androidx.compose.bom),
         libs.androidx.navigation.testing,
-        libs.bundles.testing.instrumentation
+        libs.bundles.testing.instrumentation,
+        libs.uk.gov.logging.testdouble
     ).forEach(::androidTestImplementation)
 
     listOf(
@@ -117,7 +119,8 @@ dependencies {
     listOf(
         platform(libs.androidx.compose.bom),
         libs.bundles.testing.unit,
-        testFixtures(projects.holder),
-        testFixtures(projects.sdk)
+        libs.metro.runtime,
+        libs.uk.gov.logging.testdouble,
+        testFixtures(projects.holder)
     ).forEach(::testImplementation)
 }

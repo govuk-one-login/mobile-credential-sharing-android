@@ -32,6 +32,7 @@ dependencies {
         libs.org.jetbrains.kotlin.gradle,
         libs.roborazzi.gradle,
         libs.uk.gov.pipelines.plugins,
+        libs.metro.gradle.plugin,
     ).forEach(::implementation)
 }
 

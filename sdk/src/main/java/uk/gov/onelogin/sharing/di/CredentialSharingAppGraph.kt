@@ -5,6 +5,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.orchestration.Orchestrator
 
 @DependencyGraph(AppScope::class)
 interface CredentialSharingAppGraph {
@@ -20,4 +21,6 @@ interface CredentialSharingAppGraph {
     fun applicationContext(): Context
 
     fun logger(): Logger
+
+    fun orchestrator(): Orchestrator
 }

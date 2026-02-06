@@ -6,4 +6,11 @@ object Constants {
     const val HASH_ALGORITHM_SHA256 = "SHA-256"
     const val MAC_ALGORITHM_SHA256 = "HmacSha256"
     const val HKDF_KEY_SIZE = 32
+
+    const val AES_256_TRANSFORMATION = "AES/GCM/NoPadding"
+
+    const val AES_256_ALGORITHM = "AES"
+
+    const val AES_256_NONCE_LENGTH = 128
+    const val NIST_INITIALISATION_VECTOR_SIZE = 16
 }

@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
-import CredentialSharingAppGraphStub
 import android.content.Context
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -15,6 +14,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.verifier.di.createTestGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
@@ -25,12 +25,15 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.i
 class VerifierScanRouteTest {
 
     @get:Rule
-    val composeTestRule = VerifierScannerRule(createComposeRule())
+    val composeTestRule = VerifierScannerRule(
+        composeTestRule = createComposeRule(),
+        appGraph = createTestGraph()
+    )
 
     lateinit var controller: TestNavHostController
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val appGraph = CredentialSharingAppGraphStub(context)
+    private val appGraph = createTestGraph()
 
     @Test
     fun verifyNavGraphEntry() = runTest {

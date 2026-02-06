@@ -13,12 +13,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.testapp.MainActivityRule
+import uk.gov.onelogin.sharing.testapp.createTestGraph
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination.Companion.configureTestAppRoutes
 
 @RunWith(AndroidJUnit4::class)
 class ModuleEntriesHolderTest {
     @get:Rule
-    val composeTestRule = MainActivityRule(createComposeRule())
+    val composeTestRule = MainActivityRule(
+        composeTestRule = createComposeRule(),
+        appGraph = createTestGraph()
+    )
 
     private lateinit var controller: TestNavHostController
 

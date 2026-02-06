@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
@@ -65,7 +66,8 @@ class HolderWelcomeScreenRule(
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),
-            resettable = emptySet()
+            resettable = emptySet(),
+            orchestrator = FakeOrchestrator()
         )
     }
 

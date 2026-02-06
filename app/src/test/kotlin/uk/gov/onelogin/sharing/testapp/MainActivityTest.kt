@@ -13,7 +13,10 @@ import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestinationData.exp
 class MainActivityTest {
 
     @get:Rule
-    val composeTestRule = MainActivityRule(createAndroidComposeRule<MainActivity>())
+    val composeTestRule = MainActivityRule(
+        composeTestRule = createAndroidComposeRule<MainActivity>(),
+        appGraph = createTestGraph()
+    )
 
     @Test
     fun displaysHolderMenuItems() = runTest {

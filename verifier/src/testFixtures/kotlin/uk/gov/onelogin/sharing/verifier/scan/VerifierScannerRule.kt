@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
-import CredentialSharingAppGraphStub
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -29,6 +28,7 @@ import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import org.hamcrest.CoreMatchers.allOf
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.verifier.R
 import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertions.hasState
@@ -39,6 +39,7 @@ import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertion
  */
 class VerifierScannerRule(
     composeTestRule: ComposeContentTestRule,
+    private val appGraph: CredentialSharingAppGraph,
     private val openAppSettingsText: String,
     private val permissionDeniedText: String,
     private val permissionGrantedText: String
@@ -49,9 +50,11 @@ class VerifierScannerRule(
      */
     constructor(
         composeTestRule: ComposeContentTestRule,
+        appGraph: CredentialSharingAppGraph,
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
     ) : this(
         composeTestRule = composeTestRule,
+        appGraph = appGraph,
         openAppSettingsText = resources.getString(R.string.open_app_permissions),
         permissionDeniedText = resources.getString(R.string.enable_camera_permission_to_continue),
         permissionGrantedText = resources.getString(R.string.camera_permission_is_enabled)
@@ -111,10 +114,6 @@ class VerifierScannerRule(
         onInvalidBarcode: (String) -> Unit = {},
         onValidBarcode: (String) -> Unit = {}
     ) {
-        val appGraph = CredentialSharingAppGraphStub(
-            applicationContext = ApplicationProvider.getApplicationContext()
-        )
-
         setContent {
             val graph = remember {
                 createGraphFactory<VerifierGraph.Factory>().create(

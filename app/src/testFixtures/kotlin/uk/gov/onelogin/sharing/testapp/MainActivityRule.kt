@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.testapp
 
-import CredentialSharingAppGraphStub
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
@@ -16,11 +15,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
-import androidx.test.core.app.ApplicationProvider
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
 
-class MainActivityRule(composeTestRule: ComposeContentTestRule) :
-    ComposeContentTestRule by composeTestRule {
+class MainActivityRule(
+    composeTestRule: ComposeContentTestRule,
+    private val appGraph: CredentialSharingAppGraph
+) : ComposeContentTestRule by composeTestRule {
 
     private lateinit var controller: TestNavHostController
     private val lazyColumnTestTag = "menuItems"
@@ -57,10 +58,6 @@ class MainActivityRule(composeTestRule: ComposeContentTestRule) :
         startDestination: Any,
         onUpdateTabDestination: (PrimaryTabDestination) -> Unit = {}
     ) {
-        val appGraph = CredentialSharingAppGraphStub(
-            ApplicationProvider.getApplicationContext()
-        )
-
         setContent {
             controller = TestNavHostController(LocalContext.current).apply {
                 navigatorProvider.addNavigator(ComposeNavigator())

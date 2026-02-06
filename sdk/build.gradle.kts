@@ -1,6 +1,5 @@
 plugins {
     listOf(
-        libs.plugins.metro.di,
         libs.plugins.templates.android.library
     ).forEach { alias(it) }
 }
@@ -22,8 +21,17 @@ android {
 
 dependencies {
     listOf(
-        projects.core
-    ).forEach(::implementation)
+        projects.orchestration
+    ).forEach(::api)
+}
+
+dependencies {
+    listOf(
+        projects.core,
+        projects.orchestration,
+        libs.metro.runtime,
+        testFixtures(projects.orchestration)
+    ).forEach(::testFixturesImplementation)
 }
 
 mavenPublishingConfig {
