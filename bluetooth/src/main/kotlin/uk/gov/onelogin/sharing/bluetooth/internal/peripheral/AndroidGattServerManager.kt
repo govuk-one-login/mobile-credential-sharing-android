@@ -188,6 +188,7 @@ class AndroidGattServerManager(
 
             val event =
                 if (notificationResult) {
+                    logger.debug(logTag, "GATT: Notified state characteristic with 0x02")
                     GattServerEvent.SessionEnd(SUCCESS)
                 } else {
                     GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
