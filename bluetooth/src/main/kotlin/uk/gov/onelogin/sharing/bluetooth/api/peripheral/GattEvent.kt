@@ -18,7 +18,7 @@ sealed interface GattEvent {
 
             return when {
                 status == BluetoothGatt.GATT_SUCCESS &&
-                        newState == BluetoothProfile.STATE_CONNECTED ->
+                    newState == BluetoothProfile.STATE_CONNECTED ->
                     GattServerEvent.Connected(address)
 
                 newState == BluetoothProfile.STATE_DISCONNECTED ->

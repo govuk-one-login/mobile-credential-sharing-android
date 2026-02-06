@@ -87,7 +87,7 @@ class AndroidMdocSessionManager(
     }
 
     override fun notifySessionEnd(serviceUuid: UUID) {
-        gattServerManager.endServerSession(serviceUuid)
+        gattServerManager.notifySessionEnd(serviceUuid)
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {
@@ -140,15 +140,16 @@ class AndroidMdocSessionManager(
                 )
 
             GattServerEvent.SessionStarted -> {
-                logger.error(
+                logger.debug(
                     logTag,
                     "Mdoc - Connection has been setup successfully - session state started"
                 )
             }
 
-            GattServerEvent.SessionEnd -> {
+            is GattServerEvent.SessionEnd -> {
+                _state.value = MdocSessionState.MdocSessionEnded(event.status)
                 gattServerManager.close()
-                logger.error(
+                logger.debug(
                     logTag,
                     "Mdoc - Session end command was received. Closing connection"
                 )

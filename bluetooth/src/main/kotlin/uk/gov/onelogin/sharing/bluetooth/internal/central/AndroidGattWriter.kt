@@ -32,22 +32,20 @@ class AndroidGattWriter : GattWriter {
 
     @Suppress("DEPRECATION")
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun notifyClient(
+    override fun notifyClientCharacteristic(
         server: BluetoothGattServer,
         device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
-    ): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            server.notifyCharacteristicChanged(
-                device,
-                characteristic,
-                false,
-                value
-            ) == BluetoothStatusCodes.SUCCESS
-        } else {
-            characteristic.value = value
-            server.notifyCharacteristicChanged(device, characteristic, false)
-        }
+    ): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        server.notifyCharacteristicChanged(
+            device,
+            characteristic,
+            false,
+            value
+        ) == BluetoothStatusCodes.SUCCESS
+    } else {
+        characteristic.value = value
+        server.notifyCharacteristicChanged(device, characteristic, false)
     }
 }

@@ -36,5 +36,8 @@ interface MdocSessionManager {
      */
     suspend fun stop()
 
+    /**
+     * Notifies the client to end the session with end code 0x02
+     */
     fun notifySessionEnd(serviceUuid: UUID)
 }

@@ -38,4 +38,8 @@ class FakeMdocSessionManager(initialState: MdocSessionState = MdocSessionState.I
     fun emitBluetoothState(state: BluetoothStatus) {
         _bluetoothStatus.value = state
     }
+
+    override fun notifySessionEnd(serviceUuid: UUID) {
+        lastUuid = serviceUuid
+    }
 }

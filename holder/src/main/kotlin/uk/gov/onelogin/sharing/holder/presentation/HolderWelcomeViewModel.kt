@@ -24,6 +24,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
@@ -135,6 +136,18 @@ class HolderWelcomeViewModel(
 
                     is MdocSessionState.ServiceAdded ->
                         logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
+
+                    is MdocSessionState.MdocSessionEnded -> {
+                        if (state.status == SessionEndStates.SUCCESS) {
+                            logger.debug(logTag, "Mdoc - Ending session")
+                        } else {
+                            _uiState.update { it.copy(showErrorScreen = true) }
+                            logger.error(
+                                logTag,
+                                "Mdoc - Error while ending session: ${state.status}"
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -277,9 +290,12 @@ class HolderWelcomeViewModel(
         }
     }
 
+    fun onBackPressed() {
+        mdocBleSession.notifySessionEnd(_uiState.value.uuid)
+    }
+
     fun onScreenDisposed() {
         if (_uiState.value.sessionState is MdocSessionState.Connected) {
-            mdocBleSession.notifySessionEnd(_uiState.value.uuid)
             logger.debug(logTag, "Holder stopped advertising during session")
         }
     }
@@ -288,7 +304,6 @@ class HolderWelcomeViewModel(
         viewModelScope.launch {
             mdocBleSession.stop()
             resettable.forEach(Resettable::reset)
-            logger.debug(logTag, "onCleared called")
         }
         super.onCleared()
     }

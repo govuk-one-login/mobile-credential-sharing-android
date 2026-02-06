@@ -17,12 +17,10 @@ class FakeGattWriter(val success: Boolean = true) : GattWriter {
         return success
     }
 
-    override fun notifyClient(
+    override fun notifyClientCharacteristic(
         server: BluetoothGattServer,
         device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
-    ): Boolean {
-        return true
-    }
+    ): Boolean = true
 }

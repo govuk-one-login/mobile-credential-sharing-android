@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import androidx.annotation.RequiresPermission
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
@@ -19,13 +20,14 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.NOTIFY_CLIENT_FAILED
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
-import java.util.UUID
 
 class AndroidGattServerManager(
     private val context: Context,
@@ -37,7 +39,7 @@ class AndroidGattServerManager(
     },
     private val permissionsChecker: PermissionChecker,
     private val logger: Logger,
-    private val gattWriter: AndroidGattWriter
+    private val gattWriter: GattWriter
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
@@ -101,7 +103,7 @@ class AndroidGattServerManager(
             is GattEvent.MessageReceived -> Unit
             is GattEvent.MtuChanged -> mtu = event.mtu
             is GattEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
-            is GattEvent.SessionEnd -> handleSessionEnd()
+            is GattEvent.SessionEnd -> handleSessionEndReceived()
         }
     }
 
@@ -148,33 +150,50 @@ class AndroidGattServerManager(
                     logger.debug(
                         logTag,
                         "Received descriptor write requests " +
-                                "- response not needed"
+                            "- response not needed"
                     )
                 }
         }
     }
 
-    private fun handleSessionEnd() {
-        _events.tryEmit(GattServerEvent.SessionEnd)
+    /**
+     * To handle when the holder successfully receives a END command from the reader.
+     */
+    private fun handleSessionEndReceived() {
+        _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
     }
 
-    override fun endServerSession(serviceUuid: UUID) {
+    /**
+     * Notifies the reader device with the intent to end the session. Notifying can pass or fail
+     * therefore we invoke [SUCCESS] or [NOTIFY_CLIENT_FAILED] if the holder fails to write to
+     * the readers characteristic.
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun notifySessionEnd(serviceUuid: UUID) {
         val server = gattServer ?: return
-        val gattService = server.getService(serviceUuid)
-        val characteristic = gattService.getCharacteristic(SERVER_2_CLIENT_UUID)
+        val characteristic =
+            server.getService(serviceUuid)?.getCharacteristic(SERVER_2_CLIENT_UUID) ?: return
         val connectedDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
-
         val endValue = byteArrayOf(MdocState.END.code)
 
-        for (device in connectedDevices) {
-            gattWriter.notifyClient(
-                server = server,
-                device = device,
-                characteristic = characteristic,
-                value = endValue
-            )
+        if (connectedDevices.isEmpty()) {
+            logger.error(logTag, "failed to notify client with END command: No devices connected")
+            _events.tryEmit(GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED))
+            return
         }
 
-        logger.debug(logTag, "endServerSession function called with END code")
+        connectedDevices.forEach { device ->
+            val notificationResult =
+                gattWriter.notifyClientCharacteristic(server, device, characteristic, endValue)
+
+            val event =
+                if (notificationResult) {
+                    GattServerEvent.SessionEnd(SUCCESS)
+                } else {
+                    GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
+                }
+
+            _events.tryEmit(event)
+        }
     }
 }

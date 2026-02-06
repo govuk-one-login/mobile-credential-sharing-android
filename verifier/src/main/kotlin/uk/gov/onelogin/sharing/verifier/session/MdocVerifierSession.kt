@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.verifier.session
 import android.bluetooth.BluetoothDevice
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.core.logger.logTag
-import java.util.UUID
 
 @ContributesBinding(ViewModelScope::class)
 class MdocVerifierSession(
@@ -93,10 +93,6 @@ class MdocVerifierSession(
             is GattClientEvent.UnsupportedEvent -> {
                 logger.debug(logTag, "Unhandled event: $event")
                 _state.value = VerifierSessionState.Error("Unhandled event: $event")
-            }
-
-            is GattClientEvent.SessionEnd -> {
-                stop()
             }
         }
     }

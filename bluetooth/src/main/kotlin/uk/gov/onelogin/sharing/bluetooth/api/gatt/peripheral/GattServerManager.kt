@@ -8,5 +8,5 @@ interface GattServerManager : AutoCloseable {
 
     fun open(serviceUuid: UUID)
 
-    fun endServerSession(serviceUuid: UUID)
+    fun notifySessionEnd(serviceUuid: UUID)
 }
