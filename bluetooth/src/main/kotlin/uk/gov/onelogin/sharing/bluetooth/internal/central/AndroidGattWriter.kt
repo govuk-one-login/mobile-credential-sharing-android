@@ -32,7 +32,7 @@ class AndroidGattWriter : GattWriter {
 
     @Suppress("DEPRECATION")
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun notifyClientCharacteristic(
+    override fun notifyAndWriteToClientCharacteristic(
         server: BluetoothGattServer,
         device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,

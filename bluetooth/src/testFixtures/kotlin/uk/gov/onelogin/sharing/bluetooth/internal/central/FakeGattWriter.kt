@@ -17,7 +17,7 @@ class FakeGattWriter(val success: Boolean = true) : GattWriter {
         return success
     }
 
-    override fun notifyClientCharacteristic(
+    override fun notifyAndWriteToClientCharacteristic(
         server: BluetoothGattServer,
         device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,

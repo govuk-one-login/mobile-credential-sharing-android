@@ -139,7 +139,8 @@ class AndroidGattWriterTest {
             } returns (notificationResponse == BluetoothStatusCodes.SUCCESS)
         }
 
-        val result = writer.notifyClientCharacteristic(gatt, device, characteristic, value)
+        val result =
+            writer.notifyAndWriteToClientCharacteristic(gatt, device, characteristic, value)
         return result
     }
 }

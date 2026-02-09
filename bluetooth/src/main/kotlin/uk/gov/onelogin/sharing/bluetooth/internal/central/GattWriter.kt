@@ -26,7 +26,7 @@ interface GattWriter {
         value: ByteArray
     ): Boolean
 
-    fun notifyClientCharacteristic(
+    fun notifyAndWriteToClientCharacteristic(
         server: BluetoothGattServer,
         device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,

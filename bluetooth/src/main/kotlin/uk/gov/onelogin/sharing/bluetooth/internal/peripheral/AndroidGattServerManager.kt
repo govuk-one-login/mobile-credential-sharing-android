@@ -184,7 +184,12 @@ class AndroidGattServerManager(
 
         connectedDevices.forEach { device ->
             val notificationResult =
-                gattWriter.notifyClientCharacteristic(server, device, characteristic, endValue)
+                gattWriter.notifyAndWriteToClientCharacteristic(
+                    server,
+                    device,
+                    characteristic,
+                    endValue
+                )
 
             val event =
                 if (notificationResult) {

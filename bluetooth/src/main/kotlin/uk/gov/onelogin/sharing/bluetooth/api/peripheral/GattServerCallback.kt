@@ -146,7 +146,7 @@ class GattServerCallback(
             }
 
             MdocState.END -> {
-                logger.debug(logTag, "Received END command from ${device.address}")
+                logger.debug(logTag, "GATT: Received Write Request 0x02 on State")
                 gatGattEventEmitter.emit(GattEvent.SessionEnd)
             }
 
