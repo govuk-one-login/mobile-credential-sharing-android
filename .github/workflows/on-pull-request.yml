@@ -84,7 +84,7 @@ jobs:
           ./scripts/test/unit
       - name: Upload unit test coverage report
         if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: unit-test-coverage
           path: |
@@ -107,7 +107,7 @@ jobs:
           ./scripts/test/instrumentation --no-configuration-cache
       - name: Upload instrumentation test coverage report
         if: always()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: instrumentation-test-coverage
           path: |
