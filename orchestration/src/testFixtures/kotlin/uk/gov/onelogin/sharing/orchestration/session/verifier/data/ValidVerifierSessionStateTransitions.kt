@@ -37,45 +37,45 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             "User permanently denies requested permissions" to userJourneyFailure,
             "User allows all requested permissions" to ReadyToScan
         ).map { (testName, transition) ->
-                    Triple(
-                        testName,
-                        preflightEmptyPermissions,
-                        transition
-                    )
-                }
-        private val readyToScanTransitions =
-            listOf(
-                "User cancels whilst attempting to scan a QR code" to userCancellation,
-                "Cannot obtain data from a scanned QR code" to userJourneyFailure,
-                "Generated QR code gets shown to the User" to Connecting
-            ).map { (testName, transition) ->
-                    Triple(
-                        testName,
-                        ReadyToScan,
-                        transition
-                    )
-                }
-        private val connectingTransitions =
-            listOf(
-                "User cancels whilst connecting with Holder device" to userCancellation,
-                "Connection with Holder device cannot be established" to userJourneyFailure,
-                "Receives Holder device's data transfer request" to ProcessingEngagement,
-            ).map { (testName, transition) ->
-                    Triple(
-                        testName,
-                        Connecting,
-                        transition
-                    )
-                }
-        private val processingEngagementTransitions =
-            emptyList<Pair<String, VerifierSessionState>>()
-                .map { (testName, transition) ->
-                    Triple(
-                        testName,
-                        ProcessingEngagement,
-                        transition
-                    )
-                }
+            Triple(
+                testName,
+                preflightEmptyPermissions,
+                transition
+            )
+        }
+        private val readyToScanTransitions = listOf(
+            "User cancels whilst attempting to scan a QR code" to userCancellation,
+            "Cannot obtain data from a scanned QR code" to userJourneyFailure,
+            "Generated QR code gets shown to the User" to Connecting
+        ).map { (testName, transition) ->
+            Triple(
+                testName,
+                ReadyToScan,
+                transition
+            )
+        }
+        private val connectingTransitions = listOf(
+            "User cancels whilst connecting with Holder device" to userCancellation,
+            "Connection with Holder device cannot be established" to userJourneyFailure,
+            "Receives Holder device's data transfer request" to ProcessingEngagement,
+        ).map { (testName, transition) ->
+            Triple(
+                testName,
+                Connecting,
+                transition
+            )
+        }
+        private val processingEngagementTransitions = listOf(
+            "User cancels whilst processing engagement" to userCancellation,
+            "Cannot successfully process engagement" to userJourneyFailure,
+            "Begins validating the shared digital credential" to Verifying,
+        ).map { (testName, transition) ->
+            Triple(
+                testName,
+                ProcessingEngagement,
+                transition
+            )
+        }
         private val verifyingTransitions = emptyList<Pair<String, VerifierSessionState>>()
             .map { (testName, transition) ->
                 Triple(

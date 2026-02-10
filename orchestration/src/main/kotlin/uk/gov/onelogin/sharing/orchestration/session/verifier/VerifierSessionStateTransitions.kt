@@ -47,6 +47,8 @@ val validVerifierTransitions: VerifierSessionStateTransitions = mapOf(
     Connecting::class to singleton(
         ProcessingEngagement::class
     ) + fullErrorHandling,
-    ProcessingEngagement::class to emptySet(),
+    ProcessingEngagement::class to singleton(
+        Verifying::class
+    ) + fullErrorHandling,
     Verifying::class to emptySet(),
 )
