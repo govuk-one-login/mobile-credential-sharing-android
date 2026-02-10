@@ -20,7 +20,7 @@ class TransitionableVerifierSessionStates : TestParameterValuesProvider() {
             ReadyToScan::class,
             Connecting::class,
             ProcessingEngagement::class,
-            Verifying::class,
+            Verifying::class
         )
     }
 }

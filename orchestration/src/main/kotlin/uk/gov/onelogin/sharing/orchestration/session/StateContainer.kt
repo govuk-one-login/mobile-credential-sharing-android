@@ -17,7 +17,9 @@ interface StateContainer<State : Any> {
      * Also provides the [transitionTo] function that consumers use for updating the
      * [StateContainer.currentState] property.
      */
-    interface Complete<State : Any> : StateContainer<State>, Transitional<State> {
+    interface Complete<State : Any> :
+        StateContainer<State>,
+        Transitional<State> {
         /**
          * Logs the provided [message] and [throwable].
          *
@@ -40,13 +42,13 @@ interface StateContainer<State : Any> {
                 check(state::class in availableTransitions) {
                     cannotTransitionTo(
                         fromStateName = currentState.value::class.java.simpleName,
-                        toStateName = state::class.java.simpleName,
+                        toStateName = state::class.java.simpleName
                     )
                 }
             } catch (exception: IllegalStateException) {
                 logError(
                     CANNOT_COMPLETE_TRANSITION,
-                    exception,
+                    exception
                 )
 
                 throw exception
@@ -84,21 +86,18 @@ interface StateContainer<State : Any> {
          */
         data object LogMessages {
             const val CANNOT_COMPLETE_TRANSITION: String = "Cannot complete transition"
+
             @JvmStatic
             fun cannotFindTransitions(stateName: String): String =
                 "Cannot find applicable transitions for current state: $stateName"
 
             @JvmStatic
-            fun cannotTransitionTo(
-                fromStateName: String,
-                toStateName: String,
-            ): String = "Current state ($fromStateName) cannot transition to: $toStateName"
+            fun cannotTransitionTo(fromStateName: String, toStateName: String): String =
+                "Current state ($fromStateName) cannot transition to: $toStateName"
 
             @JvmStatic
-            fun performedTransition(
-                fromStateName: String,
-                toStateName: String,
-            ): String = "Transitioned from '$fromStateName' to '$toStateName'"
+            fun performedTransition(fromStateName: String, toStateName: String): String =
+                "Transitioned from '$fromStateName' to '$toStateName'"
         }
     }
 }

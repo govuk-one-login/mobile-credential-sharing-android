@@ -40,7 +40,7 @@ val validVerifierTransitions: VerifierSessionStateTransitions = mapOf(
         Preflight::class
     ),
     Preflight::class to singleton(
-        ReadyToScan::class,
+        ReadyToScan::class
     ) + fullErrorHandling,
     ReadyToScan::class to singleton(
         Connecting::class
@@ -52,6 +52,6 @@ val validVerifierTransitions: VerifierSessionStateTransitions = mapOf(
         Verifying::class
     ) + fullErrorHandling,
     Verifying::class to singleton(
-        Success::class,
-    ) + fullErrorHandling,
+        Success::class
+    ) + fullErrorHandling
 )

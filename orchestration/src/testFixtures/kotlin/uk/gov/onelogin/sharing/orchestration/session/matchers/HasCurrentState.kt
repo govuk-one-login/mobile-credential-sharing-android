@@ -9,9 +9,8 @@ import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSession
 /**
  * Custom [HolderSession] hamcrest [Matcher] that asserts against [HolderSession.currentState].
  */
-internal class HasCurrentState <State : Any> (
-    private val matcher: Matcher<in State>
-) : TypeSafeMatcher<StateContainer<in State>>() {
+internal class HasCurrentState<State : Any>(private val matcher: Matcher<in State>) :
+    TypeSafeMatcher<StateContainer<in State>>() {
 
     override fun describeTo(description: Description?) {
         matcher.describeTo(description)

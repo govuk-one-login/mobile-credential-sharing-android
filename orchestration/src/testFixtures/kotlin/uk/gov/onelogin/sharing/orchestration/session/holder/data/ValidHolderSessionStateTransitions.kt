@@ -20,12 +20,12 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
 
     companion object {
         private val notStartedTransitions = listOf(
-            "Holder session begins initialising" to preflightEmptyPermissions,
+            "Holder session begins initialising" to preflightEmptyPermissions
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 HolderSessionState.NotStarted,
-                transition,
+                transition
             )
         }
         private val preflightTransitions = listOf(
@@ -96,11 +96,11 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
 
         val inputs: List<Triple<String, HolderSessionState, HolderSessionState>> =
             notStartedTransitions +
-                    preflightTransitions +
-                    readyToPresentTransitions +
-                    presentingEngagementTransitions +
-                    connectingTransitions +
-                    requestReceivedTransitions +
-                    processingResponseTransitions
+                preflightTransitions +
+                readyToPresentTransitions +
+                presentingEngagementTransitions +
+                connectingTransitions +
+                requestReceivedTransitions +
+                processingResponseTransitions
     }
 }

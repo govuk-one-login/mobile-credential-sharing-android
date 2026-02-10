@@ -25,12 +25,12 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
 
     companion object {
         private val notStartedTransitions = listOf(
-            "Verifier session begins initialising" to preflightEmptyPermissions,
+            "Verifier session begins initialising" to preflightEmptyPermissions
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 NotStarted,
-                transition,
+                transition
             )
         }
         private val preflightTransitions = listOf(
@@ -58,7 +58,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         private val connectingTransitions = listOf(
             "User cancels whilst connecting with Holder device" to userCancellation,
             "Connection with Holder device cannot be established" to userJourneyFailure,
-            "Receives Holder device's data transfer request" to ProcessingEngagement,
+            "Receives Holder device's data transfer request" to ProcessingEngagement
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -69,7 +69,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         private val processingEngagementTransitions = listOf(
             "User cancels whilst processing engagement" to userCancellation,
             "Cannot successfully process engagement" to userJourneyFailure,
-            "Begins validating the shared digital credential" to Verifying,
+            "Begins validating the shared digital credential" to Verifying
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -82,19 +82,19 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             "Failure occurs when validating the credential" to userJourneyFailure,
             "User completes the Verifier User journey" to successStub
         ).map { (testName, transition) ->
-                Triple(
-                    testName,
-                    Verifying,
-                    transition
-                )
-            }
+            Triple(
+                testName,
+                Verifying,
+                transition
+            )
+        }
 
         val inputs: List<Triple<String, VerifierSessionState, VerifierSessionState>> =
             notStartedTransitions +
-                    preflightTransitions +
-                    readyToScanTransitions +
-                    connectingTransitions +
-                    processingEngagementTransitions +
-                    verifyingTransitions
+                preflightTransitions +
+                readyToScanTransitions +
+                connectingTransitions +
+                processingEngagementTransitions +
+                verifyingTransitions
     }
 }
