@@ -13,11 +13,4 @@ interface HolderSession : Resettable, StateTransitional<HolderSessionState> {
      * The current position of the User within the User journey.
      */
     val currentState: StateFlow<HolderSessionState>
-
-    /**
-     * Updates the [currentState] based on internal validations.
-     *
-     * @throws IllegalStateException when the provided [state] cannot be transitioned to. This is
-     * usually due to the [currentState] being unable to transition to [state].
-     */
 }
