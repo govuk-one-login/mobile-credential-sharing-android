@@ -1,0 +1,136 @@
+package uk.gov.onelogin.sharing.orchestration.session.verifier
+
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameters
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertThrows
+import org.junit.Ignore
+import org.junit.Test
+import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
+import uk.gov.onelogin.sharing.orchestration.session.verifier.data.ValidVerifierSessionStateTransitions
+import uk.gov.onelogin.sharing.orchestration.session.verifier.data.VerifierSessionStatesWithoutTransition
+
+@RunWith(TestParameterInjector::class)
+class VerifierSessionImplTest {
+
+    private var initialState: VerifierSessionState = VerifierSessionState.NotStarted
+
+    private val stateFlow: MutableStateFlow<VerifierSessionState> by lazy {
+        MutableStateFlow(initialState)
+    }
+    private var validTransitions = validVerifierTransitions
+
+    private val logger = SystemLogger()
+    private val session by lazy {
+        VerifierSessionImpl(
+            logger = logger,
+            internalState = stateFlow,
+            transitionMap = validTransitions
+        )
+    }
+
+    @Test
+    @Ignore("Implement invalid transitions")
+    @TestParameters(valuesProvider = ValidVerifierSessionStateTransitions::class)
+    fun `IllegalStateExceptions occur when performing invalid transitions`(
+        initial: VerifierSessionState,
+        transition: VerifierSessionState
+    ) = runTest {
+        initialState = initial
+        val exception = assertThrows(IllegalStateException::class.java) {
+            session.transitionTo(transition)
+        }
+
+        assertThat(
+            exception.message,
+            equalTo(
+                "Current state (${session.currentState.value::class.java.simpleName}) " +
+                    "cannot transition to: ${transition::class.java.simpleName}"
+            )
+        )
+
+        assertThat(
+            session,
+            hasCurrentState(initial)
+        )
+
+        assert(
+            "Cannot transition from '${initial::class.java.simpleName}' " +
+                "to '${transition::class.java.simpleName}'" in logger
+        )
+    }
+
+    @Test
+    fun `IllegalStateExceptions occur when the current state has no transitions available`(
+        @TestParameter(valuesProvider = VerifierSessionStatesWithoutTransition::class)
+        state: VerifierSessionState
+    ) = runTest {
+        initialState = state
+        val exception = assertThrows(IllegalStateException::class.java) {
+            session.transitionTo(state)
+        }
+
+        assertThat(
+            exception.message,
+            equalTo(
+                "Cannot find applicable transitions for current state: " +
+                    state::class.java.simpleName
+            )
+        )
+
+        assertThat(
+            session,
+            hasCurrentState(state)
+        )
+
+        assert(
+            "Cannot transition from '${state::class.java.simpleName}' " +
+                "to '${state::class.java.simpleName}'" in logger
+        )
+    }
+
+    @Test
+    @TestParameters(valuesProvider = ValidVerifierSessionStateTransitions::class)
+    fun `Can successfully transition to a valid state`(
+        initial: VerifierSessionState,
+        transition: VerifierSessionState
+    ) = runTest {
+        initialState = initial
+        session.transitionTo(transition)
+
+        assertThat(
+            session,
+            hasCurrentState(transition)
+        )
+
+        assert(
+            "Transitioned from '${initial::class.java.simpleName}' to " +
+                "'${transition::class.java.simpleName}'" in logger
+        )
+    }
+
+    @Test
+    fun `Resetting the instance brings the session back to 'Not started'`() = runTest {
+        val resetLogMessage = "Cleared verifier session state"
+        initialState = VerifierSessionState.ProcessingEngagement
+        assertThat(
+            session,
+            hasCurrentState(initialState)
+        )
+
+        assert(resetLogMessage !in logger)
+        session.reset()
+
+        assertThat(
+            session,
+            hasCurrentState(VerifierSessionState.NotStarted)
+        )
+        assert(resetLogMessage in logger)
+    }
+}
