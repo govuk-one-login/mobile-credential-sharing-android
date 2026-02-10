@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.update
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotFindTransitions
+import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotTransitionTo
 
 /**
  * Implementation of [VerifierSessionState] that utilises a backing [MutableStateFlow] for the
@@ -36,8 +37,10 @@ class VerifierSessionImpl(
             }
 
             check(state::class in availableTransitions) {
-                "Current state (${currentState.value::class.java.simpleName}) " +
-                    "cannot transition to: ${state::class.java.simpleName}"
+                cannotTransitionTo(
+                    fromStateName = currentState.value::class.java.simpleName,
+                    toStateName = state::class.java.simpleName,
+                )
             }
         } catch (exception: IllegalStateException) {
             logger.error(

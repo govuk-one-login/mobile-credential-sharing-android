@@ -24,11 +24,16 @@ interface StateContainer<State : Any> {
         @Throws(IllegalStateException::class)
         fun transitionTo(state: State)
 
-        object LogMessages {
+        data object LogMessages {
             @JvmStatic
             fun cannotFindTransitions(stateName: String): String =
                 "Cannot find applicable transitions for current state: $stateName"
 
+            @JvmStatic
+            fun cannotTransitionTo(
+                fromStateName: String,
+                toStateName: String,
+            ): String = "Current state ($fromStateName) cannot transition to: $toStateName"
         }
     }
 }
