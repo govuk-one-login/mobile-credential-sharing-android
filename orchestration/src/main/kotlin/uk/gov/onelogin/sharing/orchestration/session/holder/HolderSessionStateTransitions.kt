@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.session.holder
 
+import java.util.Collections.singleton
 import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Cancelled
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Failed
@@ -36,26 +37,26 @@ private val fullErrorHandling: Set<KClass<out HolderSessionState>> = setOf(
  * @sample HolderSessionImpl.transitionTo
  */
 val validHolderTransitions: HolderSessionStateTransitions = mapOf(
-    NotStarted::class to setOf(
+    NotStarted::class to singleton(
         Preflight::class
     ),
-    Preflight::class to setOf(
+    Preflight::class to singleton(
         ReadyToPresent::class
     ) + fullErrorHandling,
-    ReadyToPresent::class to setOf(
+    ReadyToPresent::class to singleton(
         PresentingEngagement::class
     ) + fullErrorHandling,
     PresentingEngagement::class to setOf(
         Connecting::class,
         Cancelled::class
     ),
-    Connecting::class to setOf(
+    Connecting::class to singleton(
         RequestReceived::class
     ) + fullErrorHandling,
-    RequestReceived::class to setOf(
+    RequestReceived::class to singleton(
         ProcessingResponse::class
     ) + fullErrorHandling,
-    ProcessingResponse::class to setOf(
+    ProcessingResponse::class to singleton(
         Success::class
     ) + fullErrorHandling
 )
