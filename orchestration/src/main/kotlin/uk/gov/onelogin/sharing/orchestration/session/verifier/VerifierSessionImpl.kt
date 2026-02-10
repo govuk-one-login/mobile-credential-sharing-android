@@ -8,6 +8,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotFindTransitions
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotTransitionTo
+import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.performedTransition
 
 /**
  * Implementation of [VerifierSessionState] that utilises a backing [MutableStateFlow] for the
@@ -57,8 +58,10 @@ class VerifierSessionImpl(
             state.also {
                 logger.debug(
                     logTag,
-                    "Transitioned from '${previousState::class.java.simpleName}' to " +
-                        "'${state::class.java.simpleName}'"
+                    performedTransition(
+                        fromStateName = previousState::class.java.simpleName,
+                        toStateName = state::class.java.simpleName
+                    )
                 )
             }
         }

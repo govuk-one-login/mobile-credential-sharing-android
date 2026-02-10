@@ -35,6 +35,12 @@ interface StateContainer<State : Any> {
                 fromStateName: String,
                 toStateName: String,
             ): String = "Current state ($fromStateName) cannot transition to: $toStateName"
+
+            @JvmStatic
+            fun performedTransition(
+                fromStateName: String,
+                toStateName: String,
+            ): String = "Transitioned from '$fromStateName' to '$toStateName'"
         }
     }
 }
