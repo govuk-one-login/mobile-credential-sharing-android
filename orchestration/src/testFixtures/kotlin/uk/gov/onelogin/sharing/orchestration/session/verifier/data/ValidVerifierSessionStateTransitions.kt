@@ -9,6 +9,8 @@ import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionSta
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ReadyToScan
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Verifying
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.preflightEmptyPermissions
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.userCancellation
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.userJourneyFailure
 
 class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
@@ -30,9 +32,11 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
                 transition,
             )
         }
-        private val preflightTransitions =
-            emptyList<Pair<String, VerifierSessionState>>()
-                .map { (testName, transition) ->
+        private val preflightTransitions = listOf(
+            "User cancels during permission request" to userCancellation,
+            "User permanently denies requested permissions" to userJourneyFailure,
+            "User allows all requested permissions" to ReadyToScan
+        ).map { (testName, transition) ->
                     Triple(
                         testName,
                         preflightEmptyPermissions,

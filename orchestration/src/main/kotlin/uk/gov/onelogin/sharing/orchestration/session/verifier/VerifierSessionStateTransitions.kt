@@ -1,6 +1,9 @@
 package uk.gov.onelogin.sharing.orchestration.session.verifier
 
+import java.util.Collections.singleton
 import kotlin.reflect.KClass
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Complete.Cancelled
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Connecting
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Preflight
@@ -16,6 +19,16 @@ typealias VerifierSessionStateTransitions =
     Map<KClass<out VerifierSessionState>, Set<KClass<out VerifierSessionState>>>
 
 /**
+ * Convenience [Set] for containing both User journey completion error types
+ *
+ * @sample validVerifierTransitions
+ */
+private val fullErrorHandling: Set<KClass<out VerifierSessionState>> = setOf(
+    Cancelled::class,
+    Failed::class
+)
+
+/**
  * The [VerifierSessionStateTransitions] [Map] containing [VerifierSessionState] classes as keys.
  * The provided values are then a [Set] of applicable [VerifierSessionState]s.
  *
@@ -25,7 +38,9 @@ val validVerifierTransitions: VerifierSessionStateTransitions = mapOf(
     NotStarted::class to setOf(
         Preflight::class
     ),
-    Preflight::class to emptySet(),
+    Preflight::class to singleton(
+        ReadyToScan::class,
+    ) + fullErrorHandling,
     ReadyToScan::class to emptySet(),
     Connecting::class to emptySet(),
     ProcessingEngagement::class to emptySet(),
