@@ -24,7 +24,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
 
     companion object {
         private val notStartedTransitions = listOf(
-            "Holder session begins initialising" to preflightEmptyPermissions,
+            "Verifier session begins initialising" to preflightEmptyPermissions,
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -44,8 +44,11 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
                     )
                 }
         private val readyToScanTransitions =
-            emptyList<Pair<String, VerifierSessionState>>()
-                .map { (testName, transition) ->
+            listOf(
+                "User cancels whilst attempting to scan a QR code" to userCancellation,
+                "Cannot obtain data from a scanned QR code" to userJourneyFailure,
+                "Generated QR code gets shown to the User" to Connecting
+            ).map { (testName, transition) ->
                     Triple(
                         testName,
                         ReadyToScan,
