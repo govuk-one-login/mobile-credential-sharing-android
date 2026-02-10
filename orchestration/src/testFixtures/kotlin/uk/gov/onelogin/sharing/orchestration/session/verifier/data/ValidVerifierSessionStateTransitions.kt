@@ -3,7 +3,12 @@ package uk.gov.onelogin.sharing.orchestration.session.verifier.data
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Connecting
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.NotStarted
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ProcessingEngagement
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ReadyToScan
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Verifying
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.preflightEmptyPermissions
 
 class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
@@ -16,21 +21,30 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         }
 
     companion object {
+        private val notStartedTransitions = listOf(
+            "Holder session begins initialising" to preflightEmptyPermissions,
+        ).map { (testName, transition) ->
+            Triple(
+                testName,
+                NotStarted,
+                transition,
+            )
+        }
         private val preflightTransitions =
             emptyList<Pair<String, VerifierSessionState>>()
                 .map { (testName, transition) ->
-            Triple(
-                testName,
-                VerifierSessionStateStubs.preflightEmptyPermissions,
-                transition
-            )
-        }
+                    Triple(
+                        testName,
+                        preflightEmptyPermissions,
+                        transition
+                    )
+                }
         private val readyToScanTransitions =
             emptyList<Pair<String, VerifierSessionState>>()
                 .map { (testName, transition) ->
                     Triple(
                         testName,
-                        VerifierSessionState.ReadyToScan,
+                        ReadyToScan,
                         transition
                     )
                 }
@@ -39,7 +53,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
                 .map { (testName, transition) ->
                     Triple(
                         testName,
-                        VerifierSessionState.Connecting,
+                        Connecting,
                         transition
                     )
                 }
@@ -48,7 +62,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
                 .map { (testName, transition) ->
                     Triple(
                         testName,
-                        VerifierSessionState.ProcessingEngagement,
+                        ProcessingEngagement,
                         transition
                     )
                 }
@@ -56,21 +70,17 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             .map { (testName, transition) ->
                 Triple(
                     testName,
-                    VerifierSessionState.Verifying,
+                    Verifying,
                     transition
                 )
             }
 
-        val inputs: List<Triple<String, VerifierSessionState, VerifierSessionState>> = listOf(
-            Triple(
-                "Holder session begins initialising",
-                VerifierSessionState.NotStarted,
-                VerifierSessionStateStubs.preflightEmptyPermissions
-            )
-        ) + preflightTransitions +
-                readyToScanTransitions +
-                connectingTransitions +
-                processingEngagementTransitions +
-                verifyingTransitions
+        val inputs: List<Triple<String, VerifierSessionState, VerifierSessionState>> =
+            notStartedTransitions +
+                    preflightTransitions +
+                    readyToScanTransitions +
+                    connectingTransitions +
+                    processingEngagementTransitions +
+                    verifyingTransitions
     }
 }
