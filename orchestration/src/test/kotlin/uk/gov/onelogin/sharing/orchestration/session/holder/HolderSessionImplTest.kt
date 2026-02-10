@@ -39,7 +39,7 @@ class HolderSessionImplTest {
     @TestParameters(valuesProvider = InvalidHolderSessionStateTransitions::class)
     fun `IllegalStateExceptions occur when performing invalid transitions`(
         initial: HolderSessionState,
-        transition: HolderSessionState
+        transition: HolderSessionState,
     ) = runTest {
         initialState = initial
         val exception = assertThrows(IllegalStateException::class.java) {
@@ -50,7 +50,7 @@ class HolderSessionImplTest {
             exception.message,
             equalTo(
                 "Current state (${session.currentState.value::class.java.simpleName}) " +
-                    "cannot transition to: ${transition::class.java.simpleName}"
+                        "cannot transition to: ${transition::class.java.simpleName}"
             )
         )
 
@@ -59,16 +59,13 @@ class HolderSessionImplTest {
             hasCurrentState(initial)
         )
 
-        assert(
-            "Cannot transition from '${initial::class.java.simpleName}' " +
-                "to '${transition::class.java.simpleName}'" in logger
-        )
+        assert("Cannot complete transition" in logger)
     }
 
     @Test
     fun `IllegalStateExceptions occur when the current state has no transitions available`(
         @TestParameter(valuesProvider = HolderSessionStatesWithoutTransition::class)
-        state: HolderSessionState
+        state: HolderSessionState,
     ) = runTest {
         initialState = state
         val exception = assertThrows(IllegalStateException::class.java) {
@@ -79,7 +76,7 @@ class HolderSessionImplTest {
             exception.message,
             equalTo(
                 "Cannot find applicable transitions for current state: " +
-                    state::class.java.simpleName
+                        state::class.java.simpleName
             )
         )
 
@@ -88,17 +85,14 @@ class HolderSessionImplTest {
             hasCurrentState(state)
         )
 
-        assert(
-            "Cannot transition from '${state::class.java.simpleName}' " +
-                "to '${state::class.java.simpleName}'" in logger
-        )
+        assert("Cannot complete transition" in logger)
     }
 
     @Test
     @TestParameters(valuesProvider = ValidHolderSessionStateTransitions::class)
     fun `Can successfully transition to a valid state`(
         initial: HolderSessionState,
-        transition: HolderSessionState
+        transition: HolderSessionState,
     ) = runTest {
         initialState = initial
         session.transitionTo(transition)
@@ -110,7 +104,7 @@ class HolderSessionImplTest {
 
         assert(
             "Transitioned from '${initial::class.java.simpleName}' to " +
-                "'${transition::class.java.simpleName}'" in logger
+                    "'${transition::class.java.simpleName}'" in logger
         )
     }
 

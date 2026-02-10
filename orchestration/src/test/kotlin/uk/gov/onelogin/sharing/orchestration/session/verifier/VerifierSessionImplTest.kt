@@ -59,10 +59,7 @@ class VerifierSessionImplTest {
             hasCurrentState(initial)
         )
 
-        assert(
-            "Cannot transition from '${initial::class.java.simpleName}' " +
-                "to '${transition::class.java.simpleName}'" in logger
-        )
+        assert("Cannot complete transition" in logger)
     }
 
     @Test
@@ -88,10 +85,7 @@ class VerifierSessionImplTest {
             hasCurrentState(state)
         )
 
-        assert(
-            "Cannot transition from '${state::class.java.simpleName}' " +
-                "to '${state::class.java.simpleName}'" in logger
-        )
+        assert("Cannot complete transition" in logger)
     }
 
     @Test

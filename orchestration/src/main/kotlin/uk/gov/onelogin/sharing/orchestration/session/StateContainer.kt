@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.session
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Declares that an implementation exposes [State] objects via a kotlin [kotlinx.coroutines.flow.StateFlow].
+ * Declares that an implementation exposes [State] objects via a kotlin [StateFlow].
  */
 interface StateContainer<State : Any> {
     val currentState: StateFlow<State>
@@ -25,6 +25,7 @@ interface StateContainer<State : Any> {
         fun transitionTo(state: State)
 
         data object LogMessages {
+            const val CANNOT_COMPLETE_TRANSITION: String = "Cannot complete transition"
             @JvmStatic
             fun cannotFindTransitions(stateName: String): String =
                 "Cannot find applicable transitions for current state: $stateName"
