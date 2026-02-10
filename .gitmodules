@@ -1,3 +1,6 @@
 [submodule "mobile-android-pipelines"]
 	path = mobile-android-pipelines
 	url = https://github.com/govuk-one-login/mobile-android-pipelines.git
+[submodule "mobile-credential-sharing-docs"]
+	path = mobile-credential-sharing-docs
+	url = https://github.com/govuk-one-login/mobile-credential-sharing-docs.git
