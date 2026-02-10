@@ -8,11 +8,11 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
+import uk.gov.onelogin.sharing.orchestration.session.verifier.data.InvalidVerifierSessionStateTransitions
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.ValidVerifierSessionStateTransitions
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.VerifierSessionStatesWithoutTransition
 
@@ -36,8 +36,7 @@ class VerifierSessionImplTest {
     }
 
     @Test
-    @Ignore("Implement invalid transitions")
-    @TestParameters(valuesProvider = ValidVerifierSessionStateTransitions::class)
+    @TestParameters(valuesProvider = InvalidVerifierSessionStateTransitions::class)
     fun `IllegalStateExceptions occur when performing invalid transitions`(
         initial: VerifierSessionState,
         transition: VerifierSessionState
