@@ -56,8 +56,11 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
                     )
                 }
         private val connectingTransitions =
-            emptyList<Pair<String, VerifierSessionState>>()
-                .map { (testName, transition) ->
+            listOf(
+                "User cancels whilst connecting with Holder device" to userCancellation,
+                "Connection with Holder device cannot be established" to userJourneyFailure,
+                "Receives Holder device's data transfer request" to ProcessingEngagement,
+            ).map { (testName, transition) ->
                     Triple(
                         testName,
                         Connecting,
