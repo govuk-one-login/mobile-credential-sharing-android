@@ -83,7 +83,9 @@ dependencies {
     listOf(
         projects.holder,
         projects.verifier,
-        projects.sdk
+        projects.sdk,
+        projects.ui.uiApi,
+        projects.ui.uiImpl
     ).forEach(::implementation)
 
     listOf(

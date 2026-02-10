@@ -46,6 +46,8 @@ listOf(
     ":sdk",
     ":security",
     ":verifier",
+    ":ui:ui-api",
+    ":ui:ui-impl"
 ).forEach(::include)
 
 /**
