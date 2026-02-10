@@ -9,5 +9,4 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  */
 interface HolderSession :
     Resettable,
-    StateContainer<HolderSessionState>,
-    StateContainer.Transitional<HolderSessionState>
+    StateContainer.Complete<HolderSessionState>

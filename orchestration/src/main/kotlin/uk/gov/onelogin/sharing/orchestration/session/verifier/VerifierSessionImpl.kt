@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.session.verifier
 
+import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -7,7 +8,6 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotFindTransitions
-import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotTransitionTo
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.performedTransition
 
 /**
@@ -30,30 +30,12 @@ class VerifierSessionImpl(
 
     override val currentState: StateFlow<VerifierSessionState> = internalState
 
-    override fun transitionTo(state: VerifierSessionState) {
-        try {
-            val availableTransitions = checkNotNull(
-                transitionMap[currentState.value::class]
-            ) {
-                cannotFindTransitions(currentState.value::class.java.simpleName)
-            }
-
-            check(state::class in availableTransitions) {
-                cannotTransitionTo(
-                    fromStateName = currentState.value::class.java.simpleName,
-                    toStateName = state::class.java.simpleName,
-                )
-            }
-        } catch (exception: IllegalStateException) {
-            logger.error(
-                logTag,
-                CANNOT_COMPLETE_TRANSITION,
-                exception
-            )
-
-            throw exception
+    override fun getAvailableTransitions(): Set<KClass<out VerifierSessionState>> =
+        checkNotNull(transitionMap[currentState.value::class]) {
+            cannotFindTransitions(currentState.value::class.java.simpleName)
         }
 
+    override fun update(state: VerifierSessionState) {
         internalState.update { previousState ->
             state.also {
                 logger.debug(
@@ -65,6 +47,14 @@ class VerifierSessionImpl(
                 )
             }
         }
+    }
+
+    override fun logError(message: String, throwable: Throwable) {
+        logger.error(
+            logTag,
+            CANNOT_COMPLETE_TRANSITION,
+            throwable
+        )
     }
 
     override fun reset() {

@@ -9,5 +9,4 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  */
 interface VerifierSession :
     Resettable,
-    StateContainer<VerifierSessionState>,
-    StateContainer.Transitional<VerifierSessionState>
+    StateContainer.Complete<VerifierSessionState>
