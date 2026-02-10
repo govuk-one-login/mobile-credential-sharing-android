@@ -9,6 +9,7 @@ import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionSta
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ReadyToScan
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Verifying
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.preflightEmptyPermissions
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.successStub
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.userCancellation
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.userJourneyFailure
 
@@ -76,8 +77,11 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
                 transition
             )
         }
-        private val verifyingTransitions = emptyList<Pair<String, VerifierSessionState>>()
-            .map { (testName, transition) ->
+        private val verifyingTransitions = listOf(
+            "User cancels the journey whilst validating the credential" to userCancellation,
+            "Failure occurs when validating the credential" to userJourneyFailure,
+            "User completes the Verifier User journey" to successStub
+        ).map { (testName, transition) ->
                 Triple(
                     testName,
                     Verifying,

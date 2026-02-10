@@ -4,6 +4,7 @@ import java.util.Collections.singleton
 import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Complete.Cancelled
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Complete.Failed
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Complete.Success
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Connecting
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Preflight
@@ -50,5 +51,7 @@ val validVerifierTransitions: VerifierSessionStateTransitions = mapOf(
     ProcessingEngagement::class to singleton(
         Verifying::class
     ) + fullErrorHandling,
-    Verifying::class to emptySet(),
+    Verifying::class to singleton(
+        Success::class,
+    ) + fullErrorHandling,
 )
