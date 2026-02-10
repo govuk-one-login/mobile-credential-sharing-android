@@ -12,9 +12,9 @@ import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.UncancellableHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionMatchers.hasCurrentState
-import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionMatchers.inPreflight
+import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers
 import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.isCancelled
+import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
 
 @RunWith(TestParameterInjector::class)
 class HolderOrchestratorTest {
@@ -50,7 +50,7 @@ class HolderOrchestratorTest {
 
         assertThat(
             session,
-            inPreflight()
+            hasCurrentState(HolderSessionStateMatchers.inPreflight())
         )
     }
 
@@ -63,7 +63,7 @@ class HolderOrchestratorTest {
         assert(startOrchestratorErrorLog in logger)
         assertThat(
             session,
-            inPreflight()
+            hasCurrentState(HolderSessionStateMatchers.inPreflight())
         )
     }
 

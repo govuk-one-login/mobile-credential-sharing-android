@@ -13,5 +13,7 @@ object HolderSessionStateMatchers {
         HolderSessionState.Preflight::class.java
     )
 
-    fun isCancelled(): Matcher<HolderSessionState> = equalTo(HolderSessionState.Complete.Cancelled)
+    fun isCancelled(): Matcher<HolderSessionState> = equalTo(
+        HolderSessionState.Complete.Cancelled
+    )
 }
