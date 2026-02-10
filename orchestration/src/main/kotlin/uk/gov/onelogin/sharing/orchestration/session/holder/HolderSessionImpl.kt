@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotFindTransitions
 
 /**
  * Implementation of [HolderSessionState] that utilises a backing [MutableStateFlow] for the
@@ -31,8 +32,7 @@ class HolderSessionImpl(
             val availableTransitions = checkNotNull(
                 transitionMap[currentState.value::class]
             ) {
-                "Cannot find applicable transitions for current state: " +
-                    currentState.value::class.java.simpleName
+                cannotFindTransitions(currentState.value::class.java.simpleName)
             }
 
             check(state::class in availableTransitions) {

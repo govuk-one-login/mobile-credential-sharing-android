@@ -23,5 +23,12 @@ interface StateContainer<State : Any> {
          */
         @Throws(IllegalStateException::class)
         fun transitionTo(state: State)
+
+        object LogMessages {
+            @JvmStatic
+            fun cannotFindTransitions(stateName: String): String =
+                "Cannot find applicable transitions for current state: $stateName"
+
+        }
     }
 }
