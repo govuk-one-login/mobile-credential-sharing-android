@@ -1,21 +1,20 @@
 package uk.gov.onelogin.sharing.ui.impl.di
 
-import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
-import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
+import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 
 /**
  * Dependency graph for the UI implementation module.
  *
- * This graph is scoped to [AppScope] and extends [ViewModelGraph] to provide support
+ * This graph is scoped to [ViewModelScope] and extends [ViewModelGraph] to provide support
  * for Metro-powered ViewModels. It depends on the [CredentialSharingAppGraph] for
  * core application dependencies.
  */
 @DependencyGraph(
-    scope = AppScope::class
+    scope = ViewModelScope::class
 )
 interface CredentialSharingUiGraph : ViewModelGraph {
 
@@ -32,9 +31,4 @@ interface CredentialSharingUiGraph : ViewModelGraph {
          */
         fun create(@Includes appGraph: CredentialSharingAppGraph): CredentialSharingUiGraph
     }
-
-    /**
-     * Provides the [MetroViewModelFactory] for creating ViewModels within this graph.
-     */
-    fun metroViewModelFactory(): MetroViewModelFactory
 }
