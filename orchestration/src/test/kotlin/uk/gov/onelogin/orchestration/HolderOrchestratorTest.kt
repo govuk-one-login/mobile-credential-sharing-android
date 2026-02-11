@@ -42,7 +42,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `test start called`() = runTest {
+    fun `Starting the Orchestrator journey navigates to the Preflight state`() = runTest {
         orchestrator.start(setOf())
 
         assert(START_ORCHESTRATION_SUCCESS in logger)
@@ -56,7 +56,7 @@ class HolderOrchestratorTest {
 
     @Test
     fun `Orchestrator cannot be started more than once`() = runTest {
-        `test start called`()
+        `Starting the Orchestrator journey navigates to the Preflight state`()
 
         orchestrator.start(setOf())
 
@@ -101,7 +101,7 @@ class HolderOrchestratorTest {
 
     @Test
     fun `Resetting the Orchestrator clears the HolderSession`() = runTest {
-        `test start called`()
+        `Starting the Orchestrator journey navigates to the Preflight state`()
 
         orchestrator.reset()
 

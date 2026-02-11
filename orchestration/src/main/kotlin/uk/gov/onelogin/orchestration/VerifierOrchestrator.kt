@@ -33,6 +33,7 @@ class VerifierOrchestrator(
     }
 
     override fun cancel() {
+        session.transitionTo(VerifierSessionState.Complete.Cancelled)
         logger.debug(logTag, CANCEL_ORCHESTRATION_SUCCESS)
     }
 
