@@ -5,6 +5,10 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -21,9 +25,9 @@ class HolderOrchestrator(private val logger: Logger, private val session: Holder
             session.transitionTo(
                 HolderSessionState.Preflight(requiredPermissions)
             )
-            logger.debug(logTag, "start orchestration")
+            logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
         } catch (exception: IllegalStateException) {
-            "Cannot start orchestration".let { logMessage ->
+            START_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(
                     logTag,
                     logMessage,
@@ -36,9 +40,9 @@ class HolderOrchestrator(private val logger: Logger, private val session: Holder
     override fun cancel() {
         try {
             session.transitionTo(HolderSessionState.Complete.Cancelled)
-            logger.debug(logTag, "cancel orchestration")
+            logger.debug(logTag, CANCEL_ORCHESTRATION_SUCCESS)
         } catch (exception: IllegalStateException) {
-            "Cannot cancel orchestration".let { logMessage ->
+            CANCEL_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(
                     logTag,
                     logMessage,

@@ -8,6 +8,10 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_ERROR
+import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
+import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.CancellableHolderSessionStates
@@ -19,11 +23,7 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatc
 @RunWith(TestParameterInjector::class)
 class HolderOrchestratorTest {
     private val logger = SystemLogger()
-    private val cancelOrchestratorErrorLog = "Cannot cancel orchestration"
-    private val cancelOrchestratorSuccessLog = "cancel orchestration"
     private val resetOrchestratorSessionLog = "Cleared Orchestrator holder session"
-    private val startOrchestratorErrorLog = "Cannot start orchestration"
-    private val startOrchestratorSuccessLog = "start orchestration"
 
     private var initialState: HolderSessionState = HolderSessionState.NotStarted
 
@@ -45,8 +45,8 @@ class HolderOrchestratorTest {
     fun `test start called`() = runTest {
         orchestrator.start(setOf())
 
-        assert(startOrchestratorSuccessLog in logger)
-        assert(startOrchestratorErrorLog !in logger)
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
             session,
@@ -60,7 +60,7 @@ class HolderOrchestratorTest {
 
         orchestrator.start(setOf())
 
-        assert(startOrchestratorErrorLog in logger)
+        assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(
             session,
             hasCurrentState(HolderSessionStateMatchers.inPreflight())
@@ -75,8 +75,8 @@ class HolderOrchestratorTest {
         initialState = state
         orchestrator.cancel()
 
-        assert(cancelOrchestratorErrorLog in logger)
-        assert(cancelOrchestratorSuccessLog !in logger)
+        assert(CANCEL_ORCHESTRATION_ERROR in logger)
+        assert(CANCEL_ORCHESTRATION_SUCCESS !in logger)
         assertThat(
             session,
             hasCurrentState(state)
@@ -91,8 +91,8 @@ class HolderOrchestratorTest {
         initialState = state
         orchestrator.cancel()
 
-        assert(cancelOrchestratorSuccessLog in logger)
-        assert(cancelOrchestratorErrorLog !in logger)
+        assert(CANCEL_ORCHESTRATION_SUCCESS in logger)
+        assert(CANCEL_ORCHESTRATION_ERROR !in logger)
         assertThat(
             session,
             hasCurrentState(isCancelled())

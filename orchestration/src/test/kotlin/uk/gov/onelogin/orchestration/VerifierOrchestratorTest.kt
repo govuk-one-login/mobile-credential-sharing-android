@@ -2,30 +2,40 @@ package uk.gov.onelogin.orchestration
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.junit.Before
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 
 class VerifierOrchestratorTest {
     private val logger = SystemLogger()
-    private val orchestrator = VerifierOrchestrator(logger)
+    private val orchestrator by lazy {
+        VerifierOrchestrator(logger)
+    }
+
+    @Before
+    fun setUp() {
+        assertEquals(
+            0,
+            logger.size
+        )
+    }
 
     @Test
     fun `logs correctly on start`() {
-        assertEquals(0, logger.size)
         orchestrator.start(setOf())
-        assert(logger.contains("start orchestration"))
+        assert(START_ORCHESTRATION_SUCCESS in logger)
     }
 
     @Test
     fun `logs correctly on cancel`() {
-        assertEquals(0, logger.size)
         orchestrator.cancel()
-        assert(logger.contains("cancel orchestration"))
+        assert(CANCEL_ORCHESTRATION_SUCCESS in logger)
     }
 
     @Test
     fun `logs correctly on reset`() {
-        assertEquals(0, logger.size)
         orchestrator.reset()
-        assert(logger.contains("Cleared Orchestrator verifier session"))
+        assert("Cleared Orchestrator verifier session" in logger)
     }
 }
