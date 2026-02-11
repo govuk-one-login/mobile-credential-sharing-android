@@ -2,62 +2,25 @@ package uk.gov.onelogin.orchestration
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
-import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
-import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
-import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSession
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 
-@ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator>())
-@Inject
-class HolderOrchestrator(private val logger: Logger, private val session: HolderSession) :
-    Orchestrator.Holder {
+@ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
+class HolderOrchestrator(
+    logger: Logger,
+    session: HolderSession,
+) : AbstractOrchestrator<HolderSessionState>(
+    logger = logger,
+    session = session,
+), Orchestrator.Holder {
+    override val resetSessionLogMessage: String =
+        "Cleared Orchestrator holder session"
 
-    override fun start(requiredPermissions: Set<String>) {
-        try {
-            session.transitionTo(
-                HolderSessionState.Preflight(requiredPermissions)
-            )
-            logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
-        } catch (exception: IllegalStateException) {
-            START_ORCHESTRATION_ERROR.let { logMessage ->
-                logger.error(
-                    logTag,
-                    logMessage,
-                    OrchestratorCannotStartException(logMessage, exception)
-                )
-            }
-        }
-    }
+    override fun getStartState(requiredPermissions: Set<String>): HolderSessionState =
+        HolderSessionState.Preflight(requiredPermissions)
 
-    override fun cancel() {
-        try {
-            session.transitionTo(HolderSessionState.Complete.Cancelled)
-            logger.debug(logTag, CANCEL_ORCHESTRATION_SUCCESS)
-        } catch (exception: IllegalStateException) {
-            CANCEL_ORCHESTRATION_ERROR.let { logMessage ->
-                logger.error(
-                    logTag,
-                    logMessage,
-                    OrchestratorCannotCancelException(logMessage, exception)
-                )
-            }
-        }
-    }
-
-    override fun reset() {
-        session.reset().also {
-            logger.debug(
-                logTag,
-                "Cleared Orchestrator holder session"
-            )
-        }
-    }
+    override fun getCancellationState(): HolderSessionState =
+        HolderSessionState.Complete.Cancelled
 }

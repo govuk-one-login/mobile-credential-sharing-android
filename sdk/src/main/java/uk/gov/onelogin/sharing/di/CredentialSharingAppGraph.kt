@@ -22,5 +22,6 @@ interface CredentialSharingAppGraph {
 
     fun logger(): Logger
 
-    fun orchestrator(): Orchestrator
+    fun holderOrchestrator(): Orchestrator.Holder
+    fun verifierOrchestrator(): Orchestrator.Verifier
 }

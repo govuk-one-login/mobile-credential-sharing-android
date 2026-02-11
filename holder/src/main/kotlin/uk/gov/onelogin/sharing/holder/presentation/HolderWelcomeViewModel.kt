@@ -47,7 +47,7 @@ class HolderWelcomeViewModel(
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val resettable: Set<Resettable>,
-    private val orchestrator: Orchestrator,
+    private val orchestrator: Orchestrator.Holder,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 

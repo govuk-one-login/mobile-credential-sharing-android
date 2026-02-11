@@ -1,12 +1,9 @@
 package uk.gov.onelogin.sharing.orchestration.session.holder
 
-import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 
 /**
  * Abstraction for containing high-level information about the current position in the User journey
  * for sharing digital credentials with verifying devices.
  */
-interface HolderSession :
-    Resettable,
-    StateContainer.Complete<HolderSessionState>
+interface HolderSession : StateContainer.Complete<HolderSessionState>

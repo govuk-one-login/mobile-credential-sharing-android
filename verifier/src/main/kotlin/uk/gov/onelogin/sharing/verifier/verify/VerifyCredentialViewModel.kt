@@ -33,7 +33,7 @@ class VerifyCredentialViewModel(
     private val logger: Logger,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     private val resettable: Set<Resettable>,
-    private val orchestrator: Orchestrator
+    private val orchestrator: Orchestrator.Verifier
 ) : ViewModel() {
     private val initialState = VerifyCredentialUiState()
     private var allGranted: Boolean? = null

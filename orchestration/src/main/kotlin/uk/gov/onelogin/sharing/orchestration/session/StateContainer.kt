@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.session
 
 import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.StateFlow
+import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotTransitionTo
 
@@ -19,6 +20,7 @@ interface StateContainer<State : Any> {
      */
     interface Complete<State : Any> :
         StateContainer<State>,
+        Resettable,
         Transitional<State> {
         /**
          * Logs the provided [message] and [throwable].
