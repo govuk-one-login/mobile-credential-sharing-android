@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierS
 class VerifierOrchestratorTest {
     private var initialState: VerifierSessionState = VerifierSessionState.NotStarted
     private val logger = SystemLogger()
+    private val resetOrchestratorSessionLog = "Cleared Orchestrator verifier session"
     private val session by lazy {
         VerifierSessionImpl(
             logger = logger,
@@ -106,8 +107,15 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `logs correctly on reset`() = runTest {
+    fun `Resetting the Orchestrator clears the VerifierSession`() = runTest {
+        `Starting the Orchestrator journey navigates to the Preflight state`()
+
         orchestrator.reset()
-        assert("Cleared Orchestrator verifier session" in logger)
+
+        assert(resetOrchestratorSessionLog in logger)
+        assertThat(
+            session,
+            hasCurrentState(VerifierSessionState.NotStarted)
+        )
     }
 }

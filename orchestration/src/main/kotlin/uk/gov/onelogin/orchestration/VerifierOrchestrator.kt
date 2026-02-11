@@ -50,9 +50,11 @@ class VerifierOrchestrator(
     }
 
     override fun reset() {
-        logger.debug(
-            logTag,
-            "Cleared Orchestrator verifier session"
-        )
+        session.reset().also {
+            logger.debug(
+                logTag,
+                "Cleared Orchestrator verifier session"
+            )
+        }
     }
 }
