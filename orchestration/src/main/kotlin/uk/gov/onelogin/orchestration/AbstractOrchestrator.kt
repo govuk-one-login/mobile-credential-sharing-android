@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  */
 abstract class AbstractOrchestrator<State : Any>(
     private val logger: Logger,
-    private val session: StateContainer.Complete<State>,
+    private val session: StateContainer.Complete<State>
 ) : Orchestrator {
 
     /**

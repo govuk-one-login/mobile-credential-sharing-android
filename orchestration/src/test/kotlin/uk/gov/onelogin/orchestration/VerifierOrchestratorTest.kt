@@ -36,7 +36,7 @@ class VerifierOrchestratorTest {
     private val orchestrator by lazy {
         VerifierOrchestrator(
             logger = logger,
-            session = session,
+            session = session
         )
     }
 

@@ -8,13 +8,12 @@ import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
 
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
-class VerifierOrchestrator(
-    logger: Logger,
-    session: VerifierSession,
-) : AbstractOrchestrator<VerifierSessionState>(
-    logger = logger,
-    session = session,
-), Orchestrator.Verifier {
+class VerifierOrchestrator(logger: Logger, session: VerifierSession) :
+    AbstractOrchestrator<VerifierSessionState>(
+        logger = logger,
+        session = session
+    ),
+    Orchestrator.Verifier {
     override val resetSessionLogMessage: String =
         "Cleared Orchestrator verifier session"
 
