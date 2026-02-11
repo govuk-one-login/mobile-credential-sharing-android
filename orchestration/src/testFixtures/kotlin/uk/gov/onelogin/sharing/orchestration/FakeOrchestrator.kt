@@ -2,7 +2,9 @@ package uk.gov.onelogin.sharing.orchestration
 
 import uk.gov.onelogin.orchestration.Orchestrator
 
-class FakeOrchestrator : Orchestrator.Holder, Orchestrator.Verifier {
+class FakeOrchestrator :
+    Orchestrator.Holder,
+    Orchestrator.Verifier {
     var startCount = 0
     var cancelCount = 0
 
