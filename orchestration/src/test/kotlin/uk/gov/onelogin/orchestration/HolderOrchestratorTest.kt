@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.UncancellableHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers
+import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
 
@@ -50,7 +50,7 @@ class HolderOrchestratorTest {
 
         assertThat(
             session,
-            hasCurrentState(HolderSessionStateMatchers.inPreflight())
+            hasCurrentState(inPreflight())
         )
     }
 
@@ -63,7 +63,7 @@ class HolderOrchestratorTest {
         assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(
             session,
-            hasCurrentState(HolderSessionStateMatchers.inPreflight())
+            hasCurrentState(inPreflight())
         )
     }
 
