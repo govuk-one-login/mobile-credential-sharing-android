@@ -110,3 +110,25 @@ sonarqube {
         }
     }
 }
+
+subprojects {
+    // list of directories that aren't fully fledged gradle modules
+    val intermediateFolders = listOf(
+        "ui"
+    )
+
+    if (name in intermediateFolders) {
+        logger.lifecycle(
+            "Skipping configuration of subproject: $group:$name"
+        )
+        return@subprojects
+    }
+
+    val printMavenArtefact by tasks.registering {
+        group = "validation"
+        description = "Prints the maven artefact for the given project"
+        logger.lifecycle(
+            "Maven artefact: '${project.group}:${project.name}:${project.version}'"
+        )
+    }
+}
