@@ -16,6 +16,7 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedWithRationale
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPermissionsApi::class)
 class VerifyCredentialViewModelTest {
@@ -24,13 +25,31 @@ class VerifyCredentialViewModelTest {
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
     private val logger = SystemLogger()
     private lateinit var viewModel: VerifyCredentialViewModel
+    private val fakeOrchestrator = FakeOrchestrator()
+
+    private val resettableItems = setOf(
+        fakeOrchestrator.apply { cancel() }
+    )
 
     @Before
     fun setup() {
+        assertEquals(1, fakeOrchestrator.cancelCount)
         viewModel = VerifyCredentialViewModel(
             bluetoothStateMonitor = bluetoothStateMonitor,
-            logger = logger
+            logger = logger,
+            resettable = resettableItems,
+            orchestrator = fakeOrchestrator
         )
+    }
+
+    @Test
+    fun `orchestrator resets items on init`() {
+        assertEquals(0, fakeOrchestrator.cancelCount)
+    }
+
+    @Test
+    fun `orchestrator calls start on init`() {
+        assertEquals(1, fakeOrchestrator.startCount)
     }
 
     @Test
@@ -51,6 +70,13 @@ class VerifyCredentialViewModelTest {
         viewModel.onCleared()
 
         assert(bluetoothStateMonitor.stopCalls == 1)
+    }
+
+    @Test
+    fun `resets resettable items onCleared`() {
+        assertEquals(1, fakeOrchestrator.startCount)
+        viewModel.onCleared()
+        assertEquals(0, fakeOrchestrator.startCount)
     }
 
     @Test

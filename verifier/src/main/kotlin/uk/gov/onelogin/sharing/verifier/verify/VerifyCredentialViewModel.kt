@@ -17,9 +17,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
+import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @Inject
@@ -28,7 +31,9 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 @OptIn(ExperimentalPermissionsApi::class)
 class VerifyCredentialViewModel(
     private val logger: Logger,
-    private val bluetoothStateMonitor: BluetoothStateMonitor
+    private val bluetoothStateMonitor: BluetoothStateMonitor,
+    private val resettable: Set<Resettable>,
+    private val orchestrator: Orchestrator
 ) : ViewModel() {
     private val initialState = VerifyCredentialUiState()
     private var allGranted: Boolean? = null
@@ -43,6 +48,10 @@ class VerifyCredentialViewModel(
 
     init {
         bluetoothStateMonitor.start()
+        resettable.forEach(Resettable::reset)
+        orchestrator.start(
+            PermissionChecker.peripheralPermissions().toSet()
+        )
         viewModelScope.launch {
             bluetoothStateMonitor.states
                 .distinctUntilChanged()
@@ -57,7 +66,7 @@ class VerifyCredentialViewModel(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onCleared() {
         bluetoothStateMonitor.stop()
-
+        resettable.forEach(Resettable::reset)
         super.onCleared()
     }
 
