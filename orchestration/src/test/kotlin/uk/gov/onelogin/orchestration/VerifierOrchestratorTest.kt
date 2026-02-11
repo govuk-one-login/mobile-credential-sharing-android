@@ -18,6 +18,7 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatc
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CancellableVerifierSessionStates
+import uk.gov.onelogin.sharing.orchestration.session.verifier.data.UncancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.isCancelled
 
@@ -69,6 +70,22 @@ class VerifierOrchestratorTest {
         assertThat(
             session,
             hasCurrentState(inPreflight())
+        )
+    }
+
+    @Test
+    fun `Orchestrator cannot cancel invalid state transitions`(
+        @TestParameter(valuesProvider = UncancellableVerifierSessionStates::class)
+        state: VerifierSessionState
+    ) = runTest {
+        initialState = state
+        orchestrator.cancel()
+
+        assert(CANCEL_ORCHESTRATION_ERROR in logger)
+        assert(CANCEL_ORCHESTRATION_SUCCESS !in logger)
+        assertThat(
+            session,
+            hasCurrentState(state)
         )
     }
 

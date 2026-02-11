@@ -4,9 +4,11 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
@@ -33,8 +35,18 @@ class VerifierOrchestrator(
     }
 
     override fun cancel() {
-        session.transitionTo(VerifierSessionState.Complete.Cancelled)
-        logger.debug(logTag, CANCEL_ORCHESTRATION_SUCCESS)
+        try {
+            session.transitionTo(VerifierSessionState.Complete.Cancelled)
+            logger.debug(logTag, CANCEL_ORCHESTRATION_SUCCESS)
+        } catch (exception: IllegalStateException) {
+            CANCEL_ORCHESTRATION_ERROR.let { logMessage ->
+                logger.error(
+                    logTag,
+                    logMessage,
+                    OrchestratorCannotCancelException(logMessage, exception)
+                )
+            }
+        }
     }
 
     override fun reset() {
