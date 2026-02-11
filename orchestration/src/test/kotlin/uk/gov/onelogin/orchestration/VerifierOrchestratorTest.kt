@@ -1,11 +1,11 @@
 package uk.gov.onelogin.orchestration
 
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
+import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
@@ -46,6 +46,19 @@ class VerifierOrchestratorTest {
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 
+        assertThat(
+            session,
+            hasCurrentState(inPreflight())
+        )
+    }
+
+    @Test
+    fun `Orchestrator cannot be started more than once`() = runTest {
+        `Starting the Orchestrator journey navigates to the Preflight state`()
+
+        orchestrator.start(setOf())
+
+        assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(
             session,
             hasCurrentState(inPreflight())

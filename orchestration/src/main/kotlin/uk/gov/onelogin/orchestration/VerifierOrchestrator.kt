@@ -5,7 +5,9 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
@@ -16,8 +18,18 @@ class VerifierOrchestrator(
     private val session: VerifierSession,
 ) : Orchestrator.Verifier {
     override fun start(requiredPermissions: Set<String>) {
-        session.transitionTo(VerifierSessionState.Preflight(requiredPermissions))
-        logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
+        try {
+            session.transitionTo(VerifierSessionState.Preflight(requiredPermissions))
+            logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
+        } catch (exception: IllegalStateException) {
+            START_ORCHESTRATION_ERROR.let { logMessage ->
+                logger.error(
+                    logTag,
+                    logMessage,
+                    OrchestratorCannotStartException(logMessage, exception)
+                )
+            }
+        }
     }
 
     override fun cancel() {
