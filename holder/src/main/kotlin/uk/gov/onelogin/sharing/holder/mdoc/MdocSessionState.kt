@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.mdoc
 
 import java.util.UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 /**
  * Represents the combined states from advertising and the GATT service.
@@ -47,4 +48,10 @@ sealed interface MdocSessionState {
      * @param reason The [MdocSessionError] that occurred.
      */
     data class Error(val reason: MdocSessionError) : MdocSessionState
+
+    /**
+     * A session end command has been received from the client or server manager
+     *
+     */
+    data class MdocSessionEnded(val status: SessionEndStates) : MdocSessionState
 }

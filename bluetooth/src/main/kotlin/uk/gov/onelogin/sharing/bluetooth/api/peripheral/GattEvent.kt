@@ -63,4 +63,6 @@ sealed interface GattEvent {
             enum class Reason { NullDevice, NullDescriptor, EmptyValue }
         }
     }
+
+    data object SessionEnd : GattEvent
 }

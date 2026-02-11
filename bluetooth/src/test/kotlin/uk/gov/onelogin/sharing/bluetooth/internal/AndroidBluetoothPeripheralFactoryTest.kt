@@ -10,6 +10,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
+import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
 
@@ -23,7 +24,8 @@ class AndroidBluetoothPeripheralFactoryTest {
     fun `create returns Android peripheral components`() {
         val factory = AndroidBluetoothPeripheralFactory(
             context = context,
-            logger = logger
+            logger = logger,
+            gattWriter = FakeGattWriter()
         )
 
         val components = factory.create()

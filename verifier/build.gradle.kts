@@ -58,6 +58,7 @@ dependencies {
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),
         testFixtures(projects.security),
+        testFixtures(projects.orchestration),
         testFixtures(projects.sdk)
     ).forEach(::testFixturesImplementation)
 
@@ -66,6 +67,7 @@ dependencies {
         testFixtures(projects.core),
         testFixtures(projects.bluetooth),
         testFixtures(projects.security),
+        testFixtures(projects.orchestration),
         testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 }

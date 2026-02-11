@@ -1,7 +1,9 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.central
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattServer
 
 /**
  * Abstracts the write operation for a [BluetoothGattCharacteristic].
@@ -9,7 +11,7 @@ import android.bluetooth.BluetoothGattCharacteristic
  * This is necessary because the Android SDK has different implementation for
  * writing characteristics in older and newer SDK versions.
  */
-fun interface GattWriter {
+interface GattWriter {
     /**
      * Writes a value to a given characteristic using the provided GATT instance.
      *
@@ -20,6 +22,13 @@ fun interface GattWriter {
      */
     fun writeCharacteristic(
         gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        value: ByteArray
+    ): Boolean
+
+    fun notifyAndWriteToClientCharacteristic(
+        server: BluetoothGattServer,
+        device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
     ): Boolean

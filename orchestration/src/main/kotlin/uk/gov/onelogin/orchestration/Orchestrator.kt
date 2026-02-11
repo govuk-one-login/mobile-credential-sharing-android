@@ -12,4 +12,5 @@ interface Orchestrator : Resettable {
     fun cancel()
 
     interface Holder : Orchestrator
+    interface Verifier : Orchestrator
 }

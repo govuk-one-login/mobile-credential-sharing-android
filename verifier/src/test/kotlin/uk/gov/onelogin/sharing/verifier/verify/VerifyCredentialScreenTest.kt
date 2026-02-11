@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -36,7 +37,9 @@ class VerifyCredentialScreenTest {
         Intents.init()
         viewModel = VerifyCredentialViewModel(
             logger,
-            bluetoothStateMonitor
+            bluetoothStateMonitor,
+            setOf(),
+            FakeOrchestrator()
         )
     }
 

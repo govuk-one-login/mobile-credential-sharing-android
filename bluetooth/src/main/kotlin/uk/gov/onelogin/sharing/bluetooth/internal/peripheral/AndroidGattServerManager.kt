@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.content.Context
 import androidx.annotation.RequiresPermission
 import java.util.UUID
@@ -19,7 +20,11 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.NOTIFY_CLIENT_FAILED
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -33,7 +38,8 @@ class AndroidGattServerManager(
         )
     },
     private val permissionsChecker: PermissionChecker,
-    private val logger: Logger
+    private val logger: Logger,
+    private val gattWriter: GattWriter
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
@@ -97,6 +103,7 @@ class AndroidGattServerManager(
             is GattEvent.MessageReceived -> Unit
             is GattEvent.MtuChanged -> mtu = event.mtu
             is GattEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
+            is GattEvent.SessionEnd -> handleSessionEndReceived()
         }
     }
 
@@ -146,6 +153,53 @@ class AndroidGattServerManager(
                             "- response not needed"
                     )
                 }
+        }
+    }
+
+    /**
+     * To handle when the holder successfully receives a END command from the reader.
+     */
+    private fun handleSessionEndReceived() {
+        _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
+    }
+
+    /**
+     * Notifies the reader device with the intent to end the session. Notifying can pass or fail
+     * therefore we invoke [SUCCESS] or [NOTIFY_CLIENT_FAILED] if the holder fails to write to
+     * the readers characteristic.
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun notifySessionEnd(serviceUuid: UUID) {
+        val server = gattServer ?: return
+        val characteristic =
+            server.getService(serviceUuid)?.getCharacteristic(SERVER_2_CLIENT_UUID) ?: return
+        val connectedDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
+        val endValue = byteArrayOf(MdocState.END.code)
+
+        if (connectedDevices.isEmpty()) {
+            logger.error(logTag, "failed to notify client with END command: No devices connected")
+            _events.tryEmit(GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED))
+            return
+        }
+
+        connectedDevices.forEach { device ->
+            val notificationResult =
+                gattWriter.notifyAndWriteToClientCharacteristic(
+                    server,
+                    device,
+                    characteristic,
+                    endValue
+                )
+
+            val event =
+                if (notificationResult) {
+                    logger.debug(logTag, "GATT: Notified state characteristic with 0x02")
+                    GattServerEvent.SessionEnd(SUCCESS)
+                } else {
+                    GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
+                }
+
+            _events.tryEmit(event)
         }
     }
 }

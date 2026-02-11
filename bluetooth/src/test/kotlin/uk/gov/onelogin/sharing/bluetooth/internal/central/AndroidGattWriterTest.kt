@@ -1,12 +1,13 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.central
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -86,5 +87,60 @@ class AndroidGattWriterTest {
         val result = writer.writeCharacteristic(gatt, characteristic, value)
 
         assertFalse(result)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    fun `notifyClientCharacteristic returns true on successful write`() {
+        val result = configureNotifyClientCharacteristic(BluetoothStatusCodes.SUCCESS)
+        assertTrue(result)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    fun `notifyClientCharacteristic returns false on unsuccessful write`() {
+        val result =
+            configureNotifyClientCharacteristic(BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED)
+        assertFalse(result)
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.S])
+    fun `notifyClientCharacteristic returns true on successful write - deprecated api`() {
+        val result =
+            configureNotifyClientCharacteristic(BluetoothStatusCodes.SUCCESS)
+        assertTrue(result)
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.S])
+    fun `notifyClientCharacteristic returns false on unsuccessful write - deprecated api`() {
+        val result =
+            configureNotifyClientCharacteristic(BluetoothStatusCodes.ERROR_GATT_WRITE_NOT_ALLOWED)
+        assertFalse(result)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun configureNotifyClientCharacteristic(notificationResponse: Int): Boolean {
+        val gatt = mockk<BluetoothGattServer>()
+        val device = mockk<BluetoothDevice>()
+        val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val value = byteArrayOf(0x02)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            every {
+                gatt.notifyCharacteristicChanged(device, characteristic, false, value)
+            } returns notificationResponse
+        } else {
+            every {
+                gatt.notifyCharacteristicChanged(device, characteristic, false)
+            } returns (notificationResponse == BluetoothStatusCodes.SUCCESS)
+        }
+
+        val result =
+            writer.notifyAndWriteToClientCharacteristic(gatt, device, characteristic, value)
+        return result
     }
 }

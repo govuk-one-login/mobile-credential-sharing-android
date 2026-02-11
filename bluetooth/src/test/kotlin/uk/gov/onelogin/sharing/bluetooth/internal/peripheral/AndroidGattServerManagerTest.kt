@@ -26,7 +26,9 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
+import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
@@ -58,7 +60,8 @@ class AndroidGattServerManagerTest {
             bluetoothManager = bluetoothManager,
             gattServiceFactory = { fakeGattService },
             permissionsChecker = fakePermissionChecker,
-            logger = SystemLogger()
+            logger = SystemLogger(),
+            gattWriter = FakeGattWriter()
         )
     }
 
@@ -343,5 +346,68 @@ class AndroidGattServerManagerTest {
         every {
             bluetoothManager.openGattServer(context, any())
         } returns null
+    }
+
+    @Test
+    fun `emits session end event when end command received`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+
+        manager.events.test {
+            CharacteristicWriteRequestStub.writeRequestEnd(
+                bluetoothDevice = device,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.STATE_UUID
+                }
+            ).run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
+
+            assertEquals(
+                GattServerEvent.SessionEnd(SessionEndStates.SUCCESS),
+                awaitItem()
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `notifySessionEnd sends END code and emits SessionEnd event`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+        val serviceUuid = UUID.randomUUID()
+
+        every {
+            bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
+        } returns listOf(device)
+
+        manager.open(uuid)
+
+        manager.events.test {
+            callbackSlot.captured.onConnectionStateChange(
+                device,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothProfile.STATE_CONNECTED
+            )
+
+            assertEquals(
+                GattServerEvent.Connected(DEVICE_ADDRESS),
+                awaitItem()
+            )
+
+            manager.notifySessionEnd(serviceUuid)
+
+            val event = awaitItem()
+            assert(event is GattServerEvent.SessionEnd)
+        }
     }
 }

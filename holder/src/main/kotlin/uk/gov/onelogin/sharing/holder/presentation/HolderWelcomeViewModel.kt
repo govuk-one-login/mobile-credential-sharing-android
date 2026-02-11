@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONN
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
@@ -142,6 +143,18 @@ class HolderWelcomeViewModel(
 
                     is MdocSessionState.ServiceAdded ->
                         logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
+
+                    is MdocSessionState.MdocSessionEnded -> {
+                        if (state.status == SessionEndStates.SUCCESS) {
+                            logger.debug(logTag, "Mdoc - Ending session")
+                        } else {
+                            _uiState.update { it.copy(showErrorScreen = true) }
+                            logger.error(
+                                logTag,
+                                "Mdoc - Error while ending session: ${state.status}"
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -285,10 +298,18 @@ class HolderWelcomeViewModel(
     }
 
     fun onScreenDisposed() {
-        if (_uiState.value.sessionState is MdocSessionState.Connected) {
-            logger.debug(logTag, "Holder stopped advertising during session")
-        }
-        stopAdvertising()
+        @RequiresImplementation(
+            details = [
+                ImplementationDetail(
+                    ticket = "UI",
+                    description = "We don't have an explicit back button or way to test this atm" +
+                        "so will send end command onNavBack to test closing the connection" +
+                        "for now."
+                )
+            ]
+        )
+        mdocBleSession.notifySessionEnd(_uiState.value.uuid)
+        logger.debug(logTag, "Holder stopped advertising during session")
     }
 
     override fun onCleared() {

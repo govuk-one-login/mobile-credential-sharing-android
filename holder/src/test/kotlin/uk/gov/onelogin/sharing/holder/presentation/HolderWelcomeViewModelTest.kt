@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.holder.presentation
 import androidx.lifecycle.SavedStateHandle
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -15,6 +16,7 @@ import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.Resettable
@@ -463,5 +465,24 @@ class HolderWelcomeViewModelTest {
         assertFalse(state.hasBluetoothPermissions!!)
         assertFalse(state.previouslyHadPermissions)
         assertFalse(state.showErrorScreen)
+    }
+
+    @Test
+    fun `onScreenDisposed notifies session manager to end the session`() = runTest {
+        val fakeMdocSession = FakeMdocSessionManager(
+            initialState = MdocSessionState.AdvertisingStarted
+        )
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        val currentUuid = viewModel.uiState.value.uuid
+        assertNotNull(currentUuid)
+
+        viewModel.onScreenDisposed()
+
+        assertEquals(
+            "The session manager should receive the UUID from the UI state",
+            currentUuid,
+            fakeMdocSession.lastUuid
+        )
     }
 }

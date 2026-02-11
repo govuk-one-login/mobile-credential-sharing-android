@@ -83,4 +83,16 @@ object CharacteristicWriteRequestStub {
         characteristic = characteristic,
         value = message
     )
+
+    /**
+     * Creates a stub for `onCharacteristicWriteRequest` with the `END` command.
+     */
+    fun writeRequestEnd(
+        bluetoothDevice: BluetoothDevice,
+        characteristic: BluetoothGattCharacteristic
+    ) = OnCharacteristicWriteRequestArgs(
+        device = bluetoothDevice,
+        characteristic = characteristic,
+        value = byteArrayOf(MdocState.END.code)
+    )
 }

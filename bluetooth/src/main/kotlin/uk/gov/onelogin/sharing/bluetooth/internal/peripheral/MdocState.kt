@@ -9,7 +9,14 @@ internal enum class MdocState(val code: Byte) {
     /**
      * The initial state, indicating the start of a session.
      */
-    START(0x01);
+    START(0x01),
+
+    /**
+     * The end state, signalling the intent to finish or terminate a session. The mdoc reader shall
+     * use this value to signal the end of data retrieval. If used for session termination, ensure
+     * the session is not terminated while transmission of SessionData message is ongoing.
+     */
+    END(0x02);
 
     companion object {
         /**

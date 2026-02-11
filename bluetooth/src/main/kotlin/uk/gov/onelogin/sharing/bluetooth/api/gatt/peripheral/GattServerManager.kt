@@ -7,4 +7,6 @@ interface GattServerManager : AutoCloseable {
     val events: SharedFlow<GattServerEvent>
 
     fun open(serviceUuid: UUID)
+
+    fun notifySessionEnd(serviceUuid: UUID)
 }

@@ -86,6 +86,10 @@ class AndroidMdocSessionManager(
         bluetoothStateMonitor.stop()
     }
 
+    override fun notifySessionEnd(serviceUuid: UUID) {
+        gattServerManager.notifySessionEnd(serviceUuid)
+    }
+
     private fun handleAdvertiserState(state: AdvertiserState) {
         when (state) {
             AdvertiserState.Started ->
@@ -136,9 +140,18 @@ class AndroidMdocSessionManager(
                 )
 
             GattServerEvent.SessionStarted -> {
-                logger.error(
+                logger.debug(
                     logTag,
                     "Mdoc - Connection has been setup successfully - session state started"
+                )
+            }
+
+            is GattServerEvent.SessionEnd -> {
+                _state.value = MdocSessionState.MdocSessionEnded(event.status)
+                gattServerManager.close()
+                logger.debug(
+                    logTag,
+                    "Mdoc - Session end command was received. Closing connection"
                 )
             }
         }

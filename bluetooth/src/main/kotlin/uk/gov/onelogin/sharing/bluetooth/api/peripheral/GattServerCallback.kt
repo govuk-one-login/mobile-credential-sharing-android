@@ -145,6 +145,11 @@ class GattServerCallback(
                 gatGattEventEmitter.emit(GattEvent.ConnectionStateStarted)
             }
 
+            MdocState.END -> {
+                logger.debug(logTag, "GATT: Received Write Request 0x02 on State")
+                gatGattEventEmitter.emit(GattEvent.SessionEnd)
+            }
+
             null -> {
                 logger.debug(
                     logTag,
