@@ -16,9 +16,9 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
@@ -126,7 +126,9 @@ class AndroidGattServerManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun handleDescriptorWriteRequest(event: GattServerCallbackEvent.DescriptorWriteRequest) {
+    private fun handleDescriptorWriteRequest(
+        event: GattServerCallbackEvent.DescriptorWriteRequest
+    ) {
         when (event) {
             is GattServerCallbackEvent.DescriptorWriteRequest.Invalid -> {
                 _events.tryEmit(

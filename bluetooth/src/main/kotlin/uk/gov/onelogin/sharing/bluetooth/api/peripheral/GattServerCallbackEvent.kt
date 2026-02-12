@@ -33,7 +33,8 @@ sealed interface GattServerCallbackEvent {
         }
     }
 
-    data class ServiceAdded(val status: Int, val service: BluetoothGattService?) : GattServerCallbackEvent
+    data class ServiceAdded(val status: Int, val service: BluetoothGattService?) :
+        GattServerCallbackEvent
     data class MessageReceived(val byteArray: ByteArray) : GattServerCallbackEvent {
         override fun equals(other: Any?): Boolean {
             val other = other as? MessageReceived ?: return false

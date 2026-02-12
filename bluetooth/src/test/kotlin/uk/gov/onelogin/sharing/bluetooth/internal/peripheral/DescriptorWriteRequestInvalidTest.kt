@@ -9,8 +9,8 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.FakeGattEventEmitter
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 
 @RunWith(Parameterized::class)
 class DescriptorWriteRequestInvalidTest(
