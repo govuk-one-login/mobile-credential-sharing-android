@@ -1,16 +1,16 @@
 package uk.gov.onelogin.sharing.security.cbor.deserializers
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceRequest
 import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DeviceRequestDto
 import uk.gov.onelogin.sharing.security.util.getByteArrayFromHexStringFile
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class DeviceRequestDeserializerTest {
     private val deviceRequestExample1 = getByteArrayFromHexStringFile(
@@ -82,7 +82,6 @@ class DeviceRequestDeserializerTest {
         }
     }
 
-
     private companion object {
         private const val CBOR_FILE_PATH =
             "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cbor/deserializers/"
@@ -97,7 +96,7 @@ class DeviceRequestDeserializerTest {
             "driving_privileges" to true,
             "issue_date" to true,
             "expiry_date" to true,
-            "portrait" to false,
+            "portrait" to false
         )
     }
 }

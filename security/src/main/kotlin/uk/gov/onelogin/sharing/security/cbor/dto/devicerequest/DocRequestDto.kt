@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import uk.gov.onelogin.sharing.security.cbor.deserializers.ItemsRequestDeserializer
 
-
 data class DocRequestDto(
     @JsonProperty("itemsRequest")
     @JsonDeserialize(using = ItemsRequestDeserializer::class)

@@ -10,6 +10,8 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import java.io.IOException
+import java.util.Base64
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
@@ -23,8 +25,6 @@ import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DeviceRequestDto
 import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DocRequestDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCborSerializer
-import java.io.IOException
-import java.util.Base64
 
 private const val TAG = "decodeDeviceEngagement"
 
@@ -55,7 +55,7 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
             ImplementationDetail(
                 ticket = "N/A not captured",
                 description = "Create DTO -> Domain mapping functions for verifier to extract" +
-                        "deserialized device engagement message"
+                    "deserialized device engagement message"
             )
         ]
     )
@@ -63,17 +63,17 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
     logger.debug(
         TAG,
         " - Security - Cipher Suite: " +
-                "${deviceEngagement.security.cipherSuiteIdentifier}"
+            "${deviceEngagement.security.cipherSuiteIdentifier}"
     )
     logger.debug(
         TAG,
         " - Security - Ephemeral Public Key (as hex): " +
-                "${deviceEngagement.security.ephemeralPublicKey}"
+            "${deviceEngagement.security.ephemeralPublicKey}"
     )
     logger.debug(
         TAG,
         " - Device Retrieval Methods: " +
-                "${deviceEngagement.deviceRetrievalMethods}"
+            "${deviceEngagement.deviceRetrievalMethods}"
     )
 
     deviceEngagement
@@ -117,7 +117,7 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
         logger.debug(
             logger.logTag,
             "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
-                    "data: ${sessionEstablishmentDto.data.toHexString()} "
+                "data: ${sessionEstablishmentDto.data.toHexString()} "
         )
 
         sessionEstablishmentDto
@@ -144,10 +144,7 @@ fun deriveSessionTranscript(
 fun deriveUntaggedCbor(tagged: ByteArray): ByteArray =
     DeriveUntaggedCborImpl().deriveUntaggedCbor(tagged)
 
-fun decodeDeviceRequest(
-    bytes: ByteArray,
-    logger: Logger
-): DeviceRequestDto = try {
+fun decodeDeviceRequest(bytes: ByteArray, logger: Logger): DeviceRequestDto = try {
     val cborMapper = ObjectMapper(
         CBORFactory()
     ).apply {
