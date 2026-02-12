@@ -33,8 +33,12 @@ android {
 dependencies {
     listOf(
         libs.metro.viewmodel.compose,
+        projects.bluetooth,
+        projects.holder,
+        projects.security,
         projects.sdk,
-        projects.ui.uiApi
+        projects.ui.uiApi,
+        projects.verifier
     ).forEach(::implementation)
 }
 

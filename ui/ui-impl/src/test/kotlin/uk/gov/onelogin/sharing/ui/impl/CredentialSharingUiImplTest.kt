@@ -26,7 +26,7 @@ class CredentialSharingUiImplTest {
         composeTestRule.setContent {
             ui.Render(
                 sdk = mockSdk,
-                startDestination = CredentialSharingDestination.CredentialSharingRoot
+                startDestination = CredentialSharingDestination.HolderRoot
             )
         }
 

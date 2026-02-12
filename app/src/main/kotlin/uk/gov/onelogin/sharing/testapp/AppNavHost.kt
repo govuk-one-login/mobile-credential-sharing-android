@@ -23,7 +23,7 @@ fun AppNavHost(
         modifier = modifier
     ) {
         configureTestAppRoutes(onNavigate = navController::navigate)
-        configureHolderRoutes(appGraph)
-        configureVerifierRoutes(navController = navController, appGraph)
+        configureHolderRoutes()
+        configureVerifierRoutes(navController = navController)
     }
 }

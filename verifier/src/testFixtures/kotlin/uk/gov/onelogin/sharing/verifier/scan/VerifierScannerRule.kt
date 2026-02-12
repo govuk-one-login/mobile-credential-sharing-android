@@ -30,7 +30,6 @@ import org.hamcrest.CoreMatchers.allOf
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertions.hasState
 
 /**
@@ -115,14 +114,14 @@ class VerifierScannerRule(
         onValidBarcode: (String) -> Unit = {}
     ) {
         setContent {
-            val graph = remember {
+           /* val graph = remember {
                 createGraphFactory<VerifierGraph.Factory>().create(
                     appGraph = appGraph
                 )
-            }
+            }*/
 
             CompositionLocalProvider(
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory
+//                LocalMetroViewModelFactory provides graph.metroViewModelFactory
             ) {
                 VerifierScanner(
                     modifier = modifier,

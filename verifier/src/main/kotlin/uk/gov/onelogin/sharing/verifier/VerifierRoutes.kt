@@ -38,16 +38,13 @@ data object VerifierRoutes {
      * @see configureScannedInvalidQrRoute
      */
     fun NavGraphBuilder.configureVerifierRoutes(
-        navController: NavController,
-        appGraph: CredentialSharingAppGraph
+        navController: NavController
     ) {
         navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
             configureVerifyCredentialRoute(
-                navController,
-                appGraph
+                navController
             )
             configureVerifierScannerRoute(
-                appGraph = appGraph,
                 onInvalidBarcode = {
                     navController.navigateToScannedInvalidQrRoute(uri = it)
                 },
@@ -58,7 +55,7 @@ data object VerifierRoutes {
             configureScannedInvalidQrRoute(
                 onTryAgainClick = { navController.navigateToVerifierScanRoute() }
             )
-            configureConnectWithHolderDeviceRoute(appGraph) {
+            configureConnectWithHolderDeviceRoute() {
                 navController.navigateToBluetoothConnectionErrorRoute(title = it)
             }
             configureBluetoothConnectionErrorRoute(controller = navController)

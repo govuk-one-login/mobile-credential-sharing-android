@@ -6,15 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.CredentialSharingSdk
-import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
+import uk.gov.onelogin.sharing.ui.api.CredentialSharingDestination
 import uk.gov.onelogin.sharing.ui.api.CredentialSharingUi
 
 @AndroidEntryPoint
@@ -32,6 +29,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            GdsTheme {
+                ui.Render(
+                    sdk = credentialSharingSdk,
+                    startDestination = CredentialSharingDestination.VerifierRoot,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+
+        /*setContent {
             val navController = rememberNavController()
 
             val startDestination = PrimaryTabDestination.Holder
@@ -47,6 +54,6 @@ class MainActivity : ComponentActivity() {
                     onUpdateTabDestination = viewModel::update
                 )
             }
-        }
+        }*/
     }
 }

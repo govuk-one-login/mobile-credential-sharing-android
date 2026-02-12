@@ -4,19 +4,13 @@ import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import dev.zacsweers.metro.createGraphFactory
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlinx.serialization.Serializable
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.verifier.di.VerifierGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanFromRoot
 
 /**
@@ -32,28 +26,17 @@ object VerifyCredentialRoute {
      */
     @OptIn(ExperimentalPermissionsApi::class)
     fun NavGraphBuilder.configureVerifyCredentialRoute(
-        navController: NavController,
-        appGraph: CredentialSharingAppGraph
+        navController: NavController
     ) {
         composable<VerifyCredentialRoute> {
-            val graph = remember {
-                createGraphFactory<VerifierGraph.Factory>().create(
-                    appGraph
-                )
-            }
-
-            CompositionLocalProvider(
-                LocalMetroViewModelFactory provides graph.metroViewModelFactory
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    VerifyCredentialScreen(
-                        navigateToScanner = { navController.navigateToVerifierScanFromRoot() }
-                    )
-                }
+                VerifyCredentialScreen(
+                    navigateToScanner = { navController.navigateToVerifierScanFromRoot() }
+                )
             }
         }
     }
