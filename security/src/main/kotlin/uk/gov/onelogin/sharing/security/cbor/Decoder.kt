@@ -4,20 +4,27 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.exc.StreamReadException
 import com.fasterxml.jackson.databind.DatabindException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.IOException
-import java.util.Base64
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.cbor.CborErrors.DECODING_ERROR
 import uk.gov.onelogin.sharing.security.cbor.decoders.DeriveUntaggedCborImpl
 import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptDecoderImpl
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
+import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DeviceRequestDto
+import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DocRequestDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCborSerializer
+import java.io.IOException
+import java.util.Base64
 
 private const val TAG = "decodeDeviceEngagement"
 
@@ -48,7 +55,7 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
             ImplementationDetail(
                 ticket = "N/A not captured",
                 description = "Create DTO -> Domain mapping functions for verifier to extract" +
-                    "deserialized device engagement message"
+                        "deserialized device engagement message"
             )
         ]
     )
@@ -56,17 +63,17 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
     logger.debug(
         TAG,
         " - Security - Cipher Suite: " +
-            "${deviceEngagement.security.cipherSuiteIdentifier}"
+                "${deviceEngagement.security.cipherSuiteIdentifier}"
     )
     logger.debug(
         TAG,
         " - Security - Ephemeral Public Key (as hex): " +
-            "${deviceEngagement.security.ephemeralPublicKey}"
+                "${deviceEngagement.security.ephemeralPublicKey}"
     )
     logger.debug(
         TAG,
         " - Device Retrieval Methods: " +
-            "${deviceEngagement.deviceRetrievalMethods}"
+                "${deviceEngagement.deviceRetrievalMethods}"
     )
 
     deviceEngagement
@@ -99,7 +106,7 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
 
         val rawDto = mapper.readValue(rawBytes, SessionEstablishmentDto::class.java)
         requireNotNull(rawDto) {
-            CborErrors.DECODING_ERROR.errorMessage
+            DECODING_ERROR.errorMessage
         }
 
         val sessionEstablishmentDto = SessionEstablishmentDto(
@@ -110,7 +117,7 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
         logger.debug(
             logger.logTag,
             "eReaderKey: ${sessionEstablishmentDto.eReaderKey.encoded.toHexString()}, " +
-                "data: ${sessionEstablishmentDto.data.toHexString()} "
+                    "data: ${sessionEstablishmentDto.data.toHexString()} "
         )
 
         sessionEstablishmentDto
@@ -136,3 +143,41 @@ fun deriveSessionTranscript(
 
 fun deriveUntaggedCbor(tagged: ByteArray): ByteArray =
     DeriveUntaggedCborImpl().deriveUntaggedCbor(tagged)
+
+fun decodeDeviceRequest(
+    bytes: ByteArray,
+    logger: Logger
+): DeviceRequestDto = try {
+    val cborMapper = ObjectMapper(
+        CBORFactory()
+    ).apply {
+        registerKotlinModule()
+        val module =
+            SimpleModule().addSerializer(EmbeddedCbor::class.java, EmbeddedCborSerializer())
+        registerModule(module)
+    }
+
+    val deviceRequestDto = cborMapper.readValue(
+        bytes,
+        DeviceRequestDto::class.java
+    )
+
+    if (deviceRequestDto.docRequest.isEmpty()) {
+        val errorMessage = "empty DocRequest: status code 20"
+        logger.error(logger.logTag, errorMessage)
+        throw TypeNotPresentException(
+            DocRequestDto::class.java.name,
+            Exception(errorMessage)
+        )
+    }
+
+    logger.debug(
+        logger.logTag,
+        "device request decoded successfully"
+    )
+
+    deviceRequestDto
+} catch (e: MismatchedInputException) {
+    logger.error(logger.logTag, "session termination: status code 11")
+    throw e
+}
