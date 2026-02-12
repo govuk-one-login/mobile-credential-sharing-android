@@ -12,7 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.FakeGattEventEmitter
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
@@ -45,7 +45,7 @@ class BluetoothGattServerCallbackTest {
         )
 
         assertEquals(1, fakeEmitter.events.size)
-        val event = fakeEmitter.events.single() as GattEvent.ConnectionStateChange
+        val event = fakeEmitter.events.single() as GattServerCallbackEvent.ConnectionStateChange
         assertEquals(DEVICE_ADDRESS, event.device.address)
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
         assertEquals(BluetoothProfile.STATE_CONNECTED, event.newState)
@@ -62,7 +62,7 @@ class BluetoothGattServerCallbackTest {
         )
 
         assertEquals(1, fakeEmitter.events.size)
-        val event = fakeEmitter.events.single() as GattEvent.ServiceAdded
+        val event = fakeEmitter.events.single() as GattServerCallbackEvent.ServiceAdded
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
         assertEquals(uuid, event.service?.uuid)
     }
@@ -88,7 +88,7 @@ class BluetoothGattServerCallbackTest {
 
         assertEquals(1, fakeEmitter.events.size)
         assertEquals(
-            GattEvent.ConnectionStateStarted,
+            GattServerCallbackEvent.ConnectionStateStarted,
             fakeEmitter.events.single()
         )
     }
@@ -159,7 +159,7 @@ class BluetoothGattServerCallbackTest {
 
         assertEquals(1, fakeEmitter.events.size)
         assertEquals(
-            GattEvent.MessageReceived(byteArrayOf(0x33, 0x44, 0x55)),
+            GattServerCallbackEvent.MessageReceived(byteArrayOf(0x33, 0x44, 0x55)),
             fakeEmitter.events.firstOrNull()
         )
     }
@@ -228,7 +228,7 @@ class BluetoothGattServerCallbackTest {
 
         assertEquals(1, fakeEmitter.events.size)
         assertEquals(
-            GattEvent.MessageReceived(byteArrayOf(0x11, 0x22, 0x33, 0x44, 0x55)),
+            GattServerCallbackEvent.MessageReceived(byteArrayOf(0x11, 0x22, 0x33, 0x44, 0x55)),
             fakeEmitter.events.firstOrNull()
         )
     }

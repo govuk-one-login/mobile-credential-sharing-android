@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.FakeGattEventEmitter
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 
 @RunWith(Parameterized::class)
@@ -17,7 +17,7 @@ class DescriptorWriteRequestInvalidTest(
     private val device: BluetoothDevice?,
     private val descriptor: BluetoothGattDescriptor?,
     private val value: ByteArray?,
-    private val expectedReason: GattEvent.DescriptorWriteRequest.Invalid.Reason
+    private val expectedReason: GattServerCallbackEvent.DescriptorWriteRequest.Invalid.Reason
 ) {
 
     @Test
@@ -36,7 +36,7 @@ class DescriptorWriteRequestInvalidTest(
         )
 
         assertEquals(
-            GattEvent.DescriptorWriteRequest.Invalid(
+            GattServerCallbackEvent.DescriptorWriteRequest.Invalid(
                 requestId = 1,
                 responseNeeded = true,
                 reason = expectedReason
@@ -53,19 +53,19 @@ class DescriptorWriteRequestInvalidTest(
                 null,
                 mockk<BluetoothGattDescriptor>(),
                 byteArrayOf(0x01),
-                GattEvent.DescriptorWriteRequest.Invalid.Reason.NullDevice
+                GattServerCallbackEvent.DescriptorWriteRequest.Invalid.Reason.NullDevice
             ),
             arrayOf(
                 mockk<BluetoothDevice>(),
                 null,
                 byteArrayOf(0x01),
-                GattEvent.DescriptorWriteRequest.Invalid.Reason.NullDescriptor
+                GattServerCallbackEvent.DescriptorWriteRequest.Invalid.Reason.NullDescriptor
             ),
             arrayOf(
                 mockk<BluetoothDevice>(),
                 mockk<BluetoothGattDescriptor>(),
                 null,
-                GattEvent.DescriptorWriteRequest.Invalid.Reason.EmptyValue
+                GattServerCallbackEvent.DescriptorWriteRequest.Invalid.Reason.EmptyValue
             )
         )
     }

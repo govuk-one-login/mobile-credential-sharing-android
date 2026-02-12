@@ -18,7 +18,7 @@ class ConnectionStateChangeMappingTest {
 
     @Test
     fun `maps successful connect to Connected`() {
-        val event = GattEvent.ConnectionStateChange(
+        val event = GattServerCallbackEvent.ConnectionStateChange(
             device = device,
             status = BluetoothGatt.GATT_SUCCESS,
             newState = BluetoothProfile.STATE_CONNECTED
@@ -34,7 +34,7 @@ class ConnectionStateChangeMappingTest {
 
     @Test
     fun `maps disconnected to Disconnected`() {
-        val event = GattEvent.ConnectionStateChange(
+        val event = GattServerCallbackEvent.ConnectionStateChange(
             device = device,
             status = BluetoothGatt.GATT_SUCCESS,
             newState = BluetoothProfile.STATE_DISCONNECTED
@@ -50,7 +50,7 @@ class ConnectionStateChangeMappingTest {
 
     @Test
     fun `maps unexpected codes to UnsupportedEvent`() {
-        val event = GattEvent.ConnectionStateChange(
+        val event = GattServerCallbackEvent.ConnectionStateChange(
             device = device,
             status = 42,
             newState = 123

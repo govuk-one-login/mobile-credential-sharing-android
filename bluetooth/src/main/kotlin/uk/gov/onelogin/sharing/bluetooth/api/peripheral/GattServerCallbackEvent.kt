@@ -7,12 +7,12 @@ import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothProfile
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 
-sealed interface GattEvent {
+sealed interface GattServerCallbackEvent {
     data class ConnectionStateChange(
         val status: Int,
         val newState: Int,
         val device: BluetoothDevice
-    ) : GattEvent {
+    ) : GattServerCallbackEvent {
         fun toGattServerEvent(): GattServerEvent {
             val address = device.address
 
@@ -33,8 +33,8 @@ sealed interface GattEvent {
         }
     }
 
-    data class ServiceAdded(val status: Int, val service: BluetoothGattService?) : GattEvent
-    data class MessageReceived(val byteArray: ByteArray) : GattEvent {
+    data class ServiceAdded(val status: Int, val service: BluetoothGattService?) : GattServerCallbackEvent
+    data class MessageReceived(val byteArray: ByteArray) : GattServerCallbackEvent {
         override fun equals(other: Any?): Boolean {
             val other = other as? MessageReceived ?: return false
             return this.byteArray.contentEquals(other.byteArray)
@@ -43,11 +43,11 @@ sealed interface GattEvent {
         override fun hashCode(): Int = byteArray.contentHashCode()
     }
 
-    data object ConnectionStateStarted : GattEvent
+    data object ConnectionStateStarted : GattServerCallbackEvent
 
-    data class MtuChanged(val device: BluetoothDevice?, val mtu: Int) : GattEvent
+    data class MtuChanged(val device: BluetoothDevice?, val mtu: Int) : GattServerCallbackEvent
 
-    sealed interface DescriptorWriteRequest : GattEvent {
+    sealed interface DescriptorWriteRequest : GattServerCallbackEvent {
         data class Valid(
             val device: BluetoothDevice,
             val requestId: Int,
@@ -64,5 +64,5 @@ sealed interface GattEvent {
         }
     }
 
-    data object SessionEnd : GattEvent
+    data object SessionEnd : GattServerCallbackEvent
 }

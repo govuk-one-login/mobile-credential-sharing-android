@@ -21,7 +21,7 @@ class GattServerCallback(
         logger.debug(logTag, "Status: $status")
         logger.debug(logTag, "NewState: $newState")
         gatGattEventEmitter.emit(
-            GattEvent.ConnectionStateChange(
+            GattServerCallbackEvent.ConnectionStateChange(
                 status,
                 newState,
                 device
@@ -75,7 +75,7 @@ class GattServerCallback(
                         val fullMessage = previousMessages + newMessage
 
                         gatGattEventEmitter.emit(
-                            GattEvent.MessageReceived(fullMessage)
+                            GattServerCallbackEvent.MessageReceived(fullMessage)
                         )
 
                         val fullMessageString = fullMessage
@@ -101,26 +101,26 @@ class GattServerCallback(
         offset: Int,
         value: ByteArray?
     ) {
-        val event: GattEvent.DescriptorWriteRequest = when {
-            device == null -> GattEvent.DescriptorWriteRequest.Invalid(
+        val event: GattServerCallbackEvent.DescriptorWriteRequest = when {
+            device == null -> GattServerCallbackEvent.DescriptorWriteRequest.Invalid(
                 requestId,
                 responseNeeded,
-                GattEvent.DescriptorWriteRequest.Invalid.Reason.NullDevice
+                GattServerCallbackEvent.DescriptorWriteRequest.Invalid.Reason.NullDevice
             )
 
-            descriptor == null -> GattEvent.DescriptorWriteRequest.Invalid(
+            descriptor == null -> GattServerCallbackEvent.DescriptorWriteRequest.Invalid(
                 requestId,
                 responseNeeded,
-                GattEvent.DescriptorWriteRequest.Invalid.Reason.NullDescriptor
+                GattServerCallbackEvent.DescriptorWriteRequest.Invalid.Reason.NullDescriptor
             )
 
-            value == null -> GattEvent.DescriptorWriteRequest.Invalid(
+            value == null -> GattServerCallbackEvent.DescriptorWriteRequest.Invalid(
                 requestId,
                 responseNeeded,
-                GattEvent.DescriptorWriteRequest.Invalid.Reason.EmptyValue
+                GattServerCallbackEvent.DescriptorWriteRequest.Invalid.Reason.EmptyValue
             )
 
-            else -> GattEvent.DescriptorWriteRequest.Valid(
+            else -> GattServerCallbackEvent.DescriptorWriteRequest.Valid(
                 device,
                 requestId,
                 descriptor,
@@ -142,12 +142,12 @@ class GattServerCallback(
         when (state) {
             MdocState.START -> {
                 logger.debug(logTag, "Received START command from ${device.address}")
-                gatGattEventEmitter.emit(GattEvent.ConnectionStateStarted)
+                gatGattEventEmitter.emit(GattServerCallbackEvent.ConnectionStateStarted)
             }
 
             MdocState.END -> {
                 logger.debug(logTag, "GATT: Received Write Request 0x02 on State")
-                gatGattEventEmitter.emit(GattEvent.SessionEnd)
+                gatGattEventEmitter.emit(GattServerCallbackEvent.SessionEnd)
             }
 
             null -> {
@@ -165,13 +165,13 @@ class GattServerCallback(
 
     override fun onServiceAdded(status: Int, service: BluetoothGattService?) {
         gatGattEventEmitter.emit(
-            GattEvent.ServiceAdded(status, service)
+            GattServerCallbackEvent.ServiceAdded(status, service)
         )
     }
 
     override fun onMtuChanged(device: BluetoothDevice?, mtu: Int) {
         gatGattEventEmitter.emit(
-            GattEvent.MtuChanged(device, mtu)
+            GattServerCallbackEvent.MtuChanged(device, mtu)
         )
     }
 

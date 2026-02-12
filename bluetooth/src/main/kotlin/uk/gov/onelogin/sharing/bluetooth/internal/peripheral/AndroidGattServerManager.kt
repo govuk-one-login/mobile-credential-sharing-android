@@ -16,7 +16,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
@@ -95,23 +95,23 @@ class AndroidGattServerManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun handleGattEvent(event: GattEvent) {
+    private fun handleGattEvent(event: GattServerCallbackEvent) {
         when (event) {
-            is GattEvent.ConnectionStateChange -> handleConnectionStateChange(event)
-            is GattEvent.ConnectionStateStarted -> handleConnectionStateStarted()
-            is GattEvent.ServiceAdded -> handleServiceAdded(event)
-            is GattEvent.MessageReceived -> Unit
-            is GattEvent.MtuChanged -> mtu = event.mtu
-            is GattEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
-            is GattEvent.SessionEnd -> handleSessionEndReceived()
+            is GattServerCallbackEvent.ConnectionStateChange -> handleConnectionStateChange(event)
+            is GattServerCallbackEvent.ConnectionStateStarted -> handleConnectionStateStarted()
+            is GattServerCallbackEvent.ServiceAdded -> handleServiceAdded(event)
+            is GattServerCallbackEvent.MessageReceived -> Unit
+            is GattServerCallbackEvent.MtuChanged -> mtu = event.mtu
+            is GattServerCallbackEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
+            is GattServerCallbackEvent.SessionEnd -> handleSessionEndReceived()
         }
     }
 
-    private fun handleConnectionStateChange(event: GattEvent.ConnectionStateChange) {
+    private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
         _events.tryEmit(event.toGattServerEvent())
     }
 
-    private fun handleServiceAdded(event: GattEvent.ServiceAdded) {
+    private fun handleServiceAdded(event: GattServerCallbackEvent.ServiceAdded) {
         _events.tryEmit(
             GattServerEvent.ServiceAdded(
                 event.status,
@@ -126,9 +126,9 @@ class AndroidGattServerManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun handleDescriptorWriteRequest(event: GattEvent.DescriptorWriteRequest) {
+    private fun handleDescriptorWriteRequest(event: GattServerCallbackEvent.DescriptorWriteRequest) {
         when (event) {
-            is GattEvent.DescriptorWriteRequest.Invalid -> {
+            is GattServerCallbackEvent.DescriptorWriteRequest.Invalid -> {
                 _events.tryEmit(
                     GattServerEvent.Error(
                         GattServerError.DESCRIPTOR_WRITE_REQUEST_FAILED
@@ -137,7 +137,7 @@ class AndroidGattServerManager(
                 logger.error(logTag, "Invalid descriptor write request: ${event.reason}")
             }
 
-            is GattEvent.DescriptorWriteRequest.Valid ->
+            is GattServerCallbackEvent.DescriptorWriteRequest.Valid ->
                 if (event.responseNeeded) {
                     gattServer?.sendResponse(
                         event.device,
