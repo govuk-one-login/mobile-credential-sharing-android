@@ -21,8 +21,8 @@ import uk.gov.onelogin.sharing.orchestration.session.holder.data.CompleteHolderS
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.UncancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.isCancelled
-import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.hasCurrentSession
-import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
+import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.isNotStarted
+import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 
 @RunWith(TestParameterInjector::class)
 class HolderOrchestratorTest {
@@ -63,9 +63,7 @@ class HolderOrchestratorTest {
 
         assertThat(
             sessionFactory,
-            hasCurrentSession(
-                hasCurrentState(inPreflight())
-            )
+            currentSessionState(inPreflight())
         )
     }
 
@@ -83,9 +81,7 @@ class HolderOrchestratorTest {
 
         assertThat(
             sessionFactory,
-            hasCurrentSession(
-                hasCurrentState(inPreflight())
-            )
+            currentSessionState(inPreflight())
         )
     }
 
@@ -97,8 +93,8 @@ class HolderOrchestratorTest {
 
         assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(
-            sessionFactory.getCurrentSession(),
-            hasCurrentState(inPreflight())
+            sessionFactory,
+            currentSessionState(inPreflight())
         )
     }
 
@@ -114,9 +110,7 @@ class HolderOrchestratorTest {
         assert(CANCEL_ORCHESTRATION_SUCCESS !in logger)
         assertThat(
             sessionFactory,
-            hasCurrentSession(
-                hasCurrentState(state)
-            )
+            currentSessionState(state)
         )
     }
 
@@ -132,9 +126,7 @@ class HolderOrchestratorTest {
         assert(CANCEL_ORCHESTRATION_ERROR !in logger)
         assertThat(
             sessionFactory,
-            hasCurrentSession(
-                hasCurrentState(isCancelled())
-            )
+            currentSessionState(isCancelled())
         )
     }
 
@@ -147,9 +139,7 @@ class HolderOrchestratorTest {
         assert(resetOrchestratorSessionLog in logger)
         assertThat(
             sessionFactory,
-            hasCurrentSession(
-                hasCurrentState(HolderSessionState.NotStarted)
-            )
+            currentSessionState(isNotStarted())
         )
     }
 }

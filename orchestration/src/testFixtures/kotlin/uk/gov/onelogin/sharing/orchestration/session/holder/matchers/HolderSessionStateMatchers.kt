@@ -9,11 +9,15 @@ import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
  * Wrapper object for storing hamcrest [Matcher] functions for [HolderSessionState].
  */
 object HolderSessionStateMatchers {
-    fun inPreflight(): Matcher<HolderSessionState> = instanceOf(
+    fun inPreflight(): Matcher<in HolderSessionState> = instanceOf(
         HolderSessionState.Preflight::class.java
     )
 
-    fun isCancelled(): Matcher<HolderSessionState> = equalTo(
+    fun isCancelled(): Matcher<in HolderSessionState> = equalTo(
         HolderSessionState.Complete.Cancelled
+    )
+
+    fun isNotStarted(): Matcher<in HolderSessionState> = equalTo(
+        HolderSessionState.NotStarted
     )
 }
