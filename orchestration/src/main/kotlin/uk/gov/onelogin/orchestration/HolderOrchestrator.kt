@@ -23,6 +23,10 @@ class HolderOrchestrator(private val logger: Logger) : Orchestrator.Holder {
     var session: HolderSession = HolderSessionImpl(logger = logger)
 
     override fun start(requiredPermissions: Set<String>) {
+        if (session.currentState.value.isComplete()) {
+            session = HolderSessionImpl(logger = logger)
+        }
+
         try {
             session.transitionTo(
                 HolderSessionState.Preflight(requiredPermissions)
@@ -57,16 +61,11 @@ class HolderOrchestrator(private val logger: Logger) : Orchestrator.Holder {
     }
 
     override fun reset() {
-        update(HolderSessionImpl(logger = logger)).also {
+        session = HolderSessionImpl(logger = logger).also {
             logger.debug(
                 logTag,
                 "Cleared Orchestrator holder session"
             )
         }
-    }
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun update(session: HolderSession) {
-        this.session = session
     }
 }

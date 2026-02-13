@@ -9,6 +9,11 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
  */
 sealed class HolderSessionState {
     /**
+     * @return `true` when the high-level journey is in an end state. Otherwise `false`.
+     */
+    fun isComplete(): Boolean = this is Complete
+
+    /**
      * Null-value object declaring that a User hasn't started a digital credential verification
      * journey yet.
      */

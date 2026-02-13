@@ -16,6 +16,7 @@ import uk.gov.onelogin.sharing.orchestration.matchers.HolderOrchestratorMatchers
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.CancellableHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.session.holder.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.holder.data.UncancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.isCancelled
@@ -53,7 +54,25 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `Orchestrator cannot be started more than once`() = runTest {
+    fun `Starting the Orchestrator journey is possible when the journey is already complete`(
+        @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
+        state: HolderSessionState
+    ) = runTest {
+        initialState = state
+        orchestrator.session = session
+        orchestrator.start(setOf())
+
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
+
+        assertThat(
+            orchestrator,
+            hasSession(hasCurrentState(inPreflight()))
+        )
+    }
+
+    @Test
+    fun `Orchestrator cannot be started when the User journey is already in progress`() = runTest {
         `Starting the Orchestrator journey navigates to the Preflight state`()
 
         orchestrator.start(setOf())
@@ -71,7 +90,7 @@ class HolderOrchestratorTest {
         state: HolderSessionState
     ) = runTest {
         initialState = state
-        orchestrator.update(session)
+        orchestrator.session = session
         orchestrator.cancel()
 
         assert(CANCEL_ORCHESTRATION_ERROR in logger)
@@ -88,7 +107,7 @@ class HolderOrchestratorTest {
         state: HolderSessionState
     ) = runTest {
         initialState = state
-        orchestrator.update(session)
+        orchestrator.session = session
         orchestrator.cancel()
 
         assert(CANCEL_ORCHESTRATION_SUCCESS in logger)
