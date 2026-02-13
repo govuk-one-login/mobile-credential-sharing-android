@@ -4,12 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.exc.StreamReadException
 import com.fasterxml.jackson.databind.DatabindException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.IOException
 import java.util.Base64
 import uk.gov.logging.api.Logger
@@ -21,10 +18,7 @@ import uk.gov.onelogin.sharing.security.cbor.decoders.DeriveUntaggedCborImpl
 import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptDecoderImpl
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
-import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DeviceRequestDto
-import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DocRequestDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
-import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCborSerializer
 
 private const val TAG = "decodeDeviceEngagement"
 
@@ -143,38 +137,3 @@ fun deriveSessionTranscript(
 
 fun deriveUntaggedCbor(tagged: ByteArray): ByteArray =
     DeriveUntaggedCborImpl().deriveUntaggedCbor(tagged)
-
-fun decodeDeviceRequest(bytes: ByteArray, logger: Logger): DeviceRequestDto = try {
-    val cborMapper = ObjectMapper(
-        CBORFactory()
-    ).apply {
-        registerKotlinModule()
-        val module =
-            SimpleModule().addSerializer(EmbeddedCbor::class.java, EmbeddedCborSerializer())
-        registerModule(module)
-    }
-
-    val deviceRequestDto = cborMapper.readValue(
-        bytes,
-        DeviceRequestDto::class.java
-    )
-
-    if (deviceRequestDto.docRequest.isEmpty()) {
-        val errorMessage = "empty DocRequest: status code 20"
-        logger.error(logger.logTag, errorMessage)
-        throw TypeNotPresentException(
-            DocRequestDto::class.java.name,
-            Exception(errorMessage)
-        )
-    }
-
-    logger.debug(
-        logger.logTag,
-        "device request decoded successfully"
-    )
-
-    deviceRequestDto
-} catch (e: MismatchedInputException) {
-    logger.error(logger.logTag, "session termination: status code 11")
-    throw e
-}

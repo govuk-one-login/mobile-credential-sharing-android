@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
-import uk.gov.onelogin.sharing.security.cbor.decodeDeviceRequest
-import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DeviceRequestDto
+import uk.gov.onelogin.sharing.security.cbor.decoders.DeviceRequestDecoderImpl
 import uk.gov.onelogin.sharing.security.util.getByteArrayFromHexStringFile
 
-class DeviceRequestDeserializerTest {
+class DeviceRequestDecoderImplTest {
     private val deviceRequestExample1 = getByteArrayFromHexStringFile(
         CBOR_FILE_PATH,
         "deviceRequestExampleCbor1.txt"
@@ -30,16 +29,18 @@ class DeviceRequestDeserializerTest {
 
     private val logger = SystemLogger()
 
+    private val deviceRequestDecoderImpl = DeviceRequestDecoderImpl(logger)
+
     @Test
     fun `correctly parses cbor into device request ac1`() {
-        val deviceRequestDto = decodeDeviceRequest(deviceRequestExample1, logger)
+        val deviceRequestDto = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample1)
         assertDeviceRequestParsedCorrectly(deviceRequestDto)
         assert(logger.contains("device request decoded successfully"))
     }
 
     @Test
     fun `correctly parses  cbor into device request ac2`() {
-        val deviceRequestDto = decodeDeviceRequest(deviceRequestExample2, logger)
+        val deviceRequestDto = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
         assertDeviceRequestParsedCorrectly(deviceRequestDto)
         assert(logger.contains("device request decoded successfully"))
     }
@@ -47,7 +48,7 @@ class DeviceRequestDeserializerTest {
     @Test
     fun `when invalid cbor given, decoding fails and status code 11 thrown ac3`() {
         assertFailsWith<MismatchedInputException> {
-            decodeDeviceRequest(INVALID_CBOR.toByteArray(), logger)
+            deviceRequestDecoderImpl.deviceRequestDecoder(INVALID_CBOR.toByteArray())
         }
 
         assert(logger.contains("session termination: status code 11"))
@@ -56,28 +57,23 @@ class DeviceRequestDeserializerTest {
     @Test
     fun `when docrequests array is empty, decoding fails and status code 20 thrown ac4`() {
         assertFailsWith<TypeNotPresentException> {
-            decodeDeviceRequest(emptyDocRequest, logger)
+            deviceRequestDecoderImpl.deviceRequestDecoder(emptyDocRequest)
         }
 
         assert(logger.contains("empty DocRequest: status code 20"))
     }
 
-    private fun assertDeviceRequestParsedCorrectly(deviceRequestDto: DeviceRequestDto) {
-        with(deviceRequestDto) {
+    private fun assertDeviceRequestParsedCorrectly(deviceRequest: DeviceRequest) {
+        with(deviceRequest) {
             assertEquals("1.0", version)
-            assertEquals(1, docRequest.size)
-            assertNull(deviceRequestInfo)
-            assertNull(readerAuthAll)
+            assertEquals(1, docRequests.size)
 
-            with(docRequest.first()) {
-                assertNull(readerAuth)
+            with(docRequests.first()) {
                 assertEquals(DOC_TYPE, itemsRequest.docType)
 
                 val nameSpaceMap = itemsRequest.nameSpaces[NAME_SPACE]
                 assertNotNull(nameSpaceMap)
                 assert(nameSpaceMap == INTENT_TO_RETAIN_MAP)
-
-                assertNull(itemsRequest.requestInfo)
             }
         }
     }
