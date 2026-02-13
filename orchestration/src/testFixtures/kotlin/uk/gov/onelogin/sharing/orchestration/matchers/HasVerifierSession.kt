@@ -6,9 +6,8 @@ import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.orchestration.VerifierOrchestrator
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
 
-class HasVerifierSession(
-    private val matcher: Matcher<in VerifierSession>
-) : TypeSafeMatcher<VerifierOrchestrator>() {
+class HasVerifierSession(private val matcher: Matcher<in VerifierSession>) :
+    TypeSafeMatcher<VerifierOrchestrator>() {
     override fun describeTo(description: Description?) {
         matcher.describeTo(description)
     }
@@ -20,7 +19,6 @@ class HasVerifierSession(
         matcher.describeMismatch(item?.session, mismatchDescription)
     }
 
-    override fun matchesSafely(
-        item: VerifierOrchestrator?
-    ): Boolean = matcher.matches(item?.session)
+    override fun matchesSafely(item: VerifierOrchestrator?): Boolean =
+        matcher.matches(item?.session)
 }

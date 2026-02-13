@@ -5,8 +5,6 @@ import uk.gov.onelogin.orchestration.HolderOrchestrator
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSession
 
 object HolderOrchestratorMatchers {
-    fun hasSession(
-        matcher: Matcher<in HolderSession>
-    ): Matcher<HolderOrchestrator> = HasHolderSession(matcher)
+    fun hasSession(matcher: Matcher<in HolderSession>): Matcher<HolderOrchestrator> =
+        HasHolderSession(matcher)
 }
-
