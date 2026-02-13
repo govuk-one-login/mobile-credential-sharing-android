@@ -10,6 +10,7 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATI
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionResetMessage
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -25,7 +26,12 @@ class VerifierOrchestrator(private val logger: Logger) : Orchestrator.Verifier {
 
     override fun start(requiredPermissions: Set<String>) {
         if (session.isComplete()) {
-            session = VerifierSessionImpl(logger = logger)
+            session = VerifierSessionImpl(logger = logger).also {
+                logger.debug(
+                    logTag,
+                    recreateSessionOnStartMessage(Orchestrator.Verifier.JOURNEY_NAME)
+                )
+            }
         }
 
         try {

@@ -26,6 +26,8 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatc
 class HolderOrchestratorTest {
     private val logger = SystemLogger()
     private val resetOrchestratorSessionLog = "Cleared Orchestrator holder session"
+    private val startSessionAfterCompletionLog =
+        "Starting an Orchestrator holder session after completing the previous journey"
 
     private var initialState: HolderSessionState = HolderSessionState.NotStarted
 
@@ -62,6 +64,7 @@ class HolderOrchestratorTest {
         orchestrator.session = session
         orchestrator.start(setOf())
 
+        assert(startSessionAfterCompletionLog in logger)
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 

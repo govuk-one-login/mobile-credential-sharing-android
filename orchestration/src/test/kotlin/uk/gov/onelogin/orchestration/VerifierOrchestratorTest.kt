@@ -29,6 +29,8 @@ class VerifierOrchestratorTest {
     private var initialState: VerifierSessionState = VerifierSessionState.NotStarted
     private val logger = SystemLogger()
     private val resetOrchestratorSessionLog = "Cleared Orchestrator verifier session"
+    private val startSessionAfterCompletionLog =
+        "Starting an Orchestrator verifier session after completing the previous journey"
     private val session by lazy {
         VerifierSessionImpl(
             logger = logger,
@@ -69,6 +71,7 @@ class VerifierOrchestratorTest {
         orchestrator.session = session
         orchestrator.start(setOf())
 
+        assert(startSessionAfterCompletionLog in logger)
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 

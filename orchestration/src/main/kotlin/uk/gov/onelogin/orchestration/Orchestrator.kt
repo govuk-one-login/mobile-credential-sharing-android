@@ -45,5 +45,8 @@ interface Orchestrator : Resettable {
 
         fun createSessionResetMessage(journey: String): String =
             "Cleared Orchestrator $journey session"
+
+        fun recreateSessionOnStartMessage(journey: String): String =
+            "Starting an Orchestrator $journey session after completing the previous journey"
     }
 }
