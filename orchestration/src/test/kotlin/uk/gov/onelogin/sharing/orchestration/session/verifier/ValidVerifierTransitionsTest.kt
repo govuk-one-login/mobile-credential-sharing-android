@@ -10,9 +10,9 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CompleteVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.TransitionableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.ValidVerifierSessionStateTransitions
-import uk.gov.onelogin.sharing.orchestration.session.verifier.data.VerifierSessionStatesWithoutTransition
 
 @RunWith(TestParameterInjector::class)
 class ValidVerifierTransitionsTest {
@@ -55,7 +55,7 @@ class ValidVerifierTransitionsTest {
 
     @Test
     fun `Completed states cannot transition`(
-        @TestParameter(valuesProvider = VerifierSessionStatesWithoutTransition::class)
+        @TestParameter(valuesProvider = CompleteVerifierSessionStates::class)
         state: VerifierSessionState
     ) = runTest {
         assertThat(

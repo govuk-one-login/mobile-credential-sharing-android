@@ -12,9 +12,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
+import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CompleteVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.InvalidVerifierSessionStateTransitions
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.ValidVerifierSessionStateTransitions
-import uk.gov.onelogin.sharing.orchestration.session.verifier.data.VerifierSessionStatesWithoutTransition
 
 @RunWith(TestParameterInjector::class)
 class VerifierSessionImplTest {
@@ -64,7 +64,7 @@ class VerifierSessionImplTest {
 
     @Test
     fun `IllegalStateExceptions occur when the current state has no transitions available`(
-        @TestParameter(valuesProvider = VerifierSessionStatesWithoutTransition::class)
+        @TestParameter(valuesProvider = CompleteVerifierSessionStates::class)
         state: VerifierSessionState
     ) = runTest {
         initialState = state

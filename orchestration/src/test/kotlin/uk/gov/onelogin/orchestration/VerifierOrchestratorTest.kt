@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatc
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CancellableVerifierSessionStates
+import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CompleteVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.UncancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.isCancelled
@@ -60,6 +61,24 @@ class VerifierOrchestratorTest {
     }
 
     @Test
+    fun `Starting the Orchestrator journey is possible when the journey is already complete`(
+        @TestParameter(valuesProvider = CompleteVerifierSessionStates::class)
+        state: VerifierSessionState
+    ) = runTest {
+        initialState = state
+        orchestrator.session = session
+        orchestrator.start(setOf())
+
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
+
+        assertThat(
+            orchestrator,
+            hasSession(hasCurrentState(inPreflight()))
+        )
+    }
+
+    @Test
     fun `Orchestrator cannot be started more than once`() = runTest {
         `Starting the Orchestrator journey navigates to the Preflight state`()
 
@@ -78,7 +97,7 @@ class VerifierOrchestratorTest {
         state: VerifierSessionState
     ) = runTest {
         initialState = state
-        orchestrator.update(session)
+        orchestrator.session = session
         orchestrator.cancel()
 
         assert(CANCEL_ORCHESTRATION_ERROR in logger)
@@ -95,7 +114,7 @@ class VerifierOrchestratorTest {
         state: VerifierSessionState
     ) = runTest {
         initialState = state
-        orchestrator.update(session)
+        orchestrator.session = session
         orchestrator.cancel()
 
         assert(CANCEL_ORCHESTRATION_SUCCESS in logger)

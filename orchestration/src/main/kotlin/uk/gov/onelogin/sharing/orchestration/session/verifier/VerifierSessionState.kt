@@ -8,6 +8,9 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
  * digital credentials.
  */
 sealed class VerifierSessionState {
+
+    fun isComplete(): Boolean = this is Complete
+
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification
      * journey yet.

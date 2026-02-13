@@ -23,6 +23,10 @@ class VerifierOrchestrator(private val logger: Logger) : Orchestrator.Verifier {
     var session: VerifierSession = VerifierSessionImpl(logger = logger)
 
     override fun start(requiredPermissions: Set<String>) {
+        if (session.currentState.value.isComplete()) {
+            session = VerifierSessionImpl(logger = logger)
+        }
+
         try {
             session.transitionTo(
                 VerifierSessionState.Preflight(requiredPermissions)
@@ -57,16 +61,11 @@ class VerifierOrchestrator(private val logger: Logger) : Orchestrator.Verifier {
     }
 
     override fun reset() {
-        update(VerifierSessionImpl(logger = logger)).also {
+        session = VerifierSessionImpl(logger = logger).also {
             logger.debug(
                 logTag,
                 "Cleared Orchestrator verifier session"
             )
         }
-    }
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun update(session: VerifierSession) {
-        this.session = session
     }
 }
