@@ -1,6 +1,5 @@
 package uk.gov.onelogin.orchestration
 
-import androidx.annotation.VisibleForTesting
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
@@ -14,19 +13,21 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnS
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSession
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
-class HolderOrchestrator(private val logger: Logger) : Orchestrator.Holder {
+class HolderOrchestrator(
+    private val logger: Logger,
+    private val sessionFactory: SessionFactory<HolderSession>,
+) : Orchestrator.Holder {
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var session: HolderSession = HolderSessionImpl(logger = logger)
+    private var session: HolderSession = sessionFactory.create()
 
     override fun start(requiredPermissions: Set<String>) {
         if (session.isComplete()) {
-            session = HolderSessionImpl(logger = logger).also {
+            session = sessionFactory.create().also {
                 logger.debug(
                     logTag,
                     recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
@@ -68,7 +69,7 @@ class HolderOrchestrator(private val logger: Logger) : Orchestrator.Holder {
     }
 
     override fun reset() {
-        session = HolderSessionImpl(logger = logger).also {
+        session = sessionFactory.create().also {
             logger.debug(
                 logTag,
                 createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)

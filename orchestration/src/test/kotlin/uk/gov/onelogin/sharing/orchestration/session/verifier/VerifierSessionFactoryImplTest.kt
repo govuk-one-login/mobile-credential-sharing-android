@@ -8,7 +8,7 @@ import uk.gov.logging.testdouble.SystemLogger
 
 class VerifierSessionFactoryImplTest {
     private val logger = SystemLogger()
-    private val sessionFactory = VerifierSessionFactoryImpl(logger)
+    private val sessionFactory = VerifierSessionFactory(logger)
     private val expectedSession = VerifierSessionImpl(logger)
 
     @Test

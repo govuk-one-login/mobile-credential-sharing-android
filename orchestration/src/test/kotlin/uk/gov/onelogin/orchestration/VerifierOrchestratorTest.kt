@@ -14,8 +14,10 @@ import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCE
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
-import uk.gov.onelogin.sharing.orchestration.matchers.VerifierOrchestratorMatchers.hasSession
+import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
+import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.hasCurrentSession
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
+import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CancellableVerifierSessionStates
@@ -26,19 +28,32 @@ import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierS
 
 @RunWith(TestParameterInjector::class)
 class VerifierOrchestratorTest {
-    private var initialState: VerifierSessionState = VerifierSessionState.NotStarted
     private val logger = SystemLogger()
     private val resetOrchestratorSessionLog = "Cleared Orchestrator verifier session"
     private val startSessionAfterCompletionLog =
         "Starting an Orchestrator verifier session after completing the previous journey"
-    private val session by lazy {
-        VerifierSessionImpl(
-            logger = logger,
-            internalState = MutableStateFlow(initialState)
+
+    private var initialStates: MutableList<VerifierSessionState> = mutableListOf(
+        VerifierSessionState.NotStarted,
+        VerifierSessionState.NotStarted,
+    )
+
+    private val sessionFactory by lazy {
+        FakeSessionFactory<VerifierSession>(
+            initialStates.map { initialState ->
+                VerifierSessionImpl(
+                    logger = logger,
+                    internalState = MutableStateFlow(initialState)
+                )
+            }
         )
     }
+
     private val orchestrator by lazy {
-        VerifierOrchestrator(logger = logger)
+        VerifierOrchestrator(
+            logger = logger,
+            sessionFactory = sessionFactory,
+        )
     }
 
     @Before
@@ -57,18 +72,19 @@ class VerifierOrchestratorTest {
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(inPreflight()))
+            sessionFactory,
+            hasCurrentSession(
+            hasCurrentState(inPreflight())
+            )
         )
     }
 
     @Test
     fun `Starting the Orchestrator journey is possible when the journey is already complete`(
         @TestParameter(valuesProvider = CompleteVerifierSessionStates::class)
-        state: VerifierSessionState
+        state: VerifierSessionState,
     ) = runTest {
-        initialState = state
-        orchestrator.session = session
+        initialStates[0] = state
         orchestrator.start(setOf())
 
         assert(startSessionAfterCompletionLog in logger)
@@ -76,8 +92,10 @@ class VerifierOrchestratorTest {
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(inPreflight()))
+            sessionFactory,
+            hasCurrentSession(
+                hasCurrentState(inPreflight())
+            )
         )
     }
 
@@ -89,42 +107,46 @@ class VerifierOrchestratorTest {
 
         assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(inPreflight()))
+            sessionFactory,
+            hasCurrentSession(
+                hasCurrentState(inPreflight())
+            )
         )
     }
 
     @Test
     fun `Orchestrator cannot cancel invalid state transitions`(
         @TestParameter(valuesProvider = UncancellableVerifierSessionStates::class)
-        state: VerifierSessionState
+        state: VerifierSessionState,
     ) = runTest {
-        initialState = state
-        orchestrator.session = session
+        initialStates[0] = state
         orchestrator.cancel()
 
         assert(CANCEL_ORCHESTRATION_ERROR in logger)
         assert(CANCEL_ORCHESTRATION_SUCCESS !in logger)
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(state))
+            sessionFactory,
+            hasCurrentSession(
+                hasCurrentState(state)
+            )
         )
     }
 
     @Test
     fun `Cancelling the User journey is based on the internal session state`(
         @TestParameter(valuesProvider = CancellableVerifierSessionStates::class)
-        state: VerifierSessionState
+        state: VerifierSessionState,
     ) = runTest {
-        initialState = state
-        orchestrator.session = session
+        initialStates[0] = state
         orchestrator.cancel()
 
         assert(CANCEL_ORCHESTRATION_SUCCESS in logger)
         assert(CANCEL_ORCHESTRATION_ERROR !in logger)
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(isCancelled()))
+            sessionFactory,
+            hasCurrentSession(
+                hasCurrentState(isCancelled())
+            )
         )
     }
 
@@ -136,8 +158,10 @@ class VerifierOrchestratorTest {
 
         assert(resetOrchestratorSessionLog in logger)
         assertThat(
-            orchestrator,
-            hasSession(hasCurrentState(VerifierSessionState.NotStarted))
+            sessionFactory,
+            hasCurrentSession(
+                hasCurrentState(VerifierSessionState.NotStarted)
+            )
         )
     }
 }

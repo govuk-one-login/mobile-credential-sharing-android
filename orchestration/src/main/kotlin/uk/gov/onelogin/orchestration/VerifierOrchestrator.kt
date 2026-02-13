@@ -14,19 +14,22 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnS
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
 
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
-class VerifierOrchestrator(private val logger: Logger) : Orchestrator.Verifier {
+class VerifierOrchestrator(
+    private val logger: Logger,
+    private val sessionFactory: SessionFactory<VerifierSession>,
+) : Orchestrator.Verifier {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var session: VerifierSession = VerifierSessionImpl(logger = logger)
+    var session: VerifierSession = sessionFactory.create()
 
     override fun start(requiredPermissions: Set<String>) {
         if (session.isComplete()) {
-            session = VerifierSessionImpl(logger = logger).also {
+            session = sessionFactory.create().also {
                 logger.debug(
                     logTag,
                     recreateSessionOnStartMessage(Orchestrator.Verifier.JOURNEY_NAME)
@@ -68,7 +71,7 @@ class VerifierOrchestrator(private val logger: Logger) : Orchestrator.Verifier {
     }
 
     override fun reset() {
-        session = VerifierSessionImpl(logger = logger).also {
+        session = sessionFactory.create().also {
             logger.debug(
                 logTag,
                 createSessionResetMessage(Orchestrator.Verifier.JOURNEY_NAME)
