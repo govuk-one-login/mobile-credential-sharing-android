@@ -23,8 +23,16 @@ interface Orchestrator : Resettable {
      */
     fun cancel()
 
-    interface Holder : Orchestrator
-    interface Verifier : Orchestrator
+    interface Holder : Orchestrator {
+        companion object {
+            const val JOURNEY_NAME: String = "holder"
+        }
+    }
+    interface Verifier : Orchestrator {
+        companion object {
+            const val JOURNEY_NAME: String = "verifier"
+        }
+    }
 
     /**
      * Property bag object containing logging messages common to [Orchestrator] implementations.
@@ -34,5 +42,8 @@ interface Orchestrator : Resettable {
         const val CANCEL_ORCHESTRATION_SUCCESS: String = "cancel orchestration"
         const val START_ORCHESTRATION_ERROR: String = "Cannot start orchestration"
         const val START_ORCHESTRATION_SUCCESS: String = "start orchestration"
+
+        fun createSessionResetMessage(journey: String): String =
+            "Cleared Orchestrator $journey session"
     }
 }

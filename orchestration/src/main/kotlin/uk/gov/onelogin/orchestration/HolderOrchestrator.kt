@@ -9,6 +9,7 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATI
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -64,7 +65,7 @@ class HolderOrchestrator(private val logger: Logger) : Orchestrator.Holder {
         session = HolderSessionImpl(logger = logger).also {
             logger.debug(
                 logTag,
-                "Cleared Orchestrator holder session"
+                createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
             )
         }
     }
