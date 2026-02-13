@@ -30,6 +30,8 @@ class VerifierSessionImpl(
 
     override val currentState: StateFlow<VerifierSessionState> = internalState
 
+    override fun isComplete(): Boolean = currentState.value.isComplete()
+
     override fun getAvailableTransitions(): Set<KClass<out VerifierSessionState>> =
         checkNotNull(transitionMap[currentState.value::class]) {
             cannotFindTransitions(currentState.value::class.java.simpleName)

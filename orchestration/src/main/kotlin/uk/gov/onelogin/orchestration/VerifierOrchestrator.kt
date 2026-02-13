@@ -23,7 +23,7 @@ class VerifierOrchestrator(private val logger: Logger) : Orchestrator.Verifier {
     var session: VerifierSession = VerifierSessionImpl(logger = logger)
 
     override fun start(requiredPermissions: Set<String>) {
-        if (session.currentState.value.isComplete()) {
+        if (session.isComplete()) {
             session = VerifierSessionImpl(logger = logger)
         }
 

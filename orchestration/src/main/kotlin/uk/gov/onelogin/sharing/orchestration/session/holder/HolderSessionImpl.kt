@@ -30,6 +30,8 @@ class HolderSessionImpl(
 
     override val currentState: StateFlow<HolderSessionState> = internalState
 
+    override fun isComplete(): Boolean = currentState.value.isComplete()
+
     override fun getAvailableTransitions(): Set<KClass<out HolderSessionState>> =
         checkNotNull(transitionMap[currentState.value::class]) {
             cannotFindTransitions(currentState.value::class.java.simpleName)

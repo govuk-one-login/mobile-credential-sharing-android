@@ -23,7 +23,7 @@ class HolderOrchestrator(private val logger: Logger) : Orchestrator.Holder {
     var session: HolderSession = HolderSessionImpl(logger = logger)
 
     override fun start(requiredPermissions: Set<String>) {
-        if (session.currentState.value.isComplete()) {
+        if (session.isComplete()) {
             session = HolderSessionImpl(logger = logger)
         }
 
