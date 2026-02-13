@@ -50,7 +50,7 @@ class HolderOrchestratorTest {
     private val orchestrator by lazy {
         HolderOrchestrator(
             logger = logger,
-            sessionFactory = sessionFactory,
+            sessionFactory = sessionFactory
         )
     }
 
@@ -70,7 +70,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Starting the Orchestrator journey is possible when the journey is already complete`(
         @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
-        state: HolderSessionState,
+        state: HolderSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.start(setOf())
@@ -101,7 +101,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Orchestrator cannot cancel invalid state transitions`(
         @TestParameter(valuesProvider = UncancellableHolderSessionStates::class)
-        state: HolderSessionState,
+        state: HolderSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.cancel()
@@ -117,7 +117,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Cancelling the User journey is based on the internal session state`(
         @TestParameter(valuesProvider = CancellableHolderSessionStates::class)
-        state: HolderSessionState,
+        state: HolderSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.cancel()

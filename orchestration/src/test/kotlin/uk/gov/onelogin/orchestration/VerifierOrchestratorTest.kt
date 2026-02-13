@@ -35,7 +35,7 @@ class VerifierOrchestratorTest {
 
     private var initialStates: MutableList<VerifierSessionState> = mutableListOf(
         VerifierSessionState.NotStarted,
-        VerifierSessionState.NotStarted,
+        VerifierSessionState.NotStarted
     )
 
     private val sessionFactory by lazy {
@@ -52,7 +52,7 @@ class VerifierOrchestratorTest {
     private val orchestrator by lazy {
         VerifierOrchestrator(
             logger = logger,
-            sessionFactory = sessionFactory,
+            sessionFactory = sessionFactory
         )
     }
 
@@ -80,7 +80,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Starting the Orchestrator journey is possible when the journey is already complete`(
         @TestParameter(valuesProvider = CompleteVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.start(setOf())
@@ -111,7 +111,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Orchestrator cannot cancel invalid state transitions`(
         @TestParameter(valuesProvider = UncancellableVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.cancel()
@@ -127,7 +127,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Cancelling the User journey is based on the internal session state`(
         @TestParameter(valuesProvider = CancellableVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.cancel()

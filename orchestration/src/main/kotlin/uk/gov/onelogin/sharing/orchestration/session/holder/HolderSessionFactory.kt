@@ -11,8 +11,6 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
  * @see uk.gov.onelogin.orchestration.HolderOrchestrator
  */
 @ContributesBinding(scope = AppScope::class)
-class HolderSessionFactory(
-    private val logger: Logger,
-) : SessionFactory<HolderSession> {
+class HolderSessionFactory(private val logger: Logger) : SessionFactory<HolderSession> {
     override fun create(): HolderSession = HolderSessionImpl(logger = logger)
 }

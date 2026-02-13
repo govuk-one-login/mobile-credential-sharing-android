@@ -5,9 +5,8 @@ package uk.gov.onelogin.sharing.orchestration.session
  *
  * Note that errors occur when not providing enough [sessions].
  */
-class FakeSessionFactory<Session : Any>(
-    private val sessions: List<Session>
-) : SessionFactory<Session> {
+class FakeSessionFactory<Session : Any>(private val sessions: List<Session>) :
+    SessionFactory<Session> {
     private var callCount: Int = 0
 
     constructor(

@@ -20,7 +20,7 @@ import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
     private val logger: Logger,
-    private val sessionFactory: SessionFactory<HolderSession>,
+    private val sessionFactory: SessionFactory<HolderSession>
 ) : Orchestrator.Holder {
 
     private var session: HolderSession = sessionFactory.create()

@@ -21,7 +21,7 @@ import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionSta
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 class VerifierOrchestrator(
     private val logger: Logger,
-    private val sessionFactory: SessionFactory<VerifierSession>,
+    private val sessionFactory: SessionFactory<VerifierSession>
 ) : Orchestrator.Verifier {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

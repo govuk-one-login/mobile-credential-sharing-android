@@ -18,13 +18,11 @@ object FakeSessionFactoryMatchers {
         matcher: Matcher<in Session>
     ): Matcher<in FakeSessionFactory<in Session>> = HasCurrentSession(matcher)
 
-    fun <State : Any, Session: StateContainer<in State>> currentSessionState(
+    fun <State : Any, Session : StateContainer<in State>> currentSessionState(
         expected: State
-    ): Matcher<in FakeSessionFactory<in Session>> =
-        currentSession(hasCurrentState(expected))
+    ): Matcher<in FakeSessionFactory<in Session>> = currentSession(hasCurrentState(expected))
 
-    fun <State : Any, Session: StateContainer<in State>> currentSessionState(
+    fun <State : Any, Session : StateContainer<in State>> currentSessionState(
         matcher: Matcher<in State>
-    ): Matcher<in FakeSessionFactory<in Session>> =
-        currentSession(hasCurrentState(matcher))
+    ): Matcher<in FakeSessionFactory<in Session>> = currentSession(hasCurrentState(matcher))
 }
