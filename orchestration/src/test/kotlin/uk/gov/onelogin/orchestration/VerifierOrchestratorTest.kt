@@ -15,7 +15,6 @@ import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCE
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
-import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionImpl
@@ -25,6 +24,7 @@ import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CompleteVerif
 import uk.gov.onelogin.sharing.orchestration.session.verifier.data.UncancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.isCancelled
+import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.isNotStarted
 
 @RunWith(TestParameterInjector::class)
 class VerifierOrchestratorTest {

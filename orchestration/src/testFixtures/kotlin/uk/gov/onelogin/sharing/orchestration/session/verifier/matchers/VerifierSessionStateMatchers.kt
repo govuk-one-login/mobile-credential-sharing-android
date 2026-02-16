@@ -16,4 +16,8 @@ object VerifierSessionStateMatchers {
     fun isCancelled(): Matcher<VerifierSessionState> = equalTo(
         VerifierSessionState.Complete.Cancelled
     )
+
+    fun isNotStarted(): Matcher<VerifierSessionState> = equalTo(
+        VerifierSessionState.NotStarted
+    )
 }
