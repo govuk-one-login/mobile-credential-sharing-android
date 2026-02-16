@@ -5,7 +5,7 @@ package uk.gov.onelogin.sharing.orchestration.session
  *
  * @param Session The data type of the created session.
  */
-fun interface SessionFactory<Session : Any> {
+fun interface SessionFactory<out Session : Any> {
 
     /**
      * @return A new [Session] instance.
