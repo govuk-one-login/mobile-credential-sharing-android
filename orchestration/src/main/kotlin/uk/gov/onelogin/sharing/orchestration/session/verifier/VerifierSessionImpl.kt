@@ -58,15 +58,4 @@ class VerifierSessionImpl(
             throwable
         )
     }
-
-    override fun reset() {
-        internalState.update {
-            VerifierSessionState.NotStarted.also {
-                logger.debug(
-                    logTag,
-                    "Cleared verifier session state"
-                )
-            }
-        }
-    }
 }

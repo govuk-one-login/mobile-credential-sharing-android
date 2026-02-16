@@ -1,6 +1,5 @@
 package uk.gov.onelogin.orchestration
 
-import androidx.annotation.VisibleForTesting
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
@@ -24,8 +23,7 @@ class VerifierOrchestrator(
     private val sessionFactory: SessionFactory<VerifierSession>
 ) : Orchestrator.Verifier {
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var session: VerifierSession = sessionFactory.create()
+    private var session: VerifierSession = sessionFactory.create()
 
     override fun start(requiredPermissions: Set<String>) {
         if (session.isComplete()) {

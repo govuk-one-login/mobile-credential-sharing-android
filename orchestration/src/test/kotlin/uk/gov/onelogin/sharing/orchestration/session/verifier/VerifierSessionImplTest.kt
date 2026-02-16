@@ -107,23 +107,4 @@ class VerifierSessionImplTest {
                 "'${transition::class.java.simpleName}'" in logger
         )
     }
-
-    @Test
-    fun `Resetting the instance brings the session back to 'Not started'`() = runTest {
-        val resetLogMessage = "Cleared verifier session state"
-        initialState = VerifierSessionState.ProcessingEngagement
-        assertThat(
-            session,
-            hasCurrentState(initialState)
-        )
-
-        assert(resetLogMessage !in logger)
-        session.reset()
-
-        assertThat(
-            session,
-            hasCurrentState(VerifierSessionState.NotStarted)
-        )
-        assert(resetLogMessage in logger)
-    }
 }

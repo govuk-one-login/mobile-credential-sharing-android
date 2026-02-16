@@ -107,23 +107,4 @@ class HolderSessionImplTest {
                 "'${transition::class.java.simpleName}'" in logger
         )
     }
-
-    @Test
-    fun `Resetting the instance brings the session back to 'Not started'`() = runTest {
-        val resetLogMessage = "Cleared holder session state"
-        initialState = HolderSessionState.ProcessingResponse
-        assertThat(
-            session,
-            hasCurrentState(initialState)
-        )
-
-        assert(resetLogMessage !in logger)
-        session.reset()
-
-        assertThat(
-            session,
-            hasCurrentState(HolderSessionState.NotStarted)
-        )
-        assert(resetLogMessage in logger)
-    }
 }

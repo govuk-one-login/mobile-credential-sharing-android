@@ -58,15 +58,4 @@ class HolderSessionImpl(
             throwable
         )
     }
-
-    override fun reset() {
-        internalState.update {
-            HolderSessionState.NotStarted.also {
-                logger.debug(
-                    logTag,
-                    "Cleared holder session state"
-                )
-            }
-        }
-    }
 }
