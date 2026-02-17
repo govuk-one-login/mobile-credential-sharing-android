@@ -4,14 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import uk.gov.onelogin.sharing.CredentialSharingSdk
 import uk.gov.onelogin.sharing.ui.api.CredentialSharingDestination
 import uk.gov.onelogin.sharing.ui.api.CredentialSharingUi
-import uk.gov.onelogin.sharing.ui.impl.CredentialSharingRoutes.configureCredentialSharingRoutes
 import uk.gov.onelogin.sharing.ui.impl.di.CredentialSharingUiGraph
 
 /**

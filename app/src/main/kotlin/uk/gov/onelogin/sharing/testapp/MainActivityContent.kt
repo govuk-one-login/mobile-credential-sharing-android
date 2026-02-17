@@ -53,7 +53,7 @@ fun TestAppScreen(
         onOpenDevMenu = { destination = CredentialSharingDestination.DevMenu },
         onCloseFlow = { destination = null },
         sharingDialogVisible = sharingDialogVisible,
-        sharingContent = {
+        content = {
             destination?.let { sharingDestination ->
                 ui.Render(
                     sdk = sdk,
@@ -73,7 +73,7 @@ fun TestAppScreenContent(
     onCloseFlow: () -> Unit,
     sharingDialogVisible: Boolean,
     modifier: Modifier = Modifier,
-    sharingContent: @Composable () -> Unit
+    content: @Composable () -> Unit
 ) {
     Scaffold(modifier = modifier) { contentPadding ->
         Box(
@@ -108,7 +108,7 @@ fun TestAppScreenContent(
 
             if (sharingDialogVisible) {
                 SharingDialog(
-                    sharingContent = sharingContent,
+                    content = content,
                     onCloseFlow = onCloseFlow
                 )
             }
@@ -117,7 +117,7 @@ fun TestAppScreenContent(
 }
 
 @Composable
-private fun SharingDialog(sharingContent: @Composable () -> Unit, onCloseFlow: () -> Unit) {
+private fun SharingDialog(onCloseFlow: () -> Unit, content: @Composable () -> Unit) {
     Dialog(
         onDismissRequest = onCloseFlow,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -133,7 +133,7 @@ private fun SharingDialog(sharingContent: @Composable () -> Unit, onCloseFlow: (
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                sharingContent()
+                content()
 
                 IconButton(
                     onClick = onCloseFlow,
@@ -160,6 +160,6 @@ private fun TestAppScreenContentPreview() {
         onOpenDevMenu = {},
         onCloseFlow = {},
         sharingDialogVisible = false,
-        sharingContent = {}
+        content = {}
     )
 }

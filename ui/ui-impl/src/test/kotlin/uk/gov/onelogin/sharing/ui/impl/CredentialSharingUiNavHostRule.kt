@@ -22,10 +22,7 @@ class CredentialSharingUiNavHostRule(
     private lateinit var controller: TestNavHostController
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    fun renderWithController(
-        startDestination: CredentialSharingDestination,
-        modifier: Modifier = Modifier
-    ) {
+    fun render(startDestination: CredentialSharingDestination, modifier: Modifier = Modifier) {
         setContent {
             controller = TestNavHostController(context)
             controller.navigatorProvider.addNavigator(ComposeNavigator())

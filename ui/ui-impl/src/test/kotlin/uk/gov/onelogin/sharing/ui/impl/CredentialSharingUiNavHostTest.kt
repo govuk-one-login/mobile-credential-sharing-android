@@ -37,7 +37,7 @@ class CredentialSharingUiNavHostTest {
 
     @Test
     fun `holder start destination`() {
-        navHostTestRule.renderWithController(
+        navHostTestRule.render(
             startDestination = CredentialSharingDestination.HolderRoot
         )
 
@@ -46,7 +46,7 @@ class CredentialSharingUiNavHostTest {
 
     @Test
     fun `verifier start destination`() {
-        navHostTestRule.renderWithController(
+        navHostTestRule.render(
             startDestination = CredentialSharingDestination.VerifierRoot
         )
 
@@ -55,7 +55,7 @@ class CredentialSharingUiNavHostTest {
 
     @Test
     fun `verifier dev menu destination`() {
-        navHostTestRule.renderWithController(
+        navHostTestRule.render(
             startDestination = CredentialSharingDestination.DevMenu
         )
 
