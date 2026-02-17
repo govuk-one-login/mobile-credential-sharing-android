@@ -30,16 +30,16 @@ object VerifierScanRoute {
         onValidBarcode: (String) -> Unit = {}
     ) {
         composable<VerifierScanRoute> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    VerifierScanner(
-                        onInvalidBarcode = onInvalidBarcode,
-                        onValidBarcode = onValidBarcode
-                    )
-                }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                VerifierScanner(
+                    onInvalidBarcode = onInvalidBarcode,
+                    onValidBarcode = onValidBarcode
+                )
+            }
         }
     }
 

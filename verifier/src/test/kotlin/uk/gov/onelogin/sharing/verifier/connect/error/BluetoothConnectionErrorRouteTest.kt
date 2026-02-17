@@ -1,9 +1,11 @@
 package uk.gov.onelogin.sharing.verifier.connect.error
 
+import androidx.compose.material3.Button
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -42,7 +44,7 @@ class BluetoothConnectionErrorRouteTest {
                         validBarcodeDataResult.data
                     )
                 ) {
-                    configureConnectWithHolderDeviceRoute(appGraph = createTestGraph())
+                    composable<ConnectWithHolderDeviceRoute> {}
                     configureBluetoothConnectionErrorRoute(controller = controller)
                 }
             }

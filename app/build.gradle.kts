@@ -41,7 +41,7 @@ android {
         versionCode = androidVersionCode
         versionName = project.version.toString()
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "uk.gov.onelogin.sharing.testapp.di.CustomTestRunner"
     }
     buildFeatures {
         compose = true
@@ -77,12 +77,15 @@ dependencies {
         platform(libs.androidx.compose.bom),
         libs.androidx.navigation.testing,
         libs.bundles.testing.instrumentation,
+        libs.hilt.android.testing,
         libs.uk.gov.logging.testdouble
     ).forEach(::androidTestImplementation)
 
     listOf(
-        projects.holder,
-        projects.verifier,
+        libs.hilt.compiler
+    ).forEach(::kspAndroidTest)
+
+    listOf(
         projects.sdk,
         projects.ui.uiApi,
         projects.ui.uiImpl
@@ -115,7 +118,9 @@ dependencies {
         platform(libs.androidx.compose.bom),
         libs.androidx.navigation.testing,
         libs.bundles.android.baseline,
-        testFixtures(projects.sdk)
+        testFixtures(projects.sdk),
+        testFixtures(projects.ui.uiApi),
+        testFixtures(projects.ui.uiImpl)
     ).forEach(::testFixturesImplementation)
 
     listOf(

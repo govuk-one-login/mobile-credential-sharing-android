@@ -1,89 +1,165 @@
 package uk.gov.onelogin.sharing.testapp
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.waterfallPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.navigation.NavHostController
-import kotlinx.collections.immutable.toPersistentList
-import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.testapp.destination.PrimaryTabDestination
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import uk.gov.onelogin.sharing.CredentialSharingSdk
+import uk.gov.onelogin.sharing.ui.api.CredentialSharingDestination
+import uk.gov.onelogin.sharing.ui.api.CredentialSharingUi
 
 @Composable
-fun MainActivityContent(
-    appGraph: CredentialSharingAppGraph,
-    currentTab: PrimaryTabDestination,
-    navController: NavHostController,
-    startDestination: Any,
-    modifier: Modifier = Modifier,
-    onUpdateTabDestination: (PrimaryTabDestination) -> Unit = {}
+fun TestAppScreen(
+    ui: CredentialSharingUi,
+    sdk: CredentialSharingSdk,
+    modifier: Modifier = Modifier
 ) {
-    MainActivityContentUi(
-        currentTab = currentTab,
+    var destination by rememberSaveable {
+        mutableStateOf<CredentialSharingDestination?>(null)
+    }
+
+    val sharingDialogVisible by remember {
+        derivedStateOf { destination != null }
+    }
+
+    TestAppScreenContent(
         modifier = modifier,
-        onSelectTab = { destination ->
-            navController.navigate(destination)
-            onUpdateTabDestination(destination)
-        },
-        navHost = {
-            AppNavHost(
-                navController = navController,
-                startDestination = startDestination,
-                appGraph = appGraph
-            )
+        onOpenHolder = { destination = CredentialSharingDestination.HolderRoot },
+        onOpenVerifier = { destination = CredentialSharingDestination.VerifierRoot },
+        onOpenDevMenu = { destination = CredentialSharingDestination.DevMenu },
+        onCloseFlow = { destination = null },
+        sharingDialogVisible = sharingDialogVisible,
+        sharingContent = {
+            destination?.let { sharingDestination ->
+                ui.Render(
+                    sdk = sdk,
+                    startDestination = sharingDestination,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     )
 }
 
 @Composable
-fun MainActivityContentUi(
-    currentTab: PrimaryTabDestination,
+fun TestAppScreenContent(
+    onOpenHolder: () -> Unit,
+    onOpenVerifier: () -> Unit,
+    onOpenDevMenu: () -> Unit,
+    onCloseFlow: () -> Unit,
+    sharingDialogVisible: Boolean,
     modifier: Modifier = Modifier,
-    onSelectTab: (PrimaryTabDestination) -> Unit = {},
-    navHost: @Composable (Modifier) -> Unit = {}
+    sharingContent: @Composable () -> Unit
 ) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TestWrapperTopBar(
-                destinations = PrimaryTabDestination.entries().toPersistentList(),
-                currentDestination = currentTab,
-                modifier = Modifier.statusBarsPadding(),
-                updateCurrentDestination = onSelectTab
-            )
-        }
-    ) { contentPadding ->
-        Column(
+    Scaffold(modifier = modifier) { contentPadding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .navigationBarsPadding()
-                .waterfallPadding()
                 .padding(contentPadding)
         ) {
-            navHost(Modifier.fillMaxSize())
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Credential Sharing Test App",
+                    modifier = Modifier.padding(bottom = 64.dp),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                OutlinedButton(onClick = onOpenHolder, modifier = Modifier.padding(16.dp)) {
+                    Text("Holder")
+                }
+
+                OutlinedButton(onClick = onOpenVerifier, modifier = Modifier.padding(16.dp)) {
+                    Text("Verifier")
+                }
+
+                OutlinedButton(onClick = onOpenDevMenu, modifier = Modifier.padding(16.dp)) {
+                    Text("Dev Menu")
+                }
+            }
+
+            if (sharingDialogVisible) {
+                SharingDialog(
+                    sharingContent = sharingContent,
+                    onCloseFlow = onCloseFlow
+                )
+            }
         }
     }
 }
 
 @Composable
-@Preview
-internal fun MainActivityContentUiPreview(
-    @PreviewParameter(MainActivityContentPreviewParameters::class)
-    currentTabDestination: PrimaryTabDestination
-) {
-    GdsTheme {
-        MainActivityContentUi(
-            currentTab = currentTabDestination,
-            onSelectTab = {},
-            navHost = {}
-        )
+private fun SharingDialog(sharingContent: @Composable () -> Unit, onCloseFlow: () -> Unit) {
+    Dialog(
+        onDismissRequest = onCloseFlow,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                sharingContent()
+
+                IconButton(
+                    onClick = onCloseFlow,
+                    modifier = Modifier.align(Alignment.TopStart)
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            android.R.drawable.ic_menu_close_clear_cancel
+                        ),
+                        contentDescription = "Close"
+                    )
+                }
+            }
+        }
     }
+}
+
+@Preview
+@Composable
+private fun TestAppScreenContentPreview() {
+    TestAppScreenContent(
+        onOpenHolder = {},
+        onOpenVerifier = {},
+        onOpenDevMenu = {},
+        onCloseFlow = {},
+        sharingDialogVisible = false,
+        sharingContent = {}
+    )
 }

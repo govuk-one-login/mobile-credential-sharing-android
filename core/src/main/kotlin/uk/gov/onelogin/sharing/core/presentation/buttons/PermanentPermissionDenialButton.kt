@@ -19,6 +19,7 @@ import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_PERMANENT_DENIAL_BUTTON
 
 @Composable
 fun PermanentPermissionDenialButton(
@@ -34,7 +35,7 @@ fun PermanentPermissionDenialButton(
         )
 
         GdsButton(
-            modifier = Modifier.testTag("permissionPermanentDenialButton"),
+            modifier = Modifier.testTag(PERMISSION_PERMANENT_DENIAL_BUTTON),
             text = buttonText,
             buttonType = ButtonTypeV2.Primary(),
             onClick = {

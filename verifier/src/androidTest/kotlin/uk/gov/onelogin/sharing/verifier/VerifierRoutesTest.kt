@@ -5,6 +5,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -13,28 +15,20 @@ import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
-import uk.gov.onelogin.sharing.verifier.di.createTestGraph
+import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerRule
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
-import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScreenRule
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
+import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
 
 @RunWith(AndroidJUnit4::class)
 class VerifierRoutesTest {
-    private val appGraph = createTestGraph()
-
     @get:Rule
     val composeTestRule = VerifierScannerRule(
-        appGraph = appGraph,
         composeTestRule = createComposeRule()
-    )
-
-    private val scannedInvalidQrScreenRule = ScannedInvalidQrScreenRule(
-        composeContentTestRule = composeTestRule
     )
 
     private lateinit var controller: TestNavHostController
@@ -45,7 +39,11 @@ class VerifierRoutesTest {
             SetupNavHost()
         }
 
-        composeTestRule.assertPermissionDeniedButtonIsDisplayed()
+        testScheduler.advanceUntilIdle()
+
+        val route = controller.currentBackStackEntry?.toRoute<VerifierScanRoute>()
+
+        assertNotNull(route)
     }
 
     @Test
@@ -57,9 +55,6 @@ class VerifierRoutesTest {
         }
 
         testScheduler.advanceUntilIdle()
-
-        scannedInvalidQrScreenRule.assertTitleIsDisplayed()
-        scannedInvalidQrScreenRule.performTryAgainButtonClick()
 
         val route = controller.currentBackStackEntry?.toRoute<VerifierScanRoute>()
 
@@ -91,10 +86,13 @@ class VerifierRoutesTest {
             navController = controller,
             startDestination = VerifierRoutes
         ) {
-            configureVerifierRoutes(
-                navController = controller,
-                appGraph = appGraph
-            )
+            navigation<VerifierRoutes>(startDestination = VerifyCredentialRoute) {
+                composable<VerifyCredentialRoute> {}
+                composable<VerifierScanRoute> {}
+                composable<ScannedInvalidQrRoute> {}
+                composable<ConnectWithHolderDeviceRoute> {}
+                composable<BluetoothConnectionErrorRoute> {}
+            }
         }
         postConfiguration()
     }

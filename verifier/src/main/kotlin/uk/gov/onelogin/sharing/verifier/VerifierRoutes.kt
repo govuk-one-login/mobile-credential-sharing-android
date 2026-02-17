@@ -1,20 +1,19 @@
 package uk.gov.onelogin.sharing.verifier
 
 import androidx.annotation.Keep
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.navigateToBluetoothConnectionErrorRoute
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
+import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute.configureVerifyCredentialRoute
 
 /**
@@ -37,10 +36,8 @@ data object VerifierRoutes {
      * @see configureVerifierScannerRoute
      * @see configureScannedInvalidQrRoute
      */
-    fun NavGraphBuilder.configureVerifierRoutes(
-        navController: NavController
-    ) {
-        navigation<VerifierRoutes>(startDestination = VerifierScanRoute) {
+    fun NavGraphBuilder.configureVerifierRoutes(navController: NavHostController) {
+        navigation<VerifierRoutes>(startDestination = VerifyCredentialRoute) {
             configureVerifyCredentialRoute(
                 navController
             )
@@ -55,7 +52,7 @@ data object VerifierRoutes {
             configureScannedInvalidQrRoute(
                 onTryAgainClick = { navController.navigateToVerifierScanRoute() }
             )
-            configureConnectWithHolderDeviceRoute() {
+            configureConnectWithHolderDeviceRoute {
                 navController.navigateToBluetoothConnectionErrorRoute(title = it)
             }
             configureBluetoothConnectionErrorRoute(controller = navController)

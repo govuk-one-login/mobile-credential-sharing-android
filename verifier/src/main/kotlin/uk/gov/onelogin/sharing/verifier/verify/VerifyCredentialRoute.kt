@@ -25,9 +25,7 @@ object VerifyCredentialRoute {
      * target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    fun NavGraphBuilder.configureVerifyCredentialRoute(
-        navController: NavController
-    ) {
+    fun NavGraphBuilder.configureVerifyCredentialRoute(navController: NavController) {
         composable<VerifyCredentialRoute> {
             Column(
                 modifier = Modifier.fillMaxSize(),

@@ -3,10 +3,7 @@ package uk.gov.onelogin.sharing.verifier.scan
 import android.Manifest
 import android.content.Context
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.assertHasClickAction
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -16,8 +13,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.android.ui.componentsv2.permission.PermissionScreen
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
-import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.verifier.di.createTestGraph
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -27,7 +22,6 @@ class VerifierScannerPermissionLogicTest {
 
     @get:Rule
     val composeTestRule = VerifierScannerRule(
-        appGraph = createTestGraph(),
         resources = resources,
         composeTestRule = createComposeRule()
     )
@@ -56,6 +50,8 @@ class VerifierScannerPermissionLogicTest {
         }
 
         composeTestRule.assertPermissionDeniedButtonIsDisplayed()
+
+        composeTestRule.assertPermissionDeniedTextIsDisplayed()
     }
 
     @Test
@@ -70,7 +66,9 @@ class VerifierScannerPermissionLogicTest {
             )
         }
 
-        composeTestRule.assertPermissionDeniedButtonIsDisplayed()
+        composeTestRule.assertPermissionRationaleButtonIsDisplayed()
+
+        composeTestRule.assertPermissionDeniedTextIsDisplayed()
     }
 
     @Test
@@ -87,9 +85,6 @@ class VerifierScannerPermissionLogicTest {
 
         composeTestRule.assertOpenAppSettingsButtonIsDisplayed()
 
-        composeTestRule.onNodeWithText(
-            resources.getString(R.string.open_app_permissions)
-        ).assertIsDisplayed()
-            .assertHasClickAction()
+        composeTestRule.assertPermissionPermanentlyDeniedButtonIsDisplayed()
     }
 }

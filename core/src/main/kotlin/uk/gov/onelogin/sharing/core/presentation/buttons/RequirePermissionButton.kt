@@ -12,6 +12,7 @@ import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_REQUIRED_BUTTON
 
 @Composable
 fun RequirePermissionButton(
@@ -21,7 +22,7 @@ fun RequirePermissionButton(
 ) {
     Column(modifier = modifier) {
         GdsButton(
-            modifier = Modifier.testTag("permissionRequiredButton"),
+            modifier = Modifier.testTag(PERMISSION_REQUIRED_BUTTON),
             text = text,
             buttonType = ButtonTypeV2.Primary(),
             onClick = {

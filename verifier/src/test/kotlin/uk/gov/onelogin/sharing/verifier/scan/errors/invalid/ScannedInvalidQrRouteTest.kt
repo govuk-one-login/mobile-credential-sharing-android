@@ -4,6 +4,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -65,8 +66,8 @@ class ScannedInvalidQrRouteTest {
                 navController = controller,
                 startDestination = ConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
             ) {
-                configureConnectWithHolderDeviceRoute(appGraph = createTestGraph())
-                configureScannedInvalidQrRoute()
+                composable<ConnectWithHolderDeviceRoute> {}
+                composable<ScannedInvalidQrRoute> {}
             }
 
             controller.navigateToScannedInvalidQrRoute(invalidBarcodeDataResultOne.data)

@@ -13,13 +13,13 @@ import kotlinx.serialization.Serializable
 object HolderHomeRoute {
     fun NavGraphBuilder.configureHolderWelcomeScreen() {
         composable<HolderHomeRoute> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    HolderWelcomeScreen()
-                }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                HolderWelcomeScreen()
             }
+        }
     }
 }

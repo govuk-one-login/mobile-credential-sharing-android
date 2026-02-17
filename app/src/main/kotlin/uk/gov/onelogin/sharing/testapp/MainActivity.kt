@@ -4,19 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.CredentialSharingSdk
-import uk.gov.onelogin.sharing.ui.api.CredentialSharingDestination
 import uk.gov.onelogin.sharing.ui.api.CredentialSharingUi
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: MainActivityViewModel by viewModels()
 
     @Inject
     lateinit var credentialSharingSdk: CredentialSharingSdk
@@ -30,30 +25,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             GdsTheme {
-                ui.Render(
-                    sdk = credentialSharingSdk,
-                    startDestination = CredentialSharingDestination.VerifierRoot,
-                    modifier = Modifier.fillMaxSize()
+                TestAppScreen(
+                    ui = ui,
+                    sdk = credentialSharingSdk
                 )
             }
         }
-
-        /*setContent {
-            val navController = rememberNavController()
-
-            val startDestination = PrimaryTabDestination.Holder
-            val currentTab by viewModel.currentTabDestination.collectAsStateWithLifecycle()
-
-            GdsTheme {
-                MainActivityContent(
-                    appGraph = credentialSharingSdk.appGraph,
-                    currentTab = currentTab,
-                    navController = navController,
-                    startDestination = startDestination,
-                    modifier = Modifier.fillMaxSize(),
-                    onUpdateTabDestination = viewModel::update
-                )
-            }
-        }*/
     }
 }

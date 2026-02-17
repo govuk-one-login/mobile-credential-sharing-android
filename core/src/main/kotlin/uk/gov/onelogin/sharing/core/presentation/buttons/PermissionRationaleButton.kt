@@ -13,6 +13,7 @@ import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_RATIONALE_BUTTON
 
 @Composable
 fun PermissionRationaleButton(
@@ -27,7 +28,7 @@ fun PermissionRationaleButton(
         )
 
         GdsButton(
-            modifier = Modifier.testTag("permissionRationaleButton"),
+            modifier = Modifier.testTag(PERMISSION_RATIONALE_BUTTON),
             text = text,
             buttonType = ButtonTypeV2.Primary(),
             onClick = {
