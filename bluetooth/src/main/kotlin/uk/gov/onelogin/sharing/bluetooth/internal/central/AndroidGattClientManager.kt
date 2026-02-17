@@ -14,13 +14,16 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.logger.logTag
 
+@Suppress("TooManyFunctions")
 internal class AndroidGattClientManager(
     private val context: Context,
     private val permissionChecker: PermissionChecker,
@@ -87,6 +90,36 @@ internal class AndroidGattClientManager(
         bluetoothGatt = null
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun writeSessionEnd() {
+        val gatt = bluetoothGatt.let { bluetoothGatt } ?: return
+
+        val state = gatt
+            .getService(serviceUuid)
+            .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
+            ClientError.INVALID_SERVICE,
+            "Gatt Service does not have a state characteristic"
+        )
+
+        val endVal = byteArrayOf(MdocState.END.code)
+
+        val writeSuccess = gattWriter.writeCharacteristic(
+            gatt = gatt,
+            characteristic = state,
+            value = endVal
+        )
+
+        val event =
+            if (writeSuccess) {
+                logger.debug(logTag, "GATT: Wrote 0x02 to State characteristic")
+                GattClientEvent.SessionEnd(SessionEndStates.SUCCESS)
+            } else {
+                GattClientEvent.SessionEnd(SessionEndStates.WRITE_TO_SERVER_FAILED)
+            }
+
+        _events.tryEmit(event)
+    }
+
     private fun handleGattEvent(event: GattEvent) {
         try {
             when (event) {
@@ -94,6 +127,7 @@ internal class AndroidGattClientManager(
                 is GattEvent.ServicesDiscovered -> servicesDiscovered(event)
                 is GattEvent.MtuChange -> changedMtu(event)
                 is GattEvent.CharacteristicWrite -> characteristicWritten(event)
+                is GattEvent.CharacteristicChanged -> handleCharacteristicChanged(event)
             }
         } catch (e: SecurityException) {
             logger.error(logTag, "Security exception", e)
@@ -260,5 +294,21 @@ internal class AndroidGattClientManager(
         )
 
         disconnect()
+    }
+
+    /**
+     * Handles incoming notification changes from the central device.
+     */
+    private fun handleCharacteristicChanged(event: GattEvent.CharacteristicChanged) {
+        event.value?.firstOrNull() ?: return
+
+        if (event.characteristic.uuid == SERVER_2_CLIENT_UUID) {
+            when (event.value.first()) {
+                MdocState.END.code -> {
+                    logger.debug(logTag, "GATT: Received notification 0x02 on State")
+                    _events.tryEmit(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS))
+                }
+            }
+        }
     }
 }

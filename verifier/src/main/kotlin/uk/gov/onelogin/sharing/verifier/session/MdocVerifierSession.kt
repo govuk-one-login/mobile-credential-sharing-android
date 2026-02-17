@@ -60,6 +60,9 @@ class MdocVerifierSession(
 
     override fun stop() {
         logger.debug(logTag, "Stop session")
+
+        gattClientManager.writeSessionEnd()
+
         gattClientManager.disconnect()
     }
 
@@ -93,6 +96,10 @@ class MdocVerifierSession(
             is GattClientEvent.UnsupportedEvent -> {
                 logger.debug(logTag, "Unhandled event: $event")
                 _state.value = VerifierSessionState.Error("Unhandled event: $event")
+            }
+
+            is GattClientEvent.SessionEnd -> {
+                gattClientManager.disconnect()
             }
         }
     }

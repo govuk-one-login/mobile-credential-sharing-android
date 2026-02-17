@@ -16,4 +16,10 @@ internal sealed interface GattEvent {
         val characteristic: BluetoothGattCharacteristic,
         val status: Int
     ) : GattEvent
+
+    data class CharacteristicChanged(
+        val gatt: BluetoothGatt?,
+        val characteristic: BluetoothGattCharacteristic,
+        val value: ByteArray? = null
+    ) : GattEvent
 }

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.content.Context
+import android.os.Build
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import io.mockk.CapturingSlot
@@ -22,10 +23,13 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
 
@@ -531,6 +535,62 @@ internal class AndroidGattClientManagerTest {
 
         verifyCount { bluetoothGatt.disconnect() }
         verifyCount { bluetoothGatt.close() }
+    }
+
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    @Test
+    fun `handles incoming end command and emits SessionEnd event`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val endByte = MdocState.END.code
+
+        every { stateCharacteristic.uuid } returns GattUuids.SERVER_2_CLIENT_UUID
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onCharacteristicChanged(
+                bluetoothGatt,
+                stateCharacteristic,
+                byteArrayOf(endByte)
+            )
+
+            assertEquals(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS), awaitItem())
+        }
+    }
+
+    @Test
+    fun `writes session end to server and emits SessionEnd`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        testEvents {
+            manager.writeSessionEnd()
+            assertEquals(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS), awaitItem())
+        }
+    }
+
+    @Test
+    fun `writes session handles error`() = runTest {
+        val failingWriter = FakeGattWriter(false)
+        manager = createManager(failingWriter)
+
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        testEvents {
+            manager.writeSessionEnd()
+            assertEquals(
+                GattClientEvent.SessionEnd(SessionEndStates.WRITE_TO_SERVER_FAILED),
+                awaitItem()
+            )
+        }
     }
 
     private suspend fun testEvents(

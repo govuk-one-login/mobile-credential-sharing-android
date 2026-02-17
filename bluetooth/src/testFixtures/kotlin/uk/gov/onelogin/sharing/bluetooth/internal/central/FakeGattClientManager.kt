@@ -22,6 +22,9 @@ class FakeGattClientManager : GattClientManager {
         disconnectCalls++
     }
 
+    override fun writeSessionEnd() {
+    }
+
     suspend fun emitEvent(event: GattClientEvent) {
         _events.emit(event)
     }

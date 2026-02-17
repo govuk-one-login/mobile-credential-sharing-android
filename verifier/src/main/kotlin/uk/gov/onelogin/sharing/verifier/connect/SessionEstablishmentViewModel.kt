@@ -200,6 +200,7 @@ class SessionEstablishmentViewModel(
      * @see updateEngagementData
      * @see updatePermissions
      */
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun receive(event: ConnectWithHolderDeviceEvent) = when (event) {
         is ConnectToDevice ->
             connect(event.device, event.serviceUuid)
@@ -267,6 +268,7 @@ class SessionEstablishmentViewModel(
 
     override fun onCleared() {
         logger.debug(logTag, "VM cleared, stopping scanner")
+        mdocVerifierSession.stop()
         receive(StopScanning)
         super.onCleared()
     }

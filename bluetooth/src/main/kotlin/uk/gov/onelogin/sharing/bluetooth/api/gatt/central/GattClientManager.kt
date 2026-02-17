@@ -10,4 +10,6 @@ interface GattClientManager {
     fun connect(device: BluetoothDevice, serviceUuid: UUID)
 
     fun disconnect()
+
+    fun writeSessionEnd()
 }
