@@ -5,11 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface CredentialSharingDestination {
     @Serializable
-    data object HolderRoot : CredentialSharingDestination
+    data object Holder : CredentialSharingDestination
 
     @Serializable
-    data object VerifierRoot : CredentialSharingDestination
-
-    @Serializable
-    data object DevMenu : CredentialSharingDestination
+    data object Verifier : CredentialSharingDestination
 }

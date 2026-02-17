@@ -9,10 +9,6 @@ import uk.gov.onelogin.sharing.verifier.R
  * Ensures that tests would fail when strings update without updating this test data.
  */
 enum class StringsXmlData(val expected: String, @param:StringRes val resourceId: Int) {
-    CAMERA_PERMISSION_IS_ENABLED(
-        expected = "The camera permission is now enabled.",
-        resourceId = R.string.camera_permission_is_enabled
-    ),
     CAMERA_PERMISSION_IS_PERMANENTLY_DENIED(
         expected = "The camera permission is permanently denied.",
         resourceId = R.string.camera_permission_is_permanently_denied

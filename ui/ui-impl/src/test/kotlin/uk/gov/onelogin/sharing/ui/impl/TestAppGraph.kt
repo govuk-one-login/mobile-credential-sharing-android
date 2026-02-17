@@ -1,13 +1,15 @@
-package uk.gov.onelogin.sharing.di
+package uk.gov.onelogin.sharing.ui.impl
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.ui.impl.di.CredentialSharingUiGraph
 
 /**
- * Helper function to create a [CredentialSharingAppGraph] instance for use in tests.
+ * Helper function to create a [CredentialSharingUiGraph] instance for use in tests.
  *
  * Metro does not support testFixtures so this has to be created in the test source set.
  *
@@ -17,13 +19,18 @@ import uk.gov.logging.testdouble.SystemLogger
  * @param applicationContext The [Context] to be used in the graph. Defaults to the application
  * context provided by [ApplicationProvider].
  * @param logger The [Logger] implementation to be used. Defaults to [SystemLogger].
- * @return A configured [CredentialSharingAppGraph]
+ * @return A configured [CredentialSharingUiGraph]
  */
-fun createTestGraph(
+fun createUiTestGraph(
     applicationContext: Context = ApplicationProvider.getApplicationContext(),
     logger: Logger = SystemLogger()
-): CredentialSharingAppGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
-    .create(
-        applicationContext = applicationContext,
-        logger = logger
-    )
+): CredentialSharingUiGraph {
+    val appGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
+        .create(
+            applicationContext = applicationContext,
+            logger = logger
+        )
+
+    return createGraphFactory<CredentialSharingUiGraph.Factory>()
+        .create(appGraph)
+}

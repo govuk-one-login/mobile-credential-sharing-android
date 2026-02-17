@@ -24,10 +24,6 @@ enum class DeferredStringsXmlData(
         R.string.try_again,
         R.string.scanned_invalid_qr_try_again
     ),
-    VERIFIER_SCANNER_CAMERA_PERMISSION_ENABLED(
-        R.string.camera_permission_is_enabled,
-        R.string.verifier_scanner_camera_permission_enabled
-    ),
     VERIFIER_SCANNER_CAMERA_PERMISSION_PERMANENTLY_DENIED(
         R.string.camera_permission_is_permanently_denied,
         R.string.verifier_scanner_camera_permission_permanently_denied

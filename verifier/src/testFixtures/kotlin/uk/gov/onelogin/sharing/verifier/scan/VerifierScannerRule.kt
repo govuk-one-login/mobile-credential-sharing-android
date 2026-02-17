@@ -37,8 +37,7 @@ import uk.gov.onelogin.sharing.verifier.scan.BarcodeAnalysisUrlContractAssertion
 class VerifierScannerRule(
     composeTestRule: ComposeContentTestRule,
     private val openAppSettingsText: String,
-    private val permissionDeniedText: String,
-    private val permissionGrantedText: String
+    private val permissionDeniedText: String
 ) : ComposeContentTestRule by composeTestRule {
 
     /**
@@ -50,8 +49,7 @@ class VerifierScannerRule(
     ) : this(
         composeTestRule = composeTestRule,
         openAppSettingsText = resources.getString(R.string.open_app_permissions),
-        permissionDeniedText = resources.getString(R.string.enable_camera_permission_to_continue),
-        permissionGrantedText = resources.getString(R.string.camera_permission_is_enabled)
+        permissionDeniedText = resources.getString(R.string.enable_camera_permission_to_continue)
     )
 
     fun assertCameraViewfinderIsDisplayed() = onCameraViewfinder().assertIsDisplayed()
@@ -75,8 +73,6 @@ class VerifierScannerRule(
         onPermissionRationaleButton().assertIsDisplayed()
 
     fun assertPermissionDeniedTextIsDisplayed() = onPermissionDeniedText().assertIsDisplayed()
-
-    fun assertPermissionGrantedTextIsDisplayed() = onPermissionGrantedText().assertIsDisplayed()
 
     fun onCameraViewfinder() = onNodeWithTag("cameraViewfinder").assertExists()
 
@@ -104,9 +100,6 @@ class VerifierScannerRule(
         .assertHasClickAction()
 
     fun onPermissionDeniedText() = onNodeWithText(permissionDeniedText).assertIsDisplayed()
-
-    fun onPermissionGrantedText() = onNodeWithText(permissionGrantedText)
-        .assertExists()
 
     fun performOpenAppSettingsClick() = onOpenAppSettingsButton().performClick().also {
         intended(

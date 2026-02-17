@@ -21,7 +21,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,9 +50,8 @@ fun TestAppScreen(
 
     TestAppScreenContent(
         modifier = modifier,
-        onOpenHolder = { destination = CredentialSharingDestination.HolderRoot },
-        onOpenVerifier = { destination = CredentialSharingDestination.VerifierRoot },
-        onOpenDevMenu = { destination = CredentialSharingDestination.DevMenu },
+        onOpenHolder = { destination = CredentialSharingDestination.Holder },
+        onOpenVerifier = { destination = CredentialSharingDestination.Verifier },
         onCloseFlow = { destination = null },
         sharingDialogVisible = sharingDialogVisible,
         content = {
@@ -69,7 +70,6 @@ fun TestAppScreen(
 fun TestAppScreenContent(
     onOpenHolder: () -> Unit,
     onOpenVerifier: () -> Unit,
-    onOpenDevMenu: () -> Unit,
     onCloseFlow: () -> Unit,
     sharingDialogVisible: Boolean,
     modifier: Modifier = Modifier,
@@ -87,22 +87,18 @@ fun TestAppScreenContent(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Credential Sharing Test App",
+                    text = stringResource(R.string.test_screen_title),
                     modifier = Modifier.padding(bottom = 64.dp),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
 
                 OutlinedButton(onClick = onOpenHolder, modifier = Modifier.padding(16.dp)) {
-                    Text("Holder")
+                    Text(stringResource(R.string.holder))
                 }
 
                 OutlinedButton(onClick = onOpenVerifier, modifier = Modifier.padding(16.dp)) {
-                    Text("Verifier")
-                }
-
-                OutlinedButton(onClick = onOpenDevMenu, modifier = Modifier.padding(16.dp)) {
-                    Text("Dev Menu")
+                    Text(stringResource(R.string.verifier))
                 }
             }
 
@@ -125,7 +121,8 @@ private fun SharingDialog(onCloseFlow: () -> Unit, content: @Composable () -> Un
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .testTag(SHARING_DIALOG_TAG),
             shape = RoundedCornerShape(24.dp)
         ) {
             Box(
@@ -137,7 +134,9 @@ private fun SharingDialog(onCloseFlow: () -> Unit, content: @Composable () -> Un
 
                 IconButton(
                     onClick = onCloseFlow,
-                    modifier = Modifier.align(Alignment.TopStart)
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .testTag(CLOSE_DIALOG_BUTTON_TAG)
                 ) {
                     Icon(
                         painter = painterResource(
@@ -157,7 +156,6 @@ private fun TestAppScreenContentPreview() {
     TestAppScreenContent(
         onOpenHolder = {},
         onOpenVerifier = {},
-        onOpenDevMenu = {},
         onCloseFlow = {},
         sharingDialogVisible = false,
         content = {}

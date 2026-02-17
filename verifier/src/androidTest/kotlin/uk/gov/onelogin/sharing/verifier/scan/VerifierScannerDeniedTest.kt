@@ -32,7 +32,7 @@ class VerifierScannerDeniedTest {
     )
 
     @Test
-    fun permissionDeniedTextIsShown() = runTest {
+    fun permissionPermanentlyDeniedIsShown() = runTest {
         composeTestRule.run {
             composeTestRule.setContent {
                 VerifierScannerContent(

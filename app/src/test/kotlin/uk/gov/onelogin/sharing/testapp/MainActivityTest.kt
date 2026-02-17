@@ -1,44 +1,53 @@
 package uk.gov.onelogin.sharing.testapp
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlin.test.assertEquals
-import kotlinx.coroutines.test.runTest
+import dev.zacsweers.metro.createGraphFactory
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 
-/*@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class MainActivityTest {
+
+    val appGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
+        .create(
+            applicationContext = ApplicationProvider.getApplicationContext(),
+            logger = SystemLogger()
+        )
 
     @get:Rule
     val composeTestRule = MainActivityRule(
-        composeTestRule = createAndroidComposeRule<MainActivity>(),
-        appGraph = createTestGraph()
+        composeTestRule = createComposeRule(),
+        appGraph = appGraph
     )
 
     @Test
-    fun displaysHolderMenuItems() = runTest {
-        composeTestRule.run {
-            performHolderTabClick()
-            assertMenuItemsCount(expectedHolderMenuItems.size)
-            expectedHolderMenuItems.forEach(::assertMenuItem)
-        }
+    fun `test content`() {
+        composeTestRule.render()
+
+        composeTestRule.assertHolderIsDisplayed()
+        composeTestRule.assertVerifierIsDisplayed()
     }
 
     @Test
-    fun displaysVerifierMenuItems() = runTest {
-        composeTestRule.run {
-            performVerifierTabClick()
-            assertMenuItemsCount(expectedVerifierMenuItems.size)
-            expectedVerifierMenuItems.forEach(::assertMenuItem)
-        }
-    }
-}*/
+    fun `opening holder shows sharing dialog`() {
+        composeTestRule.render()
 
-class MainActivityTest {
+        composeTestRule.openHolder()
+
+        composeTestRule.assertSharingDialogIsDisplayed()
+    }
+
     @Test
-    fun test() {
-        assertEquals(2, 1 + 1)
+    fun `closing dialog hides sharing dialog`() {
+        `opening holder shows sharing dialog`()
+
+        composeTestRule.closeSharingDialog()
+
+        composeTestRule.assertSharingDialogDoesNotExist()
     }
 }
