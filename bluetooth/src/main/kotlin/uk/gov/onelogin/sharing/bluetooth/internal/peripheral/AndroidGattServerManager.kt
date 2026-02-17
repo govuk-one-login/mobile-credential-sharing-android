@@ -21,6 +21,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.NOTIFY_CLIENT_FAILED
@@ -174,7 +175,7 @@ class AndroidGattServerManager(
     override fun notifySessionEnd(serviceUuid: UUID) {
         val server = gattServer ?: return
         val characteristic =
-            server.getService(serviceUuid)?.getCharacteristic(SERVER_2_CLIENT_UUID) ?: return
+            server.getService(serviceUuid)?.getCharacteristic(STATE_UUID) ?: return
         val connectedDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
         val endValue = byteArrayOf(MdocState.END.code)
 

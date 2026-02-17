@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
@@ -304,7 +304,7 @@ internal class AndroidGattClientManager(
     private fun handleCharacteristicChanged(event: GattEvent.CharacteristicChanged) {
         event.value?.firstOrNull() ?: return
 
-        if (event.characteristic.uuid == SERVER_2_CLIENT_UUID) {
+        if (event.characteristic.uuid == STATE_UUID) {
             when (event.value.first()) {
                 MdocState.END.code -> {
                     logger.debug(logTag, "GATT: Received notification 0x02 on State")

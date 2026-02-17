@@ -546,7 +546,7 @@ internal class AndroidGattClientManagerTest {
         val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val endByte = MdocState.END.code
 
-        every { stateCharacteristic.uuid } returns GattUuids.SERVER_2_CLIENT_UUID
+        every { stateCharacteristic.uuid } returns GattUuids.STATE_UUID
 
         testEvents { callbackSlot ->
             callbackSlot.captured.onCharacteristicChanged(
