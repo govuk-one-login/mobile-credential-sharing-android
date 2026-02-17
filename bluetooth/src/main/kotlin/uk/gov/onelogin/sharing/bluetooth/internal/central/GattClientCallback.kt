@@ -50,19 +50,6 @@ internal class GattClientCallback(private val gattEventEmitter: GattClientEventE
         )
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onCharacteristicChanged(
-        gatt: BluetoothGatt?,
-        characteristic: BluetoothGattCharacteristic
-    ) {
-        gattEventEmitter.emit(
-            GattEvent.CharacteristicChanged(
-                gatt = gatt,
-                characteristic = characteristic
-            )
-        )
-    }
-
     override fun onCharacteristicChanged(
         gatt: BluetoothGatt,
         characteristic: BluetoothGattCharacteristic,

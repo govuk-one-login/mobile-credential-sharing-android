@@ -23,6 +23,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.logger.logTag
 
+const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
+
 @Suppress("TooManyFunctions")
 internal class AndroidGattClientManager(
     private val context: Context,
@@ -98,7 +100,7 @@ internal class AndroidGattClientManager(
             .getService(serviceUuid)
             .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
-            "Gatt Service does not have a state characteristic"
+            INVALID_SERVICE
         )
 
         val endVal = byteArrayOf(MdocState.END.code)
@@ -213,7 +215,7 @@ internal class AndroidGattClientManager(
         val state = service
             .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
-            "Gatt Service does not have a state characteristic"
+            INVALID_SERVICE
         )
 
         val serverToClient = service
@@ -249,7 +251,7 @@ internal class AndroidGattClientManager(
             .getService(serviceUuid)
             .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
-            "Gatt Service does not have a state characteristic"
+            INVALID_SERVICE
         )
 
         // Set the state value to start
