@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
     lateinit var credentialSharingSdk: CredentialSharingSdk
 
     @Inject
-    lateinit var ui: CredentialSharingUi
+    lateinit var credentialSharingUi: CredentialSharingUi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             GdsTheme {
                 TestAppScreen(
-                    ui = ui,
+                    ui = credentialSharingUi,
                     sdk = credentialSharingSdk
                 )
             }
