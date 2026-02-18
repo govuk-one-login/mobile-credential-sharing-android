@@ -200,7 +200,6 @@ class SessionEstablishmentViewModel(
      * @see updateEngagementData
      * @see updatePermissions
      */
-    @OptIn(ExperimentalPermissionsApi::class)
     override fun receive(event: ConnectWithHolderDeviceEvent) = when (event) {
         is ConnectToDevice ->
             connect(event.device, event.serviceUuid)
