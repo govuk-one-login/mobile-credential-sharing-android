@@ -82,9 +82,11 @@ class CoseKeyTest {
             SystemLogger()
         ).toSessionEstablishment()
 
-        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)
+//        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)
 
-        val resultPublicKey = CoseKey.getEReaderKeyFromParsedCoseKey(untagReaderKey)
+        val resultPublicKey = CoseKey.getEReaderKeyFromParsedCoseKey(
+            sessionEstablishment.eReaderKey
+        )
 
         assertNotNull(resultPublicKey)
     }

@@ -41,6 +41,8 @@ import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cose.CoseKeyToString
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
@@ -139,7 +141,13 @@ class SessionEstablishmentViewModel(
                     }
 
                     is VerifierSessionState.ConnectionStateStarted -> {
-                        coseKeyConverter.convert(generateSessionPublicKey())
+
+                        val keyPair = generateEcKeyPair(
+                            algorithm = ELLIPTIC_CURVE_ALGORITHM,
+                            parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
+
+                        )
+                        coseKeyConverter.convert(getCoseKey(keyPair))
                     }
 
                     else -> Unit

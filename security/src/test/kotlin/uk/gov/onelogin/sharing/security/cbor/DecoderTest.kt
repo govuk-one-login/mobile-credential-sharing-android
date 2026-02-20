@@ -220,9 +220,10 @@ class DecoderTest {
             logger
         ).toSessionEstablishment()
 
-        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)
+//        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)
 
-        val eReaderKeyPublicKey = CoseKey.getEReaderKeyFromParsedCoseKey(untagReaderKey)
+        val eReaderKeyPublicKey =
+            CoseKey.getEReaderKeyFromParsedCoseKey(sessionEstablishment.eReaderKey)
 
         val sharedSecret = getSharedSecret(
             holderKeyPair?.private as ECPrivateKey,

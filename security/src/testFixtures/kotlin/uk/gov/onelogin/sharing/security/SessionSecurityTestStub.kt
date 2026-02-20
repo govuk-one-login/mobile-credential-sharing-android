@@ -26,7 +26,7 @@ object SessionSecurityTestStub {
     val secretGenerator = EcdhSharedSecretGenerator(securityLogger)
 
     val privateKeyGenerator = EcPrivateKeyGenerator(keyPairGenerator, securityLogger)
-    val publicKeyGenerator = EcPublicCoseKeyGenerator(keyPairGenerator, securityLogger)
+    val publicKeyGenerator = EcPublicCoseKeyGenerator(securityLogger)
     val sessionKeyGenerator = HkdfSessionKeyGenerator(securityLogger)
     val sessionEncryption = AesGcmEncryption(securityLogger)
     val sessionSecurity = SessionSecurityImpl(

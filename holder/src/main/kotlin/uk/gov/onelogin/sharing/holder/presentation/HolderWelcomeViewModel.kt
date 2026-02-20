@@ -12,6 +12,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.security.interfaces.ECPrivateKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -35,8 +36,14 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
+import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
+import uk.gov.onelogin.sharing.security.cbor.deriveSessionTranscript
+import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
 
 @AssistedInject
 @Suppress("LongParameterList")
@@ -66,16 +73,23 @@ class HolderWelcomeViewModel(
     private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
+    val keyPair = sessionSecurity.generateEcKeyPair(
+        algorithm = ELLIPTIC_CURVE_ALGORITHM,
+        parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
+    )
+    val publicKey = sessionSecurity.getCoseKey(keyPair)
+
     init {
         viewModelScope.launch(dispatcher) {
             resettable.forEach(Resettable::reset)
-            val publicKey = sessionSecurity.generateSessionPublicKey()
+
             publicKey.let { coseKey ->
                 val engagement = engagementGenerator.qrCodeEngagement(
                     coseKey,
                     _uiState.value.uuid
                 )
                 _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
+                _uiState.update { it.copy(engagement = engagement) }
             }
 
             orchestrator.start(
@@ -154,6 +168,55 @@ class HolderWelcomeViewModel(
                                 "Mdoc - Error while ending session: ${state.status}"
                             )
                         }
+                    }
+
+                    is MdocSessionState.MessageReceived -> {
+                        val dto = decodeSessionEstablishmentModel(
+                            rawBytes = state.message,
+                            logger = logger
+                        )
+
+                        val sharedSecretKey = sessionSecurity.generateSharedSecret(
+                            holderKey = keyPair!!.private as ECPrivateKey,
+
+                            eReaderKey = CoseKey.getEReaderKeyFromParsedCoseKey(
+                                dto.eReaderKey.encoded
+                            )
+                        )
+
+                        logger.debug(logTag, "sharedSecretKey: ${sharedSecretKey.toHexString()}")
+                        logger.debug(logTag, "sharedSecretKey length: ${sharedSecretKey.size}")
+
+                        val transcript = deriveSessionTranscript(
+                            cborBase64Url = _uiState.value.engagement!!,
+                            sessionEstablishmentBytes = state.message,
+                            logger = logger
+                        )
+
+                        /*val skDevice = sessionSecurity.deriveSessionKey(
+                            sharedKey = sharedSecretKey,
+                            sessionTranscriptBytes = transcript,
+                            role = SessionKeyGenerator.Companion.DeviceRole.HOLDER
+                        )*/
+
+                        val skReader = sessionSecurity.deriveSessionKey(
+                            sharedKey = sharedSecretKey,
+                            sessionTranscriptBytes = transcript,
+                            role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
+                        )
+
+                       /* logger.debug(logTag, "skDevice: ${skDevice.toHexString()}")
+                        logger.debug(logTag, "skReader: ${skDevice.toHexString()}")*/
+
+                        logger.debug(logTag, "data[0]=0x${"%02x".format(dto.data[0])}")
+
+                        val decrypted = sessionSecurity.decryptPayload(
+                            key = skReader,
+                            data = dto.data,
+                            role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
+                        )
+
+                        logger.debug(logTag, "Mdoc - Message received: ${String(decrypted)}")
                     }
                 }
             }
@@ -324,6 +387,7 @@ class HolderWelcomeViewModel(
 data class HolderWelcomeUiState(
     val uuid: UUID = UUID.randomUUID(),
     val qrData: String? = null,
+    val engagement: String? = null,
     val sessionState: MdocSessionState = MdocSessionState.Idle,
     val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,

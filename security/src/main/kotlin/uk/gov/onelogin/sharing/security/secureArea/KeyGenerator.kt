@@ -46,7 +46,7 @@ sealed interface KeyGenerator {
         /**
          * @return a [CoseKey] that represents an [java.security.interfaces.ECPublicKey].
          */
-        fun generateSessionPublicKey(): CoseKey
+        fun getCoseKey(keyPair: KeyPair?): CoseKey
     }
 
     /**

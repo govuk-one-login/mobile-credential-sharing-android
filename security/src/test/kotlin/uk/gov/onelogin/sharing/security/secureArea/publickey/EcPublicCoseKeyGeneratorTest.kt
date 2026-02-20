@@ -25,7 +25,7 @@ class EcPublicCoseKeyGeneratorTest {
     private val logger = SystemLogger()
 
     private val generator by lazy {
-        EcPublicCoseKeyGenerator(keyPairGenerator, logger)
+        EcPublicCoseKeyGenerator(logger)
     }
 
     @Test
@@ -33,7 +33,7 @@ class EcPublicCoseKeyGeneratorTest {
         val expected = CoseKey.generateCoseKey(keyPair!!.public as ECPublicKey)
         assertEquals(
             expected,
-            generator.generateSessionPublicKey()
+            generator.getCoseKey(keyPair)
         )
 
         assert("Converted EC public key to CoseKey: $expected" in logger) {
@@ -49,7 +49,7 @@ class EcPublicCoseKeyGeneratorTest {
     ) = runTest {
         this@EcPublicCoseKeyGeneratorTest.keyPair = keyPair
         assertThrows(expectedExceptionClass) {
-            generator.generateSessionPublicKey()
+            generator.getCoseKey(keyPair)
         }
     }
 }

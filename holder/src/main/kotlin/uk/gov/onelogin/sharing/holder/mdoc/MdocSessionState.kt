@@ -54,4 +54,6 @@ sealed interface MdocSessionState {
      *
      */
     data class MdocSessionEnded(val status: SessionEndStates) : MdocSessionState
+
+    data class MessageReceived(val message: ByteArray) : MdocSessionState
 }

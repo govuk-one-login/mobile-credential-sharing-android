@@ -388,7 +388,7 @@ class SessionEstablishmentViewModelTest {
             logger
         )
         val publicKeyGenerator = EcPublicCoseKeyGenerator(generator, logger)
-        val expectedCoseKey = publicKeyGenerator.generateSessionPublicKey()
+        val expectedCoseKey = publicKeyGenerator.getCoseKey()
             .let(CoseKey::encodeCbor)
             .let(::EmbeddedCbor)
             .encodeCbor()
