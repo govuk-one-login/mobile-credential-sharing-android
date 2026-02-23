@@ -1,9 +1,12 @@
 package uk.gov.onelogin.sharing.testapp
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.zacsweers.metro.createGraphFactory
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +41,24 @@ class MainActivityTest {
         composeTestRule.render()
 
         composeTestRule.openHolder()
+
+        composeTestRule.assertSharingDialogIsDisplayed()
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun `Rotation is possible during the holder journey`() = runTest {
+        val restorationTester = StateRestorationTester(composeTestRule)
+        restorationTester.setContent {
+            TestAppScreen(
+                ui = FakeCredentialSharingUi(),
+                sdk = FakeCredentialSharingSdk(appGraph)
+            )
+        }
+
+        composeTestRule.openHolder()
+
+        restorationTester.emulateSavedInstanceStateRestore()
 
         composeTestRule.assertSharingDialogIsDisplayed()
     }
