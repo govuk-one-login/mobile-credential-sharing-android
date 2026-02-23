@@ -150,7 +150,7 @@ class HolderWelcomeViewModelTest {
             viewModel.uiState.value.sessionState
         )
 
-        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS))
+        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS, false))
         advanceUntilIdle()
 
         assertEquals(
@@ -415,7 +415,7 @@ class HolderWelcomeViewModelTest {
 
         advanceUntilIdle()
 
-        fakeMdocSession.emitState(MdocSessionState.Disconnected("123123"))
+        fakeMdocSession.emitState(MdocSessionState.Disconnected("123123", false))
 
         advanceUntilIdle()
         assertEquals(true, viewModel.uiState.value.showErrorScreen)

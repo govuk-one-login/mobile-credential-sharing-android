@@ -44,6 +44,7 @@ internal class AndroidGattClientManager(
         handleGattEvent(it)
     }
     private var mtu = MIN_MTU
+    private var isSessionEnd = false
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (!permissionChecker.hasCentralPermissions()) {
@@ -114,6 +115,7 @@ internal class AndroidGattClientManager(
         val event =
             if (writeSuccess) {
                 logger.debug(logTag, "GATT: Wrote 0x02 to State characteristic")
+                isSessionEnd = true
                 GattClientEvent.SessionEnd(SessionEndStates.SUCCESS)
             } else {
                 GattClientEvent.SessionEnd(SessionEndStates.WRITE_TO_SERVER_FAILED)
@@ -154,8 +156,9 @@ internal class AndroidGattClientManager(
             }
 
             event.newState == BluetoothGatt.STATE_DISCONNECTED -> {
+                bluetoothGatt?.close()
                 bluetoothGatt = null
-                GattClientEvent.Disconnected(address)
+                GattClientEvent.Disconnected(address, isSessionEnd)
             }
 
             else -> GattClientEvent.UnsupportedEvent(
@@ -308,6 +311,8 @@ internal class AndroidGattClientManager(
             when (event.value.first()) {
                 MdocState.END.code -> {
                     logger.debug(logTag, "GATT: Received notification 0x02 on State")
+                    isSessionEnd = true
+                    bluetoothGatt?.disconnect()
                     _events.tryEmit(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS))
                 }
             }

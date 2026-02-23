@@ -131,11 +131,13 @@ class SessionEstablishmentViewModel(
                         if (started) {
                             mdocVerifierSession.stop()
                         }
-                        _navEvents.tryEmit(
-                            ConnectWithHolderDeviceNavEvent.NavigateToError(
-                                ConnectWithHolderDeviceError.BluetoothConnectionError
+                        if (!sessionState.isSessionEnd) {
+                            _navEvents.tryEmit(
+                                ConnectWithHolderDeviceNavEvent.NavigateToError(
+                                    ConnectWithHolderDeviceError.BluetoothConnectionError
+                                )
                             )
-                        )
+                        }
                     }
 
                     is VerifierSessionState.ConnectionStateStarted -> {

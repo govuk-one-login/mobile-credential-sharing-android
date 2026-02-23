@@ -290,7 +290,7 @@ class SessionEstablishmentViewModelTest {
             )
 
             fakeVerifierSession.updateState(
-                VerifierSessionState.Disconnected(DEVICE_ADDRESS)
+                VerifierSessionState.Disconnected(DEVICE_ADDRESS, false)
             )
 
             assertEquals(1, fakeVerifierSession.stopCalls)
@@ -309,7 +309,7 @@ class SessionEstablishmentViewModelTest {
         viewModel = createViewModel(DummyBluetoothScanner)
         viewModel.navEvents.test {
             fakeVerifierSession.updateState(
-                VerifierSessionState.Disconnected(DEVICE_ADDRESS)
+                VerifierSessionState.Disconnected(DEVICE_ADDRESS, false)
             )
 
             assertEquals(0, fakeVerifierSession.stopCalls)

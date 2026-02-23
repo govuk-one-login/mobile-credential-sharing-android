@@ -22,8 +22,8 @@ class GattClientEventsToVerifierSessionStates : TestParametersValuesProvider() {
             ),
             Triple(
                 "GATT Services disonnect to Bluetooth device address Strings",
-                GattClientEvent.Disconnected("unit test address"),
-                VerifierSessionState.Disconnected("unit test address")
+                GattClientEvent.Disconnected("unit test address", false),
+                VerifierSessionState.Disconnected("unit test address", false)
             ),
             Triple(
                 "GATT Service errors pass client errors as Strings",

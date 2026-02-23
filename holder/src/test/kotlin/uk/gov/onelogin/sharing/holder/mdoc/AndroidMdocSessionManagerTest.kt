@@ -166,7 +166,7 @@ class AndroidMdocSessionManagerTest {
     }
 
     @Test
-    fun `gatt Disconnected event riggers mdoc session Disconnected`() = runTest {
+    fun `gatt Disconnected event triggers mdoc session Disconnected`() = runTest {
         sessionManager.state.test {
             assertEquals(MdocSessionState.Idle, awaitItem())
 
@@ -176,9 +176,9 @@ class AndroidMdocSessionManagerTest {
                 awaitItem()
             )
 
-            gattServerManager.emitEvent(GattServerEvent.Disconnected(DEVICE_ADDRESS))
+            gattServerManager.emitEvent(GattServerEvent.Disconnected(DEVICE_ADDRESS, false))
             assertEquals(
-                MdocSessionState.Disconnected(DEVICE_ADDRESS),
+                MdocSessionState.Disconnected(DEVICE_ADDRESS, false),
                 awaitItem()
             )
         }
@@ -207,7 +207,7 @@ class AndroidMdocSessionManagerTest {
         sessionManager.state.test {
             assertEquals(MdocSessionState.Idle, awaitItem())
 
-            gattServerManager.emitEvent(GattServerEvent.Disconnected(DEVICE_ADDRESS))
+            gattServerManager.emitEvent(GattServerEvent.Disconnected(DEVICE_ADDRESS, false))
 
             expectNoEvents()
         }

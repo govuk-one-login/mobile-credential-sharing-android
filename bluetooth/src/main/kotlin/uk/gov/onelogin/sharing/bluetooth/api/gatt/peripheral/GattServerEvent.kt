@@ -5,7 +5,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 sealed interface GattServerEvent {
     data class Connected(val address: String) : GattServerEvent
-    data class Disconnected(val address: String?) : GattServerEvent
+    data class Disconnected(val address: String?, val isSessionEnd: Boolean) : GattServerEvent
     data class ServiceAdded(val status: Int, val service: BluetoothGattService?) : GattServerEvent
     data object SessionStarted : GattServerEvent
     data object ServiceStopped : GattServerEvent

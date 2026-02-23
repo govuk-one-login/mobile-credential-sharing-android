@@ -115,14 +115,18 @@ class HolderWelcomeViewModel(
                                 )
                             ]
                         )
-                        logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
-                        _uiState.update {
-                            it.copy(
-                                connectedAddress = state.address,
-                                showErrorScreen = true,
-                                bluetoothErrorType = BLUETOOTH_DISCONNECTED
-                            )
+
+                        if (!state.isSessionEnd) {
+                            logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
+                            _uiState.update {
+                                it.copy(
+                                    connectedAddress = state.address,
+                                    showErrorScreen = true,
+                                    bluetoothErrorType = BLUETOOTH_DISCONNECTED
+                                )
+                            }
                         }
+
                         stopAdvertising()
                     }
 

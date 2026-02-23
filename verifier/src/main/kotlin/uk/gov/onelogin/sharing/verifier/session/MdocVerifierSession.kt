@@ -74,7 +74,8 @@ class MdocVerifierSession(
                 _state.value = VerifierSessionState.Connected(event.deviceAddress)
 
             is GattClientEvent.Disconnected ->
-                _state.value = VerifierSessionState.Disconnected(event.deviceAddress)
+                _state.value =
+                    VerifierSessionState.Disconnected(event.deviceAddress, event.isSessionEnd)
 
             is GattClientEvent.Error -> {
                 stop()

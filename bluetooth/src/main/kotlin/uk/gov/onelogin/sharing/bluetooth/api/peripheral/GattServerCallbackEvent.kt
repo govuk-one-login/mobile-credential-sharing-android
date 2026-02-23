@@ -13,7 +13,7 @@ sealed interface GattServerCallbackEvent {
         val newState: Int,
         val device: BluetoothDevice
     ) : GattServerCallbackEvent {
-        fun toGattServerEvent(): GattServerEvent {
+        fun toGattServerEvent(isSessionEnd: Boolean): GattServerEvent {
             val address = device.address
 
             return when {
@@ -22,7 +22,7 @@ sealed interface GattServerCallbackEvent {
                     GattServerEvent.Connected(address)
 
                 newState == BluetoothProfile.STATE_DISCONNECTED ->
-                    GattServerEvent.Disconnected(address)
+                    GattServerEvent.Disconnected(address, isSessionEnd)
 
                 else -> GattServerEvent.UnsupportedEvent(
                     device.address,

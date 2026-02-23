@@ -52,6 +52,7 @@ class AndroidGattServerManager(
         handleGattEvent(it)
     }
     private var mtu = MIN_MTU
+    private var isSessionEnd = false
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open(serviceUuid: UUID) {
@@ -108,7 +109,7 @@ class AndroidGattServerManager(
     }
 
     private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
-        _events.tryEmit(event.toGattServerEvent())
+        _events.tryEmit(event.toGattServerEvent(isSessionEnd))
     }
 
     private fun handleServiceAdded(event: GattServerCallbackEvent.ServiceAdded) {
@@ -159,9 +160,12 @@ class AndroidGattServerManager(
     }
 
     /**
-     * To handle when the holder successfully receives a END command from the reader.
+     *  To handle when the holder successfully receives a END command from the reader.
+     * [isSessionEnd] is set to true as a END command has been successfully been received and helps
+     * differentiate between a graceful teardown and a forced disconnection when an error occurs.
      */
     private fun handleSessionEndReceived() {
+        isSessionEnd = true
         _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
     }
 
@@ -200,7 +204,7 @@ class AndroidGattServerManager(
                 } else {
                     GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
                 }
-
+            isSessionEnd = true
             _events.tryEmit(event)
         }
     }

@@ -5,7 +5,7 @@ sealed interface VerifierSessionState {
     data object Starting : VerifierSessionState
     data object Connecting : VerifierSessionState
     data class Connected(val address: String) : VerifierSessionState
-    data class Disconnected(val address: String) : VerifierSessionState
+    data class Disconnected(val address: String, val isSessionEnd: Boolean) : VerifierSessionState
     data object ConnectionStateStarted : VerifierSessionState
     data class Error(val message: String) : VerifierSessionState
 
