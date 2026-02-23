@@ -4,12 +4,9 @@ import android.Manifest
 import android.os.Build
 
 /**
- * Checks if the application has the necessary permissions for Bluetooth operations.
- *
- * This contract separates the permission checks for acting as a Bluetooth Peripheral (server)
- * versus a Bluetooth Central (client).
+ * Checks if the app has the required permissions to act as a Bluetooth Peripheral.
  */
-interface PermissionChecker {
+fun interface BluetoothPeripheralPermissionChecker {
     /**
      * Checks if the app has the required permissions to act as a Bluetooth Peripheral.
      * This typically includes permissions for advertising and acting as a GATT server.
@@ -18,6 +15,23 @@ interface PermissionChecker {
      */
     fun hasPeripheralPermissions(): Boolean
 
+    companion object {
+        @JvmStatic
+        fun peripheralPermissions(): List<String> = buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                add(Manifest.permission.BLUETOOTH_CONNECT)
+                add(Manifest.permission.BLUETOOTH_ADVERTISE)
+            } else {
+                add(Manifest.permission.BLUETOOTH)
+            }
+        }
+    }
+}
+
+/**
+ * Checks if the app has the required permissions to act as a Bluetooth Central.
+ */
+fun interface BluetoothCentralPermissionChecker {
     /**
      * Checks if the app has the required permissions to act as a Bluetooth Central.
      * This typically includes permissions for scanning and connecting to GATT servers.
@@ -37,15 +51,15 @@ interface PermissionChecker {
                 add(Manifest.permission.BLUETOOTH)
             }
         }
-
-        @JvmStatic
-        fun peripheralPermissions(): List<String> = buildList {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-                add(Manifest.permission.BLUETOOTH_ADVERTISE)
-            } else {
-                add(Manifest.permission.BLUETOOTH)
-            }
-        }
     }
 }
+
+/**
+ * Checks if the application has the necessary permissions for Bluetooth operations.
+ *
+ * This contract separates the permission checks for acting as a Bluetooth Peripheral (server)
+ * versus a Bluetooth Central (client).
+ */
+interface PermissionChecker :
+    BluetoothPeripheralPermissionChecker,
+    BluetoothCentralPermissionChecker
