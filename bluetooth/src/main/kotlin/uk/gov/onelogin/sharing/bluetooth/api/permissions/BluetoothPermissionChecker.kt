@@ -11,8 +11,8 @@ class BluetoothPermissionChecker(private val context: Context) : PermissionCheck
     override fun checkPeripheralPermissions(): PermissionCheckerResult =
         calculateImplementation().checkPeripheralPermissions()
 
-    override fun hasCentralPermissions(): Boolean =
-        calculateImplementation().hasCentralPermissions()
+    override fun checkCentralPermissions(): PermissionCheckerResult =
+        calculateImplementation().checkCentralPermissions()
 
     private fun calculateImplementation(): PermissionChecker = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->

@@ -31,6 +31,13 @@ sealed class PermissionCheckerResult {
  * Checks if the app has the required permissions to act as a Bluetooth Peripheral.
  */
 fun interface BluetoothPeripheralPermissionChecker {
+    /**
+     * Checks if the app has the required permissions to act as a Bluetooth Peripheral.
+     * This typically includes permissions for advertising and acting as a GATT server.
+     *
+     * @return [PermissionCheckerResult.Passed] if all required peripheral permissions are granted.
+     * Otherwise, [PermissionCheckerResult.Missing] containing the list of required permissions.
+     */
     fun checkPeripheralPermissions(): PermissionCheckerResult
 
     /**
@@ -63,9 +70,18 @@ fun interface BluetoothCentralPermissionChecker {
      * Checks if the app has the required permissions to act as a Bluetooth Central.
      * This typically includes permissions for scanning and connecting to GATT servers.
      *
+     * @return [PermissionCheckerResult.Passed] if all required central permissions are granted.
+     * Otherwise, [PermissionCheckerResult.Missing] containing the list of required permissions.
+     */
+    fun checkCentralPermissions(): PermissionCheckerResult
+    /**
+     * Checks if the app has the required permissions to act as a Bluetooth Central.
+     * This typically includes permissions for scanning and connecting to GATT servers.
+     *
      * @return `true` if all required central permissions are granted.
      */
-    fun hasCentralPermissions(): Boolean
+    fun hasCentralPermissions(): Boolean =
+        checkCentralPermissions() == PermissionCheckerResult.Passed
 
     companion object {
         @JvmStatic

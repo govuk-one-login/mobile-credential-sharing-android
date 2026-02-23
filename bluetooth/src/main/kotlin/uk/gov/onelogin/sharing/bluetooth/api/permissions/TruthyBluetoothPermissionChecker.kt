@@ -8,5 +8,6 @@ internal data object TruthyBluetoothPermissionChecker : PermissionChecker {
     override fun checkPeripheralPermissions(): PermissionCheckerResult =
         PermissionCheckerResult.Passed
 
-    override fun hasCentralPermissions(): Boolean = true
+    override fun checkCentralPermissions(): PermissionCheckerResult =
+        PermissionCheckerResult.Passed
 }
