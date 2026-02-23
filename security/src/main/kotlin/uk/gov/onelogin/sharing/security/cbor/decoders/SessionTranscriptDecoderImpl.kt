@@ -2,11 +2,13 @@ package uk.gov.onelogin.sharing.security.cbor.decoders
 
 import com.fasterxml.jackson.core.exc.StreamReadException
 import com.fasterxml.jackson.databind.DatabindException
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 import java.io.IOException
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.base64Decode
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
+import uk.gov.onelogin.sharing.security.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 
@@ -25,17 +27,17 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
         cborBase64Url: String,
         sessionEstablishmentBytes: ByteArray
     ): ByteArray = try {
-        val result = deriveSessionTranscriptBytes(
+       deriveSessionTranscriptBytes(
             cborBase64Url = cborBase64Url,
             sessionEstablishmentBytes = sessionEstablishmentBytes
         )
 
-        EmbeddedCbor(result).encodeCbor().also {
+       /* EmbeddedCbor(result).encodeCbor().also {
             logger.debug(
                 logTag,
                 "Successfully derived session transcript $LOG_MESSAGE_SUFFIX"
             )
-        }
+        }*/
     } catch (exception: IllegalArgumentException) {
         logger.error(
             logTag,
@@ -69,26 +71,25 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
         cborBase64Url: String,
         sessionEstablishmentBytes: ByteArray
     ): ByteArray {
-        var result = byteArrayOf()
+        val mapper = CBORMapper()
 
-        arrayOf(
-            cborBase64Url.base64Decode(),
-            decodeSessionEstablishmentModel(
-                rawBytes = sessionEstablishmentBytes,
-                logger = logger
-            ).eReaderKey.encoded,
-            null
-        ).also {
-            logger.debug(
-                this.logTag,
-                "Created session transcript array $LOG_MESSAGE_SUFFIX"
-            )
-        }.forEach { element ->
-            element?.let {
-                result = result + it
-            }
-        }
-        return result
+        val deviceEngagementBytes = cborBase64Url.base64Decode()
+
+        val eReaderKeyTagged = decodeSessionEstablishmentModel(sessionEstablishmentBytes, logger).eReaderKey.encoded
+        val eReaderKeyCoseKeyBytes = deriveUntaggedCbor(eReaderKeyTagged)
+
+        val devEngNode = mapper.readTree(deviceEngagementBytes)
+        val eReaderKeyNode = mapper.readTree(eReaderKeyCoseKeyBytes)
+
+        val arr = mapper.createArrayNode()
+        arr.add(devEngNode)
+        arr.add(eReaderKeyNode)
+        arr.addNull() // Handover = null
+
+        val transcript = mapper.writeValueAsBytes(arr)
+
+        logger.debug(logTag, "transcript[0]=0x${"%02x".format(transcript[0])} len=${transcript.size}")
+        return transcript
     }
 
     companion object {

@@ -27,7 +27,7 @@ class HkdfSessionKeyGenerator(private val logger: Logger) : SessionKeyGenerator 
         role: DeviceRole
     ): ByteArray {
         val salt = generateSalt(sessionTranscriptBytes)
-        val roleAsBytes = role.hdkfRoleAsString.encodeCbor().also {
+        val roleAsBytes = role.hdkfRoleAsString.toByteArray(Charsets.UTF_8).also {
             logger.debug(
                 logTag,
                 "Encoded session role as bytes: ${it.decodeToString()}"

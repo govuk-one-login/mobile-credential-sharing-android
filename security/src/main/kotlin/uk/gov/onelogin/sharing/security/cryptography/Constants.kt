@@ -12,5 +12,5 @@ object Constants {
     const val AES_256_ALGORITHM = "AES"
 
     const val AES_256_NONCE_LENGTH = 128
-    const val NIST_INITIALISATION_VECTOR_SIZE = 16
+    const val NIST_INITIALISATION_VECTOR_SIZE = 12
 }

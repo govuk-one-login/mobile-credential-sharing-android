@@ -135,5 +135,40 @@ fun deriveSessionTranscript(
     sessionEstablishmentBytes = sessionEstablishmentBytes
 )
 
+private fun encodeTag24Bstr(payload: ByteArray): ByteArray {
+    val out = java.io.ByteArrayOutputStream()
+    out.write(0xD8) // tag(24)
+    out.write(0x18)
+    val n = payload.size
+    when {
+        n < 24 -> out.write(0x40 + n)
+        n <= 0xFF -> { out.write(0x58); out.write(n) }
+        n <= 0xFFFF -> { out.write(0x59); out.write((n ushr 8) and 0xFF); out.write(n and 0xFF) }
+        else -> { out.write(0x5A); out.write((n ushr 24) and 0xFF); out.write((n ushr 16) and 0xFF); out.write((n ushr 8) and 0xFF); out.write(n and 0xFF) }
+    }
+    out.write(payload)
+    return out.toByteArray()
+}
+
+fun deriveSessionTranscript(
+    deviceEngagementCborBytes: ByteArray,
+    eReaderKeyTagged: ByteArray,
+): ByteArray {
+    val taggedDevEng = encodeTag24Bstr(deviceEngagementCborBytes)
+
+    val out = java.io.ByteArrayOutputStream()
+    out.write(0x83)              // array(3)
+    out.write(taggedDevEng)      // element #1
+    out.write(eReaderKeyTagged)  // element #2 (already tag24(bstr(...)))
+    out.write(0xF6)              // element #3 null
+    return out.toByteArray()
+}
+
 fun deriveUntaggedCbor(tagged: ByteArray): ByteArray =
     DeriveUntaggedCborImpl().deriveUntaggedCbor(tagged)
+
+fun prettyPrintDecryptedCbor(bytes: ByteArray, logger: Logger) {
+    val mapper = ObjectMapper(CBORFactory())
+    val node = mapper.readTree(bytes)
+    logger.debug("Decrypted", node.toPrettyString())
+}

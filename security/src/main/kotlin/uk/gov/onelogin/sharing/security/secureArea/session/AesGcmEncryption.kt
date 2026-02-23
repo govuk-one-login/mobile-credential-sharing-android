@@ -37,6 +37,14 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
             role.nistInitialisationVectorIdentifier,
             decryptionCounter.toUInt()
         )
+//        require(nistInitialisationVector.size == 12)
+
+        logger.debug(logTag, "cipherLen=${data.size}")
+        logger.debug(logTag, "tagLast16=${data.takeLast(16).toByteArray().toHexString()}")
+        logger.debug(logTag, "iv=${nistInitialisationVector.toHexString()}")
+        logger.debug(logTag, "counter=${decryptionCounter.toUInt()}")
+        logger.debug(logTag, "first16=${key.take(16).toByteArray().toHexString()}")
+        logger.debug(logTag, "keyLen=${key.size}")
 
         try {
             val decryptedData = Cipher.getInstance(AES_256_TRANSFORMATION).run {

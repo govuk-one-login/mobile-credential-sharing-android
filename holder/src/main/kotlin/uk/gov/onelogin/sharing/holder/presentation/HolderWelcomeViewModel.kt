@@ -12,6 +12,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.security.MessageDigest
 import java.security.interfaces.ECPrivateKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,8 +37,11 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
+import uk.gov.onelogin.sharing.security.cbor.base64Decode
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.cbor.deriveSessionTranscript
+import uk.gov.onelogin.sharing.security.cbor.encodeCbor
+import uk.gov.onelogin.sharing.security.cbor.prettyPrintDecryptedCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
@@ -187,17 +191,31 @@ class HolderWelcomeViewModel(
                         logger.debug(logTag, "sharedSecretKey: ${sharedSecretKey.toHexString()}")
                         logger.debug(logTag, "sharedSecretKey length: ${sharedSecretKey.size}")
 
-                        val transcript = deriveSessionTranscript(
+                       /* val transcript = deriveSessionTranscript(
                             cborBase64Url = _uiState.value.engagement!!,
                             sessionEstablishmentBytes = state.message,
                             logger = logger
+                        )*/
+
+                        val deviceEngagementBytes = _uiState.value.engagement!!.base64Decode()
+                        val transcript = deriveSessionTranscript(
+                            deviceEngagementCborBytes = deviceEngagementBytes,
+                            eReaderKeyTagged = dto.eReaderKey.encoded
                         )
 
-                        /*val skDevice = sessionSecurity.deriveSessionKey(
+                        logger.debug(logTag, "transcript[0]=0x${"%02x".format(transcript[0])}")
+                        logger.debug(logTag, "transcriptLen=${transcript.size}")
+                        logger.debug(logTag, "transcriptLast=0x${"%02x".format(transcript.last())}")
+
+                        logger.debug(logTag, "t0=${"%02x".format(transcript[0])} t1=${"%02x".format(transcript[1])} t2=${"%02x".format(transcript[2])} t3=${"%02x".format(transcript[3])} t4=${"%02x".format(transcript[4])}")
+                        logger.debug(logTag, "last=${"%02x".format(transcript.last())} len=${transcript.size}")
+                        logger.debug(logTag, "transcriptSha256=${sha256(transcript).toHexString()} len=${transcript.size}")
+
+                        val skDevice = sessionSecurity.deriveSessionKey(
                             sharedKey = sharedSecretKey,
                             sessionTranscriptBytes = transcript,
                             role = SessionKeyGenerator.Companion.DeviceRole.HOLDER
-                        )*/
+                        )
 
                         val skReader = sessionSecurity.deriveSessionKey(
                             sharedKey = sharedSecretKey,
@@ -205,8 +223,8 @@ class HolderWelcomeViewModel(
                             role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
                         )
 
-                       /* logger.debug(logTag, "skDevice: ${skDevice.toHexString()}")
-                        logger.debug(logTag, "skReader: ${skDevice.toHexString()}")*/
+                        logger.debug(logTag, "skDevice: ${skDevice.toHexString()}")
+                        logger.debug(logTag, "skReader: ${skReader.toHexString()}")
 
                         logger.debug(logTag, "data[0]=0x${"%02x".format(dto.data[0])}")
 
@@ -216,7 +234,11 @@ class HolderWelcomeViewModel(
                             role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
                         )
 
-                        logger.debug(logTag, "Mdoc - Message received: ${String(decrypted)}")
+                        val data = prettyPrintDecryptedCbor(
+                            bytes = decrypted,
+                            logger = logger
+                        )
+                        logger.debug(logTag, "Mdoc - Message received: $data")
                     }
                 }
             }
@@ -398,3 +420,6 @@ data class HolderWelcomeUiState(
     val showEnableBluetoothPrompt: Boolean = false,
     val connectedAddress: String? = ""
 )
+
+fun sha256(input: ByteArray): ByteArray =
+    MessageDigest.getInstance("SHA-256").digest(input)
