@@ -61,7 +61,7 @@ class HolderOrchestratorTest {
         HolderOrchestrator(
             logger = logger,
             sessionFactory = sessionFactory,
-            permissionChecker = permissionChecker,
+            permissionChecker = permissionChecker
         )
     }
 
@@ -77,9 +77,11 @@ class HolderOrchestratorTest {
             currentSessionState(inPreflight())
         )
 
-        assert(logger.any { entry ->
-            entry.message.contains(permissionCheckerResult.toString())
-        })
+        assert(
+            logger.any { entry ->
+                entry.message.contains(permissionCheckerResult.toString())
+            }
+        )
     }
 
     @Test
@@ -99,9 +101,11 @@ class HolderOrchestratorTest {
             currentSessionState(inPreflight())
         )
 
-        assert(logger.any { entry ->
-            entry.message.contains(permissionCheckerResult.toString())
-        })
+        assert(
+            logger.any { entry ->
+                entry.message.contains(permissionCheckerResult.toString())
+            }
+        )
     }
 
     @Test

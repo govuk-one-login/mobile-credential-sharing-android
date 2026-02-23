@@ -50,7 +50,7 @@ class HolderSessionImplTest {
             exception.message,
             CoreMatchers.equalTo(
                 "Current state (${session.currentState.value::class.java.simpleName}) " +
-                        "cannot transition to: ${transition::class.java.simpleName}"
+                    "cannot transition to: ${transition::class.java.simpleName}"
             )
         )
 
@@ -76,7 +76,7 @@ class HolderSessionImplTest {
             exception.message,
             CoreMatchers.equalTo(
                 "Cannot find applicable transitions for current state: " +
-                        state::class.java.simpleName
+                    state::class.java.simpleName
             )
         )
 
@@ -104,7 +104,7 @@ class HolderSessionImplTest {
 
         assert(
             "Transitioned from '${initial::class.java.simpleName}' to " +
-                    "'${transition::class.java.simpleName}'" in logger
+                "'${transition::class.java.simpleName}'" in logger
         )
     }
 }

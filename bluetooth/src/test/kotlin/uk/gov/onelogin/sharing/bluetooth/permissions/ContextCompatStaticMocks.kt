@@ -5,13 +5,8 @@ import androidx.core.content.ContextCompat
 import io.mockk.every
 import io.mockk.verify
 
-data class ContextCompatStaticMocks(
-    private val context: Context
-) {
-    fun stubPermission(
-        permission: String,
-        result: Int,
-    ) {
+data class ContextCompatStaticMocks(private val context: Context) {
+    fun stubPermission(permission: String, result: Int) {
         every {
             ContextCompat.checkSelfPermission(
                 context,

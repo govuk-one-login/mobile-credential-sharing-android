@@ -6,7 +6,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 
 /**
- * [uk.gov.onelogin.sharing.orchestration.session.SessionFactory] implementation that provides new instances of [HolderSession].
+ * [SessionFactory] implementation that provides new instances of [HolderSession].
  *
  * @see uk.gov.onelogin.orchestration.HolderOrchestrator
  */

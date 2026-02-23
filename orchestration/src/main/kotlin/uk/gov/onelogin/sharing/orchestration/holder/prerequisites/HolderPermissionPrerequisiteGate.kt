@@ -12,9 +12,8 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
     AppScope::class,
     binding = binding<PrerequisiteGate.Permissions<HolderSessionState>>()
 )
-class HolderPermissionPrerequisiteGate(
-    permissionChecker: BluetoothPeripheralPermissionChecker
-) : PrerequisiteGate.Permissions<HolderSessionState>,
+class HolderPermissionPrerequisiteGate(permissionChecker: BluetoothPeripheralPermissionChecker) :
+    PrerequisiteGate.Permissions<HolderSessionState>,
     BluetoothPeripheralPermissionChecker by permissionChecker {
 
     override fun checkPermissions(): PermissionCheckerResult = checkPeripheralPermissions()

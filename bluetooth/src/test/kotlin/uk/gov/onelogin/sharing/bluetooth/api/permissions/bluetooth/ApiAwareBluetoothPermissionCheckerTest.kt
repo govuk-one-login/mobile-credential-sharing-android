@@ -53,7 +53,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
         setSdkLevel(Build.VERSION_CODES.R)
         assertThat(
             checker.calculateImplementation(),
-            equalTo(TruthyBluetoothPermissionChecker),
+            equalTo(TruthyBluetoothPermissionChecker)
         )
     }
 
@@ -62,7 +62,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
         setSdkLevel(Build.VERSION_CODES.S)
         assertThat(
             checker.calculateImplementation(),
-            instanceOf(Api31BluetoothPermissionChecker::class.java),
+            instanceOf(Api31BluetoothPermissionChecker::class.java)
         )
     }
 
@@ -120,7 +120,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
         ReflectionHelpers.setStaticField(
             Build.VERSION::class.java,
             "SDK_INT",
-            sdk,
+            sdk
         )
     }
 }

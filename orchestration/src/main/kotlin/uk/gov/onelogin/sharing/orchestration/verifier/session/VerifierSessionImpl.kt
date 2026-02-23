@@ -32,7 +32,9 @@ class VerifierSessionImpl(
 
     override fun getAvailableTransitions(): Set<KClass<out VerifierSessionState>> =
         checkNotNull(transitionMap[currentState.value::class]) {
-            StateContainer.Transitional.LogMessages.cannotFindTransitions(currentState.value::class.java.simpleName)
+            StateContainer.Transitional.LogMessages.cannotFindTransitions(
+                currentState.value::class.java.simpleName
+            )
         }
 
     override fun update(state: VerifierSessionState) {

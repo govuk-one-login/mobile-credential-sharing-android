@@ -20,7 +20,7 @@ class ValidVerifierTransitionsTest {
 
         MatcherAssert.assertThat(
             "The total number of transitions don't match! " +
-                    "Is there a need to update the transition state table?",
+                "Is there a need to update the transition state table?",
             transitionTotal,
             CoreMatchers.equalTo(ValidVerifierSessionStateTransitions.Companion.inputs.size)
         )
@@ -32,7 +32,7 @@ class ValidVerifierTransitionsTest {
 
         MatcherAssert.assertThat(
             "The number of session states that can transition doesn't match! " +
-                    "Is there a need to update the transitionable state table?",
+                "Is there a need to update the transitionable state table?",
             transitionableStateCount,
             CoreMatchers.equalTo(TransitionableVerifierSessionStates.Companion.inputs.size)
         )
@@ -45,7 +45,7 @@ class ValidVerifierTransitionsTest {
     ) = runTest {
         MatcherAssert.assertThat(
             "There should have been available transitions for the provided state: " +
-                    state.simpleName,
+                state.simpleName,
             validVerifierTransitions[state],
             CoreMatchers.notNullValue()
         )
@@ -58,7 +58,7 @@ class ValidVerifierTransitionsTest {
     ) = runTest {
         MatcherAssert.assertThat(
             "There should be no available transitions for the provided state: " +
-                    state::class.java.simpleName,
+                state::class.java.simpleName,
             validVerifierTransitions[state::class],
             CoreMatchers.nullValue()
         )

@@ -12,10 +12,11 @@ fun interface BluetoothCentralPermissionChecker {
      * Checks if the app has the required permissions to act as a Bluetooth Central.
      * This typically includes permissions for scanning and connecting to GATT servers.
      *
-     * @return [uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult.Passed] if all required central permissions are granted.
-     * Otherwise, [uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult.Missing] containing the list of required permissions.
+     * @return [PermissionCheckerResult.Passed] if all required central permissions are granted.
+     * Otherwise, [PermissionCheckerResult.Missing] containing the list of required permissions.
      */
     fun checkCentralPermissions(): PermissionCheckerResult
+
     /**
      * Checks if the app has the required permissions to act as a Bluetooth Central.
      * This typically includes permissions for scanning and connecting to GATT servers.

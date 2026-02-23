@@ -12,8 +12,8 @@ fun interface BluetoothPeripheralPermissionChecker {
      * Checks if the app has the required permissions to act as a Bluetooth Peripheral.
      * This typically includes permissions for advertising and acting as a GATT server.
      *
-     * @return [uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult.Passed] if all required peripheral permissions are granted.
-     * Otherwise, [uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult.Missing] containing the list of required permissions.
+     * @return [PermissionCheckerResult.Passed] if all required peripheral permissions are granted.
+     * Otherwise, [PermissionCheckerResult.Missing] containing the list of required permissions.
      */
     fun checkPeripheralPermissions(): PermissionCheckerResult
 

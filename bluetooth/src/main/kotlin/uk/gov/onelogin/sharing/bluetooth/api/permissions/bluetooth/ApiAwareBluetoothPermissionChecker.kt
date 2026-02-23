@@ -18,9 +18,13 @@ import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.TruthyBl
 @ContributesBinding(AppScope::class, binding = binding<BluetoothPeripheralPermissionChecker>())
 @ContributesBinding(AppScope::class, binding = binding<BluetoothPermissionChecker>())
 @ContributesBinding(ViewModelScope::class, binding = binding<BluetoothCentralPermissionChecker>())
-@ContributesBinding(ViewModelScope::class, binding = binding<BluetoothPeripheralPermissionChecker>())
+@ContributesBinding(
+    ViewModelScope::class,
+    binding = binding<BluetoothPeripheralPermissionChecker>()
+)
 @ContributesBinding(ViewModelScope::class, binding = binding<BluetoothPermissionChecker>())
-class ApiAwareBluetoothPermissionChecker(private val context: Context) : BluetoothPermissionChecker {
+class ApiAwareBluetoothPermissionChecker(private val context: Context) :
+    BluetoothPermissionChecker {
     override fun checkPeripheralPermissions(): PermissionCheckerResult =
         calculateImplementation().checkPeripheralPermissions()
 
@@ -30,6 +34,7 @@ class ApiAwareBluetoothPermissionChecker(private val context: Context) : Bluetoo
     internal fun calculateImplementation(): BluetoothPermissionChecker = when {
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S ->
             TruthyBluetoothPermissionChecker
+
         else -> Api31BluetoothPermissionChecker(context)
     }
 }

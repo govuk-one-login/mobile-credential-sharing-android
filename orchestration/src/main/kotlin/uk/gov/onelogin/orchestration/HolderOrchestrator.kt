@@ -23,7 +23,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,
-    private val permissionChecker: PrerequisiteGate.Permissions<HolderSessionState>,
+    private val permissionChecker: PrerequisiteGate.Permissions<HolderSessionState>
 ) : Orchestrator.Holder {
 
     private var session: HolderSession = sessionFactory.create()
@@ -53,7 +53,6 @@ class HolderOrchestrator(
                     )
                 )
             }
-
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(

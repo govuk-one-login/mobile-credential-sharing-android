@@ -44,10 +44,8 @@ interface Orchestrator : Resettable {
         const val START_ORCHESTRATION_ERROR: String = "Cannot start orchestration"
         const val START_ORCHESTRATION_SUCCESS: String = "start orchestration"
 
-        fun completedPermissionCheck(
-            journey: String,
-            result: PermissionCheckerResult,
-        ): String = "Performed $journey permission check: $result"
+        fun completedPermissionCheck(journey: String, result: PermissionCheckerResult): String =
+            "Performed $journey permission check: $result"
 
         fun createSessionResetMessage(journey: String): String =
             "Cleared Orchestrator $journey session"
