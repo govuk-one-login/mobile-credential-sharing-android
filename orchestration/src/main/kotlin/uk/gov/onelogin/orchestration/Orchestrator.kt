@@ -1,7 +1,7 @@
 package uk.gov.onelogin.orchestration
 
 import uk.gov.onelogin.sharing.core.Resettable
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
 
 /**
  * Implements [Resettable] for clearing internal state, such as the session state machines.
@@ -44,8 +44,8 @@ interface Orchestrator : Resettable {
         const val START_ORCHESTRATION_ERROR: String = "Cannot start orchestration"
         const val START_ORCHESTRATION_SUCCESS: String = "start orchestration"
 
-        fun completedPermissionCheck(journey: String, result: PermissionCheckerResult): String =
-            "Performed $journey permission check: $result"
+        fun completedAuthorizationCheck(journey: String, response: AuthorizationResponse): String =
+            "Performed $journey authorization check: $response"
 
         fun createSessionResetMessage(journey: String): String =
             "Cleared Orchestrator $journey session"

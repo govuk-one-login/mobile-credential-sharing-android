@@ -32,7 +32,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
 
 @RunWith(RobolectricTestRunner::class)
 internal class AndroidGattClientManagerTest {
@@ -63,7 +63,7 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `returns error if permission is not granted`() = runTest {
-        fakePermissionChecker.centralResult = PermissionCheckerResult.Missing()
+        fakePermissionChecker.centralResult = PermissionChecker.Response.Missing()
 
         manager.events.test {
             manager.connect(

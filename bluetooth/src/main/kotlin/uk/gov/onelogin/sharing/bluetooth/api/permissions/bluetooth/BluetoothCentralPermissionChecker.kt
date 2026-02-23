@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth
 
 import android.Manifest
 import android.os.Build
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 /**
  * Checks if the app has the required permissions to act as a Bluetooth Central.
@@ -12,10 +12,10 @@ fun interface BluetoothCentralPermissionChecker {
      * Checks if the app has the required permissions to act as a Bluetooth Central.
      * This typically includes permissions for scanning and connecting to GATT servers.
      *
-     * @return [PermissionCheckerResult.Passed] if all required central permissions are granted.
-     * Otherwise, [PermissionCheckerResult.Missing] containing the list of required permissions.
+     * @return [PermissionChecker.Response.Passed] if all required central permissions are granted.
+     * Otherwise, [PermissionChecker.Response.Missing] containing the list of required permissions.
      */
-    fun checkCentralPermissions(): PermissionCheckerResult
+    fun checkCentralPermissions(): PermissionChecker.Response
 
     /**
      * Checks if the app has the required permissions to act as a Bluetooth Central.
@@ -24,7 +24,7 @@ fun interface BluetoothCentralPermissionChecker {
      * @return `true` if all required central permissions are granted.
      */
     fun hasCentralPermissions(): Boolean =
-        checkCentralPermissions() == PermissionCheckerResult.Passed
+        checkCentralPermissions() == PermissionChecker.Response.Passed
 
     companion object {
         @JvmStatic

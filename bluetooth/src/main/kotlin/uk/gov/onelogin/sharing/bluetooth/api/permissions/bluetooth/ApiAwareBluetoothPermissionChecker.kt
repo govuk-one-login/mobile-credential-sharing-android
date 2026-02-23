@@ -8,7 +8,7 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.Api31BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.TruthyBluetoothPermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 /**
  * [BluetoothPermissionChecker] implementation that defers to other implementations based on the
@@ -25,10 +25,10 @@ import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 @ContributesBinding(ViewModelScope::class, binding = binding<BluetoothPermissionChecker>())
 class ApiAwareBluetoothPermissionChecker(private val context: Context) :
     BluetoothPermissionChecker {
-    override fun checkPeripheralPermissions(): PermissionCheckerResult =
+    override fun checkPeripheralPermissions(): PermissionChecker.Response =
         calculateImplementation().checkPeripheralPermissions()
 
-    override fun checkCentralPermissions(): PermissionCheckerResult =
+    override fun checkCentralPermissions(): PermissionChecker.Response =
         calculateImplementation().checkCentralPermissions()
 
     internal fun calculateImplementation(): BluetoothPermissionChecker = when {

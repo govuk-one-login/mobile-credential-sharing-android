@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites
 
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationRequest
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
 
 /**
  * Sealed interface that contains abstractions designed to verify the device state during the
@@ -11,14 +12,12 @@ import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
  */
 sealed interface PrerequisiteGate {
     /**
-     * Abstraction for validating all of the necessary permissions for the User journey.
-     *
-     * @param State The User journey data type. Used for injection purposes.
+     * Abstraction for authorizing observable capabilities.
      */
-    fun interface Permissions<in State : Any> : PrerequisiteGate {
+    fun interface Authorization : PrerequisiteGate {
         /**
-         * Validate the permission state of the device.
+         * Validate the [request]ed capabilities are authorized.
          */
-        fun checkPermissions(): PermissionCheckerResult
+        fun checkAuthorization(request: AuthorizationRequest): AuthorizationResponse
     }
 }

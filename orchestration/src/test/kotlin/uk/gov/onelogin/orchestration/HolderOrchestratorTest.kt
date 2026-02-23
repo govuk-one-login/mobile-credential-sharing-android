@@ -8,7 +8,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
@@ -22,7 +21,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHo
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
-import uk.gov.onelogin.sharing.orchestration.prerequisites.FakePrerequisitePermissionGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 
@@ -49,11 +49,11 @@ class HolderOrchestratorTest {
         )
     }
 
-    private var permissionCheckerResult: PermissionCheckerResult = PermissionCheckerResult.Passed
+    private var authorizationResponse = AuthorizationResponse.Authorized
 
     private val permissionChecker by lazy {
-        FakePrerequisitePermissionGate<HolderSessionState>(
-            permissionCheckerResult
+        FakePrerequisiteAuthorizationGate(
+            authorizationResponse
         )
     }
 
@@ -79,7 +79,7 @@ class HolderOrchestratorTest {
 
         assert(
             logger.any { entry ->
-                entry.message.contains(permissionCheckerResult.toString())
+                entry.message.contains(authorizationResponse.toString())
             }
         )
     }
@@ -103,7 +103,7 @@ class HolderOrchestratorTest {
 
         assert(
             logger.any { entry ->
-                entry.message.contains(permissionCheckerResult.toString())
+                entry.message.contains(authorizationResponse.toString())
             }
         )
     }

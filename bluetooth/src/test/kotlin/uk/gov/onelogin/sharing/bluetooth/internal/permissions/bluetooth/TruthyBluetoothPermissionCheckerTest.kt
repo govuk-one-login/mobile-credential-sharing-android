@@ -4,14 +4,13 @@ import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 class TruthyBluetoothPermissionCheckerTest {
     @Test
     fun `Always passes central permission checks`() = runTest {
         assertThat(
             TruthyBluetoothPermissionChecker.checkCentralPermissions(),
-            equalTo(PermissionCheckerResult.Passed)
+            equalTo(PermissionChecker.Response.Passed)
         )
     }
 
@@ -19,7 +18,7 @@ class TruthyBluetoothPermissionCheckerTest {
     fun `Always passes peripheral permission checks`() = runTest {
         assertThat(
             TruthyBluetoothPermissionChecker.checkPeripheralPermissions(),
-            equalTo(PermissionCheckerResult.Passed)
+            equalTo(PermissionChecker.Response.Passed)
         )
     }
 }

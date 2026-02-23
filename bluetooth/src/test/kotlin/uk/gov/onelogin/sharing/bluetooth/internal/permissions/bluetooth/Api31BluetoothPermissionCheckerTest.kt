@@ -20,7 +20,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import uk.gov.onelogin.sharing.bluetooth.permissions.ContextCompatStaticMocks
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
 
 @RunWith(RobolectricTestRunner::class)
 @Config(
@@ -88,11 +88,11 @@ class Api31BluetoothPermissionCheckerTest {
 
         assertThat(
             result,
-            instanceOf(PermissionCheckerResult.Missing::class.java)
+            instanceOf(PermissionChecker.Response.Missing::class.java)
         )
 
         assertThat(
-            result as PermissionCheckerResult.Missing,
+            result as PermissionChecker.Response.Missing,
             contains(Manifest.permission.BLUETOOTH_ADVERTISE)
         )
 
@@ -114,11 +114,11 @@ class Api31BluetoothPermissionCheckerTest {
 
         assertThat(
             result,
-            instanceOf(PermissionCheckerResult.Missing::class.java)
+            instanceOf(PermissionChecker.Response.Missing::class.java)
         )
 
         assertThat(
-            result as PermissionCheckerResult.Missing,
+            result as PermissionChecker.Response.Missing,
             contains(Manifest.permission.BLUETOOTH_SCAN)
         )
 
