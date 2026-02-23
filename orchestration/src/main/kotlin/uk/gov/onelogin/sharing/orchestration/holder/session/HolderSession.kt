@@ -1,7 +1,8 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder
+package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 /**
  * Abstraction for containing high-level information about the current position in the User journey

@@ -7,9 +7,9 @@ import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionSta
 import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.userJourneyFailure
 
 /**
- * Parameterised test input for [uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState] objects that can't transition to
- * [uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Cancelled] within the
- * [uk.gov.onelogin.orchestration.HolderOrchestrator], as per the [uk.gov.onelogin.sharing.orchestration.session.holder.validHolderTransitions] [Map].
+ * Parameterised test input for [uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState] objects that can't transition to
+ * [uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled] within the
+ * [uk.gov.onelogin.orchestration.HolderOrchestrator], as per the [uk.gov.onelogin.sharing.orchestration.holder.session.validHolderTransitions] [Map].
  */
 class UncancellableVerifierSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*>? = listOf(

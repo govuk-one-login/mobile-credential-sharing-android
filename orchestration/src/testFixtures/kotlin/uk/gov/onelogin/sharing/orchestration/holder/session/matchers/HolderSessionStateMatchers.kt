@@ -1,9 +1,9 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder.matchers
+package uk.gov.onelogin.sharing.orchestration.holder.session.matchers
 
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Matcher
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 /**
  * Wrapper object for storing hamcrest [Matcher] functions for [HolderSessionState].

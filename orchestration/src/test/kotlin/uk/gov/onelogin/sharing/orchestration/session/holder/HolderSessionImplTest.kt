@@ -11,9 +11,12 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.CompleteHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.InvalidHolderSessionStateTransitions
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.ValidHolderSessionStateTransitions
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.validHolderTransitions
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.InvalidHolderSessionStateTransitions
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.ValidHolderSessionStateTransitions
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
 
 @RunWith(TestParameterInjector::class)

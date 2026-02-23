@@ -1,12 +1,12 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder.data
+package uk.gov.onelogin.sharing.orchestration.holder.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionStateStubs.preflightEmptyPermissions
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionStateStubs.successStub
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionStateStubs.userCancellation
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionStateStubs.userJourneyFailure
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.preflightEmptyPermissions
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.successStub
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userCancellation
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userJourneyFailure
 
 class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =

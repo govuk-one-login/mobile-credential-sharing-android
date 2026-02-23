@@ -14,8 +14,8 @@ import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelExceptio
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSession
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(

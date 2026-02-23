@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder
+package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -6,7 +6,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 
 /**
- * [SessionFactory] implementation that provides new instances of [HolderSession].
+ * [uk.gov.onelogin.sharing.orchestration.session.SessionFactory] implementation that provides new instances of [HolderSession].
  *
  * @see uk.gov.onelogin.orchestration.HolderOrchestrator
  */

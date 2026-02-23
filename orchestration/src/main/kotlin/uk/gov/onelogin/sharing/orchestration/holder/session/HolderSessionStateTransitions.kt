@@ -1,17 +1,17 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder
+package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import java.util.Collections.singleton
 import kotlin.reflect.KClass
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Cancelled
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Failed
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Complete.Success
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Connecting
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.NotStarted
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.Preflight
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.PresentingEngagement
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.ProcessingResponse
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.ReadyToPresent
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState.RequestReceived
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Failed
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Success
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Connecting
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.RequestReceived
 
 /**
  * Convenience alias for defining a [Map] of [HolderSessionState] types to a [Set] of

@@ -10,9 +10,11 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.CompleteHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.TransitionableHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.ValidHolderSessionStateTransitions
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.validHolderTransitions
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.TransitionableHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.ValidHolderSessionStateTransitions
 
 @RunWith(TestParameterInjector::class)
 class ValidHolderTransitionsTest {

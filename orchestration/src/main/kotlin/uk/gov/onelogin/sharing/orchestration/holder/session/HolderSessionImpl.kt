@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder
+package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -6,18 +6,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION
-import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.cannotFindTransitions
-import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional.LogMessages.performedTransition
+import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 
 /**
- * Implementation of [HolderSessionState] that utilises a backing [MutableStateFlow] for the
+ * Implementation of [HolderSessionState] that utilises a backing [kotlinx.coroutines.flow.MutableStateFlow] for the
  * [currentState] property.
  *
- * Internally, the [transitionTo] function uses [update] instead of [MutableStateFlow.emit].
+ * Internally, the [transitionTo] function uses [update] instead of [kotlinx.coroutines.flow.MutableStateFlow.emit].
  *
  * @param internalState The [HolderSessionState] that the [currentState] begins with. Defaults to a
- * [MutableStateFlow] beginning with [HolderSessionState.NotStarted].
+ * [kotlinx.coroutines.flow.MutableStateFlow] beginning with [HolderSessionState.NotStarted].
  * @param transitionMap The [Map] of valid transitions. Used within [transitionTo]. Defaults to
  * [validHolderTransitions].
  */
@@ -34,7 +32,7 @@ class HolderSessionImpl(
 
     override fun getAvailableTransitions(): Set<KClass<out HolderSessionState>> =
         checkNotNull(transitionMap[currentState.value::class]) {
-            cannotFindTransitions(currentState.value::class.java.simpleName)
+            StateContainer.Transitional.LogMessages.cannotFindTransitions(currentState.value::class.java.simpleName)
         }
 
     override fun update(state: HolderSessionState) {
@@ -42,7 +40,7 @@ class HolderSessionImpl(
             state.also {
                 logger.debug(
                     logTag,
-                    performedTransition(
+                    StateContainer.Transitional.LogMessages.performedTransition(
                         fromStateName = previousState::class.java.simpleName,
                         toStateName = state::class.java.simpleName
                     )
@@ -54,7 +52,7 @@ class HolderSessionImpl(
     override fun logError(message: String, throwable: Throwable) {
         logger.error(
             logTag,
-            CANNOT_COMPLETE_TRANSITION,
+            StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION,
             throwable
         )
     }

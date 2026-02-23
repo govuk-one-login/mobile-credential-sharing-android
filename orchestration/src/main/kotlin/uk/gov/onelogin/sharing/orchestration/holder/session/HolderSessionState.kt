@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder
+package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
