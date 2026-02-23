@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.holder.presentation
 import androidx.lifecycle.SavedStateHandle
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -16,7 +15,6 @@ import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.Resettable
@@ -483,6 +481,36 @@ class HolderWelcomeViewModelTest {
             "The session manager should receive the UUID from the UI state",
             currentUuid,
             fakeMdocSession.lastUuid
+        )
+    }
+
+    @Test
+    fun `shows error screen when a force disconnect occurs`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS, false))
+        advanceUntilIdle()
+
+        assertEquals(
+            true,
+            viewModel.uiState.value.showErrorScreen
+        )
+    }
+
+    @Test
+    fun `shows no error screen when session end causes disconnect`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS, true))
+        advanceUntilIdle()
+
+        assertEquals(
+            false,
+            viewModel.uiState.value.showErrorScreen
         )
     }
 }

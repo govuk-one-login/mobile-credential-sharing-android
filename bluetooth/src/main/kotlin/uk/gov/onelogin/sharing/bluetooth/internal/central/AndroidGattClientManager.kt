@@ -304,6 +304,7 @@ internal class AndroidGattClientManager(
     /**
      * Handles incoming notification changes from the central device.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleCharacteristicChanged(event: GattEvent.CharacteristicChanged) {
         event.value?.firstOrNull() ?: return
 

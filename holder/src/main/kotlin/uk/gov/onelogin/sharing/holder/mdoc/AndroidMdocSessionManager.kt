@@ -148,7 +148,6 @@ class AndroidMdocSessionManager(
 
             is GattServerEvent.SessionEnd -> {
                 _state.value = MdocSessionState.MdocSessionEnded(event.status)
-                // gattServerManager.close()
                 logger.debug(
                     logTag,
                     "Mdoc - Session end command was received. Closing connection"
