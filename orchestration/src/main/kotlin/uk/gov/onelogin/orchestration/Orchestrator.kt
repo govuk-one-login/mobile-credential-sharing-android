@@ -1,5 +1,6 @@
 package uk.gov.onelogin.orchestration
 
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.core.Resettable
 
 /**
@@ -42,6 +43,11 @@ interface Orchestrator : Resettable {
         const val CANCEL_ORCHESTRATION_SUCCESS: String = "cancel orchestration"
         const val START_ORCHESTRATION_ERROR: String = "Cannot start orchestration"
         const val START_ORCHESTRATION_SUCCESS: String = "start orchestration"
+
+        fun completedPermissionCheck(
+            journey: String,
+            result: PermissionCheckerResult,
+        ): String = "Performed $journey permission check: $result"
 
         fun createSessionResetMessage(journey: String): String =
             "Cleared Orchestrator $journey session"

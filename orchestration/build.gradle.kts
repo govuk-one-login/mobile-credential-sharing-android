@@ -32,6 +32,7 @@ android {
 
 dependencies {
     listOf(
+        projects.bluetooth,
         projects.core
     ).forEach(::api)
 
