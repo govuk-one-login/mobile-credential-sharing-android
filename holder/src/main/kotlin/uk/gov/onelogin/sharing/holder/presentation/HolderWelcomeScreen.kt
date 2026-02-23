@@ -31,7 +31,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONN
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_TURNED_OFF
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.core.R.string.bluetooth_disconnected_unexpectedly
 import uk.gov.onelogin.sharing.core.R.string.bluetooth_permissions_revoked
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen

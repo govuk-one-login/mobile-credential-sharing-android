@@ -18,6 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.util.ReflectionHelpers
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.ApiAwareBluetoothPermissionChecker
 
 @RunWith(RobolectricTestRunner::class)
 class BluetoothPermissionCheckerTest {
@@ -49,7 +50,7 @@ class BluetoothPermissionCheckerTest {
             Build.VERSION_CODES.R
         )
 
-        val checker = BluetoothPermissionChecker(context)
+        val checker = ApiAwareBluetoothPermissionChecker(context)
 
         assertTrue(checker.hasPeripheralPermissions())
 
@@ -80,7 +81,7 @@ class BluetoothPermissionCheckerTest {
             )
         } returns PackageManager.PERMISSION_GRANTED
 
-        val checker = BluetoothPermissionChecker(context)
+        val checker = ApiAwareBluetoothPermissionChecker(context)
 
         assertTrue(checker.hasPeripheralPermissions())
 
@@ -107,7 +108,7 @@ class BluetoothPermissionCheckerTest {
             )
         } returns PackageManager.PERMISSION_DENIED
 
-        val checker = BluetoothPermissionChecker(context)
+        val checker = ApiAwareBluetoothPermissionChecker(context)
 
         assertFalse(checker.hasPeripheralPermissions())
 
