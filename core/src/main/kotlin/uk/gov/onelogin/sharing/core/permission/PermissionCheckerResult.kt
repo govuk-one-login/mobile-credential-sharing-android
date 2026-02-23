@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.permissions
+package uk.gov.onelogin.sharing.core.permission
 
 /**
  * State table for verifying granted permissions on an Android-powered device.

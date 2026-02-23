@@ -19,8 +19,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.bluetooth.permissions.ContextCompatStaticMocks
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 @RunWith(RobolectricTestRunner::class)
 @Config(

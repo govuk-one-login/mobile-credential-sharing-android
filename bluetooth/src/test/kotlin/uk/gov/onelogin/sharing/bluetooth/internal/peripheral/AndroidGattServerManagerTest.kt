@@ -25,7 +25,6 @@ import org.junit.Before
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
@@ -34,7 +33,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.Chara
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
-import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
@@ -49,7 +49,7 @@ class AndroidGattServerManagerTest {
             listOf()
         )
     )
-    private val fakePermissionChecker = FakePermissionChecker()
+    private val fakePermissionChecker = StubBluetoothPermissionChecker()
 
     private lateinit var manager: AndroidGattServerManager
     private val uuid = UUID.randomUUID()

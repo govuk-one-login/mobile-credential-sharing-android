@@ -17,17 +17,17 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
-import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class AndroidBleAdvertiserTest {
     private lateinit var bleProvider: FakeBleProvider
     private lateinit var bleAdvertiser: AndroidBleAdvertiser
-    private val permissionChecker = FakePermissionChecker()
+    private val permissionChecker = StubBluetoothPermissionChecker()
     private val logger = SystemLogger()
 
     @get:Rule

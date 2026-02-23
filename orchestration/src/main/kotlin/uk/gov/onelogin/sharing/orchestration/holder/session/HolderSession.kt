@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.core.Completable
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 
 /**

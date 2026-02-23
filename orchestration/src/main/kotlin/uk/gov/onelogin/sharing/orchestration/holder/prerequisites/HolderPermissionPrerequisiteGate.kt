@@ -3,8 +3,8 @@ package uk.gov.onelogin.sharing.orchestration.holder.prerequisites
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 

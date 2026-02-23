@@ -8,7 +8,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR

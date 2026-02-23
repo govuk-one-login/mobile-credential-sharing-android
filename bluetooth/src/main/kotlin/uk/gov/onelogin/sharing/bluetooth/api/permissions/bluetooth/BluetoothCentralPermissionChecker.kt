@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth
 
 import android.Manifest
 import android.os.Build
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 /**
  * Checks if the app has the required permissions to act as a Bluetooth Central.

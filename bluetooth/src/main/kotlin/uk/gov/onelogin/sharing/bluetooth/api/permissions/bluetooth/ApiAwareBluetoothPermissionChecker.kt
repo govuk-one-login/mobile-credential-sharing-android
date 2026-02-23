@@ -6,9 +6,9 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.Api31BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.TruthyBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 /**
  * [BluetoothPermissionChecker] implementation that defers to other implementations based on the

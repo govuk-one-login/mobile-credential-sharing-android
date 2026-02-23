@@ -36,6 +36,10 @@ dependencies {
         libs.metro.viewmodel.compose
     ).forEach(::implementation)
 
+    listOf(
+        projects.core
+    ).forEach(::testFixturesApi)
+
     testImplementation(testFixtures(projects.bluetooth))
 }
 

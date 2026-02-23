@@ -1,7 +1,7 @@
 package uk.gov.onelogin.orchestration
 
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.core.Resettable
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 /**
  * Implements [Resettable] for clearing internal state, such as the session state machines.

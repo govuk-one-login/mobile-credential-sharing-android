@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites
 
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 /**
  * Sealed interface that contains abstractions designed to verify the device state during the

@@ -27,19 +27,19 @@ import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
-import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerResult
 
 @RunWith(RobolectricTestRunner::class)
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
     private val bluetoothGatt = mockk<BluetoothGatt>(relaxed = true)
-    private val fakePermissionChecker = FakePermissionChecker()
+    private val fakePermissionChecker = StubBluetoothPermissionChecker()
     private val fakeGattWriter = FakeGattWriter()
 
     private val fakeServiceValidator = FakeServiceValidator()
