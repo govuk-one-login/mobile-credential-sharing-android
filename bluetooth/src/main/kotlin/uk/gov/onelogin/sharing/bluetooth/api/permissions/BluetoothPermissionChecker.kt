@@ -8,8 +8,8 @@ import android.os.Build
  * Android-powered device's [Build.VERSION.SDK_INT].
  */
 class BluetoothPermissionChecker(private val context: Context) : PermissionChecker {
-    override fun hasPeripheralPermissions(): Boolean =
-        calculateImplementation().hasPeripheralPermissions()
+    override fun checkPeripheralPermissions(): PermissionCheckerResult =
+        calculateImplementation().checkPeripheralPermissions()
 
     override fun hasCentralPermissions(): Boolean =
         calculateImplementation().hasCentralPermissions()

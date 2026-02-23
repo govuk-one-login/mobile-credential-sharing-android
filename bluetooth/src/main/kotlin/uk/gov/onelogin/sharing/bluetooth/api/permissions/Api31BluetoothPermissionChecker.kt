@@ -16,10 +16,22 @@ import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPeripheralPerm
 internal class Api31BluetoothPermissionChecker(
     private val context: Context,
 ) : PermissionChecker {
-    override fun hasPeripheralPermissions(): Boolean = peripheralPermissions()
-        .map { permission ->
-            ContextCompat.checkSelfPermission(context, permission)
-        }.all { PackageManager.PERMISSION_GRANTED == it }
+    override fun checkPeripheralPermissions(): PermissionCheckerResult {
+        val missingPermissions = peripheralPermissions()
+            .map { permission ->
+                permission to ContextCompat.checkSelfPermission(context, permission)
+            }.filterNot { (_, permissionState) ->
+                PackageManager.PERMISSION_GRANTED == permissionState
+            }.map { (permission, _) ->
+                permission
+            }
+
+        return if (missingPermissions.isEmpty()) {
+            PermissionCheckerResult.Passed
+        } else {
+            PermissionCheckerResult.Missing(missingPermissions)
+        }
+    }
 
     override fun hasCentralPermissions(): Boolean = centralPermissions()
         .map { permission ->

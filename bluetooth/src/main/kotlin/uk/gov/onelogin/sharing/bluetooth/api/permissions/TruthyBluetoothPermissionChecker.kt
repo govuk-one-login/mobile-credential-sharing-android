@@ -5,6 +5,8 @@ package uk.gov.onelogin.sharing.bluetooth.api.permissions
  * [android.os.Build.VERSION_CODES.S].
  */
 internal data object TruthyBluetoothPermissionChecker : PermissionChecker {
-    override fun hasPeripheralPermissions(): Boolean = true
+    override fun checkPeripheralPermissions(): PermissionCheckerResult =
+        PermissionCheckerResult.Passed
+
     override fun hasCentralPermissions(): Boolean = true
 }

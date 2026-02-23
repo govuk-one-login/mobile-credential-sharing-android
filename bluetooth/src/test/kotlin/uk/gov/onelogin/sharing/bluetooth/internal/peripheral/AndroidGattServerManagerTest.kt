@@ -25,6 +25,7 @@ import org.junit.Before
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
@@ -301,7 +302,7 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `gatt server returns error if permissions are not granted`() = runTest {
-        fakePermissionChecker.hasPeripheralPermissions = false
+        fakePermissionChecker.peripheralResult = PermissionCheckerResult.Missing()
 
         manager.events.test {
             manager.open(uuid)

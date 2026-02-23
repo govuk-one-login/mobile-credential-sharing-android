@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
@@ -61,7 +62,7 @@ internal class AndroidBleAdvertiserTest {
 
     @Test
     fun `has advertise permission returns false when provider does not have permissions`() {
-        permissionChecker.hasPeripheralPermissions = false
+        permissionChecker.peripheralResult = PermissionCheckerResult.Missing()
         assert(!bleAdvertiser.hasAdvertisePermission())
     }
 
@@ -99,7 +100,7 @@ internal class AndroidBleAdvertiserTest {
 
     @Test
     fun `start fails when permission not granted`() = runTest {
-        permissionChecker.hasPeripheralPermissions = false
+        permissionChecker.peripheralResult = PermissionCheckerResult.Missing()
 
         val exception = assertFailsWith<StartAdvertisingException> {
             bleAdvertiser.startAdvertise(

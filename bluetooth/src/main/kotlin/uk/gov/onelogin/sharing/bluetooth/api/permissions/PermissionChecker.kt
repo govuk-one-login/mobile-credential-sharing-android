@@ -4,16 +4,43 @@ import android.Manifest
 import android.os.Build
 
 /**
+ * Output state for the [PermissionChecker] interface and it's inheritance structure.
+ */
+sealed class PermissionCheckerResult {
+    /**
+     * State for when all associated permissions are currently granted on the Android-powered
+     * device.
+     */
+    data object Passed : PermissionCheckerResult()
+
+    /**
+     * State for when there are required permissions that're currently denied on the Android-powered
+     * device.
+     *
+     * @param missingPermissions The list of [Manifest.permission] permissions that need granting
+     * by the User. Defaults to an empty list.
+     *
+     * @sample Api31BluetoothPermissionChecker.checkPeripheralPermissions
+     */
+    data class Missing(
+        val missingPermissions: List<String> = emptyList()
+    ) : PermissionCheckerResult()
+}
+
+/**
  * Checks if the app has the required permissions to act as a Bluetooth Peripheral.
  */
 fun interface BluetoothPeripheralPermissionChecker {
+    fun checkPeripheralPermissions(): PermissionCheckerResult
+
     /**
      * Checks if the app has the required permissions to act as a Bluetooth Peripheral.
      * This typically includes permissions for advertising and acting as a GATT server.
      *
      * @return `true` if all required peripheral permissions are granted.
      */
-    fun hasPeripheralPermissions(): Boolean
+    fun hasPeripheralPermissions(): Boolean =
+        checkPeripheralPermissions() == PermissionCheckerResult.Passed
 
     companion object {
         @JvmStatic
