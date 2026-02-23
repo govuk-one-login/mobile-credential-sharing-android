@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.session.verifier
+package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding

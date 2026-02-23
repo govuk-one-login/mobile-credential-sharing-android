@@ -1,13 +1,11 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder
+package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import org.hamcrest.Matcher
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionFactory
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactoryImplTest
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
-import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
+import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers
 
 class HolderSessionFactoryImplTest :
     SessionFactoryImplTest<StateContainer<in HolderSessionState>> {
@@ -15,5 +13,5 @@ class HolderSessionFactoryImplTest :
     private val logger = SystemLogger()
     override val factory: HolderSessionFactory = HolderSessionFactory(logger)
     override val assertion: Matcher<StateContainer<in HolderSessionState>> =
-        hasCurrentState(isNotStarted())
+        StateContainerMatchers.hasCurrentState(HolderSessionStateMatchers.isNotStarted())
 }

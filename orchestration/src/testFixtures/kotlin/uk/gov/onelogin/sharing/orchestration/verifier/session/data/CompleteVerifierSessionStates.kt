@@ -1,7 +1,7 @@
-package uk.gov.onelogin.sharing.orchestration.session.verifier.data
+package uk.gov.onelogin.sharing.orchestration.verifier.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs
 
 class CompleteVerifierSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*>? = inputs

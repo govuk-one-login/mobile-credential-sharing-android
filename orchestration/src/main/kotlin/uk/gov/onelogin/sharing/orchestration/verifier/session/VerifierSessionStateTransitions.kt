@@ -1,16 +1,16 @@
-package uk.gov.onelogin.sharing.orchestration.session.verifier
+package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import java.util.Collections.singleton
 import kotlin.reflect.KClass
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Complete.Cancelled
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Complete.Failed
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Complete.Success
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Connecting
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.NotStarted
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Preflight
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ProcessingEngagement
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ReadyToScan
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Verifying
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Complete.Cancelled
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Complete.Failed
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Complete.Success
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Connecting
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.NotStarted
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Preflight
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ProcessingEngagement
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ReadyToScan
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Verifying
 
 /**
  * Convenience alias for defining a [Map] of [VerifierSessionState] types to a [Set] of

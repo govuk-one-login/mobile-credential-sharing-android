@@ -1,20 +1,20 @@
-package uk.gov.onelogin.sharing.orchestration.session.verifier
+package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert.assertThrows
+import org.hamcrest.CoreMatchers
+import org.hamcrest.MatcherAssert
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers.hasCurrentState
-import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CompleteVerifierSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.verifier.data.InvalidVerifierSessionStateTransitions
-import uk.gov.onelogin.sharing.orchestration.session.verifier.data.ValidVerifierSessionStateTransitions
+import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers
+import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerifierSessionStates
+import uk.gov.onelogin.sharing.orchestration.verifier.session.data.InvalidVerifierSessionStateTransitions
+import uk.gov.onelogin.sharing.orchestration.verifier.session.data.ValidVerifierSessionStateTransitions
 
 @RunWith(TestParameterInjector::class)
 class VerifierSessionImplTest {
@@ -42,21 +42,21 @@ class VerifierSessionImplTest {
         transition: VerifierSessionState
     ) = runTest {
         initialState = initial
-        val exception = assertThrows(IllegalStateException::class.java) {
+        val exception = Assert.assertThrows(IllegalStateException::class.java) {
             session.transitionTo(transition)
         }
 
-        assertThat(
+        MatcherAssert.assertThat(
             exception.message,
-            equalTo(
+            CoreMatchers.equalTo(
                 "Current state (${session.currentState.value::class.java.simpleName}) " +
-                    "cannot transition to: ${transition::class.java.simpleName}"
+                        "cannot transition to: ${transition::class.java.simpleName}"
             )
         )
 
-        assertThat(
+        MatcherAssert.assertThat(
             session,
-            hasCurrentState(initial)
+            StateContainerMatchers.hasCurrentState(initial)
         )
 
         assert("Cannot complete transition" in logger)
@@ -68,21 +68,21 @@ class VerifierSessionImplTest {
         state: VerifierSessionState
     ) = runTest {
         initialState = state
-        val exception = assertThrows(IllegalStateException::class.java) {
+        val exception = Assert.assertThrows(IllegalStateException::class.java) {
             session.transitionTo(state)
         }
 
-        assertThat(
+        MatcherAssert.assertThat(
             exception.message,
-            equalTo(
+            CoreMatchers.equalTo(
                 "Cannot find applicable transitions for current state: " +
-                    state::class.java.simpleName
+                        state::class.java.simpleName
             )
         )
 
-        assertThat(
+        MatcherAssert.assertThat(
             session,
-            hasCurrentState(state)
+            StateContainerMatchers.hasCurrentState(state)
         )
 
         assert("Cannot complete transition" in logger)
@@ -97,14 +97,14 @@ class VerifierSessionImplTest {
         initialState = initial
         session.transitionTo(transition)
 
-        assertThat(
+        MatcherAssert.assertThat(
             session,
-            hasCurrentState(transition)
+            StateContainerMatchers.hasCurrentState(transition)
         )
 
         assert(
             "Transitioned from '${initial::class.java.simpleName}' to " +
-                "'${transition::class.java.simpleName}'" in logger
+                    "'${transition::class.java.simpleName}'" in logger
         )
     }
 }

@@ -1,17 +1,17 @@
-package uk.gov.onelogin.sharing.orchestration.session.verifier.data
+package uk.gov.onelogin.sharing.orchestration.verifier.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Connecting
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.NotStarted
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ProcessingEngagement
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ReadyToScan
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Verifying
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.preflightEmptyPermissions
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.successStub
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.userCancellation
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.userJourneyFailure
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Connecting
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.NotStarted
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ProcessingEngagement
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ReadyToScan
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Verifying
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.preflightEmptyPermissions
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.successStub
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.userCancellation
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.userJourneyFailure
 
 class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =

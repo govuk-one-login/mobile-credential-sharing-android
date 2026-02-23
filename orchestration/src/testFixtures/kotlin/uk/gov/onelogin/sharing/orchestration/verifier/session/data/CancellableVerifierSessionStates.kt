@@ -1,11 +1,11 @@
-package uk.gov.onelogin.sharing.orchestration.session.verifier.data
+package uk.gov.onelogin.sharing.orchestration.verifier.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Connecting
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ProcessingEngagement
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.ReadyToScan
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState.Verifying
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionStateStubs.preflightEmptyPermissions
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Connecting
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ProcessingEngagement
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ReadyToScan
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Verifying
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.preflightEmptyPermissions
 
 /**
  * Parameterised test input for valid [uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState] objects that can transition to

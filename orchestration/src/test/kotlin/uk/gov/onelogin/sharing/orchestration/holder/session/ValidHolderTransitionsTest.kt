@@ -1,17 +1,13 @@
-package uk.gov.onelogin.sharing.orchestration.session.holder
+package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.reflect.KClass
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.notNullValue
-import org.hamcrest.CoreMatchers.nullValue
-import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.CoreMatchers
+import org.hamcrest.MatcherAssert
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.holder.session.validHolderTransitions
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.TransitionableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.ValidHolderSessionStateTransitions
@@ -22,11 +18,11 @@ class ValidHolderTransitionsTest {
     fun `There are a fixed number of available transitions`() = runTest {
         val transitionTotal = validHolderTransitions.values.sumOf { it.size }
 
-        assertThat(
+        MatcherAssert.assertThat(
             "The total number of transitions don't match! " +
-                "Is there a need to update the transition state table?",
+                    "Is there a need to update the transition state table?",
             transitionTotal,
-            equalTo(ValidHolderSessionStateTransitions.inputs.size)
+            CoreMatchers.equalTo(ValidHolderSessionStateTransitions.Companion.inputs.size)
         )
     }
 
@@ -34,11 +30,11 @@ class ValidHolderTransitionsTest {
     fun `There are a fixed number of states that can transition`() = runTest {
         val transitionableStateCount = validHolderTransitions.keys.size
 
-        assertThat(
+        MatcherAssert.assertThat(
             "The number of session states that can transition doesn't match! " +
-                "Is there a need to update the transitionable state table?",
+                    "Is there a need to update the transitionable state table?",
             transitionableStateCount,
-            equalTo(TransitionableHolderSessionStates.inputs.size)
+            CoreMatchers.equalTo(TransitionableHolderSessionStates.Companion.inputs.size)
         )
     }
 
@@ -47,11 +43,11 @@ class ValidHolderTransitionsTest {
         @TestParameter(valuesProvider = TransitionableHolderSessionStates::class)
         state: KClass<out HolderSessionState>
     ) = runTest {
-        assertThat(
+        MatcherAssert.assertThat(
             "There should have been available transitions for the provided state: " +
-                state.simpleName,
+                    state.simpleName,
             validHolderTransitions[state],
-            notNullValue()
+            CoreMatchers.notNullValue()
         )
     }
 
@@ -60,11 +56,11 @@ class ValidHolderTransitionsTest {
         @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
         state: HolderSessionState
     ) = runTest {
-        assertThat(
+        MatcherAssert.assertThat(
             "There should be no available transitions for the provided state: " +
-                state::class.java.simpleName,
+                    state::class.java.simpleName,
             validHolderTransitions[state::class],
-            nullValue()
+            CoreMatchers.nullValue()
         )
     }
 }
