@@ -17,7 +17,7 @@ sealed class PermissionCheckerResult {
      * @param missingPermissions The list of [android.Manifest.permission] permissions that need granting
      * by the User. Defaults to an empty list.
      *
-     * @sample uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.Api31BluetoothPermissionChecker.checkPeripheralPermissions
+     * @sample uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.Api31BluetoothPermissionChecker.checkPeripheralPermissions
      */
     data class Missing(
         val missingPermissions: List<String> = emptyList()

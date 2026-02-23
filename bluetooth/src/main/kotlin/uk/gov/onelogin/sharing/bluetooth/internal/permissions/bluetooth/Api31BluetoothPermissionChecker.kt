@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth
+package uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -6,9 +6,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothCentralPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 
 /**
- * [BluetoothPermissionChecker] implementation for use in Android-powered devices running
+ * [uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker] implementation for use in Android-powered devices running
  * [android.os.Build.VERSION_CODES.S] or higher.
  */
 @RequiresApi(Build.VERSION_CODES.S)
