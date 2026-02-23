@@ -21,5 +21,6 @@ sealed class PermissionCheckerResult {
      */
     data class Missing(
         val missingPermissions: List<String> = emptyList()
-    ) : PermissionCheckerResult()
+    ) : PermissionCheckerResult(),
+        Iterable<String> by missingPermissions
 }

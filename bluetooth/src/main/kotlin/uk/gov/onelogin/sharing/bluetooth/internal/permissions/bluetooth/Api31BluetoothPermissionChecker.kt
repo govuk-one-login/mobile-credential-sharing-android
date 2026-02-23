@@ -6,8 +6,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionCheckerResult
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothCentralPermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothCentralPermissionChecker.Companion.centralPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 
 /**
@@ -19,10 +19,10 @@ internal class Api31BluetoothPermissionChecker(
     private val context: Context,
 ) : BluetoothPermissionChecker {
     override fun checkPeripheralPermissions(): PermissionCheckerResult =
-        checkPermissions(BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions())
+        checkPermissions(peripheralPermissions())
 
     override fun checkCentralPermissions(): PermissionCheckerResult =
-        checkPermissions(BluetoothCentralPermissionChecker.Companion.centralPermissions())
+        checkPermissions(centralPermissions())
 
     private fun checkPermissions(
         permissionsToCheck: List<String>
