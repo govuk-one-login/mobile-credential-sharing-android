@@ -116,7 +116,12 @@ class HolderWelcomeViewModel(
                             ]
                         )
 
-                        if (!state.isSessionEnd) {
+                        if (state.isSessionEnd) {
+                            logger.debug(
+                                logTag,
+                                "BLE session terminated successfully via GATT End command"
+                            )
+                        } else {
                             logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
                             _uiState.update {
                                 it.copy(
@@ -126,10 +131,7 @@ class HolderWelcomeViewModel(
                                 )
                             }
                         }
-                        logger.debug(
-                            logTag,
-                            "BLE session terminated successfully via GATT End command"
-                        )
+
                         stopAdvertising()
                     }
 

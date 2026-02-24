@@ -130,17 +130,18 @@ class SessionEstablishmentViewModel(
                         if (started) {
                             mdocVerifierSession.stop()
                         }
-                        if (!sessionState.isSessionEnd) {
+                        if (sessionState.isSessionEnd) {
+                            logger.debug(
+                                logTag,
+                                "BLE session terminated successfully via GATT End command"
+                            )
+                        } else {
                             _navEvents.tryEmit(
                                 ConnectWithHolderDeviceNavEvent.NavigateToError(
                                     ConnectWithHolderDeviceError.BluetoothConnectionError
                                 )
                             )
                         }
-                        logger.debug(
-                            logTag,
-                            "BLE session terminated successfully via GATT End command"
-                        )
                     }
 
                     is VerifierSessionState.ConnectionStateStarted -> {
