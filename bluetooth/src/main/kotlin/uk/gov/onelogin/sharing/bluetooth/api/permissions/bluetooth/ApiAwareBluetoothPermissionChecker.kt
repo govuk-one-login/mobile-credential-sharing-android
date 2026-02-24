@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth
 
-import android.content.Context
 import android.os.Build
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -23,7 +22,7 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker
     binding = binding<BluetoothPeripheralPermissionChecker>()
 )
 @ContributesBinding(ViewModelScope::class, binding = binding<BluetoothPermissionChecker>())
-class ApiAwareBluetoothPermissionChecker(private val context: Context) :
+class ApiAwareBluetoothPermissionChecker(private val checker: PermissionChecker) :
     BluetoothPermissionChecker {
     override fun checkPeripheralPermissions(): PermissionChecker.Response =
         calculateImplementation().checkPeripheralPermissions()
@@ -35,6 +34,6 @@ class ApiAwareBluetoothPermissionChecker(private val context: Context) :
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S ->
             TruthyBluetoothPermissionChecker
 
-        else -> Api31BluetoothPermissionChecker(context)
+        else -> Api31BluetoothPermissionChecker(checker)
     }
 }

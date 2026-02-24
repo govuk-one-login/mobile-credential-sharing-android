@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.permissions
+package uk.gov.onelogin.sharing.core.permission
 
 import android.content.Context
 import androidx.core.content.ContextCompat

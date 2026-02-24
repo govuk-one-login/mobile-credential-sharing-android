@@ -25,7 +25,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,
-    private val permissionChecker: PrerequisiteGate.Authorization
+    private val authorizationGate: PrerequisiteGate.Authorization
 ) : Orchestrator.Holder {
 
     private var session: HolderSession = sessionFactory.create()
@@ -46,7 +46,8 @@ class HolderOrchestrator(
             )
             logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
 
-            permissionChecker.checkAuthorization(
+            // future work: Authorization occurs within a capability check
+            authorizationGate.checkAuthorization(
                 AuthorizationRequest.AuthorizePermission(
                     peripheralPermissions()
                 )

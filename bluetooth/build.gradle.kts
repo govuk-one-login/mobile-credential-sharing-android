@@ -40,7 +40,10 @@ dependencies {
         projects.core
     ).forEach(::testFixturesApi)
 
-    testImplementation(testFixtures(projects.bluetooth))
+    listOf(
+        testFixtures(projects.bluetooth),
+        testFixtures(projects.core)
+    ).forEach(::testImplementation)
 }
 
 mavenPublishingConfig {

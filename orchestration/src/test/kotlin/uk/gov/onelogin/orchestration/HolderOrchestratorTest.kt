@@ -61,7 +61,7 @@ class HolderOrchestratorTest {
         HolderOrchestrator(
             logger = logger,
             sessionFactory = sessionFactory,
-            permissionChecker = permissionChecker
+            authorizationGate = permissionChecker
         )
     }
 

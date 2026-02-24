@@ -63,7 +63,7 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `returns error if permission is not granted`() = runTest {
-        fakePermissionChecker.centralResult = PermissionChecker.Response.Missing()
+        fakePermissionChecker.centralResult = Response.Missing()
 
         manager.events.test {
             manager.connect(

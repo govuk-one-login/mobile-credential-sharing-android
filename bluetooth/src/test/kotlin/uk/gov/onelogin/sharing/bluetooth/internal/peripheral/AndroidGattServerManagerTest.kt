@@ -302,7 +302,7 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `gatt server returns error if permissions are not granted`() = runTest {
-        fakePermissionChecker.peripheralResult = PermissionChecker.Response.Missing()
+        fakePermissionChecker.peripheralResult = Response.Missing()
 
         manager.events.test {
             manager.open(uuid)

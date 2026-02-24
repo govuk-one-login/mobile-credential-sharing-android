@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 class TruthyBluetoothPermissionCheckerTest {
     @Test
