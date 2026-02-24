@@ -37,10 +37,9 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
-import uk.gov.onelogin.sharing.security.cbor.base64Decode
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.cbor.deriveSessionTranscript
-import uk.gov.onelogin.sharing.security.cbor.encodeCbor
+import uk.gov.onelogin.sharing.security.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.security.cbor.prettyPrintDecryptedCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
@@ -48,6 +47,7 @@ import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PA
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
+import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 @AssistedInject
 @Suppress("LongParameterList")
@@ -175,46 +175,23 @@ class HolderWelcomeViewModel(
                     }
 
                     is MdocSessionState.MessageReceived -> {
-                        val dto = decodeSessionEstablishmentModel(
+                        val sessionEstablishment = decodeSessionEstablishmentModel(
                             rawBytes = state.message,
                             logger = logger
-                        )
+                        ).toSessionEstablishment()
 
                         val sharedSecretKey = sessionSecurity.generateSharedSecret(
                             holderKey = keyPair!!.private as ECPrivateKey,
 
                             eReaderKey = CoseKey.getEReaderKeyFromParsedCoseKey(
-                                dto.eReaderKey.encoded
+                                sessionEstablishment.eReaderKey
                             )
                         )
 
-                        logger.debug(logTag, "sharedSecretKey: ${sharedSecretKey.toHexString()}")
-                        logger.debug(logTag, "sharedSecretKey length: ${sharedSecretKey.size}")
-
-                       /* val transcript = deriveSessionTranscript(
-                            cborBase64Url = _uiState.value.engagement!!,
-                            sessionEstablishmentBytes = state.message,
-                            logger = logger
-                        )*/
-
-                        val deviceEngagementBytes = _uiState.value.engagement!!.base64Decode()
                         val transcript = deriveSessionTranscript(
-                            deviceEngagementCborBytes = deviceEngagementBytes,
-                            eReaderKeyTagged = dto.eReaderKey.encoded
-                        )
-
-                        logger.debug(logTag, "transcript[0]=0x${"%02x".format(transcript[0])}")
-                        logger.debug(logTag, "transcriptLen=${transcript.size}")
-                        logger.debug(logTag, "transcriptLast=0x${"%02x".format(transcript.last())}")
-
-                        logger.debug(logTag, "t0=${"%02x".format(transcript[0])} t1=${"%02x".format(transcript[1])} t2=${"%02x".format(transcript[2])} t3=${"%02x".format(transcript[3])} t4=${"%02x".format(transcript[4])}")
-                        logger.debug(logTag, "last=${"%02x".format(transcript.last())} len=${transcript.size}")
-                        logger.debug(logTag, "transcriptSha256=${sha256(transcript).toHexString()} len=${transcript.size}")
-
-                        val skDevice = sessionSecurity.deriveSessionKey(
-                            sharedKey = sharedSecretKey,
-                            sessionTranscriptBytes = transcript,
-                            role = SessionKeyGenerator.Companion.DeviceRole.HOLDER
+                            cborBase64Url = _uiState.value.engagement!!,
+                            eReaderKeyTagged = sessionEstablishment.eReaderKey,
+                            logger = logger
                         )
 
                         val skReader = sessionSecurity.deriveSessionKey(
@@ -223,14 +200,9 @@ class HolderWelcomeViewModel(
                             role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
                         )
 
-                        logger.debug(logTag, "skDevice: ${skDevice.toHexString()}")
-                        logger.debug(logTag, "skReader: ${skReader.toHexString()}")
-
-                        logger.debug(logTag, "data[0]=0x${"%02x".format(dto.data[0])}")
-
                         val decrypted = sessionSecurity.decryptPayload(
                             key = skReader,
-                            data = dto.data,
+                            data = sessionEstablishment.data,
                             role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
                         )
 
@@ -421,5 +393,4 @@ data class HolderWelcomeUiState(
     val connectedAddress: String? = ""
 )
 
-fun sha256(input: ByteArray): ByteArray =
-    MessageDigest.getInstance("SHA-256").digest(input)
+fun sha256(input: ByteArray): ByteArray = MessageDigest.getInstance("SHA-256").digest(input)

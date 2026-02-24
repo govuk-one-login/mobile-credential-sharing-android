@@ -4,6 +4,10 @@ import uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 
 object SessionEstablishmentStub {
+    const val MOCK_E_READER_KEY = "d818584ba401022001215820b3a42d21ea73d2f66760a8010b2cf3cfd" +
+        "a7d0f598a1c8b93f4d6324099afc21f225820110ebb94d8fabf6c251777c37cea1dbde0a4e85ce7" +
+        "333b5342944cfc6c4551e7"
+
     const val MOCK_SESSION_ESTABLISHMENT_DATA =
         "a26a655265616465724b6579d818584ba40102200121582060e3392385041f51403051f2415531cb56dd3f" +
             "999c71687013aac6768bc8187e225820e58deb8fdbe907f7dd5368245551a34796f7d2215c440c339b" +

@@ -6,6 +6,15 @@ object CryptoStub {
     const val BINARY_PACKAGE_PATH =
         "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cryptography/java/"
 
+    const val VALID_SALT =
+        "2bced77ca0da01df85dbfe9858c30e6a5966801e372730b35b76e648afb0ffbc"
+
+    const val VALID_SK_DEVICE_KEY = "3a9cfc475b558204eb31020f32adf319fd4ef84c" +
+        "4a18133538bcbb806d597e08"
+
+    const val VALID_SK_READER_KEY = "6162fb421390f81db15088f5eca6aebe931d0931f" +
+        "bfd78ee4f4fc3816b149316"
+
     val VALID_SALT_BYTES = getByteArrayFromFile(
         BINARY_PACKAGE_PATH,
         "sessionTranscriptAsSaltBytes.bin"

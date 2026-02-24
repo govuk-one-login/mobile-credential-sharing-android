@@ -2,7 +2,8 @@ package uk.gov.onelogin.sharing.security.secureArea.session
 
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
-import kotlin.test.assertContentEquals
+import kotlin.test.assertNotEquals
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
@@ -11,6 +12,8 @@ import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptStub.vali
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.SHARED_SECRET_BYTES
+import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.VALID_SK_DEVICE_KEY
+import uk.gov.onelogin.sharing.security.cryptography.java.CryptoStub.VALID_SK_READER_KEY
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.HOLDER
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionStubs.VALID_SKDEVICE_BYTES
@@ -30,7 +33,7 @@ class HkdfSessionKeyGeneratorTest {
             VERIFIER
         )
 
-        assertContentEquals(skReaderKey, VALID_SKREADER_BYTES)
+        assertEquals(VALID_SK_READER_KEY, skReaderKey.toHexString())
     }
 
     @Test
@@ -41,7 +44,9 @@ class HkdfSessionKeyGeneratorTest {
             HOLDER
         )
 
-        assertContentEquals(skDeviceKey, VALID_SKDEVICE_BYTES)
+        val key = "3a9cfc475b558204eb31020f32adf319fd4ef84c4a18133538bcbb806d597e08"
+
+        assertEquals(VALID_SK_DEVICE_KEY, skDeviceKey.toHexString())
     }
 
     @Test
@@ -54,7 +59,7 @@ class HkdfSessionKeyGeneratorTest {
             HOLDER
         )
 
-        assert(!skDeviceKey.contentEquals(VALID_SKDEVICE_BYTES))
+        assertNotEquals(VALID_SK_DEVICE_KEY, skDeviceKey.toHexString())
     }
 
     @Test

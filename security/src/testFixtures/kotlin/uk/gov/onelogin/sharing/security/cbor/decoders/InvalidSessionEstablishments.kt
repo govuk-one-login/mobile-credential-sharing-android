@@ -5,6 +5,7 @@ import com.google.testing.junit.testparameterinjector.TestParametersValuesProvid
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingDataParameter
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingEReader
 
+@OptIn(ExperimentalStdlibApi::class)
 class InvalidSessionEstablishments : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
         listOf(
