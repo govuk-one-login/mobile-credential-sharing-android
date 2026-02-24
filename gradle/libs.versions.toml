@@ -14,11 +14,11 @@ coreKtx = "1.17.0" # https://developer.android.com/jetpack/androidx/releases/cor
 detekt = "1.23.8" # https://github.com/detekt/detekt/releases
 espressoCore = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#3.7.0
 hilt = "2.58" # https://github.com/google/dagger/releases
-jackson = "2.21.0" # https://github.com/FasterXML/jackson/wiki/Jackson-Releases
+jackson = "2.21.1" # https://github.com/FasterXML/jackson/wiki/Jackson-Releases
 jacoco = "0.8.14" # https://github.com/jacoco/jacoco/releases
 junit = "4.13.2" # https://github.com/junit-team/junit4/releases
 kotlin = "2.2.21" # https://github.com/JetBrains/kotlin/releases
-kotlin-symbol-processing = "2.3.5" # https://github.com/google/ksp/releases ; update with 'kotlin'
+kotlin-symbol-processing = "2.3.6" # https://github.com/google/ksp/releases ; update with 'kotlin'
 kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 kotlinx-bytestring = "0.8.2"
 ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
@@ -31,7 +31,7 @@ sonarqube = "7.1.0.6387" # https://github.com/SonarSource/sonar-scanner-gradle/r
 spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "0.39.1" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
-uk-gov-ui = "12.1.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
+uk-gov-ui = "13.1.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
