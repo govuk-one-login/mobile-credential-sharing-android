@@ -12,7 +12,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +36,7 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import java.util.UUID
 
 @AssistedInject
 @Suppress("LongParameterList")
@@ -108,10 +108,10 @@ class HolderWelcomeViewModel(
                                 ImplementationDetail(
                                     ticket = "DCMAW-16898",
                                     description = "We may need to handle explicit bluetooth" +
-                                        "disconnection states to handle common error codes " +
-                                        "8, 19, 22 and 133. The function below will handle " +
-                                        "treat all disconnect states the same when connected " +
-                                        "to a device"
+                                            "disconnection states to handle common error codes " +
+                                            "8, 19, 22 and 133. The function below will handle " +
+                                            "treat all disconnect states the same when connected " +
+                                            "to a device"
                                 )
                             ]
                         )
@@ -126,7 +126,10 @@ class HolderWelcomeViewModel(
                                 )
                             }
                         }
-
+                        logger.debug(
+                            logTag,
+                            "BLE session terminated successfully via GATT End command"
+                        )
                         stopAdvertising()
                     }
 
@@ -272,10 +275,10 @@ class HolderWelcomeViewModel(
         val bluetoothOn = state.bluetoothState == BluetoothState.Enabled
 
         val canStart = !sessionStartRequested &&
-            hasPermissions &&
-            bluetoothOn &&
-            canStartNewSession(state) &&
-            !sessionStartRequested
+                hasPermissions &&
+                bluetoothOn &&
+                canStartNewSession(state) &&
+                !sessionStartRequested
 
         if (canStart) {
             sessionStartRequested = true
@@ -287,8 +290,8 @@ class HolderWelcomeViewModel(
 
     private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
         state.sessionState == MdocSessionState.Idle ||
-            state.sessionState == MdocSessionState.AdvertisingStopped ||
-            state.sessionState == MdocSessionState.GattServiceStopped
+                state.sessionState == MdocSessionState.AdvertisingStopped ||
+                state.sessionState == MdocSessionState.GattServiceStopped
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
@@ -307,8 +310,8 @@ class HolderWelcomeViewModel(
                 ImplementationDetail(
                     ticket = "UI",
                     description = "We don't have an explicit back button or way to test this atm" +
-                        "so will send end command onNavBack to test closing the connection" +
-                        "for now."
+                            "so will send end command onNavBack to test closing the connection" +
+                            "for now."
                 )
             ]
         )
