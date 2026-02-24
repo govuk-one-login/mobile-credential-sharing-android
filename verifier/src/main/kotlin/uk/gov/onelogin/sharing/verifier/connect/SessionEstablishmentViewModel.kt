@@ -17,6 +17,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.security.interfaces.ECPublicKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -40,6 +41,7 @@ import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cose.CoseKeyToString
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
@@ -147,7 +149,13 @@ class SessionEstablishmentViewModel(
                             parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
 
                         )
-                        coseKeyConverter.convert(getCoseKey(keyPair))
+
+                        val publicCoseKey = CoseKey.generateCoseKey(
+                            publicKey = keyPair?.public as ECPublicKey,
+                            logger = logger
+                        )
+
+                        coseKeyConverter.convert(publicCoseKey)
                     }
 
                     else -> Unit

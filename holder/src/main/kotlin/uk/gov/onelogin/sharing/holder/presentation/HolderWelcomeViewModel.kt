@@ -14,6 +14,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.security.MessageDigest
 import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +40,6 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.cbor.deriveSessionTranscript
-import uk.gov.onelogin.sharing.security.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.security.cbor.prettyPrintDecryptedCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
@@ -81,13 +81,16 @@ class HolderWelcomeViewModel(
         algorithm = ELLIPTIC_CURVE_ALGORITHM,
         parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
     )
-    val publicKey = sessionSecurity.getCoseKey(keyPair)
+    val cosePublicKey = CoseKey.generateCoseKey(
+        publicKey = keyPair?.public as ECPublicKey,
+        logger = logger
+    )
 
     init {
         viewModelScope.launch(dispatcher) {
             resettable.forEach(Resettable::reset)
 
-            publicKey.let { coseKey ->
+            cosePublicKey.let { coseKey ->
                 val engagement = engagementGenerator.qrCodeEngagement(
                     coseKey,
                     _uiState.value.uuid

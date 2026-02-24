@@ -9,6 +9,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
 import io.mockk.every
 import io.mockk.mockk
+import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -51,8 +52,6 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.security.secureArea.keypair.FakeKeyPairGenerator
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
 import uk.gov.onelogin.sharing.security.secureArea.keypair.MemorisedKeyGenerator
-import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
-import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.AesGcmEncryption
 import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
@@ -387,29 +386,29 @@ class SessionEstablishmentViewModelTest {
             FakeKeyPairGenerator(validKeyPair),
             logger
         )
-        val publicKeyGenerator = EcPublicCoseKeyGenerator(logger)
-        val expectedCoseKey = publicKeyGenerator.getCoseKey(validKeyPair)
-            .let(CoseKey::encodeCbor)
+
+        val expectedCoseKey = CoseKey.generateCoseKey(
+            publicKey = validKeyPair!!.public as ECPublicKey,
+            logger = logger
+        ) .let(CoseKey::encodeCbor)
             .let(::EmbeddedCbor)
             .encodeCbor()
 
-        viewModel = createViewModel(
-            scanner = scanner,
-            sessionSecurity = SessionSecurityImpl(
-                keyPairGenerator = generator,
-                privateKeyGenerator = EcPrivateKeyGenerator(generator, logger),
-                publicKeyGenerator = publicKeyGenerator,
-                secretGenerator = EcdhSharedSecretGenerator(logger),
-                sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-                sessionEncryption = AesGcmEncryption(logger)
+            viewModel = createViewModel(
+                scanner = scanner,
+                sessionSecurity = SessionSecurityImpl(
+                    keyPairGenerator = generator,
+                    secretGenerator = EcdhSharedSecretGenerator(logger),
+                    sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
+                    sessionEncryption = AesGcmEncryption(logger)
+                )
             )
-        )
         fakeVerifierSession.updateState(VerifierSessionState.ConnectionStateStarted)
         runCurrent()
 
         assert(
             "Encoded public CoseKey into EReaderKeyBytes: ${expectedCoseKey.toHexString()}"
-                in logger
+                    in logger
         ) {
             "Cannot find expected message in logs: $logger"
         }

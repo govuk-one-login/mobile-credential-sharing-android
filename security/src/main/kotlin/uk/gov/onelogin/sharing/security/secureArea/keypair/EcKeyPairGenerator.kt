@@ -2,23 +2,22 @@ package uk.gov.onelogin.sharing.security.secureArea.keypair
 
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPair
-import java.security.KeyPairGenerator
 import java.security.NoSuchAlgorithmException
 import java.security.spec.ECGenParameterSpec
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.KeyPairGenerator
 
 /**
- * [KeyGenerator.KeyPairGenerator] implementation that uses Elliptic Curve (EC) cryptography.
+ * [KeyPairGenerator] implementation that uses Elliptic Curve (EC) cryptography.
  */
-class EcKeyPairGenerator(private val logger: Logger) : KeyGenerator.KeyPairGenerator {
+class EcKeyPairGenerator(private val logger: Logger) : KeyPairGenerator {
     /**
      * @return a [KeyPair] containing an [java.security.interfaces.ECPrivateKey] and
      * [java.security.interfaces.ECPublicKey]. Returns null if an error occurs.
      */
     override fun generateEcKeyPair(algorithm: String, parameterSpec: String): KeyPair? = try {
-        val keyPairGenerator = KeyPairGenerator.getInstance(algorithm)
+        val keyPairGenerator = java.security.KeyPairGenerator.getInstance(algorithm)
         val ecSpec = ECGenParameterSpec(parameterSpec)
         keyPairGenerator.initialize(ecSpec)
         val keyPair = keyPairGenerator.generateKeyPair()

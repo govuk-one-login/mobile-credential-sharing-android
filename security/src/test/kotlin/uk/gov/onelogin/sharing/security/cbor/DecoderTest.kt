@@ -179,16 +179,13 @@ class DecoderTest {
             ELLIPTIC_CURVE_PARAMETER_SPEC
         )
 
-        val readerPrivateKey = readerSession.getSessionPrivateKey()
-        val holderPrivateKey = holderSession.getSessionPrivateKey()
-
         val eReaderSharedSecret = getSharedSecret(
-            readerPrivateKey,
+            readerKeyPair.private as ECPrivateKey,
             holderKeyPair.public as ECPublicKey
         )
 
         val holderSharedSecret = getSharedSecret(
-            holderPrivateKey,
+            holderKeyPair.private as ECPrivateKey,
             readerKeyPair.public as ECPublicKey
         )
 

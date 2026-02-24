@@ -21,17 +21,6 @@ class FakeSessionSecurity : SessionSecurity {
     override fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray =
         byteArrayOf()
 
-    override fun getCoseKey(keyPair: KeyPair?): CoseKey {
-        TODO("Not yet implemented")
-    }
-
-    fun generateSessionPublicKey(): CoseKey {
-        val keyPair = SessionSecurityTestStub.generateValidKeyPair()
-        return CoseKey.generateCoseKey(keyPair?.public as ECPublicKey)
-    }
-
-    override fun getSessionPrivateKey(): ECPrivateKey = sessionKeyPair.private as ECPrivateKey
-
     override fun deriveSessionKey(
         sharedKey: ByteArray,
         sessionTranscriptBytes: ByteArray,

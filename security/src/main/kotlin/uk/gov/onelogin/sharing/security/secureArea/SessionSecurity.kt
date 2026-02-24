@@ -8,9 +8,7 @@ import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
  * Wrapper interface for holding cryptographic operations throughout a User's session.
  */
 interface SessionSecurity :
-    KeyGenerator.KeyPairGenerator,
-    KeyGenerator.PrivateKeyGenerator,
-    KeyGenerator.PublicKeyGenerator,
+    KeyPairGenerator,
     SessionKeyGenerator,
     SharedSecretGenerator,
     SessionEncryption

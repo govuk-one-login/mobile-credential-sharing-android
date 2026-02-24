@@ -7,19 +7,17 @@ import java.security.KeyPair
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.KeyPairGenerator
 
 /**
- * [KeyGenerator.KeyPairGenerator] decorator implementation that primarily defers to the provided
+ * [KeyPairGenerator] decorator implementation that primarily defers to the provided
  * [generator] for creating [java.security.KeyPair] instances.
  *
  * Internally stores the last successful [java.security.KeyPair] via the [sessionKeyPair] property.
  */
 @ContributesIntoSet(ViewModelScope::class, binding = binding<Resettable>())
-class MemorisedKeyGenerator(
-    private val generator: KeyGenerator.KeyPairGenerator,
-    private val logger: Logger
-) : KeyGenerator.KeyPairGenerator,
+class MemorisedKeyGenerator(private val generator: KeyPairGenerator, private val logger: Logger) :
+    KeyPairGenerator,
     Resettable {
     /**
      * The last successfully generated [java.security.KeyPair].
@@ -28,7 +26,7 @@ class MemorisedKeyGenerator(
 
     /**
      * @return [sessionKeyPair] when it's not null. Otherwise, the result of [generator]'s
-     * [KeyGenerator.KeyPairGenerator.generateEcKeyPair] after storing it in memory.
+     * [KeyPairGenerator.generateEcKeyPair] after storing it in memory.
      */
     override fun generateEcKeyPair(algorithm: String, parameterSpec: String): KeyPair? {
         if (sessionKeyPair == null) {
