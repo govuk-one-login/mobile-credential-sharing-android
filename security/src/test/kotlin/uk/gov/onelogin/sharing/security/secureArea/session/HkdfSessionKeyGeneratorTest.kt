@@ -44,8 +44,6 @@ class HkdfSessionKeyGeneratorTest {
             HOLDER
         )
 
-        val key = "3a9cfc475b558204eb31020f32adf319fd4ef84c4a18133538bcbb806d597e08"
-
         assertEquals(VALID_SK_DEVICE_KEY, skDeviceKey.toHexString())
     }
 

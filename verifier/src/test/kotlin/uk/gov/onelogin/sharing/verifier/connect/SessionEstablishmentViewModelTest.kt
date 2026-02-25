@@ -390,25 +390,25 @@ class SessionEstablishmentViewModelTest {
         val expectedCoseKey = CoseKey.generateCoseKey(
             publicKey = validKeyPair!!.public as ECPublicKey,
             logger = logger
-        ) .let(CoseKey::encodeCbor)
+        ).let(CoseKey::encodeCbor)
             .let(::EmbeddedCbor)
             .encodeCbor()
 
-            viewModel = createViewModel(
-                scanner = scanner,
-                sessionSecurity = SessionSecurityImpl(
-                    keyPairGenerator = generator,
-                    secretGenerator = EcdhSharedSecretGenerator(logger),
-                    sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-                    sessionEncryption = AesGcmEncryption(logger)
-                )
+        viewModel = createViewModel(
+            scanner = scanner,
+            sessionSecurity = SessionSecurityImpl(
+                keyPairGenerator = generator,
+                secretGenerator = EcdhSharedSecretGenerator(logger),
+                sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
+                sessionEncryption = AesGcmEncryption(logger)
             )
+        )
         fakeVerifierSession.updateState(VerifierSessionState.ConnectionStateStarted)
         runCurrent()
 
         assert(
             "Encoded public CoseKey into EReaderKeyBytes: ${expectedCoseKey.toHexString()}"
-                    in logger
+                in logger
         ) {
             "Cannot find expected message in logs: $logger"
         }

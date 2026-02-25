@@ -20,7 +20,7 @@ class SessionTranscriptDecoders : TestParametersValuesProvider() {
                 to { deviceEngagement, eReaderKeyTagged, logger ->
                     SessionTranscriptDecoderImpl(logger).deriveSessionTranscript(
                         cborBase64Url = deviceEngagement,
-                        eReaderKeyTagged = eReaderKeyTagged
+                        taggedEReaderKey = eReaderKeyTagged
                     )
                 }
         ).map { (testName, functionUnderTest) ->

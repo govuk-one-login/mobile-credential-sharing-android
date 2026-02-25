@@ -132,7 +132,7 @@ fun deriveSessionTranscript(
     logger: Logger
 ): ByteArray = SessionTranscriptDecoderImpl(logger).deriveSessionTranscript(
     cborBase64Url = cborBase64Url,
-    eReaderKeyTagged = eReaderKeyTagged
+    taggedEReaderKey = eReaderKeyTagged
 )
 
 fun deriveUntaggedCbor(tagged: ByteArray): ByteArray =

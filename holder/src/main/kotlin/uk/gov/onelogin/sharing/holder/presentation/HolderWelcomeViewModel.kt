@@ -12,7 +12,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.security.MessageDigest
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.util.UUID
@@ -38,16 +37,12 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
-import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
-import uk.gov.onelogin.sharing.security.cbor.deriveSessionTranscript
-import uk.gov.onelogin.sharing.security.cbor.prettyPrintDecryptedCbor
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
-import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 @AssistedInject
 @Suppress("LongParameterList")
@@ -59,7 +54,8 @@ class HolderWelcomeViewModel(
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val resettable: Set<Resettable>,
     private val orchestrator: Orchestrator.Holder,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase
 ) : ViewModel() {
 
     companion object {
@@ -178,42 +174,19 @@ class HolderWelcomeViewModel(
                     }
 
                     is MdocSessionState.MessageReceived -> {
-                        val sessionEstablishment = decodeSessionEstablishmentModel(
-                            rawBytes = state.message,
-                            logger = logger
-                        ).toSessionEstablishment()
-
-                        val sharedSecretKey = sessionSecurity.generateSharedSecret(
-                            holderKey = keyPair!!.private as ECPrivateKey,
-
-                            eReaderKey = CoseKey.getEReaderKeyFromParsedCoseKey(
-                                sessionEstablishment.eReaderKey
-                            )
+                        val deviceRequest = decryptDeviceRequestUseCase.execute(
+                            sessionEstablishmentBytes = state.message,
+                            engagement = _uiState.value.engagement!!,
+                            holderPrivateKey = keyPair?.private as ECPrivateKey
                         )
 
-                        val transcript = deriveSessionTranscript(
-                            cborBase64Url = _uiState.value.engagement!!,
-                            eReaderKeyTagged = sessionEstablishment.eReaderKey,
-                            logger = logger
-                        )
-
-                        val skReader = sessionSecurity.deriveSessionKey(
-                            sharedKey = sharedSecretKey,
-                            sessionTranscriptBytes = transcript,
-                            role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
-                        )
-
-                        val decrypted = sessionSecurity.decryptPayload(
-                            key = skReader,
-                            data = sessionEstablishment.data,
-                            role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
-                        )
-
-                        val data = prettyPrintDecryptedCbor(
-                            bytes = decrypted,
-                            logger = logger
-                        )
-                        logger.debug(logTag, "Mdoc - Message received: $data")
+                        deviceRequest
+                            .docRequests.firstOrNull()
+                            ?.itemsRequest
+                            ?.nameSpaces
+                            ?.forEach { (key, value) ->
+                                logger.debug(logTag, "Requests: key = $key, value = $value")
+                            }
                     }
                 }
             }
@@ -395,5 +368,3 @@ data class HolderWelcomeUiState(
     val showEnableBluetoothPrompt: Boolean = false,
     val connectedAddress: String? = ""
 )
-
-fun sha256(input: ByteArray): ByteArray = MessageDigest.getInstance("SHA-256").digest(input)
