@@ -45,19 +45,10 @@ class HolderOrchestrator(
                     preFlightChecks()
                 }
 
-                HolderSessionState.ReadyToPresent -> {
-
-                }
-
-                HolderSessionState.PresentingEngagement -> TODO()
-                HolderSessionState.ProcessingResponse -> TODO()
-                HolderSessionState.Connecting -> TODO()
-                HolderSessionState.RequestReceived -> TODO()
                 is HolderSessionState.Complete.Success -> sessionComplete()
-                is HolderSessionState.Complete.Failed -> TODO()
-                HolderSessionState.Complete.Cancelled -> TODO()
-            }
 
+                else -> Unit
+            }
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(
@@ -111,10 +102,6 @@ class HolderOrchestrator(
                 )
             }
         }
-    }
-
-    override fun command(): Any {
-        return byteArrayOf()
     }
 
     override fun reset() {
