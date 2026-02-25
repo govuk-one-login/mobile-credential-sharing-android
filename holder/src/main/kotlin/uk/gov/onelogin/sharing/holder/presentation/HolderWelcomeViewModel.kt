@@ -27,7 +27,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
@@ -96,7 +96,7 @@ class HolderWelcomeViewModel(
             }
 
             orchestrator.start(
-                PermissionChecker.peripheralPermissions().toSet()
+                peripheralPermissions().toSet()
             )
         }
 
@@ -132,14 +132,23 @@ class HolderWelcomeViewModel(
                                 )
                             ]
                         )
-                        logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
-                        _uiState.update {
-                            it.copy(
-                                connectedAddress = state.address,
-                                showErrorScreen = true,
-                                bluetoothErrorType = BLUETOOTH_DISCONNECTED
+
+                        if (state.isSessionEnd) {
+                            logger.debug(
+                                logTag,
+                                "BLE session terminated successfully via GATT End command"
                             )
+                        } else {
+                            logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
+                            _uiState.update {
+                                it.copy(
+                                    connectedAddress = state.address,
+                                    showErrorScreen = true,
+                                    bluetoothErrorType = BLUETOOTH_DISCONNECTED
+                                )
+                            }
                         }
+
                         stopAdvertising()
                     }
 

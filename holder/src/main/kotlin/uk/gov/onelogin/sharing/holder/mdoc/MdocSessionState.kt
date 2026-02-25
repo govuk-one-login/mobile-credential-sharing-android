@@ -39,7 +39,7 @@ sealed interface MdocSessionState {
      * @param address The address of the disconnected device, which may be null if the address
      * is not known.
      */
-    data class Disconnected(val address: String?) : MdocSessionState
+    data class Disconnected(val address: String?, val isSessionEnd: Boolean) : MdocSessionState
 
     /**
      * An error occurred during the session. This can be and error

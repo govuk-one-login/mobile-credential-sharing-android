@@ -13,7 +13,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothCentralPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -28,7 +28,7 @@ const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 @Suppress("TooManyFunctions")
 internal class AndroidGattClientManager(
     private val context: Context,
-    private val permissionChecker: PermissionChecker,
+    private val permissionChecker: BluetoothCentralPermissionChecker,
     private val serviceValidator: ServiceValidator,
     private val gattWriter: GattWriter,
     private val logger: Logger
@@ -44,6 +44,7 @@ internal class AndroidGattClientManager(
         handleGattEvent(it)
     }
     private var mtu = MIN_MTU
+    private var isSessionEnd = false
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (!permissionChecker.hasCentralPermissions()) {
@@ -114,6 +115,7 @@ internal class AndroidGattClientManager(
         val event =
             if (writeSuccess) {
                 logger.debug(logTag, "GATT: Wrote 0x02 to State characteristic")
+                isSessionEnd = true
                 GattClientEvent.SessionEnd(SessionEndStates.SUCCESS)
             } else {
                 GattClientEvent.SessionEnd(SessionEndStates.WRITE_TO_SERVER_FAILED)
@@ -154,8 +156,9 @@ internal class AndroidGattClientManager(
             }
 
             event.newState == BluetoothGatt.STATE_DISCONNECTED -> {
+                bluetoothGatt?.close()
                 bluetoothGatt = null
-                GattClientEvent.Disconnected(address)
+                GattClientEvent.Disconnected(address, isSessionEnd)
             }
 
             else -> GattClientEvent.UnsupportedEvent(
@@ -301,6 +304,7 @@ internal class AndroidGattClientManager(
     /**
      * Handles incoming notification changes from the central device.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleCharacteristicChanged(event: GattEvent.CharacteristicChanged) {
         event.value?.firstOrNull() ?: return
 
@@ -308,6 +312,8 @@ internal class AndroidGattClientManager(
             when (event.value.first()) {
                 MdocState.END.code -> {
                     logger.debug(logTag, "GATT: Received notification 0x02 on State")
+                    isSessionEnd = true
+                    bluetoothGatt?.disconnect()
                     _events.tryEmit(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS))
                 }
             }

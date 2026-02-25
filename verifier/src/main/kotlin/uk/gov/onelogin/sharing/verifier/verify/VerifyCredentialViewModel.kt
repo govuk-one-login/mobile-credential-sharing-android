@@ -20,7 +20,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -50,7 +50,7 @@ class VerifyCredentialViewModel(
         bluetoothStateMonitor.start()
         resettable.forEach(Resettable::reset)
         orchestrator.start(
-            PermissionChecker.peripheralPermissions().toSet()
+            peripheralPermissions().toSet()
         )
         viewModelScope.launch {
             bluetoothStateMonitor.states

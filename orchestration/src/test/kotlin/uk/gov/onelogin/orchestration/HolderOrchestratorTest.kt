@@ -12,16 +12,18 @@ import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCE
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPreflight
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSession
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionImpl
-import uk.gov.onelogin.sharing.orchestration.session.holder.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.CancellableHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.CompleteHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.holder.data.UncancellableHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.inPreflight
-import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.isCancelled
-import uk.gov.onelogin.sharing.orchestration.session.holder.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 
 @RunWith(TestParameterInjector::class)
@@ -47,10 +49,19 @@ class HolderOrchestratorTest {
         )
     }
 
+    private var authorizationResponse = AuthorizationResponse.Authorized
+
+    private val permissionChecker by lazy {
+        FakePrerequisiteAuthorizationGate(
+            authorizationResponse
+        )
+    }
+
     private val orchestrator by lazy {
         HolderOrchestrator(
             logger = logger,
-            sessionFactory = sessionFactory
+            sessionFactory = sessionFactory,
+            authorizationGate = permissionChecker
         )
     }
 
@@ -64,6 +75,12 @@ class HolderOrchestratorTest {
         assertThat(
             sessionFactory,
             currentSessionState(inPreflight())
+        )
+
+        assert(
+            logger.any { entry ->
+                entry.message.contains(authorizationResponse.toString())
+            }
         )
     }
 
@@ -82,6 +99,12 @@ class HolderOrchestratorTest {
         assertThat(
             sessionFactory,
             currentSessionState(inPreflight())
+        )
+
+        assert(
+            logger.any { entry ->
+                entry.message.contains(authorizationResponse.toString())
+            }
         )
     }
 

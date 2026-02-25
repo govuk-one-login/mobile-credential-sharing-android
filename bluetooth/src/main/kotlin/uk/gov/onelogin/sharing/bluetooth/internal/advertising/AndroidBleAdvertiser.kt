@@ -17,13 +17,13 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
-    private val permissionChecker: PermissionChecker,
+    private val permissionChecker: BluetoothPeripheralPermissionChecker,
     private val logger: Logger,
     private val startTimeoutMs: Long = 5_000
 ) : BleAdvertiser {

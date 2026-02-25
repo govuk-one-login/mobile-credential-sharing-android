@@ -12,6 +12,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidBluetoothCentralFactoryTest {
@@ -24,6 +25,7 @@ class AndroidBluetoothCentralFactoryTest {
     @Test
     fun `create returns Android central components`() {
         val factory = AndroidBluetoothCentralFactory(
+            bluetoothPermissionChecker = StubBluetoothPermissionChecker(),
             context = context,
             serviceValidator = fakeServiceValidator,
             logger = logger

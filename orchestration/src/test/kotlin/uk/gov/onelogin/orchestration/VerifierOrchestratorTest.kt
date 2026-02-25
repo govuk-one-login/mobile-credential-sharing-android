@@ -16,15 +16,15 @@ import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionImpl
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
-import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CancellableVerifierSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.verifier.data.CompleteVerifierSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.verifier.data.UncancellableVerifierSessionStates
-import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.inPreflight
-import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.isCancelled
-import uk.gov.onelogin.sharing.orchestration.session.verifier.matchers.VerifierSessionStateMatchers.isNotStarted
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
+import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerifierSessionStates
+import uk.gov.onelogin.sharing.orchestration.verifier.session.data.UncancellableVerifierSessionStates
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.inPreflight
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
 
 @RunWith(TestParameterInjector::class)
 class VerifierOrchestratorTest {

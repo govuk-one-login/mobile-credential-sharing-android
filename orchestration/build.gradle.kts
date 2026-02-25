@@ -32,6 +32,7 @@ android {
 
 dependencies {
     listOf(
+        projects.bluetooth,
         projects.core
     ).forEach(::api)
 
@@ -39,6 +40,10 @@ dependencies {
         libs.com.google.test.parameter.injector,
         libs.junit
     ).forEach(::testFixturesApi)
+
+    listOf(
+        testFixtures(projects.core)
+    ).forEach(::testImplementation)
 }
 
 mavenPublishingConfig {

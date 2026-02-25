@@ -14,8 +14,8 @@ import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelExceptio
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSession
-import uk.gov.onelogin.sharing.orchestration.session.verifier.VerifierSessionState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 class VerifierOrchestrator(

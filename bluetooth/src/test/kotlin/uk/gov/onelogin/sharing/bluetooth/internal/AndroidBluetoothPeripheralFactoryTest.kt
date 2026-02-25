@@ -13,6 +13,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertis
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerManager
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidBluetoothPeripheralFactoryTest {
@@ -23,6 +24,7 @@ class AndroidBluetoothPeripheralFactoryTest {
     @Test
     fun `create returns Android peripheral components`() {
         val factory = AndroidBluetoothPeripheralFactory(
+            bluetoothPermissionChecker = StubBluetoothPermissionChecker(),
             context = context,
             logger = logger,
             gattWriter = FakeGattWriter()

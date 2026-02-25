@@ -27,6 +27,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.android.ui.componentsv2.camera.CameraContentViewModelHelper.monitor
 import uk.gov.logging.testdouble.LogEntry
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
@@ -289,7 +290,7 @@ class SessionEstablishmentViewModelTest {
             )
 
             fakeVerifierSession.updateState(
-                VerifierSessionState.Disconnected(DEVICE_ADDRESS)
+                VerifierSessionState.Disconnected(DEVICE_ADDRESS, false)
             )
 
             assertEquals(1, fakeVerifierSession.stopCalls)
@@ -308,7 +309,7 @@ class SessionEstablishmentViewModelTest {
         viewModel = createViewModel(DummyBluetoothScanner)
         viewModel.navEvents.test {
             fakeVerifierSession.updateState(
-                VerifierSessionState.Disconnected(DEVICE_ADDRESS)
+                VerifierSessionState.Disconnected(DEVICE_ADDRESS, false)
             )
 
             assertEquals(0, fakeVerifierSession.stopCalls)
@@ -462,5 +463,23 @@ class SessionEstablishmentViewModelTest {
             viewModel,
             hasUiState(assertion)
         )
+    }
+
+    @Test
+    fun `showErrorScreen is false when isSessionEnd set true for disconnects`() = runTest {
+        viewModel = createViewModel(DummyBluetoothScanner)
+        viewModel.navEvents.test {
+            fakeVerifierSession.updateState(
+                VerifierSessionState.Connected(DEVICE_ADDRESS)
+            )
+
+            fakeVerifierSession.updateState(
+                VerifierSessionState.Disconnected(DEVICE_ADDRESS, true)
+            )
+
+            assertEquals(1, fakeVerifierSession.stopCalls)
+
+            expectNoEvents()
+        }
     }
 }

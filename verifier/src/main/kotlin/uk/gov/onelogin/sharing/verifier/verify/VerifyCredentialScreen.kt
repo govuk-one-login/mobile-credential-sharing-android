@@ -11,7 +11,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.PermissionChecker.Companion.centralPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothCentralPermissionChecker.Companion.centralPermissions
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)

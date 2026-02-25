@@ -130,16 +130,22 @@ class SessionEstablishmentViewModel(
                         }
 
                     is VerifierSessionState.Disconnected -> {
-                        logger.debug(logTag, "Bluetooth connection dropped")
                         val started = _uiState.value.connectionStateStarted
                         if (started) {
                             mdocVerifierSession.stop()
                         }
-                        _navEvents.tryEmit(
-                            ConnectWithHolderDeviceNavEvent.NavigateToError(
-                                ConnectWithHolderDeviceError.BluetoothConnectionError
+                        if (sessionState.isSessionEnd) {
+                            logger.debug(
+                                logTag,
+                                "BLE session terminated successfully via GATT End command"
                             )
-                        )
+                        } else {
+                            _navEvents.tryEmit(
+                                ConnectWithHolderDeviceNavEvent.NavigateToError(
+                                    ConnectWithHolderDeviceError.BluetoothConnectionError
+                                )
+                            )
+                        }
                     }
 
                     is VerifierSessionState.ConnectionStateStarted -> {
@@ -216,6 +222,7 @@ class SessionEstablishmentViewModel(
      * @see updateEngagementData
      * @see updatePermissions
      */
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun receive(event: ConnectWithHolderDeviceEvent) = when (event) {
         is ConnectToDevice ->
             connect(event.device, event.serviceUuid)

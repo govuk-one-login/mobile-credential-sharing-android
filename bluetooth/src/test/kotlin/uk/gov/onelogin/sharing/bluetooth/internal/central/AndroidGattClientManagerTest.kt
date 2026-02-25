@@ -31,14 +31,15 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
-import uk.gov.onelogin.sharing.bluetooth.permissions.FakePermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
 
 @RunWith(RobolectricTestRunner::class)
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
     private val bluetoothGatt = mockk<BluetoothGatt>(relaxed = true)
-    private val fakePermissionChecker = FakePermissionChecker()
+    private val fakePermissionChecker = StubBluetoothPermissionChecker()
     private val fakeGattWriter = FakeGattWriter()
 
     private val fakeServiceValidator = FakeServiceValidator()
@@ -62,7 +63,7 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `returns error if permission is not granted`() = runTest {
-        fakePermissionChecker.hasCentralPermissions = false
+        fakePermissionChecker.centralResult = Response.Missing()
 
         manager.events.test {
             manager.connect(
@@ -503,7 +504,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.Disconnected(bluetoothGatt.device.address),
+                GattClientEvent.Disconnected(bluetoothGatt.device.address, false),
                 awaitItem()
             )
         }

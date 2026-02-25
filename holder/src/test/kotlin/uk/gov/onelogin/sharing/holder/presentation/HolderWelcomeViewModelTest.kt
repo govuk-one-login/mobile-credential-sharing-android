@@ -150,7 +150,7 @@ class HolderWelcomeViewModelTest {
             viewModel.uiState.value.sessionState
         )
 
-        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS))
+        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS, false))
         advanceUntilIdle()
 
         assertEquals(
@@ -415,7 +415,7 @@ class HolderWelcomeViewModelTest {
 
         advanceUntilIdle()
 
-        fakeMdocSession.emitState(MdocSessionState.Disconnected("123123"))
+        fakeMdocSession.emitState(MdocSessionState.Disconnected("123123", false))
 
         advanceUntilIdle()
         assertEquals(true, viewModel.uiState.value.showErrorScreen)
@@ -483,6 +483,36 @@ class HolderWelcomeViewModelTest {
             "The session manager should receive the UUID from the UI state",
             currentUuid,
             fakeMdocSession.lastUuid
+        )
+    }
+
+    @Test
+    fun `shows error screen when a force disconnect occurs`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS, false))
+        advanceUntilIdle()
+
+        assertEquals(
+            true,
+            viewModel.uiState.value.showErrorScreen
+        )
+    }
+
+    @Test
+    fun `shows no error screen when session end causes disconnect`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitState(MdocSessionState.Disconnected(DEVICE_ADDRESS, true))
+        advanceUntilIdle()
+
+        assertEquals(
+            false,
+            viewModel.uiState.value.showErrorScreen
         )
     }
 }

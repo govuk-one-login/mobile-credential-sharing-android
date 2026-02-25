@@ -30,6 +30,12 @@ android {
     }
 }
 
+dependencies {
+    listOf(
+        libs.metro.viewmodel.compose
+    ).forEach(::implementation)
+}
+
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(

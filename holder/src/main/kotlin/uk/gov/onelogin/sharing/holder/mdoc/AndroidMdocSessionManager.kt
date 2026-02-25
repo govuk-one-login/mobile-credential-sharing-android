@@ -118,7 +118,7 @@ class AndroidMdocSessionManager(
 
             is GattServerEvent.Disconnected -> {
                 if (connectedDevices.remove(event.address)) {
-                    _state.value = MdocSessionState.Disconnected(event.address)
+                    _state.value = MdocSessionState.Disconnected(event.address, event.isSessionEnd)
                 }
             }
 
@@ -148,7 +148,6 @@ class AndroidMdocSessionManager(
 
             is GattServerEvent.SessionEnd -> {
                 _state.value = MdocSessionState.MdocSessionEnded(event.status)
-                gattServerManager.close()
                 logger.debug(
                     logTag,
                     "Mdoc - Session end command was received. Closing connection"

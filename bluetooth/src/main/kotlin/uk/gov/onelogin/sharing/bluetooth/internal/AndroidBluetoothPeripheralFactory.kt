@@ -8,7 +8,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralFactory
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.AndroidBluetoothAdapterProvider
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AndroidBluetoothAdvertiserProvider
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
@@ -27,6 +27,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerMa
  */
 @ContributesBinding(ViewModelScope::class)
 class AndroidBluetoothPeripheralFactory(
+    private val bluetoothPermissionChecker: BluetoothPermissionChecker,
     private val context: Context,
     private val logger: Logger,
     private val gattWriter: GattWriter
@@ -39,14 +40,14 @@ class AndroidBluetoothPeripheralFactory(
                 bluetoothAdapter = adapterProvider,
                 bleAdvertiser = AndroidBluetoothAdvertiserProvider(adapterProvider, logger)
             ),
-            permissionChecker = BluetoothPermissionChecker(context),
+            permissionChecker = bluetoothPermissionChecker,
             logger = logger
         )
 
         val gattServerManager = AndroidGattServerManager(
             context = context,
             bluetoothManager = context.getSystemService(BluetoothManager::class.java),
-            permissionsChecker = BluetoothPermissionChecker(context),
+            permissionsChecker = bluetoothPermissionChecker,
             logger = logger,
             gattWriter = gattWriter
         )

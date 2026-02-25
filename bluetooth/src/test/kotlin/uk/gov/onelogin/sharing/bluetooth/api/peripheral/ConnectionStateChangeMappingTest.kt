@@ -24,7 +24,7 @@ class ConnectionStateChangeMappingTest {
             newState = BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = event.toGattServerEvent()
+        val result = event.toGattServerEvent(false)
 
         assertEquals(
             GattServerEvent.Connected(DEVICE_ADDRESS),
@@ -40,10 +40,10 @@ class ConnectionStateChangeMappingTest {
             newState = BluetoothProfile.STATE_DISCONNECTED
         )
 
-        val result = event.toGattServerEvent()
+        val result = event.toGattServerEvent(false)
 
         assertEquals(
-            GattServerEvent.Disconnected(DEVICE_ADDRESS),
+            GattServerEvent.Disconnected(DEVICE_ADDRESS, false),
             result
         )
     }
@@ -56,7 +56,7 @@ class ConnectionStateChangeMappingTest {
             newState = 123
         )
 
-        val result = event.toGattServerEvent()
+        val result = event.toGattServerEvent(false)
 
         Assert.assertEquals(
             GattServerEvent.UnsupportedEvent(
