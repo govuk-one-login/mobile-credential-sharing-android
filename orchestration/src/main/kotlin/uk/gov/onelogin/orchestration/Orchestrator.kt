@@ -24,6 +24,11 @@ interface Orchestrator : Resettable {
      */
     fun cancel()
 
+    /**
+     * Receive a command from the UI layer to be processed by the orchestrator.
+     */
+    fun command(): Any
+
     interface Holder : Orchestrator {
         companion object {
             const val JOURNEY_NAME: String = "holder"

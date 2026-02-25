@@ -31,35 +31,33 @@ class HolderOrchestrator(
     private var session: HolderSession = sessionFactory.create()
 
     override fun start(requiredPermissions: Set<String>) {
-        if (session.isComplete()) {
-            session = sessionFactory.create().also {
-                logger.debug(
-                    logTag,
-                    recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
-                )
-            }
-        }
-
         try {
-            session.transitionTo(
-                HolderSessionState.Preflight(requiredPermissions)
-            )
-            logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
-
-            // future work: Authorization occurs within a capability check
-            authorizationGate.checkAuthorization(
-                AuthorizationRequest.AuthorizePermission(
-                    peripheralPermissions()
-                )
-            ).also {
-                logger.debug(
-                    logTag,
-                    completedAuthorizationCheck(
-                        Orchestrator.Holder.JOURNEY_NAME,
-                        it
+            when (session.currentState.value) {
+                HolderSessionState.NotStarted -> {
+                    session.transitionTo(
+                        HolderSessionState.Preflight(requiredPermissions)
                     )
-                )
+                    logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
+                }
+
+                is HolderSessionState.Preflight -> {
+                    // future work: Authorization occurs within a capability check
+                    preFlightChecks()
+                }
+
+                HolderSessionState.ReadyToPresent -> {
+
+                }
+
+                HolderSessionState.PresentingEngagement -> TODO()
+                HolderSessionState.ProcessingResponse -> TODO()
+                HolderSessionState.Connecting -> TODO()
+                HolderSessionState.RequestReceived -> TODO()
+                is HolderSessionState.Complete.Success -> sessionComplete()
+                is HolderSessionState.Complete.Failed -> TODO()
+                HolderSessionState.Complete.Cancelled -> TODO()
             }
+
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(
@@ -68,6 +66,33 @@ class HolderOrchestrator(
                     OrchestratorCannotStartException(logMessage, exception)
                 )
             }
+        }
+    }
+
+    private fun sessionComplete() {
+        if (session.isComplete()) {
+            session = sessionFactory.create().also {
+                logger.debug(
+                    logTag,
+                    recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
+                )
+            }
+        }
+    }
+
+    private fun preFlightChecks() {
+        authorizationGate.checkAuthorization(
+            AuthorizationRequest.AuthorizePermission(
+                peripheralPermissions()
+            )
+        ).also {
+            logger.debug(
+                logTag,
+                completedAuthorizationCheck(
+                    Orchestrator.Holder.JOURNEY_NAME,
+                    it
+                )
+            )
         }
     }
 
@@ -86,6 +111,10 @@ class HolderOrchestrator(
                 )
             }
         }
+    }
+
+    override fun command(): Any {
+        return byteArrayOf()
     }
 
     override fun reset() {

@@ -33,7 +33,8 @@ android {
 dependencies {
     listOf(
         projects.bluetooth,
-        projects.core
+        projects.core,
+        projects.security
     ).forEach(::api)
 
     listOf(
