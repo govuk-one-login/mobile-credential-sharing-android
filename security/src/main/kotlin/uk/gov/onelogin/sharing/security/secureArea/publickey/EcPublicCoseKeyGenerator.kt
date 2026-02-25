@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.security.secureArea.publickey
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.security.interfaces.ECPublicKey
@@ -18,6 +19,7 @@ import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
  * function returns an instance of [ECPublicKey].
  */
 @ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
 class EcPublicCoseKeyGenerator(
     private val keyPairGenerator: KeyGenerator.KeyPairGenerator,
     private val logger: Logger
