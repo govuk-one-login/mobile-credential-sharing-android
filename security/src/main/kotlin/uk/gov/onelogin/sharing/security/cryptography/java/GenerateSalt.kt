@@ -15,7 +15,5 @@ fun generateSalt(byteArray: ByteArray): ByteArray {
     val saltInput = EmbeddedCbor(byteArray).encodeCbor()
     val result = MessageDigest.getInstance(HASH_ALGORITHM_SHA256).digest(saltInput)
 
-    println("result = ${result.toHexString()}")
-
     return result
 }
