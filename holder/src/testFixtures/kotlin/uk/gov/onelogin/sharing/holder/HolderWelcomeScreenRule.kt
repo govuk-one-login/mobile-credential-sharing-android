@@ -28,8 +28,10 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
+import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
+import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
 
 class HolderWelcomeScreenRule(
     composeTestRule: ComposeContentTestRule,
@@ -57,6 +59,7 @@ class HolderWelcomeScreenRule(
     private val fakeEngagementGenerator = FakeEngagementGenerator(
         data = "${Engagement.QR_CODE_SCHEME}TEST_QR"
     )
+    private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
     val viewModel: HolderWelcomeViewModel by lazy {
         HolderWelcomeViewModel(
@@ -67,7 +70,8 @@ class HolderWelcomeScreenRule(
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),
             resettable = emptySet(),
-            orchestrator = FakeOrchestrator()
+            orchestrator = FakeOrchestrator(),
+            decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
         )
     }
 

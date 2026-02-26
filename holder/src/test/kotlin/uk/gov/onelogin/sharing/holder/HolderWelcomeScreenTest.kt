@@ -43,6 +43,7 @@ import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -83,7 +84,8 @@ class HolderWelcomeScreenTest {
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),
         resettable = emptySet(),
-        orchestrator = FakeOrchestrator()
+        orchestrator = FakeOrchestrator(),
+        decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
     )
 
     @Test

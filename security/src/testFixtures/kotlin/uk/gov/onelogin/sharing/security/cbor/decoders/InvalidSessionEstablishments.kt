@@ -2,14 +2,15 @@ package uk.gov.onelogin.sharing.security.cbor.decoders
 
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
-import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingDataParameter
-import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingEReader
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.INVALID_CBOR_MISSING_DATA_PARAMETER
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.INVALID_CBOR_MISSING_E_READER
 
+@OptIn(ExperimentalStdlibApi::class)
 class InvalidSessionEstablishments : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
         listOf(
-            "Malformed session establishment" to invalidCborMissingDataParameter,
-            "Missing eReader key" to invalidCborMissingEReader
+            "Malformed session establishment" to INVALID_CBOR_MISSING_DATA_PARAMETER,
+            "Missing eReader key" to INVALID_CBOR_MISSING_E_READER
         ).map { (testName, input) ->
             TestParameters.TestParametersValues.builder()
                 .name(testName)

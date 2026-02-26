@@ -13,11 +13,12 @@ import uk.gov.onelogin.sharing.security.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 class CoseKeyTest {
+    private val logger = SystemLogger()
 
     @Test
     fun `should convert EcPublicKey to CoseKey with key type EC2`() {
         val keyPair = generateValidPublicKey()
-        val coseKey = CoseKey.generateCoseKey(keyPair)
+        val coseKey = CoseKey.generateCoseKey(keyPair, logger)
 
         assertEquals(Cose.KEY_TYPE_EC2, coseKey.keyType)
     }
@@ -25,7 +26,7 @@ class CoseKeyTest {
     @Test
     fun `should convert EcPublicKey to CoseKey with curve P-256`() {
         val keyPair = generateValidPublicKey()
-        val coseKey = CoseKey.generateCoseKey(keyPair)
+        val coseKey = CoseKey.generateCoseKey(keyPair, logger)
 
         assertEquals(Cose.CURVE_P256, coseKey.curve)
     }
@@ -33,7 +34,7 @@ class CoseKeyTest {
     @Test
     fun `should convert EcPublicKey to CoseKey with 32 byte length X coordinates`() {
         val keyPair = generateValidPublicKey()
-        val coseKey = CoseKey.generateCoseKey(keyPair)
+        val coseKey = CoseKey.generateCoseKey(keyPair, logger)
 
         assertEquals(32, coseKey.x.size)
     }
@@ -41,7 +42,7 @@ class CoseKeyTest {
     @Test
     fun `should convert EcPublicKey to CoseKey with 32 byte length Y coordinates`() {
         val keyPair = generateValidPublicKey()
-        val coseKey = CoseKey.generateCoseKey(keyPair)
+        val coseKey = CoseKey.generateCoseKey(keyPair, logger)
 
         assertEquals(32, coseKey.y.size)
     }
@@ -82,9 +83,11 @@ class CoseKeyTest {
             SystemLogger()
         ).toSessionEstablishment()
 
-        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)
+//        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)
 
-        val resultPublicKey = CoseKey.getEReaderKeyFromParsedCoseKey(untagReaderKey)
+        val resultPublicKey = CoseKey.getEReaderKeyFromParsedCoseKey(
+            sessionEstablishment.eReaderKey
+        )
 
         assertNotNull(resultPublicKey)
     }

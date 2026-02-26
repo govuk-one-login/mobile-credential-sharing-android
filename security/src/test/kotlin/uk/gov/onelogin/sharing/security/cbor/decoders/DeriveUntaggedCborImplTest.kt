@@ -7,6 +7,7 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_E_READER_KEY
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
@@ -32,6 +33,14 @@ class DeriveUntaggedCborImplTest {
 
         val untaggedCbor = deriveUntaggedCbor.deriveUntaggedCbor(sessionEstablishment.eReaderKey)
         val untaggedCborToHex = untaggedCbor.toHexString()
-        assertEquals(SessionEstablishmentStub.eReaderKeyUntagged, untaggedCborToHex)
+        assertEquals(SessionEstablishmentStub.E_READER_KEY_UNTAGGED, untaggedCborToHex)
+    }
+
+    @Test
+    fun `derive untagged e reader key`() {
+        val tagged = MOCK_E_READER_KEY.hexToByteArray()
+        val untagged = deriveUntaggedCbor.deriveUntaggedCbor(tagged)
+
+        assertEquals(0xA4.toByte(), untagged[0])
     }
 }

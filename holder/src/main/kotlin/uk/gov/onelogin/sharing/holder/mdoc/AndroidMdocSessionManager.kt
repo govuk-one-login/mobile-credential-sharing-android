@@ -153,6 +153,10 @@ class AndroidMdocSessionManager(
                     "Mdoc - Session end command was received. Closing connection"
                 )
             }
+
+            is GattServerEvent.MessageReceived -> {
+                _state.value = MdocSessionState.MessageReceived(event.byteArray)
+            }
         }
     }
 }

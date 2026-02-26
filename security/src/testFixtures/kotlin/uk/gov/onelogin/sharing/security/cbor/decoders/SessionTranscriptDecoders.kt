@@ -6,21 +6,21 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.security.cbor.deriveSessionTranscript
 
 class SessionTranscriptDecoders : TestParametersValuesProvider() {
-    override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
+    override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?> =
         listOf<Pair<String, (String, ByteArray, Logger) -> ByteArray>>(
             "Decoder entry function"
-                to { deviceEngagement, sessionEstablishment, logger ->
+                to { deviceEngagement, eReaderKeyTagged, logger ->
                     deriveSessionTranscript(
                         cborBase64Url = deviceEngagement,
-                        sessionEstablishmentBytes = sessionEstablishment,
+                        eReaderKeyTagged = eReaderKeyTagged,
                         logger = logger
                     )
                 },
             "SessionTranscriptDecoderImpl implementation"
-                to { deviceEngagement, sessionEstablishment, logger ->
+                to { deviceEngagement, eReaderKeyTagged, logger ->
                     SessionTranscriptDecoderImpl(logger).deriveSessionTranscript(
                         cborBase64Url = deviceEngagement,
-                        sessionEstablishmentBytes = sessionEstablishment
+                        taggedEReaderKey = eReaderKeyTagged
                     )
                 }
         ).map { (testName, functionUnderTest) ->

@@ -9,14 +9,15 @@ import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.qrCod
 
 class EngagementGeneratorTest {
 
+    private val logger = SystemLogger()
     private val engagementGenerator: EngagementGenerator = EngagementGenerator(
-        logger = SystemLogger()
+        logger = logger
     )
 
     @Test
     fun `generates base 64 encoded string for device engagement`() {
         val key = SessionSecurityTestStub.generateValidPublicKey()
-        val coseKey = CoseKey.generateCoseKey(key)
+        val coseKey = CoseKey.generateCoseKey(key, logger)
 
         val engagementString = engagementGenerator.qrCodeEngagement(coseKey, qrCodeEngagementUuid)
         assertNotNull(engagementString)

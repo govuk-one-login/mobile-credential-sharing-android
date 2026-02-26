@@ -19,11 +19,11 @@ import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.security.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.INVALID_CBOR_MISSING_DATA_PARAMETER
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.INVALID_CBOR_MISSING_E_READER
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_E_READER_KEY
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
-import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.eReaderKeyHexFormat
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
-import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingDataParameter
-import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.invalidCborMissingEReader
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidUnsupportedKeyPair
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
@@ -102,7 +102,7 @@ class DecoderTest {
         )
 
         val actualReaderHexLog = outContent.toString()
-        assertTrue(actualReaderHexLog.contains(eReaderKeyHexFormat))
+        assertTrue(actualReaderHexLog.contains(MOCK_E_READER_KEY))
     }
 
     @Test
@@ -131,7 +131,7 @@ class DecoderTest {
     @Test
     fun `CBOR missing eReaderKey should throw session establishment status 12 exception`() {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            decodeSessionEstablishmentModel(invalidCborMissingEReader.hexToByteArray(), logger)
+            decodeSessionEstablishmentModel(INVALID_CBOR_MISSING_E_READER.hexToByteArray(), logger)
         }
 
         assertTrue(exception is IllegalArgumentException)
@@ -142,7 +142,7 @@ class DecoderTest {
     fun `CBOR missing data parameter should throw session establishment status 12 exception`() {
         val exception = assertThrows(IllegalArgumentException::class.java) {
             decodeSessionEstablishmentModel(
-                invalidCborMissingDataParameter.hexToByteArray(),
+                INVALID_CBOR_MISSING_DATA_PARAMETER.hexToByteArray(),
                 logger
             )
         }
@@ -179,16 +179,13 @@ class DecoderTest {
             ELLIPTIC_CURVE_PARAMETER_SPEC
         )
 
-        val readerPrivateKey = readerSession.getSessionPrivateKey()
-        val holderPrivateKey = holderSession.getSessionPrivateKey()
-
         val eReaderSharedSecret = getSharedSecret(
-            readerPrivateKey,
+            readerKeyPair.private as ECPrivateKey,
             holderKeyPair.public as ECPublicKey
         )
 
         val holderSharedSecret = getSharedSecret(
-            holderPrivateKey,
+            holderKeyPair.private as ECPrivateKey,
             readerKeyPair.public as ECPublicKey
         )
 
@@ -220,9 +217,10 @@ class DecoderTest {
             logger
         ).toSessionEstablishment()
 
-        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)
+//        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)
 
-        val eReaderKeyPublicKey = CoseKey.getEReaderKeyFromParsedCoseKey(untagReaderKey)
+        val eReaderKeyPublicKey =
+            CoseKey.getEReaderKeyFromParsedCoseKey(sessionEstablishment.eReaderKey)
 
         val sharedSecret = getSharedSecret(
             holderKeyPair?.private as ECPrivateKey,

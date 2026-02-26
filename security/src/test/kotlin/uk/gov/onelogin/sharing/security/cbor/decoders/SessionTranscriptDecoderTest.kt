@@ -2,17 +2,16 @@ package uk.gov.onelogin.sharing.security.cbor.decoders
 
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
-import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.api.Logger
-import uk.gov.logging.testdouble.LogEntry
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
-import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptStub.validSessionTranscript
+import uk.gov.onelogin.sharing.security.DecoderStub.VALID_TRANSCRIPT
+import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_E_READER_KEY
 
 @RunWith(TestParameterInjector::class)
 class SessionTranscriptDecoderTest
@@ -25,21 +24,16 @@ constructor(
     @Test
     fun `Derives session transcript array from device engagement and session establishment`() =
         runTest {
+            val eReaderKeyTagged = MOCK_E_READER_KEY.hexToByteArray()
+
             val actual = decoder(
                 VALID_ENCODED_DEVICE_ENGAGEMENT,
-                MOCK_SESSION_ESTABLISHMENT_DATA.hexToByteArray(),
+                eReaderKeyTagged,
                 logger
             )
 
-            assertContentEquals(
-                validSessionTranscript,
-                actual
-            )
+            assertEquals(VALID_TRANSCRIPT, actual.toHexString())
 
-            assert(
-                "Created session transcript array from encoded device engagement and " +
-                    "eReader bytes" in logger
-            )
             assert(
                 "Successfully derived session transcript from encoded device engagement and " +
                     "eReader bytes" in logger
@@ -62,20 +56,16 @@ constructor(
         }
 
         assert(
-            LogEntry.Error(
-                tag = SessionTranscriptDecoderImpl::class.java.simpleName,
-                message = "Cannot derive session transcript from encoded device engagement " +
-                    "and eReader bytes",
-                throwable = exception
-            ) in logger
+            "Cannot derive session transcript from encoded device engagement " +
+                "and eReader bytes"
+                in logger
         ) {
             "Cannot find expected entry in logger: $logger"
         }
 
-        assert(
-            exception.message?.startsWith(
-                "CBOR parsing error: SessionEstablishment missing mandatory keys"
-            ) ?: false
+        assertEquals(
+            "CBOR parsing error: eReaderKey must be tag(24)",
+            exception.message
         )
     }
 }

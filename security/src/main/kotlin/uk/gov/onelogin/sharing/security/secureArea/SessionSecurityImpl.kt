@@ -4,6 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import javax.crypto.KeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.secret.SharedSecretGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionEncryption
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
@@ -16,17 +17,12 @@ import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
  */
 @ContributesBinding(AppScope::class, binding = binding<SessionSecurity>())
 class SessionSecurityImpl(
-    keyPairGenerator: KeyGenerator.KeyPairGenerator,
-    privateKeyGenerator: KeyGenerator.PrivateKeyGenerator,
-    publicKeyGenerator: KeyGenerator.PublicKeyGenerator,
+    keyPairGenerator: KeyPairGenerator,
     secretGenerator: SharedSecretGenerator,
     sessionKeyGenerator: SessionKeyGenerator,
     sessionEncryption: SessionEncryption
 ) : SessionSecurity,
-    KeyGenerator.Complete,
-    KeyGenerator.KeyPairGenerator by keyPairGenerator,
-    KeyGenerator.PrivateKeyGenerator by privateKeyGenerator,
-    KeyGenerator.PublicKeyGenerator by publicKeyGenerator,
+    KeyPairGenerator by keyPairGenerator,
     SessionKeyGenerator by sessionKeyGenerator,
     SharedSecretGenerator by secretGenerator,
     SessionEncryption by sessionEncryption

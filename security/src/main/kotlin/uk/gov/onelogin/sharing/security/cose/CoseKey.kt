@@ -9,6 +9,9 @@ import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 
@@ -63,15 +66,22 @@ data class CoseKey(
      * @return A [CoseKey] instance representing the provided public key.
      */
     companion object {
-        fun generateCoseKey(publicKey: ECPublicKey): CoseKey {
+        fun generateCoseKey(publicKey: ECPublicKey, logger: Logger): CoseKey {
             val xCoord = padEcCoordinatesTo32Bytes(publicKey.w.affineX)
             val yCoord = padEcCoordinatesTo32Bytes(publicKey.w.affineY)
 
-            return CoseKey(
+            val coseKey = CoseKey(
                 curve = Cose.CURVE_P256,
                 x = xCoord,
                 y = yCoord
-            )
+            ).also {
+                logger.debug(
+                    logTag,
+                    "Converted EC public key to CoseKey: $it"
+                )
+            }
+
+            return coseKey
         }
 
         /**
@@ -137,7 +147,8 @@ data class CoseKey(
          * @return A fully constructed [ECPublicKey] instance.
          */
         fun getEReaderKeyFromParsedCoseKey(eReaderBytes: ByteArray): ECPublicKey {
-            val parsedKey = parseEReaderPublicKey(eReaderBytes)
+            val unTaggedBytes = deriveUntaggedCbor(eReaderBytes)
+            val parsedKey = parseEReaderPublicKey(unTaggedBytes)
             val params = AlgorithmParameters.getInstance(ELLIPTIC_CURVE_ALGORITHM).apply {
                 init(ECGenParameterSpec(ELLIPTIC_CURVE_PARAMETER_SPEC))
             }

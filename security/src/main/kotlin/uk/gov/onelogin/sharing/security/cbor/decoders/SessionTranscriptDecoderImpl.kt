@@ -2,13 +2,16 @@ package uk.gov.onelogin.sharing.security.cbor.decoders
 
 import com.fasterxml.jackson.core.exc.StreamReadException
 import com.fasterxml.jackson.databind.DatabindException
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.base64Decode
-import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
+
+private const val CBOR_ARRAY = 0x83
+private const val CBOR_NULL = 0xF6
 
 /**
  * Standard [SessionTranscriptDecoder] implementation, converting device engagement and
@@ -23,75 +26,55 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
     )
     override fun deriveSessionTranscript(
         cborBase64Url: String,
-        sessionEstablishmentBytes: ByteArray
-    ): ByteArray = try {
-        val result = deriveSessionTranscriptBytes(
-            cborBase64Url = cborBase64Url,
-            sessionEstablishmentBytes = sessionEstablishmentBytes
-        )
-
-        EmbeddedCbor(result).encodeCbor().also {
-            logger.debug(
+        taggedEReaderKey: ByteArray
+    ): ByteArray {
+        require(
+            taggedEReaderKey.size >= 2 &&
+                taggedEReaderKey[0] == 0xD8.toByte() &&
+                taggedEReaderKey[1] == 0x18.toByte()
+        ) {
+            logger.error(
                 logTag,
-                "Successfully derived session transcript $LOG_MESSAGE_SUFFIX"
+                "Cannot derive session transcript from encoded device engagement " +
+                    "and eReader bytes"
             )
+            "CBOR parsing error: eReaderKey must be tag(24)"
         }
-    } catch (exception: IllegalArgumentException) {
-        logger.error(
-            logTag,
-            "Cannot derive session transcript $LOG_MESSAGE_SUFFIX",
-            exception
+
+        val deviceEngagementBytes = cborBase64Url.base64Decode()
+        val taggedDevEng = EmbeddedCbor(deviceEngagementBytes).encodeCbor()
+
+        val encodedSessionTranscript = createCborArray(
+            taggedDeviceEngagement = taggedDevEng,
+            eReaderKeyTagged = taggedEReaderKey
         )
 
-        throw exception
+        logger.debug(
+            logTag,
+            "Successfully derived session transcript from encoded device " +
+                "engagement and eReader bytes"
+        )
+
+        return encodedSessionTranscript
     }
 
     /**
-     * Generates a [ByteArray] with the proceeding ordering:
-     * - Base-64 decoded representation of [cborBase64Url].
-     * - [EmbeddedCbor.encoded] value of
-     *   [uk.gov.onelogin.sharing.security.cbor.dto.SessionEstablishmentDto.eReaderKey] generated
-     *   from [sessionEstablishmentBytes].
-     * - `null`, as there's no current need for a `Handover` value.
+     * creates cbor array with the following structure:
      *
-     * @return A concatenated [ByteArray], containing the preceding list of elements.
-     *
-     * @see base64Decode
-     * @see decodeSessionEstablishmentModel
+     *  [
+     *      tag24(btsr(DeviceEngagementBytes)
+     *      tag24(btsr(COSEKeyBytes)
+     *      null
+     *  ]
      */
-    @Throws(
-        IllegalArgumentException::class,
-        IOException::class,
-        StreamReadException::class,
-        DatabindException::class
-    )
-    private fun deriveSessionTranscriptBytes(
-        cborBase64Url: String,
-        sessionEstablishmentBytes: ByteArray
-    ): ByteArray {
-        var result = byteArrayOf()
-
-        arrayOf(
-            cborBase64Url.base64Decode(),
-            decodeSessionEstablishmentModel(
-                rawBytes = sessionEstablishmentBytes,
-                logger = logger
-            ).eReaderKey.encoded,
-            null
-        ).also {
-            logger.debug(
-                this.logTag,
-                "Created session transcript array $LOG_MESSAGE_SUFFIX"
-            )
-        }.forEach { element ->
-            element?.let {
-                result = result + it
-            }
-        }
-        return result
-    }
-
-    companion object {
-        private const val LOG_MESSAGE_SUFFIX = "from encoded device engagement and eReader bytes"
+    private fun createCborArray(
+        taggedDeviceEngagement: ByteArray,
+        eReaderKeyTagged: ByteArray
+    ): ByteArray = ByteArrayOutputStream().use { out ->
+        out.write(CBOR_ARRAY) // array
+        out.write(taggedDeviceEngagement) // element #1
+        out.write(eReaderKeyTagged) // element #2
+        out.write(CBOR_NULL) // element #3 null
+        out.toByteArray()
     }
 }

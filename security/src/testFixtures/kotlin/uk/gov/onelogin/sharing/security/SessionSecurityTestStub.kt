@@ -12,8 +12,6 @@ import uk.gov.onelogin.sharing.security.secureArea.keypair.EcKeyPairGenerator
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.ALGORITHM
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.UNSUPPORTED_PARAMETER_SPEC
-import uk.gov.onelogin.sharing.security.secureArea.privatekey.EcPrivateKeyGenerator
-import uk.gov.onelogin.sharing.security.secureArea.publickey.EcPublicCoseKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.AesGcmEncryption
 import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
@@ -25,14 +23,10 @@ object SessionSecurityTestStub {
     val keyPairGenerator = EcKeyPairGenerator(securityLogger)
     val secretGenerator = EcdhSharedSecretGenerator(securityLogger)
 
-    val privateKeyGenerator = EcPrivateKeyGenerator(keyPairGenerator, securityLogger)
-    val publicKeyGenerator = EcPublicCoseKeyGenerator(keyPairGenerator, securityLogger)
     val sessionKeyGenerator = HkdfSessionKeyGenerator(securityLogger)
     val sessionEncryption = AesGcmEncryption(securityLogger)
     val sessionSecurity = SessionSecurityImpl(
         keyPairGenerator = keyPairGenerator,
-        privateKeyGenerator = privateKeyGenerator,
-        publicKeyGenerator = publicKeyGenerator,
         secretGenerator = secretGenerator,
         sessionKeyGenerator = sessionKeyGenerator,
         sessionEncryption = sessionEncryption

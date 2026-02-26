@@ -12,6 +12,8 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -35,18 +37,26 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
 @AssistedInject
 @Suppress("LongParameterList")
 class HolderWelcomeViewModel(
+    sessionSecurity: SessionSecurity,
+    private val engagementGenerator: Engagement,
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val resettable: Set<Resettable>,
     private val orchestrator: Orchestrator.Holder,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase
 ) : ViewModel() {
 
     companion object {
@@ -64,9 +74,28 @@ class HolderWelcomeViewModel(
     private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
+    val keyPair = sessionSecurity.generateEcKeyPair(
+        algorithm = ELLIPTIC_CURVE_ALGORITHM,
+        parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
+    )
+    val cosePublicKey = CoseKey.generateCoseKey(
+        publicKey = keyPair?.public as ECPublicKey,
+        logger = logger
+    )
+
     init {
         viewModelScope.launch(dispatcher) {
             resettable.forEach(Resettable::reset)
+
+            cosePublicKey.let { coseKey ->
+                val engagement = engagementGenerator.qrCodeEngagement(
+                    coseKey,
+                    _uiState.value.uuid
+                )
+                _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
+                _uiState.update { it.copy(engagement = engagement) }
+            }
+
             orchestrator.start(
                 peripheralPermissions().toSet()
             )
@@ -152,6 +181,24 @@ class HolderWelcomeViewModel(
                                 "Mdoc - Error while ending session: ${state.status}"
                             )
                         }
+                    }
+
+                    is MdocSessionState.MessageReceived -> {
+                        val deviceRequest = decryptDeviceRequestUseCase.execute(
+                            sessionEstablishmentBytes = state.message,
+                            engagement = _uiState.value.engagement!!,
+                            holderPrivateKey = keyPair?.private as ECPrivateKey
+                        )
+
+                        _uiState.update { it.copy(deviceRequest = deviceRequest) }
+
+                        deviceRequest
+                            .docRequests.firstOrNull()
+                            ?.itemsRequest
+                            ?.nameSpaces
+                            ?.forEach { (key, value) ->
+                                logger.debug(logTag, "Requests: key = $key, value = $value")
+                            }
                     }
                 }
             }
@@ -322,6 +369,7 @@ class HolderWelcomeViewModel(
 data class HolderWelcomeUiState(
     val uuid: UUID = UUID.randomUUID(),
     val qrData: String? = null,
+    val engagement: String? = null,
     val sessionState: MdocSessionState = MdocSessionState.Idle,
     val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
@@ -330,5 +378,6 @@ data class HolderWelcomeUiState(
     val bluetoothErrorType: BluetoothUiErrorTypes = BLUETOOTH_DISCONNECTED,
     val previouslyHadPermissions: Boolean = false,
     val showEnableBluetoothPrompt: Boolean = false,
-    val connectedAddress: String? = ""
+    val connectedAddress: String? = "",
+    val deviceRequest: DeviceRequest? = null
 )

@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.security.secureArea.keypair
 
 import java.security.KeyPair
-import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
+import uk.gov.onelogin.sharing.security.secureArea.KeyPairGenerator
 
-class FakeKeyPairGenerator(private val keyPairs: List<KeyPair?>) : KeyGenerator.KeyPairGenerator {
+class FakeKeyPairGenerator(private val keyPairs: List<KeyPair?>) : KeyPairGenerator {
 
     constructor(vararg keyPairs: KeyPair?) : this(
         keyPairs = keyPairs.asList()

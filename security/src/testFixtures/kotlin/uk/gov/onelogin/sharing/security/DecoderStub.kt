@@ -18,6 +18,14 @@ object DecoderStub {
 
     const val VALID_MDOC_URI = "mdoc:$VALID_ENCODED_DEVICE_ENGAGEMENT"
 
+    const val VALID_TRANSCRIPT =
+        "83d818587abf0063312e30019f01d818584cbf0102200121582093bc26294991e6afa8cd9181d6e3c029f8" +
+            "bcba98a203c242f3c225820f046aaa2258203c4226fa6c27da6affb903c42f7c211c7804f1d47f" +
+            "4747f2a3d999cd7b2c592dffff029f9f0201bf00f501f40a501111111122223333444455555555" +
+            "5555ffffffffd818584ba40102200121582060e3392385041f51403051f2415531cb56dd3f999c" +
+            "71687013aac6768bc8187e225820e58deb8fdbe907f7dd5368245551a34796f7d2215c440c339b" +
+            "b0f7b67beccdfaf6"
+
     /**
      * [DeviceEngagementDto] representation of the [VALID_ENCODED_DEVICE_ENGAGEMENT] property.
      */

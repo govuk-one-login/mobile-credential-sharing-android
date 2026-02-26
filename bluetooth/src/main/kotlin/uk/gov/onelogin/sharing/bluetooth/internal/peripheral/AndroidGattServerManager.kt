@@ -101,11 +101,15 @@ class AndroidGattServerManager(
             is GattServerCallbackEvent.ConnectionStateChange -> handleConnectionStateChange(event)
             is GattServerCallbackEvent.ConnectionStateStarted -> handleConnectionStateStarted()
             is GattServerCallbackEvent.ServiceAdded -> handleServiceAdded(event)
-            is GattServerCallbackEvent.MessageReceived -> Unit
+            is GattServerCallbackEvent.MessageReceived -> handleMessageReceived(event)
             is GattServerCallbackEvent.MtuChanged -> mtu = event.mtu
             is GattServerCallbackEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
             is GattServerCallbackEvent.SessionEnd -> handleSessionEndReceived()
         }
+    }
+
+    private fun handleMessageReceived(event: GattServerCallbackEvent.MessageReceived) {
+        _events.tryEmit(GattServerEvent.MessageReceived(event.byteArray))
     }
 
     private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {

@@ -179,6 +179,6 @@ class GattServerCallback(
         private const val BYTE_TO_HEX_FORMAT = "%02X"
 
         private const val NON_LAST_PART: Byte = 0x01
-        private const val LAST_PART: Byte = 0x00
+        const val LAST_PART: Byte = 0x00
     }
 }

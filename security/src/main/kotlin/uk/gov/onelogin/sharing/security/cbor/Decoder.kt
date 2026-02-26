@@ -128,11 +128,11 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
 )
 fun deriveSessionTranscript(
     cborBase64Url: String,
-    sessionEstablishmentBytes: ByteArray,
+    eReaderKeyTagged: ByteArray,
     logger: Logger
 ): ByteArray = SessionTranscriptDecoderImpl(logger).deriveSessionTranscript(
     cborBase64Url = cborBase64Url,
-    sessionEstablishmentBytes = sessionEstablishmentBytes
+    taggedEReaderKey = eReaderKeyTagged
 )
 
 fun deriveUntaggedCbor(tagged: ByteArray): ByteArray =
