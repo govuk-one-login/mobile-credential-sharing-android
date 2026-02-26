@@ -14,7 +14,6 @@ import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
  *
  * Uses interface delegation to provide the necessary features.
  */
-@ContributesBinding(ViewModelScope::class, binding = binding<SessionSecurity>())
 @ContributesBinding(AppScope::class, binding = binding<SessionSecurity>())
 class SessionSecurityImpl(
     keyPairGenerator: KeyGenerator.KeyPairGenerator,

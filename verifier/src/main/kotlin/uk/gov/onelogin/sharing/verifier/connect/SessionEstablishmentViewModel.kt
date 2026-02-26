@@ -41,7 +41,6 @@ import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cose.CoseKeyToString
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.StartScanning
@@ -60,12 +59,10 @@ class SessionEstablishmentViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val logger: Logger,
     private val bluetoothStatusMonitor: BluetoothStateMonitor,
-    private val sessionSecurity: SessionSecurity,
     private val coseKeyConverter: CoseKeyToString,
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel(),
-    Receiver<ConnectWithHolderDeviceEvent>,
-    SessionSecurity by sessionSecurity {
+    Receiver<ConnectWithHolderDeviceEvent> {
     private val initialState = ConnectWithHolderDeviceState(
         previouslyHadPermissions = savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] ?: false
     )
@@ -104,7 +101,7 @@ class SessionEstablishmentViewModel(
                 when (sessionState) {
                     VerifierSessionState.Invalid,
                     VerifierSessionState.ServiceNotFound
-                    ->
+                        ->
                         _navEvents.tryEmit(
                             ConnectWithHolderDeviceNavEvent.NavigateToError(
                                 ConnectWithHolderDeviceError.BluetoothConfigurationError
@@ -145,7 +142,7 @@ class SessionEstablishmentViewModel(
                     }
 
                     is VerifierSessionState.ConnectionStateStarted -> {
-                        coseKeyConverter.convert(generateSessionPublicKey())
+                        //coseKeyConverter.convert(generateSessionPublicKey())
                     }
 
                     else -> Unit
@@ -161,7 +158,7 @@ class SessionEstablishmentViewModel(
                 when (bluetoothState) {
                     BluetoothStatus.ON,
                     BluetoothStatus.TURNING_ON
-                    -> {
+                        -> {
                         updateState {
                             it.copy(
                                 isBluetoothEnabled = true

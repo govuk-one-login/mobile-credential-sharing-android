@@ -18,7 +18,6 @@ import uk.gov.onelogin.sharing.security.secureArea.KeyGenerator
  * This implementation expects that the internally called [java.security.KeyPair.getPublic]
  * function returns an instance of [ECPublicKey].
  */
-@ContributesBinding(ViewModelScope::class)
 @ContributesBinding(AppScope::class)
 class EcPublicCoseKeyGenerator(
     private val keyPairGenerator: KeyGenerator.KeyPairGenerator,

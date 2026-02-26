@@ -17,7 +17,6 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
  * and a verifier.
  */
 
-@ContributesBinding(ViewModelScope::class)
 @ContributesBinding(AppScope::class)
 class EngagementGenerator(private val logger: Logger) : Engagement {
 

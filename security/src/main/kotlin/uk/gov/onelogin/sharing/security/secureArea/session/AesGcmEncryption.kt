@@ -15,7 +15,6 @@ import uk.gov.onelogin.sharing.security.cryptography.Constants.AES_256_TRANSFORM
 import uk.gov.onelogin.sharing.security.cryptography.createNistInitialisationVector
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
-@ContributesBinding(ViewModelScope::class)
 @ContributesBinding(AppScope::class)
 class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
 

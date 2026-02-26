@@ -41,8 +41,6 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 @AssistedInject
 @Suppress("LongParameterList")
 class HolderWelcomeViewModel(
-    private val sessionSecurity: SessionSecurity,
-    private val engagementGenerator: Engagement,
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
@@ -69,15 +67,6 @@ class HolderWelcomeViewModel(
     init {
         viewModelScope.launch(dispatcher) {
             resettable.forEach(Resettable::reset)
-            val publicKey = sessionSecurity.generateSessionPublicKey()
-            publicKey.let { coseKey ->
-                val engagement = engagementGenerator.qrCodeEngagement(
-                    coseKey,
-                    _uiState.value.uuid
-                )
-                _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
-            }
-
             orchestrator.start(
                 peripheralPermissions().toSet()
             )

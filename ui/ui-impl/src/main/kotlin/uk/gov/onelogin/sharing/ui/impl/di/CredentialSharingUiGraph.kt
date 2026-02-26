@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 @DependencyGraph(
     scope = ViewModelScope::class
 )
-interface difCredentialSharingUiGraph : ViewModelGraph {
+interface CredentialSharingUiGraph : ViewModelGraph {
 
     /**
      * Factory for creating instances of [CredentialSharingUiGraph].

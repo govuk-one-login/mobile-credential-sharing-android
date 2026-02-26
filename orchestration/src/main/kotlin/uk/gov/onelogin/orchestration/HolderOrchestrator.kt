@@ -4,6 +4,8 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
@@ -15,7 +17,6 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnS
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
-import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderEvent
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
@@ -34,6 +35,9 @@ class HolderOrchestrator(
     private val authorizationGate: PrerequisiteGate.Authorization,
     private val qrCodeData: GenerateEngagementQrCode
 ) : Orchestrator.Holder {
+
+    private val _events = MutableSharedFlow<HolderEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<HolderEvent> = _events
 
     private var session: HolderSession = sessionFactory.create()
 
@@ -70,7 +74,11 @@ class HolderOrchestrator(
 
             when (authResult) {
                 AuthorizationResponse.Authorized -> {
-                    qrCodeData.generateQrCode()
+                    val qrCode = qrCodeData.generateQrCode()
+                    if (qrCode.isNotEmpty()) {
+                        _events.tryEmit(HolderEvent.QrCodeReady(qrCode))
+                        session.transitionTo(HolderSessionState.ReadyToPresent)
+                    }
                 }
 
                 is AuthorizationResponse.Unauthorized -> Unit
