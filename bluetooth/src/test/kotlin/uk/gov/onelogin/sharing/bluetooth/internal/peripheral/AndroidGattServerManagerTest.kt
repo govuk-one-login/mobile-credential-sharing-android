@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.Manifest
+import android.R.id.message
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattDescriptor
@@ -25,11 +26,13 @@ import org.junit.Before
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
@@ -409,6 +412,73 @@ class AndroidGattServerManagerTest {
 
             val event = awaitItem()
             assert(event is GattServerEvent.SessionEnd)
+        }
+    }
+
+    @Test
+    fun `emits message received event`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.events.test {
+            manager.open(uuid)
+
+            CharacteristicWriteRequestStub.writeRequestMessage(
+                bluetoothDevice = device,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+                },
+                message = byteArrayOf(LAST_PART, 0x44, 0x55)
+            ).run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
+
+            assertEquals(
+                GattServerEvent.MessageReceived(byteArrayOf(0x44, 0x55)),
+                awaitItem()
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `emits error event if value is null`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.events.test {
+            manager.open(uuid)
+
+            OnDescriptorWriteRequestArgs(
+                device = device,
+                descriptor = descriptor
+            ).run {
+                callbackSlot.captured.onDescriptorWriteRequest(
+                    device,
+                    requestId,
+                    descriptor,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    null
+                )
+            }
+
+            assertEquals(
+                GattServerEvent.Error(
+                    GattServerError.DESCRIPTOR_WRITE_REQUEST_FAILED
+                ),
+                awaitItem()
+            )
+
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

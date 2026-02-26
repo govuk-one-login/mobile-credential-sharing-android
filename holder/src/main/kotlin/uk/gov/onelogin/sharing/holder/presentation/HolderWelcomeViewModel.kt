@@ -37,6 +37,7 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
@@ -47,7 +48,7 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 @AssistedInject
 @Suppress("LongParameterList")
 class HolderWelcomeViewModel(
-    private val sessionSecurity: SessionSecurity,
+    sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
@@ -188,6 +189,8 @@ class HolderWelcomeViewModel(
                             engagement = _uiState.value.engagement!!,
                             holderPrivateKey = keyPair?.private as ECPrivateKey
                         )
+
+                        _uiState.update { it.copy(deviceRequest = deviceRequest) }
 
                         deviceRequest
                             .docRequests.firstOrNull()
@@ -375,5 +378,6 @@ data class HolderWelcomeUiState(
     val bluetoothErrorType: BluetoothUiErrorTypes = BLUETOOTH_DISCONNECTED,
     val previouslyHadPermissions: Boolean = false,
     val showEnableBluetoothPrompt: Boolean = false,
-    val connectedAddress: String? = ""
+    val connectedAddress: String? = "",
+    val deviceRequest: DeviceRequest? = null
 )

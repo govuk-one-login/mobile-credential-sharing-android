@@ -137,9 +137,3 @@ fun deriveSessionTranscript(
 
 fun deriveUntaggedCbor(tagged: ByteArray): ByteArray =
     DeriveUntaggedCborImpl().deriveUntaggedCbor(tagged)
-
-fun prettyPrintDecryptedCbor(bytes: ByteArray, logger: Logger) {
-    val mapper = ObjectMapper(CBORFactory())
-    val node = mapper.readTree(bytes)
-    logger.debug("Decrypted", node.toPrettyString())
-}

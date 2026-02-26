@@ -1,7 +1,9 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.UUID
+import javolution.util.stripped.FastMap.logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -16,6 +18,7 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.holder.FakeMdocSessionManager
@@ -23,6 +26,7 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
@@ -35,8 +39,9 @@ class HolderWelcomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val dummyEngagementData = "ENGAGEMENT_DATA"
-
+    private val logger = SystemLogger()
     private var hasResetElements = false
+    private val decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
     private fun createViewModel(
         mdocSessionManager: MdocSessionManager = FakeMdocSessionManager(),
@@ -47,13 +52,13 @@ class HolderWelcomeViewModelTest {
         engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocSessionManager },
         dispatcher = mainDispatcherRule.testDispatcher,
-        logger = SystemLogger(),
+        logger = logger,
         savedStateHandle = SavedStateHandle(),
         resettable = setOf(
             Resettable { hasResetElements = true }
         ),
         orchestrator = FakeOrchestrator(),
-        decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
+        decryptDeviceRequestUseCase = decryptDeviceRequestUseCase
     )
 
     @Test
@@ -513,6 +518,61 @@ class HolderWelcomeViewModelTest {
         assertEquals(
             false,
             viewModel.uiState.value.showErrorScreen
+        )
+    }
+
+    @Test
+    fun `logs end session event when session ends`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitState(
+            MdocSessionState.MdocSessionEnded(
+                SessionEndStates.SUCCESS
+            )
+        )
+        advanceUntilIdle()
+
+        assert("Mdoc - Ending session" in logger)
+    }
+
+    @Test
+    fun `shows error when fails to end session`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitState(
+            MdocSessionState.MdocSessionEnded(
+                SessionEndStates.NOTIFY_CLIENT_FAILED
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            true,
+            viewModel.uiState.value.showErrorScreen
+        )
+    }
+
+    @Test
+    fun `decrypts device request when session ends`() = runTest {
+        val fakeMdocSession =
+            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
+        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
+
+        fakeMdocSession.emitState(
+            MdocSessionState.MessageReceived(
+                byteArrayOf(1, 2, 3)
+            )
+        )
+
+        advanceUntilIdle()
+
+        assertEquals(
+            deviceRequestStub(),
+            viewModel.uiState.value.deviceRequest
         )
     }
 }

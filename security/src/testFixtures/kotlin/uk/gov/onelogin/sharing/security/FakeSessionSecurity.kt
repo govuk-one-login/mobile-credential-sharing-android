@@ -9,24 +9,31 @@ import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
 class FakeSessionSecurity : SessionSecurity {
+    lateinit var plaintextToReturn: ByteArray
+
+    var lastDecryptData: ByteArray? = null
+    var lastDecryptRole: DeviceRole? = null
 
     private lateinit var sessionKeyPair: KeyPair
 
-    // Returns the public key for engagement
+    // Returns the keypair for engagement
     override fun generateEcKeyPair(algorithm: String, parameterSpec: String): KeyPair {
         sessionKeyPair = SessionSecurityTestStub.generateValidKeyPair()!!
         return sessionKeyPair
     }
 
     override fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray =
-        byteArrayOf()
+        byteArrayOf(1)
 
     override fun deriveSessionKey(
         sharedKey: ByteArray,
         sessionTranscriptBytes: ByteArray,
         role: DeviceRole
-    ): ByteArray = byteArrayOf()
+    ): ByteArray = byteArrayOf(2)
 
-    override fun decryptPayload(key: ByteArray, data: ByteArray, role: DeviceRole): ByteArray =
-        byteArrayOf()
+    override fun decryptPayload(key: ByteArray, data: ByteArray, role: DeviceRole): ByteArray {
+        lastDecryptData = data
+        lastDecryptRole = role
+        return plaintextToReturn
+    }
 }

@@ -7,7 +7,7 @@ object CryptoStub {
         "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cryptography/java/"
 
     const val VALID_SALT =
-        "2bced77ca0da01df85dbfe9858c30e6a5966801e372730b35b76e648afb0ffbc"
+        "66ea34bad309a58e255831be8a6a89d8f3d5e730af49ac687c2dee82f3b5041b"
 
     const val VALID_SK_DEVICE_KEY = "3a9cfc475b558204eb31020f32adf319fd4ef84c" +
         "4a18133538bcbb806d597e08"

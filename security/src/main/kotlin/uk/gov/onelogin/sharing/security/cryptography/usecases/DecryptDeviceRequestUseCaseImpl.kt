@@ -32,7 +32,7 @@ class DecryptDeviceRequestUseCaseImpl(
             logger = logger
         ).toSessionEstablishment()
 
-        val eReaderPublicKey = CoseKey.Companion.getEReaderKeyFromParsedCoseKey(
+        val eReaderPublicKey = CoseKey.getEReaderKeyFromParsedCoseKey(
             sessionEstablishment.eReaderKey
         )
 
