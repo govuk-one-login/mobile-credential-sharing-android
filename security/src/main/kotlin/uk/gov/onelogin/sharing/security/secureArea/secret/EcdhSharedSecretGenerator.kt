@@ -11,7 +11,6 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(AppScope::class)
-@ContributesBinding(ViewModelScope::class)
 class EcdhSharedSecretGenerator(private val logger: Logger) : SharedSecretGenerator {
     /**
      * Generates a shared secret using the Elliptic Curve Diffie-Hellman (ECDH) key agreement

@@ -3,21 +3,36 @@ package uk.gov.onelogin.sharing.security.engagement
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.security.cose.CoseKey
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import java.security.interfaces.ECPublicKey
 import java.util.UUID
 
 @ContributesBinding(AppScope::class, binding = binding<GenerateEngagementQrCode>())
 class GenerateQrCodeUseCase(
+    private val logger: Logger,
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement
 ) : GenerateEngagementQrCode {
 
     override fun generateQrCode(): String {
-        val publicKey = sessionSecurity.generateSessionPublicKey()
-        publicKey.let { coseKey ->
+        val keyPair = sessionSecurity.generateEcKeyPair(
+            algorithm = ELLIPTIC_CURVE_ALGORITHM,
+            parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
+        )
+
+        val cosePublicKey = CoseKey.generateCoseKey(
+            publicKey = keyPair?.public as ECPublicKey,
+            logger = logger
+        )
+
+        cosePublicKey.let { coseKey ->
             val engagement = engagementGenerator.qrCodeEngagement(
                 coseKey,
-                UUID.randomUUID()
+                UUID.randomUUID() // generate from the orchestrator?
             )
             println(engagement)
             return engagement

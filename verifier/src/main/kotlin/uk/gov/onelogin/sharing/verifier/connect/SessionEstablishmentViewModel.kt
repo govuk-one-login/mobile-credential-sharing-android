@@ -64,8 +64,6 @@ class SessionEstablishmentViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val logger: Logger,
     private val bluetoothStatusMonitor: BluetoothStateMonitor,
-    private val sessionSecurity: SessionSecurity,
-    private val coseKeyConverter: CoseKeyToString,
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel(),
     Receiver<ConnectWithHolderDeviceEvent> {
@@ -149,18 +147,18 @@ class SessionEstablishmentViewModel(
 
                     is VerifierSessionState.ConnectionStateStarted -> {
 
-                        val keyPair = generateEcKeyPair(
-                            algorithm = ELLIPTIC_CURVE_ALGORITHM,
-                            parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
-
-                        )
-
-                        val publicCoseKey = CoseKey.generateCoseKey(
-                            publicKey = keyPair?.public as ECPublicKey,
-                            logger = logger
-                        )
-
-                        coseKeyConverter.convert(publicCoseKey)
+//                        val keyPair = generateEcKeyPair(
+//                            algorithm = ELLIPTIC_CURVE_ALGORITHM,
+//                            parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
+//
+//                        )
+//
+//                        val publicCoseKey = CoseKey.generateCoseKey(
+//                            publicKey = keyPair?.public as ECPublicKey,
+//                            logger = logger
+//                        )
+//
+//                        coseKeyConverter.convert(publicCoseKey)
                     }
 
                     else -> Unit

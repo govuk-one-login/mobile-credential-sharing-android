@@ -48,15 +48,12 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 @AssistedInject
 @Suppress("LongParameterList")
 class HolderWelcomeViewModel(
-    sessionSecurity: SessionSecurity,
-    private val engagementGenerator: Engagement,
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val resettable: Set<Resettable>,
     private val orchestrator: Orchestrator.Holder,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase
 ) : ViewModel() {
 
     companion object {
@@ -74,27 +71,12 @@ class HolderWelcomeViewModel(
     private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
-    val keyPair = sessionSecurity.generateEcKeyPair(
-        algorithm = ELLIPTIC_CURVE_ALGORITHM,
-        parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
-    )
-    val cosePublicKey = CoseKey.generateCoseKey(
-        publicKey = keyPair?.public as ECPublicKey,
-        logger = logger
-    )
+
 
     init {
         viewModelScope.launch(dispatcher) {
             resettable.forEach(Resettable::reset)
 
-            cosePublicKey.let { coseKey ->
-                val engagement = engagementGenerator.qrCodeEngagement(
-                    coseKey,
-                    _uiState.value.uuid
-                )
-                _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
-                _uiState.update { it.copy(engagement = engagement) }
-            }
 
             orchestrator.start(
                 peripheralPermissions().toSet()
@@ -184,21 +166,21 @@ class HolderWelcomeViewModel(
                     }
 
                     is MdocSessionState.MessageReceived -> {
-                        val deviceRequest = decryptDeviceRequestUseCase.execute(
-                            sessionEstablishmentBytes = state.message,
-                            engagement = _uiState.value.engagement!!,
-                            holderPrivateKey = keyPair?.private as ECPrivateKey
-                        )
-
-                        _uiState.update { it.copy(deviceRequest = deviceRequest) }
-
-                        deviceRequest
-                            .docRequests.firstOrNull()
-                            ?.itemsRequest
-                            ?.nameSpaces
-                            ?.forEach { (key, value) ->
-                                logger.debug(logTag, "Requests: key = $key, value = $value")
-                            }
+//                        val deviceRequest = decryptDeviceRequestUseCase.execute(
+//                            sessionEstablishmentBytes = state.message,
+//                            engagement = _uiState.value.engagement!!,
+//                            holderPrivateKey = keyPair?.private as ECPrivateKey
+//                        )
+//
+//                        _uiState.update { it.copy(deviceRequest = deviceRequest) }
+//
+//                        deviceRequest
+//                            .docRequests.firstOrNull()
+//                            ?.itemsRequest
+//                            ?.nameSpaces
+//                            ?.forEach { (key, value) ->
+//                                logger.debug(logTag, "Requests: key = $key, value = $value")
+//                            }
                     }
                 }
             }
