@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.security.secureArea.keypair
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidKeyPair
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPrivateKey
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
 
 object KeyPairGeneratorStubs {
@@ -15,7 +14,6 @@ object KeyPairGeneratorStubs {
 
     val validKeyPair = generateValidKeyPair()
     val keyPairWithNullEntries = KeyPair(null, null)
-    val keyPairWithPrivateKey = KeyPair(null, generateValidPrivateKey())
     val keyPairWithPublicKey = KeyPair(generateValidPublicKey(), null)
     val rsaKeyPair = KeyPairGenerator.getInstance("RSA").apply {
         initialize(1024)

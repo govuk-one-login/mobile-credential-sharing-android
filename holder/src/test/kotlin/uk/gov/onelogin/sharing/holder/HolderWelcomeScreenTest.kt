@@ -83,7 +83,6 @@ class HolderWelcomeScreenTest {
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),
-        resettable = emptySet(),
         orchestrator = FakeOrchestrator(),
         decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
     )

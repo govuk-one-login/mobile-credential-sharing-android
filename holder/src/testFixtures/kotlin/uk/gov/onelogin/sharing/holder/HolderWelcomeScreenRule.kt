@@ -68,7 +68,6 @@ class HolderWelcomeScreenRule(
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),
-            resettable = emptySet(),
             orchestrator = FakeOrchestrator(),
             decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
         )

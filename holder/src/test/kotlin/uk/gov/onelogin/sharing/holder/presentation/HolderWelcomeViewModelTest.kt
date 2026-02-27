@@ -38,7 +38,6 @@ class HolderWelcomeViewModelTest {
 
     private val dummyEngagementData = "ENGAGEMENT_DATA"
     private val logger = SystemLogger()
-    private var hasResetElements = false
     private val decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
     private fun createViewModel(
@@ -52,9 +51,6 @@ class HolderWelcomeViewModelTest {
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = logger,
         savedStateHandle = SavedStateHandle(),
-        resettable = setOf(
-            Resettable { hasResetElements = true }
-        ),
         orchestrator = FakeOrchestrator(),
         decryptDeviceRequestUseCase = decryptDeviceRequestUseCase
     )
@@ -68,7 +64,6 @@ class HolderWelcomeViewModelTest {
         assertEquals(MdocSessionState.Idle, state.sessionState)
         assertNull(state.lastErrorMessage)
         assertNotNull(state.uuid)
-        assertTrue(hasResetElements)
     }
 
     @Test

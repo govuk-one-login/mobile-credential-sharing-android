@@ -38,7 +38,6 @@ class VerifyCredentialScreenTest {
         viewModel = VerifyCredentialViewModel(
             logger,
             bluetoothStateMonitor,
-            setOf(),
             FakeOrchestrator()
         )
     }

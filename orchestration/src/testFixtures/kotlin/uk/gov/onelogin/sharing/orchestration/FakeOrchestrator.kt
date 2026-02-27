@@ -1,10 +1,12 @@
 package uk.gov.onelogin.sharing.orchestration
 
 import uk.gov.onelogin.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.core.Resettable
 
 class FakeOrchestrator :
     Orchestrator.Holder,
-    Orchestrator.Verifier {
+    Orchestrator.Verifier,
+    Resettable {
     var startCount = 0
     var cancelCount = 0
 

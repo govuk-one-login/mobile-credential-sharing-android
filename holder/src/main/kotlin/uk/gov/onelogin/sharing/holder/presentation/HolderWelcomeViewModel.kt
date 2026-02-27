@@ -53,7 +53,6 @@ class HolderWelcomeViewModel(
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
-    private val resettable: Set<Resettable>,
     private val orchestrator: Orchestrator.Holder,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase
@@ -85,8 +84,6 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            resettable.forEach(Resettable::reset)
-
             cosePublicKey.let { coseKey ->
                 val engagement = engagementGenerator.qrCodeEngagement(
                     coseKey,
@@ -360,7 +357,6 @@ class HolderWelcomeViewModel(
     override fun onCleared() {
         viewModelScope.launch {
             mdocBleSession.stop()
-            resettable.forEach(Resettable::reset)
         }
         super.onCleared()
     }
