@@ -1,10 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.connect.matchers
 
-import kotlin.math.exp
 import org.hamcrest.Description
-import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceState
 
 class HasBluetoothEnabled(private val expected: Boolean) :

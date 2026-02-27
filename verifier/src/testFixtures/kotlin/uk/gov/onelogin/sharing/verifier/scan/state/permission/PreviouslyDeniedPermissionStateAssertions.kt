@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan.state.permission
 
 import org.hamcrest.Matcher
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerViewModel
 
 /**
  * Wrapper object containing [Matcher] assertions for [PreviouslyDeniedPermissionState.State]

@@ -1,9 +1,7 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.UUID
-import javolution.util.stripped.FastMap.logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest

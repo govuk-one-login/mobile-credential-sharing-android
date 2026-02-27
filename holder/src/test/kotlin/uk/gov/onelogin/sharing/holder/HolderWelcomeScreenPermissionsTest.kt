@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.holder
 
 import android.Manifest
 import android.content.Context
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -16,7 +15,6 @@ import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)

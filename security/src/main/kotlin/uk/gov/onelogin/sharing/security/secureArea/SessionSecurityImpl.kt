@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.security.secureArea
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import javax.crypto.KeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.secret.SharedSecretGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionEncryption
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator

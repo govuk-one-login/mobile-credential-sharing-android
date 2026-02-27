@@ -27,7 +27,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.android.ui.componentsv2.camera.CameraContentViewModelHelper.monitor
 import uk.gov.logging.testdouble.LogEntry
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider

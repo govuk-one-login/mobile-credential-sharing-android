@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.security.cryptography.usecases
 
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.security.PrivateKey

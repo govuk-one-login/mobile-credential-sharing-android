@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan.state.data
 
-import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch

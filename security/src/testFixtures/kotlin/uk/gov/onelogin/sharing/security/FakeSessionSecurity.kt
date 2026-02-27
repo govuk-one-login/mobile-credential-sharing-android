@@ -3,9 +3,7 @@ package uk.gov.onelogin.sharing.security
 import java.security.KeyPair
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
-import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
 class FakeSessionSecurity : SessionSecurity {
