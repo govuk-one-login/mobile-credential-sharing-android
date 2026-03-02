@@ -145,21 +145,7 @@ class SessionEstablishmentViewModel(
                         }
                     }
 
-                    is VerifierSessionState.ConnectionStateStarted -> {
-
-//                        val keyPair = generateEcKeyPair(
-//                            algorithm = ELLIPTIC_CURVE_ALGORITHM,
-//                            parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
-//
-//                        )
-//
-//                        val publicCoseKey = CoseKey.generateCoseKey(
-//                            publicKey = keyPair?.public as ECPublicKey,
-//                            logger = logger
-//                        )
-//
-//                        coseKeyConverter.convert(publicCoseKey)
-                    }
+                    is VerifierSessionState.ConnectionStateStarted -> Unit
 
                     else -> Unit
                 }
