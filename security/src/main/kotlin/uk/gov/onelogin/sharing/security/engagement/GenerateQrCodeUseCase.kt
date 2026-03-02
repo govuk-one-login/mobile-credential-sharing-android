@@ -34,7 +34,6 @@ class GenerateQrCodeUseCase(
                 coseKey,
                 uuid
             )
-            println("QR CODE $engagement")
             return engagement
         }
     }

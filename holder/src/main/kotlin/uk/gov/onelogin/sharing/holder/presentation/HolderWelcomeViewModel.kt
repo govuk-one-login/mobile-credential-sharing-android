@@ -161,25 +161,7 @@ class HolderWelcomeViewModel(
                         }
                     }
 
-                    is MdocSessionState.MessageReceived -> {
-                        // This logic needs to move out of the viewmodel
-
-//                        val deviceRequest = decryptDeviceRequestUseCase.execute(
-//                            sessionEstablishmentBytes = state.message,
-//                            engagement = _uiState.value.engagement!!,
-//                            holderPrivateKey = keyPair?.private as ECPrivateKey
-//                        )
-//
-//                        _uiState.update { it.copy(deviceRequest = deviceRequest) }
-//
-//                        deviceRequest
-//                            .docRequests.firstOrNull()
-//                            ?.itemsRequest
-//                            ?.nameSpaces
-//                            ?.forEach { (key, value) ->
-//                                logger.debug(logTag, "Requests: key = $key, value = $value")
-//                            }
-                    }
+                    is MdocSessionState.MessageReceived -> Unit
                 }
             }
         }
