@@ -12,8 +12,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -38,12 +36,7 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
-import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
-import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
-import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @AssistedInject
 @Suppress("LongParameterList")
@@ -53,7 +46,7 @@ class HolderWelcomeViewModel(
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val resettable: Set<Resettable>,
     private val orchestrator: Orchestrator.Holder,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     companion object {
@@ -71,16 +64,23 @@ class HolderWelcomeViewModel(
     private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
-
-
     init {
         viewModelScope.launch(dispatcher) {
             resettable.forEach(Resettable::reset)
 
-
             orchestrator.start(
                 peripheralPermissions().toSet()
             )
+
+            orchestrator.holderSessionState.collect { currentSate ->
+                when (currentSate) {
+                    is HolderSessionState.PresentingEngagement -> _uiState.update {
+                        it.copy(qrData = currentSate.qrData)
+                    }
+
+                    else -> Unit
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -166,6 +166,8 @@ class HolderWelcomeViewModel(
                     }
 
                     is MdocSessionState.MessageReceived -> {
+                        // This logic needs to move out of the viewmodel
+
 //                        val deviceRequest = decryptDeviceRequestUseCase.execute(
 //                            sessionEstablishmentBytes = state.message,
 //                            engagement = _uiState.value.engagement!!,

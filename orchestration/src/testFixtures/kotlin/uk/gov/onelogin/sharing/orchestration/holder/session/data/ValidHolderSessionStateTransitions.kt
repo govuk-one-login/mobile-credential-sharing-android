@@ -42,7 +42,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val readyToPresentTransitions = listOf(
             "User cancels whilst generating QR code is shown" to userCancellation,
             "QR generation fails" to userJourneyFailure,
-            "Generated QR code gets shown to the User" to HolderSessionState.PresentingEngagement
+            "Generated QR code gets shown to the User" to
+                HolderSessionState.PresentingEngagement("")
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -56,7 +57,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.PresentingEngagement,
+                HolderSessionState.PresentingEngagement(""),
                 transition
             )
         }

@@ -43,7 +43,8 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
-        testFixtures(projects.core)
+        testFixtures(projects.core),
+        testFixtures(projects.security)
     ).forEach(::testImplementation)
 }
 

@@ -19,12 +19,14 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHold
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPreflight
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
+import uk.gov.onelogin.sharing.security.usecases.FakeGenerateQrCodeUseCase
 
 @RunWith(TestParameterInjector::class)
 class HolderOrchestratorTest {
@@ -57,32 +59,37 @@ class HolderOrchestratorTest {
         )
     }
 
+    private val fakeGenerateQrEngagement = FakeGenerateQrCodeUseCase()
+
     private val orchestrator by lazy {
         HolderOrchestrator(
             logger = logger,
             sessionFactory = sessionFactory,
-            authorizationGate = permissionChecker
+            authorizationGate = permissionChecker,
+            qrCodeData = fakeGenerateQrEngagement
+
         )
     }
 
     @Test
-    fun `Starting the Orchestrator journey navigates to the Preflight state`() = runTest {
-        orchestrator.start(setOf())
+    fun `Starting the Orchestrator journey navigates to the PresentingEngagement state`() =
+        runTest {
+            orchestrator.start(setOf())
 
-        assert(START_ORCHESTRATION_SUCCESS in logger)
-        assert(START_ORCHESTRATION_ERROR !in logger)
+            assert(START_ORCHESTRATION_SUCCESS in logger)
+            assert(START_ORCHESTRATION_ERROR !in logger)
 
-        assertThat(
-            sessionFactory,
-            currentSessionState(inPreflight())
-        )
+            assertThat(
+                sessionFactory,
+                currentSessionState(inPresentingEngagement())
+            )
 
-        assert(
-            logger.any { entry ->
-                entry.message.contains(authorizationResponse.toString())
-            }
-        )
-    }
+            assert(
+                logger.any { entry ->
+                    entry.message.contains(authorizationResponse.toString())
+                }
+            )
+        }
 
     @Test
     fun `Starting the Orchestrator journey is possible when the journey is already complete`(
@@ -98,7 +105,7 @@ class HolderOrchestratorTest {
 
         assertThat(
             sessionFactory,
-            currentSessionState(inPreflight())
+            currentSessionState(inPresentingEngagement())
         )
 
         assert(
@@ -110,14 +117,14 @@ class HolderOrchestratorTest {
 
     @Test
     fun `Orchestrator cannot be started when the User journey is already in progress`() = runTest {
-        `Starting the Orchestrator journey navigates to the Preflight state`()
+        `Starting the Orchestrator journey navigates to the PresentingEngagement state`()
 
         orchestrator.start(setOf())
 
         assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(
             sessionFactory,
-            currentSessionState(inPreflight())
+            currentSessionState(inPresentingEngagement())
         )
     }
 
@@ -155,7 +162,7 @@ class HolderOrchestratorTest {
 
     @Test
     fun `Resetting the Orchestrator clears the HolderSession`() = runTest {
-        `Starting the Orchestrator journey navigates to the Preflight state`()
+        `Starting the Orchestrator journey navigates to the PresentingEngagement state`()
 
         orchestrator.reset()
 

@@ -38,7 +38,7 @@ sealed class HolderSessionState : Completable {
     /**
      * The holder device is now showing encoded engagement data.
      */
-    data object PresentingEngagement : HolderSessionState()
+    data class PresentingEngagement(val qrData: String) : HolderSessionState()
 
     /**
      * State for when the Android-powered device is connecting with another device.

@@ -77,15 +77,12 @@ class HolderWelcomeScreenTest {
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
         sessionSecurity: SessionSecurity = FakeSessionSecurity()
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
-        sessionSecurity = sessionSecurity,
-        engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocBleSession },
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),
         resettable = emptySet(),
-        orchestrator = FakeOrchestrator(),
-        decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
+        orchestrator = FakeOrchestrator()
     )
 
     @Test

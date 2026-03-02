@@ -4,7 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import kotlinx.coroutines.flow.MutableSharedFlow
+import java.util.UUID
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
@@ -18,7 +18,6 @@ import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelExceptio
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderEvent
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
@@ -36,10 +35,12 @@ class HolderOrchestrator(
     private val qrCodeData: GenerateEngagementQrCode
 ) : Orchestrator.Holder {
 
-    private val _events = MutableSharedFlow<HolderEvent>(extraBufferCapacity = 1)
-    val events: SharedFlow<HolderEvent> = _events
-
     private var session: HolderSession = sessionFactory.create()
+
+    // this is used to generate the qr, but will also need to be passed to our bluetooth session
+    private val stateUUID: UUID = UUID.randomUUID()
+
+    override val holderSessionState: SharedFlow<HolderSessionState> = session.currentState
 
     override fun start(requiredPermissions: Set<String>) {
         if (session.isComplete()) {
@@ -74,17 +75,15 @@ class HolderOrchestrator(
 
             when (authResult) {
                 AuthorizationResponse.Authorized -> {
-                    val qrCode = qrCodeData.generateQrCode()
+                    session.transitionTo(HolderSessionState.ReadyToPresent)
+                    val qrCode = qrCodeData.generateQrCode(stateUUID)
                     if (qrCode.isNotEmpty()) {
-                        _events.tryEmit(HolderEvent.QrCodeReady(qrCode))
-                        session.transitionTo(HolderSessionState.ReadyToPresent)
+                        session.transitionTo(HolderSessionState.PresentingEngagement(qrCode))
                     }
                 }
 
                 is AuthorizationResponse.Unauthorized -> Unit
             }
-
-
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(

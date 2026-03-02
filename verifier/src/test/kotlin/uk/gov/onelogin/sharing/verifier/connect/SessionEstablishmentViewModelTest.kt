@@ -94,9 +94,7 @@ class SessionEstablishmentViewModelTest {
         logger = logger,
         bluetoothStatusMonitor = fakeBluetoothStateMonitor,
         verifierSessionFactory = { fakeVerifierSession },
-        savedStateHandle = savedStateHandle,
-        sessionSecurity = sessionSecurity,
-        coseKeyConverter = DefaultCoseKeyToString(logger)
+        savedStateHandle = savedStateHandle
     )
 
     @Test

@@ -20,4 +20,8 @@ object HolderSessionStateMatchers {
     fun isNotStarted(): Matcher<in HolderSessionState> = equalTo(
         HolderSessionState.NotStarted
     )
+
+    fun inPresentingEngagement(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.PresentingEngagement::class.java
+    )
 }

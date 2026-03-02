@@ -105,7 +105,7 @@ class SessionEstablishmentViewModel(
                 when (sessionState) {
                     VerifierSessionState.Invalid,
                     VerifierSessionState.ServiceNotFound
-                        ->
+                    ->
                         _navEvents.tryEmit(
                             ConnectWithHolderDeviceNavEvent.NavigateToError(
                                 ConnectWithHolderDeviceError.BluetoothConfigurationError
@@ -174,7 +174,7 @@ class SessionEstablishmentViewModel(
                 when (bluetoothState) {
                     BluetoothStatus.ON,
                     BluetoothStatus.TURNING_ON
-                        -> {
+                    -> {
                         updateState {
                             it.copy(
                                 isBluetoothEnabled = true

@@ -27,6 +27,7 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.security.engagement.Engagement
@@ -63,15 +64,12 @@ class HolderWelcomeScreenRule(
 
     val viewModel: HolderWelcomeViewModel by lazy {
         HolderWelcomeViewModel(
-            sessionSecurity = fakeSessionSecurity,
-            engagementGenerator = fakeEngagementGenerator,
             mdocSessionManagerFactory = { mdocSessionManager },
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),
             resettable = emptySet(),
-            orchestrator = FakeOrchestrator(),
-            decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
+            orchestrator = FakeOrchestrator()
         )
     }
 

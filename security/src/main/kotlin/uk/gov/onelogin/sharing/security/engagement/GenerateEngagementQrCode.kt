@@ -1,7 +1,8 @@
 package uk.gov.onelogin.sharing.security.engagement
 
+import java.util.UUID
+
 fun interface GenerateEngagementQrCode {
 
-    fun generateQrCode(): String
-
+    fun generateQrCode(uuid: UUID): String
 }
