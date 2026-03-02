@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
 import androidx.lifecycle.SavedStateHandle
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -24,16 +25,13 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HolderWelcomeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val dummyEngagementData = "ENGAGEMENT_DATA"
     private val logger = SystemLogger()
-    private var hasResetElements = false
 
     private fun createViewModel(
         mdocSessionManager: MdocSessionManager = FakeMdocSessionManager(),

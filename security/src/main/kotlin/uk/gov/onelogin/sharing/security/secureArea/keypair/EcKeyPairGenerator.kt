@@ -2,13 +2,13 @@ package uk.gov.onelogin.sharing.security.secureArea.keypair
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.security.secureArea.KeyPairGenerator
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPair
 import java.security.NoSuchAlgorithmException
 import java.security.spec.ECGenParameterSpec
+import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.security.secureArea.KeyPairGenerator
 
 /**
  * [KeyPairGenerator] implementation that uses Elliptic Curve (EC) cryptography.
