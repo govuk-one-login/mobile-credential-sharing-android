@@ -9,7 +9,6 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
-import uk.gov.onelogin.sharing.security.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.security.toSessionEstablishment
 
 class CoseKeyTest {

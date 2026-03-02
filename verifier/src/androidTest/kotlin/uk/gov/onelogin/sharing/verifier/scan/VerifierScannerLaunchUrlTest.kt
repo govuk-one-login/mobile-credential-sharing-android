@@ -25,8 +25,7 @@ class VerifierScannerLaunchUrlTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val model = VerifierScannerViewModel(
-        state = CompleteVerifierScannerState(),
-        resettable = emptySet()
+        state = CompleteVerifierScannerState()
     )
     private val resources: Resources = context.resources
 

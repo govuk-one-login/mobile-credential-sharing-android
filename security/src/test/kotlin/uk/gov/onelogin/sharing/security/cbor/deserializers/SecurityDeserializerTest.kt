@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.security.cbor.deserializers
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
@@ -10,7 +9,6 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.onelogin.sharing.security.SecurityDeserializerStub.coseKeyMap
 import uk.gov.onelogin.sharing.security.SecurityDeserializerStub.expectedSecurityDto
-import uk.gov.onelogin.sharing.security.cbor.dto.SecurityDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCborSerializer
 

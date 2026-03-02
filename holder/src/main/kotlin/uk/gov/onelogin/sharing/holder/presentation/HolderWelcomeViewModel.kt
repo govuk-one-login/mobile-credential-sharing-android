@@ -12,7 +12,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +26,6 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSI
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
-import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -37,6 +35,7 @@ import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import java.util.UUID
 
 @AssistedInject
 @Suppress("LongParameterList")
@@ -44,7 +43,6 @@ class HolderWelcomeViewModel(
     mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
-    private val resettable: Set<Resettable>,
     private val orchestrator: Orchestrator.Holder,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
@@ -66,9 +64,7 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            resettable.forEach(Resettable::reset)
-
-            orchestrator.start(
+             orchestrator.start(
                 peripheralPermissions().toSet()
             )
 
@@ -344,7 +340,6 @@ class HolderWelcomeViewModel(
     override fun onCleared() {
         viewModelScope.launch {
             mdocBleSession.stop()
-            resettable.forEach(Resettable::reset)
         }
         super.onCleared()
     }

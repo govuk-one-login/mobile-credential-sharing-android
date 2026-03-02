@@ -32,11 +32,6 @@ object SessionSecurityTestStub {
         sessionEncryption = sessionEncryption
     )
 
-    fun generateValidPrivateKey(): ECPrivateKey {
-        val keyPair = sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
-        return keyPair?.private as ECPrivateKey
-    }
-
     fun generateValidPublicKey(): ECPublicKey {
         val publicKey = sessionSecurity.generateEcKeyPair(ALGORITHM, PARAMETER_SPEC)
         return publicKey?.public as ECPublicKey

@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.connect.error
 
-import androidx.compose.material3.Button
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.ComposeNavigator

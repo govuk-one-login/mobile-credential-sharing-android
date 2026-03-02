@@ -16,15 +16,9 @@ import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 @ContributesIntoMap(ViewModelScope::class, binding = binding<ViewModel>())
 @Inject
 @ViewModelKey(VerifierScannerViewModel::class)
-class VerifierScannerViewModel(
-    state: VerifierScannerState.Complete,
-    private val resettable: Set<Resettable>
-) : ViewModel(),
+class VerifierScannerViewModel(state: VerifierScannerState.Complete) :
+    ViewModel(),
     VerifierScannerState.Complete by state {
-
-    init {
-        resettable.forEach(Resettable::reset)
-    }
 
     override fun onCleared() {
         reset()
@@ -34,7 +28,6 @@ class VerifierScannerViewModel(
     fun reset(): Job = viewModelScope.launch {
         update(hasPreviouslyDeniedPermission = false)
         resetBarcodeData()
-        resettable.forEach(Resettable::reset)
     }
 
     fun resetBarcodeData(): Job = viewModelScope.launch {

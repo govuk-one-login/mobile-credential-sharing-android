@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.orchestration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 class FakeOrchestrator(
@@ -11,7 +12,8 @@ class FakeOrchestrator(
     )
 
 ) : Orchestrator.Holder,
-    Orchestrator.Verifier {
+    Orchestrator.Verifier,
+    Resettable {
 
     override val holderSessionState: SharedFlow<HolderSessionState> = initialHolderState
 

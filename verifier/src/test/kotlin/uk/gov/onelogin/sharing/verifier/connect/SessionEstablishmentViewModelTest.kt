@@ -27,7 +27,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.android.ui.componentsv2.camera.CameraContentViewModelHelper.monitor
 import uk.gov.logging.testdouble.LogEntry
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
@@ -52,7 +51,6 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.security.secureArea.keypair.FakeKeyPairGenerator
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
-import uk.gov.onelogin.sharing.security.secureArea.keypair.MemorisedKeyGenerator
 import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
 import uk.gov.onelogin.sharing.security.secureArea.session.AesGcmEncryption
 import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
@@ -381,10 +379,7 @@ class SessionEstablishmentViewModelTest {
     @Test
     fun `Creates KeyPair instance when bluetooth connection starts`() = runTest {
         viewModel = createViewModel(scanner)
-        val generator = MemorisedKeyGenerator(
-            FakeKeyPairGenerator(validKeyPair),
-            logger
-        )
+        val generator = FakeKeyPairGenerator(validKeyPair)
 
         val expectedCoseKey = CoseKey.generateCoseKey(
             publicKey = validKeyPair!!.public as ECPublicKey,

@@ -27,24 +27,13 @@ class VerifyCredentialViewModelTest {
     private lateinit var viewModel: VerifyCredentialViewModel
     private val fakeOrchestrator = FakeOrchestrator()
 
-    private val resettableItems = setOf(
-        fakeOrchestrator.apply { cancel() }
-    )
-
     @Before
     fun setup() {
-        assertEquals(1, fakeOrchestrator.cancelCount)
         viewModel = VerifyCredentialViewModel(
             bluetoothStateMonitor = bluetoothStateMonitor,
             logger = logger,
-            resettable = resettableItems,
             orchestrator = fakeOrchestrator
         )
-    }
-
-    @Test
-    fun `orchestrator resets items on init`() {
-        assertEquals(0, fakeOrchestrator.cancelCount)
     }
 
     @Test
@@ -70,13 +59,6 @@ class VerifyCredentialViewModelTest {
         viewModel.onCleared()
 
         assert(bluetoothStateMonitor.stopCalls == 1)
-    }
-
-    @Test
-    fun `resets resettable items onCleared`() {
-        assertEquals(1, fakeOrchestrator.startCount)
-        viewModel.onCleared()
-        assertEquals(0, fakeOrchestrator.startCount)
     }
 
     @Test

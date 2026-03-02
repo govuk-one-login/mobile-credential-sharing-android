@@ -8,7 +8,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceDeferredStringsXmlData
 
 @RunWith(RobolectricTestParameterInjector::class)
 class BluetoothConnectionErrorStringsXmlTest {

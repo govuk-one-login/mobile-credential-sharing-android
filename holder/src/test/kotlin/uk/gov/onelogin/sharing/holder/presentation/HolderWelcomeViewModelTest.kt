@@ -18,7 +18,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.holder.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
@@ -44,9 +43,6 @@ class HolderWelcomeViewModelTest {
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = logger,
         savedStateHandle = SavedStateHandle(),
-        resettable = setOf(
-            Resettable { hasResetElements = true }
-        ),
         orchestrator = orchestrator
     )
 
@@ -58,7 +54,6 @@ class HolderWelcomeViewModelTest {
         assertEquals(MdocSessionState.Idle, state.sessionState)
         assertNull(state.lastErrorMessage)
         assertNotNull(state.uuid)
-        assertTrue(hasResetElements)
     }
 
     @Test

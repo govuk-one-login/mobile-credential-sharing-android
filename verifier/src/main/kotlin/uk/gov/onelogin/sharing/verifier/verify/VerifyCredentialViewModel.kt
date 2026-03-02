@@ -32,7 +32,6 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 class VerifyCredentialViewModel(
     private val logger: Logger,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
-    private val resettable: Set<Resettable>,
     private val orchestrator: Orchestrator.Verifier
 ) : ViewModel() {
     private val initialState = VerifyCredentialUiState()
@@ -48,7 +47,6 @@ class VerifyCredentialViewModel(
 
     init {
         bluetoothStateMonitor.start()
-        resettable.forEach(Resettable::reset)
         orchestrator.start(
             peripheralPermissions().toSet()
         )
@@ -66,7 +64,6 @@ class VerifyCredentialViewModel(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onCleared() {
         bluetoothStateMonitor.stop()
-        resettable.forEach(Resettable::reset)
         super.onCleared()
     }
 

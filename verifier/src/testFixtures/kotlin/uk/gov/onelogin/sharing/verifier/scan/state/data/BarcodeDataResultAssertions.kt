@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan.state.data
 
-import android.net.Uri
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matcher
 

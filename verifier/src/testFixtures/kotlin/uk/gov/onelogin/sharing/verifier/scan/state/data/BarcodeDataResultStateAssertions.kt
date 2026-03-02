@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan.state.data
 
-import android.net.Uri
 import org.hamcrest.Matcher
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultAssertions.hasFound
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultAssertions.isNotFound
