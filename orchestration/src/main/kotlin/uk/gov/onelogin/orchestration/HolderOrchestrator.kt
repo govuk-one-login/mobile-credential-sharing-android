@@ -20,7 +20,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate.Companion.meetsPrerequisites
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 
@@ -56,19 +56,16 @@ class HolderOrchestrator(
             )
             logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
 
-            val authResult = prerequisiteGate.checkPrerequisites(Prerequisite.BLUETOOTH)
+            val prerequisiteCheck = prerequisiteGate.checkPrerequisites(
+                Prerequisite.BLUETOOTH
+            )
 
-            when (authResult[Prerequisite.BLUETOOTH]!!) {
-                PrerequisiteResponse.MeetsPrerequisites -> {
-                    session.transitionTo(HolderSessionState.ReadyToPresent)
-                    val qrCode = qrCodeData.generateQrCode(stateUUID)
-                    if (qrCode.isNotEmpty()) {
-                        session.transitionTo(HolderSessionState.PresentingEngagement(qrCode))
-                    }
+            if (prerequisiteCheck.meetsPrerequisites()) {
+                session.transitionTo(HolderSessionState.ReadyToPresent)
+                val qrCode = qrCodeData.generateQrCode(stateUUID)
+                if (qrCode.isNotEmpty()) {
+                    session.transitionTo(HolderSessionState.PresentingEngagement(qrCode))
                 }
-                is PrerequisiteResponse.Incapable,
-                is PrerequisiteResponse.NotReady,
-                is PrerequisiteResponse.Unauthorized -> Unit
             }
 
         } catch (exception: IllegalStateException) {

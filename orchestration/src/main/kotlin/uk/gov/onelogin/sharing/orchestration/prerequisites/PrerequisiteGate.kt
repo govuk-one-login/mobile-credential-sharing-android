@@ -10,4 +10,10 @@ fun interface PrerequisiteGate {
     ): Map<Prerequisite, PrerequisiteResponse> = checkPrerequisites(
         prerequisites.toList()
     )
+
+    companion object {
+        fun Map<Prerequisite, PrerequisiteResponse>.meetsPrerequisites(): Boolean = values.all {
+            it == PrerequisiteResponse.MeetsPrerequisites
+        }
+    }
 }

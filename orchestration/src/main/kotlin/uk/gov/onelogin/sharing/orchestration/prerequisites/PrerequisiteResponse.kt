@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
 
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
+import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReason
 
 sealed class PrerequisiteResponse {
     data object MeetsPrerequisites : PrerequisiteResponse()
@@ -9,7 +10,7 @@ sealed class PrerequisiteResponse {
         val reason: IncapableReason
     ) : PrerequisiteResponse()
     data class NotReady(
-        val reason: UnauthorizedReason
+        val reason: NotReadyReason
     ) : PrerequisiteResponse()
     data class Unauthorized(
         val reason: UnauthorizedReason

@@ -7,6 +7,7 @@ import dev.zacsweers.metro.ContributesBinding
 class PrerequisiteGateImpl(
     private val authorization: PrerequisiteGateLayer.Authorization,
     private val capability: PrerequisiteGateLayer.Capability,
+    private val readiness: PrerequisiteGateLayer.Readiness,
 ) : PrerequisiteGate {
     override fun checkPrerequisites(
         prerequisites: Collection<Prerequisite>
@@ -14,6 +15,8 @@ class PrerequisiteGateImpl(
         authorization.checkAuthorization(
             prerequisite
         ) ?: capability.checkCapability(
+            prerequisite
+        ) ?: readiness.checkReadiness(
             prerequisite
         ) ?: PrerequisiteResponse.MeetsPrerequisites
     }
