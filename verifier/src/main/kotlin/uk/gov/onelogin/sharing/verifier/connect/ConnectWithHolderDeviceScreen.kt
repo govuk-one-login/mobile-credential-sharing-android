@@ -29,13 +29,13 @@ import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothCentralPermissionChecker.Companion.centralPermissions
-import uk.gov.onelogin.sharing.core.R as coreR
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
@@ -44,7 +44,7 @@ fun ConnectWithHolderDeviceScreen(
     modifier: Modifier = Modifier,
     viewModel: SessionEstablishmentViewModel = metroViewModel(),
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = centralPermissions()
+        permissions = bluetoothPermissions()
 
     ) {
         viewModel.receive(ConnectWithHolderDeviceEvent.RequestedPermission(true))
@@ -233,7 +233,7 @@ internal fun ConnectWithHolderDevicePreview(
                 engagementData = engagementData
             ),
             multiplePermissionsState = rememberMultiplePermissionsState(
-                permissions = centralPermissions()
+                permissions = bluetoothPermissions()
             ) {},
             modifier = Modifier.background(Color.White)
         )
