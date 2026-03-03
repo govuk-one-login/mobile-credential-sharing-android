@@ -42,6 +42,7 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        testFixtures(projects.bluetooth),
         testFixtures(projects.core)
     ).forEach(::testImplementation)
 }

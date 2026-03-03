@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,6 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
 class AndroidBluetoothStateMonitor(private val appContext: Context, private val logger: Logger) :
     BluetoothStateMonitor {
     private val _states = MutableSharedFlow<BluetoothStatus>(

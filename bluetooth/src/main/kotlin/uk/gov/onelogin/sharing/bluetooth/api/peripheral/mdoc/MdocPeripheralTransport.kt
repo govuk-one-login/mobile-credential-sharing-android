@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.mdoc
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
@@ -7,15 +7,15 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 /**
  * Responsible for orchestrating the BLE advertising and GATT service
  *
- * [MdocSessionState] via a [StateFlow].
+ * [MdocPeripheralState] via a [StateFlow].
  */
-interface MdocSessionManager {
+interface MdocPeripheralTransport {
     /**
      * The current state of the BLE session, exposed as a [StateFlow].
      * This can be used to observe the session's status, such as whether it's advertising,
      * connected, or has encountered an error.
      */
-    val state: StateFlow<MdocSessionState>
+    val state: StateFlow<MdocPeripheralState>
 
     /**
      * Current state of the Bluetooth adapter, exposed as a [StateFlow].

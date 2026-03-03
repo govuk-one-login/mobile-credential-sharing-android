@@ -13,6 +13,7 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionReset
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransport
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
@@ -25,7 +26,8 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,
-    private val authorizationGate: PrerequisiteGate.Authorization
+    private val authorizationGate: PrerequisiteGate.Authorization,
+    mdocPeripheralTransport: MdocPeripheralTransport
 ) : Orchestrator.Holder {
 
     private var session: HolderSession = sessionFactory.create()

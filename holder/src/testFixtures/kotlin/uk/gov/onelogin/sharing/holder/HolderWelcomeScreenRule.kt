@@ -19,10 +19,11 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakeMdocPeripheralTransport
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransport
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
@@ -53,7 +54,7 @@ class HolderWelcomeScreenRule(
         bluetoothDisabledText = resources.getString(R.string.bluetooth_turned_off_holder)
     )
 
-    private val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
+    private val mdocPeripheralTransport: MdocPeripheralTransport = FakeMdocPeripheralTransport()
     private val fakeSessionSecurity = FakeSessionSecurity()
     private val fakeEngagementGenerator = FakeEngagementGenerator(
         data = "${Engagement.QR_CODE_SCHEME}TEST_QR"
@@ -64,7 +65,6 @@ class HolderWelcomeScreenRule(
         HolderWelcomeViewModel(
             sessionSecurity = fakeSessionSecurity,
             engagementGenerator = fakeEngagementGenerator,
-            mdocSessionManagerFactory = { mdocSessionManager },
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),

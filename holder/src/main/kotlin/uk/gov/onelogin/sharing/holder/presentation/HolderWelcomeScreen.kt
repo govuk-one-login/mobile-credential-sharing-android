@@ -31,6 +31,7 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONN
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_TURNED_OFF
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.core.R.string.bluetooth_disconnected_unexpectedly
 import uk.gov.onelogin.sharing.core.R.string.bluetooth_permissions_revoked
@@ -41,7 +42,6 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.R.string.bluetooth_turned_off_holder
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 
 private const val QR_SIZE = 800
 
@@ -192,7 +192,7 @@ fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier)
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
         lastErrorMessage = null,
-        sessionState = MdocSessionState.AdvertisingStarted,
+        sessionState = MdocPeripheralState.AdvertisingStarted,
         uuid = UUID.randomUUID(),
         qrData = "QR Data"
     )

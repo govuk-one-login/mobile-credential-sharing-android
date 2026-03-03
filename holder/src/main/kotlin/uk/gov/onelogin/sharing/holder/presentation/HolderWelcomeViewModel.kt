@@ -27,16 +27,14 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransport
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransportError
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
-import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
-import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
@@ -50,7 +48,6 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 class HolderWelcomeViewModel(
     sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement,
-    mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val orchestrator: Orchestrator.Holder,
@@ -67,8 +64,8 @@ class HolderWelcomeViewModel(
     )
 
     private val _uiState = MutableStateFlow(initialState)
-    private val mdocBleSession: MdocSessionManager =
-        mdocSessionManagerFactory.create(viewModelScope)
+/*    private val mdocBleSession: MdocPeripheralTransport =
+        mdocPeripheralTransportFactory.create(viewModelScope)*/
 
     private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
@@ -98,26 +95,26 @@ class HolderWelcomeViewModel(
             )
         }
 
-        viewModelScope.launch {
+        /*viewModelScope.launch {
             mdocBleSession.state.collect { state ->
                 _uiState.update { it.copy(sessionState = state) }
 
                 when (state) {
-                    MdocSessionState.AdvertisingStarted ->
+                    MdocPeripheralState.AdvertisingStarted ->
                         logger.debug(
                             logTag,
                             "Mdoc - Advertising Started UUID: ${_uiState.value.uuid}"
                         )
 
-                    MdocSessionState.AdvertisingStopped -> {
+                    MdocPeripheralState.AdvertisingStopped -> {
                         sessionStartRequested = false
                         logger.debug(logTag, "Mdoc - Advertising Stopped")
                     }
 
-                    is MdocSessionState.Connected ->
+                    is MdocPeripheralState.Connected ->
                         logger.debug(logTag, "Mdoc - Connected: ${state.address}")
 
-                    is MdocSessionState.Disconnected -> {
+                    is MdocPeripheralState.Disconnected -> {
                         @RequiresImplementation(
                             details = [
                                 ImplementationDetail(
@@ -150,25 +147,25 @@ class HolderWelcomeViewModel(
                         stopAdvertising()
                     }
 
-                    is MdocSessionState.Error -> {
+                    is MdocPeripheralState.Error -> {
                         sessionStartRequested = false
                         handleError(state.reason)
                     }
 
-                    MdocSessionState.GattServiceStopped -> {
+                    MdocPeripheralState.GattServiceStopped -> {
                         sessionStartRequested = false
                         logger.debug(logTag, "Mdoc - GattService Stopped")
                     }
 
-                    MdocSessionState.Idle -> {
+                    MdocPeripheralState.Idle -> {
                         sessionStartRequested = false
                         logger.debug(logTag, "Mdoc - Idle")
                     }
 
-                    is MdocSessionState.ServiceAdded ->
+                    is MdocPeripheralState.ServiceAdded ->
                         logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
 
-                    is MdocSessionState.MdocSessionEnded -> {
+                    is MdocPeripheralState.MdocPeripheralEnded -> {
                         if (state.status == SessionEndStates.SUCCESS) {
                             logger.debug(logTag, "Mdoc - Ending session")
                         } else {
@@ -180,7 +177,7 @@ class HolderWelcomeViewModel(
                         }
                     }
 
-                    is MdocSessionState.MessageReceived -> {
+                    is MdocPeripheralState.MessageReceived -> {
                         val deviceRequest = decryptDeviceRequestUseCase.execute(
                             sessionEstablishmentBytes = state.message,
                             engagement = _uiState.value.engagement!!,
@@ -199,9 +196,9 @@ class HolderWelcomeViewModel(
                     }
                 }
             }
-        }
+        }*/
 
-        viewModelScope.launch {
+       /* viewModelScope.launch {
             mdocBleSession.bluetoothStatus.collect { bluetoothState ->
                 when (bluetoothState) {
                     BluetoothStatus.OFF,
@@ -246,28 +243,28 @@ class HolderWelcomeViewModel(
                         logger.debug(logTag, "Mdoc - Bluetooth status unknown")
                 }
             }
-        }
+        }*/
     }
 
-    private fun handleError(reason: MdocSessionError) {
+    private fun handleError(reason: MdocPeripheralTransportError) {
         when (reason) {
-            MdocSessionError.ADVERTISING_FAILED ->
+            MdocPeripheralTransportError.ADVERTISING_FAILED ->
                 logger.debug(logTag, "Mdoc - Error: Advertising failed")
 
-            MdocSessionError.GATT_NOT_AVAILABLE ->
+            MdocPeripheralTransportError.GATT_NOT_AVAILABLE ->
                 logger.debug(logTag, "Mdoc - Error: GATT not available")
 
-            MdocSessionError.BLUETOOTH_PERMISSION_MISSING ->
+            MdocPeripheralTransportError.BLUETOOTH_PERMISSION_MISSING ->
                 logger.debug(logTag, "Mdoc - Error: Bluetooth permission missing")
 
-            MdocSessionError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
+            MdocPeripheralTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
                 logger.debug(logTag, "Mdoc - Error: Descriptor write request failed")
         }
     }
 
     fun stopAdvertising() {
         viewModelScope.launch {
-            mdocBleSession.stop()
+//            mdocBleSession.stop()
         }
     }
 
@@ -318,15 +315,15 @@ class HolderWelcomeViewModel(
         if (canStart) {
             sessionStartRequested = true
             viewModelScope.launch {
-                mdocBleSession.start(state.uuid)
+//                mdocBleSession.start(state.uuid)
             }
         }
     }
 
     private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
-        state.sessionState == MdocSessionState.Idle ||
-            state.sessionState == MdocSessionState.AdvertisingStopped ||
-            state.sessionState == MdocSessionState.GattServiceStopped
+        state.sessionState == MdocPeripheralState.Idle ||
+            state.sessionState == MdocPeripheralState.AdvertisingStopped ||
+            state.sessionState == MdocPeripheralState.GattServiceStopped
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
@@ -350,13 +347,13 @@ class HolderWelcomeViewModel(
                 )
             ]
         )
-        mdocBleSession.notifySessionEnd(_uiState.value.uuid)
+//        mdocBleSession.notifySessionEnd(_uiState.value.uuid)
         logger.debug(logTag, "Holder stopped advertising during session")
     }
 
     override fun onCleared() {
         viewModelScope.launch {
-            mdocBleSession.stop()
+//            mdocBleSession.stop()
         }
         super.onCleared()
     }
@@ -366,7 +363,7 @@ data class HolderWelcomeUiState(
     val uuid: UUID = UUID.randomUUID(),
     val qrData: String? = null,
     val engagement: String? = null,
-    val sessionState: MdocSessionState = MdocSessionState.Idle,
+    val sessionState: MdocPeripheralState = MdocPeripheralState.Idle,
     val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
     val hasBluetoothPermissions: Boolean? = null,

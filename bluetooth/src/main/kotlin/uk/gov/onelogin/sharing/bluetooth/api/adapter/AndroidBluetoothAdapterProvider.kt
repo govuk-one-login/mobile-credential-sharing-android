@@ -4,9 +4,12 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeAdvertiser
 import android.bluetooth.le.BluetoothLeScanner
 import android.content.Context
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 
+@ContributesBinding(AppScope::class)
 @ContributesBinding(ViewModelScope::class)
 class AndroidBluetoothAdapterProvider(val context: Context) : BluetoothAdapterProvider {
     private val bluetoothManager by lazy {

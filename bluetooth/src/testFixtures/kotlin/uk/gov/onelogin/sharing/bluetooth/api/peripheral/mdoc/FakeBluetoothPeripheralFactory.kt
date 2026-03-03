@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothPeripheralFactory

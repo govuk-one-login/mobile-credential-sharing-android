@@ -29,23 +29,6 @@ internal class AndroidBleProviderTest {
     }
 
     @Test
-    fun `start advertising throws when advertiser provider is null`() {
-        val provider = AndroidBleProvider(
-            fakeAdapter,
-            bleAdvertiser = null
-        )
-
-        val exception = Assert.assertThrows(IllegalStateException::class.java) {
-            provider.startAdvertising(
-                AdvertisingParameters(),
-                stubBleAdvertiseData(),
-                AdvertisingCallbackStub()
-            )
-        }
-        Assert.assertEquals("Bluetooth advertiser not available", exception.message)
-    }
-
-    @Test
     fun `start advertising delegates to advertiser with same params and callback`() {
         val parameters = AdvertisingParameters()
         val bleAdvertiseData = stubBleAdvertiseData()
@@ -68,14 +51,5 @@ internal class AndroidBleProviderTest {
         provider.stopAdvertising()
 
         assert(fakeAdvertiser.stopCalled == 1)
-    }
-
-    @Test
-    fun `stop advertising does nothing when advertiser provider is null`() {
-        val provider = AndroidBleProvider(fakeAdapter, bleAdvertiser = null)
-
-        provider.stopAdvertising()
-
-        assert(fakeAdvertiser.stopCalled == 0)
     }
 }

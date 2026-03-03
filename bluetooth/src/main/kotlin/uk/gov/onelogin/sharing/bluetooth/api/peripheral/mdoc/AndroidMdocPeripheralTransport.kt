@@ -1,9 +1,11 @@
-package uk.gov.onelogin.sharing.holder.mdoc
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,18 +18,20 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(scope = ViewModelScope::class)
-class AndroidMdocSessionManager(
+@ContributesBinding(scope = AppScope::class)
+class AndroidMdocPeripheralTransport(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
-    coroutineScope: CoroutineScope,
+    @ApplicationScope coroutineScope: CoroutineScope,
     private val logger: Logger
-) : MdocSessionManager {
-    private val _state = MutableStateFlow<MdocSessionState>(MdocSessionState.Idle)
-    override val state: StateFlow<MdocSessionState> = _state
+) : MdocPeripheralTransport {
+    private val _state = MutableStateFlow<MdocPeripheralState>(MdocPeripheralState.Idle)
+    override val state: StateFlow<MdocPeripheralState> = _state
 
     private val _bluetoothStatus = MutableStateFlow(BluetoothStatus.UNKNOWN)
     override val bluetoothStatus: StateFlow<BluetoothStatus> = _bluetoothStatus
@@ -74,7 +78,8 @@ class AndroidMdocSessionManager(
             bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid))
         } catch (e: StartAdvertisingException) {
             logger.error(logTag, "Error starting advertising: ${e.error}", e)
-            _state.value = MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED)
+            _state.value =
+                MdocPeripheralState.Error(MdocPeripheralTransportError.ADVERTISING_FAILED)
         }
 
         gattServerManager.open(serviceUuid)
@@ -93,16 +98,17 @@ class AndroidMdocSessionManager(
     private fun handleAdvertiserState(state: AdvertiserState) {
         when (state) {
             AdvertiserState.Started ->
-                _state.value = MdocSessionState.AdvertisingStarted
+                _state.value = MdocPeripheralState.AdvertisingStarted
 
             AdvertiserState.Stopped ->
-                _state.value = MdocSessionState.AdvertisingStopped
+                _state.value = MdocPeripheralState.AdvertisingStopped
 
             is AdvertiserState.Failed ->
-                _state.value = MdocSessionState.Error(MdocSessionError.ADVERTISING_FAILED)
+                _state.value =
+                    MdocPeripheralState.Error(MdocPeripheralTransportError.ADVERTISING_FAILED)
 
             AdvertiserState.Idle ->
-                _state.value = MdocSessionState.Idle
+                _state.value = MdocPeripheralState.Idle
 
             else -> Unit
         }
@@ -112,26 +118,27 @@ class AndroidMdocSessionManager(
         when (event) {
             is GattServerEvent.Connected -> {
                 if (connectedDevices.add(event.address)) {
-                    _state.value = MdocSessionState.Connected(event.address)
+                    _state.value = MdocPeripheralState.Connected(event.address)
                 }
             }
 
             is GattServerEvent.Disconnected -> {
                 if (connectedDevices.remove(event.address)) {
-                    _state.value = MdocSessionState.Disconnected(event.address, event.isSessionEnd)
+                    _state.value =
+                        MdocPeripheralState.Disconnected(event.address, event.isSessionEnd)
                 }
             }
 
             is GattServerEvent.Error ->
-                _state.value = MdocSessionState.Error(
-                    MdocSessionError.fromGattError(event.error)
+                _state.value = MdocPeripheralState.Error(
+                    MdocPeripheralTransportError.fromGattError(event.error)
                 )
 
             is GattServerEvent.ServiceAdded ->
-                _state.value = MdocSessionState.ServiceAdded(event.service?.uuid)
+                _state.value = MdocPeripheralState.ServiceAdded(event.service?.uuid)
 
             GattServerEvent.ServiceStopped ->
-                _state.value = MdocSessionState.GattServiceStopped
+                _state.value = MdocPeripheralState.GattServiceStopped
 
             is GattServerEvent.UnsupportedEvent ->
                 logger.error(
@@ -147,7 +154,7 @@ class AndroidMdocSessionManager(
             }
 
             is GattServerEvent.SessionEnd -> {
-                _state.value = MdocSessionState.MdocSessionEnded(event.status)
+                _state.value = MdocPeripheralState.MdocPeripheralEnded(event.status)
                 logger.debug(
                     logTag,
                     "Mdoc - Session end command was received. Closing connection"
@@ -155,7 +162,7 @@ class AndroidMdocSessionManager(
             }
 
             is GattServerEvent.MessageReceived -> {
-                _state.value = MdocSessionState.MessageReceived(event.byteArray)
+                _state.value = MdocPeripheralState.MessageReceived(event.byteArray)
             }
         }
     }

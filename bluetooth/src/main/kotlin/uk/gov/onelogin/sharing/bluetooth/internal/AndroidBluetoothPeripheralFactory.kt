@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal
 
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.logging.api.Logger
@@ -25,7 +26,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.AndroidGattServerMa
  * @param logger An instance of [Logger] for logging events.
  * @param gattWriter A custom class to write to bluetooth characteristics
  */
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
 class AndroidBluetoothPeripheralFactory(
     private val bluetoothPermissionChecker: BluetoothPermissionChecker,
     private val context: Context,
