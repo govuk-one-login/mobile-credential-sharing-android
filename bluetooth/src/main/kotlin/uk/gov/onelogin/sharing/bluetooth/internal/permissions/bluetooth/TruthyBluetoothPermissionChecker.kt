@@ -7,6 +7,7 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
  * [BluetoothPermissionChecker] implementation for use in Android-powered devices lower than
  * [android.os.Build.VERSION_CODES.S].
  */
-val truthyBluetoothPermissionChecker: BluetoothPermissionChecker = BluetoothPermissionChecker {
-    Response.Passed
-}
+internal val truthyBluetoothPermissionChecker: BluetoothPermissionChecker =
+    BluetoothPermissionChecker {
+        Response.Passed
+    }
