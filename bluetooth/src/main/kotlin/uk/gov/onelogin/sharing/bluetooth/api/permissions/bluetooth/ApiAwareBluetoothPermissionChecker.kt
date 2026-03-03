@@ -30,6 +30,9 @@ class ApiAwareBluetoothPermissionChecker(private val checker: PermissionChecker)
     override fun checkCentralPermissions(): PermissionChecker.Response =
         calculateImplementation().checkCentralPermissions()
 
+    override fun checkBluetoothPermissions(): PermissionChecker.Response =
+        calculateImplementation().checkBluetoothPermissions()
+
     internal fun calculateImplementation(): BluetoothPermissionChecker = when {
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S ->
             TruthyBluetoothPermissionChecker

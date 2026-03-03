@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth
 
 import android.Manifest
 import android.os.Build
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
 
 /**
  * Checks if the application has the necessary permissions for Bluetooth operations.
@@ -12,6 +13,10 @@ import android.os.Build
 interface BluetoothPermissionChecker :
     BluetoothPeripheralPermissionChecker,
     BluetoothCentralPermissionChecker {
+
+    fun checkBluetoothPermissions(): Response
+
+    fun hasBluetoothPermissions(): Boolean = checkBluetoothPermissions() == Response.Passed
 
         companion object {
             @JvmStatic

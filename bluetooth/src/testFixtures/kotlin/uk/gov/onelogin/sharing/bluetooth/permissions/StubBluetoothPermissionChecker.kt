@@ -9,4 +9,5 @@ class StubBluetoothPermissionChecker(
 ) : BluetoothPermissionChecker {
     override fun checkPeripheralPermissions(): Response = peripheralResult
     override fun checkCentralPermissions(): Response = centralResult
+    override fun checkBluetoothPermissions(): Response = peripheralResult
 }

@@ -19,4 +19,7 @@ internal class Api31BluetoothPermissionChecker(checker: PermissionChecker) :
 
     override fun checkCentralPermissions(): PermissionChecker.Response =
         checkPermissions(bluetoothPermissions())
+
+    override fun checkBluetoothPermissions(): PermissionChecker.Response =
+        checkPermissions(bluetoothPermissions())
 }
