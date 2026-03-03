@@ -11,8 +11,9 @@ import com.google.accompanist.permissions.PermissionStatus
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.android.ui.componentsv2.permission.PermissionScreen
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
+import uk.gov.onelogin.sharing.core.presentation.permissions.MultiplePermissionsScreen
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -30,9 +31,13 @@ class VerifierScannerPermissionLogicTest {
 
     private var hasLaunchedPermission = false
     private val state by lazy {
-        FakePermissionState(
-            permission = Manifest.permission.CAMERA,
-            status = permissionStatus,
+        FakeMultiplePermissionsState(
+            permissions = listOf(
+                FakePermissionState(
+                    Manifest.permission.CAMERA,
+                    permissionStatus
+                )
+            ),
             onLaunchPermission = { hasLaunchedPermission = true }
         )
     }
@@ -42,10 +47,10 @@ class VerifierScannerPermissionLogicTest {
         permissionStatus = PermissionStatus.Denied(false)
 
         composeTestRule.setContent {
-            PermissionScreen(
-                permissionState = state,
+            MultiplePermissionsScreen(
+                state = state,
                 logic = verifierScannerPermissionLogic(LocalContext.current),
-                hasPreviouslyDeniedPermission = false
+                hasPreviouslyRequestedPermission = false
             )
         }
 
@@ -59,10 +64,10 @@ class VerifierScannerPermissionLogicTest {
         permissionStatus = PermissionStatus.Denied(true)
 
         composeTestRule.setContent {
-            PermissionScreen(
-                permissionState = state,
+            MultiplePermissionsScreen(
+                state = state,
                 logic = verifierScannerPermissionLogic(LocalContext.current),
-                hasPreviouslyDeniedPermission = false
+                hasPreviouslyRequestedPermission = false
             )
         }
 
@@ -76,10 +81,10 @@ class VerifierScannerPermissionLogicTest {
         permissionStatus = PermissionStatus.Denied(false)
 
         composeTestRule.setContent {
-            PermissionScreen(
-                permissionState = state,
+            MultiplePermissionsScreen(
+                state = state,
                 logic = verifierScannerPermissionLogic(LocalContext.current),
-                hasPreviouslyDeniedPermission = true
+                hasPreviouslyRequestedPermission = true
             )
         }
 
