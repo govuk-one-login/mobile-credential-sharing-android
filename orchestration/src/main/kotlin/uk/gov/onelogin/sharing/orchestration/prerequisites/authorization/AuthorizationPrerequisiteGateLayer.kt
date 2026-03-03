@@ -49,7 +49,7 @@ internal class AuthorizationPrerequisiteGateLayer(
         PermissionChecker.Response.Passed -> null
         is PermissionChecker.Response.Missing -> PrerequisiteResponse.Unauthorized(
             UnauthorizedReason.MissingPermissions(
-                result.missingPermissions
+                result.missingPermissions.toSet()
             )
         )
     }

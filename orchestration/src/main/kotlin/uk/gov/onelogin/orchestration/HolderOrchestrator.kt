@@ -20,7 +20,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate.Companion.meetsPrerequisites
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 
@@ -51,23 +52,36 @@ class HolderOrchestrator(
         }
 
         try {
-            session.transitionTo(
-                HolderSessionState.Preflight(requiredPermissions)
-            )
-            logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
-
             val prerequisiteCheck = prerequisiteGate.checkPrerequisites(
                 Prerequisite.BLUETOOTH
-            )
+            )[Prerequisite.BLUETOOTH]!!
 
-            if (prerequisiteCheck.meetsPrerequisites()) {
-                session.transitionTo(HolderSessionState.ReadyToPresent)
-                val qrCode = qrCodeData.generateQrCode(stateUUID)
-                if (qrCode.isNotEmpty()) {
-                    session.transitionTo(HolderSessionState.PresentingEngagement(qrCode))
+            when (prerequisiteCheck) {
+                is PrerequisiteResponse.Incapable,
+                is PrerequisiteResponse.NotReady -> Unit
+
+                PrerequisiteResponse.MeetsPrerequisites -> {
+                    session.transitionTo(HolderSessionState.ReadyToPresent)
+                    val qrCode = qrCodeData.generateQrCode(stateUUID)
+                    if (qrCode.isNotEmpty()) {
+                        session.transitionTo(
+                            HolderSessionState.PresentingEngagement(qrCode)
+                        )
+                    }
                 }
-            }
 
+                is PrerequisiteResponse.Unauthorized ->
+                    when (prerequisiteCheck.reason) {
+                        is UnauthorizedReason.MissingPermissions -> {
+                            session.transitionTo(
+                                HolderSessionState.Preflight(
+                                    prerequisiteCheck.reason.missingPermissions
+                                )
+                            )
+                        }
+                    }
+            }
+            logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(

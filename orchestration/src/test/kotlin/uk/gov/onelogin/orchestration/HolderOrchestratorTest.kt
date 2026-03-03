@@ -22,8 +22,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.security.usecases.FakeGenerateQrCodeUseCase
@@ -56,9 +56,7 @@ class HolderOrchestratorTest {
     )
 
     private val gate by lazy {
-        PrerequisiteGate {
-            prerequisiteResponse
-        }
+        StubPrerequisiteGate(prerequisiteResponse)
     }
 
     private val fakeGenerateQrEngagement = FakeGenerateQrCodeUseCase()
