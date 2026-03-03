@@ -20,7 +20,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPerm
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationRequest
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
@@ -31,7 +31,7 @@ import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,
-    private val authorizationGate: PrerequisiteGate.Authorization,
+    private val authorizationGate: PrerequisiteGateLayer.Authorization,
     private val qrCodeData: GenerateEngagementQrCode
 ) : Orchestrator.Holder {
 

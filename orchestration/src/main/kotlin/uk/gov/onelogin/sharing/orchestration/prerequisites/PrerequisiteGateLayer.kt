@@ -10,11 +10,11 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.Authori
  * @see uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
  * @see uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Preflight
  */
-sealed interface PrerequisiteGate {
+sealed interface PrerequisiteGateLayer {
     /**
      * Abstraction for authorizing observable capabilities.
      */
-    fun interface Authorization : PrerequisiteGate {
+    fun interface Authorization : PrerequisiteGateLayer {
         /**
          * Validate the [request]ed capabilities are authorized.
          */

@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.authorization
 
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
 
 data class FakePrerequisiteAuthorizationGate(var result: AuthorizationResponse) :
-    PrerequisiteGate.Authorization {
+    PrerequisiteGateLayer.Authorization {
     override fun checkAuthorization(request: AuthorizationRequest): AuthorizationResponse = result
 }

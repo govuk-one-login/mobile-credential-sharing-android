@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites.authorization
 
 /**
  * Sealed class to represent different types of responses returned by the
- * [uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate.Authorization] interface.
+ * [uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer.Authorization] interface.
  */
 sealed class AuthorizationResponse {
     /**

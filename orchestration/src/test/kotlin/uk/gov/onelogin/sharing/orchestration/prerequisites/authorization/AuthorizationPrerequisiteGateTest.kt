@@ -24,7 +24,7 @@ class AuthorizationPrerequisiteGateTest {
     }
 
     private val gate by lazy {
-        AuthorizationPrerequisiteGate(
+        AuthorizationPrerequisiteGateLayer(
             logger = logger,
             permissionChecker = permissionChecker
         )
