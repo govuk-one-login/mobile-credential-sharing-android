@@ -36,10 +36,10 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
-import uk.gov.onelogin.sharing.bluetooth.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cose.CoseKeyToString

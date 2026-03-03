@@ -26,15 +26,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.MultiplePermissionsState
 import kotlinx.coroutines.CoroutineScope
 import uk.gov.android.ui.componentsv2.camera.CameraContentViewModel
 import uk.gov.android.ui.componentsv2.camera.ImageProxyConverter
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeUseCaseProviders
 import uk.gov.android.ui.componentsv2.camera.qr.CentrallyCroppedImageProxyConverter
-import uk.gov.android.ui.componentsv2.permission.PermissionLogic
-import uk.gov.android.ui.componentsv2.permission.PermissionScreen
 import uk.gov.android.ui.patterns.camera.qr.ModifierExtensions
 import uk.gov.android.ui.patterns.camera.qr.QrScannerScreen
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
@@ -45,6 +43,8 @@ import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
+import uk.gov.onelogin.sharing.core.presentation.permissions.MultiplePermissionsLogic
+import uk.gov.onelogin.sharing.core.presentation.permissions.MultiplePermissionsScreen
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
@@ -53,7 +53,7 @@ fun VerifierScannerContent(
     lifecycleOwner: LifecycleOwner,
     onUpdatePreviouslyDeniedPermission: (Boolean) -> Unit,
     hasPreviouslyDeniedPermission: Boolean,
-    permissionState: PermissionState,
+    permissionState: MultiplePermissionsState,
     barcodeScanResultCallback: BarcodeScanResult.Callback,
     modifier: Modifier = Modifier,
     viewModel: CameraContentViewModel = viewModel<CameraContentViewModel>()
@@ -68,13 +68,13 @@ fun VerifierScannerContent(
 
     VerifierScannerContentDisposableEffects(lifecycleOwner, onUpdatePreviouslyDeniedPermission)
 
-    PermissionScreen(
-        hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
+    MultiplePermissionsScreen(
+        state = permissionState,
+        hasPreviouslyRequestedPermission = hasPreviouslyDeniedPermission,
         logic = verifierScannerPermissionLogic(
             context = LocalContext.current,
             modifier = modifier
-        ),
-        permissionState = permissionState
+        )
     )
 }
 
@@ -110,7 +110,7 @@ private fun VerifierScannerContentDisposableEffects(
 @ComposablePreview
 internal fun VerifierScannerContentPreview(
     @PreviewParameter(VerifierScannerPreviewParameters::class)
-    permissionStates: Pair<PermissionState, Boolean>
+    permissionStates: Pair<MultiplePermissionsState, Boolean>
 ) {
     GdsTheme {
         Column(
@@ -142,7 +142,7 @@ fun verifierScannerPermissionLogic(
     viewModel: CameraContentViewModel = viewModel<CameraContentViewModel>(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     coroutineScope: CoroutineScope = rememberCoroutineScope()
-): PermissionLogic = PermissionLogic(
+): MultiplePermissionsLogic = MultiplePermissionsLogic(
     onGrantPermission = {
         val surfaceRequest: SurfaceRequest? by
             viewModel.surfaceRequest.collectAsStateWithLifecycle(lifecycleOwner = lifecycleOwner)
@@ -165,7 +165,7 @@ fun verifierScannerPermissionLogic(
             colors = QrScannerOverlayDefaults
         )
     },
-    onPermissionPermanentlyDenied = { _ ->
+    onPermanentlyDenyPermission = { _ ->
         PermanentPermissionDenialButton(
             context = context,
             modifier = modifier,
