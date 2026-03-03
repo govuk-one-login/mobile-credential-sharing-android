@@ -32,6 +32,7 @@ android {
 dependencies {
     listOf(
         libs.metro.viewmodel.compose,
+        testFixtures(projects.core),
         testFixtures(projects.security),
         testFixtures(projects.sdk)
     ).forEach(::androidTestImplementation)

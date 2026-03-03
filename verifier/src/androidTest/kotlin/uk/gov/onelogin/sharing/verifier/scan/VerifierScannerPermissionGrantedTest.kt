@@ -11,8 +11,9 @@ import com.google.accompanist.permissions.PermissionStatus
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.android.ui.componentsv2.permission.PermissionScreen
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
+import uk.gov.onelogin.sharing.core.presentation.permissions.MultiplePermissionsScreen
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -30,9 +31,13 @@ class VerifierScannerPermissionGrantedTest {
 
     private var hasLaunchedPermission = false
     private val state by lazy {
-        FakePermissionState(
-            permission = Manifest.permission.CAMERA,
-            status = permissionStatus,
+        FakeMultiplePermissionsState(
+            listOf(
+                FakePermissionState(
+                    permission = Manifest.permission.CAMERA,
+                    status = permissionStatus
+                )
+            ),
             onLaunchPermission = { hasLaunchedPermission = true }
         )
     }
@@ -40,10 +45,10 @@ class VerifierScannerPermissionGrantedTest {
     @Test
     fun permissionGrantedBehaviour() {
         composeTestRule.setContent {
-            PermissionScreen(
-                permissionState = state,
+            MultiplePermissionsScreen(
+                state = state,
                 logic = verifierScannerPermissionLogic(LocalContext.current),
-                hasPreviouslyDeniedPermission = false
+                hasPreviouslyRequestedPermission = false
             )
         }
 

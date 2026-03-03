@@ -21,7 +21,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasFlags
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.MultiplePermissionsState
 import org.hamcrest.CoreMatchers.allOf
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_PERMANENT_DENIAL_BUTTON
@@ -119,7 +119,7 @@ class VerifierScannerRule(
      */
     @OptIn(ExperimentalPermissionsApi::class)
     fun render(
-        permissionState: @Composable () -> PermissionState,
+        permissionState: @Composable () -> MultiplePermissionsState,
         modifier: Modifier = Modifier,
         onInvalidBarcode: (String) -> Unit = {},
         onValidBarcode: (String) -> Unit = {}
