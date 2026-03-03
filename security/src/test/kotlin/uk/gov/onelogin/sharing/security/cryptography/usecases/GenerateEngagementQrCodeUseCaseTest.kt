@@ -7,9 +7,9 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
-import uk.gov.onelogin.sharing.security.engagement.GenerateQrCodeUseCase
+import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCodeUseCase
 
-class GenerateQrCodeUseCaseTest {
+class GenerateEngagementQrCodeUseCaseTest {
     private val testQrCode = "${Engagement.QR_CODE_SCHEME}TEST_QR"
 
     private val logger = SystemLogger()
@@ -20,7 +20,7 @@ class GenerateQrCodeUseCaseTest {
 
     @Test
     fun `should return qr data as string`() {
-        val generateEngagementQrCode = GenerateQrCodeUseCase(
+        val generateEngagementQrCode = GenerateEngagementQrCodeUseCase(
             logger,
             sessionSecurity,
             fakeEngagementGenerator
