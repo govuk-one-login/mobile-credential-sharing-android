@@ -9,11 +9,17 @@ import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.hasEntry
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
+import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.FakePrerequisiteCapabilityGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
+import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReasonMatchers.isMissingHardware
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasIncapableReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasUnauthorizedPermissions
 
 class PrerequisiteGateImplTest {
 
     private var authorizationResult: PrerequisiteResponse.Unauthorized? = null
+    private var capabilityResult: PrerequisiteResponse.Incapable? = null
+
     private val prerequisite = Prerequisite.BLUETOOTH
 
     private val authorization by lazy {
@@ -21,9 +27,15 @@ class PrerequisiteGateImplTest {
             result = authorizationResult
         )
     }
+    private val capability by lazy {
+        FakePrerequisiteCapabilityGate(
+            result = capabilityResult
+        )
+    }
     private val gate by lazy {
         PrerequisiteGateImpl(
-            authorization = authorization
+            authorization = authorization,
+            capability = capability,
         )
     }
 
@@ -40,10 +52,8 @@ class PrerequisiteGateImplTest {
     }
 
     @Test
-    fun `Failing authorization provides an authorized value`() = runTest {
-        authorizationResult = PrerequisiteResponse.Unauthorized(
-            UnauthorizedReason.MissingPermissions(Manifest.permission.BLUETOOTH)
-        )
+    fun `Failing authorization provides an unauthorized value`() = runTest {
+        setupAuthorizationFailure()
 
         assertThat(
             gate.checkPrerequisites(prerequisite),
@@ -54,5 +64,47 @@ class PrerequisiteGateImplTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `Authorization failures are a higher priority than capability failures`() = runTest {
+        setupAuthorizationFailure()
+        setupCapabilityFailure()
+
+        assertThat(
+            gate.checkPrerequisites(prerequisite),
+            hasEntry(
+                equalTo(prerequisite),
+                hasUnauthorizedPermissions(
+                    contains(Manifest.permission.BLUETOOTH),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Failing capability provides an incapable reason`() = runTest {
+        setupCapabilityFailure()
+        assertThat(
+            gate.checkPrerequisites(prerequisite),
+            hasEntry(
+                equalTo(prerequisite),
+                hasIncapableReason(isMissingHardware())
+            )
+        )
+    }
+
+    private fun setupAuthorizationFailure(
+        reason: UnauthorizedReason = UnauthorizedReason.MissingPermissions(
+            Manifest.permission.BLUETOOTH
+        )
+    ) {
+        authorizationResult = PrerequisiteResponse.Unauthorized(reason)
+    }
+
+    private fun setupCapabilityFailure(
+        reason: IncapableReason = IncapableReason.MissingHardware
+    ) {
+        capabilityResult = PrerequisiteResponse.Incapable(reason)
     }
 }

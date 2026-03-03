@@ -4,6 +4,7 @@ import org.hamcrest.Matcher
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReasonMatchers.isMissingPermissions
+import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 
 object PrerequisiteResponseMatchers {
 
@@ -14,6 +15,10 @@ object PrerequisiteResponseMatchers {
             matcher
         )
     )
+
+    fun hasIncapableReason(
+        matcher: Matcher<in IncapableReason>
+    ): Matcher<PrerequisiteResponse> = HasIncapableReason(matcher)
 
     fun hasUnauthorizedReason(
         matcher: Matcher<in UnauthorizedReason>,
