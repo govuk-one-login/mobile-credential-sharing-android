@@ -32,15 +32,15 @@ class Api31BluetoothPermissionCheckerTest {
     }
 
     @Test
-    fun `returns true when peripheral permissions granted`() = runTest {
-        assertTrue(checker.hasPeripheralPermissions())
+    fun `returns true when bluetooth permissions granted`() = runTest {
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
-    fun `returns false when peripheral permissions denied`() = runTest {
+    fun `returns false when bluetooth permissions denied`() = runTest {
         permissionResult = Response.Missing(Manifest.permission.BLUETOOTH_ADVERTISE)
 
-        assertFalse(checker.hasPeripheralPermissions())
+        assertFalse(checker.hasBluetoothPermissions())
     }
 
     @Test
@@ -55,10 +55,10 @@ class Api31BluetoothPermissionCheckerTest {
     }
 
     @Test
-    fun `Performing a peripheral check exposes missing permissions`() = runTest {
+    fun `Performing a bluetooth check exposes missing permissions`() = runTest {
         permissionResult = Response.Missing(Manifest.permission.BLUETOOTH_ADVERTISE)
 
-        val result = checker.checkPeripheralPermissions()
+        val result = checker.hasBluetoothPermissions()
 
         assertThat(
             result,

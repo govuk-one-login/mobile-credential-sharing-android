@@ -78,7 +78,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
     @Test
     fun `peripheral checks return true when SDK is below S`() = runTest {
         setSdkLevel(Build.VERSION_CODES.R)
-        assertTrue(checker.hasPeripheralPermissions())
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
@@ -99,7 +99,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
     fun `returns true when peripheral permission granted on SDK S or above`() = runTest {
         setSdkLevel(Build.VERSION_CODES.S)
 
-        assertTrue(checker.hasPeripheralPermissions())
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
@@ -107,7 +107,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
         setSdkLevel(Build.VERSION_CODES.TIRAMISU)
 
         permissionResult = PermissionChecker.Response.Missing()
-        assertFalse(checker.hasPeripheralPermissions())
+        assertFalse(checker.hasBluetoothPermissions())
     }
 
     private fun setSdkLevel(sdk: Int) {

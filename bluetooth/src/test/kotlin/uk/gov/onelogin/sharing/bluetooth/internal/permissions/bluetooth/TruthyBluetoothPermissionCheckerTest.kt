@@ -16,9 +16,9 @@ class TruthyBluetoothPermissionCheckerTest {
     }
 
     @Test
-    fun `Always passes peripheral permission checks`() = runTest {
+    fun `Always passes bluetooth permission checks`() = runTest {
         assertThat(
-            TruthyBluetoothPermissionChecker.checkPeripheralPermissions(),
+            TruthyBluetoothPermissionChecker.hasBluetoothPermissions(),
             equalTo(PermissionChecker.Response.Passed)
         )
     }

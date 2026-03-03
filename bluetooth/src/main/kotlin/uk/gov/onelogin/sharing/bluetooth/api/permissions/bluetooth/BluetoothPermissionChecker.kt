@@ -11,7 +11,6 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
  * versus a Bluetooth Central (client).
  */
 interface BluetoothPermissionChecker :
-    BluetoothPeripheralPermissionChecker,
     BluetoothCentralPermissionChecker {
 
     fun checkBluetoothPermissions(): Response

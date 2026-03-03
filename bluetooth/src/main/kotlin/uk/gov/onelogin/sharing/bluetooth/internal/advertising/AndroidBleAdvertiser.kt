@@ -17,13 +17,13 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
-    private val permissionChecker: BluetoothPeripheralPermissionChecker,
+    private val permissionChecker: BluetoothPermissionChecker,
     private val logger: Logger,
     private val startTimeoutMs: Long = 5_000
 ) : BleAdvertiser {
@@ -34,7 +34,7 @@ internal class AndroidBleAdvertiser(
     private var currentCallback: AdvertisingCallback? = null
 
     override fun isBluetoothEnabled() = bleProvider.isBluetoothEnabled()
-    override fun hasAdvertisePermission() = permissionChecker.hasPeripheralPermissions()
+    override fun hasAdvertisePermission() = permissionChecker.hasBluetoothPermissions()
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
         when {
@@ -43,7 +43,7 @@ internal class AndroidBleAdvertiser(
                     AdvertisingError.BLUETOOTH_DISABLED
                 )
 
-            !permissionChecker.hasPeripheralPermissions() ->
+            !permissionChecker.hasBluetoothPermissions() ->
                 throw StartAdvertisingException(
                     AdvertisingError.MISSING_PERMISSION
                 )
