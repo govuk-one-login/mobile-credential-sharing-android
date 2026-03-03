@@ -15,9 +15,8 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker
  */
 @ContributesBinding(AppScope::class, binding = binding<BluetoothPermissionChecker>())
 @ContributesBinding(ViewModelScope::class, binding = binding<BluetoothPermissionChecker>())
-class ApiAwareBluetoothPermissionChecker(
-    private val checker: PermissionChecker
-) : BluetoothPermissionChecker {
+class ApiAwareBluetoothPermissionChecker(private val checker: PermissionChecker) :
+    BluetoothPermissionChecker {
 
     override fun checkBluetoothPermissions(): PermissionChecker.Response =
         calculateImplementation().checkBluetoothPermissions()
