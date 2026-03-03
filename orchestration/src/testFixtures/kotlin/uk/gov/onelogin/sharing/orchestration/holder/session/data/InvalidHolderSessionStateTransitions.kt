@@ -23,7 +23,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val notStartedTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.PresentingEngagement,
+            HolderSessionState.PresentingEngagement(""),
             HolderSessionState.Connecting,
             HolderSessionState.RequestReceived,
             HolderSessionState.ProcessingResponse,
@@ -37,7 +37,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val preflightTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
-            HolderSessionState.PresentingEngagement,
+            HolderSessionState.PresentingEngagement(""),
             HolderSessionState.Connecting,
             HolderSessionState.RequestReceived,
             HolderSessionState.ProcessingResponse,
@@ -60,19 +60,19 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.PresentingEngagement,
+            HolderSessionState.PresentingEngagement(""),
             HolderSessionState.RequestReceived,
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub,
             HolderSessionStateStubs.userJourneyFailure
         ).map {
-            HolderSessionState.PresentingEngagement to it
+            HolderSessionState.PresentingEngagement("") to it
         }
         private val connectingTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.PresentingEngagement,
+            HolderSessionState.PresentingEngagement(""),
             HolderSessionState.Connecting,
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
@@ -83,7 +83,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.PresentingEngagement,
+            HolderSessionState.PresentingEngagement(""),
             HolderSessionState.Connecting,
             HolderSessionState.RequestReceived,
             HolderSessionStateStubs.successStub
@@ -94,7 +94,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.PresentingEngagement,
+            HolderSessionState.PresentingEngagement(""),
             HolderSessionState.Connecting,
             HolderSessionState.RequestReceived
         ).map {

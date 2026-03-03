@@ -33,7 +33,8 @@ android {
 dependencies {
     listOf(
         projects.bluetooth,
-        projects.core
+        projects.core,
+        projects.security
     ).forEach(::api)
 
     listOf(
@@ -42,7 +43,8 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
-        testFixtures(projects.core)
+        testFixtures(projects.core),
+        testFixtures(projects.security)
     ).forEach(::testImplementation)
 }
 

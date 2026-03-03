@@ -62,14 +62,11 @@ class HolderWelcomeScreenRule(
 
     val viewModel: HolderWelcomeViewModel by lazy {
         HolderWelcomeViewModel(
-            sessionSecurity = fakeSessionSecurity,
-            engagementGenerator = fakeEngagementGenerator,
             mdocSessionManagerFactory = { mdocSessionManager },
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),
-            orchestrator = FakeOrchestrator(),
-            decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
+            orchestrator = FakeOrchestrator()
         )
     }
 

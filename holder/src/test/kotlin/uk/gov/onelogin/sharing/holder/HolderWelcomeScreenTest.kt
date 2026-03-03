@@ -39,11 +39,6 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.security.FakeSessionSecurity
-import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -70,21 +65,14 @@ class HolderWelcomeScreenTest {
         Intents.release()
     }
 
-    private val dummyEngagementData = "ENGAGEMENT_DATA"
-
     private fun createViewModel(
-        mdocBleSession: FakeMdocSessionManager = FakeMdocSessionManager(),
-        engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
-        sessionSecurity: SessionSecurity = FakeSessionSecurity()
+        mdocBleSession: FakeMdocSessionManager = FakeMdocSessionManager()
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
-        sessionSecurity = sessionSecurity,
-        engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocBleSession },
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),
-        orchestrator = FakeOrchestrator(),
-        decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
+        orchestrator = FakeOrchestrator()
     )
 
     @Test

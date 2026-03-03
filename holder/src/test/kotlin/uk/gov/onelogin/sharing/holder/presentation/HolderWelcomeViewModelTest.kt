@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.holder.presentation
 import androidx.lifecycle.SavedStateHandle
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -18,41 +19,29 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.holder.FakeMdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
-import uk.gov.onelogin.sharing.security.FakeSessionSecurity
-import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HolderWelcomeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val dummyEngagementData = "ENGAGEMENT_DATA"
     private val logger = SystemLogger()
-    private val decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
     private fun createViewModel(
         mdocSessionManager: MdocSessionManager = FakeMdocSessionManager(),
-        engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
-        sessionSecurity: SessionSecurity = FakeSessionSecurity()
+        orchestrator: FakeOrchestrator = FakeOrchestrator()
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
-        sessionSecurity = sessionSecurity,
-        engagementGenerator = engagementGenerator,
         mdocSessionManagerFactory = { mdocSessionManager },
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = logger,
         savedStateHandle = SavedStateHandle(),
-        orchestrator = FakeOrchestrator(),
-        decryptDeviceRequestUseCase = decryptDeviceRequestUseCase
+        orchestrator = orchestrator
     )
 
     @Test
@@ -60,22 +49,9 @@ class HolderWelcomeViewModelTest {
         val viewModel = createViewModel()
 
         val state = viewModel.uiState.value
-        assertNotNull(state.qrData)
         assertEquals(MdocSessionState.Idle, state.sessionState)
         assertNull(state.lastErrorMessage)
         assertNotNull(state.uuid)
-    }
-
-    @Test
-    fun `sets qr code data when key is generated`() = runTest {
-        val fakeSessionSecurity = FakeSessionSecurity()
-        val viewModel = createViewModel(sessionSecurity = fakeSessionSecurity)
-
-        advanceUntilIdle()
-
-        val state = viewModel.uiState.value
-        assertEquals("${Engagement.QR_CODE_SCHEME}$dummyEngagementData", state.qrData)
-        assertEquals(MdocSessionState.Idle, state.sessionState)
     }
 
     @Test
@@ -550,22 +526,15 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `decrypts device request when session ends`() = runTest {
-        val fakeMdocSession =
-            FakeMdocSessionManager(initialState = MdocSessionState.Connected(DEVICE_ADDRESS))
-        val viewModel = createViewModel(mdocSessionManager = fakeMdocSession)
-
-        fakeMdocSession.emitState(
-            MdocSessionState.MessageReceived(
-                byteArrayOf(1, 2, 3)
+    fun `when orchestrator state is PresentingEngagement, should set QR data to ui state`() {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(
+                HolderSessionState.PresentingEngagement(qrData = "fakeQrData")
             )
         )
 
-        advanceUntilIdle()
+        val viewModel = createViewModel(orchestrator = orchestrator)
 
-        assertEquals(
-            deviceRequestStub(),
-            viewModel.uiState.value.deviceRequest
-        )
+        assertEquals("fakeQrData", viewModel.uiState.value.qrData)
     }
 }

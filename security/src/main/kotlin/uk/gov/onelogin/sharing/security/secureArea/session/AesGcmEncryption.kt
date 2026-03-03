@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.security.secureArea.session
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import javax.crypto.AEADBadTagException
@@ -14,7 +15,7 @@ import uk.gov.onelogin.sharing.security.cryptography.Constants.AES_256_TRANSFORM
 import uk.gov.onelogin.sharing.security.cryptography.createNistInitialisationVector
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
 class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
 
     private var decryptionCounter = 1
