@@ -11,18 +11,16 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATI
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.completedAuthorizationCheck
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationRequest
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 
@@ -31,7 +29,7 @@ import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,
-    private val authorizationGate: PrerequisiteGateLayer.Authorization,
+    private val prerequisiteGate: PrerequisiteGate,
     private val qrCodeData: GenerateEngagementQrCode
 ) : Orchestrator.Holder {
 
@@ -58,32 +56,21 @@ class HolderOrchestrator(
             )
             logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
 
-            // future work: Authorization occurs within a capability check
-            val authResult = authorizationGate.checkAuthorization(
-                AuthorizationRequest.AuthorizePermission(
-                    bluetoothPermissions()
-                )
-            ).also {
-                logger.debug(
-                    logTag,
-                    completedAuthorizationCheck(
-                        Orchestrator.Holder.JOURNEY_NAME,
-                        it
-                    )
-                )
-            }
+            val authResult = prerequisiteGate.checkPrerequisites(Prerequisite.BLUETOOTH)
 
-            when (authResult) {
-                AuthorizationResponse.Authorized -> {
+            when (authResult[Prerequisite.BLUETOOTH]!!) {
+                PrerequisiteResponse.MeetsPrerequisites -> {
                     session.transitionTo(HolderSessionState.ReadyToPresent)
                     val qrCode = qrCodeData.generateQrCode(stateUUID)
                     if (qrCode.isNotEmpty()) {
                         session.transitionTo(HolderSessionState.PresentingEngagement(qrCode))
                     }
                 }
-
-                is AuthorizationResponse.Unauthorized -> Unit
+                is PrerequisiteResponse.Incapable,
+                is PrerequisiteResponse.NotReady,
+                is PrerequisiteResponse.Unauthorized -> Unit
             }
+
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(

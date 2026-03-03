@@ -18,12 +18,12 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.security.usecases.FakeGenerateQrCodeUseCase
@@ -51,12 +51,14 @@ class HolderOrchestratorTest {
         )
     }
 
-    private var authorizationResponse = AuthorizationResponse.Authorized
+    private var prerequisiteResponse: Map<Prerequisite, PrerequisiteResponse> = mapOf(
+        Prerequisite.BLUETOOTH to PrerequisiteResponse.MeetsPrerequisites
+    )
 
-    private val permissionChecker by lazy {
-        FakePrerequisiteAuthorizationGate(
-            authorizationResponse
-        )
+    private val gate by lazy {
+        PrerequisiteGate {
+            prerequisiteResponse
+        }
     }
 
     private val fakeGenerateQrEngagement = FakeGenerateQrCodeUseCase()
@@ -65,7 +67,7 @@ class HolderOrchestratorTest {
         HolderOrchestrator(
             logger = logger,
             sessionFactory = sessionFactory,
-            authorizationGate = permissionChecker,
+            prerequisiteGate = gate,
             qrCodeData = fakeGenerateQrEngagement
 
         )
@@ -82,12 +84,6 @@ class HolderOrchestratorTest {
             assertThat(
                 sessionFactory,
                 currentSessionState(inPresentingEngagement())
-            )
-
-            assert(
-                logger.any { entry ->
-                    entry.message.contains(authorizationResponse.toString())
-                }
             )
         }
 
@@ -106,12 +102,6 @@ class HolderOrchestratorTest {
         assertThat(
             sessionFactory,
             currentSessionState(inPresentingEngagement())
-        )
-
-        assert(
-            logger.any { entry ->
-                entry.message.contains(authorizationResponse.toString())
-            }
         )
     }
 

@@ -1,9 +1,8 @@
-package uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.matchers
+package uk.gov.onelogin.sharing.orchestration.prerequisites.authorization
 
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
 
 internal class IsMissingPermission(private val matcher: Matcher<in Iterable<String>>) :
     TypeSafeMatcher<UnauthorizedReason>() {

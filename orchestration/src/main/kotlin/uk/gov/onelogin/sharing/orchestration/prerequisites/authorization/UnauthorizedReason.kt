@@ -11,5 +11,9 @@ sealed class UnauthorizedReason {
      */
     data class MissingPermissions(val missingPermissions: List<String>) :
         UnauthorizedReason(),
-        Iterable<String> by missingPermissions
+        Iterable<String> by missingPermissions {
+            constructor(
+                vararg permissions: String
+            ) : this (permissions.toList())
+        }
 }

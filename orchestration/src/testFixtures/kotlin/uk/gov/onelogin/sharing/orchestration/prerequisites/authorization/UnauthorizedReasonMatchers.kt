@@ -1,8 +1,7 @@
-package uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.matchers
+package uk.gov.onelogin.sharing.orchestration.prerequisites.authorization
 
 import org.hamcrest.CoreMatchers
 import org.hamcrest.Matcher
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
 
 object UnauthorizedReasonMatchers {
     fun isMissingPermissionInstance(): Matcher<UnauthorizedReason> =
