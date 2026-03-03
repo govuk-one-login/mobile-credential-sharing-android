@@ -6,15 +6,22 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
 
 /**
  * Checks if the application has the necessary permissions for Bluetooth operations.
- *
- * This contract separates the permission checks for acting as a Bluetooth Peripheral (server)
- * versus a Bluetooth Central (client).
  */
-interface BluetoothPermissionChecker :
-    BluetoothCentralPermissionChecker {
+fun interface BluetoothPermissionChecker {
 
+    /**
+     * Checks if the app has the required permissions to interact with devices via Bluetooth.
+     *
+     * @return [Response.Passed] if all required permissions are granted.
+     * Otherwise, [Response.Missing] containing the list of required permissions.
+     */
     fun checkBluetoothPermissions(): Response
 
+    /**
+     * Checks if the app has the required permissions to interact with devices via Bluetooth.
+     *
+     * @return `true` if all required permissions are granted.
+     */
     fun hasBluetoothPermissions(): Boolean = checkBluetoothPermissions() == Response.Passed
 
         companion object {

@@ -4,10 +4,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPerm
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
 
 class StubBluetoothPermissionChecker(
-    var peripheralResult: Response = Response.Passed,
-    var centralResult: Response = Response.Passed
+    var result: Response = Response.Passed,
 ) : BluetoothPermissionChecker {
-    override fun checkPeripheralPermissions(): Response = peripheralResult
-    override fun checkCentralPermissions(): Response = centralResult
-    override fun checkBluetoothPermissions(): Response = peripheralResult
+    override fun checkBluetoothPermissions(): Response = result
 }

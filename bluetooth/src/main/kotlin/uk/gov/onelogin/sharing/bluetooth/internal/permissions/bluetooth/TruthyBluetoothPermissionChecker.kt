@@ -8,8 +8,5 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
  * [android.os.Build.VERSION_CODES.S].
  */
 internal data object TruthyBluetoothPermissionChecker : BluetoothPermissionChecker {
-    override fun checkPeripheralPermissions(): Response = Response.Passed
-    override fun checkCentralPermissions(): Response = Response.Passed
-
     override fun checkBluetoothPermissions(): Response = Response.Passed
 }

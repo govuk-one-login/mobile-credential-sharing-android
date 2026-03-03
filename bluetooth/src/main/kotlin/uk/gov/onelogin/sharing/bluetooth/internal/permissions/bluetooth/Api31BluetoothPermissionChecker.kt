@@ -14,11 +14,6 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 internal class Api31BluetoothPermissionChecker(checker: PermissionChecker) :
     BluetoothPermissionChecker,
     PermissionChecker by checker {
-    override fun checkPeripheralPermissions(): PermissionChecker.Response =
-        checkPermissions(bluetoothPermissions())
-
-    override fun checkCentralPermissions(): PermissionChecker.Response =
-        checkPermissions(bluetoothPermissions())
 
     override fun checkBluetoothPermissions(): PermissionChecker.Response =
         checkPermissions(bluetoothPermissions())

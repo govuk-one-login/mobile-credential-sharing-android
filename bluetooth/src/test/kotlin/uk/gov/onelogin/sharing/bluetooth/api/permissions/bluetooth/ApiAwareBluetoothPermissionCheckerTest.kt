@@ -72,7 +72,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
     @Test
     fun `central checks return true when SDK is below S`() = runTest {
         setSdkLevel(Build.VERSION_CODES.R)
-        assertTrue(checker.hasCentralPermissions())
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
@@ -84,7 +84,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
     @Test
     fun `returns true when central permission granted on SDK S or above`() = runTest {
         setSdkLevel(Build.VERSION_CODES.S)
-        assertTrue(checker.hasCentralPermissions())
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
@@ -92,7 +92,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
         setSdkLevel(Build.VERSION_CODES.TIRAMISU)
 
         permissionResult = PermissionChecker.Response.Missing()
-        assertFalse(checker.hasCentralPermissions())
+        assertFalse(checker.hasBluetoothPermissions())
     }
 
     @Test

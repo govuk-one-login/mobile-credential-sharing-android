@@ -13,7 +13,7 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothCentralPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -28,7 +28,7 @@ const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 @Suppress("TooManyFunctions")
 internal class AndroidGattClientManager(
     private val context: Context,
-    private val permissionChecker: BluetoothCentralPermissionChecker,
+    private val permissionChecker: BluetoothPermissionChecker,
     private val serviceValidator: ServiceValidator,
     private val gattWriter: GattWriter,
     private val logger: Logger
@@ -47,7 +47,7 @@ internal class AndroidGattClientManager(
     private var isSessionEnd = false
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
-        if (!permissionChecker.hasCentralPermissions()) {
+        if (!permissionChecker.hasBluetoothPermissions()) {
             _events.tryEmit(
                 GattClientEvent.Error(
                     ClientError.BLUETOOTH_PERMISSION_MISSING

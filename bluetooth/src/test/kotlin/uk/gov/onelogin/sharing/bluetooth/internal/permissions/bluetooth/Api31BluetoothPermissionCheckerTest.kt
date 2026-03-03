@@ -45,13 +45,13 @@ class Api31BluetoothPermissionCheckerTest {
 
     @Test
     fun `returns true when central permissions granted`() = runTest {
-        assertTrue(checker.hasCentralPermissions())
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
     fun `returns false when central permissions denied`() = runTest {
         permissionResult = Response.Missing(Manifest.permission.BLUETOOTH_ADVERTISE)
-        assertFalse(checker.hasCentralPermissions())
+        assertFalse(checker.hasBluetoothPermissions())
     }
 
     @Test
@@ -75,7 +75,7 @@ class Api31BluetoothPermissionCheckerTest {
     fun `Performing a central check exposes missing permissions`() = runTest {
         permissionResult = Response.Missing(Manifest.permission.BLUETOOTH_SCAN)
 
-        val result = checker.checkCentralPermissions()
+        val result = checker.checkBluetoothPermissions()
 
         assertThat(
             result,
