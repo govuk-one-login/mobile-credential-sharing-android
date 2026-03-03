@@ -13,7 +13,7 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionReset
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -49,7 +49,7 @@ class HolderOrchestrator(
             // future work: Authorization occurs within a capability check
             authorizationGate.checkAuthorization(
                 AuthorizationRequest.AuthorizePermission(
-                    peripheralPermissions()
+                    bluetoothPermissions()
                 )
             ).also {
                 logger.debug(

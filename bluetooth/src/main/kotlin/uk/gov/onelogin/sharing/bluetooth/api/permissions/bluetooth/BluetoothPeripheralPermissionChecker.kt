@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth
 
-import android.Manifest
-import android.os.Build
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
 
 /**
@@ -24,16 +22,4 @@ fun interface BluetoothPeripheralPermissionChecker {
      * @return `true` if all required peripheral permissions are granted.
      */
     fun hasPeripheralPermissions(): Boolean = checkPeripheralPermissions() == Response.Passed
-
-    companion object {
-        @JvmStatic
-        fun peripheralPermissions(): List<String> = buildList {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-                add(Manifest.permission.BLUETOOTH_ADVERTISE)
-            } else {
-                add(Manifest.permission.BLUETOOTH)
-            }
-        }
-    }
 }
