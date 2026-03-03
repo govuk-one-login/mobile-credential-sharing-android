@@ -6,7 +6,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.Api31BluetoothPermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.TruthyBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.truthyBluetoothPermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 /**
@@ -22,7 +22,7 @@ class ApiAwareBluetoothPermissionChecker(private val checker: PermissionChecker)
         calculateImplementation().checkBluetoothPermissions()
 
     internal fun calculateImplementation(): BluetoothPermissionChecker = when {
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.S -> TruthyBluetoothPermissionChecker
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.S -> truthyBluetoothPermissionChecker
         else -> Api31BluetoothPermissionChecker(checker)
     }
 }

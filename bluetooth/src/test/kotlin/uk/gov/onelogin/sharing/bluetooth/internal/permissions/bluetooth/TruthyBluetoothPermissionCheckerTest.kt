@@ -11,13 +11,13 @@ class TruthyBluetoothPermissionCheckerTest {
     @Test
     fun `Always passes central permission checks`() = runTest {
         assertThat(
-            TruthyBluetoothPermissionChecker.checkBluetoothPermissions(),
+            truthyBluetoothPermissionChecker.checkBluetoothPermissions(),
             equalTo(PermissionChecker.Response.Passed)
         )
     }
 
     @Test
     fun `Always passes bluetooth permission checks`() = runTest {
-        assertTrue(TruthyBluetoothPermissionChecker.hasBluetoothPermissions())
+        assertTrue(truthyBluetoothPermissionChecker.hasBluetoothPermissions())
     }
 }

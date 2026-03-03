@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.util.ReflectionHelpers
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.Api31BluetoothPermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.TruthyBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.truthyBluetoothPermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.core.permission.StubPermissionChecker
 
@@ -56,7 +56,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
         setSdkLevel(Build.VERSION_CODES.R)
         assertThat(
             checker.calculateImplementation(),
-            equalTo(TruthyBluetoothPermissionChecker)
+            equalTo(truthyBluetoothPermissionChecker)
         )
     }
 
