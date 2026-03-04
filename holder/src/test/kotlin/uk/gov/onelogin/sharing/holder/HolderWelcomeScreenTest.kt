@@ -28,7 +28,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakeMdocPeripheralTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
@@ -41,10 +40,6 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.security.FakeSessionSecurity
-import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
 @Ignore
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -74,12 +69,7 @@ class HolderWelcomeScreenTest {
     }
 
     private fun createViewModel(
-        mdocBleSession: FakeMdocPeripheralTransport = FakeMdocPeripheralTransport(),
-        engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
-        sessionSecurity: SessionSecurity = FakeSessionSecurity()
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
-        sessionSecurity = sessionSecurity,
-        engagementGenerator = engagementGenerator,
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),
@@ -176,10 +166,7 @@ class HolderWelcomeScreenTest {
 
     @Test
     fun holderScreenSetsBluetoothStatusUnknownWhenPermissionsAreGranted() = runTest {
-        val mdocBleSession = FakeMdocPeripheralTransport().apply {
-            mockBluetoothEnabled = false
-        }
-        val viewModel = createViewModel(mdocBleSession = mdocBleSession)
+        val viewModel = createViewModel()
 
         composeTestRule.setContent {
             HolderWelcomeScreen(viewModel)

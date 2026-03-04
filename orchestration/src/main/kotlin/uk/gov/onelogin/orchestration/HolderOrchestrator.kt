@@ -4,7 +4,8 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import java.util.UUID
+import java.security.interfaces.ECPrivateKey
+import kotlin.math.log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharedFlow
@@ -28,11 +29,13 @@ import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationRequest
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
+import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 
 @Inject
@@ -43,15 +46,11 @@ class HolderOrchestrator(
     private val authorizationGate: PrerequisiteGate.Authorization,
     private val mdocPeripheralTransport: MdocPeripheralTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
-    private val qrCodeData: GenerateEngagementQrCode
+    private val engagementData: GenerateEngagementQrCode,
+    private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase
 ) : Orchestrator.Holder {
 
     private var session: HolderSession = sessionFactory.create()
-    private val uuid = UUID.randomUUID()
-
-    // this is used to generate the qr, but will also need to be passed to our bluetooth session
-    private val stateUUID: UUID = UUID.randomUUID()
-
     override val holderSessionState: SharedFlow<HolderSessionState> = session.currentState
 
     override fun start(requiredPermissions: Set<String>) {
@@ -65,10 +64,10 @@ class HolderOrchestrator(
         }
 
         appCoroutineScope.launch {
-            mdocPeripheralTransport.start(uuid)
-        }
+            mdocPeripheralTransport.start(
+                serviceUuid = (session as HolderSessionImpl).sessionContext.sessionUuid,
+            )
 
-        appCoroutineScope.launch {
             mdocPeripheralTransport.state.collect {
                 handleMdocState(it)
             }
@@ -98,7 +97,7 @@ class HolderOrchestrator(
             when (authResult) {
                 AuthorizationResponse.Authorized -> {
                     session.transitionTo(HolderSessionState.ReadyToPresent)
-                    val qrCode = qrCodeData.generateQrCode(stateUUID)
+                    val qrCode = (session as HolderSessionImpl).sessionContext.qrCode
                     if (qrCode.isNotEmpty()) {
                         session.transitionTo(HolderSessionState.PresentingEngagement(qrCode))
                     }
@@ -133,7 +132,7 @@ class HolderOrchestrator(
             }
         }
 
-        stopAdvertising()
+//        stopAdvertising()
     }
 
     override fun reset() {
@@ -152,11 +151,14 @@ class HolderOrchestrator(
     }
 
     private fun handleMdocState(state: MdocPeripheralState) {
+        logger.debug(logTag, "state = $state")
+
         when (state) {
             MdocPeripheralState.AdvertisingStarted -> {
                 logger.debug(
                     logTag,
-                    "Mdoc - Advertising Started UUID: $uuid"
+                    "Mdoc - Advertising Started UUID: " +
+                            "${(session as HolderSessionImpl).sessionContext.sessionUuid}"
                 )
             }
 
@@ -230,7 +232,26 @@ class HolderOrchestrator(
                 }
             }
 
-            else -> Unit
+            is MdocPeripheralState.MessageReceived -> {
+                val deviceRequest = decryptDeviceRequestUseCase.execute(
+                    sessionEstablishmentBytes = state.message,
+                    engagement = (session as HolderSessionImpl).sessionContext.engagement,
+                    holderPrivateKey = (session as HolderSessionImpl)
+                        .sessionContext
+                        .keyPair
+                        ?.private as ECPrivateKey
+                )
+
+//                _uiState.update { it.copy(deviceRequest = deviceRequest) }
+
+                deviceRequest
+                    .docRequests.firstOrNull()
+                    ?.itemsRequest
+                    ?.nameSpaces
+                    ?.forEach { (key, value) ->
+                        logger.debug(logTag, "Requests: key = $key, value = $value")
+                    }
+            }
         }
     }
 

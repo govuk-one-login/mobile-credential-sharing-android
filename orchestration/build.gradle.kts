@@ -37,6 +37,9 @@ dependencies {
         projects.security
     ).forEach(::api)
 
+    listOf(projects.models)
+        .forEach(::implementation)
+
     listOf(
         libs.com.google.test.parameter.injector,
         libs.junit

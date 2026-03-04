@@ -63,8 +63,6 @@ class HolderWelcomeScreenRule(
 
     val viewModel: HolderWelcomeViewModel by lazy {
         HolderWelcomeViewModel(
-            sessionSecurity = fakeSessionSecurity,
-            engagementGenerator = fakeEngagementGenerator,
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),

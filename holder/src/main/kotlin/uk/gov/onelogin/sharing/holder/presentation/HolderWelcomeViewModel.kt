@@ -32,14 +32,10 @@ import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
 @AssistedInject
 @Suppress("LongParameterList")
 class HolderWelcomeViewModel(
-    sessionSecurity: SessionSecurity,
-    private val engagementGenerator: Engagement,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val orchestrator: Orchestrator.Holder,

@@ -88,7 +88,7 @@ class HolderOrchestratorTest {
         authorizationGate = permissionChecker,
         mdocPeripheralTransport = mdocPeripheralTransport,
         appCoroutineScope = scope,
-        qrCodeData = fakeGenerateQrEngagement
+        engagementData = fakeGenerateQrEngagement
     )
 
     @Test

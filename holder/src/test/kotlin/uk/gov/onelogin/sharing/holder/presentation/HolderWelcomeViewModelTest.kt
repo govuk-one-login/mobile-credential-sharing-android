@@ -41,13 +41,8 @@ class HolderWelcomeViewModelTest {
     private val dummyEngagementData = "ENGAGEMENT_DATA"
 
     private fun createViewModel(
-        mdocPeripheralTransport: MdocPeripheralTransport = FakeMdocPeripheralTransport(),
-        engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
-        sessionSecurity: SessionSecurity = FakeSessionSecurity(),
         orchestrator: FakeOrchestrator = FakeOrchestrator()
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
-        sessionSecurity = sessionSecurity,
-        engagementGenerator = engagementGenerator,
         logger = logger,
         savedStateHandle = SavedStateHandle(),
         orchestrator = orchestrator
@@ -66,8 +61,7 @@ class HolderWelcomeViewModelTest {
 
     @Test
     fun `sets qr code data when key is generated`() = runTest {
-        val fakeSessionSecurity = FakeSessionSecurity()
-        val viewModel = createViewModel(sessionSecurity = fakeSessionSecurity)
+        val viewModel = createViewModel()
 
         advanceUntilIdle()
 
@@ -117,7 +111,7 @@ class HolderWelcomeViewModelTest {
     fun `state updates to connected`() = runTest {
         val fakeMdocSession =
             FakeMdocPeripheralTransport(initialState = MdocPeripheralState.AdvertisingStarted)
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         advanceUntilIdle()
         assertEquals(
@@ -140,7 +134,7 @@ class HolderWelcomeViewModelTest {
             FakeMdocPeripheralTransport(
                 initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
             )
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         advanceUntilIdle()
         assertEquals(
@@ -163,7 +157,7 @@ class HolderWelcomeViewModelTest {
             FakeMdocPeripheralTransport(
                 initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
             )
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         advanceUntilIdle()
         assertEquals(
@@ -226,7 +220,7 @@ class HolderWelcomeViewModelTest {
             FakeMdocPeripheralTransport(
                 initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
             )
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
         val uuid = UUID.randomUUID()
 
         advanceUntilIdle()
@@ -247,7 +241,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `state updates to idle`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         advanceUntilIdle()
         assertEquals(
@@ -259,7 +253,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `bluetooth switched off updates state to Disabled`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         fakeMdocSession.emitBluetoothState(BluetoothStatus.OFF)
 
@@ -273,7 +267,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `bluetooth turning off updates state to Disabled`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         fakeMdocSession.emitBluetoothState(BluetoothStatus.TURNING_OFF)
 
@@ -287,7 +281,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `bluetooth turning on updates state to Initializing`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         fakeMdocSession.emitBluetoothState(BluetoothStatus.TURNING_ON)
 
@@ -301,7 +295,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `bluetooth on updates state to Enabled and triggers start BLE session`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         viewModel.updateBluetoothPermissions(true)
 
@@ -319,7 +313,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `does not start BLE session if permissions not granted`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         viewModel.updateBluetoothPermissions(false)
 
@@ -337,7 +331,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `bluetooth unknown status on updates state to Unknown`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         fakeMdocSession.emitBluetoothState(BluetoothStatus.UNKNOWN)
 
@@ -360,7 +354,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `bluetooth ON only triggers start once while already enabled`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         viewModel.updateBluetoothPermissions(true)
 
@@ -389,7 +383,7 @@ class HolderWelcomeViewModelTest {
     @Test
     fun `bluetooth ON does not trigger restart until session has fully stopped`() = runTest {
         val fakeMdocSession = FakeMdocPeripheralTransport()
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         viewModel.updateBluetoothPermissions(true)
 
@@ -413,7 +407,7 @@ class HolderWelcomeViewModelTest {
     fun `showErrorScreen set to true when mdoc session disconnects`() = runTest {
         val fakeMdocSession =
             FakeMdocPeripheralTransport(initialState = MdocPeripheralState.AdvertisingStarted)
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         advanceUntilIdle()
 
@@ -474,7 +468,7 @@ class HolderWelcomeViewModelTest {
         val fakeMdocSession = FakeMdocPeripheralTransport(
             initialState = MdocPeripheralState.AdvertisingStarted
         )
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         val currentUuid = viewModel.uiState.value.uuid
         assertNotNull(currentUuid)
@@ -494,7 +488,7 @@ class HolderWelcomeViewModelTest {
             FakeMdocPeripheralTransport(
                 initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
             )
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         fakeMdocSession.emitState(MdocPeripheralState.Disconnected(DEVICE_ADDRESS, false))
         advanceUntilIdle()
@@ -511,7 +505,7 @@ class HolderWelcomeViewModelTest {
             FakeMdocPeripheralTransport(
                 initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
             )
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         fakeMdocSession.emitState(MdocPeripheralState.Disconnected(DEVICE_ADDRESS, true))
         advanceUntilIdle()
@@ -528,7 +522,7 @@ class HolderWelcomeViewModelTest {
             FakeMdocPeripheralTransport(
                 initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
             )
-        createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        createViewModel()
 
         fakeMdocSession.emitState(
             MdocPeripheralState.MdocPeripheralEnded(
@@ -546,7 +540,7 @@ class HolderWelcomeViewModelTest {
             FakeMdocPeripheralTransport(
                 initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
             )
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         fakeMdocSession.emitState(
             MdocPeripheralState.MdocPeripheralEnded(
@@ -567,7 +561,7 @@ class HolderWelcomeViewModelTest {
             FakeMdocPeripheralTransport(
                 initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
             )
-        val viewModel = createViewModel(mdocPeripheralTransport = fakeMdocSession)
+        val viewModel = createViewModel()
 
         fakeMdocSession.emitState(
             MdocPeripheralState.MessageReceived(

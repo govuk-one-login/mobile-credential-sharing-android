@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.binding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
@@ -18,7 +17,7 @@ import uk.gov.onelogin.sharing.security.cbor.dto.devicerequest.DocRequestDto
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCborSerializer
 
-@ContributesBinding(ViewModelScope::class, binding = binding<DeviceRequestDecoder>())
+@ContributesBinding(AppScope::class)
 class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
     override fun deviceRequestDecoder(bytes: ByteArray): DeviceRequest = try {
         val cborMapper = ObjectMapper(
