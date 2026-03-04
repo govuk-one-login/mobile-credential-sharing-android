@@ -44,7 +44,7 @@ class VerifierOrchestrator(
         try {
             val prerequisites = listOf(
                 Prerequisite.BLUETOOTH,
-                Prerequisite.CAMERA,
+                Prerequisite.CAMERA
             )
 
             val prerequisiteResponse = prerequisiteGate.checkPrerequisites(prerequisites).also {

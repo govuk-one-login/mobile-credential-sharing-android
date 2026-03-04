@@ -6,9 +6,8 @@ import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 
-internal class HasHolderPreflightPrerequisites(
-    private val matcher: Matcher<in Set<Prerequisite>>
-) : TypeSafeMatcher<HolderSessionState>() {
+internal class HasHolderPreflightPrerequisites(private val matcher: Matcher<in Set<Prerequisite>>) :
+    TypeSafeMatcher<HolderSessionState>() {
     override fun describeTo(description: Description?) = matcher.describeTo(description)
 
     override fun describeMismatchSafely(

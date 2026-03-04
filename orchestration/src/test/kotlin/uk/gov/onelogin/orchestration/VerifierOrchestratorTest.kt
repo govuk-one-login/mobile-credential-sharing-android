@@ -5,6 +5,8 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -106,7 +108,10 @@ class VerifierOrchestratorTest {
         assertThat(
             sessionFactory,
             currentSessionState(
-                hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+                allOf(
+                    hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH),
+                    not(hasMissingPreflightPrerequisites(Prerequisite.CAMERA))
+                )
             )
         )
     }
@@ -114,7 +119,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Starting the Orchestrator journey is possible when the journey is already complete`(
         @TestParameter(valuesProvider = CompleteVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.start()
@@ -145,7 +150,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Orchestrator cannot cancel invalid state transitions`(
         @TestParameter(valuesProvider = UncancellableVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.cancel()
@@ -161,7 +166,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Cancelling the User journey is based on the internal session state`(
         @TestParameter(valuesProvider = CancellableVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         orchestrator.cancel()

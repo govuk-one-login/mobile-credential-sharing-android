@@ -31,7 +31,7 @@ class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,
     private val prerequisiteGate: PrerequisiteGate,
-    private val qrCodeData: GenerateEngagementQrCode,
+    private val qrCodeData: GenerateEngagementQrCode
 ) : Orchestrator.Holder {
 
     private var session: HolderSession = sessionFactory.create()
