@@ -32,8 +32,4 @@ class FakeOrchestrator(
         startCount = 0
         cancelCount = 0
     }
-
-    override fun start(requiredPermissions: Set<String>) {
-        start()
-    }
 }

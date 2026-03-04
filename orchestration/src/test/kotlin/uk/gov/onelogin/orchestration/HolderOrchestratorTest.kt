@@ -18,12 +18,14 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.security.usecases.FakeGenerateQrCodeUseCase
@@ -51,9 +53,10 @@ class HolderOrchestratorTest {
         )
     }
 
-    private var prerequisiteResponse: Map<Prerequisite, PrerequisiteResponse> = mapOf(
-        Prerequisite.BLUETOOTH to PrerequisiteResponse.MeetsPrerequisites
-    )
+    private var prerequisiteResponse: MutableMap<Prerequisite, PrerequisiteResponse> =
+        Prerequisite.entries.associateWith {
+            PrerequisiteResponse.MeetsPrerequisites
+        }.toMutableMap()
 
     private val gate by lazy {
         StubPrerequisiteGate(prerequisiteResponse)
@@ -90,6 +93,25 @@ class HolderOrchestratorTest {
                 }
             )
         }
+
+    @Test
+    fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
+        prerequisiteResponse[Prerequisite.BLUETOOTH] = PrerequisiteResponse.Incapable(
+            IncapableReason.MissingHardware
+        )
+
+        orchestrator.start()
+
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
+
+        assertThat(
+            sessionFactory,
+            currentSessionState(
+                hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+            )
+        )
+    }
 
     @Test
     fun `Starting the Orchestrator journey is possible when the journey is already complete`(

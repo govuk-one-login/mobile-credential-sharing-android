@@ -5,12 +5,15 @@ import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 /**
  * Implements [Resettable] for clearing internal state, such as the session state machines.
  */
 interface Orchestrator : Resettable {
+    /**
+     * Begins the User journey.
+     */
+    fun start()
 
     /**
      * Completes the User journey.
@@ -21,8 +24,6 @@ interface Orchestrator : Resettable {
     fun cancel()
 
     interface Holder : Orchestrator {
-        fun start()
-
         val holderSessionState: SharedFlow<HolderSessionState>
 
         companion object {
@@ -30,14 +31,6 @@ interface Orchestrator : Resettable {
         }
     }
     interface Verifier : Orchestrator {
-        /**
-         * Begins the User journey.
-         *
-         * @param requiredPermissions The Android permissions required to successfully complete the
-         * User journey.
-         */
-        fun start(requiredPermissions: Set<String>)
-
         companion object {
             const val JOURNEY_NAME: String = "verifier"
             val requiredPermissions = bluetoothPermissions() + Manifest.permission.CAMERA
@@ -53,7 +46,7 @@ interface Orchestrator : Resettable {
         const val START_ORCHESTRATION_ERROR: String = "Cannot start orchestration"
         const val START_ORCHESTRATION_SUCCESS: String = "start orchestration"
 
-        fun completedPrerequisiteChecks(journey: String, response: PrerequisiteResponse?): String =
+        fun completedPrerequisiteChecks(journey: String, response: Any?): String =
             "Performed $journey prerequisite checks: $response"
 
         fun createSessionResetMessage(journey: String): String =

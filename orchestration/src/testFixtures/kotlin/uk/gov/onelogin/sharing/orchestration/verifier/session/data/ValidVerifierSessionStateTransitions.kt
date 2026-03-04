@@ -25,7 +25,8 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
 
     companion object {
         private val notStartedTransitions = listOf(
-            "Verifier session begins initialising" to preflightEmptyPermissions
+            "Verifier session begins initialising" to preflightEmptyPermissions,
+            "Verifier session is ready to scan" to ReadyToScan
         ).map { (testName, transition) ->
             Triple(
                 testName,

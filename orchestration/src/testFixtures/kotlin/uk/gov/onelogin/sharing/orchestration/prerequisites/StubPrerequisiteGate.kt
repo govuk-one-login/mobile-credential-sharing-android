@@ -8,5 +8,7 @@ class StubPrerequisiteGate(private val results: Map<Prerequisite, PrerequisiteRe
 
     override fun checkPrerequisites(
         prerequisites: Iterable<Prerequisite>
-    ): Map<Prerequisite, PrerequisiteResponse> = results
+    ): Map<Prerequisite, PrerequisiteResponse> = results.filterKeys { prerequisite ->
+        prerequisite in prerequisites
+    }
 }
