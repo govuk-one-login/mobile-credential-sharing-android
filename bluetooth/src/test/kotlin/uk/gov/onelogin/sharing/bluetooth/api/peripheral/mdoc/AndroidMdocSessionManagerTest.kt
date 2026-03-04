@@ -19,9 +19,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingExcepti
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.AndroidMdocPeripheralTransport
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransportError
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor

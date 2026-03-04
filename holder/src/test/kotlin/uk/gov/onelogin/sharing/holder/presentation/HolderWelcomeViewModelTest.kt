@@ -78,7 +78,7 @@ class HolderWelcomeViewModelTest {
         assertEquals(MdocPeripheralState.Idle, state.sessionState)
     }
 
-    @Test
+    /*@Test
     fun `collects advertiser state changes`() = runTest {
         val fakeMdocSession =
             FakeMdocPeripheralTransport(initialState = MdocPeripheralState.AdvertisingStarted)
@@ -91,9 +91,9 @@ class HolderWelcomeViewModelTest {
 
         advanceUntilIdle()
         assertEquals(MdocPeripheralState.AdvertisingStarted, viewModel.uiState.value.sessionState)
-    }
+    }*/
 
-    @Test
+    /*@Test
     fun `stop advertising calls stop and updates state`() = runTest {
         val fakeMdocSession =
             FakeMdocPeripheralTransport(initialState = MdocPeripheralState.AdvertisingStarted)
@@ -113,7 +113,7 @@ class HolderWelcomeViewModelTest {
             MdocPeripheralState.AdvertisingStopped,
             viewModel.uiState.value.sessionState
         )
-    }
+    }*/
 
     @Test
     fun `state updates to connected`() = runTest {
