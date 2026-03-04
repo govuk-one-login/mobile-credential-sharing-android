@@ -10,7 +10,7 @@ class PrerequisiteGateImpl(
     private val authorization: PrerequisiteGateLayer.Authorization,
     private val capability: PrerequisiteGateLayer.Capability,
     private val logger: Logger,
-    private val readiness: PrerequisiteGateLayer.Readiness,
+    private val readiness: PrerequisiteGateLayer.Readiness
 ) : PrerequisiteGate {
     override fun checkPrerequisites(
         prerequisites: Iterable<Prerequisite>

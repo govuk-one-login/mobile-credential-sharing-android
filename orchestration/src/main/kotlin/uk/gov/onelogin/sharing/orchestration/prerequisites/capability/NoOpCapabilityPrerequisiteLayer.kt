@@ -9,15 +9,13 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 @ContributesBinding(AppScope::class)
-class NoOpCapabilityPrerequisiteLayer(
-    private val logger: Logger
-) : PrerequisiteGateLayer.Capability {
-    override fun checkCapability(
-        prerequisite: Prerequisite
-    ): PrerequisiteResponse.Incapable? = null.also {
-        logger.debug(
-            logTag,
-            "Performed $prerequisite capability check. Response: $it"
-        )
-    }
+class NoOpCapabilityPrerequisiteLayer(private val logger: Logger) :
+    PrerequisiteGateLayer.Capability {
+    override fun checkCapability(prerequisite: Prerequisite): PrerequisiteResponse.Incapable? =
+        null.also {
+            logger.debug(
+                logTag,
+                "Performed $prerequisite capability check. Response: $it"
+            )
+        }
 }

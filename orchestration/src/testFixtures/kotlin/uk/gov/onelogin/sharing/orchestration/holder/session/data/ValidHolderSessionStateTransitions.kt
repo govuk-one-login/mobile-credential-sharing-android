@@ -21,7 +21,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
     companion object {
         private val notStartedTransitions = listOf(
             "Holder session begins initialising" to preflightEmptyPermissions,
-            "Holder session meets all prerequisites" to HolderSessionState.ReadyToPresent,
+            "Holder session meets all prerequisites" to HolderSessionState.ReadyToPresent
         ).map { (testName, transition) ->
             Triple(
                 testName,

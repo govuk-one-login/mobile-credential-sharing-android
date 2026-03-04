@@ -5,7 +5,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 data class FakePrerequisiteAuthorizationGate(
-    private val result: Map<Prerequisite, PrerequisiteResponse.Unauthorized?>,
+    private val result: Map<Prerequisite, PrerequisiteResponse.Unauthorized?>
 ) : PrerequisiteGateLayer.Authorization {
 
     constructor(

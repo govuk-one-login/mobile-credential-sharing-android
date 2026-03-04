@@ -9,15 +9,12 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 @ContributesBinding(AppScope::class)
-class NoOpReadinessPrerequisiteLayer(
-    private val logger: Logger
-) : PrerequisiteGateLayer.Readiness {
-    override fun checkReadiness(
-        prerequisite: Prerequisite
-    ): PrerequisiteResponse.NotReady? = null.also {
-        logger.debug(
-            logTag,
-            "Performed $prerequisite readiness check. Response: $it"
-        )
-    }
+class NoOpReadinessPrerequisiteLayer(private val logger: Logger) : PrerequisiteGateLayer.Readiness {
+    override fun checkReadiness(prerequisite: Prerequisite): PrerequisiteResponse.NotReady? =
+        null.also {
+            logger.debug(
+                logTag,
+                "Performed $prerequisite readiness check. Response: $it"
+            )
+        }
 }

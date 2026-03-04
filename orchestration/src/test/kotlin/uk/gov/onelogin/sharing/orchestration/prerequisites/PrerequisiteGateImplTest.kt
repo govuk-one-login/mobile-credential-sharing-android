@@ -53,7 +53,7 @@ class PrerequisiteGateImplTest {
             authorization = authorization,
             capability = capability,
             logger = logger,
-            readiness = readiness,
+            readiness = readiness
         )
     }
 
@@ -70,7 +70,7 @@ class PrerequisiteGateImplTest {
     fun `Response maps to provided Prerequisites`() = runTest {
         val prerequisites = listOf(
             Prerequisite.BLUETOOTH,
-            Prerequisite.CAMERA,
+            Prerequisite.CAMERA
         )
         val result = gate.checkPrerequisites(prerequisites)
 
@@ -83,7 +83,7 @@ class PrerequisiteGateImplTest {
     @Test
     fun `Responses are grouped based on prerequisite`() = runTest {
         setupCapabilityFailure(
-            prerequisite = Prerequisite.CAMERA,
+            prerequisite = Prerequisite.CAMERA
         )
         val result = gate.checkPrerequisites(Prerequisite.entries)
 
@@ -109,7 +109,7 @@ class PrerequisiteGateImplTest {
             result,
             hasEntry(
                 prerequisite,
-                PrerequisiteResponse.MeetsPrerequisites,
+                PrerequisiteResponse.MeetsPrerequisites
             )
         )
     }
@@ -123,7 +123,7 @@ class PrerequisiteGateImplTest {
             hasEntry(
                 equalTo(prerequisite),
                 hasUnauthorizedPermissions(
-                    contains(Manifest.permission.BLUETOOTH),
+                    contains(Manifest.permission.BLUETOOTH)
                 )
             )
         )
@@ -139,7 +139,7 @@ class PrerequisiteGateImplTest {
             hasEntry(
                 equalTo(prerequisite),
                 hasUnauthorizedPermissions(
-                    contains(Manifest.permission.BLUETOOTH),
+                    contains(Manifest.permission.BLUETOOTH)
                 )
             )
         )
@@ -187,21 +187,21 @@ class PrerequisiteGateImplTest {
         prerequisite: Prerequisite = this.prerequisite,
         reason: UnauthorizedReason = UnauthorizedReason.MissingPermissions(
             Manifest.permission.BLUETOOTH
-        ),
+        )
     ) {
         authorizationResult[prerequisite] = PrerequisiteResponse.Unauthorized(reason)
     }
 
     private fun setupCapabilityFailure(
         prerequisite: Prerequisite = this.prerequisite,
-        reason: IncapableReason = IncapableReason.MissingHardware,
+        reason: IncapableReason = IncapableReason.MissingHardware
     ) {
         capabilityResult[prerequisite] = PrerequisiteResponse.Incapable(reason)
     }
 
     private fun setupReadinessFailure(
         prerequisite: Prerequisite = this.prerequisite,
-        reason: NotReadyReason = NotReadyReason.BluetoothTurnedOff,
+        reason: NotReadyReason = NotReadyReason.BluetoothTurnedOff
     ) {
         readinessResult[prerequisite] = PrerequisiteResponse.NotReady(reason)
     }

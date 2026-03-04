@@ -4,6 +4,5 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matcher
 
 object IncapableReasonMatchers {
-    fun isMissingHardware(): Matcher<IncapableReason> =
-        equalTo(IncapableReason.MissingHardware)
+    fun isMissingHardware(): Matcher<IncapableReason> = equalTo(IncapableReason.MissingHardware)
 }
