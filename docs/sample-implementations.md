@@ -1,6 +1,6 @@
-## Sample Implementations: Host App Responsibilities
+## Sample Implementations: Host app responsibilities
 
-#### Holder role: Secure Vault
+#### Holder role: secure vault
 
 This implementation demonstrates the boundary between the SDK and the Host App for the Holder role. The Host App acts as a secure vault: retrieving metadata, filtering consented data, and proxying signing requests to the Android Keystore. The SDK handles transport and Concise Binary Object Representation (CBOR) encoding.
 
@@ -60,9 +60,9 @@ class SecureVaultCredentialProvider : CredentialProvider {
 }
 ```
 
-#### Verifier role: Trust Anchor & Consumption
+#### Verifier role: trust anchor & consumption
 
-This implementation demonstrates how the Host App acts as a relying party. It provides trusted root certificate authorities (CA) to the SDK, defines what data is required, and processes the decrypted, verified response, while the SDK handles the engagement and transport lifecycle.
+This implementation demonstrates how the Host App acts as a relying party. It provides trusted root certificate authorities (CA) to the SDK, defines the required data, and processes the decrypted, verified response, while the SDK handles the engagement and transport lifecycle.
 
 ```kotlin
 import com.credentialsharing.sdk.*
