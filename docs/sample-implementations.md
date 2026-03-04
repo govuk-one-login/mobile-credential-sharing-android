@@ -1,6 +1,6 @@
 ## Sample Implementations: Host app responsibilities
 
-#### Holder role: secure vault
+#### Holder role: Secure vault
 
 This implementation demonstrates the boundary between the SDK and the Host App for the Holder role. The Host App acts as a secure vault: retrieving metadata, filtering consented data, and proxying signing requests to the Android Keystore. The SDK handles transport and Concise Binary Object Representation (CBOR) encoding.
 
