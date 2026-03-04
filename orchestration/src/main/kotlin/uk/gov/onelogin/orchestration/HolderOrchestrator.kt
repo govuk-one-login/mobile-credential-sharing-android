@@ -53,9 +53,9 @@ class HolderOrchestrator(
         }
 
         try {
-            val prerequisiteCheck = prerequisiteGate.checkPrerequisites(
+            prerequisiteGate.checkPrerequisites(
                 Prerequisite.BLUETOOTH
-            )[Prerequisite.BLUETOOTH]!!.also {
+            )[Prerequisite.BLUETOOTH].also {
                 logger.debug(
                     logTag,
                     completedPrerequisiteChecks(
@@ -63,32 +63,33 @@ class HolderOrchestrator(
                         response = it
                     )
                 )
-            }
+            }?.let { prerequisiteCheck ->
+                when (prerequisiteCheck) {
+                    is PrerequisiteResponse.Incapable,
+                    is PrerequisiteResponse.NotReady
+                    -> Unit
 
-            when (prerequisiteCheck) {
-                is PrerequisiteResponse.Incapable,
-                is PrerequisiteResponse.NotReady -> Unit
-
-                PrerequisiteResponse.MeetsPrerequisites -> {
-                    session.transitionTo(HolderSessionState.ReadyToPresent)
-                    val qrCode = qrCodeData.generateQrCode(stateUUID)
-                    if (qrCode.isNotEmpty()) {
-                        session.transitionTo(
-                            HolderSessionState.PresentingEngagement(qrCode)
-                        )
-                    }
-                }
-
-                is PrerequisiteResponse.Unauthorized ->
-                    when (prerequisiteCheck.reason) {
-                        is UnauthorizedReason.MissingPermissions -> {
+                    PrerequisiteResponse.MeetsPrerequisites -> {
+                        session.transitionTo(HolderSessionState.ReadyToPresent)
+                        val qrCode = qrCodeData.generateQrCode(stateUUID)
+                        if (qrCode.isNotEmpty()) {
                             session.transitionTo(
-                                HolderSessionState.Preflight(Prerequisite.BLUETOOTH)
+                                HolderSessionState.PresentingEngagement(qrCode)
                             )
                         }
                     }
+
+                    is PrerequisiteResponse.Unauthorized ->
+                        when (prerequisiteCheck.reason) {
+                            is UnauthorizedReason.MissingPermissions -> {
+                                session.transitionTo(
+                                    HolderSessionState.Preflight(Prerequisite.BLUETOOTH)
+                                )
+                            }
+                        }
+                }
+                logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
             }
-            logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
                 logger.error(
