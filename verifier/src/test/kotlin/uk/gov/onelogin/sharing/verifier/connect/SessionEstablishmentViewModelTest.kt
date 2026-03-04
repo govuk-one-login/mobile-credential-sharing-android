@@ -9,7 +9,6 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
 import io.mockk.every
 import io.mockk.mockk
-import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -42,18 +41,6 @@ import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
-import uk.gov.onelogin.sharing.security.cbor.encodeCbor
-import uk.gov.onelogin.sharing.security.cbor.serializers.EmbeddedCbor
-import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.cose.DefaultCoseKeyToString
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurityImpl
-import uk.gov.onelogin.sharing.security.secureArea.keypair.FakeKeyPairGenerator
-import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
-import uk.gov.onelogin.sharing.security.secureArea.secret.EcdhSharedSecretGenerator
-import uk.gov.onelogin.sharing.security.secureArea.session.AesGcmEncryption
-import uk.gov.onelogin.sharing.security.secureArea.session.HkdfSessionKeyGenerator
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.startScanningDummyServiceUuid
@@ -83,8 +70,7 @@ class SessionEstablishmentViewModelTest {
 
     private fun createViewModel(
         scanner: BluetoothScanner,
-        savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        sessionSecurity: SessionSecurity = SessionSecurityTestStub.sessionSecurity
+        savedStateHandle: SavedStateHandle = SavedStateHandle()
     ) = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         scanner = scanner,
@@ -92,9 +78,7 @@ class SessionEstablishmentViewModelTest {
         logger = logger,
         bluetoothStatusMonitor = fakeBluetoothStateMonitor,
         verifierSessionFactory = { fakeVerifierSession },
-        savedStateHandle = savedStateHandle,
-        sessionSecurity = sessionSecurity,
-        coseKeyConverter = DefaultCoseKeyToString(logger)
+        savedStateHandle = savedStateHandle
     )
 
     @Test
@@ -376,38 +360,6 @@ class SessionEstablishmentViewModelTest {
                 hasPreviouslyRequestedPermission(hasRequestedPermission)
             )
         )
-    }
-
-    @Test
-    fun `Creates KeyPair instance when bluetooth connection starts`() = runTest {
-        viewModel = createViewModel(scanner)
-        val generator = FakeKeyPairGenerator(validKeyPair)
-
-        val expectedCoseKey = CoseKey.generateCoseKey(
-            publicKey = validKeyPair!!.public as ECPublicKey,
-            logger = logger
-        ).let(CoseKey::encodeCbor)
-            .let(::EmbeddedCbor)
-            .encodeCbor()
-
-        viewModel = createViewModel(
-            scanner = scanner,
-            sessionSecurity = SessionSecurityImpl(
-                keyPairGenerator = generator,
-                secretGenerator = EcdhSharedSecretGenerator(logger),
-                sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-                sessionEncryption = AesGcmEncryption(logger)
-            )
-        )
-        fakeVerifierSession.updateState(VerifierSessionState.ConnectionStateStarted)
-        runCurrent()
-
-        assert(
-            "Encoded public CoseKey into EReaderKeyBytes: ${expectedCoseKey.toHexString()}"
-                in logger
-        ) {
-            "Cannot find expected message in logs: $logger"
-        }
     }
 
     @OptIn(ExperimentalPermissionsApi::class)

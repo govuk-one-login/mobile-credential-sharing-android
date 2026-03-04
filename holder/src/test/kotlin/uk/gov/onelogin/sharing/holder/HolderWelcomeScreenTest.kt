@@ -45,7 +45,6 @@ import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
-import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
 
 @Ignore
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -55,6 +54,7 @@ class HolderWelcomeScreenTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val resources = ApplicationProvider.getApplicationContext<Context>().resources
+    private val dummyEngagementData = "ENGAGEMENT_DATA"
 
     @get:Rule
     val composeTestRule =
@@ -73,8 +73,6 @@ class HolderWelcomeScreenTest {
         Intents.release()
     }
 
-    private val dummyEngagementData = "ENGAGEMENT_DATA"
-
     private fun createViewModel(
         mdocBleSession: FakeMdocPeripheralTransport = FakeMdocPeripheralTransport(),
         engagementGenerator: Engagement = FakeEngagementGenerator(data = dummyEngagementData),
@@ -85,8 +83,7 @@ class HolderWelcomeScreenTest {
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),
-        orchestrator = FakeOrchestrator(),
-        decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
+        orchestrator = FakeOrchestrator()
     )
 
     @Test

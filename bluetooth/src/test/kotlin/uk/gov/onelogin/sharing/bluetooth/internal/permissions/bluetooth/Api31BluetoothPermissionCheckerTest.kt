@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth
 import android.Manifest
 import android.os.Build
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.instanceOf
@@ -32,33 +33,26 @@ class Api31BluetoothPermissionCheckerTest {
     }
 
     @Test
-    fun `returns true when peripheral permissions granted`() = runTest {
-        assertTrue(checker.hasPeripheralPermissions())
+    fun `returns true when bluetooth permissions granted`() = runTest {
+        assertThat(
+            checker.checkBluetoothPermissions(),
+            equalTo(Response.Passed)
+        )
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
-    fun `returns false when peripheral permissions denied`() = runTest {
+    fun `returns false when bluetooth permissions denied`() = runTest {
         permissionResult = Response.Missing(Manifest.permission.BLUETOOTH_ADVERTISE)
 
-        assertFalse(checker.hasPeripheralPermissions())
+        assertFalse(checker.hasBluetoothPermissions())
     }
 
     @Test
-    fun `returns true when central permissions granted`() = runTest {
-        assertTrue(checker.hasCentralPermissions())
-    }
-
-    @Test
-    fun `returns false when central permissions denied`() = runTest {
-        permissionResult = Response.Missing(Manifest.permission.BLUETOOTH_ADVERTISE)
-        assertFalse(checker.hasCentralPermissions())
-    }
-
-    @Test
-    fun `Performing a peripheral check exposes missing permissions`() = runTest {
+    fun `Performing a bluetooth check exposes missing permissions`() = runTest {
         permissionResult = Response.Missing(Manifest.permission.BLUETOOTH_ADVERTISE)
 
-        val result = checker.checkPeripheralPermissions()
+        val result = checker.checkBluetoothPermissions()
 
         assertThat(
             result,
@@ -68,23 +62,6 @@ class Api31BluetoothPermissionCheckerTest {
         assertThat(
             result as Response.Missing,
             contains(Manifest.permission.BLUETOOTH_ADVERTISE)
-        )
-    }
-
-    @Test
-    fun `Performing a central check exposes missing permissions`() = runTest {
-        permissionResult = Response.Missing(Manifest.permission.BLUETOOTH_SCAN)
-
-        val result = checker.checkCentralPermissions()
-
-        assertThat(
-            result,
-            instanceOf(Response.Missing::class.java)
-        )
-
-        assertThat(
-            result as Response.Missing,
-            contains(Manifest.permission.BLUETOOTH_SCAN)
         )
     }
 }

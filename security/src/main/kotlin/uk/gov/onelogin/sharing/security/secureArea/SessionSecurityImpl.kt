@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.security.secureArea
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
@@ -13,7 +14,7 @@ import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator
  *
  * Uses interface delegation to provide the necessary features.
  */
-@ContributesBinding(ViewModelScope::class, binding = binding<SessionSecurity>())
+@ContributesBinding(AppScope::class, binding = binding<SessionSecurity>())
 class SessionSecurityImpl(
     keyPairGenerator: KeyPairGenerator,
     secretGenerator: SharedSecretGenerator,

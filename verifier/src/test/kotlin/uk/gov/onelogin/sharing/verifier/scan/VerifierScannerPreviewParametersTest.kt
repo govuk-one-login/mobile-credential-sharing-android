@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.verifier.scan
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.MultiplePermissionsState
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -24,7 +24,9 @@ class VerifierScannerPreviewParametersTest {
 
     @Test
     fun thereAreThreeUniquePermissionRequestStates() = runTest {
-        val uniqueStates = parameters.map(Pair<PermissionState, Boolean>::first).distinct()
+        val uniqueStates = parameters.map(
+            Pair<MultiplePermissionsState, Boolean>::first
+        ).distinct()
         assertEquals(
             EXPECTED_STATES,
             uniqueStates.size

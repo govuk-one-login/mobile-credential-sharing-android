@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
-import android.Manifest
 import android.content.Context
 import android.content.res.Resources
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -9,12 +8,14 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
+import uk.gov.onelogin.orchestration.Orchestrator.Verifier.Companion.requiredPermissions
+import uk.gov.onelogin.sharing.core.PermissionListExtensions.toGrantPermissionsRule
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -24,9 +25,7 @@ class VerifierScannerGrantedTest {
         ApplicationProvider.getApplicationContext<Context>().resources
 
     @get:Rule
-    val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
-        Manifest.permission.CAMERA
-    )
+    val grantPermissionRule: GrantPermissionRule = requiredPermissions.toGrantPermissionsRule()
 
     @get:Rule
     val composeTestRule = VerifierScannerRule(
@@ -42,7 +41,9 @@ class VerifierScannerGrantedTest {
                     lifecycleOwner = LocalLifecycleOwner.current,
                     onUpdatePreviouslyDeniedPermission = {},
                     hasPreviouslyDeniedPermission = false,
-                    permissionState = rememberPermissionState(Manifest.permission.CAMERA),
+                    permissionState = rememberMultiplePermissionsState(
+                        requiredPermissions
+                    ),
                     barcodeScanResultCallback = { _, _ -> }
                 )
             }
@@ -59,7 +60,9 @@ class VerifierScannerGrantedTest {
                     lifecycleOwner = LocalLifecycleOwner.current,
                     hasPreviouslyDeniedPermission = false,
                     onUpdatePreviouslyDeniedPermission = {},
-                    permissionState = rememberPermissionState(Manifest.permission.CAMERA),
+                    permissionState = rememberMultiplePermissionsState(
+                        requiredPermissions
+                    ),
                     barcodeScanResultCallback = BarcodeScanResult.Callback { _, _ -> }
                 )
             }

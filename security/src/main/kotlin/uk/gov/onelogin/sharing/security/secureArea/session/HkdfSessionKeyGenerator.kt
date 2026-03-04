@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.security.secureArea.session
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.logging.api.Logger
@@ -8,7 +9,7 @@ import uk.gov.onelogin.sharing.security.cryptography.java.generateSalt
 import uk.gov.onelogin.sharing.security.cryptography.java.hkdfKeyGeneration
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
 class HkdfSessionKeyGenerator(private val logger: Logger) : SessionKeyGenerator {
     /**
      * Generates a single session key from a given shared secret key, a generated cryptographic

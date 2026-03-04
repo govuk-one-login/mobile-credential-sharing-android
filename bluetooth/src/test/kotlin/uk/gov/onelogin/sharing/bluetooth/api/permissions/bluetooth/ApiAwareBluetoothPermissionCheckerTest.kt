@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.util.ReflectionHelpers
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.Api31BluetoothPermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.TruthyBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.truthyBluetoothPermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.core.permission.StubPermissionChecker
 
@@ -56,7 +56,7 @@ class ApiAwareBluetoothPermissionCheckerTest {
         setSdkLevel(Build.VERSION_CODES.R)
         assertThat(
             checker.calculateImplementation(),
-            equalTo(TruthyBluetoothPermissionChecker)
+            equalTo(truthyBluetoothPermissionChecker)
         )
     }
 
@@ -70,44 +70,23 @@ class ApiAwareBluetoothPermissionCheckerTest {
     }
 
     @Test
-    fun `central checks return true when SDK is below S`() = runTest {
+    fun `bluetooth checks return true when SDK is below S`() = runTest {
         setSdkLevel(Build.VERSION_CODES.R)
-        assertTrue(checker.hasCentralPermissions())
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
-    fun `peripheral checks return true when SDK is below S`() = runTest {
-        setSdkLevel(Build.VERSION_CODES.R)
-        assertTrue(checker.hasPeripheralPermissions())
-    }
-
-    @Test
-    fun `returns true when central permission granted on SDK S or above`() = runTest {
+    fun `returns true when bluetooth permissions granted on SDK S or above`() = runTest {
         setSdkLevel(Build.VERSION_CODES.S)
-        assertTrue(checker.hasCentralPermissions())
+        assertTrue(checker.hasBluetoothPermissions())
     }
 
     @Test
-    fun `returns false when central permission denied on SDK S or above`() = runTest {
+    fun `returns false when bluetooth permission denied on SDK S or above`() = runTest {
         setSdkLevel(Build.VERSION_CODES.TIRAMISU)
 
         permissionResult = PermissionChecker.Response.Missing()
-        assertFalse(checker.hasCentralPermissions())
-    }
-
-    @Test
-    fun `returns true when peripheral permission granted on SDK S or above`() = runTest {
-        setSdkLevel(Build.VERSION_CODES.S)
-
-        assertTrue(checker.hasPeripheralPermissions())
-    }
-
-    @Test
-    fun `returns false when peripheral permission denied on SDK S or above`() = runTest {
-        setSdkLevel(Build.VERSION_CODES.TIRAMISU)
-
-        permissionResult = PermissionChecker.Response.Missing()
-        assertFalse(checker.hasPeripheralPermissions())
+        assertFalse(checker.hasBluetoothPermissions())
     }
 
     private fun setSdkLevel(sdk: Int) {

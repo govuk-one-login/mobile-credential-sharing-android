@@ -51,9 +51,7 @@ class ConnectWithHolderDeviceScreenTest {
         logger = logger,
         bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
         verifierSessionFactory = { mdocVerifierSession },
-        savedStateHandle = SavedStateHandle(),
-        coseKeyConverter = DefaultCoseKeyToString(logger),
-        sessionSecurity = sessionSecurity
+        savedStateHandle = SavedStateHandle()
     )
 
     @Before

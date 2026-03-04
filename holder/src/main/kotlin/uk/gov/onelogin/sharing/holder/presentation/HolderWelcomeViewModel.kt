@@ -12,8 +12,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -26,20 +24,14 @@ import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
-import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransportError
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
-import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
-import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
-import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
@@ -51,8 +43,7 @@ class HolderWelcomeViewModel(
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val orchestrator: Orchestrator.Holder,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     companion object {
@@ -70,29 +61,21 @@ class HolderWelcomeViewModel(
     private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
-    val keyPair = sessionSecurity.generateEcKeyPair(
-        algorithm = ELLIPTIC_CURVE_ALGORITHM,
-        parameterSpec = ELLIPTIC_CURVE_PARAMETER_SPEC
-    )
-    val cosePublicKey = CoseKey.generateCoseKey(
-        publicKey = keyPair?.public as ECPublicKey,
-        logger = logger
-    )
-
     init {
         viewModelScope.launch(dispatcher) {
-            cosePublicKey.let { coseKey ->
-                val engagement = engagementGenerator.qrCodeEngagement(
-                    coseKey,
-                    _uiState.value.uuid
-                )
-                _uiState.update { it.copy(qrData = "${Engagement.QR_CODE_SCHEME}$engagement") }
-                _uiState.update { it.copy(engagement = engagement) }
-            }
-
             orchestrator.start(
-                peripheralPermissions().toSet()
+                bluetoothPermissions().toSet()
             )
+
+            orchestrator.holderSessionState.collect { currentSate ->
+                when (currentSate) {
+                    is HolderSessionState.PresentingEngagement -> _uiState.update {
+                        it.copy(qrData = currentSate.qrData)
+                    }
+
+                    else -> Unit
+                }
+            }
         }
 
         /*viewModelScope.launch {

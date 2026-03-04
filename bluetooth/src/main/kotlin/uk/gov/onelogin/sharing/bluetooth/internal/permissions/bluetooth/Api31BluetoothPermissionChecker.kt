@@ -2,9 +2,8 @@ package uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothCentralPermissionChecker.Companion.centralPermissions
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 /**
@@ -15,9 +14,7 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 internal class Api31BluetoothPermissionChecker(checker: PermissionChecker) :
     BluetoothPermissionChecker,
     PermissionChecker by checker {
-    override fun checkPeripheralPermissions(): PermissionChecker.Response =
-        checkPermissions(peripheralPermissions())
 
-    override fun checkCentralPermissions(): PermissionChecker.Response =
-        checkPermissions(centralPermissions())
+    override fun checkBluetoothPermissions(): PermissionChecker.Response =
+        checkPermissions(bluetoothPermissions())
 }

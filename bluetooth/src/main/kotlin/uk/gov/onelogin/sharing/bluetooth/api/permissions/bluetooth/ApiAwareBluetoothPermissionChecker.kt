@@ -6,34 +6,23 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.Api31BluetoothPermissionChecker
-import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.TruthyBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.truthyBluetoothPermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 /**
  * [BluetoothPermissionChecker] implementation that defers to other implementations based on the
  * Android-powered device's [android.os.Build.VERSION.SDK_INT].
  */
-@ContributesBinding(AppScope::class, binding = binding<BluetoothCentralPermissionChecker>())
-@ContributesBinding(AppScope::class, binding = binding<BluetoothPeripheralPermissionChecker>())
 @ContributesBinding(AppScope::class, binding = binding<BluetoothPermissionChecker>())
-@ContributesBinding(ViewModelScope::class, binding = binding<BluetoothCentralPermissionChecker>())
-@ContributesBinding(
-    ViewModelScope::class,
-    binding = binding<BluetoothPeripheralPermissionChecker>()
-)
 @ContributesBinding(ViewModelScope::class, binding = binding<BluetoothPermissionChecker>())
 class ApiAwareBluetoothPermissionChecker(private val checker: PermissionChecker) :
     BluetoothPermissionChecker {
-    override fun checkPeripheralPermissions(): PermissionChecker.Response =
-        calculateImplementation().checkPeripheralPermissions()
 
-    override fun checkCentralPermissions(): PermissionChecker.Response =
-        calculateImplementation().checkCentralPermissions()
+    override fun checkBluetoothPermissions(): PermissionChecker.Response =
+        calculateImplementation().checkBluetoothPermissions()
 
     internal fun calculateImplementation(): BluetoothPermissionChecker = when {
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.S ->
-            TruthyBluetoothPermissionChecker
-
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.S -> truthyBluetoothPermissionChecker
         else -> Api31BluetoothPermissionChecker(checker)
     }
 }

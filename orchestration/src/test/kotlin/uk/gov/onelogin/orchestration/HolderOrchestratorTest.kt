@@ -8,7 +8,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
@@ -33,6 +32,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHold
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPreflight
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
@@ -40,6 +40,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePre
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
+import uk.gov.onelogin.sharing.security.usecases.FakeGenerateQrCodeUseCase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -66,6 +67,8 @@ class HolderOrchestratorTest {
         )
     }
 
+    private val fakeGenerateQrEngagement = FakeGenerateQrCodeUseCase()
+
     private fun createSessionFactory(): SessionFactory<HolderSession> =
         FakeSessionFactory<HolderSession>(
             initialStates.map { initialState ->
@@ -79,14 +82,14 @@ class HolderOrchestratorTest {
     private fun createOrchestrator(
         mdocPeripheralTransport: MdocPeripheralTransport = FakeMdocPeripheralTransport(),
         sessionFactory: SessionFactory<HolderSession> = createSessionFactory()
-    ): Orchestrator =
-        HolderOrchestrator(
-            logger = logger,
-            sessionFactory = sessionFactory,
-            authorizationGate = permissionChecker,
-            mdocPeripheralTransport = mdocPeripheralTransport,
-            appCoroutineScope = scope
-        )
+    ): Orchestrator = HolderOrchestrator(
+        logger = logger,
+        sessionFactory = sessionFactory,
+        authorizationGate = permissionChecker,
+        mdocPeripheralTransport = mdocPeripheralTransport,
+        appCoroutineScope = scope,
+        qrCodeData = fakeGenerateQrEngagement
+    )
 
     @Test
     fun `Starting the Orchestrator journey navigates to the Preflight state`() = runTest {
@@ -97,9 +100,15 @@ class HolderOrchestratorTest {
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 
+        /*<<<<<<< HEAD
+                assertThat(
+                    sessionFactory as FakeSessionFactory,
+                    currentSessionState(inPreflight())
+                )
+        =======*/
         assertThat(
             sessionFactory as FakeSessionFactory,
-            currentSessionState(inPreflight())
+            currentSessionState(inPresentingEngagement())
         )
 
         assert(
@@ -125,7 +134,7 @@ class HolderOrchestratorTest {
 
         assertThat(
             sessionFactory as FakeSessionFactory,
-            currentSessionState(inPreflight())
+            currentSessionState(inPresentingEngagement())
         )
 
         assert(
@@ -152,6 +161,7 @@ class HolderOrchestratorTest {
             sessionFactory = sessionFactory
         )
         orchestrator.start(setOf())
+        advanceUntilIdle()
 
         assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(

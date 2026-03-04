@@ -2,11 +2,12 @@ package uk.gov.onelogin.orchestration
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import java.security.interfaces.ECPrivateKey
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
@@ -17,33 +18,41 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionReset
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransportError
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPeripheralPermissionChecker.Companion.peripheralPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationRequest
+import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
+import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 
+@Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,
     private val authorizationGate: PrerequisiteGate.Authorization,
     private val mdocPeripheralTransport: MdocPeripheralTransport,
-    @param:ApplicationScope private val appCoroutineScope: CoroutineScope
+    @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
+    private val qrCodeData: GenerateEngagementQrCode
 ) : Orchestrator.Holder {
 
     private var session: HolderSession = sessionFactory.create()
     private val uuid = UUID.randomUUID()
+
+    // this is used to generate the qr, but will also need to be passed to our bluetooth session
+    private val stateUUID: UUID = UUID.randomUUID()
+
+    override val holderSessionState: SharedFlow<HolderSessionState> = session.currentState
 
     override fun start(requiredPermissions: Set<String>) {
         if (session.isComplete()) {
@@ -72,9 +81,9 @@ class HolderOrchestrator(
             logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
 
             // future work: Authorization occurs within a capability check
-            authorizationGate.checkAuthorization(
+            val authResult = authorizationGate.checkAuthorization(
                 AuthorizationRequest.AuthorizePermission(
-                    peripheralPermissions()
+                    bluetoothPermissions()
                 )
             ).also {
                 logger.debug(
@@ -84,6 +93,18 @@ class HolderOrchestrator(
                         it
                     )
                 )
+            }
+
+            when (authResult) {
+                AuthorizationResponse.Authorized -> {
+                    session.transitionTo(HolderSessionState.ReadyToPresent)
+                    val qrCode = qrCodeData.generateQrCode(stateUUID)
+                    if (qrCode.isNotEmpty()) {
+                        session.transitionTo(HolderSessionState.PresentingEngagement(qrCode))
+                    }
+                }
+
+                is AuthorizationResponse.Unauthorized -> Unit
             }
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
