@@ -62,7 +62,7 @@ class SecureVaultCredentialProvider : CredentialProvider {
 
 #### Verifier role: Trust Anchor & Consumption
 
-This implementation demonstrates how the Host App acts as a relying party. It provides trusted root certificate authorities (CAs) to the SDK, defines what data is required, and processes the decrypted, verified response, while the SDK handles the engagement and transport lifecycle.
+This implementation demonstrates how the Host App acts as a relying party. It provides trusted root certificate authorities (CA) to the SDK, defines what data is required, and processes the decrypted, verified response, while the SDK handles the engagement and transport lifecycle.
 
 ```kotlin
 import com.credentialsharing.sdk.*
