@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.readiness
 
 /**
- * State table for the different reasons that a device fails to authorize.
+ * State table for the different reasons that a device isn't ready to complete the User journey.
  */
 sealed class NotReadyReason {
     /**

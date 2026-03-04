@@ -25,10 +25,10 @@ sealed class HolderSessionState : Completable {
      * State for when a User is ensuring all necessary steps to perform a digital credential
      * verification journey are complete.
      *
-     * @param missingPermissions The list of permissions required to perform the journey in it's
-     * entirety.
+     * @param missingPrerequisites The list of [Prerequisite]s required to perform the journey in
+     * it's entirety.
      */
-    data class Preflight(val missingPermissions: Set<Prerequisite>) : HolderSessionState() {
+    data class Preflight(val missingPrerequisites: Set<Prerequisite>) : HolderSessionState() {
         constructor(
             vararg prerequisite: Prerequisite
         ) : this(prerequisite.toSet())

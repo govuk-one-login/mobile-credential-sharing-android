@@ -42,7 +42,7 @@ class HolderOrchestrator(
 
     override val holderSessionState: SharedFlow<HolderSessionState> = session.currentState
 
-    override fun start(requiredPermissions: Set<String>) {
+    override fun start() {
         if (session.isComplete()) {
             session = sessionFactory.create().also {
                 logger.debug(

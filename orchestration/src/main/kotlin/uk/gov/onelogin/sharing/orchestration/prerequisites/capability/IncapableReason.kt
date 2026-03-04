@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.capability
 
 /**
- * State table for the different reasons that a device fails to authorize.
+ * State table for the different reasons that a device fails capability checks.
  */
 sealed class IncapableReason {
     /**

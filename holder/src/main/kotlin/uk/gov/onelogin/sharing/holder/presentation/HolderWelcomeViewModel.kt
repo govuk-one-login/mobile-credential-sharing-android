@@ -25,7 +25,6 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
@@ -64,9 +63,7 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            orchestrator.start(
-                bluetoothPermissions().toSet()
-            )
+            orchestrator.start()
 
             orchestrator.holderSessionState.collect { currentSate ->
                 when (currentSate) {

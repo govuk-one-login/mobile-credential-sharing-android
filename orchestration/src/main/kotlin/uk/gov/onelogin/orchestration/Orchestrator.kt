@@ -13,14 +13,6 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 interface Orchestrator : Resettable {
 
     /**
-     * Begins the User journey.
-     *
-     * @param requiredPermissions The Android permissions required to successfully complete the
-     * User journey.
-     */
-    fun start(requiredPermissions: Set<String>)
-
-    /**
      * Completes the User journey.
      *
      * Specifically, this represents the User choosing to prematurely end the journey, as opposed to
@@ -29,6 +21,8 @@ interface Orchestrator : Resettable {
     fun cancel()
 
     interface Holder : Orchestrator {
+        fun start()
+
         val holderSessionState: SharedFlow<HolderSessionState>
 
         companion object {
@@ -36,6 +30,14 @@ interface Orchestrator : Resettable {
         }
     }
     interface Verifier : Orchestrator {
+        /**
+         * Begins the User journey.
+         *
+         * @param requiredPermissions The Android permissions required to successfully complete the
+         * User journey.
+         */
+        fun start(requiredPermissions: Set<String>)
+
         companion object {
             const val JOURNEY_NAME: String = "verifier"
             val requiredPermissions = bluetoothPermissions() + Manifest.permission.CAMERA
