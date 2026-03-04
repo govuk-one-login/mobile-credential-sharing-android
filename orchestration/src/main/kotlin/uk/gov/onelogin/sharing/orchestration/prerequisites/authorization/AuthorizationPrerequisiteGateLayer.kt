@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
     AppScope::class,
     binding = binding<PrerequisiteGateLayer.Authorization>()
 )
-internal class AuthorizationPrerequisiteGateLayer(
+class AuthorizationPrerequisiteGateLayer(
     permissionChecker: PermissionChecker,
     private val logger: Logger,
 ) : PrerequisiteGateLayer.Authorization,
