@@ -11,6 +11,7 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATI
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
@@ -54,7 +55,15 @@ class HolderOrchestrator(
         try {
             val prerequisiteCheck = prerequisiteGate.checkPrerequisites(
                 Prerequisite.BLUETOOTH
-            )[Prerequisite.BLUETOOTH]!!
+            )[Prerequisite.BLUETOOTH]!!.also {
+                logger.debug(
+                    logTag,
+                    completedPrerequisiteChecks(
+                        journey = Orchestrator.Holder.JOURNEY_NAME,
+                        response = it
+                    )
+                )
+            }
 
             when (prerequisiteCheck) {
                 is PrerequisiteResponse.Incapable,
@@ -74,9 +83,7 @@ class HolderOrchestrator(
                     when (prerequisiteCheck.reason) {
                         is UnauthorizedReason.MissingPermissions -> {
                             session.transitionTo(
-                                HolderSessionState.Preflight(
-                                    prerequisiteCheck.reason.missingPermissions
-                                )
+                                HolderSessionState.Preflight(Prerequisite.BLUETOOTH)
                             )
                         }
                     }

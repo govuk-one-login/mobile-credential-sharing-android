@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
 
 fun interface PrerequisiteGate {
     fun checkPrerequisites(
-        prerequisites: Collection<Prerequisite>
+        prerequisites: Iterable<Prerequisite>
     ): Map<Prerequisite, PrerequisiteResponse>
 
     fun checkPrerequisites(

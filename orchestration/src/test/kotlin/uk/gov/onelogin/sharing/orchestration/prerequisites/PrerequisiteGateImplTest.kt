@@ -8,6 +8,8 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.hasEntry
+import org.junit.After
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.FakePrerequisiteCapabilityGate
@@ -30,7 +32,7 @@ class PrerequisiteGateImplTest {
         mutableMapOf()
 
     private val prerequisite = Prerequisite.BLUETOOTH
-
+    private val logger = SystemLogger()
     private val authorization by lazy {
         FakePrerequisiteAuthorizationGate(
             result = authorizationResult
@@ -50,7 +52,17 @@ class PrerequisiteGateImplTest {
         PrerequisiteGateImpl(
             authorization = authorization,
             capability = capability,
+            logger = logger,
             readiness = readiness,
+        )
+    }
+
+    @After
+    fun verifyLogs() {
+        assert(
+            logger.any {
+                it.message.startsWith("Performed prerequisite checks for: ")
+            }
         )
     }
 

@@ -8,6 +8,6 @@ class StubPrerequisiteGate(
     ) : this(Prerequisite.entries.associateWith { result })
 
     override fun checkPrerequisites(
-        prerequisites: Collection<Prerequisite>
+        prerequisites: Iterable<Prerequisite>
     ): Map<Prerequisite, PrerequisiteResponse> = results
 }
