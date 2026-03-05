@@ -3,13 +3,14 @@ package uk.gov.onelogin.orchestration
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import java.util.UUID
-import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertEquals
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,17 +31,19 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.dummyHolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPreflight
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isReadyToPresent
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isRequestReceived
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
-import uk.gov.onelogin.sharing.security.usecases.FakeGenerateQrCodeUseCase
+import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -67,14 +70,15 @@ class HolderOrchestratorTest {
         )
     }
 
-    private val fakeGenerateQrEngagement = FakeGenerateQrCodeUseCase()
+    private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
     private fun createSessionFactory(): SessionFactory<HolderSession> =
         FakeSessionFactory<HolderSession>(
             initialStates.map { initialState ->
                 HolderSessionImpl(
                     logger = logger,
-                    internalState = MutableStateFlow(initialState)
+                    internalState = MutableStateFlow(initialState),
+                    sessionContext = dummyHolderSessionContext
                 )
             }
         )
@@ -88,7 +92,7 @@ class HolderOrchestratorTest {
         authorizationGate = permissionChecker,
         mdocPeripheralTransport = mdocPeripheralTransport,
         appCoroutineScope = scope,
-        engagementData = fakeGenerateQrEngagement
+        decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
     )
 
     @Test
@@ -100,15 +104,9 @@ class HolderOrchestratorTest {
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 
-        /*<<<<<<< HEAD
-                assertThat(
-                    sessionFactory as FakeSessionFactory,
-                    currentSessionState(inPreflight())
-                )
-        =======*/
         assertThat(
             sessionFactory as FakeSessionFactory,
-            currentSessionState(inPresentingEngagement())
+            currentSessionState(isReadyToPresent())
         )
 
         assert(
@@ -134,7 +132,7 @@ class HolderOrchestratorTest {
 
         assertThat(
             sessionFactory as FakeSessionFactory,
-            currentSessionState(inPresentingEngagement())
+            currentSessionState(isReadyToPresent())
         )
 
         assert(
@@ -150,8 +148,9 @@ class HolderOrchestratorTest {
             initialStates.map { _ ->
                 HolderSessionImpl(
                     logger = logger,
+                    sessionContext = dummyHolderSessionContext,
                     internalState = MutableStateFlow(
-                        HolderSessionState.Preflight(setOf())
+                        HolderSessionState.Preflight(setOf()),
                     )
                 )
             }
@@ -421,5 +420,35 @@ class HolderOrchestratorTest {
         assert(
             "Mdoc - Error while ending session: ${SessionEndStates.NOTIFY_CLIENT_FAILED}" in logger
         )
+    }
+
+    @Ignore
+    @Test
+    fun `decrypts device request when session ends`() = runTest {
+        val sessionFactory = createSessionFactory()
+        val peripheralTransport =
+            FakeMdocPeripheralTransport(
+                initialState = MdocPeripheralState.AdvertisingStarted
+            )
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            mdocPeripheralTransport = peripheralTransport
+        )
+        orchestrator.start(setOf())
+
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(
+            MdocPeripheralState.MessageReceived(
+                byteArrayOf(1, 2, 3)
+            )
+        )
+
+        advanceUntilIdle()
+
+         assertThat(
+             sessionFactory as FakeSessionFactory,
+             currentSessionState(isRequestReceived())
+         )
     }
 }

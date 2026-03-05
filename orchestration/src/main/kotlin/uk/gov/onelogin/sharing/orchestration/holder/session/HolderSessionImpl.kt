@@ -21,7 +21,7 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  */
 class HolderSessionImpl(
     private val logger: Logger,
-    val sessionContext: HolderSessionContext,
+    override val sessionContext: HolderSessionContext,
     private val internalState: MutableStateFlow<HolderSessionState> =
         MutableStateFlow(HolderSessionState.NotStarted),
     private val transitionMap: HolderSessionStateTransitions = validHolderTransitions,

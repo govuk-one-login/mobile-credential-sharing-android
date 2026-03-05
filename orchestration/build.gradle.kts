@@ -42,13 +42,14 @@ dependencies {
 
     listOf(
         libs.com.google.test.parameter.injector,
-        libs.junit
+        libs.junit,
+        projects.models,
+        testFixtures(projects.security)
     ).forEach(::testFixturesApi)
 
     listOf(
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),
-        testFixtures(projects.security)
     ).forEach(::testImplementation)
 }
 

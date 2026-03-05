@@ -38,7 +38,6 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 
-@Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
     private val logger: Logger,
@@ -46,10 +45,8 @@ class HolderOrchestrator(
     private val authorizationGate: PrerequisiteGate.Authorization,
     private val mdocPeripheralTransport: MdocPeripheralTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
-    private val engagementData: GenerateEngagementQrCode,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase
 ) : Orchestrator.Holder {
-
     private var session: HolderSession = sessionFactory.create()
     override val holderSessionState: SharedFlow<HolderSessionState> = session.currentState
 
@@ -60,16 +57,6 @@ class HolderOrchestrator(
                     logTag,
                     recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
                 )
-            }
-        }
-
-        appCoroutineScope.launch {
-            mdocPeripheralTransport.start(
-                serviceUuid = (session as HolderSessionImpl).sessionContext.sessionUuid,
-            )
-
-            mdocPeripheralTransport.state.collect {
-                handleMdocState(it)
             }
         }
 
@@ -96,8 +83,20 @@ class HolderOrchestrator(
 
             when (authResult) {
                 AuthorizationResponse.Authorized -> {
+                    appCoroutineScope.launch {
+                        mdocPeripheralTransport.state.collect {
+                            handleMdocState(it)
+                        }
+                    }
+
+                    appCoroutineScope.launch {
+                        mdocPeripheralTransport.start(
+                            serviceUuid = session.sessionContext.sessionUuid,
+                        )
+                    }
+
                     session.transitionTo(HolderSessionState.ReadyToPresent)
-                    val qrCode = (session as HolderSessionImpl).sessionContext.qrCode
+                    val qrCode = session.sessionContext.qrCode
                     if (qrCode.isNotEmpty()) {
                         session.transitionTo(HolderSessionState.PresentingEngagement(qrCode))
                     }
@@ -132,7 +131,7 @@ class HolderOrchestrator(
             }
         }
 
-//        stopAdvertising()
+        stopAdvertising()
     }
 
     override fun reset() {
@@ -158,7 +157,7 @@ class HolderOrchestrator(
                 logger.debug(
                     logTag,
                     "Mdoc - Advertising Started UUID: " +
-                            "${(session as HolderSessionImpl).sessionContext.sessionUuid}"
+                            "${session.sessionContext.sessionUuid}"
                 )
             }
 
@@ -235,14 +234,21 @@ class HolderOrchestrator(
             is MdocPeripheralState.MessageReceived -> {
                 val deviceRequest = decryptDeviceRequestUseCase.execute(
                     sessionEstablishmentBytes = state.message,
-                    engagement = (session as HolderSessionImpl).sessionContext.engagement,
-                    holderPrivateKey = (session as HolderSessionImpl)
-                        .sessionContext
-                        .keyPair
-                        ?.private as ECPrivateKey
+                    engagement = session.sessionContext.engagement,
+                    holderPrivateKey = session.sessionContext.keyPair?.private as ECPrivateKey
                 )
 
-//                _uiState.update { it.copy(deviceRequest = deviceRequest) }
+                try {
+                    session.transitionTo(
+                        HolderSessionState.RequestReceived(deviceRequest)
+                    )
+                } catch (exception: IllegalStateException) {
+                    logger.error(
+                        logTag,
+                        "Cannot transition to request received state",
+                        exception
+                    )
+                }
 
                 deviceRequest
                     .docRequests.firstOrNull()

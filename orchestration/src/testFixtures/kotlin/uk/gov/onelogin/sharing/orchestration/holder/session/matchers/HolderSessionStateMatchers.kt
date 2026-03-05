@@ -21,7 +21,15 @@ object HolderSessionStateMatchers {
         HolderSessionState.NotStarted
     )
 
+    fun isReadyToPresent(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.ReadyToPresent::class.java
+    )
+
     fun inPresentingEngagement(): Matcher<in HolderSessionState> = instanceOf(
         HolderSessionState.PresentingEngagement::class.java
+    )
+
+    fun isRequestReceived(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.RequestReceived::class.java
     )
 }

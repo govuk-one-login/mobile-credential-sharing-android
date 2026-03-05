@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.core.Completable
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
@@ -51,7 +53,7 @@ sealed class HolderSessionState : Completable {
      * State for when a successful connection occurs, allowing the User to consent to data being
      * shared with the Verifying device.
      */
-    data object RequestReceived : HolderSessionState()
+    data class RequestReceived(val request: DeviceRequest) : HolderSessionState()
 
     /**
      * State for when the consenting User is generating the proof before completing the

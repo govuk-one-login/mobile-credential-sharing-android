@@ -47,7 +47,7 @@ class HolderSessionFactory(
         val qrCode = "${Engagement.QR_CODE_SCHEME}$engagement"
 
         val context = HolderSessionContext(
-            sessionUuid = UUID.randomUUID(),
+            sessionUuid = uuid,
             keyPair = keyPair,
             engagement = engagement,
             qrCode = qrCode

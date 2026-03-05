@@ -7,6 +7,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateSt
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.successStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userCancellation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userJourneyFailure
+import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
 
 class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
@@ -64,7 +65,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val connectingTransitions = listOf(
             "User cancels whilst connecting with Verifier device" to userCancellation,
             "Connection with verifier device cannot be established" to userJourneyFailure,
-            "Receives Verifier device's data transfer request" to HolderSessionState.RequestReceived
+            "Receives Verifier device's data transfer request" to HolderSessionState.RequestReceived(deviceRequestStub())
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -79,7 +80,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.RequestReceived,
+                HolderSessionState.RequestReceived(deviceRequestStub()),
                 transition
             )
         }
