@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.capability
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.Logger
@@ -19,7 +21,8 @@ class CapabilityPrerequisiteLayer(
         prerequisite: Prerequisite,
     ): PrerequisiteResponse.Incapable? = when (prerequisite) {
         Prerequisite.BLUETOOTH -> handleBluetoothCapability()
-        else -> null
+        Prerequisite.CAMERA -> handleCameraCapability()
+        Prerequisite.UNKNOWN -> null
     }.also {
         logger.debug(
             logTag,
@@ -33,5 +36,14 @@ class CapabilityPrerequisiteLayer(
         PrerequisiteResponse.Incapable(IncapableReason.MissingHardware)
     } else {
         null
+    }
+
+    @SuppressLint("UnsupportedChromeOsCameraSystemFeature")
+    private fun handleCameraCapability(): PrerequisiteResponse.Incapable? = if (
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
+    ) {
+        null
+    } else {
+        PrerequisiteResponse.Incapable(IncapableReason.MissingHardware)
     }
 }
