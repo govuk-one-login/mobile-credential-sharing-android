@@ -5,20 +5,15 @@ import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
 
 /**
  * Implements [Resettable] for clearing internal state, such as the session state machines.
  */
 interface Orchestrator : Resettable {
-
     /**
      * Begins the User journey.
-     *
-     * @param requiredPermissions The Android permissions required to successfully complete the
-     * User journey.
      */
-    fun start(requiredPermissions: Set<String>)
+    fun start()
 
     /**
      * Completes the User journey.
@@ -51,8 +46,8 @@ interface Orchestrator : Resettable {
         const val START_ORCHESTRATION_ERROR: String = "Cannot start orchestration"
         const val START_ORCHESTRATION_SUCCESS: String = "start orchestration"
 
-        fun completedAuthorizationCheck(journey: String, response: AuthorizationResponse): String =
-            "Performed $journey authorization check: $response"
+        fun completedPrerequisiteChecks(journey: String, response: Any?): String =
+            "Performed $journey prerequisite checks: $response"
 
         fun createSessionResetMessage(journey: String): String =
             "Cleared Orchestrator $journey session"

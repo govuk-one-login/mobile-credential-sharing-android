@@ -26,7 +26,6 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONN
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransportError
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -59,9 +58,7 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            orchestrator.start(
-                bluetoothPermissions().toSet()
-            )
+            orchestrator.start()
 
             orchestrator.holderSessionState.collect { currentSate ->
                 when (currentSate) {

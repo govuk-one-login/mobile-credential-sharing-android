@@ -1,23 +1,19 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites
 
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationRequest
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
+fun interface PrerequisiteGate {
+    fun checkPrerequisites(
+        prerequisites: Iterable<Prerequisite>
+    ): Map<Prerequisite, PrerequisiteResponse>
 
-/**
- * Sealed interface that contains abstractions designed to verify the device state during the
- * 'Pre-flight' stage of the User journey.
- *
- * @see uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
- * @see uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Preflight
- */
-sealed interface PrerequisiteGate {
-    /**
-     * Abstraction for authorizing observable capabilities.
-     */
-    fun interface Authorization : PrerequisiteGate {
-        /**
-         * Validate the [request]ed capabilities are authorized.
-         */
-        fun checkAuthorization(request: AuthorizationRequest): AuthorizationResponse
+    fun checkPrerequisites(
+        vararg prerequisites: Prerequisite
+    ): Map<Prerequisite, PrerequisiteResponse> = checkPrerequisites(
+        prerequisites.toList()
+    )
+
+    companion object {
+        fun Map<Prerequisite, PrerequisiteResponse>.meetsPrerequisites(): Boolean = values.all {
+            it == PrerequisiteResponse.MeetsPrerequisites
+        }
     }
 }

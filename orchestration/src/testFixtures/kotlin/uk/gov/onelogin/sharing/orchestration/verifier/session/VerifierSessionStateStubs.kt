@@ -10,6 +10,6 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 object VerifierSessionStateStubs {
     val userCancellation: VerifierSessionState = Cancelled
     val userJourneyFailure: VerifierSessionState = Failed(SessionErrorStubs.dummySessionError)
-    val preflightEmptyPermissions: VerifierSessionState = Preflight(setOf())
+    val preflightEmptyPermissions: VerifierSessionState = Preflight(mapOf())
     val successStub: VerifierSessionState = Success(DeviceResponse)
 }

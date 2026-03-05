@@ -2,7 +2,8 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
+import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
@@ -26,10 +27,11 @@ sealed class HolderSessionState : Completable {
      * State for when a User is ensuring all necessary steps to perform a digital credential
      * verification journey are complete.
      *
-     * @param missingPermissions The list of permissions required to perform the journey in it's
-     * entirety.
+     * @param missingPrerequisites The list of [Prerequisite]s required to perform the journey in
+     * it's entirety.
      */
-    data class Preflight(val missingPermissions: Set<String>) : HolderSessionState()
+    data class Preflight(val missingPrerequisites: Map<Prerequisite, PrerequisiteResponse>) :
+        HolderSessionState()
 
     /**
      * The User's completed the [Preflight] validations, so the device is ready to

@@ -20,7 +20,7 @@ class FakeOrchestrator(
     var startCount = 0
     var cancelCount = 0
 
-    override fun start(requiredPermissions: Set<String>) {
+    override fun start() {
         startCount++
     }
 

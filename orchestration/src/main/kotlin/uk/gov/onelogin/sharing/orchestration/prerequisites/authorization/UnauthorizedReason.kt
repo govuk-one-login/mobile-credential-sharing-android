@@ -9,7 +9,11 @@ sealed class UnauthorizedReason {
      *
      * @param missingPermissions The list of permissions that the User needs to grant.
      */
-    data class MissingPermissions(val missingPermissions: List<String>) :
+    data class MissingPermissions(val missingPermissions: Set<String>) :
         UnauthorizedReason(),
-        Iterable<String> by missingPermissions
+        Iterable<String> by missingPermissions {
+        constructor(
+            vararg permissions: String
+        ) : this (permissions.toSet())
+    }
 }

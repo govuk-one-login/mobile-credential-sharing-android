@@ -24,7 +24,6 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
     companion object {
         private val notStartedTransitions = listOf(
             HolderSessionState.NotStarted,
-            HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
             HolderSessionState.Connecting,
             HolderSessionState.RequestReceived(deviceRequestStub()),

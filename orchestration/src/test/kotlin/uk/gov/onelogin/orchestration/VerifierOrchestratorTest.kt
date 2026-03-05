@@ -5,6 +5,8 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -14,6 +16,10 @@ import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCE
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
@@ -22,9 +28,10 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.UncancellableVerifierSessionStates
-import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.inPreflight
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 
 @RunWith(TestParameterInjector::class)
 class VerifierOrchestratorTest {
@@ -49,9 +56,19 @@ class VerifierOrchestratorTest {
         )
     }
 
+    private var gateResponses: MutableMap<Prerequisite, PrerequisiteResponse> =
+        Prerequisite.entries.associateWith {
+            PrerequisiteResponse.MeetsPrerequisites
+        }.toMutableMap()
+
+    private val gate by lazy {
+        StubPrerequisiteGate(gateResponses)
+    }
+
     private val orchestrator by lazy {
         VerifierOrchestrator(
             logger = logger,
+            prerequisiteGate = gate,
             sessionFactory = sessionFactory
         )
     }
@@ -66,14 +83,36 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `Starting the Orchestrator journey navigates to the Preflight state`() = runTest {
-        orchestrator.start(setOf())
+        orchestrator.start()
 
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
             sessionFactory,
-            currentSessionState(inPreflight())
+            currentSessionState(isReadyToScan())
+        )
+    }
+
+    @Test
+    fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
+        gateResponses[Prerequisite.BLUETOOTH] = PrerequisiteResponse.Incapable(
+            IncapableReason.MissingHardware
+        )
+
+        orchestrator.start()
+
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
+
+        assertThat(
+            sessionFactory,
+            currentSessionState(
+                allOf(
+                    hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH),
+                    not(hasMissingPreflightPrerequisites(Prerequisite.CAMERA))
+                )
+            )
         )
     }
 
@@ -83,7 +122,7 @@ class VerifierOrchestratorTest {
         state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
-        orchestrator.start(setOf())
+        orchestrator.start()
 
         assert(startSessionAfterCompletionLog in logger)
         assert(START_ORCHESTRATION_SUCCESS in logger)
@@ -91,7 +130,7 @@ class VerifierOrchestratorTest {
 
         assertThat(
             sessionFactory,
-            currentSessionState(inPreflight())
+            currentSessionState(isReadyToScan())
         )
     }
 
@@ -99,12 +138,12 @@ class VerifierOrchestratorTest {
     fun `Orchestrator cannot be started more than once`() = runTest {
         `Starting the Orchestrator journey navigates to the Preflight state`()
 
-        orchestrator.start(setOf())
+        orchestrator.start()
 
         assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(
             sessionFactory,
-            currentSessionState(inPreflight())
+            currentSessionState(isReadyToScan())
         )
     }
 

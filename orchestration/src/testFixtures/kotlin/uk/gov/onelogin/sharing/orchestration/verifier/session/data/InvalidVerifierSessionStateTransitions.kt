@@ -30,7 +30,6 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
     companion object {
         private val notStartedTransitions = listOf(
             NotStarted,
-            ReadyToScan,
             Connecting,
             ProcessingEngagement,
             Verifying,

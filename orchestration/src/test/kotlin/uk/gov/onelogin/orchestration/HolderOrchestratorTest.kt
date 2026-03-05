@@ -33,13 +33,15 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHold
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.dummyHolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPreflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isReadyToPresent
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isRequestReceived
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.AuthorizationResponse
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.hasMissingPreflightPrerequisites
+import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
+import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
@@ -62,12 +64,13 @@ class HolderOrchestratorTest {
         HolderSessionState.NotStarted
     )
 
-    private var authorizationResponse = AuthorizationResponse.Authorized
+    private var prerequisiteResponse: MutableMap<Prerequisite, PrerequisiteResponse> =
+        Prerequisite.entries.associateWith {
+            PrerequisiteResponse.MeetsPrerequisites
+        }.toMutableMap()
 
-    private val permissionChecker by lazy {
-        FakePrerequisiteAuthorizationGate(
-            authorizationResponse
-        )
+    private val gate by lazy {
+        StubPrerequisiteGate(prerequisiteResponse)
     }
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
@@ -89,30 +92,51 @@ class HolderOrchestratorTest {
     ): Orchestrator = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
-        authorizationGate = permissionChecker,
+        prerequisiteGate = gate,
         mdocPeripheralTransport = mdocPeripheralTransport,
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
     )
 
     @Test
-    fun `Starting the Orchestrator journey navigates to the Preflight state`() = runTest {
+    fun `Starting the Orchestrator journey navigates to the PresentingEngagement state`() =
+        runTest {
+            val sessionFactory = createSessionFactory()
+            val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+            orchestrator.start()
+
+            assert(START_ORCHESTRATION_SUCCESS in logger)
+            assert(START_ORCHESTRATION_ERROR !in logger)
+
+            assertThat(
+                sessionFactory as FakeSessionFactory,
+                currentSessionState(isReadyToPresent())
+            )
+
+            assert(
+                logger.any {
+                    it.message.startsWith("Performed holder prerequisite checks: ")
+                }
+            )
+        }
+
+    @Test
+    fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
+        prerequisiteResponse[Prerequisite.BLUETOOTH] = PrerequisiteResponse.Incapable(
+            IncapableReason.MissingHardware
+        )
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
-        orchestrator.start(setOf())
+        orchestrator.start()
 
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
             sessionFactory as FakeSessionFactory,
-            currentSessionState(isReadyToPresent())
-        )
-
-        assert(
-            logger.any { entry ->
-                entry.message.contains(authorizationResponse.toString())
-            }
+            currentSessionState(
+                hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+            )
         )
     }
 
@@ -124,7 +148,7 @@ class HolderOrchestratorTest {
         initialStates[0] = state
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
-        orchestrator.start(setOf())
+        orchestrator.start()
 
         assert(startSessionAfterCompletionLog in logger)
         assert(START_ORCHESTRATION_SUCCESS in logger)
@@ -134,39 +158,17 @@ class HolderOrchestratorTest {
             sessionFactory as FakeSessionFactory,
             currentSessionState(isReadyToPresent())
         )
-
-        assert(
-            logger.any { entry ->
-                entry.message.contains(authorizationResponse.toString())
-            }
-        )
     }
 
     @Test
     fun `Orchestrator cannot be started when the User journey is already in progress`() = runTest {
-        val sessionFactory = FakeSessionFactory<HolderSession>(
-            initialStates.map { _ ->
-                HolderSessionImpl(
-                    logger = logger,
-                    sessionContext = dummyHolderSessionContext,
-                    internalState = MutableStateFlow(
-                        HolderSessionState.Preflight(setOf()),
-                    )
-                )
-            }
-        )
+        val orchestrator = createOrchestrator()
 
-        val orchestrator = createOrchestrator(
-            sessionFactory = sessionFactory
-        )
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
+
+        orchestrator.start()
 
         assert(START_ORCHESTRATION_ERROR in logger)
-        assertThat(
-            sessionFactory,
-            currentSessionState(inPreflight())
-        )
     }
 
     @Test
@@ -224,8 +226,7 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         assertEquals(1, mdocPeripheralTransport.startCalls)
 
@@ -236,13 +237,9 @@ class HolderOrchestratorTest {
     fun `handles advertiser stopped state change`() = runTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
-        orchestrator.start(setOf())
-
-        advanceUntilIdle()
+        orchestrator.start()
 
         orchestrator.cancel()
-
-        advanceUntilIdle()
 
         assertEquals(1, mdocPeripheralTransport.stopCalls)
 
@@ -254,11 +251,9 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         mdocPeripheralTransport.emitState(MdocPeripheralState.Connected(DEVICE_ADDRESS))
-        advanceUntilIdle()
 
         assert("Mdoc - Connected: $DEVICE_ADDRESS" in logger)
     }
@@ -268,13 +263,11 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         mdocPeripheralTransport.emitState(
             MdocPeripheralState.Disconnected(DEVICE_ADDRESS, false)
         )
-        advanceUntilIdle()
 
         assert("Error Mdoc - Disconnected: $DEVICE_ADDRESS" in logger)
         assertEquals(1, mdocPeripheralTransport.stopCalls)
@@ -285,13 +278,11 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         mdocPeripheralTransport.emitState(
             MdocPeripheralState.Disconnected(DEVICE_ADDRESS, true)
         )
-        advanceUntilIdle()
 
         assert("BLE session terminated successfully via GATT End command" in logger)
     }
@@ -301,15 +292,14 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         mdocPeripheralTransport.emitState(
             MdocPeripheralState.Error(
                 MdocPeripheralTransportError.ADVERTISING_FAILED
             )
         )
-        advanceUntilIdle()
+
         assert("Mdoc - Error: Advertising failed" in logger)
 
         mdocPeripheralTransport.emitState(
@@ -317,7 +307,7 @@ class HolderOrchestratorTest {
                 MdocPeripheralTransportError.GATT_NOT_AVAILABLE
             )
         )
-        advanceUntilIdle()
+
         assert("Mdoc - Error: GATT not available" in logger)
 
         mdocPeripheralTransport.emitState(
@@ -325,7 +315,7 @@ class HolderOrchestratorTest {
                 MdocPeripheralTransportError.BLUETOOTH_PERMISSION_MISSING
             )
         )
-        advanceUntilIdle()
+
         assert("Mdoc - Error: Bluetooth permission missing" in logger)
 
         mdocPeripheralTransport.emitState(
@@ -333,7 +323,7 @@ class HolderOrchestratorTest {
                 MdocPeripheralTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED
             )
         )
-        advanceUntilIdle()
+
         assert("Mdoc - Error: Descriptor write request failed" in logger)
     }
 
@@ -342,13 +332,11 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         mdocPeripheralTransport.emitState(
             MdocPeripheralState.GattServiceStopped
         )
-        advanceUntilIdle()
 
         assert("Mdoc - GattService Stopped" in logger)
     }
@@ -358,13 +346,11 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         mdocPeripheralTransport.emitState(
             MdocPeripheralState.Idle
         )
-        advanceUntilIdle()
 
         assert("Mdoc - Idle" in logger)
     }
@@ -374,14 +360,12 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         val uuid = UUID.randomUUID()
         mdocPeripheralTransport.emitState(
             MdocPeripheralState.ServiceAdded(uuid)
         )
-        advanceUntilIdle()
 
         assert("Mdoc - Service Added: $uuid" in logger)
     }
@@ -391,13 +375,11 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         mdocPeripheralTransport.emitState(
             MdocPeripheralState.MdocPeripheralEnded(SessionEndStates.SUCCESS)
         )
-        advanceUntilIdle()
 
         assert("Mdoc - Ending session" in logger)
     }
@@ -407,15 +389,13 @@ class HolderOrchestratorTest {
         val mdocPeripheralTransport = FakeMdocPeripheralTransport()
         val orchestrator = createOrchestrator(mdocPeripheralTransport)
 
-        orchestrator.start(setOf())
-        advanceUntilIdle()
+        orchestrator.start()
 
         mdocPeripheralTransport.emitState(
             MdocPeripheralState.MdocPeripheralEnded(
                 SessionEndStates.NOTIFY_CLIENT_FAILED
             )
         )
-        advanceUntilIdle()
 
         assert(
             "Mdoc - Error while ending session: ${SessionEndStates.NOTIFY_CLIENT_FAILED}" in logger
@@ -434,9 +414,7 @@ class HolderOrchestratorTest {
             sessionFactory = sessionFactory,
             mdocPeripheralTransport = peripheralTransport
         )
-        orchestrator.start(setOf())
-
-        advanceUntilIdle()
+        orchestrator.start()
 
         peripheralTransport.emitState(
             MdocPeripheralState.MessageReceived(
@@ -444,11 +422,9 @@ class HolderOrchestratorTest {
             )
         )
 
-        advanceUntilIdle()
-
-         assertThat(
-             sessionFactory as FakeSessionFactory,
-             currentSessionState(isRequestReceived())
-         )
+        assertThat(
+            sessionFactory as FakeSessionFactory,
+            currentSessionState(isRequestReceived())
+        )
     }
 }
