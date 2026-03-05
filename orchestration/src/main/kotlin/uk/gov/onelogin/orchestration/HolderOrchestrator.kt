@@ -93,7 +93,11 @@ class HolderOrchestrator(
             is PrerequisiteResponse.NotReady,
             is PrerequisiteResponse.Unauthorized ->
                 session.transitionTo(
-                    HolderSessionState.Preflight(Prerequisite.BLUETOOTH)
+                    HolderSessionState.Preflight(
+                        mapOf(
+                            Prerequisite.BLUETOOTH to prerequisiteCheck
+                        )
+                    )
                 )
         }
     }

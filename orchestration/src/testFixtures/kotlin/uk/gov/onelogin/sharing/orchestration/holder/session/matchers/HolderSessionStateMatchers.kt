@@ -1,11 +1,13 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session.matchers
 
+import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.containsInAnyOrder
+import org.hamcrest.Matchers.hasKey
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 /**
  * Wrapper object for storing hamcrest [Matcher] functions for [HolderSessionState].
@@ -18,11 +20,13 @@ object HolderSessionStateMatchers {
     fun hasMissingPreflightPrerequisites(
         vararg prerequisite: Prerequisite
     ): Matcher<HolderSessionState> = hasMissingPreflightPrerequisites(
-        containsInAnyOrder(*prerequisite)
+        prerequisite
+            .map(::hasKey)
+            .let(::allOf)
     )
 
     fun hasMissingPreflightPrerequisites(
-        matcher: Matcher<in Set<Prerequisite>>
+        matcher: Matcher<in Map<Prerequisite, PrerequisiteResponse>>
     ): Matcher<HolderSessionState> = HasHolderPreflightPrerequisites(matcher)
 
     fun isCancelled(): Matcher<in HolderSessionState> = equalTo(

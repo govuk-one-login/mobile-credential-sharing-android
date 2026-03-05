@@ -79,7 +79,7 @@ class VerifierOrchestrator(
     ) {
         responseMap.filterValues {
             PrerequisiteResponse.MeetsPrerequisites != it
-        }.keys
+        }
             .let(VerifierSessionState::Preflight)
             .let(session::transitionTo)
     }

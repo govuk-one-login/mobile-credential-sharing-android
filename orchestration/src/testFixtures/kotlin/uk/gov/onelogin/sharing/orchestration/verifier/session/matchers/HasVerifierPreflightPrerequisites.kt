@@ -4,10 +4,11 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 internal class HasVerifierPreflightPrerequisites(
-    private val matcher: Matcher<in Set<Prerequisite>>
+    private val matcher: Matcher<in Map<Prerequisite, PrerequisiteResponse>>
 ) : TypeSafeMatcher<VerifierSessionState>() {
     override fun describeTo(description: Description?) = matcher.describeTo(description)
 
