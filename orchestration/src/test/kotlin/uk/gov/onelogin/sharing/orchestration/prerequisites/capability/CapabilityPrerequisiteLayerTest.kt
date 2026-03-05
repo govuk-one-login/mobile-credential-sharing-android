@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.capability
 
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.pm.PackageManager
 import io.mockk.every
@@ -19,6 +20,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.Prerequisite
 class CapabilityPrerequisiteLayerTest {
     private val context: Context = mockk()
     private val packageManager: PackageManager = mockk()
+    private val bluetoothManager: BluetoothManager = mockk()
 
     private val logger = SystemLogger()
     private val capability by lazy {
@@ -33,6 +35,9 @@ class CapabilityPrerequisiteLayerTest {
         every {
             context.packageManager
         }.returns(packageManager)
+        every {
+            context.getSystemService(Context.BLUETOOTH_SERVICE)
+        }.returns(bluetoothManager)
     }
 
     private fun verifyLogs(prerequisite: Prerequisite) {
@@ -46,7 +51,7 @@ class CapabilityPrerequisiteLayerTest {
     @Test
     fun `Bluetooth is incapable when unable to obtain a manager from the context`() = runTest {
         every {
-            context.getSystemService(Context.BLUETOOTH_SERVICE)
+            bluetoothManager.adapter
         }.returns(null)
 
         performJourney(
@@ -58,7 +63,7 @@ class CapabilityPrerequisiteLayerTest {
     @Test
     fun `Bluetooth is capable when able to obtain a manager from the context`() = runTest {
         every {
-            context.getSystemService(Context.BLUETOOTH_SERVICE)
+            bluetoothManager.adapter
         }.returns(mockk())
 
         performJourney(

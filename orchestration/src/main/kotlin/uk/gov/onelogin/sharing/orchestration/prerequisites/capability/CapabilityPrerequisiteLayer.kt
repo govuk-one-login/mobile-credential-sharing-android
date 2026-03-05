@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.capability
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.pm.PackageManager
 import dev.zacsweers.metro.AppScope
@@ -27,7 +28,11 @@ class CapabilityPrerequisiteLayer(private val context: Context, private val logg
         }
 
     private fun handleBluetoothCapability(): PrerequisiteResponse.Incapable? = if (
-        context.getSystemService(Context.BLUETOOTH_SERVICE) == null
+        (
+                context.getSystemService(
+                    Context.BLUETOOTH_SERVICE
+                ) as? BluetoothManager
+                )?.adapter == null
     ) {
         PrerequisiteResponse.Incapable(IncapableReason.MissingHardware)
     } else {
