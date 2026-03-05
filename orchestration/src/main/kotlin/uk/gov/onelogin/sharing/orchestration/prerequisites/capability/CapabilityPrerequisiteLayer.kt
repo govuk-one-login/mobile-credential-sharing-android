@@ -29,10 +29,10 @@ class CapabilityPrerequisiteLayer(private val context: Context, private val logg
 
     private fun handleBluetoothCapability(): PrerequisiteResponse.Incapable? = if (
         (
-                context.getSystemService(
-                    Context.BLUETOOTH_SERVICE
-                ) as? BluetoothManager
-                )?.adapter == null
+            context.getSystemService(
+                Context.BLUETOOTH_SERVICE
+            ) as? BluetoothManager
+            )?.adapter == null
     ) {
         PrerequisiteResponse.Incapable(IncapableReason.MissingHardware)
     } else {
