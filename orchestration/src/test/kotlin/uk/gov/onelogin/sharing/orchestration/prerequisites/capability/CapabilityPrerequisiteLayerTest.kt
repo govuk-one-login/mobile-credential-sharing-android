@@ -35,9 +35,7 @@ class CapabilityPrerequisiteLayerTest {
         }.returns(packageManager)
     }
 
-    private fun verifyLogs(
-        prerequisite: Prerequisite
-    ) {
+    private fun verifyLogs(prerequisite: Prerequisite) {
         assert(
             logger.any {
                 it.message.startsWith("Performed $prerequisite capability check.")
@@ -89,7 +87,7 @@ class CapabilityPrerequisiteLayerTest {
 
         performJourney(
             Prerequisite.CAMERA,
-            nullValue(),
+            nullValue()
         )
     }
 
@@ -107,7 +105,7 @@ class CapabilityPrerequisiteLayerTest {
     ) {
         assertThat(
             capability.checkCapability(prerequisite),
-            matcher,
+            matcher
         )
         verifyLogs(prerequisite)
     }

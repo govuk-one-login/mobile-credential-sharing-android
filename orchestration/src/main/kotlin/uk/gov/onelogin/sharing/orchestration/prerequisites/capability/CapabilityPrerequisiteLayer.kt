@@ -12,23 +12,19 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 @ContributesBinding(AppScope::class)
-class CapabilityPrerequisiteLayer(
-    private val context: Context,
-    private val logger: Logger,
-) :
+class CapabilityPrerequisiteLayer(private val context: Context, private val logger: Logger) :
     PrerequisiteGateLayer.Capability {
-    override fun checkCapability(
-        prerequisite: Prerequisite,
-    ): PrerequisiteResponse.Incapable? = when (prerequisite) {
-        Prerequisite.BLUETOOTH -> handleBluetoothCapability()
-        Prerequisite.CAMERA -> handleCameraCapability()
-        Prerequisite.UNKNOWN -> null
-    }.also {
-        logger.debug(
-            logTag,
-            "Performed $prerequisite capability check. Response: $it"
-        )
-    }
+    override fun checkCapability(prerequisite: Prerequisite): PrerequisiteResponse.Incapable? =
+        when (prerequisite) {
+            Prerequisite.BLUETOOTH -> handleBluetoothCapability()
+            Prerequisite.CAMERA -> handleCameraCapability()
+            Prerequisite.UNKNOWN -> null
+        }.also {
+            logger.debug(
+                logTag,
+                "Performed $prerequisite capability check. Response: $it"
+            )
+        }
 
     private fun handleBluetoothCapability(): PrerequisiteResponse.Incapable? = if (
         context.getSystemService(Context.BLUETOOTH_SERVICE) == null
