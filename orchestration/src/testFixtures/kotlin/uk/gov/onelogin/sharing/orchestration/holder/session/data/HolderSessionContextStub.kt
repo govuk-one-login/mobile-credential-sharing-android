@@ -6,7 +6,7 @@ import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 
 object HolderSessionContextStub {
 
-    val dummyHolderSessionContext = HolderSessionContext(
+    val holderSessionContextStub = HolderSessionContext(
         sessionUuid = UUID.randomUUID(),
         keyPair = SessionSecurityTestStub.generateValidKeyPair(),
         engagement = "engagement",

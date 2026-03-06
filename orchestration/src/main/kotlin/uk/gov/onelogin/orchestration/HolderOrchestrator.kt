@@ -15,6 +15,7 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESS
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
+import uk.gov.onelogin.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
@@ -30,6 +31,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 
@@ -55,6 +57,18 @@ class HolderOrchestrator(
             }
         }
 
+        if (session.currentState.value !is HolderSessionState.NotStarted) {
+            logger.error(
+                logTag,
+                START_ORCHESTRATION_ERROR,
+                OrchestratorCannotStartException(
+                    START_ORCHESTRATION_ERROR,
+                    IllegalStateException("Journey already in progress")
+                )
+            )
+            return
+        }
+
         try {
             prerequisiteGate.checkPrerequisites(
                 Prerequisite.BLUETOOTH
@@ -69,18 +83,6 @@ class HolderOrchestrator(
             }?.let { prerequisiteCheck ->
                 handleStartPrerequisiteCheck(prerequisiteCheck)
                 logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
-
-                appCoroutineScope.launch {
-                    peripheralBluetoothTransport.state.collect {
-                        handleMdocState(it)
-                    }
-                }
-
-                appCoroutineScope.launch {
-                    peripheralBluetoothTransport.start(
-                        serviceUuid = session.sessionContext.sessionUuid
-                    )
-                }
             }
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
@@ -96,17 +98,30 @@ class HolderOrchestrator(
     private fun handleStartPrerequisiteCheck(prerequisiteCheck: PrerequisiteResponse) {
         when (prerequisiteCheck) {
             PrerequisiteResponse.MeetsPrerequisites -> {
-                session.transitionTo(HolderSessionState.ReadyToPresent)
+                safeTransitionTo(HolderSessionState.ReadyToPresent)
+
+                appCoroutineScope.launch {
+                    peripheralBluetoothTransport.state.collect {
+                        handleMdocState(it)
+                    }
+                }
+
+                appCoroutineScope.launch {
+                    peripheralBluetoothTransport.start(
+                        serviceUuid = session.sessionContext.sessionUuid
+                    )
+                }
+
                 val qrCode = session.sessionContext.qrCode
                 if (qrCode.isNotEmpty()) {
-                    safeTransition(HolderSessionState.PresentingEngagement(qrCode))
+                    safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
                 }
             }
 
             is PrerequisiteResponse.Incapable,
             is PrerequisiteResponse.NotReady,
             is PrerequisiteResponse.Unauthorized ->
-                session.transitionTo(
+                safeTransitionTo(
                     HolderSessionState.Preflight(
                         mapOf(
                             Prerequisite.BLUETOOTH to prerequisiteCheck
@@ -117,7 +132,7 @@ class HolderOrchestrator(
     }
 
     override fun cancel() {
-        safeTransition(
+        safeTransitionTo(
             state = HolderSessionState.Complete.Cancelled,
             exceptionWrapper = ::OrchestratorCannotCancelException
         )
@@ -149,7 +164,7 @@ class HolderOrchestrator(
                 logger.debug(
                     logTag,
                     "Mdoc - Advertising Started UUID: " +
-                        "${session.sessionContext.sessionUuid}"
+                            "${session.sessionContext.sessionUuid}"
                 )
             }
 
@@ -158,7 +173,7 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.Connected -> {
-                safeTransition(HolderSessionState.Connected)
+                safeTransitionTo(HolderSessionState.ProcessingEstablishment)
 
                 logger.debug(logTag, "Mdoc - Connected: ${state.address}")
             }
@@ -169,10 +184,10 @@ class HolderOrchestrator(
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
                             description = "We may need to handle explicit bluetooth" +
-                                "disconnection states to handle common error codes " +
-                                "8, 19, 22 and 133. The function below will handle " +
-                                "treat all disconnect states the same when connected " +
-                                "to a device"
+                                    "disconnection states to handle common error codes " +
+                                    "8, 19, 22 and 133. The function below will handle " +
+                                    "treat all disconnect states the same when connected " +
+                                    "to a device"
                         )
                     ]
                 )
@@ -184,14 +199,19 @@ class HolderOrchestrator(
                     )
                 } else {
                     logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
-//                    TODO("pass error to view model")
-                    /*_uiState.update {
-                        it.copy(
-                            connectedAddress = state.address,
-                            showErrorScreen = true,
-                            bluetoothErrorType = BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
+                    safeTransitionTo(
+                        HolderSessionState.Complete.Failed(
+                            SessionError(
+                                "Device ${state.address} disconnected unexpectedly",
+                                BluetoothDisconnectedException(
+                                    "Bluetooth disconnected unexpectedly",
+                                    IllegalStateException(
+                                        "Device ${state.address} disconnected unexpectedly"
+                                    )
+                                )
+                            )
                         )
-                    }*/
+                    )
                 }
 
                 stopAdvertising()
@@ -213,10 +233,12 @@ class HolderOrchestrator(
                 logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
 
             is PeripheralBluetoothState.PeripheralBluetoothEnded -> {
+                safeTransitionTo(HolderSessionState.Complete.Cancelled)
+
                 if (state.status == SessionEndStates.SUCCESS) {
                     logger.debug(logTag, "Mdoc - Ending session")
+
                 } else {
-//                    _uiState.update { it.copy(showErrorScreen = true) }
                     logger.error(
                         logTag,
                         "Mdoc - Error while ending session: ${state.status}"
@@ -240,7 +262,7 @@ class HolderOrchestrator(
                     holderPrivateKey = keypair
                 )
 
-                safeTransition(HolderSessionState.RequestReceived(deviceRequest))
+                safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
 
                 deviceRequest
                     .docRequests.firstOrNull()
@@ -269,7 +291,7 @@ class HolderOrchestrator(
         }
     }
 
-    private fun safeTransition(
+    private fun safeTransitionTo(
         state: HolderSessionState,
         logMessage: String = "$CANNOT_TRANSITION_TO_STATE $state",
         exceptionWrapper: ((String, Throwable) -> Exception)? = null

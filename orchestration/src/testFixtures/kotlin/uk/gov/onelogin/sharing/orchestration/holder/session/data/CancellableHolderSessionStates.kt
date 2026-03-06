@@ -15,8 +15,8 @@ class CancellableHolderSessionStates : TestParameterValuesProvider() {
         HolderSessionStateStubs.preflightEmptyPermissions,
         HolderSessionState.ReadyToPresent,
         HolderSessionState.PresentingEngagement(""),
-        HolderSessionState.Connected,
-        HolderSessionState.RequestReceived(deviceRequestStub),
+        HolderSessionState.ProcessingEstablishment,
+        HolderSessionState.AwaitingUserConsent(deviceRequestStub),
         HolderSessionState.ProcessingResponse
     )
 }

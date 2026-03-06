@@ -5,13 +5,13 @@ import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Success
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Connected
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.RequestReceived
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
 
 /**
  * Convenience alias for defining a [Map] of [HolderSessionState] types to a [Set] of
@@ -48,13 +48,13 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
         PresentingEngagement::class
     ) + fullErrorHandling,
     PresentingEngagement::class to setOf(
-        Connected::class,
+        ProcessingEstablishment::class,
         Cancelled::class
-    ),
-    Connected::class to singleton(
-        RequestReceived::class
+    )+ fullErrorHandling,
+    ProcessingEstablishment::class to singleton(
+        AwaitingUserConsent::class
     ) + fullErrorHandling,
-    RequestReceived::class to singleton(
+    AwaitingUserConsent::class to singleton(
         ProcessingResponse::class
     ) + fullErrorHandling,
     ProcessingResponse::class to singleton(

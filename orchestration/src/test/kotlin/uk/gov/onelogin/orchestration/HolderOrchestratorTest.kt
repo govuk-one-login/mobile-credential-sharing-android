@@ -7,6 +7,7 @@ import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
+import uk.gov.onelogin.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
@@ -30,13 +32,15 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
-import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.dummyHolderSessionContext
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isRequestReceived
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingUserConsent
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
@@ -81,7 +85,7 @@ class HolderOrchestratorTest {
                 HolderSessionImpl(
                     logger = logger,
                     internalState = MutableStateFlow(initialState),
-                    sessionContext = dummyHolderSessionContext
+                    sessionContext = holderSessionContextStub
                 )
             }
         )
@@ -251,19 +255,33 @@ class HolderOrchestratorTest {
     @Test
     fun `handles device connected state change`() = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            peripheralBluetoothTransport = peripheralBluetoothTransport
+        )
 
         orchestrator.start()
 
-        peripheralBluetoothTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralBluetoothTransport.emitState(
+            state = PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
+        )
 
         assert("Mdoc - Connected: $DEVICE_ADDRESS" in logger)
+        assertThat(
+            sessionFactory as FakeSessionFactory,
+            currentSessionState(isProcessingEstablishment())
+        )
     }
 
     @Test
     fun `handles device disconnected state change`() = runTest {
+        val sessionFactory = createSessionFactory()
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            peripheralBluetoothTransport = peripheralBluetoothTransport
+        )
 
         orchestrator.start()
 
@@ -273,6 +291,9 @@ class HolderOrchestratorTest {
 
         assert("Error Mdoc - Disconnected: $DEVICE_ADDRESS" in logger)
         assertEquals(1, peripheralBluetoothTransport.stopCalls)
+        val state = (sessionFactory as FakeSessionFactory).getCurrentSession().currentState.value
+        val failed = state as HolderSessionState.Complete.Failed
+        assert(failed.error.exception is BluetoothDisconnectedException)
     }
 
     @Test
@@ -374,8 +395,12 @@ class HolderOrchestratorTest {
 
     @Test
     fun `logs end session event when session ends`() = runTest {
+        val sessionFactory = createSessionFactory()
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralBluetoothTransport,
+            sessionFactory = sessionFactory
+        )
 
         orchestrator.start()
 
@@ -383,13 +408,22 @@ class HolderOrchestratorTest {
             PeripheralBluetoothState.PeripheralBluetoothEnded(SessionEndStates.SUCCESS)
         )
 
+        assertThat(
+            sessionFactory as FakeSessionFactory,
+            currentSessionState(isCancelled())
+        )
+
         assert("Mdoc - Ending session" in logger)
     }
 
     @Test
     fun `shows error when fails to end session`() = runTest {
+        val sessionFactory = createSessionFactory()
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralBluetoothTransport,
+            sessionFactory = sessionFactory
+        )
 
         orchestrator.start()
 
@@ -399,40 +433,65 @@ class HolderOrchestratorTest {
             )
         )
 
+        assertThat(
+            sessionFactory as FakeSessionFactory,
+            currentSessionState(isCancelled())
+        )
+
         assert(
             "Mdoc - Error while ending session: ${SessionEndStates.NOTIFY_CLIENT_FAILED}" in logger
         )
     }
 
     @Test
-    fun `decrypts device request when session ends`() = runTest {
+    fun `decrypts device request when connected`() = runTest {
         val sessionFactory = createSessionFactory()
         val peripheralTransport =
             FakePeripheralBluetoothTransport(
-                initialState = PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
+                initialState = PeripheralBluetoothState.AdvertisingStarted
             )
+
         val orchestrator = createOrchestrator(
             sessionFactory = sessionFactory,
             peripheralBluetoothTransport = peripheralTransport
         )
-        orchestrator.start()
 
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(
-                byteArrayOf(1, 2, 3)
-            )
-        )
+        orchestrator.start()
+        advanceUntilIdle()
 
         (orchestrator as HolderOrchestrator).holderSessionState.test {
+
             assertEquals(
-                HolderSessionState.RequestReceived(deviceRequestStub),
+                HolderSessionState.PresentingEngagement(
+                    holderSessionContextStub.qrCode
+                ),
+                awaitItem()
+            )
+
+            peripheralTransport.emitState(
+                PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
+            )
+
+            assertEquals(
+                HolderSessionState.ProcessingEstablishment,
+                awaitItem()
+            )
+
+            peripheralTransport.emitState(
+                PeripheralBluetoothState.MessageReceived(
+                    byteArrayOf(1, 2, 3)
+                )
+            )
+
+            assertEquals(
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub),
                 awaitItem()
             )
         }
 
         assertThat(
             sessionFactory as FakeSessionFactory,
-            currentSessionState(isRequestReceived())
+            currentSessionState(isAwaitingUserConsent())
         )
     }
 }

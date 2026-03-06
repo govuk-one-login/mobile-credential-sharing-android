@@ -5,7 +5,6 @@ import dev.zacsweers.metro.ContributesBinding
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
-import uk.gov.onelogin.sharing.bluetooth.internal.Errors
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BluetoothAdvertiserProvider
 
@@ -22,10 +21,6 @@ class AndroidBleProvider(
         bleAdvertiseData: BleAdvertiseData,
         callback: AdvertisingCallback
     ) {
-/*        check(bleAdvertiser != null) {
-            Errors.BLUETOOTH_NOT_AVAILABLE
-        }*/
-
         bleAdvertiser.startAdvertisingSet(
             parameters,
             bleAdvertiseData,
@@ -34,6 +29,6 @@ class AndroidBleProvider(
     }
 
     override fun stopAdvertising() {
-        bleAdvertiser?.stopAdvertisingSet()
+        bleAdvertiser.stopAdvertisingSet()
     }
 }

@@ -55,7 +55,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         }
         private val presentingEngagementTransitions = listOf(
             "User cancels from the QR code screen" to userCancellation,
-            "QR code handshake completes" to HolderSessionState.Connected
+            "QR generation fails" to userJourneyFailure,
+            "QR code handshake completes" to HolderSessionState.ProcessingEstablishment
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -67,22 +68,22 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels whilst connecting with Verifier device" to userCancellation,
             "Connection with verifier device cannot be established" to userJourneyFailure,
             "Receives Verifier device's data transfer request" to
-                HolderSessionState.RequestReceived(deviceRequestStub)
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub)
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.Connected,
+                HolderSessionState.ProcessingEstablishment,
                 transition
             )
         }
-        private val requestReceivedTransitions = listOf(
+        private val awaitingUserConsentTransitions = listOf(
             "User cancels the data transfer request" to userCancellation,
             "Data transfer disconnects before completion" to userJourneyFailure,
             "Holder device begins processing the response" to HolderSessionState.ProcessingResponse
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.RequestReceived(deviceRequestStub),
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub),
                 transition
             )
         }
@@ -104,7 +105,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
                 readyToPresentTransitions +
                 presentingEngagementTransitions +
                 connectingTransitions +
-                requestReceivedTransitions +
+                awaitingUserConsentTransitions +
                 processingResponseTransitions
     }
 }

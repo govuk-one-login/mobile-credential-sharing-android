@@ -104,36 +104,7 @@ class HolderWelcomeViewModel(
         if (grantedPermissionsForFirstTime) {
             savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] = true
         }
-
-        if (granted) {
-            startBleSession()
-        }
     }
-
-    private fun startBleSession() {
-        val state = _uiState.value
-
-        val hasPermissions = state.hasBluetoothPermissions == true
-        val bluetoothOn = state.bluetoothState == BluetoothState.Enabled
-
-        val canStart = !sessionStartRequested &&
-            hasPermissions &&
-            bluetoothOn &&
-            canStartNewSession(state) &&
-            !sessionStartRequested
-
-        if (canStart) {
-            sessionStartRequested = true
-            viewModelScope.launch {
-//                mdocBleSession.start(state.uuid)
-            }
-        }
-    }
-
-    private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
-        state.sessionState == PeripheralBluetoothState.Idle ||
-            state.sessionState == PeripheralBluetoothState.AdvertisingStopped ||
-            state.sessionState == PeripheralBluetoothState.GattServiceStopped
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
@@ -157,15 +128,8 @@ class HolderWelcomeViewModel(
                 )
             ]
         )
-//        mdocBleSession.notifySessionEnd(_uiState.value.uuid)
+        orchestrator.cancel()
         logger.debug(logTag, "Holder stopped advertising during session")
-    }
-
-    override fun onCleared() {
-        viewModelScope.launch {
-//            mdocBleSession.stop()
-        }
-        super.onCleared()
     }
 }
 
