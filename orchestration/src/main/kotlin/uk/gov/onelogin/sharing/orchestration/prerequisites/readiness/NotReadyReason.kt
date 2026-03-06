@@ -9,4 +9,5 @@ sealed class NotReadyReason {
      * [uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite].
      */
     data object BluetoothTurnedOff : NotReadyReason()
+    data object CameraAlreadyInUse : NotReadyReason()
 }

@@ -32,10 +32,16 @@ android {
 
 dependencies {
     listOf(
+        libs.androidx.camera.lifecycle,
         projects.bluetooth,
         projects.core,
         projects.security
     ).forEach(::api)
+
+    listOf(
+        libs.com.google.guava.android,
+        libs.bundles.androidx.camera,
+    ).forEach(::implementation)
 
     listOf(
         libs.com.google.test.parameter.injector,
@@ -43,6 +49,7 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        libs.bundles.androidx.camera,
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),
         testFixtures(projects.security)

@@ -2,12 +2,14 @@
 activityCompose = "1.12.4" # https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
 agp = "8.13.2" # https://developer.android.com/build/releases/gradle-plugin
 androidx-browser = "1.9.0" # https://developer.android.com/jetpack/androidx/releases/browser
+androidx-camera = "1.5.3" # https://developer.android.com/jetpack/androidx/releases/camera
 androidx-navigation = "2.9.7" # https://developer.android.com/jetpack/androidx/releases/navigation
 androidx-test-espresso = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#espresso-3.7.0
 androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/test#orchestrator-1.6.1
 androidx-test-rules = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#rules-1.7.0
 androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#runner-1.7.0
 com-google-test-parameter-injector = "1.21" # https://github.com/google/TestParameterInjector
+com-google-guava-android = "33.5.0-android" # https://github.com/google/guava/releases
 compose-lint-rules = "0.5.6" # https://github.com/mrmans0n/compose-rules/releases/
 composeBom = "2026.02.01" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.17.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
@@ -38,6 +40,14 @@ xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 app-cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "androidx-camera" }
+androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "androidx-camera" }
+androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "androidx-camera" }
+androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "androidx-camera" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "androidx-camera" }
+androidx-camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "androidx-camera" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "androidx-camera" }
+androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version.ref = "androidx-camera" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -58,6 +68,7 @@ androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 com-android-tools-build-gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 com-google-devtools-ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "kotlin-symbol-processing" }
+com-google-guava-android = { module = "com.google.guava:guava", version.ref = "com-google-guava-android" }
 com-google-test-parameter-injector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "com-google-test-parameter-injector" }
 compose-rules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "compose-lint-rules" }
 compose-rules-ktlint = { module = "io.nlopez.compose.rules:ktlint", version.ref = "compose-lint-rules" }
@@ -97,6 +108,16 @@ uk-gov-ui-android-theme = { module = "uk.gov.android:theme", version.ref = "uk-g
 zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
 
 [bundles]
+androidx-camera = [
+    "androidx-camera-camera2",
+    "androidx-camera-compose",
+    "androidx-camera-core",
+    "androidx-camera-extensions",
+    "androidx-camera-lifecycle",
+    "androidx-camera-mlkit-vision",
+    "androidx-camera-view",
+    "androidx-camera-viewfinder-compose",
+]
 android-baseline = [
     "androidx-activity-compose",
     "androidx-compose-ui",
