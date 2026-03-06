@@ -63,7 +63,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.PresentingEngagement(""),
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
-            HolderSessionStateStubs.successStub,
+            HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.PresentingEngagement("") to it
         }

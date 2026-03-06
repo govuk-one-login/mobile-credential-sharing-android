@@ -36,10 +36,10 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionCo
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingUserConsent
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
@@ -460,7 +460,6 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         (orchestrator as HolderOrchestrator).holderSessionState.test {
-
             assertEquals(
                 HolderSessionState.PresentingEngagement(
                     holderSessionContextStub.qrCode

@@ -2,16 +2,16 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import java.util.Collections.singleton
 import kotlin.reflect.KClass
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Success
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
 
 /**
  * Convenience alias for defining a [Map] of [HolderSessionState] types to a [Set] of
@@ -50,7 +50,7 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
     PresentingEngagement::class to setOf(
         ProcessingEstablishment::class,
         Cancelled::class
-    )+ fullErrorHandling,
+    ) + fullErrorHandling,
     ProcessingEstablishment::class to singleton(
         AwaitingUserConsent::class
     ) + fullErrorHandling,

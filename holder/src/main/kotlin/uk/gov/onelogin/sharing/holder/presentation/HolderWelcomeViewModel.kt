@@ -50,7 +50,6 @@ class HolderWelcomeViewModel(
 
     private val _uiState = MutableStateFlow(initialState)
 
-    private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
     init {
