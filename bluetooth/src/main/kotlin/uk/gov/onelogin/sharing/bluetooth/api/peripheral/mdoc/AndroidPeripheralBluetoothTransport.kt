@@ -20,15 +20,15 @@ import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(scope = AppScope::class)
-class AndroidMdocPeripheralTransport(
+class AndroidPeripheralBluetoothTransport(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @ApplicationScope coroutineScope: CoroutineScope,
     private val logger: Logger
-) : MdocPeripheralTransport {
-    private val _state = MutableStateFlow<MdocPeripheralState>(MdocPeripheralState.Idle)
-    override val state: StateFlow<MdocPeripheralState> = _state
+) : PeripheralBluetoothTransport {
+    private val _state = MutableStateFlow<PeripheralBluetoothState>(PeripheralBluetoothState.Idle)
+    override val state: StateFlow<PeripheralBluetoothState> = _state
 
     private val _bluetoothStatus = MutableStateFlow(BluetoothStatus.UNKNOWN)
     override val bluetoothStatus: StateFlow<BluetoothStatus> = _bluetoothStatus
@@ -76,7 +76,7 @@ class AndroidMdocPeripheralTransport(
         } catch (e: StartAdvertisingException) {
             logger.error(logTag, "Error starting advertising: ${e.error}", e)
             _state.value =
-                MdocPeripheralState.Error(MdocPeripheralTransportError.ADVERTISING_FAILED)
+                PeripheralBluetoothState.Error(PeripheralBuetoothTransportError.ADVERTISING_FAILED)
         }
 
         gattServerManager.open(serviceUuid)
@@ -95,17 +95,19 @@ class AndroidMdocPeripheralTransport(
     private fun handleAdvertiserState(state: AdvertiserState) {
         when (state) {
             AdvertiserState.Started ->
-                _state.value = MdocPeripheralState.AdvertisingStarted
+                _state.value = PeripheralBluetoothState.AdvertisingStarted
 
             AdvertiserState.Stopped ->
-                _state.value = MdocPeripheralState.AdvertisingStopped
+                _state.value = PeripheralBluetoothState.AdvertisingStopped
 
             is AdvertiserState.Failed ->
                 _state.value =
-                    MdocPeripheralState.Error(MdocPeripheralTransportError.ADVERTISING_FAILED)
+                    PeripheralBluetoothState.Error(
+                        PeripheralBuetoothTransportError.ADVERTISING_FAILED
+                    )
 
             AdvertiserState.Idle ->
-                _state.value = MdocPeripheralState.Idle
+                _state.value = PeripheralBluetoothState.Idle
 
             else -> Unit
         }
@@ -115,27 +117,27 @@ class AndroidMdocPeripheralTransport(
         when (event) {
             is GattServerEvent.Connected -> {
                 if (connectedDevices.add(event.address)) {
-                    _state.value = MdocPeripheralState.Connected(event.address)
+                    _state.value = PeripheralBluetoothState.Connected(event.address)
                 }
             }
 
             is GattServerEvent.Disconnected -> {
                 if (connectedDevices.remove(event.address)) {
                     _state.value =
-                        MdocPeripheralState.Disconnected(event.address, event.isSessionEnd)
+                        PeripheralBluetoothState.Disconnected(event.address, event.isSessionEnd)
                 }
             }
 
             is GattServerEvent.Error ->
-                _state.value = MdocPeripheralState.Error(
-                    MdocPeripheralTransportError.fromGattError(event.error)
+                _state.value = PeripheralBluetoothState.Error(
+                    PeripheralBuetoothTransportError.fromGattError(event.error)
                 )
 
             is GattServerEvent.ServiceAdded ->
-                _state.value = MdocPeripheralState.ServiceAdded(event.service?.uuid)
+                _state.value = PeripheralBluetoothState.ServiceAdded(event.service?.uuid)
 
             GattServerEvent.ServiceStopped ->
-                _state.value = MdocPeripheralState.GattServiceStopped
+                _state.value = PeripheralBluetoothState.GattServiceStopped
 
             is GattServerEvent.UnsupportedEvent ->
                 logger.error(
@@ -151,7 +153,7 @@ class AndroidMdocPeripheralTransport(
             }
 
             is GattServerEvent.SessionEnd -> {
-                _state.value = MdocPeripheralState.MdocPeripheralEnded(event.status)
+                _state.value = PeripheralBluetoothState.PeripheralBluetoothEnded(event.status)
                 logger.debug(
                     logTag,
                     "Mdoc - Session end command was received. Closing connection"
@@ -159,7 +161,7 @@ class AndroidMdocPeripheralTransport(
             }
 
             is GattServerEvent.MessageReceived -> {
-                _state.value = MdocPeripheralState.MessageReceived(event.byteArray)
+                _state.value = PeripheralBluetoothState.MessageReceived(event.byteArray)
             }
         }
     }

@@ -6,32 +6,32 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 /**
  * Represents the combined states from advertising and the GATT service.
  */
-sealed interface MdocPeripheralState {
+sealed interface PeripheralBluetoothState {
     /** This is the initial state. */
-    data object Idle : MdocPeripheralState
+    data object Idle : PeripheralBluetoothState
 
     /** BLE advertising is in progress. */
-    data object AdvertisingStarted : MdocPeripheralState
+    data object AdvertisingStarted : PeripheralBluetoothState
 
     /** BLE advertising has stopped. */
-    data object AdvertisingStopped : MdocPeripheralState
+    data object AdvertisingStopped : PeripheralBluetoothState
 
     /** GATT service stopped */
-    data object GattServiceStopped : MdocPeripheralState
+    data object GattServiceStopped : PeripheralBluetoothState
 
     /**
      * The device has successfully connected.
      *
      * @param address The address of the connected device.
      */
-    data class Connected(val address: String) : MdocPeripheralState
+    data class Connected(val address: String) : PeripheralBluetoothState
 
     /**
      * The GATT service has been successfully added.
      *
      * @param uuid The uuid of the service.
      */
-    data class ServiceAdded(val uuid: UUID?) : MdocPeripheralState
+    data class ServiceAdded(val uuid: UUID?) : PeripheralBluetoothState
 
     /**
      * The device has disconnected.
@@ -39,21 +39,22 @@ sealed interface MdocPeripheralState {
      * @param address The address of the disconnected device, which may be null if the address
      * is not known.
      */
-    data class Disconnected(val address: String?, val isSessionEnd: Boolean) : MdocPeripheralState
+    data class Disconnected(val address: String?, val isSessionEnd: Boolean) :
+        PeripheralBluetoothState
 
     /**
      * An error occurred during the session. This can be and error
      * from the Advertiser or the GATT service
      *
-     * @param reason The [MdocPeripheralTransportError] that occurred.
+     * @param reason The [PeripheralBuetoothTransportError] that occurred.
      */
-    data class Error(val reason: MdocPeripheralTransportError) : MdocPeripheralState
+    data class Error(val reason: PeripheralBuetoothTransportError) : PeripheralBluetoothState
 
     /**
      * A session end command has been received from the client or server manager
      *
      */
-    data class MdocPeripheralEnded(val status: SessionEndStates) : MdocPeripheralState
+    data class PeripheralBluetoothEnded(val status: SessionEndStates) : PeripheralBluetoothState
 
-    data class MessageReceived(val message: ByteArray) : MdocPeripheralState
+    data class MessageReceived(val message: ByteArray) : PeripheralBluetoothState
 }

@@ -7,15 +7,15 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 /**
  * Responsible for orchestrating the BLE advertising and GATT service
  *
- * [MdocPeripheralState] via a [StateFlow].
+ * [PeripheralBluetoothState] via a [StateFlow].
  */
-interface MdocPeripheralTransport {
+interface PeripheralBluetoothTransport {
     /**
      * The current state of the BLE session, exposed as a [StateFlow].
      * This can be used to observe the session's status, such as whether it's advertising,
      * connected, or has encountered an error.
      */
-    val state: StateFlow<MdocPeripheralState>
+    val state: StateFlow<PeripheralBluetoothState>
 
     /**
      * Current state of the Bluetooth adapter, exposed as a [StateFlow].

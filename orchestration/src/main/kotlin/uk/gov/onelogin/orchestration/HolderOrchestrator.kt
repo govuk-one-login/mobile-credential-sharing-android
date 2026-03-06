@@ -17,9 +17,9 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionReset
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransport
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransportError
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBuetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
@@ -37,7 +37,7 @@ import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceReque
 class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,
-    private val mdocPeripheralTransport: MdocPeripheralTransport,
+    private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val prerequisiteGate: PrerequisiteGate
@@ -71,13 +71,13 @@ class HolderOrchestrator(
                 logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
 
                 appCoroutineScope.launch {
-                    mdocPeripheralTransport.state.collect {
+                    peripheralBluetoothTransport.state.collect {
                         handleMdocState(it)
                     }
                 }
 
                 appCoroutineScope.launch {
-                    mdocPeripheralTransport.start(
+                    peripheralBluetoothTransport.start(
                         serviceUuid = session.sessionContext.sessionUuid
                     )
                 }
@@ -136,16 +136,16 @@ class HolderOrchestrator(
 
     private fun stopAdvertising() {
         appCoroutineScope.launch {
-            mdocPeripheralTransport.stop()
+            peripheralBluetoothTransport.stop()
         }
     }
 
     @Suppress("ComplexMethod", "LongMethod")
-    private fun handleMdocState(state: MdocPeripheralState) {
+    private fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
 
         when (state) {
-            MdocPeripheralState.AdvertisingStarted -> {
+            PeripheralBluetoothState.AdvertisingStarted -> {
                 logger.debug(
                     logTag,
                     "Mdoc - Advertising Started UUID: " +
@@ -153,17 +153,17 @@ class HolderOrchestrator(
                 )
             }
 
-            MdocPeripheralState.AdvertisingStopped -> {
+            PeripheralBluetoothState.AdvertisingStopped -> {
                 logger.debug(logTag, "Mdoc - Advertising Stopped")
             }
 
-            is MdocPeripheralState.Connected -> {
+            is PeripheralBluetoothState.Connected -> {
                 safeTransition(HolderSessionState.Connected)
 
                 logger.debug(logTag, "Mdoc - Connected: ${state.address}")
             }
 
-            is MdocPeripheralState.Disconnected -> {
+            is PeripheralBluetoothState.Disconnected -> {
                 @RequiresImplementation(
                     details = [
                         ImplementationDetail(
@@ -197,22 +197,22 @@ class HolderOrchestrator(
                 stopAdvertising()
             }
 
-            is MdocPeripheralState.Error -> {
+            is PeripheralBluetoothState.Error -> {
                 handleError(state.reason)
             }
 
-            MdocPeripheralState.GattServiceStopped -> {
+            PeripheralBluetoothState.GattServiceStopped -> {
                 logger.debug(logTag, "Mdoc - GattService Stopped")
             }
 
-            MdocPeripheralState.Idle -> {
+            PeripheralBluetoothState.Idle -> {
                 logger.debug(logTag, "Mdoc - Idle")
             }
 
-            is MdocPeripheralState.ServiceAdded ->
+            is PeripheralBluetoothState.ServiceAdded ->
                 logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
 
-            is MdocPeripheralState.MdocPeripheralEnded -> {
+            is PeripheralBluetoothState.PeripheralBluetoothEnded -> {
                 if (state.status == SessionEndStates.SUCCESS) {
                     logger.debug(logTag, "Mdoc - Ending session")
                 } else {
@@ -224,7 +224,7 @@ class HolderOrchestrator(
                 }
             }
 
-            is MdocPeripheralState.MessageReceived -> {
+            is PeripheralBluetoothState.MessageReceived -> {
                 val keypair = session.sessionContext.keyPair?.private
                 if (keypair !is ECPrivateKey) {
                     logger.error(
@@ -253,18 +253,18 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleError(reason: MdocPeripheralTransportError) {
+    private fun handleError(reason: PeripheralBuetoothTransportError) {
         when (reason) {
-            MdocPeripheralTransportError.ADVERTISING_FAILED ->
+            PeripheralBuetoothTransportError.ADVERTISING_FAILED ->
                 logger.debug(logTag, "Mdoc - Error: Advertising failed")
 
-            MdocPeripheralTransportError.GATT_NOT_AVAILABLE ->
+            PeripheralBuetoothTransportError.GATT_NOT_AVAILABLE ->
                 logger.debug(logTag, "Mdoc - Error: GATT not available")
 
-            MdocPeripheralTransportError.BLUETOOTH_PERMISSION_MISSING ->
+            PeripheralBuetoothTransportError.BLUETOOTH_PERMISSION_MISSING ->
                 logger.debug(logTag, "Mdoc - Error: Bluetooth permission missing")
 
-            MdocPeripheralTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
+            PeripheralBuetoothTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
                 logger.debug(logTag, "Mdoc - Error: Descriptor write request failed")
         }
     }

@@ -24,7 +24,7 @@ import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -131,9 +131,9 @@ class HolderWelcomeViewModel(
     }
 
     private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
-        state.sessionState == MdocPeripheralState.Idle ||
-            state.sessionState == MdocPeripheralState.AdvertisingStopped ||
-            state.sessionState == MdocPeripheralState.GattServiceStopped
+        state.sessionState == PeripheralBluetoothState.Idle ||
+            state.sessionState == PeripheralBluetoothState.AdvertisingStopped ||
+            state.sessionState == PeripheralBluetoothState.GattServiceStopped
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
@@ -173,7 +173,7 @@ data class HolderWelcomeUiState(
     val uuid: UUID = UUID.randomUUID(),
     val qrData: String? = null,
     val engagement: String? = null,
-    val sessionState: MdocPeripheralState = MdocPeripheralState.Idle,
+    val sessionState: PeripheralBluetoothState = PeripheralBluetoothState.Idle,
     val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
     val hasBluetoothPermissions: Boolean? = null,

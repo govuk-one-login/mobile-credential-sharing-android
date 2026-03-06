@@ -24,7 +24,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
@@ -105,7 +105,7 @@ class HolderWelcomeScreenTest {
         }
 
         assertEquals(
-            MdocPeripheralState.Idle,
+            PeripheralBluetoothState.Idle,
             viewModel.uiState.value.sessionState
         )
     }

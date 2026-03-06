@@ -16,10 +16,10 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakeMdocPeripheralTransport
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransport
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransportError
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBuetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -36,7 +36,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isReadyToPresent
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isRequestReceived
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
@@ -88,13 +87,14 @@ class HolderOrchestratorTest {
         )
 
     private fun createOrchestrator(
-        mdocPeripheralTransport: MdocPeripheralTransport = FakeMdocPeripheralTransport(),
+        peripheralBluetoothTransport: PeripheralBluetoothTransport =
+            FakePeripheralBluetoothTransport(),
         sessionFactory: SessionFactory<HolderSession> = createSessionFactory()
     ): Orchestrator = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
         prerequisiteGate = gate,
-        mdocPeripheralTransport = mdocPeripheralTransport,
+        peripheralBluetoothTransport = peripheralBluetoothTransport,
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
     )
@@ -225,65 +225,65 @@ class HolderOrchestratorTest {
 
     @Test
     fun `handles advertiser started state change`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        assertEquals(1, mdocPeripheralTransport.startCalls)
+        assertEquals(1, peripheralBluetoothTransport.startCalls)
 
         assert(logger.any { it.message.startsWith("Mdoc - Advertising Started") })
     }
 
     @Test
     fun `handles advertiser stopped state change`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
         orchestrator.start()
 
         orchestrator.cancel()
 
-        assertEquals(1, mdocPeripheralTransport.stopCalls)
+        assertEquals(1, peripheralBluetoothTransport.stopCalls)
 
         assert("Mdoc - Advertising Stopped" in logger)
     }
 
     @Test
     fun `handles device connected state change`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        mdocPeripheralTransport.emitState(MdocPeripheralState.Connected(DEVICE_ADDRESS))
+        peripheralBluetoothTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
 
         assert("Mdoc - Connected: $DEVICE_ADDRESS" in logger)
     }
 
     @Test
     fun `handles device disconnected state change`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.Disconnected(DEVICE_ADDRESS, false)
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false)
         )
 
         assert("Error Mdoc - Disconnected: $DEVICE_ADDRESS" in logger)
-        assertEquals(1, mdocPeripheralTransport.stopCalls)
+        assertEquals(1, peripheralBluetoothTransport.stopCalls)
     }
 
     @Test
     fun `handles device disconnected state change when session ended`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.Disconnected(DEVICE_ADDRESS, true)
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, true)
         )
 
         assert("BLE session terminated successfully via GATT End command" in logger)
@@ -291,38 +291,38 @@ class HolderOrchestratorTest {
 
     @Test
     fun `handles error states`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.Error(
-                MdocPeripheralTransportError.ADVERTISING_FAILED
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Error(
+                PeripheralBuetoothTransportError.ADVERTISING_FAILED
             )
         )
 
         assert("Mdoc - Error: Advertising failed" in logger)
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.Error(
-                MdocPeripheralTransportError.GATT_NOT_AVAILABLE
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Error(
+                PeripheralBuetoothTransportError.GATT_NOT_AVAILABLE
             )
         )
 
         assert("Mdoc - Error: GATT not available" in logger)
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.Error(
-                MdocPeripheralTransportError.BLUETOOTH_PERMISSION_MISSING
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Error(
+                PeripheralBuetoothTransportError.BLUETOOTH_PERMISSION_MISSING
             )
         )
 
         assert("Mdoc - Error: Bluetooth permission missing" in logger)
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.Error(
-                MdocPeripheralTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Error(
+                PeripheralBuetoothTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED
             )
         )
 
@@ -331,13 +331,13 @@ class HolderOrchestratorTest {
 
     @Test
     fun `handles gatt service stopped`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.GattServiceStopped
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.GattServiceStopped
         )
 
         assert("Mdoc - GattService Stopped" in logger)
@@ -345,13 +345,13 @@ class HolderOrchestratorTest {
 
     @Test
     fun `handles idle state`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.Idle
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Idle
         )
 
         assert("Mdoc - Idle" in logger)
@@ -359,14 +359,14 @@ class HolderOrchestratorTest {
 
     @Test
     fun `handles service added state`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
         val uuid = UUID.randomUUID()
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.ServiceAdded(uuid)
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.ServiceAdded(uuid)
         )
 
         assert("Mdoc - Service Added: $uuid" in logger)
@@ -374,13 +374,13 @@ class HolderOrchestratorTest {
 
     @Test
     fun `logs end session event when session ends`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.MdocPeripheralEnded(SessionEndStates.SUCCESS)
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.PeripheralBluetoothEnded(SessionEndStates.SUCCESS)
         )
 
         assert("Mdoc - Ending session" in logger)
@@ -388,13 +388,13 @@ class HolderOrchestratorTest {
 
     @Test
     fun `shows error when fails to end session`() = runTest {
-        val mdocPeripheralTransport = FakeMdocPeripheralTransport()
-        val orchestrator = createOrchestrator(mdocPeripheralTransport)
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
 
         orchestrator.start()
 
-        mdocPeripheralTransport.emitState(
-            MdocPeripheralState.MdocPeripheralEnded(
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.PeripheralBluetoothEnded(
                 SessionEndStates.NOTIFY_CLIENT_FAILED
             )
         )
@@ -408,17 +408,17 @@ class HolderOrchestratorTest {
     fun `decrypts device request when session ends`() = runTest {
         val sessionFactory = createSessionFactory()
         val peripheralTransport =
-            FakeMdocPeripheralTransport(
-                initialState = MdocPeripheralState.Connected(DEVICE_ADDRESS)
+            FakePeripheralBluetoothTransport(
+                initialState = PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
             )
         val orchestrator = createOrchestrator(
             sessionFactory = sessionFactory,
-            mdocPeripheralTransport = peripheralTransport
+            peripheralBluetoothTransport = peripheralTransport
         )
         orchestrator.start()
 
         peripheralTransport.emitState(
-            MdocPeripheralState.MessageReceived(
+            PeripheralBluetoothState.MessageReceived(
                 byteArrayOf(1, 2, 3)
             )
         )
