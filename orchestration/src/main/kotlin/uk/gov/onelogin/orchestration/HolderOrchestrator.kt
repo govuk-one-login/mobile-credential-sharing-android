@@ -43,7 +43,7 @@ class HolderOrchestrator(
     private val prerequisiteGate: PrerequisiteGate
 ) : Orchestrator.Holder {
     private var session: HolderSession = sessionFactory.create()
-    override val holderSessionState: SharedFlow<HolderSessionState> = session.currentState
+    override var holderSessionState: SharedFlow<HolderSessionState> = session.currentState
 
     override fun start() {
         if (session.isComplete()) {
@@ -140,6 +140,7 @@ class HolderOrchestrator(
         }
     }
 
+    @Suppress("ComplexMethod", "LongMethod")
     private fun handleMdocState(state: MdocPeripheralState) {
         logger.debug(logTag, "state = $state")
 
@@ -224,10 +225,19 @@ class HolderOrchestrator(
             }
 
             is MdocPeripheralState.MessageReceived -> {
+                val keypair = session.sessionContext.keyPair?.private
+                if (keypair !is ECPrivateKey) {
+                    logger.error(
+                        logTag,
+                        "Invalid or missing keypair"
+                    )
+                    return
+                }
+
                 val deviceRequest = decryptDeviceRequestUseCase.execute(
                     sessionEstablishmentBytes = state.message,
                     engagement = session.sessionContext.engagement,
-                    holderPrivateKey = session.sessionContext.keyPair?.private as ECPrivateKey
+                    holderPrivateKey = keypair
                 )
 
                 safeTransition(HolderSessionState.RequestReceived(deviceRequest))

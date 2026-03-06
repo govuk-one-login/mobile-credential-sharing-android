@@ -2,13 +2,12 @@ package uk.gov.onelogin.sharing.orchestration.holder.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
-import kotlin.to
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
 import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
 
 class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
-    override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
+    override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?> =
         inputs.mapIndexed { index, (initial, transition) ->
             TestParameters.TestParametersValues.builder()
                 .name(

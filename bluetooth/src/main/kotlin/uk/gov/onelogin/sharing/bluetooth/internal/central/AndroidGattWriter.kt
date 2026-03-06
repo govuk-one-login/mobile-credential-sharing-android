@@ -10,9 +10,7 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 
-// @ContributesBinding(ViewModelScope::class)
 @ContributesBinding(AppScope::class)
 class AndroidGattWriter : GattWriter {
     @Suppress("DEPRECATION")

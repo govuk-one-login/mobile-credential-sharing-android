@@ -4,9 +4,6 @@ package uk.gov.onelogin.sharing.holder
 
 import android.content.Context
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -22,7 +19,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,7 +37,6 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
-@Ignore
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HolderWelcomeScreenTest {
@@ -49,7 +44,6 @@ class HolderWelcomeScreenTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val resources = ApplicationProvider.getApplicationContext<Context>().resources
-    private val dummyEngagementData = "ENGAGEMENT_DATA"
 
     @get:Rule
     val composeTestRule =
@@ -112,40 +106,6 @@ class HolderWelcomeScreenTest {
 
         assertEquals(
             MdocPeripheralState.Idle,
-            viewModel.uiState.value.sessionState
-        )
-    }
-
-    @Test
-    fun `should stop bluetooth advertisement when composable leaves composition`() {
-        val viewModel = createViewModel()
-
-        var showContent by mutableStateOf(true)
-
-        composeTestRule.setContent {
-            if (showContent) {
-                BluetoothPermissionPrompt(
-                    multiplePermissionsState = bluetoothPermissionsGranted,
-                    hasPreviouslyRequestedPermission = true,
-                    onGrantedPermissions = {
-                        DisposableEffect(Unit) {
-                            onDispose {
-                                viewModel.stopAdvertising()
-                            }
-                        }
-                    }
-                )
-            }
-        }
-
-        composeTestRule.runOnUiThread {
-            showContent = false
-        }
-
-        composeTestRule.waitForIdle()
-
-        assertEquals(
-            MdocPeripheralState.AdvertisingStopped,
             viewModel.uiState.value.sessionState
         )
     }

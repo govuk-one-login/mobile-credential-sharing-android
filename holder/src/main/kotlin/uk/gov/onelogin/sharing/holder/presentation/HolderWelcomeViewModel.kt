@@ -63,6 +63,10 @@ class HolderWelcomeViewModel(
                         it.copy(qrData = currentSate.qrData)
                     }
 
+                    is HolderSessionState.Complete.Cancelled -> _uiState.update {
+                        it.copy()
+                    }
+
                     else -> Unit
                 }
             }
@@ -71,7 +75,7 @@ class HolderWelcomeViewModel(
 
     fun stopAdvertising() {
         viewModelScope.launch {
-//            mdocBleSession.stop()
+            orchestrator.cancel()
         }
     }
 

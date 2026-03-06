@@ -28,7 +28,8 @@ class HolderWelcomeViewModelTest {
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         logger = logger,
         savedStateHandle = SavedStateHandle(),
-        orchestrator = orchestrator
+        orchestrator = orchestrator,
+        dispatcher = mainDispatcherRule.testDispatcher
     )
 
     @Test

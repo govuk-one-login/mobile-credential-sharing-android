@@ -10,7 +10,6 @@ import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 
 /**
