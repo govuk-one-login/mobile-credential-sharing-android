@@ -18,20 +18,19 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraP
 class ReadinessPrerequisiteLayer(
     private val context: Context,
     private val factory: ProcessCameraProviderFactory,
-    private val logger: Logger,
+    private val logger: Logger
 ) : PrerequisiteGateLayer.Readiness {
-    override fun checkReadiness(
-        prerequisite: Prerequisite,
-    ): PrerequisiteResponse.NotReady? = when (prerequisite) {
-        Prerequisite.BLUETOOTH -> handleBluetoothReadiness()
-        Prerequisite.CAMERA -> handleCameraReadiness()
-        Prerequisite.UNKNOWN -> null
-    }.also {
-        logger.debug(
-            logTag,
-            "Performed $prerequisite readiness check. Response: $it"
-        )
-    }
+    override fun checkReadiness(prerequisite: Prerequisite): PrerequisiteResponse.NotReady? =
+        when (prerequisite) {
+            Prerequisite.BLUETOOTH -> handleBluetoothReadiness()
+            Prerequisite.CAMERA -> handleCameraReadiness()
+            Prerequisite.UNKNOWN -> null
+        }.also {
+            logger.debug(
+                logTag,
+                "Performed $prerequisite readiness check. Response: $it"
+            )
+        }
 
     private fun handleBluetoothReadiness(): PrerequisiteResponse.NotReady? = if (
         context.bluetoothManager?.adapter?.isEnabled ?: false

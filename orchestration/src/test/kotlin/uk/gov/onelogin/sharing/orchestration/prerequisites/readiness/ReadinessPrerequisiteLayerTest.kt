@@ -137,7 +137,7 @@ class ReadinessPrerequisiteLayerTest {
     ) {
         assertThat(
             readiness.checkReadiness(prerequisite),
-            matcher,
+            matcher
         )
         assertTrue {
             logger.any {

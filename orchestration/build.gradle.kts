@@ -40,7 +40,7 @@ dependencies {
 
     listOf(
         libs.com.google.guava.android,
-        libs.bundles.androidx.camera,
+        libs.bundles.androidx.camera
     ).forEach(::implementation)
 
     listOf(
