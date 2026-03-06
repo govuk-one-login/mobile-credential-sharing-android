@@ -2,7 +2,7 @@
 
 #### Holder role: Secure vault
 
-This implementation demonstrates the boundary between the SDK and the Host App for the Holder role. The Host App acts as a secure vault: retrieving metadata, filtering consented data, and proxying signing requests to the Android Keystore. The SDK handles transport and Concise Binary Object Representation (CBOR) encoding.
+This implementation demonstrates the boundary between the SDK and the Host App for the Holder role. The Host App acts as a secure vault: retrieving raw credentials and proxying signing requests to the Android Keystore. The SDK handles transport, Concise Binary Object Representation (CBOR) encoding, and consent UI.
 
 ```kotlin
 import com.credentialsharing.sdk.*
@@ -13,43 +13,31 @@ class SecureVaultCredentialProvider : CredentialProvider {
     
     private val secureStorage = MySecureStorage() 
     
-    /// 1. Provide Metadata
-    override suspend fun getAvailableDocuments(documentType: String): List<DocumentMetadata> {
-        val storedDocs = secureStorage.fetchDocuments(documentType)
-        return storedDocs.map { doc ->
-            DocumentMetadata(
-                documentId = doc.id,
-                displayName = doc.displayName,
-                issuer = doc.issuerName,
-                backgroundColor = doc.themeColor
-            )
-        }
-    }
-    
-    /// 2. Extract Consented Data
-    override suspend fun getConsentedAttributes(
-        documentId: String, 
-        requestedItems: Map<String, List<String>>
-    ): Map<String, ByteArray> {
+    /// 1. Provide Raw Credentials
+    override suspend fun getCredentials(
+        request: CredentialRequest
+    ): List<Credential> {
+        val credentials = mutableListOf<Credential>()
         
-        val fullPayload = secureStorage.decryptPayload(documentId)
-        val consentedData = mutableMapOf<String, ByteArray>()
-        
-        for ((namespace, attributes) in requestedItems) {
-            for (attribute in attributes) {
-                fullPayload[namespace]?.get(attribute)?.let { value ->
-                    consentedData["$namespace.$attribute"] = value
-                }
+        for (docType in request.documentTypes) {
+            val storedDoc = secureStorage.fetchDocument(docType)
+            if (storedDoc != null) {
+                credentials.add(
+                    Credential(
+                        id = storedDoc.id,
+                        rawCredential = storedDoc.decryptedCborData
+                    )
+                )
             }
         }
         
-        return consentedData
+        return credentials
     }
     
-    /// 3. Remote Signing
-    override suspend fun sign(payload: ByteArray, keyAlias: String): ByteArray {
+    /// 2. Sign Device Response
+    override suspend fun sign(payload: ByteArray, documentId: String): ByteArray {
         val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-        val privateKey = keyStore.getKey(keyAlias, null) as java.security.PrivateKey
+        val privateKey = keyStore.getKey(documentId, null) as java.security.PrivateKey
         
         val signature = Signature.getInstance("SHA256withECDSA").apply {
             initSign(privateKey)

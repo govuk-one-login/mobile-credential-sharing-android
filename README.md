@@ -100,33 +100,66 @@ and bind the credential to the current BLE session, the SDK constructs a `Device
 payload, which the Host App then signs using the credential's Android Keystore private key. Finally,
 the SDK handles all mdoc session encryption for the transport tunnel.
 
-#### 2. Initialise the Holder Module
+#### 1. Importing the module
+
+Import the module into Wallet Core using GitHub Packages / Gradle Modules.
+
+#### 2. Implement the CredentialProvider
+
+Wallet Core implements the `CredentialProvider` interface to provide the Sharing SDK with access to credentials and signing capabilities:
+
+```kotlin
+interface CredentialProvider {
+  suspend fun getCredentials(
+    request: CredentialRequest
+  ): List<Credential>
+
+  suspend fun sign(
+    payload: ByteArray,
+    documentId: String
+  ): ByteArray
+}
+```
+
+The `CredentialRequest` contains an array of docTypes to be provided:
+
+```kotlin
+data class CredentialRequest(
+   val documentTypes: List<String>
+)
+
+data class Credential(
+  val id: String,
+  val rawCredential: ByteArray
+)
+```
+
+Initially `getCredentials` will always return an array of exactly **one** element: the decrypted raw CBOR data for the user's mDL credential.
+
+#### 3. Initialise the Holder Module
 
 The Host App initialises the sharing module by injecting the provider.
 
 ```kotlin
 val credentialProvider = MyCredentialProvider()
-val presenter = CredentialPresenter(credentialProvider)
+val presenter = rememberCredentialPresenter(
+  credentialProvider,
+  logger
+)
 ```
 
-#### 3. Start a Sharing Session
+#### 4. Present the Share Flow
 
-The Host App initiates the engagement QR code display. The SDK awaits the Verifier's request,
-queries the `CredentialProvider`, and prompts for consent.
+The host adds the presenter's flow to its view hierarchy, which triggers the sharing journey to start:
 
 ```kotlin
-// The SDK displays the Device Engagement UI (QR code) and listens for Verifiers.
-presenter.startSharingJourney(activity)
+ShareCredential(
+    component = presenter,
+    modifier = Modifier.fillMaxWidth()
+)
 ```
 
-#### 4. Handling Consent (Optional Customisation)
-
-The SDK provides standard UI for Verifier requests and consent. The Host App can provide a custom
-delegate to match its design system.
-
-```kotlin
-presenter.consentDelegate = MyCustomConsentUI()
-```
+This pattern mirrors the CRIOrchestrator implementation.
 
 ---
 
