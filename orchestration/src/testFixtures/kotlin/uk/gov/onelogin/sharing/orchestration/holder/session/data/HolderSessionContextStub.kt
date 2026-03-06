@@ -9,7 +9,7 @@ object HolderSessionContextStub {
     val dummyHolderSessionContext = HolderSessionContext(
         sessionUuid = UUID.randomUUID(),
         keyPair = SessionSecurityTestStub.generateValidKeyPair(),
-        engagement = "",
-        qrCode = ""
+        engagement = "engagement",
+        qrCode = "qr_code"
     )
 }

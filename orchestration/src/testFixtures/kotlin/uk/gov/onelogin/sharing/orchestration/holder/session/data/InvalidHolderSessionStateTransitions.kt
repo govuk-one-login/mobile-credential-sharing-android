@@ -25,8 +25,8 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val notStartedTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived(deviceRequestStub()),
+            HolderSessionState.Connected,
+            HolderSessionState.RequestReceived(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub,
             HolderSessionStateStubs.userCancellation,
@@ -39,8 +39,8 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived(deviceRequestStub()),
+            HolderSessionState.Connected,
+            HolderSessionState.RequestReceived(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
@@ -50,8 +50,8 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived(deviceRequestStub()),
+            HolderSessionState.Connected,
+            HolderSessionState.RequestReceived(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
@@ -62,7 +62,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.RequestReceived(deviceRequestStub()),
+            HolderSessionState.RequestReceived(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub,
             HolderSessionStateStubs.userJourneyFailure
@@ -74,30 +74,30 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
+            HolderSessionState.Connected,
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
-            HolderSessionState.Connecting to it
+            HolderSessionState.Connected to it
         }
         private val requestReceivedTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived(deviceRequestStub()),
+            HolderSessionState.Connected,
+            HolderSessionState.RequestReceived(deviceRequestStub),
             HolderSessionStateStubs.successStub
         ).map {
-            HolderSessionState.RequestReceived(deviceRequestStub()) to it
+            HolderSessionState.RequestReceived(deviceRequestStub) to it
         }
         private val processingResponseTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived(deviceRequestStub())
+            HolderSessionState.Connected,
+            HolderSessionState.RequestReceived(deviceRequestStub)
         ).map {
             HolderSessionState.ProcessingResponse to it
         }

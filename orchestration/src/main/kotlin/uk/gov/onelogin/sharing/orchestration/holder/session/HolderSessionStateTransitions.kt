@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Success
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Connecting
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Connected
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
@@ -48,10 +48,10 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
         PresentingEngagement::class
     ) + fullErrorHandling,
     PresentingEngagement::class to setOf(
-        Connecting::class,
+        Connected::class,
         Cancelled::class
     ),
-    Connecting::class to singleton(
+    Connected::class to singleton(
         RequestReceived::class
     ) + fullErrorHandling,
     RequestReceived::class to singleton(

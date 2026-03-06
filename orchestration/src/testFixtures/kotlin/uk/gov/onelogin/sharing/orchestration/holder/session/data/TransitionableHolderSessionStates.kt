@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session.data
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Connecting
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Connected
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
@@ -20,7 +20,7 @@ class TransitionableHolderSessionStates : TestParameterValuesProvider() {
             Preflight::class,
             ReadyToPresent::class,
             PresentingEngagement::class,
-            Connecting::class,
+            Connected::class,
             RequestReceived::class,
             ProcessingResponse::class
         )

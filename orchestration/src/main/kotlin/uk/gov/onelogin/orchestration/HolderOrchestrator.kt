@@ -5,13 +5,13 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
@@ -32,7 +32,6 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
-import uk.gov.onelogin.sharing.security.engagement.GenerateEngagementQrCode
 
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
@@ -41,7 +40,7 @@ class HolderOrchestrator(
     private val mdocPeripheralTransport: MdocPeripheralTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
-    private val prerequisiteGate: PrerequisiteGate,
+    private val prerequisiteGate: PrerequisiteGate
 ) : Orchestrator.Holder {
     private var session: HolderSession = sessionFactory.create()
     override val holderSessionState: SharedFlow<HolderSessionState> = session.currentState
@@ -79,10 +78,9 @@ class HolderOrchestrator(
 
                 appCoroutineScope.launch {
                     mdocPeripheralTransport.start(
-                        serviceUuid = session.sessionContext.sessionUuid,
+                        serviceUuid = session.sessionContext.sessionUuid
                     )
                 }
-
             }
         } catch (exception: IllegalStateException) {
             START_ORCHESTRATION_ERROR.let { logMessage ->
@@ -101,9 +99,7 @@ class HolderOrchestrator(
                 session.transitionTo(HolderSessionState.ReadyToPresent)
                 val qrCode = session.sessionContext.qrCode
                 if (qrCode.isNotEmpty()) {
-                    session.transitionTo(
-                        HolderSessionState.PresentingEngagement(qrCode)
-                    )
+                    safeTransition(HolderSessionState.PresentingEngagement(qrCode))
                 }
             }
 
@@ -121,20 +117,10 @@ class HolderOrchestrator(
     }
 
     override fun cancel() {
-        try {
-            session.transitionTo(
-                HolderSessionState.Complete.Cancelled
-            )
-            logger.debug(logTag, CANCEL_ORCHESTRATION_SUCCESS)
-        } catch (exception: IllegalStateException) {
-            CANCEL_ORCHESTRATION_ERROR.let { logMessage ->
-                logger.error(
-                    logTag,
-                    logMessage,
-                    OrchestratorCannotCancelException(logMessage, exception)
-                )
-            }
-        }
+        safeTransition(
+            state = HolderSessionState.Complete.Cancelled,
+            exceptionWrapper = ::OrchestratorCannotCancelException
+        )
 
         stopAdvertising()
     }
@@ -162,7 +148,7 @@ class HolderOrchestrator(
                 logger.debug(
                     logTag,
                     "Mdoc - Advertising Started UUID: " +
-                            "${session.sessionContext.sessionUuid}"
+                        "${session.sessionContext.sessionUuid}"
                 )
             }
 
@@ -170,8 +156,11 @@ class HolderOrchestrator(
                 logger.debug(logTag, "Mdoc - Advertising Stopped")
             }
 
-            is MdocPeripheralState.Connected ->
+            is MdocPeripheralState.Connected -> {
+                safeTransition(HolderSessionState.Connected)
+
                 logger.debug(logTag, "Mdoc - Connected: ${state.address}")
+            }
 
             is MdocPeripheralState.Disconnected -> {
                 @RequiresImplementation(
@@ -179,10 +168,10 @@ class HolderOrchestrator(
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
                             description = "We may need to handle explicit bluetooth" +
-                                    "disconnection states to handle common error codes " +
-                                    "8, 19, 22 and 133. The function below will handle " +
-                                    "treat all disconnect states the same when connected " +
-                                    "to a device"
+                                "disconnection states to handle common error codes " +
+                                "8, 19, 22 and 133. The function below will handle " +
+                                "treat all disconnect states the same when connected " +
+                                "to a device"
                         )
                     ]
                 )
@@ -205,7 +194,6 @@ class HolderOrchestrator(
                 }
 
                 stopAdvertising()
-
             }
 
             is MdocPeripheralState.Error -> {
@@ -227,7 +215,6 @@ class HolderOrchestrator(
                 if (state.status == SessionEndStates.SUCCESS) {
                     logger.debug(logTag, "Mdoc - Ending session")
                 } else {
-//                    T
 //                    _uiState.update { it.copy(showErrorScreen = true) }
                     logger.error(
                         logTag,
@@ -243,17 +230,7 @@ class HolderOrchestrator(
                     holderPrivateKey = session.sessionContext.keyPair?.private as ECPrivateKey
                 )
 
-                try {
-                    session.transitionTo(
-                        HolderSessionState.RequestReceived(deviceRequest)
-                    )
-                } catch (exception: IllegalStateException) {
-                    logger.error(
-                        logTag,
-                        "Cannot transition to request received state",
-                        exception
-                    )
-                }
+                safeTransition(HolderSessionState.RequestReceived(deviceRequest))
 
                 deviceRequest
                     .docRequests.firstOrNull()
@@ -282,4 +259,17 @@ class HolderOrchestrator(
         }
     }
 
+    private fun safeTransition(
+        state: HolderSessionState,
+        logMessage: String = "$CANNOT_TRANSITION_TO_STATE $state",
+        exceptionWrapper: ((String, Throwable) -> Exception)? = null
+    ) {
+        try {
+            session.transitionTo(state)
+            logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
+        } catch (exception: IllegalStateException) {
+            val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
+            logger.error(logTag, logMessage, loggedException)
+        }
+    }
 }

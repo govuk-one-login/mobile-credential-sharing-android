@@ -45,11 +45,11 @@ sealed class HolderSessionState : Completable {
     data class PresentingEngagement(val qrData: String) : HolderSessionState()
 
     /**
-     * State for when the Android-powered device is connecting with another device.
+     * State for when the Android-powered device is connected with another device.
      *
      * The digital credential transfers between devices during this state.
      */
-    data object Connecting : HolderSessionState()
+    data object Connected : HolderSessionState()
 
     /**
      * State for when a successful connection occurs, allowing the User to consent to data being

@@ -25,7 +25,6 @@ import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
 import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralState
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.MdocPeripheralTransportError
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -50,8 +49,6 @@ class HolderWelcomeViewModel(
     )
 
     private val _uiState = MutableStateFlow(initialState)
-/*    private val mdocBleSession: MdocPeripheralTransport =
-        mdocPeripheralTransportFactory.create(viewModelScope)*/
 
     private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
@@ -69,172 +66,6 @@ class HolderWelcomeViewModel(
                     else -> Unit
                 }
             }
-        }
-
-        /*viewModelScope.launch {
-            mdocBleSession.state.collect { state ->
-                _uiState.update { it.copy(sessionState = state) }
-
-                when (state) {
-                    MdocPeripheralState.AdvertisingStarted ->
-                        logger.debug(
-                            logTag,
-                            "Mdoc - Advertising Started UUID: ${_uiState.value.uuid}"
-                        )
-
-                    MdocPeripheralState.AdvertisingStopped -> {
-                        sessionStartRequested = false
-                        logger.debug(logTag, "Mdoc - Advertising Stopped")
-                    }
-
-                    is MdocPeripheralState.Connected ->
-                        logger.debug(logTag, "Mdoc - Connected: ${state.address}")
-
-                    is MdocPeripheralState.Disconnected -> {
-                        @RequiresImplementation(
-                            details = [
-                                ImplementationDetail(
-                                    ticket = "DCMAW-16898",
-                                    description = "We may need to handle explicit bluetooth" +
-                                        "disconnection states to handle common error codes " +
-                                        "8, 19, 22 and 133. The function below will handle " +
-                                        "treat all disconnect states the same when connected " +
-                                        "to a device"
-                                )
-                            ]
-                        )
-
-                        if (state.isSessionEnd) {
-                            logger.debug(
-                                logTag,
-                                "BLE session terminated successfully via GATT End command"
-                            )
-                        } else {
-                            logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
-                            _uiState.update {
-                                it.copy(
-                                    connectedAddress = state.address,
-                                    showErrorScreen = true,
-                                    bluetoothErrorType = BLUETOOTH_DISCONNECTED
-                                )
-                            }
-                        }
-
-                        stopAdvertising()
-                    }
-
-                    is MdocPeripheralState.Error -> {
-                        sessionStartRequested = false
-                        handleError(state.reason)
-                    }
-
-                    MdocPeripheralState.GattServiceStopped -> {
-                        sessionStartRequested = false
-                        logger.debug(logTag, "Mdoc - GattService Stopped")
-                    }
-
-                    MdocPeripheralState.Idle -> {
-                        sessionStartRequested = false
-                        logger.debug(logTag, "Mdoc - Idle")
-                    }
-
-                    is MdocPeripheralState.ServiceAdded ->
-                        logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
-
-                    is MdocPeripheralState.MdocPeripheralEnded -> {
-                        if (state.status == SessionEndStates.SUCCESS) {
-                            logger.debug(logTag, "Mdoc - Ending session")
-                        } else {
-                            _uiState.update { it.copy(showErrorScreen = true) }
-                            logger.error(
-                                logTag,
-                                "Mdoc - Error while ending session: ${state.status}"
-                            )
-                        }
-                    }
-
-                    is MdocPeripheralState.MessageReceived -> {
-                        val deviceRequest = decryptDeviceRequestUseCase.execute(
-                            sessionEstablishmentBytes = state.message,
-                            engagement = _uiState.value.engagement!!,
-                            holderPrivateKey = keyPair?.private as ECPrivateKey
-                        )
-
-                        _uiState.update { it.copy(deviceRequest = deviceRequest) }
-
-                        deviceRequest
-                            .docRequests.firstOrNull()
-                            ?.itemsRequest
-                            ?.nameSpaces
-                            ?.forEach { (key, value) ->
-                                logger.debug(logTag, "Requests: key = $key, value = $value")
-                            }
-                    }
-                }
-            }
-        }*/
-
-       /* viewModelScope.launch {
-            mdocBleSession.bluetoothStatus.collect { bluetoothState ->
-                when (bluetoothState) {
-                    BluetoothStatus.OFF,
-                    BluetoothStatus.TURNING_OFF -> {
-                        val wasDisabled = _uiState.value.bluetoothState == BluetoothState.Disabled
-                        if (!wasDisabled) {
-                            logger.debug(logTag, "Mdoc - Bluetooth switched OFF")
-                            _uiState.update {
-                                it.copy(
-                                    showEnableBluetoothPrompt = true,
-                                    bluetoothState = BluetoothState.Disabled
-                                )
-                            }
-                        }
-                        stopAdvertising()
-                    }
-
-                    BluetoothStatus.TURNING_ON -> {
-                        logger.debug(logTag, "Mdoc - Bluetooth initializing")
-                        _uiState.update {
-                            it.copy(
-                                showEnableBluetoothPrompt = false,
-                                bluetoothState = BluetoothState.Initializing,
-                                showErrorScreen = false
-                            )
-                        }
-                    }
-
-                    BluetoothStatus.ON -> {
-                        logger.debug(logTag, "Mdoc - Bluetooth switched ON")
-                        _uiState.update {
-                            it.copy(
-                                showEnableBluetoothPrompt = false,
-                                bluetoothState = BluetoothState.Enabled,
-                                showErrorScreen = false
-                            )
-                        }
-                        startBleSession()
-                    }
-
-                    BluetoothStatus.UNKNOWN ->
-                        logger.debug(logTag, "Mdoc - Bluetooth status unknown")
-                }
-            }
-        }*/
-    }
-
-    private fun handleError(reason: MdocPeripheralTransportError) {
-        when (reason) {
-            MdocPeripheralTransportError.ADVERTISING_FAILED ->
-                logger.debug(logTag, "Mdoc - Error: Advertising failed")
-
-            MdocPeripheralTransportError.GATT_NOT_AVAILABLE ->
-                logger.debug(logTag, "Mdoc - Error: GATT not available")
-
-            MdocPeripheralTransportError.BLUETOOTH_PERMISSION_MISSING ->
-                logger.debug(logTag, "Mdoc - Error: Bluetooth permission missing")
-
-            MdocPeripheralTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
-                logger.debug(logTag, "Mdoc - Error: Descriptor write request failed")
         }
     }
 
@@ -264,7 +95,6 @@ class HolderWelcomeViewModel(
 
         if (shouldShowError) {
             logger.debug(logTag, "Error - Permissions were revoked during the session")
-            stopAdvertising()
         }
 
         if (grantedPermissionsForFirstTime) {

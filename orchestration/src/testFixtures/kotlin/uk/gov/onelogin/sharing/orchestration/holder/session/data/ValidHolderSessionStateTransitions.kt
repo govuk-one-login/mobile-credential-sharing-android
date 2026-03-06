@@ -55,7 +55,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         }
         private val presentingEngagementTransitions = listOf(
             "User cancels from the QR code screen" to userCancellation,
-            "QR code handshake completes" to HolderSessionState.Connecting
+            "QR code handshake completes" to HolderSessionState.Connected
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -66,11 +66,12 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val connectingTransitions = listOf(
             "User cancels whilst connecting with Verifier device" to userCancellation,
             "Connection with verifier device cannot be established" to userJourneyFailure,
-            "Receives Verifier device's data transfer request" to HolderSessionState.RequestReceived(deviceRequestStub())
+            "Receives Verifier device's data transfer request" to
+                HolderSessionState.RequestReceived(deviceRequestStub)
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.Connecting,
+                HolderSessionState.Connected,
                 transition
             )
         }
@@ -81,7 +82,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.RequestReceived(deviceRequestStub()),
+                HolderSessionState.RequestReceived(deviceRequestStub),
                 transition
             )
         }

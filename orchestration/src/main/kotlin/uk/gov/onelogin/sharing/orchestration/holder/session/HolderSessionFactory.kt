@@ -22,7 +22,7 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 class HolderSessionFactory(
     private val logger: Logger,
     private val sessionSecurity: SessionSecurity,
-    private val engagementGenerator: Engagement,
+    private val engagementGenerator: Engagement
 ) : SessionFactory<HolderSession> {
     override fun create(): HolderSession {
         val uuid = UUID.randomUUID()

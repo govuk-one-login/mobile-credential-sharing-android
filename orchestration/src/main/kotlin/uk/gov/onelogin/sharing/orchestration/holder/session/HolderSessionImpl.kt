@@ -24,7 +24,7 @@ class HolderSessionImpl(
     override val sessionContext: HolderSessionContext,
     private val internalState: MutableStateFlow<HolderSessionState> =
         MutableStateFlow(HolderSessionState.NotStarted),
-    private val transitionMap: HolderSessionStateTransitions = validHolderTransitions,
+    private val transitionMap: HolderSessionStateTransitions = validHolderTransitions
 ) : HolderSession {
 
     override val currentState: StateFlow<HolderSessionState> = internalState

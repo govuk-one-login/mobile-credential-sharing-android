@@ -68,8 +68,7 @@ class HolderWelcomeScreenTest {
         Intents.release()
     }
 
-    private fun createViewModel(
-    ): HolderWelcomeViewModel = HolderWelcomeViewModel(
+    private fun createViewModel(): HolderWelcomeViewModel = HolderWelcomeViewModel(
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),

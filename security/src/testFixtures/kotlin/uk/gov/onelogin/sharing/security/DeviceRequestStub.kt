@@ -5,7 +5,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.Do
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 object DeviceRequestStub {
-    fun deviceRequestStub() = DeviceRequest(
+    val deviceRequestStub = DeviceRequest(
         version = "1.0",
         docRequests = listOf(
             DocRequest(

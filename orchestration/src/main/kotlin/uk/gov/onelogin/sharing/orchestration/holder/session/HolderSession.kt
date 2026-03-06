@@ -10,5 +10,5 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 interface HolderSession :
     Completable,
     StateContainer.Complete<HolderSessionState> {
-        val sessionContext: HolderSessionContext
-    }
+    val sessionContext: HolderSessionContext
+}
