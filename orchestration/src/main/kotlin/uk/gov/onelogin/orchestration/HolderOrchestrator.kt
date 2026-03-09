@@ -262,14 +262,6 @@ class HolderOrchestrator(
                 )
 
                 safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
-
-                deviceRequest
-                    .docRequests.firstOrNull()
-                    ?.itemsRequest
-                    ?.nameSpaces
-                    ?.forEach { (key, value) ->
-                        logger.debug(logTag, "Requests: key = $key, value = $value")
-                    }
             }
         }
     }
