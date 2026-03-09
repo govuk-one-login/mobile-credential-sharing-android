@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.capability
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.camera.core.CameraSelector
 import dev.zacsweers.metro.AppScope
@@ -39,13 +38,18 @@ class CapabilityPrerequisiteLayer(
         null
     }
 
-    @SuppressLint("UnsupportedChromeOsCameraSystemFeature")
-    private fun handleCameraCapability(): PrerequisiteResponse.Incapable? =
-        factory.create().let { provider ->
-            if (provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)) {
+    private fun handleCameraCapability(): PrerequisiteResponse.Incapable? = runCatching {
+        factory.create()
+    }.mapCatching { provider ->
+        provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
+    }.fold(
+        onSuccess = { condition ->
+            if (condition) {
                 null
             } else {
                 PrerequisiteResponse.Incapable(IncapableReason.MissingHardware)
             }
-        }
+        },
+        onFailure = { PrerequisiteResponse.Incapable(IncapableReason.CannotCheckCamera) }
+    )
 }

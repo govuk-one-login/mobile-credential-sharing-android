@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasNotReadyReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReasonMatchers.cameraAlreadyInUse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReasonMatchers.cannotCheckCamera
 import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReasonMatchers.hasBluetoothTurnedOff
 
 @RunWith(TestParameterInjector::class)
@@ -39,7 +40,7 @@ class ReadinessPrerequisiteLayerTest {
     private val cameraState: CameraState = mockk()
     private val cameraStateData: LiveData<CameraState> = MutableLiveData(cameraState)
 
-    private val factory = ProcessCameraProviderFactory {
+    private var factory = ProcessCameraProviderFactory {
         processCameraProvider
     }
     private val readiness by lazy {
@@ -120,6 +121,18 @@ class ReadinessPrerequisiteLayerTest {
         performJourney(
             Prerequisite.CAMERA,
             cameraAssertions[type]!!
+        )
+    }
+
+    @Test
+    fun `Camera isn't ready when unable to obtain a ProcessCameraProvider instance`() = runTest {
+        factory = ProcessCameraProviderFactory {
+            throw IllegalStateException("This is a unit test")
+        }
+
+        performJourney(
+            Prerequisite.CAMERA,
+            hasNotReadyReason(cannotCheckCamera())
         )
     }
 

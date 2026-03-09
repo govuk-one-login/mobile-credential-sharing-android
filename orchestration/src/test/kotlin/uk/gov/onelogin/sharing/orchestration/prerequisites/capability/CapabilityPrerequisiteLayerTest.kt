@@ -15,6 +15,7 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
+import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReasonMatchers.cannotCheckCamera
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReasonMatchers.isMissingHardware
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasIncapableReason
 
@@ -22,7 +23,7 @@ class CapabilityPrerequisiteLayerTest {
     private val processCameraProvider: ProcessCameraProvider = mockk()
     private val context: Context = mockk()
     private val bluetoothManager: BluetoothManager = mockk()
-    private val factory = ProcessCameraProviderFactory {
+    private var factory = ProcessCameraProviderFactory {
         processCameraProvider
     }
 
@@ -75,7 +76,7 @@ class CapabilityPrerequisiteLayerTest {
     }
 
     @Test
-    fun `Camera is incapable when package manager has no rear-facing camera`() = runTest {
+    fun `Camera is incapable when device has no rear-facing camera`() = runTest {
         every {
             processCameraProvider.hasCamera(any())
         }.returns(false)
@@ -87,7 +88,19 @@ class CapabilityPrerequisiteLayerTest {
     }
 
     @Test
-    fun `Camera is capable when package manager has a rear-facing camera`() = runTest {
+    fun `Camera is incapable when unable to obtain a ProcessCameraProvider instance`() = runTest {
+        factory = ProcessCameraProviderFactory {
+            throw IllegalStateException("This is a unit test")
+        }
+
+        performJourney(
+            Prerequisite.CAMERA,
+            hasIncapableReason(cannotCheckCamera())
+        )
+    }
+
+    @Test
+    fun `Camera is capable when device has a rear-facing camera`() = runTest {
         every {
             processCameraProvider.hasCamera(any())
         } returns true

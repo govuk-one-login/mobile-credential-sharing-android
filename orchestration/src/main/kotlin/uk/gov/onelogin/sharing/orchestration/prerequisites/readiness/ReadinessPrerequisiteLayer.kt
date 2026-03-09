@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.readiness
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraState
@@ -40,20 +39,18 @@ class ReadinessPrerequisiteLayer(
         PrerequisiteResponse.NotReady(NotReadyReason.BluetoothTurnedOff)
     }
 
-    private fun isCameraCurrentlyClosed(): Boolean = factory
-        .create()
-        .getCameraInfo(CameraSelector.DEFAULT_BACK_CAMERA)
-        .cameraState
-        .value.let { state ->
-            state == null || CameraState.Type.CLOSED == state.type
-        }
-
-    @SuppressLint("UnsupportedChromeOsCameraSystemFeature")
-    private fun handleCameraReadiness(): PrerequisiteResponse.NotReady? = if (
-        isCameraCurrentlyClosed()
-    ) {
-        null
-    } else {
-        PrerequisiteResponse.NotReady(NotReadyReason.CameraAlreadyInUse)
-    }
+    private fun handleCameraReadiness(): PrerequisiteResponse.NotReady? = runCatching {
+        factory.create()
+    }.mapCatching { provider ->
+        provider.getCameraInfo(CameraSelector.DEFAULT_BACK_CAMERA).cameraState.value?.type
+    }.fold(
+        onSuccess = { state ->
+            if (state == null || CameraState.Type.CLOSED == state) {
+                null
+            } else {
+                PrerequisiteResponse.NotReady(NotReadyReason.CameraAlreadyInUse)
+            }
+        },
+        onFailure = { PrerequisiteResponse.NotReady(NotReadyReason.CannotCheckCamera) }
+    )
 }
