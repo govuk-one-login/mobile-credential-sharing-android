@@ -11,7 +11,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -69,7 +68,10 @@ class HolderWelcomeViewModelTest {
         assertFalse(state.hasBluetoothPermissions!!)
         assertTrue(state.previouslyHadPermissions)
         assertTrue(state.showErrorScreen)
-        assertEquals(BluetoothUiErrorTypes.PERMISSIONS_MISSING, state.bluetoothErrorType)
+        assertEquals(
+            "Bluetooth permissions were revoked during the session",
+            state.errorMessage
+        )
     }
 
     @Test

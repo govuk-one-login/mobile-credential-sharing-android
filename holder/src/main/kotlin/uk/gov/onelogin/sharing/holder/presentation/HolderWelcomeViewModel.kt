@@ -12,7 +12,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,10 +20,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -49,7 +44,6 @@ class HolderWelcomeViewModel(
     )
 
     private val _uiState = MutableStateFlow(initialState)
-
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
     init {
@@ -62,19 +56,16 @@ class HolderWelcomeViewModel(
                         it.copy(qrData = currentSate.qrData)
                     }
 
-                    is HolderSessionState.Complete.Cancelled -> _uiState.update {
-                        it.copy()
+                    is HolderSessionState.Complete.Failed -> _uiState.update {
+                        it.copy(
+                            showErrorScreen = true,
+                            errorMessage = currentSate.error.message
+                        )
                     }
 
                     else -> Unit
                 }
             }
-        }
-    }
-
-    fun stopAdvertising() {
-        viewModelScope.launch {
-            orchestrator.cancel()
         }
     }
 
@@ -88,10 +79,10 @@ class HolderWelcomeViewModel(
                 hasBluetoothPermissions = granted,
                 previouslyHadPermissions = hadPermissionsPreviously || granted,
                 showErrorScreen = shouldShowError,
-                bluetoothErrorType = if (shouldShowError) {
-                    PERMISSIONS_MISSING
+                errorMessage = if (shouldShowError) {
+                    "Bluetooth permissions were revoked during the session"
                 } else {
-                    BLUETOOTH_DISCONNECTED
+                    "Bluetooth disconnected"
                 }
             )
         }
@@ -133,17 +124,12 @@ class HolderWelcomeViewModel(
 }
 
 data class HolderWelcomeUiState(
-    val uuid: UUID = UUID.randomUUID(),
     val qrData: String? = null,
-    val engagement: String? = null,
-    val sessionState: PeripheralBluetoothState = PeripheralBluetoothState.Idle,
-    val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
     val hasBluetoothPermissions: Boolean? = null,
     val showErrorScreen: Boolean = false,
-    val bluetoothErrorType: BluetoothUiErrorTypes = BLUETOOTH_DISCONNECTED,
+    val errorMessage: String = "",
     val previouslyHadPermissions: Boolean = false,
     val showEnableBluetoothPrompt: Boolean = false,
-    val connectedAddress: String? = "",
     val deviceRequest: DeviceRequest? = null
 )

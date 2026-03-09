@@ -3,7 +3,6 @@
 package uk.gov.onelogin.sharing.holder
 
 import android.content.Context
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -23,8 +22,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
@@ -88,29 +85,6 @@ class HolderWelcomeScreenTest {
     }
 
     @Test
-    fun `should start bluetooth advertisement once granted permissions`() {
-        val viewModel = createViewModel()
-        composeTestRule.setContent {
-            BluetoothPermissionPrompt(
-                multiplePermissionsState = bluetoothPermissionsGranted,
-                hasPreviouslyRequestedPermission = true,
-                onGrantedPermissions = {
-                    DisposableEffect(Unit) {
-                        onDispose {
-                            viewModel.stopAdvertising()
-                        }
-                    }
-                }
-            )
-        }
-
-        assertEquals(
-            PeripheralBluetoothState.Idle,
-            viewModel.uiState.value.sessionState
-        )
-    }
-
-    @Test
     fun initiallyDisplaysEnablePermissionButtonBeforeRequestingPermissions() {
         composeTestRule.setContent {
             val permissionsState = bluetoothPermissionsDenied
@@ -163,7 +137,7 @@ class HolderWelcomeScreenTest {
             render(
                 HolderWelcomeUiState(
                     showErrorScreen = true,
-                    bluetoothErrorType = PERMISSIONS_MISSING,
+                    errorMessage = "Bluetooth permissions were revoked during the session",
                     hasBluetoothPermissions = true
                 )
             )
