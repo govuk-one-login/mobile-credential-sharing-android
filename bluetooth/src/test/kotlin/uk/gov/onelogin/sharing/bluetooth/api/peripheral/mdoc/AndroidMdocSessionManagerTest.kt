@@ -62,7 +62,9 @@ class AndroidMdocSessionManagerTest {
 
             advertiser.emitState(AdvertiserState.Failed("error"))
             assertEquals(
-                PeripheralBluetoothState.Error(PeripheralBuetoothTransportError.ADVERTISING_FAILED),
+                PeripheralBluetoothState.Error(
+                    PeripheralBluetoothTransportError.ADVERTISING_FAILED
+                ),
                 awaitItem()
             )
         }
@@ -98,7 +100,9 @@ class AndroidMdocSessionManagerTest {
 
             sessionManager.start(uuid)
             assertEquals(
-                PeripheralBluetoothState.Error(PeripheralBuetoothTransportError.ADVERTISING_FAILED),
+                PeripheralBluetoothState.Error(
+                    PeripheralBluetoothTransportError.ADVERTISING_FAILED
+                ),
                 awaitItem()
             )
         }
@@ -224,7 +228,9 @@ class AndroidMdocSessionManagerTest {
                 )
             )
             assertEquals(
-                PeripheralBluetoothState.Error(PeripheralBuetoothTransportError.GATT_NOT_AVAILABLE),
+                PeripheralBluetoothState.Error(
+                    PeripheralBluetoothTransportError.GATT_NOT_AVAILABLE
+                ),
                 awaitItem()
             )
         }

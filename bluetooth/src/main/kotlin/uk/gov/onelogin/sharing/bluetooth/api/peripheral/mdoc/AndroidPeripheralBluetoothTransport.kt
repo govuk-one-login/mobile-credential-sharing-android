@@ -76,7 +76,7 @@ class AndroidPeripheralBluetoothTransport(
         } catch (e: StartAdvertisingException) {
             logger.error(logTag, "Error starting advertising: ${e.error}", e)
             _state.value =
-                PeripheralBluetoothState.Error(PeripheralBuetoothTransportError.ADVERTISING_FAILED)
+                PeripheralBluetoothState.Error(PeripheralBluetoothTransportError.ADVERTISING_FAILED)
         }
 
         gattServerManager.open(serviceUuid)
@@ -103,7 +103,7 @@ class AndroidPeripheralBluetoothTransport(
             is AdvertiserState.Failed ->
                 _state.value =
                     PeripheralBluetoothState.Error(
-                        PeripheralBuetoothTransportError.ADVERTISING_FAILED
+                        PeripheralBluetoothTransportError.ADVERTISING_FAILED
                     )
 
             AdvertiserState.Idle ->
@@ -130,7 +130,7 @@ class AndroidPeripheralBluetoothTransport(
 
             is GattServerEvent.Error ->
                 _state.value = PeripheralBluetoothState.Error(
-                    PeripheralBuetoothTransportError.fromGattError(event.error)
+                    PeripheralBluetoothTransportError.fromGattError(event.error)
                 )
 
             is GattServerEvent.ServiceAdded ->

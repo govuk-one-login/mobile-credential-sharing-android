@@ -20,7 +20,7 @@ import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelExceptio
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBuetoothTransportError
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
@@ -274,18 +274,18 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleError(reason: PeripheralBuetoothTransportError) {
+    private fun handleError(reason: PeripheralBluetoothTransportError) {
         when (reason) {
-            PeripheralBuetoothTransportError.ADVERTISING_FAILED ->
+            PeripheralBluetoothTransportError.ADVERTISING_FAILED ->
                 logger.debug(logTag, "Mdoc - Error: Advertising failed")
 
-            PeripheralBuetoothTransportError.GATT_NOT_AVAILABLE ->
+            PeripheralBluetoothTransportError.GATT_NOT_AVAILABLE ->
                 logger.debug(logTag, "Mdoc - Error: GATT not available")
 
-            PeripheralBuetoothTransportError.BLUETOOTH_PERMISSION_MISSING ->
+            PeripheralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING ->
                 logger.debug(logTag, "Mdoc - Error: Bluetooth permission missing")
 
-            PeripheralBuetoothTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
+            PeripheralBluetoothTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
                 logger.debug(logTag, "Mdoc - Error: Descriptor write request failed")
         }
     }

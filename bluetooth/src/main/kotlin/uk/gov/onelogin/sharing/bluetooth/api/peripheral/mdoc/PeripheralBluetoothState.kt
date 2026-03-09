@@ -46,9 +46,9 @@ sealed interface PeripheralBluetoothState {
      * An error occurred during the session. This can be and error
      * from the Advertiser or the GATT service
      *
-     * @param reason The [PeripheralBuetoothTransportError] that occurred.
+     * @param reason The [PeripheralBluetoothTransportError] that occurred.
      */
-    data class Error(val reason: PeripheralBuetoothTransportError) : PeripheralBluetoothState
+    data class Error(val reason: PeripheralBluetoothTransportError) : PeripheralBluetoothState
 
     /**
      * A session end command has been received from the client or server manager

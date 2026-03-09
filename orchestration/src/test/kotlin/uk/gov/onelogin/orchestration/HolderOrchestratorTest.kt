@@ -21,7 +21,7 @@ import uk.gov.onelogin.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBuetoothTransportError
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -38,7 +38,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingUserConsent
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
@@ -319,7 +318,7 @@ class HolderOrchestratorTest {
 
         peripheralBluetoothTransport.emitState(
             PeripheralBluetoothState.Error(
-                PeripheralBuetoothTransportError.ADVERTISING_FAILED
+                PeripheralBluetoothTransportError.ADVERTISING_FAILED
             )
         )
 
@@ -327,7 +326,7 @@ class HolderOrchestratorTest {
 
         peripheralBluetoothTransport.emitState(
             PeripheralBluetoothState.Error(
-                PeripheralBuetoothTransportError.GATT_NOT_AVAILABLE
+                PeripheralBluetoothTransportError.GATT_NOT_AVAILABLE
             )
         )
 
@@ -335,7 +334,7 @@ class HolderOrchestratorTest {
 
         peripheralBluetoothTransport.emitState(
             PeripheralBluetoothState.Error(
-                PeripheralBuetoothTransportError.BLUETOOTH_PERMISSION_MISSING
+                PeripheralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING
             )
         )
 
@@ -343,7 +342,7 @@ class HolderOrchestratorTest {
 
         peripheralBluetoothTransport.emitState(
             PeripheralBluetoothState.Error(
-                PeripheralBuetoothTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED
+                PeripheralBluetoothTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED
             )
         )
 
