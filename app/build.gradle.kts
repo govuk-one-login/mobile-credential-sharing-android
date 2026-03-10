@@ -111,6 +111,7 @@ dependencies {
         libs.androidx.ui.test.junit4,
         libs.com.google.test.parameter.injector,
         testFixtures(projects.holder),
+        testFixtures(projects.ui.uiImpl),
         testFixtures(projects.verifier)
     ).forEach(::testFixturesApi)
 

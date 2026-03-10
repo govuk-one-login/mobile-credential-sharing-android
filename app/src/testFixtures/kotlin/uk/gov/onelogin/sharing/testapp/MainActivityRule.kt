@@ -12,6 +12,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.ui.impl.FakeCredentialPresenter
+import uk.gov.onelogin.sharing.ui.impl.FakeCredentialVerifier
 
 class MainActivityRule(
     private val appGraph: CredentialSharingAppGraph,
@@ -40,8 +42,8 @@ class MainActivityRule(
     @Composable
     fun Content(appGraph: CredentialSharingAppGraph) {
         TestAppScreen(
-            ui = FakeCredentialSharingUi(),
-            sdk = FakeCredentialSharingSdk(appGraph)
+            credentialPresenter = FakeCredentialPresenter(appGraph),
+            credentialVerifier = FakeCredentialVerifier(appGraph)
         )
     }
 

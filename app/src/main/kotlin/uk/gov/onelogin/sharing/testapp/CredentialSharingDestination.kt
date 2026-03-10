@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.ui.api
+package uk.gov.onelogin.sharing.testapp
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
