@@ -23,10 +23,6 @@ class SampleCredentialProvider : CredentialProvider {
 
     override suspend fun sign(payload: ByteArray, documentId: String): ByteArray {
         // Sample implementation - would use Android Keystore in production
-        return ByteArray(PLACEHOLDER_SIGNATURE_SIZE) // Placeholder signature
-    }
-
-    private companion object {
-        private const val PLACEHOLDER_SIGNATURE_SIZE = 64
+        return ByteArray(64) // Placeholder signature
     }
 }
