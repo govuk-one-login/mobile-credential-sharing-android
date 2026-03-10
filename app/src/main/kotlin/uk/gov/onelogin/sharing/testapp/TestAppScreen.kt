@@ -35,6 +35,8 @@ import uk.gov.onelogin.sharing.ui.api.CredentialVerifier
 import uk.gov.onelogin.sharing.ui.impl.ShareCredential
 import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
 
+// DCMAW-19086 Refactor to use state hoisting instead of VM forwarding
+@Suppress("ktlint:compose:vm-forwarding-check")
 @Composable
 fun TestAppScreen(
     credentialPresenter: CredentialPresenter,
@@ -61,10 +63,12 @@ fun TestAppScreen(
                     component = credentialPresenter,
                     modifier = Modifier.fillMaxSize()
                 )
+
                 CredentialSharingDestination.Verifier -> VerifyCredential(
                     component = credentialVerifier,
                     modifier = Modifier.fillMaxSize()
                 )
+
                 null -> {}
             }
         }
