@@ -23,10 +23,7 @@ import uk.gov.onelogin.sharing.ui.impl.di.CredentialSharingUiGraph
  * @param modifier Optional [Modifier] to apply to the root composable.
  */
 @Composable
-fun ShareCredential(
-    component: CredentialPresenter,
-    modifier: Modifier = Modifier
-) {
+fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifier) {
     val uiGraph = remember(component.appGraph) {
         createGraphFactory<CredentialSharingUiGraph.Factory>()
             .create(component.appGraph)

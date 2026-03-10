@@ -20,10 +20,8 @@ import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 fun createTestAppGraph(
     applicationContext: Context = ApplicationProvider.getApplicationContext(),
     logger: Logger = SystemLogger()
-): CredentialSharingAppGraph {
-    return createGraphFactory<CredentialSharingAppGraph.Factory>()
-        .create(
-            applicationContext = applicationContext,
-            logger = logger
-        )
-}
+): CredentialSharingAppGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
+    .create(
+        applicationContext = applicationContext,
+        logger = logger
+    )
