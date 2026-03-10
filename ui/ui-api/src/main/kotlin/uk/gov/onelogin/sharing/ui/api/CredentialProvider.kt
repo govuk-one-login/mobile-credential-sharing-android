@@ -9,11 +9,6 @@ interface CredentialProvider {
     suspend fun sign(payload: ByteArray, documentId: String): ByteArray
 }
 
-data class CredentialRequest(
-    val documentTypes: List<String>
-)
+data class CredentialRequest(val documentTypes: List<String>)
 
-data class Credential(
-    val id: String,
-    val rawCredential: ByteArray
-)
+data class Credential(val id: String, val rawCredential: ByteArray)

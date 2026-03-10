@@ -9,7 +9,4 @@ interface CredentialVerifier {
     val appGraph: CredentialSharingAppGraph
 }
 
-data class VerificationRequest(
-    val documentType: String,
-    val requestedElements: List<String>
-)
+data class VerificationRequest(val documentType: String, val requestedElements: List<String>)
