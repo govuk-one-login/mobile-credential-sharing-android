@@ -6,6 +6,7 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.sharing.di.internal.CredentialSharingSdkImpl
 
 class SharingSdkImplTest {
     private lateinit var logger: Logger

@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import uk.gov.onelogin.sharing.ui.api.CredentialPresenter
-import uk.gov.onelogin.sharing.ui.api.CredentialVerifier
+import uk.gov.onelogin.sharing.CredentialPresenterNew
+import uk.gov.onelogin.sharing.CredentialVerifierNew
 import uk.gov.onelogin.sharing.ui.impl.ShareCredential
 import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
 
@@ -39,8 +39,8 @@ import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
 @Suppress("ktlint:compose:vm-forwarding-check")
 @Composable
 fun TestAppScreen(
-    credentialPresenter: CredentialPresenter,
-    credentialVerifier: CredentialVerifier,
+    credentialPresenter: CredentialPresenterNew,
+    credentialVerifier: CredentialVerifierNew,
     modifier: Modifier = Modifier
 ) {
     var destination by rememberSaveable {

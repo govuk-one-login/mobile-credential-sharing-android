@@ -10,10 +10,11 @@ import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.core.Resettable
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.verifier.scan.state.VerifierScannerState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
 
-@ContributesIntoMap(ViewModelScope::class, binding = binding<ViewModel>())
+@ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())
 @Inject
 @ViewModelKey(VerifierScannerViewModel::class)
 class VerifierScannerViewModel(state: VerifierScannerState.Complete) :

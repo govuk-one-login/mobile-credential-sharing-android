@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.ui.api
 
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.orchestration.Orchestrator
 
 /**
  * Holder role: Presents credentials to verifiers.
  */
 interface CredentialPresenter {
-    val appGraph: CredentialSharingAppGraph
+    val orchestrator: Orchestrator.Holder
 }

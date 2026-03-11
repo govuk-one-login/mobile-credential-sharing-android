@@ -9,8 +9,9 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import uk.gov.onelogin.sharing.CredentialVerifierNew
 import uk.gov.onelogin.sharing.ui.api.CredentialVerifier
-import uk.gov.onelogin.sharing.ui.impl.di.CredentialSharingUiGraph
+import uk.gov.onelogin.sharing.ui.impl.di.VerifierCredentialSharingUiGraph
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 
@@ -25,10 +26,10 @@ import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun VerifyCredential(component: CredentialVerifier, modifier: Modifier = Modifier) {
+fun VerifyCredential(component: CredentialVerifierNew, modifier: Modifier = Modifier) {
     val uiGraph = remember(component.appGraph) {
-        createGraphFactory<CredentialSharingUiGraph.Factory>()
-            .create(component.appGraph)
+        createGraphFactory<VerifierCredentialSharingUiGraph.Factory>()
+            .create(component.appGraph, component.orchestrator)
     }
 
     val navController = rememberNavController()

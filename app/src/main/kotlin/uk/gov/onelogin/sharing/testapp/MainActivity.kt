@@ -7,10 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.orchestration.CredentialProviderNew
 import uk.gov.onelogin.sharing.CredentialSharingSdk
-import uk.gov.onelogin.sharing.ui.api.VerificationRequest
-import uk.gov.onelogin.sharing.ui.impl.CredentialPresenterImpl
-import uk.gov.onelogin.sharing.ui.impl.CredentialVerifierImpl
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -22,28 +20,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Initialize Holder role API
-        val credentialProvider = SampleCredentialProvider()
-        val credentialPresenter = CredentialPresenterImpl(
-            credentialProvider,
-            credentialSharingSdk.appGraph
-        )
+        // this can be injected via Hilt like the credentialSharingSdk
+        val holder = credentialSharingSdk
+            .presenterCredentialSdk
+            .presenter(CredentialProviderNew())
 
-        // Initialize Verifier role API
-        val credentialVerifier = CredentialVerifierImpl(
-            verificationRequest = VerificationRequest(
-                documentType = "org.iso.18013.5.1.mDL",
-                requestedElements = listOf("given_name", "age_over_21", "family_name", "portrait")
-            ),
-            trustedCertificates = emptyList(), // Would load trusted CAs in production
-            appGraph = credentialSharingSdk.appGraph
-        )
+        val verifier = credentialSharingSdk
+            .verifierCredentialSdk
+            .verifier()
 
         setContent {
             GdsTheme {
                 TestAppScreen(
-                    credentialPresenter = credentialPresenter,
-                    credentialVerifier = credentialVerifier
+                    credentialPresenter = holder,
+                    credentialVerifier = verifier
                 )
             }
         }

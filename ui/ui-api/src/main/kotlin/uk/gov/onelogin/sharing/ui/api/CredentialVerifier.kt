@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.ui.api
 
+import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 
 /**
@@ -7,6 +8,8 @@ import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
  */
 interface CredentialVerifier {
     val appGraph: CredentialSharingAppGraph
+
+    val orchestrator: Orchestrator.Verifier
 }
 
 data class VerificationRequest(val documentType: String, val requestedElements: List<String>)

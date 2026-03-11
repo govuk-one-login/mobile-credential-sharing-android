@@ -2,8 +2,11 @@ package uk.gov.onelogin.sharing.ui.impl.di
 
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
+import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import uk.gov.onelogin.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 
 /**
@@ -14,21 +17,24 @@ import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
  * core application dependencies.
  */
 @DependencyGraph(
-    scope = ViewModelScope::class
+    scope = HolderUiScope::class
 )
-interface CredentialSharingUiGraph : ViewModelGraph {
+interface HolderCredentialSharingUiGraph : ViewModelGraph {
 
     /**
-     * Factory for creating instances of [CredentialSharingUiGraph].
+     * Factory for creating instances of [HolderCredentialSharingUiGraph].
      */
     @DependencyGraph.Factory
     fun interface Factory {
         /**
-         * Creates a new [CredentialSharingUiGraph] instance.
+         * Creates a new [HolderCredentialSharingUiGraph] instance.
          *
          * @param appGraph The application-level dependency graph to include.
-         * @return A configured [CredentialSharingUiGraph] instance.
+         * @return A configured [HolderCredentialSharingUiGraph] instance.
          */
-        fun create(@Includes appGraph: CredentialSharingAppGraph): CredentialSharingUiGraph
+        fun create(
+            @Includes appGraph: CredentialSharingAppGraph,
+            @Provides holderOrchestrator: Orchestrator.Holder,
+        ): HolderCredentialSharingUiGraph
     }
 }
