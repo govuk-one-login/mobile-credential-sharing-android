@@ -1,5 +1,5 @@
 package uk.gov.onelogin.sharing.core
 
-abstract class HolderUiScope
+interface HolderUiScope
 
-abstract class VerifierUiScope
+interface VerifierUiScope

@@ -10,7 +10,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import uk.gov.onelogin.sharing.CredentialVerifierNew
-import uk.gov.onelogin.sharing.ui.api.CredentialVerifier
 import uk.gov.onelogin.sharing.ui.impl.di.VerifierCredentialSharingUiGraph
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
@@ -21,7 +20,7 @@ import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
  * Renders the complete Verifier UI flow including camera scanning and navigation,
  * allowing the app to request and verify credentials from holders.
  *
- * @param component The [CredentialVerifier] containing the app graph and verification request.
+ * @param component The [CredentialVerifierNew] containing the app graph and verification request.
  * @param modifier Optional [Modifier] to apply to the root composable.
  */
 @OptIn(ExperimentalPermissionsApi::class)

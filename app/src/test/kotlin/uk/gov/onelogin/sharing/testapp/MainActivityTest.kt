@@ -11,10 +11,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.orchestration.CredentialProviderNewImpl
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
 import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProviderNew
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenterNew
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifierNew
 
@@ -28,7 +28,7 @@ class MainActivityTest {
         )
 
     val holderGraph = createGraphFactory<PresenterCredentialGraph.Factory>()
-        .create(appGraph = appGraph, CredentialProviderNewImpl())
+        .create(appGraph = appGraph, FakeCredentialProviderNew())
 
     val verifierGraph = createGraphFactory<VerifierCredentialGraph.Factory>()
         .create(appGraph = appGraph)

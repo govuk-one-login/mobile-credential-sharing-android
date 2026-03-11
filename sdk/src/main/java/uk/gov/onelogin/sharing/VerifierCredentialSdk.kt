@@ -4,7 +4,7 @@ import java.security.cert.Certificate
 import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 
-interface VerifierCredentialSdk {
+fun interface VerifierCredentialSdk {
     fun verifier(): CredentialVerifierNew
 }
 

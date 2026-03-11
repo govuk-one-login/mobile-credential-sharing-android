@@ -18,8 +18,6 @@ import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
 import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenterNew
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifierNew
-import uk.gov.onelogin.sharing.ui.impl.FakeCredentialPresenter
-import uk.gov.onelogin.sharing.ui.impl.FakeCredentialVerifier
 
 class MainActivityRule(
     composeTestRule: ComposeContentTestRule,

@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.orchestration.FakeCredentialProviderNew
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenterNew
 
 @RunWith(AndroidJUnit4::class)
