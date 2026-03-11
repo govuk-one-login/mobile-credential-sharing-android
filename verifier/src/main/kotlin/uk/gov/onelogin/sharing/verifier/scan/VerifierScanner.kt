@@ -34,7 +34,7 @@ fun VerifierScanner(
                     )
 
                     is VerifierNavigationEvents.NavigateToInvalidScreen -> currentOnInvalidBarcode(
-                        "Invalid"
+                        event.qrCode
                     )
                 }
             }

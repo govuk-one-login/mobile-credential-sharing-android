@@ -42,15 +42,12 @@ class VerifierOrchestrator(
     override val verifierSessionState = sessionFlow.flatMapLatest { it.currentState }
 
     override fun start() {
-        println(sessionFlow.value.currentState)
         if (sessionFlow.value.isComplete()) {
-            if (sessionFlow.value.isComplete()) {
-                sessionFlow.value = sessionFactory.create().also {
-                    logger.debug(
-                        logTag,
-                        recreateSessionOnStartMessage(Orchestrator.Verifier.JOURNEY_NAME)
-                    )
-                }
+            sessionFlow.value = sessionFactory.create().also {
+                logger.debug(
+                    logTag,
+                    recreateSessionOnStartMessage(Orchestrator.Verifier.JOURNEY_NAME)
+                )
             }
         }
 
@@ -109,7 +106,7 @@ class VerifierOrchestrator(
                 sessionFlow.value.transitionTo(
                     VerifierSessionState.Complete.Failed(
                         SessionError(
-                            message = "Invalid barcode",
+                            message = qrCode.data,
                             exception = IllegalArgumentException("Qr Code is an unsupported format")
                         )
                     )

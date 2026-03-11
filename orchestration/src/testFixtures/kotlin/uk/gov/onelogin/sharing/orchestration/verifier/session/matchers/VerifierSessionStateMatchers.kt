@@ -44,4 +44,8 @@ object VerifierSessionStateMatchers {
     fun isConnecting(): Matcher<VerifierSessionState> = equalTo(
         VerifierSessionState.Connecting("https://this.is.a.test")
     )
+
+    fun isFailed(): Matcher<VerifierSessionState> = instanceOf(
+        VerifierSessionState.Complete.Failed::class.java
+    )
 }

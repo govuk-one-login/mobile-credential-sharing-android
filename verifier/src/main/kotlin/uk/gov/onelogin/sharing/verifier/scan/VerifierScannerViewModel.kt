@@ -34,8 +34,14 @@ class VerifierScannerViewModel(
 
             barcodeDataResult.collectLatest {
                 when (it) {
-                    is BarcodeDataResult.Invalid ->
-                        _navigationEvents.emit(VerifierNavigationEvents.NavigateToInvalidScreen)
+                    is BarcodeDataResult.Invalid -> {
+                        processQrCode(it)
+                        _navigationEvents.emit(
+                            VerifierNavigationEvents.NavigateToInvalidScreen(
+                                it.data
+                            )
+                        )
+                    }
 
                     BarcodeDataResult.NotFound -> Unit
 

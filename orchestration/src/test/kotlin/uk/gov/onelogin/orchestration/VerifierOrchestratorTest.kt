@@ -33,6 +33,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.data.Uncancellable
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isConnecting
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 
@@ -207,6 +208,22 @@ class VerifierOrchestratorTest {
             sessionFactory,
             currentSessionState(
                 isConnecting()
+            )
+        )
+    }
+
+    @Test
+    fun `processQrCode returns invalid BarcodeDataResult`() = runTest {
+        orchestrator.start()
+        val data = "https://"
+        val barcodeResult = BarcodeDataResult.Invalid(data)
+
+        orchestrator.processQrCode(barcodeResult)
+
+        assertThat(
+            sessionFactory,
+            currentSessionState(
+                isFailed()
             )
         )
     }
