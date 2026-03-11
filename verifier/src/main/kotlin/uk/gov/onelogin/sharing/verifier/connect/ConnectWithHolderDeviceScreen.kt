@@ -79,7 +79,7 @@ fun ConnectWithHolderDeviceScreen(
         )
     }
 
-    DisposableEffect(Unit){
+    DisposableEffect(Unit) {
         onDispose {
             viewModel.resetOrchestrator()
         }
