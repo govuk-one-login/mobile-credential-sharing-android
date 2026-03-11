@@ -38,6 +38,11 @@ dependencies {
         projects.ui.uiApi,
         projects.verifier
     ).forEach(::implementation)
+
+    listOf(
+        projects.sdk,
+        projects.ui.uiApi
+    ).forEach(::testFixturesApi)
 }
 
 mavenPublishingConfig {

@@ -8,6 +8,7 @@ import org.hamcrest.Matchers.hasKey
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
 /**
  * Wrapper object for storing hamcrest [Matcher] functions for [HolderSessionState].
@@ -33,11 +34,29 @@ object HolderSessionStateMatchers {
         HolderSessionState.Complete.Cancelled
     )
 
+    fun isFailed(message: String, exception: Exception): Matcher<in HolderSessionState> = equalTo(
+        HolderSessionState.Complete.Failed(
+            SessionError(message, exception)
+        )
+    )
+
     fun isNotStarted(): Matcher<in HolderSessionState> = equalTo(
         HolderSessionState.NotStarted
     )
 
+    fun isReadyToPresent(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.ReadyToPresent::class.java
+    )
+
     fun inPresentingEngagement(): Matcher<in HolderSessionState> = instanceOf(
         HolderSessionState.PresentingEngagement::class.java
+    )
+
+    fun isProcessingEstablishment(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.ProcessingEstablishment::class.java
+    )
+
+    fun isAwaitingUserConsent(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.AwaitingUserConsent::class.java
     )
 }

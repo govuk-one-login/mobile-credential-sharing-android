@@ -3,10 +3,6 @@
 package uk.gov.onelogin.sharing.holder
 
 import android.content.Context
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -26,11 +22,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
@@ -65,10 +59,7 @@ class HolderWelcomeScreenTest {
         Intents.release()
     }
 
-    private fun createViewModel(
-        mdocBleSession: FakeMdocSessionManager = FakeMdocSessionManager()
-    ): HolderWelcomeViewModel = HolderWelcomeViewModel(
-        mdocSessionManagerFactory = { mdocBleSession },
+    private fun createViewModel(): HolderWelcomeViewModel = HolderWelcomeViewModel(
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = SystemLogger(),
         savedStateHandle = SavedStateHandle(),
@@ -94,63 +85,6 @@ class HolderWelcomeScreenTest {
     }
 
     @Test
-    fun `should start bluetooth advertisement once granted permissions`() {
-        val viewModel = createViewModel()
-        composeTestRule.setContent {
-            BluetoothPermissionPrompt(
-                multiplePermissionsState = bluetoothPermissionsGranted,
-                hasPreviouslyRequestedPermission = true,
-                onGrantedPermissions = {
-                    DisposableEffect(Unit) {
-                        onDispose {
-                            viewModel.stopAdvertising()
-                        }
-                    }
-                }
-            )
-        }
-
-        assertEquals(
-            MdocSessionState.Idle,
-            viewModel.uiState.value.sessionState
-        )
-    }
-
-    @Test
-    fun `should stop bluetooth advertisement when composable leaves composition`() {
-        val viewModel = createViewModel()
-
-        var showContent by mutableStateOf(true)
-
-        composeTestRule.setContent {
-            if (showContent) {
-                BluetoothPermissionPrompt(
-                    multiplePermissionsState = bluetoothPermissionsGranted,
-                    hasPreviouslyRequestedPermission = true,
-                    onGrantedPermissions = {
-                        DisposableEffect(Unit) {
-                            onDispose {
-                                viewModel.stopAdvertising()
-                            }
-                        }
-                    }
-                )
-            }
-        }
-
-        composeTestRule.runOnUiThread {
-            showContent = false
-        }
-
-        composeTestRule.waitForIdle()
-
-        assertEquals(
-            MdocSessionState.AdvertisingStopped,
-            viewModel.uiState.value.sessionState
-        )
-    }
-
-    @Test
     fun initiallyDisplaysEnablePermissionButtonBeforeRequestingPermissions() {
         composeTestRule.setContent {
             val permissionsState = bluetoothPermissionsDenied
@@ -165,10 +99,7 @@ class HolderWelcomeScreenTest {
 
     @Test
     fun holderScreenSetsBluetoothStatusUnknownWhenPermissionsAreGranted() = runTest {
-        val mdocBleSession = FakeMdocSessionManager().apply {
-            mockBluetoothEnabled = false
-        }
-        val viewModel = createViewModel(mdocBleSession = mdocBleSession)
+        val viewModel = createViewModel()
 
         composeTestRule.setContent {
             HolderWelcomeScreen(viewModel)
@@ -206,7 +137,7 @@ class HolderWelcomeScreenTest {
             render(
                 HolderWelcomeUiState(
                     showErrorScreen = true,
-                    bluetoothErrorType = PERMISSIONS_MISSING,
+                    errorMessage = "Bluetooth permissions were revoked during the session",
                     hasBluetoothPermissions = true
                 )
             )

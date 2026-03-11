@@ -12,7 +12,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
-import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,25 +20,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
-import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionError
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
-import uk.gov.onelogin.sharing.holder.mdoc.SessionManagerFactory
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @AssistedInject
 @Suppress("LongParameterList")
 class HolderWelcomeViewModel(
-    mdocSessionManagerFactory: SessionManagerFactory,
     private val logger: Logger,
     @Assisted private val savedStateHandle: SavedStateHandle,
     private val orchestrator: Orchestrator.Holder,
@@ -55,10 +44,6 @@ class HolderWelcomeViewModel(
     )
 
     private val _uiState = MutableStateFlow(initialState)
-    private val mdocBleSession: MdocSessionManager =
-        mdocSessionManagerFactory.create(viewModelScope)
-
-    private var sessionStartRequested = false
     val uiState: StateFlow<HolderWelcomeUiState> = _uiState
 
     init {
@@ -71,165 +56,16 @@ class HolderWelcomeViewModel(
                         it.copy(qrData = currentSate.qrData)
                     }
 
+                    is HolderSessionState.Complete.Failed -> _uiState.update {
+                        it.copy(
+                            showErrorScreen = true,
+                            errorMessage = currentSate.error.message
+                        )
+                    }
+
                     else -> Unit
                 }
             }
-        }
-
-        viewModelScope.launch {
-            mdocBleSession.state.collect { state ->
-                _uiState.update { it.copy(sessionState = state) }
-
-                when (state) {
-                    MdocSessionState.AdvertisingStarted ->
-                        logger.debug(
-                            logTag,
-                            "Mdoc - Advertising Started UUID: ${_uiState.value.uuid}"
-                        )
-
-                    MdocSessionState.AdvertisingStopped -> {
-                        sessionStartRequested = false
-                        logger.debug(logTag, "Mdoc - Advertising Stopped")
-                    }
-
-                    is MdocSessionState.Connected ->
-                        logger.debug(logTag, "Mdoc - Connected: ${state.address}")
-
-                    is MdocSessionState.Disconnected -> {
-                        @RequiresImplementation(
-                            details = [
-                                ImplementationDetail(
-                                    ticket = "DCMAW-16898",
-                                    description = "We may need to handle explicit bluetooth" +
-                                        "disconnection states to handle common error codes " +
-                                        "8, 19, 22 and 133. The function below will handle " +
-                                        "treat all disconnect states the same when connected " +
-                                        "to a device"
-                                )
-                            ]
-                        )
-
-                        if (state.isSessionEnd) {
-                            logger.debug(
-                                logTag,
-                                "BLE session terminated successfully via GATT End command"
-                            )
-                        } else {
-                            logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
-                            _uiState.update {
-                                it.copy(
-                                    connectedAddress = state.address,
-                                    showErrorScreen = true,
-                                    bluetoothErrorType = BLUETOOTH_DISCONNECTED
-                                )
-                            }
-                        }
-
-                        stopAdvertising()
-                    }
-
-                    is MdocSessionState.Error -> {
-                        sessionStartRequested = false
-                        handleError(state.reason)
-                    }
-
-                    MdocSessionState.GattServiceStopped -> {
-                        sessionStartRequested = false
-                        logger.debug(logTag, "Mdoc - GattService Stopped")
-                    }
-
-                    MdocSessionState.Idle -> {
-                        sessionStartRequested = false
-                        logger.debug(logTag, "Mdoc - Idle")
-                    }
-
-                    is MdocSessionState.ServiceAdded ->
-                        logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
-
-                    is MdocSessionState.MdocSessionEnded -> {
-                        if (state.status == SessionEndStates.SUCCESS) {
-                            logger.debug(logTag, "Mdoc - Ending session")
-                        } else {
-                            _uiState.update { it.copy(showErrorScreen = true) }
-                            logger.error(
-                                logTag,
-                                "Mdoc - Error while ending session: ${state.status}"
-                            )
-                        }
-                    }
-
-                    is MdocSessionState.MessageReceived -> Unit
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            mdocBleSession.bluetoothStatus.collect { bluetoothState ->
-                when (bluetoothState) {
-                    BluetoothStatus.OFF,
-                    BluetoothStatus.TURNING_OFF -> {
-                        val wasDisabled = _uiState.value.bluetoothState == BluetoothState.Disabled
-                        if (!wasDisabled) {
-                            logger.debug(logTag, "Mdoc - Bluetooth switched OFF")
-                            _uiState.update {
-                                it.copy(
-                                    showEnableBluetoothPrompt = true,
-                                    bluetoothState = BluetoothState.Disabled
-                                )
-                            }
-                        }
-                        stopAdvertising()
-                    }
-
-                    BluetoothStatus.TURNING_ON -> {
-                        logger.debug(logTag, "Mdoc - Bluetooth initializing")
-                        _uiState.update {
-                            it.copy(
-                                showEnableBluetoothPrompt = false,
-                                bluetoothState = BluetoothState.Initializing,
-                                showErrorScreen = false
-                            )
-                        }
-                    }
-
-                    BluetoothStatus.ON -> {
-                        logger.debug(logTag, "Mdoc - Bluetooth switched ON")
-                        _uiState.update {
-                            it.copy(
-                                showEnableBluetoothPrompt = false,
-                                bluetoothState = BluetoothState.Enabled,
-                                showErrorScreen = false
-                            )
-                        }
-                        startBleSession()
-                    }
-
-                    BluetoothStatus.UNKNOWN ->
-                        logger.debug(logTag, "Mdoc - Bluetooth status unknown")
-                }
-            }
-        }
-    }
-
-    private fun handleError(reason: MdocSessionError) {
-        when (reason) {
-            MdocSessionError.ADVERTISING_FAILED ->
-                logger.debug(logTag, "Mdoc - Error: Advertising failed")
-
-            MdocSessionError.GATT_NOT_AVAILABLE ->
-                logger.debug(logTag, "Mdoc - Error: GATT not available")
-
-            MdocSessionError.BLUETOOTH_PERMISSION_MISSING ->
-                logger.debug(logTag, "Mdoc - Error: Bluetooth permission missing")
-
-            MdocSessionError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
-                logger.debug(logTag, "Mdoc - Error: Descriptor write request failed")
-        }
-    }
-
-    fun stopAdvertising() {
-        viewModelScope.launch {
-            mdocBleSession.stop()
         }
     }
 
@@ -243,52 +79,22 @@ class HolderWelcomeViewModel(
                 hasBluetoothPermissions = granted,
                 previouslyHadPermissions = hadPermissionsPreviously || granted,
                 showErrorScreen = shouldShowError,
-                bluetoothErrorType = if (shouldShowError) {
-                    PERMISSIONS_MISSING
+                errorMessage = if (shouldShowError) {
+                    "Bluetooth permissions were revoked during the session"
                 } else {
-                    BLUETOOTH_DISCONNECTED
+                    "Bluetooth disconnected"
                 }
             )
         }
 
         if (shouldShowError) {
             logger.debug(logTag, "Error - Permissions were revoked during the session")
-            stopAdvertising()
         }
 
         if (grantedPermissionsForFirstTime) {
             savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] = true
         }
-
-        if (granted) {
-            startBleSession()
-        }
     }
-
-    private fun startBleSession() {
-        val state = _uiState.value
-
-        val hasPermissions = state.hasBluetoothPermissions == true
-        val bluetoothOn = state.bluetoothState == BluetoothState.Enabled
-
-        val canStart = !sessionStartRequested &&
-            hasPermissions &&
-            bluetoothOn &&
-            canStartNewSession(state) &&
-            !sessionStartRequested
-
-        if (canStart) {
-            sessionStartRequested = true
-            viewModelScope.launch {
-                mdocBleSession.start(state.uuid)
-            }
-        }
-    }
-
-    private fun canStartNewSession(state: HolderWelcomeUiState): Boolean =
-        state.sessionState == MdocSessionState.Idle ||
-            state.sessionState == MdocSessionState.AdvertisingStopped ||
-            state.sessionState == MdocSessionState.GattServiceStopped
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
@@ -312,30 +118,18 @@ class HolderWelcomeViewModel(
                 )
             ]
         )
-        mdocBleSession.notifySessionEnd(_uiState.value.uuid)
+        orchestrator.cancel()
         logger.debug(logTag, "Holder stopped advertising during session")
-    }
-
-    override fun onCleared() {
-        viewModelScope.launch {
-            mdocBleSession.stop()
-        }
-        super.onCleared()
     }
 }
 
 data class HolderWelcomeUiState(
-    val uuid: UUID = UUID.randomUUID(),
     val qrData: String? = null,
-    val engagement: String? = null,
-    val sessionState: MdocSessionState = MdocSessionState.Idle,
-    val lastErrorMessage: String? = null,
     val bluetoothState: BluetoothState = BluetoothState.Unknown,
     val hasBluetoothPermissions: Boolean? = null,
     val showErrorScreen: Boolean = false,
-    val bluetoothErrorType: BluetoothUiErrorTypes = BLUETOOTH_DISCONNECTED,
+    val errorMessage: String = "",
     val previouslyHadPermissions: Boolean = false,
     val showEnableBluetoothPrompt: Boolean = false,
-    val connectedAddress: String? = "",
     val deviceRequest: DeviceRequest? = null
 )

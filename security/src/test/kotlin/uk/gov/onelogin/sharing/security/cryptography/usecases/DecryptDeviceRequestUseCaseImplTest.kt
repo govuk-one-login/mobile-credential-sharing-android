@@ -19,7 +19,7 @@ class DecryptDeviceRequestUseCaseImplTest {
     private val logger = SystemLogger()
     private val sessionSecurity = FakeSessionSecurity()
     val fakeDecoder = FakeDeviceRequestDecoder(
-        deviceRequestToReturn = deviceRequestStub()
+        deviceRequestToReturn = deviceRequestStub
     )
 
     @Test

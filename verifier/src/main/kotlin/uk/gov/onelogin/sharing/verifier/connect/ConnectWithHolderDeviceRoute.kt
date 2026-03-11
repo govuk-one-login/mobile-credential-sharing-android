@@ -55,7 +55,7 @@ data class ConnectWithHolderDeviceRoute(val base64EncodedEngagement: String) {
             ConnectWithHolderDeviceRoute(uri)
         ) {
             popUpTo<VerifierScanRoute> {
-                inclusive = false
+                inclusive = true
             }
         }
     }

@@ -6,7 +6,10 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.security.PrivateKey
 import java.security.interfaces.ECPrivateKey
+import kotlin.collections.component1
+import kotlin.collections.component2
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.security.cbor.decoders.DeviceRequestDecoder
@@ -59,6 +62,16 @@ class DecryptDeviceRequestUseCaseImpl(
             role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
         )
 
-        return deviceRequestDecoder.deviceRequestDecoder(plaintext)
+        val deviceRequest = deviceRequestDecoder.deviceRequestDecoder(plaintext)
+
+        deviceRequest
+            .docRequests.firstOrNull()
+            ?.itemsRequest
+            ?.nameSpaces
+            ?.forEach { (key, value) ->
+                logger.debug(logTag, "Requests: key = $key, value = $value")
+            }
+
+        return deviceRequest
     }
 }

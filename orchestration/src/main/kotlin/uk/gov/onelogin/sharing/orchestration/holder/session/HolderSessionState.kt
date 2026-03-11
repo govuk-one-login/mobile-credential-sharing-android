@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.core.Completable
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
@@ -44,17 +45,18 @@ sealed class HolderSessionState : Completable {
     data class PresentingEngagement(val qrData: String) : HolderSessionState()
 
     /**
-     * State for when the Android-powered device is connecting with another device.
+     * State for when the Android-powered device is connected with another device and the
+     * processing establishment begins.
      *
      * The digital credential transfers between devices during this state.
      */
-    data object Connecting : HolderSessionState()
+    data object ProcessingEstablishment : HolderSessionState()
 
     /**
-     * State for when a successful connection occurs, allowing the User to consent to data being
-     * shared with the Verifying device.
+     * State for when a successful connection and processing establishment occurs,
+     * allowing the User to consent to data being shared with the Verifying device.
      */
-    data object RequestReceived : HolderSessionState()
+    data class AwaitingUserConsent(val request: DeviceRequest) : HolderSessionState()
 
     /**
      * State for when the consenting User is generating the proof before completing the

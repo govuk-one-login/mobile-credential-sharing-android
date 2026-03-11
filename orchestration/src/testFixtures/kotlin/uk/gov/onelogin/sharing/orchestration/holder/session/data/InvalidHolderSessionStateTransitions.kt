@@ -4,9 +4,10 @@ import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
+import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
 
 class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
-    override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
+    override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?> =
         inputs.mapIndexed { index, (initial, transition) ->
             TestParameters.TestParametersValues.builder()
                 .name(
@@ -23,8 +24,8 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val notStartedTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived,
+            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub,
             HolderSessionStateStubs.userCancellation,
@@ -37,8 +38,8 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived,
+            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
@@ -48,8 +49,8 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived,
+            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
@@ -60,10 +61,9 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.RequestReceived,
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
-            HolderSessionStateStubs.successStub,
-            HolderSessionStateStubs.userJourneyFailure
+            HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.PresentingEngagement("") to it
         }
@@ -72,30 +72,30 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
+            HolderSessionState.ProcessingEstablishment,
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
-            HolderSessionState.Connecting to it
+            HolderSessionState.ProcessingEstablishment to it
         }
-        private val requestReceivedTransitions = listOf(
+        private val awaitingUserConsentTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived,
+            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionStateStubs.successStub
         ).map {
-            HolderSessionState.RequestReceived to it
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub) to it
         }
         private val processingResponseTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.Connecting,
-            HolderSessionState.RequestReceived
+            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub)
         ).map {
             HolderSessionState.ProcessingResponse to it
         }
@@ -106,7 +106,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
                 readyToPresentTransitions +
                 presentingEngagementTransitions +
                 connectingTransitions +
-                requestReceivedTransitions +
+                awaitingUserConsentTransitions +
                 processingResponseTransitions
     }
 }

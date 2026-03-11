@@ -1,15 +1,17 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
-import uk.gov.onelogin.sharing.bluetooth.internal.Errors
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.AdvertisingCallback
 import uk.gov.onelogin.sharing.bluetooth.internal.advertising.BluetoothAdvertiserProvider
 
-internal class AndroidBleProvider(
+@ContributesBinding(AppScope::class)
+class AndroidBleProvider(
     private val bluetoothAdapter: BluetoothAdapterProvider,
-    private val bleAdvertiser: BluetoothAdvertiserProvider?
+    private val bleAdvertiser: BluetoothAdvertiserProvider
 ) : BleProvider {
 
     override fun isBluetoothEnabled(): Boolean = bluetoothAdapter.isEnabled()
@@ -19,10 +21,6 @@ internal class AndroidBleProvider(
         bleAdvertiseData: BleAdvertiseData,
         callback: AdvertisingCallback
     ) {
-        check(bleAdvertiser != null) {
-            Errors.BLUETOOTH_NOT_AVAILABLE
-        }
-
         bleAdvertiser.startAdvertisingSet(
             parameters,
             bleAdvertiseData,
@@ -31,6 +29,6 @@ internal class AndroidBleProvider(
     }
 
     override fun stopAdvertising() {
-        bleAdvertiser?.stopAdvertisingSet()
+        bleAdvertiser.stopAdvertisingSet()
     }
 }

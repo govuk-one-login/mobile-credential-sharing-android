@@ -42,6 +42,7 @@ class VerifierOrchestrator(
     override val verifierSessionState = sessionFlow.flatMapLatest { it.currentState }
 
     override fun start() {
+        println(sessionFlow.value.currentState)
         if (sessionFlow.value.isComplete()) {
             if (sessionFlow.value.isComplete()) {
                 sessionFlow.value = sessionFactory.create().also {
@@ -121,6 +122,7 @@ class VerifierOrchestrator(
 
     override fun cancel() {
         try {
+            println(sessionFlow.value.currentState)
             sessionFlow.value.transitionTo(
                 VerifierSessionState.Complete.Cancelled
             )

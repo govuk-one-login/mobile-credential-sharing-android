@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import androidx.annotation.RequiresPermission
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -29,6 +31,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGatt
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
 
+@ContributesBinding(AppScope::class)
 class AndroidGattServerManager(
     private val context: Context,
     private val bluetoothManager: BluetoothManager,

@@ -12,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.InvalidHolderSessionStateTransitions
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.ValidHolderSessionStateTransitions
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers
@@ -31,7 +32,8 @@ class HolderSessionImplTest {
         HolderSessionImpl(
             logger = logger,
             internalState = stateFlow,
-            transitionMap = validTransitions
+            transitionMap = validTransitions,
+            sessionContext = holderSessionContextStub
         )
     }
 

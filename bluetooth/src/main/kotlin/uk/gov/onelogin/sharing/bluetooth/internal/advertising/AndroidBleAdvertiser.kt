@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CancellableContinuation
@@ -21,7 +23,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPerm
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-internal class AndroidBleAdvertiser(
+@ContributesBinding(AppScope::class)
+class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
     private val permissionChecker: BluetoothPermissionChecker,
     private val logger: Logger,

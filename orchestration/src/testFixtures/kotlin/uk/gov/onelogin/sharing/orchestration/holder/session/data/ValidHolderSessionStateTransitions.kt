@@ -7,6 +7,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateSt
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.successStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userCancellation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userJourneyFailure
+import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
 
 class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
@@ -54,7 +55,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         }
         private val presentingEngagementTransitions = listOf(
             "User cancels from the QR code screen" to userCancellation,
-            "QR code handshake completes" to HolderSessionState.Connecting
+            "QR generation fails" to userJourneyFailure,
+            "QR code handshake completes" to HolderSessionState.ProcessingEstablishment
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -65,22 +67,23 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val connectingTransitions = listOf(
             "User cancels whilst connecting with Verifier device" to userCancellation,
             "Connection with verifier device cannot be established" to userJourneyFailure,
-            "Receives Verifier device's data transfer request" to HolderSessionState.RequestReceived
+            "Receives Verifier device's data transfer request" to
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub)
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.Connecting,
+                HolderSessionState.ProcessingEstablishment,
                 transition
             )
         }
-        private val requestReceivedTransitions = listOf(
+        private val awaitingUserConsentTransitions = listOf(
             "User cancels the data transfer request" to userCancellation,
             "Data transfer disconnects before completion" to userJourneyFailure,
             "Holder device begins processing the response" to HolderSessionState.ProcessingResponse
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.RequestReceived,
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub),
                 transition
             )
         }
@@ -102,7 +105,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
                 readyToPresentTransitions +
                 presentingEngagementTransitions +
                 connectingTransitions +
-                requestReceivedTransitions +
+                awaitingUserConsentTransitions +
                 processingResponseTransitions
     }
 }

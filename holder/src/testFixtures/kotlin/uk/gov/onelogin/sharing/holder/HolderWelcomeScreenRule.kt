@@ -22,15 +22,10 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionManager
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeUiState
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.security.FakeSessionSecurity
-import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
-import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
 
 class HolderWelcomeScreenRule(
     composeTestRule: ComposeContentTestRule,
@@ -53,16 +48,8 @@ class HolderWelcomeScreenRule(
         bluetoothDisabledText = resources.getString(R.string.bluetooth_turned_off_holder)
     )
 
-    private val mdocSessionManager: MdocSessionManager = FakeMdocSessionManager()
-    private val fakeSessionSecurity = FakeSessionSecurity()
-    private val fakeEngagementGenerator = FakeEngagementGenerator(
-        data = "${Engagement.QR_CODE_SCHEME}TEST_QR"
-    )
-    private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
-
     val viewModel: HolderWelcomeViewModel by lazy {
         HolderWelcomeViewModel(
-            mdocSessionManagerFactory = { mdocSessionManager },
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),

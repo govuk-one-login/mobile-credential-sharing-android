@@ -9,4 +9,16 @@ sealed class NotReadyReason {
      * [uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite].
      */
     data object BluetoothTurnedOff : NotReadyReason()
+
+    /**
+     * State for when the Android-powered device's camera is already in use by another app.
+     *
+     * This may occur during picture-in-picture modes or with foldable devices.
+     */
+    data object CameraAlreadyInUse : NotReadyReason()
+
+    /**
+     * State for when the Android-powered device's cameras cannot be queried.
+     */
+    data object CannotCheckCamera : NotReadyReason()
 }

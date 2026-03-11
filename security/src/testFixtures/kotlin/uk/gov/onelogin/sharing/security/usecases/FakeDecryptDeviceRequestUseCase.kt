@@ -10,5 +10,5 @@ class FakeDecryptDeviceRequestUseCase : DecryptDeviceRequestUseCase {
         sessionEstablishmentBytes: ByteArray,
         engagement: String,
         holderPrivateKey: PrivateKey
-    ): DeviceRequest = deviceRequestStub()
+    ): DeviceRequest = deviceRequestStub
 }

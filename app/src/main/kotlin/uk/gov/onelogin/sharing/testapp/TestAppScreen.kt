@@ -30,14 +30,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import uk.gov.onelogin.sharing.CredentialSharingSdk
-import uk.gov.onelogin.sharing.ui.api.CredentialSharingDestination
-import uk.gov.onelogin.sharing.ui.api.CredentialSharingUi
+import uk.gov.onelogin.sharing.ui.api.CredentialPresenter
+import uk.gov.onelogin.sharing.ui.api.CredentialVerifier
+import uk.gov.onelogin.sharing.ui.impl.ShareCredential
+import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
 
+// DCMAW-19086 Refactor to use state hoisting instead of VM forwarding
+@Suppress("ktlint:compose:vm-forwarding-check")
 @Composable
 fun TestAppScreen(
-    ui: CredentialSharingUi,
-    sdk: CredentialSharingSdk,
+    credentialPresenter: CredentialPresenter,
+    credentialVerifier: CredentialVerifier,
     modifier: Modifier = Modifier
 ) {
     var destination by rememberSaveable {
@@ -55,12 +58,18 @@ fun TestAppScreen(
         onCloseFlow = { destination = null },
         sharingDialogVisible = sharingDialogVisible,
         content = {
-            destination?.let { sharingDestination ->
-                ui.Render(
-                    sdk = sdk,
-                    startDestination = sharingDestination,
+            when (destination) {
+                CredentialSharingDestination.Holder -> ShareCredential(
+                    component = credentialPresenter,
                     modifier = Modifier.fillMaxSize()
                 )
+
+                CredentialSharingDestination.Verifier -> VerifyCredential(
+                    component = credentialVerifier,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                null -> {}
             }
         }
     )

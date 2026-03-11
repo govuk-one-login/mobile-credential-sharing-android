@@ -9,7 +9,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
  * Decouples the [AndroidBleAdvertiser] from the concrete Android implementation
  * details.
  */
-internal interface BluetoothAdvertiserProvider {
+interface BluetoothAdvertiserProvider {
     /**
      * Starts a BLE advertising with the given parameters and data.
      *

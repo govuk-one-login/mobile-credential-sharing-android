@@ -9,4 +9,9 @@ sealed class IncapableReason {
      * [uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite].
      */
     data object MissingHardware : IncapableReason()
+
+    /**
+     * State for when the Android-powered device's cameras cannot be queried.
+     */
+    data object CannotCheckCamera : IncapableReason()
 }

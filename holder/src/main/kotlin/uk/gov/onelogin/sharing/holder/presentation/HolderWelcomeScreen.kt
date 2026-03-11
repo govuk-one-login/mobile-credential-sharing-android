@@ -27,10 +27,8 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 import java.util.UUID
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_DISCONNECTED
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.BLUETOOTH_TURNED_OFF
-import uk.gov.onelogin.sharing.bluetooth.BluetoothUiErrorTypes.PERMISSIONS_MISSING
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.R.string.bluetooth_disconnected_unexpectedly
 import uk.gov.onelogin.sharing.core.R.string.bluetooth_permissions_revoked
@@ -41,7 +39,6 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.R.string.bluetooth_turned_off_holder
-import uk.gov.onelogin.sharing.holder.mdoc.MdocSessionState
 
 private const val QR_SIZE = 800
 
@@ -92,13 +89,7 @@ fun HolderScreenContent(
 ) {
     when {
         contentState.showErrorScreen -> {
-            val errorText = when (contentState.bluetoothErrorType) {
-                BLUETOOTH_DISCONNECTED -> bluetooth_disconnected_unexpectedly
-                PERMISSIONS_MISSING -> bluetooth_permissions_revoked
-                BLUETOOTH_TURNED_OFF -> bluetooth_turned_off_holder
-            }
-
-            ErrorScreen(errorText = stringResource(errorText))
+            ErrorScreen(errorText = contentState.errorMessage)
         }
 
         contentState.showEnableBluetoothPrompt &&
@@ -191,9 +182,6 @@ fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier)
 @Preview
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(
-        lastErrorMessage = null,
-        sessionState = MdocSessionState.AdvertisingStarted,
-        uuid = UUID.randomUUID(),
         qrData = "QR Data"
     )
 
