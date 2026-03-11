@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.orchestration.CredentialProviderNew
+import uk.gov.onelogin.orchestration.CredentialProviderNewImpl
 import uk.gov.onelogin.sharing.CredentialSharingSdk
 
 @AndroidEntryPoint
@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         // this can be injected via Hilt like the credentialSharingSdk
         val holder = credentialSharingSdk
             .presenterCredentialSdk
-            .presenter(CredentialProviderNew())
+            .presenter(CredentialProviderNewImpl())
 
         val verifier = credentialSharingSdk
             .verifierCredentialSdk

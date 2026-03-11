@@ -11,7 +11,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.orchestration.CredentialProviderNewImpl
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -23,13 +26,21 @@ class MainActivityTest {
             logger = SystemLogger()
         )
 
+    val holderGraph = createGraphFactory<PresenterCredentialGraph.Factory>()
+        .create(appGraph = appGraph, CredentialProviderNewImpl())
+
+    val verifierGraph = createGraphFactory<VerifierCredentialGraph.Factory>()
+        .create(appGraph = appGraph)
+
     @get:Rule
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule
     val composeRule = MainActivityRule(
         composeTestRule = createAndroidComposeRule<MainActivity>(),
-        appGraph = appGraph
+        appGraph = appGraph,
+        holderGraph = holderGraph,
+        verifierGraph = verifierGraph
     )
 
     @Before

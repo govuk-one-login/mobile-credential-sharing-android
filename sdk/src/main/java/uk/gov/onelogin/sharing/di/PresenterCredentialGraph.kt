@@ -5,6 +5,7 @@ import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
 import dev.zacsweers.metro.Provides
 import uk.gov.onelogin.orchestration.CredentialProviderNew
+import uk.gov.onelogin.orchestration.CredentialProviderNewImpl
 import uk.gov.onelogin.orchestration.Orchestrator
 
 @DependencyGraph(AppScope::class)

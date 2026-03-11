@@ -1,11 +1,11 @@
 package uk.gov.onelogin.sharing
 
-import uk.gov.onelogin.orchestration.CredentialProviderNew
+import uk.gov.onelogin.orchestration.CredentialProviderNewImpl
 import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 
 interface PresenterCredentialSdk {
-    fun presenter(credentialProvider: CredentialProviderNew): CredentialPresenterNew
+    fun presenter(credentialProvider: CredentialProviderNewImpl): CredentialPresenterNew
 }
 
 interface CredentialPresenterNew {
@@ -16,7 +16,7 @@ interface CredentialPresenterNew {
 
 class CredentialPresenterNewImpl(
     @Suppress("UnusedPrivateProperty")
-    private val credentialProvider: CredentialProviderNew,
+    private val credentialProvider: CredentialProviderNewImpl,
     override val orchestrator: Orchestrator.Holder,
     override val appGraph: CredentialSharingAppGraph
 ) : CredentialPresenterNew

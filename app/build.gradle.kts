@@ -112,7 +112,8 @@ dependencies {
         libs.com.google.test.parameter.injector,
         testFixtures(projects.holder),
         testFixtures(projects.ui.uiImpl),
-        testFixtures(projects.verifier)
+        testFixtures(projects.verifier),
+        testFixtures(projects.sdk)
     ).forEach(::testFixturesApi)
 
     listOf(
@@ -121,7 +122,8 @@ dependencies {
         libs.bundles.android.baseline,
         testFixtures(projects.sdk),
         testFixtures(projects.ui.uiApi),
-        testFixtures(projects.ui.uiImpl)
+        testFixtures(projects.ui.uiImpl),
+        testFixtures(projects.sdk)
     ).forEach(::testFixturesImplementation)
 
     listOf(

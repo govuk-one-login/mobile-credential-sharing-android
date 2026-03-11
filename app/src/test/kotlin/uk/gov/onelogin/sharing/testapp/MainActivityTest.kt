@@ -11,9 +11,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.orchestration.CredentialProviderNewImpl
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.ui.impl.FakeCredentialPresenter
-import uk.gov.onelogin.sharing.ui.impl.FakeCredentialVerifier
+import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenterNew
+import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifierNew
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
@@ -24,10 +27,18 @@ class MainActivityTest {
             logger = SystemLogger()
         )
 
+    val holderGraph = createGraphFactory<PresenterCredentialGraph.Factory>()
+        .create(appGraph = appGraph, CredentialProviderNewImpl())
+
+    val verifierGraph = createGraphFactory<VerifierCredentialGraph.Factory>()
+        .create(appGraph = appGraph)
+
     @get:Rule
     val composeTestRule = MainActivityRule(
         composeTestRule = createComposeRule(),
-        appGraph = appGraph
+        appGraph = appGraph,
+        holderGraph = holderGraph,
+        verifierGraph = verifierGraph
     )
 
     @Test
@@ -53,8 +64,14 @@ class MainActivityTest {
         val restorationTester = StateRestorationTester(composeTestRule)
         restorationTester.setContent {
             TestAppScreen(
-                credentialPresenter = FakeCredentialPresenter(appGraph),
-                credentialVerifier = FakeCredentialVerifier(appGraph)
+                credentialPresenter = FakeCredentialPresenterNew(
+                    appGraph = appGraph,
+                    orchestrator = holderGraph.holderOrchestrator()
+                ),
+                credentialVerifier = FakeCredentialVerifierNew(
+                    appGraph = appGraph,
+                    orchestrator = verifierGraph.verifierOrchestrator()
+                )
             )
         }
 

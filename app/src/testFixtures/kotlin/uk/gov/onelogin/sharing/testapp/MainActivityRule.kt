@@ -11,13 +11,21 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
+import uk.gov.onelogin.sharing.CredentialPresenterNew
+import uk.gov.onelogin.sharing.CredentialVerifierNew
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenterNew
+import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifierNew
 import uk.gov.onelogin.sharing.ui.impl.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.FakeCredentialVerifier
 
 class MainActivityRule(
-    private val appGraph: CredentialSharingAppGraph,
     composeTestRule: ComposeContentTestRule,
+    private val appGraph: CredentialSharingAppGraph,
+    private val holderGraph: PresenterCredentialGraph,
+    private val verifierGraph: VerifierCredentialGraph,
     private val holderText: String,
     private val verifierText: String
 ) : ComposeContentTestRule by composeTestRule {
@@ -25,25 +33,39 @@ class MainActivityRule(
     constructor(
         composeTestRule: ComposeContentTestRule,
         appGraph: CredentialSharingAppGraph,
+        holderGraph: PresenterCredentialGraph,
+        verifierGraph: VerifierCredentialGraph,
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
     ) : this(
         composeTestRule = composeTestRule,
         appGraph = appGraph,
+        holderGraph = holderGraph,
+        verifierGraph = verifierGraph,
         holderText = resources.getString(R.string.holder),
         verifierText = resources.getString(R.string.verifier)
     )
 
     fun render() {
         setContent {
-            Content(appGraph)
+            Content(appGraph = appGraph,
+                credentialPresenter = holderGraph,
+                credentialVerifier = verifierGraph)
         }
     }
 
     @Composable
-    fun Content(appGraph: CredentialSharingAppGraph) {
+    fun Content(appGraph: CredentialSharingAppGraph,
+                credentialPresenter: PresenterCredentialGraph,
+                credentialVerifier: VerifierCredentialGraph) {
         TestAppScreen(
-            credentialPresenter = FakeCredentialPresenter(appGraph),
-            credentialVerifier = FakeCredentialVerifier(appGraph)
+            credentialPresenter = FakeCredentialPresenterNew(
+                appGraph = appGraph,
+                orchestrator = credentialPresenter.holderOrchestrator()
+            ),
+            credentialVerifier = FakeCredentialVerifierNew(
+                appGraph = appGraph,
+                orchestrator = credentialVerifier.verifierOrchestrator()
+            )
         )
     }
 
