@@ -2,7 +2,6 @@ package uk.gov.onelogin.orchestration
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.GraphPrivate
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import java.util.UUID
@@ -33,7 +32,7 @@ class HolderOrchestrator(
     private val sessionFactory: SessionFactory<HolderSession>,
     private val prerequisiteGate: PrerequisiteGate,
     private val qrCodeData: GenerateEngagementQrCode,
-    private val credentialProvider: CredentialProviderNew
+    private val credentialProvider: CredentialProviderNew,
 ) : Orchestrator.Holder {
 
     private var session: HolderSession = sessionFactory.create()

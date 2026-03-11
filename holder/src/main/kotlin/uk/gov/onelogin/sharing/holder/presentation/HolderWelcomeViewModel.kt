@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -98,7 +99,7 @@ class HolderWelcomeViewModel(
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
-    @ContributesIntoMap(ViewModelScope::class)
+    @ContributesIntoMap(HolderUiScope::class)
     interface Factory : ViewModelAssistedFactory {
         fun create(@Assisted savedStateHandle: SavedStateHandle): HolderWelcomeViewModel
         override fun create(extras: CreationExtras): HolderWelcomeViewModel {

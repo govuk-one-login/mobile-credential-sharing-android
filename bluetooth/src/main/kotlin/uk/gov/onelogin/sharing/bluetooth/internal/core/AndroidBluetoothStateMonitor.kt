@@ -16,9 +16,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(VerifierUiScope::class)
 @ContributesBinding(AppScope::class)
 class AndroidBluetoothStateMonitor(private val appContext: Context, private val logger: Logger) :
     BluetoothStateMonitor {
