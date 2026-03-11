@@ -52,6 +52,7 @@ class HolderWelcomeViewModel(
             orchestrator.start()
 
             orchestrator.holderSessionState.collect { currentSate ->
+                logger.debug(logTag, "State: $currentSate")
                 when (currentSate) {
                     is HolderSessionState.PresentingEngagement -> _uiState.update {
                         it.copy(qrData = currentSate.qrData)

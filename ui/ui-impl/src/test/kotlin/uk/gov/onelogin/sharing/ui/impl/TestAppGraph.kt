@@ -6,6 +6,9 @@ import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProviderNew
 
 /**
  * Helper function to create a [CredentialSharingAppGraph] instance for use in tests.
@@ -25,3 +28,11 @@ fun createTestAppGraph(
         applicationContext = applicationContext,
         logger = logger
     )
+
+fun createTestHolderGraph(appGraph: CredentialSharingAppGraph): PresenterCredentialGraph =
+    createGraphFactory<PresenterCredentialGraph.Factory>()
+        .create(appGraph = appGraph, credentialProvider = FakeCredentialProviderNew())
+
+fun createTestVerifierGraph(appGraph: CredentialSharingAppGraph): VerifierCredentialGraph =
+    createGraphFactory<VerifierCredentialGraph.Factory>()
+        .create(appGraph = appGraph)

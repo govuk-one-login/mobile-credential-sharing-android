@@ -15,7 +15,7 @@ interface PresenterCredentialGraph {
     fun interface Factory {
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
-            @Provides credentialProvider: CredentialProviderNew,
+            @Provides credentialProvider: CredentialProviderNew
         ): PresenterCredentialGraph
     }
 

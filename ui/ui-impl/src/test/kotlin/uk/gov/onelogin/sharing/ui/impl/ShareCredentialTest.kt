@@ -5,6 +5,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProviderNew
+import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenterNew
 
 @RunWith(AndroidJUnit4::class)
 class ShareCredentialTest {
@@ -14,7 +16,11 @@ class ShareCredentialTest {
     @Test
     fun `renders holder flow`() {
         val appGraph = createTestAppGraph()
-        val presenter = FakeCredentialPresenter(appGraph)
+        val holderGraph = createTestHolderGraph(appGraph)
+        val presenter = FakeCredentialPresenterNew(
+            appGraph = appGraph,
+            orchestrator = holderGraph.holderOrchestrator()
+        )
 
         composeTestRule.setContent {
             ShareCredential(component = presenter)

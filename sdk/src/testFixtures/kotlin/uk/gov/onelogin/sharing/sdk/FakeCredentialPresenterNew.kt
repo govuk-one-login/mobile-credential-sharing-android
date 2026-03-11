@@ -7,7 +7,4 @@ import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
 class FakeCredentialPresenterNew(
     override val appGraph: CredentialSharingAppGraph,
     override val orchestrator: Orchestrator.Holder
-) : CredentialPresenterNew {
-
-
-}
+) : CredentialPresenterNew

@@ -34,7 +34,7 @@ interface HolderCredentialSharingUiGraph : ViewModelGraph {
          */
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
-            @Provides holderOrchestrator: Orchestrator.Holder,
+            @Provides holderOrchestrator: Orchestrator.Holder
         ): HolderCredentialSharingUiGraph
     }
 

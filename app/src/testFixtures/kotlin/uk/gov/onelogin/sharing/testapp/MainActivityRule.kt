@@ -47,16 +47,20 @@ class MainActivityRule(
 
     fun render() {
         setContent {
-            Content(appGraph = appGraph,
+            Content(
+                appGraph = appGraph,
                 credentialPresenter = holderGraph,
-                credentialVerifier = verifierGraph)
+                credentialVerifier = verifierGraph
+            )
         }
     }
 
     @Composable
-    fun Content(appGraph: CredentialSharingAppGraph,
-                credentialPresenter: PresenterCredentialGraph,
-                credentialVerifier: VerifierCredentialGraph) {
+    fun Content(
+        appGraph: CredentialSharingAppGraph,
+        credentialPresenter: PresenterCredentialGraph,
+        credentialVerifier: VerifierCredentialGraph
+    ) {
         TestAppScreen(
             credentialPresenter = FakeCredentialPresenterNew(
                 appGraph = appGraph,

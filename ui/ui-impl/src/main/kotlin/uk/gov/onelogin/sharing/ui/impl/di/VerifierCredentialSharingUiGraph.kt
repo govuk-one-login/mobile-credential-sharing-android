@@ -34,7 +34,7 @@ interface VerifierCredentialSharingUiGraph : ViewModelGraph {
          */
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
-            @Provides verifierOrchestrator: Orchestrator.Verifier,
+            @Provides verifierOrchestrator: Orchestrator.Verifier
         ): VerifierCredentialSharingUiGraph
     }
 

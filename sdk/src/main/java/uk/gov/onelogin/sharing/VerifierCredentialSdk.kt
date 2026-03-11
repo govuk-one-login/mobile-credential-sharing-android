@@ -14,7 +14,6 @@ interface CredentialVerifierNew {
     val orchestrator: Orchestrator.Verifier
 }
 
-
 class CredentialVerifierNewImpl(
     @Suppress("UnusedPrivateProperty")
     private val verificationRequest: VerificationRequestNew,

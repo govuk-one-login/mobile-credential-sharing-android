@@ -21,6 +21,4 @@ class PresenterCredentialSdkImpl(val appGraph: CredentialSharingAppGraph) :
             appGraph = appGraph
         )
     }
-
-
 }

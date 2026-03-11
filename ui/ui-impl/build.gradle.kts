@@ -43,6 +43,11 @@ dependencies {
         projects.sdk,
         projects.ui.uiApi
     ).forEach(::testFixturesApi)
+
+    listOf(
+        testFixtures(projects.orchestration),
+        testFixtures(projects.sdk)
+    ).forEach(::testImplementation)
 }
 
 mavenPublishingConfig {

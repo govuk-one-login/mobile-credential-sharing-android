@@ -21,7 +21,7 @@ class VerifierCredentialSdkImpl(private val appGraph: CredentialSharingAppGraph)
             appGraph = appGraph,
             orchestrator = orchestrator,
             verificationRequest = VerificationRequestNew(),
-            trustedCertificates = listOf(),
+            trustedCertificates = listOf()
         )
     }
 }

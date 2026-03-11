@@ -10,9 +10,7 @@ interface VerifierCredentialGraph {
 
     @DependencyGraph.Factory
     fun interface Factory {
-        fun create(
-            @Includes appGraph: CredentialSharingAppGraph,
-        ): VerifierCredentialGraph
+        fun create(@Includes appGraph: CredentialSharingAppGraph): VerifierCredentialGraph
     }
 
     fun verifierOrchestrator(): Orchestrator.Verifier

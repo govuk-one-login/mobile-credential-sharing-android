@@ -4,7 +4,7 @@ interface CredentialProviderNew {
     fun provideCredential()
 }
 
-class CredentialProviderNewImpl : CredentialProviderNew{
+class CredentialProviderNewImpl : CredentialProviderNew {
     override fun provideCredential() {
         println("Providing credential")
     }
