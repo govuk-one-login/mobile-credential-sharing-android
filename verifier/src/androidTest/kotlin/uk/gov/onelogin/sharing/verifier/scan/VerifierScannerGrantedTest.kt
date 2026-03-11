@@ -39,11 +39,6 @@ class VerifierScannerGrantedTest {
             setContent {
                 VerifierScannerContent(
                     lifecycleOwner = LocalLifecycleOwner.current,
-                    onUpdatePreviouslyDeniedPermission = {},
-                    hasPreviouslyDeniedPermission = false,
-                    permissionState = rememberMultiplePermissionsState(
-                        requiredPermissions
-                    ),
                     barcodeScanResultCallback = { _, _ -> }
                 )
             }
@@ -58,12 +53,7 @@ class VerifierScannerGrantedTest {
             setContent {
                 VerifierScannerContent(
                     lifecycleOwner = LocalLifecycleOwner.current,
-                    hasPreviouslyDeniedPermission = false,
-                    onUpdatePreviouslyDeniedPermission = {},
-                    permissionState = rememberMultiplePermissionsState(
-                        requiredPermissions
-                    ),
-                    barcodeScanResultCallback = BarcodeScanResult.Callback { _, _ -> }
+                    barcodeScanResultCallback = { _, _ -> }
                 )
             }
             assertCameraViewfinderIsDisplayed()

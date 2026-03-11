@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan.state.data
 
+import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriTwo
 import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR

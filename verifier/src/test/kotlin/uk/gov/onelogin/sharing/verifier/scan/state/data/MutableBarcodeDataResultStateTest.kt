@@ -6,6 +6,8 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResultState
+import uk.gov.onelogin.sharing.cameraService.data.MutableBarcodeDataResultState
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAssertions.hasBarcodeData
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStateAssertions.hasNoBarcodeData

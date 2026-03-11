@@ -41,7 +41,7 @@ sealed class VerifierSessionState : Completable {
      *
      * The digital credential transfers between devices during this state.
      */
-    data object Connecting : VerifierSessionState()
+    data class Connecting(val qrCode: String) : VerifierSessionState()
 
     /**
      * State for handling the Session engagement data obtained from a successfully connected holder

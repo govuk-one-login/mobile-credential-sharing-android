@@ -16,7 +16,7 @@ class CancellableVerifierSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*>? = listOf(
         preflightEmptyPermissions,
         ReadyToScan,
-        Connecting,
+        Connecting(""),
         ProcessingEngagement,
         Verifying
     )

@@ -40,4 +40,8 @@ object VerifierSessionStateMatchers {
     fun isReadyToScan(): Matcher<VerifierSessionState> = equalTo(
         VerifierSessionState.ReadyToScan
     )
+
+    fun isConnecting(): Matcher<VerifierSessionState> = equalTo(
+        VerifierSessionState.Connecting("https://this.is.a.test")
+    )
 }

@@ -32,7 +32,10 @@ spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+P
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "0.39.7" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
 uk-gov-ui = "13.2.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
-xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
+xzing = "3.5.4"
+junitVersion = "1.3.0"
+appcompat = "1.7.1"
+material = "1.13.0" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]
 app-cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
@@ -95,6 +98,9 @@ uk-gov-ui-android-patterns = { module = "uk.gov.android:patterns", version.ref =
 uk-gov-ui-android-patterns-camera = { module = "uk.gov.android:patterns-camera", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-theme = { module = "uk.gov.android:theme", version.ref = "uk-gov-ui" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [bundles]
 android-baseline = [

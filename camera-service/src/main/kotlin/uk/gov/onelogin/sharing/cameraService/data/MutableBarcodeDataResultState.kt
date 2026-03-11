@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.scan.state.data
+package uk.gov.onelogin.sharing.cameraService.data
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

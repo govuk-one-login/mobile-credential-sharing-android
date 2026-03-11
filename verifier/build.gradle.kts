@@ -33,6 +33,7 @@ dependencies {
     listOf(
         libs.metro.viewmodel.compose,
         testFixtures(projects.core),
+        testFixtures(projects.orchestration),
         testFixtures(projects.security),
         testFixtures(projects.sdk)
     ).forEach(::androidTestImplementation)
@@ -40,6 +41,7 @@ dependencies {
     listOf(
         projects.bluetooth,
         projects.core,
+        projects.cameraService,
         projects.models,
         projects.security,
         projects.orchestration,

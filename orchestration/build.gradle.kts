@@ -34,7 +34,8 @@ dependencies {
     listOf(
         projects.bluetooth,
         projects.core,
-        projects.security
+        projects.security,
+        projects.cameraService
     ).forEach(::api)
 
     listOf(
