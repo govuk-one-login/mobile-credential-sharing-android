@@ -3,9 +3,11 @@ package uk.gov.onelogin.sharing.di.internal.shared
 import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
 import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialSdk
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingSdk
+import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
 import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialSdk
 import uk.gov.onelogin.sharing.di.internal.presenter.PresenterCredentialSdkImpl
 import uk.gov.onelogin.sharing.di.internal.verifier.VerifierCredentialSdkImpl
@@ -19,8 +21,14 @@ class CredentialSharingSdkImpl(applicationContext: Context, logger: Logger) : Cr
     override val appGraph: CredentialSharingAppGraph = _appGraph
 
     override val presenterCredentialSdk: PresenterCredentialSdk =
-        PresenterCredentialSdkImpl(appGraph)
+        PresenterCredentialSdkImpl(
+            appGraph = appGraph,
+            presenterGraphFactory = createGraphFactory<PresenterCredentialGraph.Factory>()
+        )
 
     override val verifierCredentialSdk: VerifierCredentialSdk =
-        VerifierCredentialSdkImpl(appGraph)
+        VerifierCredentialSdkImpl(
+            appGraph = appGraph,
+            verifierGraphFactory = createGraphFactory<VerifierCredentialGraph.Factory>()
+        )
 }
