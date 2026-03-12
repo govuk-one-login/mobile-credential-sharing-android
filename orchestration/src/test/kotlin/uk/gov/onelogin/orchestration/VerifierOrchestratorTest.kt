@@ -32,9 +32,9 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerif
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.UncancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
-import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isConnecting
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isProcessingEngagement
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 
 @RunWith(TestParameterInjector::class)
@@ -197,7 +197,7 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `processQrCode with valid barcode transitions to Connecting`() = runTest {
+    fun `processQrCode with valid barcode transitions to ProcessingEngagement`() = runTest {
         orchestrator.start()
         val data = exampleUriOne
         val barcodeResult = BarcodeDataResult.Valid(data)
@@ -207,7 +207,7 @@ class VerifierOrchestratorTest {
         assertThat(
             sessionFactory,
             currentSessionState(
-                isConnecting()
+                isProcessingEngagement()
             )
         )
     }

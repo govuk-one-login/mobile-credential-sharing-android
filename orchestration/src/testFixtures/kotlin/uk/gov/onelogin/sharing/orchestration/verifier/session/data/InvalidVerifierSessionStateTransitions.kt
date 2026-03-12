@@ -30,8 +30,8 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
     companion object {
         private val notStartedTransitions = listOf(
             NotStarted,
-            Connecting(""),
-            ProcessingEngagement,
+            Connecting,
+            ProcessingEngagement(""),
             Verifying,
             successStub,
             userCancellation,
@@ -43,8 +43,7 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         private val preflightTransitions = listOf(
             NotStarted,
             preflightEmptyPermissions,
-            Connecting(""),
-            ProcessingEngagement,
+            Connecting,
             Verifying,
             successStub
         ).map {
@@ -54,7 +53,7 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             NotStarted,
             preflightEmptyPermissions,
             ReadyToScan,
-            ProcessingEngagement,
+            Connecting,
             Verifying,
             successStub
         ).map {
@@ -64,28 +63,27 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             NotStarted,
             preflightEmptyPermissions,
             ReadyToScan,
-            Connecting(""),
-            Verifying,
+            Connecting,
+            ProcessingEngagement(""),
             successStub
         ).map {
-            Connecting("") to it
+            Connecting to it
         }
         private val processingEngagementTransitions = listOf(
             NotStarted,
             preflightEmptyPermissions,
             ReadyToScan,
-            Connecting(""),
-            ProcessingEngagement,
+            ProcessingEngagement(""),
             successStub
         ).map {
-            ProcessingEngagement to it
+            ProcessingEngagement("") to it
         }
         private val VerifyingTransitions = listOf(
             NotStarted,
             preflightEmptyPermissions,
             ReadyToScan,
-            Connecting(""),
-            ProcessingEngagement
+            Connecting,
+            ProcessingEngagement("")
         ).map {
             Verifying to it
         }

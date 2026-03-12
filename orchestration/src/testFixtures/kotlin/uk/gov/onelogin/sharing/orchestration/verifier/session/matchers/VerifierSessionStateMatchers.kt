@@ -41,8 +41,8 @@ object VerifierSessionStateMatchers {
         VerifierSessionState.ReadyToScan
     )
 
-    fun isConnecting(): Matcher<VerifierSessionState> = equalTo(
-        VerifierSessionState.Connecting("https://this.is.a.test")
+    fun isProcessingEngagement(): Matcher<VerifierSessionState> = equalTo(
+        VerifierSessionState.ProcessingEngagement("https://this.is.a.test")
     )
 
     fun isFailed(): Matcher<VerifierSessionState> = instanceOf(

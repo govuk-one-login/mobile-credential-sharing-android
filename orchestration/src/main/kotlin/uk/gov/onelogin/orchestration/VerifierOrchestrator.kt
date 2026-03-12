@@ -97,7 +97,7 @@ class VerifierOrchestrator(
     override fun processQrCode(qrCode: BarcodeDataResult) {
         when (qrCode) {
             is BarcodeDataResult.Valid -> sessionFlow.value.transitionTo(
-                VerifierSessionState.Connecting(
+                VerifierSessionState.ProcessingEngagement(
                     qrCode.data
                 )
             )
