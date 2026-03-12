@@ -6,10 +6,8 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.verifier.scan.state.VerifierScannerState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult

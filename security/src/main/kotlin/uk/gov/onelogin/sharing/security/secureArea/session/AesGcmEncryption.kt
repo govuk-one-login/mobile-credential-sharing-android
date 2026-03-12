@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.security.secureArea.session
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec

@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.bluetooth.internal
 
 import android.content.Context
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
@@ -11,6 +11,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManag
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 
 /**
  * An Android-specific implementation of the [BluetoothCentralFactory] interface.
@@ -20,7 +21,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
  * @param context The Android application context.
  * @param logger An instance of [Logger] for logging events.
  */
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
+@ContributesBinding(VerifierUiScope::class)
 class AndroidBluetoothCentralFactory(
     private val bluetoothPermissionChecker: BluetoothPermissionChecker,
     private val context: Context,

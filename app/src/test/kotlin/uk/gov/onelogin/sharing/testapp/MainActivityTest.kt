@@ -28,7 +28,7 @@ class MainActivityTest {
         )
 
     val holderGraph = createGraphFactory<PresenterCredentialGraph.Factory>()
-        .create(appGraph = appGraph, FakeCredentialProvider())
+        .create(appGraph = appGraph, credentialProvider = FakeCredentialProvider())
 
     val verifierGraph = createGraphFactory<VerifierCredentialGraph.Factory>()
         .create(appGraph = appGraph)

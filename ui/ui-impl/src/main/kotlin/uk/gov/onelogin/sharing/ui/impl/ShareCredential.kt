@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.ui.impl.di.HolderCredentialSharingUiGraph
  */
 @Composable
 fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifier) {
-    val uiGraph = remember(component.orchestrator) {
+    val uiGraph = remember(component.appGraph, component.orchestrator) {
         createGraphFactory<HolderCredentialSharingUiGraph.Factory>()
             .create(component.appGraph, component.orchestrator)
     }

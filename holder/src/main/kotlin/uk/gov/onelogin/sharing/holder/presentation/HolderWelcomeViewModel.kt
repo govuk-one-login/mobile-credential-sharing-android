@@ -11,7 +11,6 @@ import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +51,6 @@ class HolderWelcomeViewModel(
             orchestrator.start()
 
             orchestrator.holderSessionState.collect { currentSate ->
-                logger.debug(logTag, "State: $currentSate")
                 when (currentSate) {
                     is HolderSessionState.PresentingEngagement -> _uiState.update {
                         it.copy(qrData = currentSate.qrData)

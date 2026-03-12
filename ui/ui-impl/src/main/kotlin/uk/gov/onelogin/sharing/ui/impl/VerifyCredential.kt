@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun VerifyCredential(component: CredentialVerifier, modifier: Modifier = Modifier) {
-    val uiGraph = remember(component.appGraph) {
+    val uiGraph = remember(component.appGraph, component.orchestrator) {
         createGraphFactory<VerifierCredentialSharingUiGraph.Factory>()
             .create(component.appGraph, component.orchestrator)
     }
