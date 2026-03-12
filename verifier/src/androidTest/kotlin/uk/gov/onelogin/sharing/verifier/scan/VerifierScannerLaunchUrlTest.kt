@@ -16,6 +16,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.verifier.scan.state.CompleteVerifierScannerState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
 
@@ -25,7 +26,8 @@ class VerifierScannerLaunchUrlTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val model = VerifierScannerViewModel(
-        state = CompleteVerifierScannerState()
+        state = CompleteVerifierScannerState(),
+        orchestrator = FakeOrchestrator()
     )
     private val resources: Resources = context.resources
 
@@ -52,12 +54,17 @@ class VerifierScannerLaunchUrlTest {
     fun validUrlsDeferToOnValidBarcodeLambda() = runTest {
         composeTestRule.run {
             var hasNavigatedViaValidBarcode = false
-            model.update(BarcodeDataResultStubs.validBarcodeDataResult)
+
             render(
                 model,
                 onValidBarcode = { hasNavigatedViaValidBarcode = true }
             )
-            testScheduler.advanceUntilIdle()
+
+            waitForIdle()
+
+            model.update(BarcodeDataResultStubs.validBarcodeDataResult)
+
+            waitForIdle()
 
             Assert.assertTrue(hasNavigatedViaValidBarcode)
         }
@@ -67,12 +74,16 @@ class VerifierScannerLaunchUrlTest {
     fun invalidUrlsDeferToOnInvalidBarcodeLambda() = runTest {
         composeTestRule.run {
             var hasNavigatedViaInvalidBarcode = false
-            model.update(BarcodeDataResultStubs.invalidBarcodeDataResultOne)
             render(
                 model,
                 onInvalidBarcode = { hasNavigatedViaInvalidBarcode = true }
             )
-            testScheduler.advanceUntilIdle()
+
+            waitForIdle()
+
+            model.update(BarcodeDataResultStubs.invalidBarcodeDataResultOne)
+
+            waitForIdle()
 
             Assert.assertTrue(hasNavigatedViaInvalidBarcode)
         }

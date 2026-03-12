@@ -40,4 +40,12 @@ object VerifierSessionStateMatchers {
     fun isReadyToScan(): Matcher<VerifierSessionState> = equalTo(
         VerifierSessionState.ReadyToScan
     )
+
+    fun isProcessingEngagement(): Matcher<VerifierSessionState> = equalTo(
+        VerifierSessionState.ProcessingEngagement("https://this.is.a.test")
+    )
+
+    fun isFailed(): Matcher<VerifierSessionState> = instanceOf(
+        VerifierSessionState.Complete.Failed::class.java
+    )
 }

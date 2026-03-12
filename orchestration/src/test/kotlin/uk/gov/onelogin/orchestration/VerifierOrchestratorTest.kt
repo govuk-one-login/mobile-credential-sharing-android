@@ -12,7 +12,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.VerifierConfig
+import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
+import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
@@ -32,7 +33,9 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerif
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.UncancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isProcessingEngagement
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 
 @RunWith(TestParameterInjector::class)
@@ -192,6 +195,38 @@ class VerifierOrchestratorTest {
         assertThat(
             sessionFactory,
             currentSessionState(isNotStarted())
+        )
+    }
+
+    @Test
+    fun `processQrCode with valid barcode transitions to ProcessingEngagement`() = runTest {
+        orchestrator.start()
+        val data = exampleUriOne
+        val barcodeResult = BarcodeDataResult.Valid(data)
+
+        orchestrator.processQrCode(barcodeResult)
+
+        assertThat(
+            sessionFactory,
+            currentSessionState(
+                isProcessingEngagement()
+            )
+        )
+    }
+
+    @Test
+    fun `processQrCode returns invalid BarcodeDataResult`() = runTest {
+        orchestrator.start()
+        val data = "https://"
+        val barcodeResult = BarcodeDataResult.Invalid(data)
+
+        orchestrator.processQrCode(barcodeResult)
+
+        assertThat(
+            sessionFactory,
+            currentSessionState(
+                isFailed()
+            )
         )
     }
 }

@@ -1,8 +1,8 @@
-package uk.gov.onelogin.sharing.verifier.scan.state.data
+package uk.gov.onelogin.sharing.cameraService.data
 
 /**
  * Sealed class representing a state table for the
- * [uk.gov.onelogin.sharing.verifier.scan.callbacks.VerifierScannerBarcodeScanCallback].
+ * [uk.gov.onelogin.sharing.cameraService.scan.QrScannerCallback].
  */
 sealed class BarcodeDataResult {
     /**

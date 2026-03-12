@@ -41,6 +41,7 @@ import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.startScanningDummyServiceUuid
@@ -78,7 +79,8 @@ class SessionEstablishmentViewModelTest {
         logger = logger,
         bluetoothStatusMonitor = fakeBluetoothStateMonitor,
         verifierSessionFactory = { fakeVerifierSession },
-        savedStateHandle = savedStateHandle
+        savedStateHandle = savedStateHandle,
+        orchestrator = FakeOrchestrator()
     )
 
     @Test

@@ -39,6 +39,7 @@ rootProject.name = "Mobile-credential-sharing-android"
 listOf(
     ":app",
     ":bluetooth",
+    ":camera-service",
     ":core",
     ":holder",
     ":models",

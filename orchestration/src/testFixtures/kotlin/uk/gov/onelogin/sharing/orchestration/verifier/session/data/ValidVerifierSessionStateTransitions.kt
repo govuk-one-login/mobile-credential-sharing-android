@@ -48,7 +48,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         private val readyToScanTransitions = listOf(
             "User cancels whilst attempting to scan a QR code" to userCancellation,
             "Cannot obtain data from a scanned QR code" to userJourneyFailure,
-            "Generated QR code gets shown to the User" to Connecting
+            "Generated QR code gets shown to the User" to ProcessingEngagement("")
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -56,10 +56,22 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
                 transition
             )
         }
+        private val processingEngagementTransitions = listOf(
+            "User cancels whilst processing engagement" to userCancellation,
+            "Cannot successfully process engagement" to userJourneyFailure,
+            "Begins validating the shared digital credential" to Connecting
+        ).map { (testName, transition) ->
+            Triple(
+                testName,
+                ProcessingEngagement(""),
+                transition
+            )
+        }
+
         private val connectingTransitions = listOf(
             "User cancels whilst connecting with Holder device" to userCancellation,
             "Connection with Holder device cannot be established" to userJourneyFailure,
-            "Receives Holder device's data transfer request" to ProcessingEngagement
+            "Receives Holder device's data transfer request" to Verifying
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -67,17 +79,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
                 transition
             )
         }
-        private val processingEngagementTransitions = listOf(
-            "User cancels whilst processing engagement" to userCancellation,
-            "Cannot successfully process engagement" to userJourneyFailure,
-            "Begins validating the shared digital credential" to Verifying
-        ).map { (testName, transition) ->
-            Triple(
-                testName,
-                ProcessingEngagement,
-                transition
-            )
-        }
+
         private val verifyingTransitions = listOf(
             "User cancels the journey whilst validating the credential" to userCancellation,
             "Failure occurs when validating the credential" to userJourneyFailure,
@@ -94,8 +96,8 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             notStartedTransitions +
                 preflightTransitions +
                 readyToScanTransitions +
-                connectingTransitions +
                 processingEngagementTransitions +
+                connectingTransitions +
                 verifyingTransitions
     }
 }

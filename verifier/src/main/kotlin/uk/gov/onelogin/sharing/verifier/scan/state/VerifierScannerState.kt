@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.verifier.scan.state
 
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultState
+import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResultState
 import uk.gov.onelogin.sharing.verifier.scan.state.permission.PreviouslyDeniedPermissionState
 
 sealed interface VerifierScannerState {

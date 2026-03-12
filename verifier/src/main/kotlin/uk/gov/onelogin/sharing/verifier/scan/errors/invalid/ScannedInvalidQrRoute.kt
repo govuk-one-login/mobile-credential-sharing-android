@@ -36,7 +36,7 @@ data class ScannedInvalidQrRoute(val data: String) {
             ScannedInvalidQrRoute(data = uri)
         ) {
             popUpTo<VerifierScanRoute> {
-                inclusive = false
+                inclusive = true
             }
         }
     }

@@ -78,6 +78,12 @@ fun ConnectWithHolderDeviceScreen(
             onSendEvent = viewModel::receive
         )
     }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.resetOrchestrator()
+        }
+    }
 }
 
 @OptIn(ExperimentalPermissionsApi::class)

@@ -10,7 +10,6 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Com
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.navigateToBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
@@ -50,7 +49,12 @@ data object VerifierRoutes {
                 }
             )
             configureScannedInvalidQrRoute(
-                onTryAgainClick = { navController.navigateToVerifierScanRoute() }
+                onTryAgainClick = {
+                    navController.popBackStack()
+                    navController.navigate(VerifyCredentialRoute) {
+                        popUpTo<VerifyCredentialRoute> { inclusive = true }
+                    }
+                }
             )
             configureConnectWithHolderDeviceRoute {
                 navController.navigateToBluetoothConnectionErrorRoute(title = it)

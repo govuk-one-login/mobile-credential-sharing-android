@@ -17,7 +17,7 @@ class CancellableVerifierSessionStates : TestParameterValuesProvider() {
         preflightEmptyPermissions,
         ReadyToScan,
         Connecting,
-        ProcessingEngagement,
+        ProcessingEngagement(""),
         Verifying
     )
 }

@@ -117,9 +117,7 @@ class VerifierScannerRule(
      * Due to issues with the metro dependency injection framework's compiler, don't use this
      * in android instrumentation tests.
      */
-    @OptIn(ExperimentalPermissionsApi::class)
     fun render(
-        permissionState: @Composable () -> MultiplePermissionsState,
         modifier: Modifier = Modifier,
         onInvalidBarcode: (String) -> Unit = {},
         onValidBarcode: (String) -> Unit = {}
@@ -127,7 +125,6 @@ class VerifierScannerRule(
         setContent {
             VerifierScanner(
                 modifier = modifier,
-                permissionState = permissionState(),
                 onInvalidBarcode = onInvalidBarcode,
                 onValidBarcode = onValidBarcode
             )
