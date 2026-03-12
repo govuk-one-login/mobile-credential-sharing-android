@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.CompleteVerifierScannerState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
 
 @RunWith(AndroidJUnit4::class)
-class VerifierScannerViewModelTest {
+class ScannerViewModelTest {
 
     private val orchestrator = FakeOrchestrator()
 

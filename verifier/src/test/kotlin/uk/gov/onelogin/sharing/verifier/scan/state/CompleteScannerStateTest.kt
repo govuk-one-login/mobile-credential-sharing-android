@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.permission.PreviouslyDeniedPe
 import uk.gov.onelogin.sharing.verifier.scan.state.permission.PreviouslyDeniedPermissionStateAssertions.hasPreviouslyGrantedPermission
 
 @RunWith(AndroidJUnit4::class)
-class CompleteVerifierScannerStateTest {
+class CompleteScannerStateTest {
 
     private val state: VerifierScannerState.Complete = CompleteVerifierScannerState()
 
