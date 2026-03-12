@@ -8,8 +8,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.security.cert.Certificate
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.VerificationRequest
+import uk.gov.onelogin.VerifierConfig
 import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialSdk
-import uk.gov.onelogin.sharing.di.api.verifier.VerificationRequest
 import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialSdk
 
 @AndroidEntryPoint
@@ -36,8 +37,10 @@ class MainActivity : ComponentActivity() {
 
         val verifier = verifierCredentialSdk
             .verifier(
-                verificationRequest = verificationRequest,
-                trustedCertificates = trustedCertificates
+                VerifierConfig(
+                    verificationRequest = verificationRequest,
+                    trustedCertificates = trustedCertificates
+                )
             )
 
         setContent {

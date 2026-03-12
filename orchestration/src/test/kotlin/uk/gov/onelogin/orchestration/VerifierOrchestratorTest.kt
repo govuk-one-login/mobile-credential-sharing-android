@@ -12,6 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.onelogin.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
@@ -22,6 +23,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
@@ -69,7 +71,8 @@ class VerifierOrchestratorTest {
         VerifierOrchestrator(
             logger = logger,
             prerequisiteGate = gate,
-            sessionFactory = sessionFactory
+            sessionFactory = sessionFactory,
+            verifierConfig = verifierConfigStub
         )
     }
 

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.CredentialProvider
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -40,6 +41,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 
+@Suppress("LongParameterList")
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
     private val logger: Logger,
@@ -47,7 +49,9 @@ class HolderOrchestrator(
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
-    private val prerequisiteGate: PrerequisiteGate
+    private val prerequisiteGate: PrerequisiteGate,
+    @Suppress("UnusedPrivateProperty")
+    private val credentialProvider: CredentialProvider
 ) : Orchestrator.Holder {
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
     private val session: HolderSession

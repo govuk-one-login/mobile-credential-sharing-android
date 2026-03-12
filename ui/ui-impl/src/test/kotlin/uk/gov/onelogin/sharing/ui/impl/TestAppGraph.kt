@@ -8,7 +8,8 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
-import uk.gov.onelogin.sharing.sdk.FakeCredentialProvider
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 
 /**
  * Helper function to create a [CredentialSharingAppGraph] instance for use in tests.
@@ -35,4 +36,7 @@ fun createTestHolderGraph(appGraph: CredentialSharingAppGraph): PresenterCredent
 
 fun createTestVerifierGraph(appGraph: CredentialSharingAppGraph): VerifierCredentialGraph =
     createGraphFactory<VerifierCredentialGraph.Factory>()
-        .create(appGraph = appGraph)
+        .create(
+            appGraph = appGraph,
+            verifierConfig = verifierConfigStub
+        )

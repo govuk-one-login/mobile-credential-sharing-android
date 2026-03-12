@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.di.api.presenter
+package uk.gov.onelogin
 
 /**
  * Provider interface for Holder role.

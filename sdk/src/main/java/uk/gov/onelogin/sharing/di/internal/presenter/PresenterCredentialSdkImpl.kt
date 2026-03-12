@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.di.internal.presenter
 
+import uk.gov.onelogin.CredentialProvider
 import uk.gov.onelogin.sharing.di.api.presenter.CredentialPresenter
-import uk.gov.onelogin.sharing.di.api.presenter.CredentialProvider
 import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
 import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialSdk
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph

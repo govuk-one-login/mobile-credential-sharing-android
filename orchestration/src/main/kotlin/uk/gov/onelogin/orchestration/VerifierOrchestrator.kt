@@ -4,6 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.VerifierConfig
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
@@ -26,7 +27,9 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,
-    private val sessionFactory: SessionFactory<VerifierSession>
+    private val sessionFactory: SessionFactory<VerifierSession>,
+    @Suppress("UnusedPrivateProperty")
+    private val verifierConfig: VerifierConfig
 ) : Orchestrator.Verifier {
 
     private var session: VerifierSession = sessionFactory.create()

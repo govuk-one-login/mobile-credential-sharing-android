@@ -1,9 +1,8 @@
 package uk.gov.onelogin.sharing.di.internal.verifier
 
-import java.security.cert.Certificate
+import uk.gov.onelogin.VerifierConfig
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.api.verifier.CredentialVerifier
-import uk.gov.onelogin.sharing.di.api.verifier.VerificationRequest
 import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
 import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialSdk
 
@@ -12,19 +11,19 @@ class VerifierCredentialSdkImpl(
     private val verifierGraphFactory: VerifierCredentialGraph.Factory
 ) : VerifierCredentialSdk {
 
-    override fun verifier(
-        verificationRequest: VerificationRequest,
-        trustedCertificates: List<Certificate>
-    ): CredentialVerifier {
+    override fun verifier(verifierConfig: VerifierConfig): CredentialVerifier {
         val orchestrator = verifierGraphFactory
-            .create(appGraph)
+            .create(
+                appGraph = appGraph,
+                verifierConfig = verifierConfig
+            )
             .verifierOrchestrator()
 
         return CredentialVerifierImpl(
             appGraph = appGraph,
             orchestrator = orchestrator,
-            verificationRequest = verificationRequest,
-            trustedCertificates = trustedCertificates
+            verificationRequest = verifierConfig.verificationRequest,
+            trustedCertificates = verifierConfig.trustedCertificates
         )
     }
 }

@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
@@ -99,7 +100,8 @@ class HolderOrchestratorTest {
         prerequisiteGate = gate,
         peripheralBluetoothTransport = peripheralBluetoothTransport,
         appCoroutineScope = scope,
-        decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
+        decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
+        credentialProvider = FakeCredentialProvider()
     )
 
     @Test

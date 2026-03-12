@@ -6,9 +6,10 @@ import java.security.cert.Certificate
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import uk.gov.onelogin.VerificationRequest
+import uk.gov.onelogin.VerifierConfig
 import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.api.verifier.VerificationRequest
 import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
 import uk.gov.onelogin.sharing.di.internal.verifier.CredentialVerifierImpl
 import uk.gov.onelogin.sharing.di.internal.verifier.VerifierCredentialSdkImpl
@@ -26,8 +27,17 @@ class VerifierSharingSdkImplTest {
             requestedElements = listOf("given_name", "family_name")
         )
         val trustedCertificates = emptyList<Certificate>()
+        val verifierConfig = VerifierConfig(
+            verificationRequest = verificationRequest,
+            trustedCertificates = trustedCertificates
+        )
 
-        every { verifierGraphFactory.create(appGraph) } returns verifierGraph
+        every {
+            verifierGraphFactory.create(
+                appGraph = appGraph,
+                verifierConfig = verifierConfig
+            )
+        } returns verifierGraph
         every { verifierGraph.verifierOrchestrator() } returns orchestrator
 
         val sdk = VerifierCredentialSdkImpl(
@@ -35,7 +45,7 @@ class VerifierSharingSdkImplTest {
             verifierGraphFactory = verifierGraphFactory
         )
 
-        val result = sdk.verifier(verificationRequest, trustedCertificates)
+        val result = sdk.verifier(verifierConfig)
 
         assertTrue(result is CredentialVerifierImpl)
 

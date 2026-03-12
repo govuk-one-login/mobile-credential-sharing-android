@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.internal.presenter.CredentialPresenterImpl
 import uk.gov.onelogin.sharing.di.internal.presenter.PresenterCredentialSdkImpl
-import uk.gov.onelogin.sharing.sdk.FakeCredentialProvider
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 
 class PresenterSharingSdkImplTest {
     private val appGraph = mockk<CredentialSharingAppGraph>()

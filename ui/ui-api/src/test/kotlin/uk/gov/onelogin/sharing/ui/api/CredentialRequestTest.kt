@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.ui.api
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.di.api.presenter.CredentialRequest
+import uk.gov.onelogin.CredentialRequest
 
 class CredentialRequestTest {
     @Test

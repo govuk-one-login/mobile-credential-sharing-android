@@ -14,7 +14,8 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
-import uk.gov.onelogin.sharing.sdk.FakeCredentialProvider
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -30,7 +31,10 @@ class MainActivityTest {
         .create(appGraph = appGraph, credentialProvider = FakeCredentialProvider())
 
     val verifierGraph = createGraphFactory<VerifierCredentialGraph.Factory>()
-        .create(appGraph = appGraph)
+        .create(
+            appGraph = appGraph,
+            verifierConfig = verifierConfigStub
+        )
 
     @get:Rule
     val hiltRule = HiltAndroidRule(this)
