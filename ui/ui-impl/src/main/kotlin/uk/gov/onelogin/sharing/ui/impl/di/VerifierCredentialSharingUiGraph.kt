@@ -7,7 +7,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.core.VerifierUiScope
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 
 /**
  * Dependency graph for the UI implementation module.

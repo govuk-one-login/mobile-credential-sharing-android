@@ -7,8 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.CredentialSharingSdk
-import uk.gov.onelogin.sharing.di.internal.CredentialSharingSdkImpl
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingSdk
+import uk.gov.onelogin.sharing.di.internal.shared.CredentialSharingSdkImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -22,4 +22,14 @@ object CredentialSharingSdkModule {
         applicationContext = application,
         logger = logger
     )
+
+    @Provides
+    @Singleton
+    fun providePresenterCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
+        credentialSharingSdk.presenterCredentialSdk
+
+    @Provides
+    @Singleton
+    fun provideVerifierCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
+        credentialSharingSdk.verifierCredentialSdk
 }

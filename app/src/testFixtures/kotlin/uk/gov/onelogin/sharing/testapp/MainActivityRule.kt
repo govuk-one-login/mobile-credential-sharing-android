@@ -11,13 +11,11 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
-import uk.gov.onelogin.sharing.CredentialPresenterNew
-import uk.gov.onelogin.sharing.CredentialVerifierNew
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
-import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
-import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenterNew
-import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifierNew
+import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
+import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
 
 class MainActivityRule(
     composeTestRule: ComposeContentTestRule,
@@ -60,11 +58,11 @@ class MainActivityRule(
         credentialVerifier: VerifierCredentialGraph
     ) {
         TestAppScreen(
-            credentialPresenter = FakeCredentialPresenterNew(
+            credentialPresenter = FakeCredentialPresenter(
                 appGraph = appGraph,
                 orchestrator = credentialPresenter.holderOrchestrator()
             ),
-            credentialVerifier = FakeCredentialVerifierNew(
+            credentialVerifier = FakeCredentialVerifier(
                 appGraph = appGraph,
                 orchestrator = credentialVerifier.verifierOrchestrator()
             )

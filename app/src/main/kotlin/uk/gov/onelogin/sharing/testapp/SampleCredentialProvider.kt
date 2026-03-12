@@ -1,16 +1,16 @@
 package uk.gov.onelogin.sharing.testapp
 
-import uk.gov.onelogin.orchestration.Credential
-import uk.gov.onelogin.orchestration.CredentialProviderNew
-import uk.gov.onelogin.orchestration.CredentialRequest
+import uk.gov.onelogin.sharing.di.api.presenter.Credential
+import uk.gov.onelogin.sharing.di.api.presenter.CredentialProvider
+import uk.gov.onelogin.sharing.di.api.presenter.CredentialRequest
 
 /**
- * Sample implementation of [CredentialProviderNew] for demonstration purposes.
+ * Sample implementation of [CredentialProvider] for demonstration purposes.
  *
  * In a production app, this would retrieve actual credentials from secure storage
  * and use the Android Keystore for signing operations.
  */
-class SampleCredentialProvider : CredentialProviderNew {
+class SampleCredentialProvider : CredentialProvider {
     override suspend fun getCredentials(request: CredentialRequest): List<Credential> {
         // Sample implementation - returns mock credentials
         return request.documentTypes.map { docType ->

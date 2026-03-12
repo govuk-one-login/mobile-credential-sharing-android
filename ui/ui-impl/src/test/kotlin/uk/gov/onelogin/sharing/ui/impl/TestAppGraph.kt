@@ -5,10 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
-import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
-import uk.gov.onelogin.sharing.orchestration.FakeCredentialProviderNew
+import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.sdk.FakeCredentialProvider
 
 /**
  * Helper function to create a [CredentialSharingAppGraph] instance for use in tests.
@@ -31,7 +31,7 @@ fun createTestAppGraph(
 
 fun createTestHolderGraph(appGraph: CredentialSharingAppGraph): PresenterCredentialGraph =
     createGraphFactory<PresenterCredentialGraph.Factory>()
-        .create(appGraph = appGraph, credentialProvider = FakeCredentialProviderNew())
+        .create(appGraph = appGraph, credentialProvider = FakeCredentialProvider())
 
 fun createTestVerifierGraph(appGraph: CredentialSharingAppGraph): VerifierCredentialGraph =
     createGraphFactory<VerifierCredentialGraph.Factory>()

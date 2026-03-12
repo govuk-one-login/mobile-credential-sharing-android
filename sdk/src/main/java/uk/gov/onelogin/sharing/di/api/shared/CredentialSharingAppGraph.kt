@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.di
+package uk.gov.onelogin.sharing.di.api.shared
 
 import android.content.Context
 import dev.zacsweers.metro.AppScope

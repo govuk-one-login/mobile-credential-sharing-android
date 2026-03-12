@@ -1,12 +1,14 @@
-package uk.gov.onelogin.sharing.di.internal
+package uk.gov.onelogin.sharing.di.internal.shared
 
 import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.CredentialSharingSdk
-import uk.gov.onelogin.sharing.PresenterCredentialSdk
-import uk.gov.onelogin.sharing.VerifierCredentialSdk
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialSdk
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingSdk
+import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialSdk
+import uk.gov.onelogin.sharing.di.internal.presenter.PresenterCredentialSdkImpl
+import uk.gov.onelogin.sharing.di.internal.verifier.VerifierCredentialSdkImpl
 
 class CredentialSharingSdkImpl(applicationContext: Context, logger: Logger) : CredentialSharingSdk {
 

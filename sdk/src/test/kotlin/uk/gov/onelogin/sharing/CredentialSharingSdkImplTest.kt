@@ -6,11 +6,12 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.internal.CredentialSharingSdkImpl
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingSdk
+import uk.gov.onelogin.sharing.di.internal.shared.CredentialSharingSdkImpl
 
-class SharingSdkImplTest {
+class CredentialSharingSdkImplTest {
     private lateinit var logger: Logger
-    private lateinit var sdk: CredentialSharingSdkImpl
+    private lateinit var sdk: CredentialSharingSdk
 
     @Before
     fun setUp() {

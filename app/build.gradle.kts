@@ -133,6 +133,6 @@ dependencies {
         libs.metro.runtime,
         libs.uk.gov.logging.testdouble,
         testFixtures(projects.holder),
-        testFixtures(projects.orchestration)
+        testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 }

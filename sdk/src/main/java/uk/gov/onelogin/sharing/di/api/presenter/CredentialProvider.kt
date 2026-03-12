@@ -1,10 +1,10 @@
-package uk.gov.onelogin.orchestration
+package uk.gov.onelogin.sharing.di.api.presenter
 
 /**
  * Provider interface for Holder role.
  * Host app implements this to supply credentials and signatures.
  */
-interface CredentialProviderNew {
+interface CredentialProvider {
     suspend fun getCredentials(request: CredentialRequest): List<Credential>
     suspend fun sign(payload: ByteArray, documentId: String): ByteArray
 }

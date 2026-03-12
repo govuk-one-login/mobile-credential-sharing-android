@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
-import uk.gov.onelogin.sharing.CredentialPresenterNew
+import uk.gov.onelogin.sharing.di.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.presentation.HolderHomeRoute
 import uk.gov.onelogin.sharing.ui.impl.di.HolderCredentialSharingUiGraph
@@ -19,11 +19,11 @@ import uk.gov.onelogin.sharing.ui.impl.di.HolderCredentialSharingUiGraph
  * Renders the complete Holder UI flow including navigation, allowing users to share
  * their credentials with verifiers via QR code and Bluetooth.
  *
- * @param component The [CredentialPresenterNew] containing the app graph and configuration.
+ * @param component The [CredentialPresenter] containing the app graph and configuration.
  * @param modifier Optional [Modifier] to apply to the root composable.
  */
 @Composable
-fun ShareCredential(component: CredentialPresenterNew, modifier: Modifier = Modifier) {
+fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifier) {
     val uiGraph = remember(component.orchestrator) {
         createGraphFactory<HolderCredentialSharingUiGraph.Factory>()
             .create(component.appGraph, component.orchestrator)

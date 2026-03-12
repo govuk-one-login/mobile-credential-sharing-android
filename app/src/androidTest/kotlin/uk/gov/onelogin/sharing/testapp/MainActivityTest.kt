@@ -11,10 +11,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.PresenterCredentialGraph
-import uk.gov.onelogin.sharing.di.VerifierCredentialGraph
-import uk.gov.onelogin.sharing.orchestration.FakeCredentialProviderNew
+import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.sdk.FakeCredentialProvider
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -27,7 +27,7 @@ class MainActivityTest {
         )
 
     val holderGraph = createGraphFactory<PresenterCredentialGraph.Factory>()
-        .create(appGraph = appGraph, FakeCredentialProviderNew())
+        .create(appGraph = appGraph, FakeCredentialProvider())
 
     val verifierGraph = createGraphFactory<VerifierCredentialGraph.Factory>()
         .create(appGraph = appGraph)

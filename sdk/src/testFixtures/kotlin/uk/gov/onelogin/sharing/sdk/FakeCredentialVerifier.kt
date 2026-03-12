@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.sdk
 
 import uk.gov.onelogin.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.CredentialVerifierNew
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.di.api.verifier.CredentialVerifier
 
-class FakeCredentialVerifierNew(
+class FakeCredentialVerifier(
     override val appGraph: CredentialSharingAppGraph,
     override val orchestrator: Orchestrator.Verifier
-) : CredentialVerifierNew
+) : CredentialVerifier

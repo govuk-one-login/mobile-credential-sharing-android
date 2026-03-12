@@ -5,7 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenterNew
+import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
 
 @RunWith(AndroidJUnit4::class)
 class ShareCredentialTest {
@@ -16,7 +16,7 @@ class ShareCredentialTest {
     fun `renders holder flow`() {
         val appGraph = createTestAppGraph()
         val holderGraph = createTestHolderGraph(appGraph)
-        val presenter = FakeCredentialPresenterNew(
+        val presenter = FakeCredentialPresenter(
             appGraph = appGraph,
             orchestrator = holderGraph.holderOrchestrator()
         )
