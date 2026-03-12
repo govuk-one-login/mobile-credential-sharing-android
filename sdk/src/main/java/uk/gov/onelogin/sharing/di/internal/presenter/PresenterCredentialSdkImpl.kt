@@ -7,7 +7,7 @@ import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialSdk
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 
 class PresenterCredentialSdkImpl(
-    val appGraph: CredentialSharingAppGraph,
+    private val appGraph: CredentialSharingAppGraph,
     private val presenterGraphFactory: PresenterCredentialGraph.Factory
 ) : PresenterCredentialSdk {
     override fun presenter(credentialProvider: CredentialProvider): CredentialPresenter {

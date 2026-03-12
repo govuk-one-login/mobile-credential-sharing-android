@@ -19,7 +19,7 @@ class PresenterSharingSdkImplTest {
     private val orchestrator = mockk<Orchestrator.Holder>()
 
     @Test
-    fun `verifier returns CredentialHolder with expected dependencies`() {
+    fun `holder returns CredentialHolder with expected dependencies`() {
         val credentialProvider = FakeCredentialProvider()
 
         every { presenterGraphFactory.create(appGraph, credentialProvider) } returns holderGraph

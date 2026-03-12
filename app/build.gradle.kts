@@ -123,8 +123,7 @@ dependencies {
         libs.bundles.android.baseline,
         testFixtures(projects.sdk),
         testFixtures(projects.ui.uiApi),
-        testFixtures(projects.ui.uiImpl),
-        testFixtures(projects.sdk)
+        testFixtures(projects.ui.uiImpl)
     ).forEach(::testFixturesImplementation)
 
     listOf(
