@@ -10,10 +10,10 @@ import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.verifier.VerifierNavigationEvents
 import uk.gov.onelogin.sharing.verifier.scan.state.VerifierScannerState
 
@@ -31,28 +31,17 @@ class VerifierScannerViewModel(
 
     init {
         viewModelScope.launch {
-
-            barcodeDataResult.collectLatest {
+            orchestrator.verifierSessionState.collect {
                 when (it) {
-                    is BarcodeDataResult.Invalid -> {
-                        processQrCode(it)
-                        _navigationEvents.emit(
-                            VerifierNavigationEvents.NavigateToInvalidScreen(
-                                it.data
-                            )
-                        )
-                    }
+                    is VerifierSessionState.Complete.Failed -> _navigationEvents.emit(
+                        VerifierNavigationEvents.NavigateToInvalidScreen(it.reason)
+                    )
 
-                    BarcodeDataResult.NotFound -> Unit
+                    is VerifierSessionState.ProcessingEngagement -> _navigationEvents.emit(
+                        VerifierNavigationEvents.NavigateToDiagnostic(it.qrCode)
+                    )
 
-                    is BarcodeDataResult.Valid -> {
-                        processQrCode(it)
-                        _navigationEvents.emit(
-                            VerifierNavigationEvents.NavigateToDiagnostic(
-                                it.data
-                            )
-                        )
-                    }
+                    else -> Unit
                 }
             }
         }
@@ -69,9 +58,5 @@ class VerifierScannerViewModel(
 
     private fun resetBarcodeData(): Job = viewModelScope.launch {
         update(result = BarcodeDataResult.NotFound)
-    }
-
-    private fun processQrCode(qrCode: BarcodeDataResult) {
-        orchestrator.processQrCode(qrCode)
     }
 }

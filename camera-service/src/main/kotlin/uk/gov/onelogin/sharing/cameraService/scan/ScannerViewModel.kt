@@ -18,7 +18,8 @@ import uk.gov.onelogin.sharing.cameraService.state.ScannerState
 @ViewModelKey(ScannerViewModel::class)
 class ScannerViewModel(
     state: ScannerState.Complete,
-    private val observer: ScanObserver
+    private val observer: ScanObserver,
+    private val orchestratorInteractor: OrchestratorInteractor
 ) : ViewModel(),
     ScannerState.Complete by state {
 
@@ -44,6 +45,9 @@ class ScannerViewModel(
     }
 
     override fun onCleared() {
+        if (barcodeDataResult.value is BarcodeDataResult.NotFound) {
+            orchestratorInteractor.cancel()
+        }
         reset()
         super.onCleared()
     }
@@ -55,4 +59,6 @@ class ScannerViewModel(
     private fun resetBarcodeData(): Job = viewModelScope.launch {
         update(result = BarcodeDataResult.NotFound)
     }
+
+
 }

@@ -6,7 +6,10 @@ import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
@@ -39,7 +42,14 @@ class VerifierOrchestrator(
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val verifierSessionState = sessionFlow.flatMapLatest { it.currentState }
+    override val verifierSessionState: StateFlow<VerifierSessionState> =
+        sessionFlow. flatMapLatest { session ->
+            session.currentState
+        }.stateIn(
+            scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main.immediate),
+            started = SharingStarted.Eagerly,
+            initialValue = VerifierSessionState.NotStarted
+        )
 
     override fun start() {
         if (sessionFlow.value.isComplete()) {
@@ -97,7 +107,6 @@ class VerifierOrchestrator(
     override fun processQrCode(qrCode: BarcodeDataResult) {
         when (qrCode) {
             is BarcodeDataResult.Valid -> {
-                println("ORCHESTRATOR VALID")
                 sessionFlow.value.transitionTo(
                     VerifierSessionState.ProcessingEngagement(
                         qrCode.data
@@ -106,8 +115,6 @@ class VerifierOrchestrator(
             }
 
             is BarcodeDataResult.Invalid -> {
-                println("ORCHESTRATOR INVALID")
-
                 sessionFlow.value.transitionTo(
                     VerifierSessionState.Complete.Failed(
                         SessionError(

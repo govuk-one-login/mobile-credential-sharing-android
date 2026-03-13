@@ -44,7 +44,8 @@ dependencies {
 
     listOf(
         libs.com.google.guava.android,
-        libs.bundles.androidx.camera
+        libs.bundles.androidx.camera,
+        libs.metro.viewmodel.compose
     ).forEach(::implementation)
 
     listOf(

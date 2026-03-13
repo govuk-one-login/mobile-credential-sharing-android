@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cameraService.state
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ import uk.gov.onelogin.sharing.cameraService.data.MutableBarcodeDataResultState
  */
 @Inject
 @ContributesBinding(ViewModelScope::class, binding = binding<ScannerState.Complete>())
+@SingleIn(ViewModelScope::class)
 class CompleteVerifierScannerState(
     barcodeDataResultState: BarcodeDataResultState.Complete = MutableBarcodeDataResultState()
 ) : BarcodeDataResultState.Complete by barcodeDataResultState,
