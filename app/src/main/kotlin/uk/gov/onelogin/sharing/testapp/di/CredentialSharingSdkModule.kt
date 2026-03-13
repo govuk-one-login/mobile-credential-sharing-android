@@ -7,8 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.CredentialSharingSdk
-import uk.gov.onelogin.sharing.CredentialSharingSdkImpl
+import uk.gov.onelogin.sharing.sdk.CredentialSharingSdk
+import uk.gov.onelogin.sharing.sdk.CredentialSharingSdkImpl
 
 @Module
 @InstallIn(SingletonComponent::class)

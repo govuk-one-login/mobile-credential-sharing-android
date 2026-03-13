@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing
+package uk.gov.onelogin.sharing.sdk
 
 import io.mockk.mockk
 import kotlin.test.assertNotNull

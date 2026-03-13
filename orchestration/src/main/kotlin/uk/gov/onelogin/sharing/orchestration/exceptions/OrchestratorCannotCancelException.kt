@@ -1,4 +1,4 @@
-package uk.gov.onelogin.orchestration.exceptions
+package uk.gov.onelogin.sharing.orchestration.exceptions
 
 class OrchestratorCannotCancelException(
     override val message: String,
