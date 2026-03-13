@@ -11,17 +11,17 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
-import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialGraph
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
 
 class MainActivityRule(
     composeTestRule: ComposeContentTestRule,
     private val appGraph: CredentialSharingAppGraph,
-    private val holderGraph: PresenterCredentialGraph,
-    private val verifierGraph: VerifierCredentialGraph,
+    private val holderGraph: PresentCredentialGraph,
+    private val verifierGraph: VerifyCredentialGraph,
     private val holderText: String,
     private val verifierText: String
 ) : ComposeContentTestRule by composeTestRule {
@@ -29,8 +29,8 @@ class MainActivityRule(
     constructor(
         composeTestRule: ComposeContentTestRule,
         appGraph: CredentialSharingAppGraph,
-        holderGraph: PresenterCredentialGraph,
-        verifierGraph: VerifierCredentialGraph,
+        holderGraph: PresentCredentialGraph,
+        verifierGraph: VerifyCredentialGraph,
         resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
     ) : this(
         composeTestRule = composeTestRule,
@@ -54,8 +54,8 @@ class MainActivityRule(
     @Composable
     fun Content(
         appGraph: CredentialSharingAppGraph,
-        credentialPresenter: PresenterCredentialGraph,
-        credentialVerifier: VerifierCredentialGraph
+        credentialPresenter: PresentCredentialGraph,
+        credentialVerifier: VerifyCredentialGraph
     ) {
         TestAppScreen(
             credentialPresenter = FakeCredentialPresenter(

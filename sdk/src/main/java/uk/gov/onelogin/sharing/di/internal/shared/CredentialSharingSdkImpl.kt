@@ -3,14 +3,14 @@ package uk.gov.onelogin.sharing.di.internal.shared
 import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
-import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialSdk
+import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialGraph
+import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingSdk
-import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
-import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialSdk
-import uk.gov.onelogin.sharing.di.internal.presenter.PresenterCredentialSdkImpl
-import uk.gov.onelogin.sharing.di.internal.verifier.VerifierCredentialSdkImpl
+import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialGraph
+import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialSdk
+import uk.gov.onelogin.sharing.di.internal.presenter.PresentCredentialSdkImpl
+import uk.gov.onelogin.sharing.di.internal.verifier.VerifyCredentialSdkImpl
 
 class CredentialSharingSdkImpl(applicationContext: Context, logger: Logger) : CredentialSharingSdk {
 
@@ -20,15 +20,15 @@ class CredentialSharingSdkImpl(applicationContext: Context, logger: Logger) : Cr
 
     override val appGraph: CredentialSharingAppGraph = _appGraph
 
-    override val presenterCredentialSdk: PresenterCredentialSdk =
-        PresenterCredentialSdkImpl(
+    override val presentCredentialSdk: PresentCredentialSdk =
+        PresentCredentialSdkImpl(
             appGraph = appGraph,
-            presenterGraphFactory = createGraphFactory<PresenterCredentialGraph.Factory>()
+            presenterGraphFactory = createGraphFactory<PresentCredentialGraph.Factory>()
         )
 
-    override val verifierCredentialSdk: VerifierCredentialSdk =
-        VerifierCredentialSdkImpl(
+    override val verifyCredentialSdk: VerifyCredentialSdk =
+        VerifyCredentialSdkImpl(
             appGraph = appGraph,
-            verifierGraphFactory = createGraphFactory<VerifierCredentialGraph.Factory>()
+            verifierGraphFactory = createGraphFactory<VerifyCredentialGraph.Factory>()
         )
 }

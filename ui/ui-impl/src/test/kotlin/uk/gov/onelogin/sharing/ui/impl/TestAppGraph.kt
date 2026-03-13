@@ -5,9 +5,9 @@ import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialGraph
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
+import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 
@@ -30,12 +30,12 @@ fun createTestAppGraph(
         logger = logger
     )
 
-fun createTestHolderGraph(appGraph: CredentialSharingAppGraph): PresenterCredentialGraph =
-    createGraphFactory<PresenterCredentialGraph.Factory>()
+fun createTestHolderGraph(appGraph: CredentialSharingAppGraph): PresentCredentialGraph =
+    createGraphFactory<PresentCredentialGraph.Factory>()
         .create(appGraph = appGraph, credentialProvider = FakeCredentialProvider())
 
-fun createTestVerifierGraph(appGraph: CredentialSharingAppGraph): VerifierCredentialGraph =
-    createGraphFactory<VerifierCredentialGraph.Factory>()
+fun createTestVerifierGraph(appGraph: CredentialSharingAppGraph): VerifyCredentialGraph =
+    createGraphFactory<VerifyCredentialGraph.Factory>()
         .create(
             appGraph = appGraph,
             verifierConfig = verifierConfigStub

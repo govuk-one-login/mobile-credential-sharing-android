@@ -6,16 +6,16 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialGraph
+import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialGraph
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.internal.presenter.CredentialPresenterImpl
-import uk.gov.onelogin.sharing.di.internal.presenter.PresenterCredentialSdkImpl
+import uk.gov.onelogin.sharing.di.internal.presenter.PresentCredentialSdkImpl
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 
 class PresenterSharingSdkImplTest {
     private val appGraph = mockk<CredentialSharingAppGraph>()
-    private val presenterGraphFactory = mockk<PresenterCredentialGraph.Factory>()
-    private val holderGraph = mockk<PresenterCredentialGraph>()
+    private val presenterGraphFactory = mockk<PresentCredentialGraph.Factory>()
+    private val holderGraph = mockk<PresentCredentialGraph>()
     private val orchestrator = mockk<Orchestrator.Holder>()
 
     @Test
@@ -25,7 +25,7 @@ class PresenterSharingSdkImplTest {
         every { presenterGraphFactory.create(appGraph, credentialProvider) } returns holderGraph
         every { holderGraph.holderOrchestrator() } returns orchestrator
 
-        val sdk = PresenterCredentialSdkImpl(
+        val sdk = PresentCredentialSdkImpl(
             appGraph = appGraph,
             presenterGraphFactory = presenterGraphFactory
         )

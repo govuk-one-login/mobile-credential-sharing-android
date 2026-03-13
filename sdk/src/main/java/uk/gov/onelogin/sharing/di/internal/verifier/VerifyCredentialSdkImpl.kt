@@ -3,13 +3,13 @@ package uk.gov.onelogin.sharing.di.internal.verifier
 import uk.gov.onelogin.VerifierConfig
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.di.api.verifier.CredentialVerifier
-import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialGraph
-import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialSdk
+import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialGraph
+import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialSdk
 
-class VerifierCredentialSdkImpl(
+class VerifyCredentialSdkImpl(
     private val appGraph: CredentialSharingAppGraph,
-    private val verifierGraphFactory: VerifierCredentialGraph.Factory
-) : VerifierCredentialSdk {
+    private val verifierGraphFactory: VerifyCredentialGraph.Factory
+) : VerifyCredentialSdk {
 
     override fun verifier(verifierConfig: VerifierConfig): CredentialVerifier {
         val orchestrator = verifierGraphFactory

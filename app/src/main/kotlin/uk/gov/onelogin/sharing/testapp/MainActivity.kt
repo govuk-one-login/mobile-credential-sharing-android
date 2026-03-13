@@ -10,23 +10,23 @@ import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.VerificationRequest
 import uk.gov.onelogin.VerifierConfig
-import uk.gov.onelogin.sharing.di.api.presenter.PresenterCredentialSdk
-import uk.gov.onelogin.sharing.di.api.verifier.VerifierCredentialSdk
+import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialSdk
+import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialSdk
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var presenterCredentialSdk: PresenterCredentialSdk
+    lateinit var presentCredentialSdk: PresentCredentialSdk
 
     @Inject
-    lateinit var verifierCredentialSdk: VerifierCredentialSdk
+    lateinit var verifyCredentialSdk: VerifyCredentialSdk
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val holder = presenterCredentialSdk
+        val holder = presentCredentialSdk
             .presenter(SampleCredentialProvider())
 
         val verificationRequest = VerificationRequest(
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         )
         val trustedCertificates: List<Certificate> = emptyList()
 
-        val verifier = verifierCredentialSdk
+        val verifier = verifyCredentialSdk
             .verifier(
                 VerifierConfig(
                     verificationRequest = verificationRequest,

@@ -18,23 +18,23 @@ import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 @DependencyGraph(
     scope = VerifierUiScope::class
 )
-interface VerifierCredentialSharingUiGraph : ViewModelGraph {
+interface VerifierUiGraph : ViewModelGraph {
 
     /**
-     * Factory for creating instances of [VerifierCredentialSharingUiGraph].
+     * Factory for creating instances of [VerifierUiGraph].
      */
     @DependencyGraph.Factory
     fun interface Factory {
         /**
-         * Creates a new [VerifierCredentialSharingUiGraph] instance.
+         * Creates a new [VerifierUiGraph] instance.
          *
          * @param appGraph The application-level dependency graph to include.
-         * @return A configured [VerifierCredentialSharingUiGraph] instance.
+         * @return A configured [VerifierUiGraph] instance.
          */
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
             @Provides verifierOrchestrator: Orchestrator.Verifier
-        ): VerifierCredentialSharingUiGraph
+        ): VerifierUiGraph
     }
 
     fun appGraph(): CredentialSharingAppGraph

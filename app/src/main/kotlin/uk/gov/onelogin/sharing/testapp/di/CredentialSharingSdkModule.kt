@@ -25,11 +25,11 @@ object CredentialSharingSdkModule {
 
     @Provides
     @Singleton
-    fun providePresenterCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
-        credentialSharingSdk.presenterCredentialSdk
+    fun providePresentCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
+        credentialSharingSdk.presentCredentialSdk
 
     @Provides
     @Singleton
-    fun provideVerifierCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
-        credentialSharingSdk.verifierCredentialSdk
+    fun provideVerifyCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
+        credentialSharingSdk.verifyCredentialSdk
 }

@@ -18,23 +18,23 @@ import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 @DependencyGraph(
     scope = HolderUiScope::class
 )
-interface HolderCredentialSharingUiGraph : ViewModelGraph {
+interface HolderUiGraph : ViewModelGraph {
 
     /**
-     * Factory for creating instances of [HolderCredentialSharingUiGraph].
+     * Factory for creating instances of [HolderUiGraph].
      */
     @DependencyGraph.Factory
     fun interface Factory {
         /**
-         * Creates a new [HolderCredentialSharingUiGraph] instance.
+         * Creates a new [HolderUiGraph] instance.
          *
          * @param appGraph The application-level dependency graph to include.
-         * @return A configured [HolderCredentialSharingUiGraph] instance.
+         * @return A configured [HolderUiGraph] instance.
          */
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
             @Provides holderOrchestrator: Orchestrator.Holder
-        ): HolderCredentialSharingUiGraph
+        ): HolderUiGraph
     }
 
     fun appGraph(): CredentialSharingAppGraph

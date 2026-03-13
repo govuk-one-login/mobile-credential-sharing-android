@@ -1,25 +1,25 @@
-package uk.gov.onelogin.sharing.di.api.presenter
+package uk.gov.onelogin.sharing.di.api.verifier
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
 import dev.zacsweers.metro.Provides
-import uk.gov.onelogin.CredentialProvider
+import uk.gov.onelogin.VerifierConfig
 import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
 
 @DependencyGraph(AppScope::class)
-interface PresenterCredentialGraph {
+interface VerifyCredentialGraph {
 
     @DependencyGraph.Factory
     fun interface Factory {
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
-            @Provides credentialProvider: CredentialProvider
-        ): PresenterCredentialGraph
+            @Provides verifierConfig: VerifierConfig
+        ): VerifyCredentialGraph
     }
 
-    fun holderOrchestrator(): Orchestrator.Holder
+    fun verifierOrchestrator(): Orchestrator.Verifier
 
-    fun credentialProvider(): CredentialProvider
+    fun verifierConfig(): VerifierConfig
 }
