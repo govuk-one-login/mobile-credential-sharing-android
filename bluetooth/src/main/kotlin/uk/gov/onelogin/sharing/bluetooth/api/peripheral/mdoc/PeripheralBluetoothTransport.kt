@@ -34,10 +34,10 @@ interface PeripheralBluetoothTransport {
     /**
      * Stops the BLE advertising and GATT service.
      */
-    suspend fun stop()
+    suspend fun stop(serviceUuid: UUID)
 
     /**
      * Notifies the client to end the session with end code 0x02
      */
-    fun notifySessionEnd(serviceUuid: UUID)
+    suspend fun notifySessionEnd(serviceUuid: UUID)
 }

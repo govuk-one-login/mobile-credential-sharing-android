@@ -4,6 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.SessionEndStateQueued
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
@@ -27,6 +29,10 @@ class AndroidPeripheralBluetoothTransport(
     @ApplicationScope coroutineScope: CoroutineScope,
     private val logger: Logger
 ) : PeripheralBluetoothTransport {
+    companion object {
+        private const val BLE_SEND_NOTIFICATION_DELAY = 200L
+    }
+
     private val _state = MutableStateFlow<PeripheralBluetoothState>(PeripheralBluetoothState.Idle)
     override val state: StateFlow<PeripheralBluetoothState> = _state
 
@@ -82,14 +88,19 @@ class AndroidPeripheralBluetoothTransport(
         gattServerManager.open(serviceUuid)
     }
 
-    override suspend fun stop() {
+    override suspend fun stop(serviceUuid: UUID) {
+        notifySessionEnd(serviceUuid)
         bleAdvertiser.stopAdvertise()
         gattServerManager.close()
         bluetoothStateMonitor.stop()
     }
 
-    override fun notifySessionEnd(serviceUuid: UUID) {
-        gattServerManager.notifySessionEnd(serviceUuid)
+    override suspend fun notifySessionEnd(serviceUuid: UUID) {
+        val result = gattServerManager.notifySessionEnd(serviceUuid)
+        if (result == SessionEndStateQueued.SUCCESS) {
+            // allow time for the END notification to be sent before closing the GATT server
+            delay(BLE_SEND_NOTIFICATION_DELAY)
+        }
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {
