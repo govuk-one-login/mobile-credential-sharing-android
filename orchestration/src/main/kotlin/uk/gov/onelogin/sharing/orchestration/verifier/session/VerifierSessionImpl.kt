@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import kotlin.reflect.KClass
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 
@@ -11,7 +12,7 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  *
  * Internally, the [transitionTo] function uses [update] instead of [kotlinx.coroutines.flow.MutableStateFlow.emit].
  *
- * @param internalState The [VerifierSessionState] that the [currentState] begins with.
+ * @param internalState The [VerifierSessionState] that the session begins with.
  * Defaults to a [kotlinx.coroutines.flow.MutableStateFlow] beginning with [VerifierSessionState.NotStarted].
  * @param transitionMap The [Map] of valid transitions. Used within [transitionTo]. Defaults to
  * [validVerifierTransitions].
@@ -20,11 +21,10 @@ data class VerifierSessionImpl(
     private val logger: Logger,
     private var internalState: VerifierSessionState = VerifierSessionState.NotStarted,
     private val transitionMap: VerifierSessionStateTransitions = validVerifierTransitions
-) : VerifierSession {
+) : VerifierSession,
+    Completable by internalState {
 
     override fun getCurrentState(): VerifierSessionState = internalState
-
-    override fun isComplete(): Boolean = internalState.isComplete()
 
     override fun getAvailableTransitions(): Set<KClass<out VerifierSessionState>> =
         checkNotNull(transitionMap[internalState::class]) {

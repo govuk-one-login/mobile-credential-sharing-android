@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import kotlin.reflect.KClass
 import uk.gov.logging.api.Logger
+import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 
@@ -11,7 +12,7 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  *
  * Internally, the [transitionTo] function uses [update] instead of [kotlinx.coroutines.flow.MutableStateFlow.emit].
  *
- * @param internalState The [HolderSessionState] that the [currentState] begins with. Defaults to a
+ * @param internalState The [HolderSessionState] that the session begins with. Defaults to a
  * [kotlinx.coroutines.flow.MutableStateFlow] beginning with [HolderSessionState.NotStarted].
  * @param transitionMap The [Map] of valid transitions. Used within [transitionTo]. Defaults to
  * [validHolderTransitions].
@@ -21,11 +22,10 @@ data class HolderSessionImpl(
     override val sessionContext: HolderSessionContext,
     private var internalState: HolderSessionState = HolderSessionState.NotStarted,
     private val transitionMap: HolderSessionStateTransitions = validHolderTransitions
-) : HolderSession {
+) : HolderSession,
+    Completable by internalState {
 
     override fun getCurrentState(): HolderSessionState = internalState
-
-    override fun isComplete(): Boolean = internalState.isComplete()
 
     override fun getAvailableTransitions(): Set<KClass<out HolderSessionState>> =
         checkNotNull(transitionMap[internalState::class]) {
