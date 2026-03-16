@@ -49,8 +49,8 @@ class HolderOrchestrator(
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
-    private val prerequisiteGate: PrerequisiteGate,
-    ) : Orchestrator.Holder {
+    private val prerequisiteGate: PrerequisiteGate
+) : Orchestrator.Holder {
     private val session = MutableStateFlow(sessionFactory.create())
     override val holderSessionState: StateFlow<HolderSessionState> = session.map {
         it.getCurrentState()

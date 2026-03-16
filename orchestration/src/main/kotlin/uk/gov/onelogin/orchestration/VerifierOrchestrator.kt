@@ -40,7 +40,7 @@ class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,
     private val sessionFactory: SessionFactory<VerifierSessionImpl>,
-    @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
+    @param:ApplicationScope private val appCoroutineScope: CoroutineScope
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -64,6 +64,18 @@ class VerifierOrchestrator(
                     )
                 }
             }
+        }
+
+        if (verifierSessionState.value !is VerifierSessionState.NotStarted) {
+            logger.error(
+                logTag,
+                START_ORCHESTRATION_ERROR,
+                OrchestratorCannotStartException(
+                    START_ORCHESTRATION_ERROR,
+                    IllegalStateException("Journey already in progress")
+                )
+            )
+            return
         }
 
         try {
@@ -102,13 +114,13 @@ class VerifierOrchestrator(
     }
 
     private fun handleStartPrerequisiteFailure(
-        responseMap: Map<Prerequisite, PrerequisiteResponse>,
+        responseMap: Map<Prerequisite, PrerequisiteResponse>
     ) {
         responseMap.filterValues {
             PrerequisiteResponse.MeetsPrerequisites != it
         }
             .let(VerifierSessionState::Preflight)
-            .let { safeTransitionTo(state = it) }
+            .let { safeTransitionTo(state = it, logMessage = START_ORCHESTRATION_ERROR) }
     }
 
     override fun processQrCode(qrCode: BarcodeDataResult) {
@@ -155,7 +167,7 @@ class VerifierOrchestrator(
     private fun safeTransitionTo(
         state: VerifierSessionState,
         logMessage: String = "$CANNOT_TRANSITION_TO_STATE $state",
-        exceptionWrapper: ((String, Throwable) -> Exception)? = null,
+        exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
         try {
             if (sessionFlow.value.canTransition(state)) {

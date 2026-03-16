@@ -9,8 +9,6 @@ data object OrchestratorStubs {
      * these properties.
      */
     data object LogMessages {
-        const val CANCEL_ORCHESTRATION_ERROR: String = "Cannot cancel orchestration"
-        const val CANCEL_ORCHESTRATION_SUCCESS: String = "cancel orchestration"
         const val START_ORCHESTRATION_ERROR: String = "Cannot start orchestration"
         const val START_ORCHESTRATION_SUCCESS: String = "start orchestration"
     }
