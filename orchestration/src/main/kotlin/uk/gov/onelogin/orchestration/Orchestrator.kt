@@ -2,7 +2,7 @@ package uk.gov.onelogin.orchestration
 
 import android.Manifest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.Resettable
@@ -27,7 +27,7 @@ interface Orchestrator : Resettable {
     fun cancel()
 
     interface Holder : Orchestrator {
-        val holderSessionState: SharedFlow<HolderSessionState>
+        val holderSessionState: StateFlow<HolderSessionState>
 
         companion object {
             const val JOURNEY_NAME: String = "holder"

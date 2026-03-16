@@ -5,7 +5,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -27,7 +26,6 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
@@ -78,12 +76,12 @@ class HolderOrchestratorTest {
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
-    private fun createSessionFactory(): SessionFactory<HolderSession> =
-        FakeSessionFactory<HolderSession>(
+    private fun createSessionFactory() =
+        FakeSessionFactory(
             initialStates.map { initialState ->
                 HolderSessionImpl(
                     logger = logger,
-                    internalState = MutableStateFlow(initialState),
+                    internalState = initialState,
                     sessionContext = holderSessionContextStub
                 )
             }
@@ -92,7 +90,7 @@ class HolderOrchestratorTest {
     private fun createOrchestrator(
         peripheralBluetoothTransport: PeripheralBluetoothTransport =
             FakePeripheralBluetoothTransport(),
-        sessionFactory: SessionFactory<HolderSession> = createSessionFactory()
+        sessionFactory: SessionFactory<HolderSessionImpl> = createSessionFactory()
     ): Orchestrator = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -290,7 +288,7 @@ class HolderOrchestratorTest {
 
         assert("Error Mdoc - Disconnected: $DEVICE_ADDRESS" in logger)
         assertEquals(1, peripheralBluetoothTransport.stopCalls)
-        val state = (sessionFactory as FakeSessionFactory).getCurrentSession().currentState.value
+        val state = (sessionFactory as FakeSessionFactory).getCurrentSession().getCurrentState()
         val failed = state as HolderSessionState.Complete.Failed
         assert(failed.error.exception is BluetoothDisconnectedException)
     }

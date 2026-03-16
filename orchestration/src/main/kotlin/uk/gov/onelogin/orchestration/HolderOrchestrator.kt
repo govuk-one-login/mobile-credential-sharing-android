@@ -2,10 +2,16 @@ package uk.gov.onelogin.orchestration
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
@@ -26,7 +32,7 @@ import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
@@ -35,29 +41,38 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 
+@SingleIn(AppScope::class)
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
     private val logger: Logger,
-    private val sessionFactory: SessionFactory<HolderSession>,
+    private val sessionFactory: SessionFactory<HolderSessionImpl>,
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
-    private val prerequisiteGate: PrerequisiteGate
-) : Orchestrator.Holder {
-    private var session: HolderSession = sessionFactory.create()
-    override var holderSessionState: SharedFlow<HolderSessionState> = session.currentState
+    private val prerequisiteGate: PrerequisiteGate,
+    ) : Orchestrator.Holder {
+    private val session = MutableStateFlow(sessionFactory.create())
+    override val holderSessionState: StateFlow<HolderSessionState> = session.map {
+        it.getCurrentState()
+    }.stateIn(
+        appCoroutineScope,
+        SharingStarted.Eagerly,
+        HolderSessionState.NotStarted
+    )
 
     override fun start() {
-        if (session.isComplete()) {
-            session = sessionFactory.create().also {
-                logger.debug(
-                    logTag,
-                    recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
-                )
+        if (session.value.isComplete()) {
+            session.update {
+                sessionFactory.create().also {
+                    logger.debug(
+                        logTag,
+                        recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
+                    )
+                }
             }
         }
 
-        if (session.currentState.value !is HolderSessionState.NotStarted) {
+        if (holderSessionState.value !is HolderSessionState.NotStarted) {
             logger.error(
                 logTag,
                 START_ORCHESTRATION_ERROR,
@@ -108,11 +123,11 @@ class HolderOrchestrator(
 
                 appCoroutineScope.launch {
                     peripheralBluetoothTransport.start(
-                        serviceUuid = session.sessionContext.sessionUuid
+                        serviceUuid = session.value.sessionContext.sessionUuid
                     )
                 }
 
-                val qrCode = session.sessionContext.qrCode
+                val qrCode = session.value.sessionContext.qrCode
                 if (qrCode.isNotEmpty()) {
                     safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
                 }
@@ -141,11 +156,13 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
-        session = sessionFactory.create().also {
-            logger.debug(
-                logTag,
-                createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
-            )
+        session.update {
+            sessionFactory.create().also {
+                logger.debug(
+                    logTag,
+                    createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
+                )
+            }
         }
     }
 
@@ -164,7 +181,7 @@ class HolderOrchestrator(
                 logger.debug(
                     logTag,
                     "Mdoc - Advertising Started UUID: " +
-                        "${session.sessionContext.sessionUuid}"
+                        "${session.value.sessionContext.sessionUuid}"
                 )
             }
 
@@ -246,7 +263,7 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.MessageReceived -> {
-                val keypair = session.sessionContext.keyPair?.private
+                val keypair = session.value.sessionContext.keyPair?.private
                 if (keypair !is ECPrivateKey) {
                     logger.error(
                         logTag,
@@ -257,7 +274,7 @@ class HolderOrchestrator(
 
                 val deviceRequest = decryptDeviceRequestUseCase.execute(
                     sessionEstablishmentBytes = state.message,
-                    engagement = session.sessionContext.engagement,
+                    engagement = session.value.sessionContext.engagement,
                     holderPrivateKey = keypair
                 )
 
@@ -288,7 +305,9 @@ class HolderOrchestrator(
         exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
         try {
-            session.transitionTo(state)
+            if (session.value.canTransition(state)) {
+                session.update { it.copy(internalState = state) }
+            }
             logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
         } catch (exception: IllegalStateException) {
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception

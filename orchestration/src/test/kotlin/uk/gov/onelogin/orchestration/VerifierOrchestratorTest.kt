@@ -3,16 +3,18 @@ package uk.gov.onelogin.orchestration
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.assertEquals
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
@@ -24,7 +26,6 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
@@ -39,6 +40,9 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierS
 
 @RunWith(TestParameterInjector::class)
 class VerifierOrchestratorTest {
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
     private val logger = SystemLogger()
     private val resetOrchestratorSessionLog = "Cleared Orchestrator verifier session"
     private val startSessionAfterCompletionLog =
@@ -50,11 +54,11 @@ class VerifierOrchestratorTest {
     )
 
     private val sessionFactory by lazy {
-        FakeSessionFactory<VerifierSession>(
+        FakeSessionFactory(
             initialStates.map { initialState ->
                 VerifierSessionImpl(
                     logger = logger,
-                    internalState = MutableStateFlow(initialState)
+                    internalState = initialState
                 )
             }
         )
@@ -69,11 +73,14 @@ class VerifierOrchestratorTest {
         StubPrerequisiteGate(gateResponses)
     }
 
+    private val scope = TestScope(mainDispatcherRule.testDispatcher)
+
     private val orchestrator by lazy {
         VerifierOrchestrator(
             logger = logger,
             prerequisiteGate = gate,
-            sessionFactory = sessionFactory
+            sessionFactory = sessionFactory,
+            appCoroutineScope = scope,
         )
     }
 

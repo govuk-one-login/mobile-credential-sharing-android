@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
@@ -22,16 +21,13 @@ class HolderSessionImplTest {
 
     private var initialState: HolderSessionState = HolderSessionState.NotStarted
 
-    private val stateFlow: MutableStateFlow<HolderSessionState> by lazy {
-        MutableStateFlow(initialState)
-    }
     private var validTransitions = validHolderTransitions
 
     private val logger = SystemLogger()
     private val session by lazy {
         HolderSessionImpl(
             logger = logger,
-            internalState = stateFlow,
+            internalState = initialState,
             transitionMap = validTransitions,
             sessionContext = holderSessionContextStub
         )
@@ -51,7 +47,7 @@ class HolderSessionImplTest {
         MatcherAssert.assertThat(
             exception.message,
             CoreMatchers.equalTo(
-                "Current state (${session.currentState.value::class.java.simpleName}) " +
+                "Current state (${session.getCurrentState()::class.java.simpleName}) " +
                     "cannot transition to: ${transition::class.java.simpleName}"
             )
         )

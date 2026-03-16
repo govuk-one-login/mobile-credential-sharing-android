@@ -20,10 +20,10 @@ internal class HasCurrentState<State : Any>(private val matcher: Matcher<in Stat
         item: StateContainer<in State>?,
         mismatchDescription: Description?
     ) {
-        matcher.describeMismatch(item?.currentState?.value, mismatchDescription)
+        matcher.describeMismatch(item?.getCurrentState(), mismatchDescription)
     }
 
     override fun matchesSafely(item: StateContainer<in State>?): Boolean = matcher.matches(
-        item?.currentState?.value
+        item?.getCurrentState()
     )
 }

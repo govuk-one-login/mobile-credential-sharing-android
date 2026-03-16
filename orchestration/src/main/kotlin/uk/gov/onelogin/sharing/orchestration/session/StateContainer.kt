@@ -8,8 +8,8 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional
 /**
  * Declares that an implementation exposes [State] objects via a kotlin [StateFlow].
  */
-interface StateContainer<State : Any> {
-    val currentState: StateFlow<State>
+fun interface StateContainer<State : Any> {
+    fun getCurrentState(): State
 
     /**
      * Interface that contains all of the [StateContainer] sub-interfaces.
@@ -20,28 +20,14 @@ interface StateContainer<State : Any> {
     interface Complete<State : Any> :
         StateContainer<State>,
         Transitional<State> {
-        /**
-         * Logs the provided [message] and [throwable].
-         *
-         * Implementations usually defer to a [uk.gov.logging.api.Logger] instance.
-         */
-        fun logError(message: String, throwable: Throwable)
 
-        /**
-         * Validates then updates the [StateContainer.currentState] to [state].
-         *
-         * Implementations usually update the [StateContainer.currentState] property.
-         *
-         * @throws IllegalStateException when the provided [state] cannot be transitioned to.
-         */
-        @Throws(IllegalStateException::class)
-        fun transitionTo(state: State) {
+        fun canTransition(state: State): Boolean {
             try {
                 val availableTransitions: Set<KClass<out State>> = getAvailableTransitions()
 
                 check(state::class in availableTransitions) {
                     cannotTransitionTo(
-                        fromStateName = currentState.value::class.java.simpleName,
+                        fromStateName = getCurrentState()::class.java.simpleName,
                         toStateName = state::class.java.simpleName
                     )
                 }
@@ -54,7 +40,21 @@ interface StateContainer<State : Any> {
                 throw exception
             }
 
-            update(state)
+            return true
+        }
+
+        /**
+         * Validates then updates the [StateContainer.currentState] to [state].
+         *
+         * Implementations usually update the [StateContainer.currentState] property.
+         *
+         * @throws IllegalStateException when the provided [state] cannot be transitioned to.
+         */
+        @Throws(IllegalStateException::class)
+        fun transitionTo(state: State) {
+            if (canTransition(state)) {
+                update(state)
+            }
         }
     }
 
@@ -64,6 +64,13 @@ interface StateContainer<State : Any> {
      * Most commonly implemented alongside the [StateContainer] interface.
      */
     interface Transitional<State : Any> {
+        /**
+         * Logs the provided [message] and [throwable].
+         *
+         * Implementations usually defer to a [uk.gov.logging.api.Logger] instance.
+         */
+        fun logError(message: String, throwable: Throwable)
+
         /**
          * @return A [Set] of applicable [State] classes that can be transitioned towards.
          * @throws IllegalStateException when there are no available transitions available.
