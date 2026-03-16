@@ -29,7 +29,7 @@ class FakeGattServerManager : GattServerManager {
             )
         }
 
-        return SessionEndStateQueued.SUCCESS
+        return SessionEndStateQueued.Success
     }
 
     override fun close() {

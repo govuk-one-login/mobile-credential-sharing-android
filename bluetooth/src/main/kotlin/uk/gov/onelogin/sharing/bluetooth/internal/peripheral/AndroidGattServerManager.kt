@@ -207,16 +207,16 @@ class AndroidGattServerManager(
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued {
-        val server = gattServer ?: return SessionEndStateQueued.FAILED
+        val server = gattServer ?: return SessionEndStateQueued.Failed
         val characteristic: BluetoothGattCharacteristic =
             server.getService(serviceUuid)?.getCharacteristic(STATE_UUID)
-                ?: return SessionEndStateQueued.FAILED
+                ?: return SessionEndStateQueued.Failed
         val endValue = byteArrayOf(MdocState.END.code)
 
         val device = connectedDevice
         if (device == null) {
             logger.debug(logTag, "END command not sent - No device connected")
-            return SessionEndStateQueued.FAILED
+            return SessionEndStateQueued.NoDeviceConnected
         }
 
         val notificationResult = gattWriter.notifyAndWriteToClientCharacteristic(
@@ -229,15 +229,16 @@ class AndroidGattServerManager(
         return if (notificationResult) {
             logger.debug(logTag, "GATT: Notified state characteristic with 0x02")
             isSessionEnd = true
-            SessionEndStateQueued.SUCCESS
+            SessionEndStateQueued.Success
         } else {
             logger.error(logTag, "failed to notify client with END command: notification failed")
-            SessionEndStateQueued.FAILED
+            SessionEndStateQueued.Failed
         }
     }
 }
 
 sealed interface SessionEndStateQueued {
-    data object SUCCESS : SessionEndStateQueued
-    data object FAILED : SessionEndStateQueued
+    data object Success : SessionEndStateQueued
+    data object Failed : SessionEndStateQueued
+    data object NoDeviceConnected : SessionEndStateQueued
 }

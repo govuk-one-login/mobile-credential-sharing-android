@@ -185,7 +185,12 @@ class HolderOrchestratorTest {
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
         orchestrator.cancel()
 
-        assert("$CANNOT_TRANSITION_TO_STATE ${HolderSessionState.Complete.Cancelled}" in logger)
+        assert(
+            CANNOT_TRANSITION_TO_STATE.format(
+                state,
+                HolderSessionState.Complete.Cancelled
+            ) in logger
+        )
         assert(
             "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.Complete.Cancelled}" !in logger
         )

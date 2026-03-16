@@ -284,7 +284,7 @@ class HolderOrchestrator(
 
     private fun safeTransitionTo(
         state: HolderSessionState,
-        logMessage: String = "$CANNOT_TRANSITION_TO_STATE $state from current state: ${session.currentState.value}",
+        logMessage: String = CANNOT_TRANSITION_TO_STATE.format(session.currentState.value, state),
         exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
         try {
