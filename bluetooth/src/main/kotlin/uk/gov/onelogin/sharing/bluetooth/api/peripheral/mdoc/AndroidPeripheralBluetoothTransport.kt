@@ -17,7 +17,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.SessionEndStateQueued
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 

@@ -23,6 +23,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
@@ -98,6 +99,8 @@ class AndroidGattServerManager(
     override fun close() {
         gattServer?.close()
         gattServer = null
+        connectedDevice = null
+        isSessionEnd = false
         _events.tryEmit(GattServerEvent.ServiceStopped)
     }
 
@@ -123,13 +126,14 @@ class AndroidGattServerManager(
 
         val event = when {
             event.status == BluetoothGatt.GATT_SUCCESS &&
-                    event.newState == BluetoothProfile.STATE_CONNECTED -> {
+                event.newState == BluetoothProfile.STATE_CONNECTED -> {
                 connectedDevice = event.device
                 GattServerEvent.Connected(address)
             }
 
             event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
                 connectedDevice = null
+                isSessionEnd = false
                 GattServerEvent.Disconnected(address, isSessionEnd)
             }
 
@@ -184,7 +188,7 @@ class AndroidGattServerManager(
                     logger.debug(
                         logTag,
                         "Received descriptor write requests " +
-                                "- response not needed"
+                            "- response not needed"
                     )
                 }
         }
@@ -235,10 +239,4 @@ class AndroidGattServerManager(
             SessionEndStateQueued.Failed
         }
     }
-}
-
-sealed interface SessionEndStateQueued {
-    data object Success : SessionEndStateQueued
-    data object Failed : SessionEndStateQueued
-    data object NoDeviceConnected : SessionEndStateQueued
 }

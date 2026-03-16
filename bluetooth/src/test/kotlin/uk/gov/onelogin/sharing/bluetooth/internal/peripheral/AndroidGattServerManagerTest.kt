@@ -26,6 +26,7 @@ import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
@@ -412,7 +413,7 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `returns failed stated when BLE session end command fails to queue command`() = runTest {
+    fun `returns failed state when BLE session end command fails to queue command`() = runTest {
         val fakeGattWriter = FakeGattWriter(success = false)
         val manager = AndroidGattServerManager(
             context = context,
@@ -439,8 +440,6 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `emits message received event`() = runTest {
-
-
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
         manager.events.test {
