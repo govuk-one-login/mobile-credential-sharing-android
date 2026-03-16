@@ -10,6 +10,7 @@ object HolderSessionContextStub {
         sessionUuid = UUID.randomUUID(),
         keyPair = SessionSecurityTestStub.generateValidKeyPair(),
         engagement = "engagement",
-        qrCode = "qr_code"
+        qrCode = "qr_code",
+        decryptCounter = 1u
     )
 }

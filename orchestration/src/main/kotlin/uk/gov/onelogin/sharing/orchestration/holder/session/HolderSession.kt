@@ -11,4 +11,6 @@ interface HolderSession :
     Completable,
     StateContainer.Complete<HolderSessionState> {
     val sessionContext: HolderSessionContext
+
+    fun updateSessionContext(update: (HolderSessionContext) -> HolderSessionContext)
 }

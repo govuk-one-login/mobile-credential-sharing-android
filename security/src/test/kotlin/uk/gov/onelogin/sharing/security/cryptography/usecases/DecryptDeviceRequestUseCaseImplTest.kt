@@ -46,7 +46,8 @@ class DecryptDeviceRequestUseCaseImplTest {
         val result = useCase.execute(
             sessionEstablishmentBytes = sessionEstablishmentBytes,
             engagement = engagement,
-            holderPrivateKey = holderPrivateKey
+            holderPrivateKey = holderPrivateKey,
+            decryptCounter = 1u
         )
 
         val expectedCipherText = decodeSessionEstablishmentModel(

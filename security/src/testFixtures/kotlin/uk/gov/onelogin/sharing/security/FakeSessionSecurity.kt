@@ -29,7 +29,12 @@ class FakeSessionSecurity : SessionSecurity {
         role: DeviceRole
     ): ByteArray = byteArrayOf(2)
 
-    override fun decryptPayload(key: ByteArray, data: ByteArray, role: DeviceRole): ByteArray {
+    override fun decryptPayload(
+        key: ByteArray,
+        data: ByteArray,
+        role: DeviceRole,
+        decryptCounter: UInt
+    ): ByteArray {
         lastDecryptData = data
         lastDecryptRole = role
         return plaintextToReturn

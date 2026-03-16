@@ -84,7 +84,7 @@ class HolderOrchestratorTest {
                 HolderSessionImpl(
                     logger = logger,
                     internalState = MutableStateFlow(initialState),
-                    sessionContext = holderSessionContextStub
+                    initialContext = holderSessionContextStub
                 )
             }
         )

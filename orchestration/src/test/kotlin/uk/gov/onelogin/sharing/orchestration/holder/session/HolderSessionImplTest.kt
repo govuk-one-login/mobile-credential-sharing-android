@@ -33,7 +33,7 @@ class HolderSessionImplTest {
             logger = logger,
             internalState = stateFlow,
             transitionMap = validTransitions,
-            sessionContext = holderSessionContextStub
+            initialContext = holderSessionContextStub
         )
     }
 

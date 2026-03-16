@@ -54,7 +54,7 @@ class HolderSessionFactory(
 
         return HolderSessionImpl(
             logger = logger,
-            sessionContext = context
+            initialContext = context
         )
     }
 }

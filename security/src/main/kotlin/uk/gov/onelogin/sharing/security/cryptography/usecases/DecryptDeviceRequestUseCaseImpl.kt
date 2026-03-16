@@ -28,7 +28,8 @@ class DecryptDeviceRequestUseCaseImpl(
     override fun execute(
         sessionEstablishmentBytes: ByteArray,
         engagement: String,
-        holderPrivateKey: PrivateKey
+        holderPrivateKey: PrivateKey,
+        decryptCounter: UInt
     ): DeviceRequest {
         val sessionEstablishment = decodeSessionEstablishmentModel(
             rawBytes = sessionEstablishmentBytes,
@@ -59,7 +60,8 @@ class DecryptDeviceRequestUseCaseImpl(
         val plaintext = sessionSecurity.decryptPayload(
             key = skReader,
             data = sessionEstablishment.data,
-            role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
+            role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER,
+            decryptCounter = decryptCounter
         )
 
         val deviceRequest = deviceRequestDecoder.deviceRequestDecoder(plaintext)
