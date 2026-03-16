@@ -22,8 +22,8 @@ class HolderSessionFactory(
     private val logger: Logger,
     private val sessionSecurity: SessionSecurity,
     private val engagementGenerator: Engagement
-) : SessionFactory<HolderSession> {
-    override fun create(): HolderSession {
+) : SessionFactory<HolderSessionImpl> {
+    override fun create(): HolderSessionImpl {
         val uuid = UUID.randomUUID()
 
         val keyPair = sessionSecurity.generateEcKeyPair(
