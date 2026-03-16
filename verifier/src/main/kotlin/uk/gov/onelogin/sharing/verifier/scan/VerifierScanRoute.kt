@@ -11,6 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.cameraService.scan.Scanner
 import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
 
 /**
@@ -37,7 +38,8 @@ object VerifierScanRoute {
             ) {
                 VerifierScanner(
                     onInvalidBarcode = onInvalidBarcode,
-                    onValidBarcode = onValidBarcode
+                    onValidBarcode = onValidBarcode,
+                    scanner = { Scanner() }
                 )
             }
         }

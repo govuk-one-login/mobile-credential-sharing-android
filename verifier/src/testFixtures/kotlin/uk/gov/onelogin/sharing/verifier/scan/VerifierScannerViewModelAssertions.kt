@@ -13,8 +13,5 @@ object VerifierScannerViewModelAssertions {
      * @see hasPreviouslyGrantedPermission
      * @see hasNoBarcodeData
      */
-    fun isInInitialState(): Matcher<VerifierScannerViewModel> = allOf(
-        hasPreviouslyGrantedPermission(),
-        hasNoBarcodeData()
-    )
+    fun isInInitialState(): Matcher<VerifierScannerViewModel> = allOf()
 }

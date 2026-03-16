@@ -33,7 +33,7 @@ android {
 dependencies {
     listOf(
         projects.core,
-        libs.metro.viewmodel.compose,
+        libs.metro.viewmodel.compose
     ).forEach(::implementation)
 
     listOf(

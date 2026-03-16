@@ -41,7 +41,6 @@ dependencies {
     listOf(
         projects.bluetooth,
         projects.core,
-        projects.cameraService,
         projects.models,
         projects.security,
         projects.orchestration,

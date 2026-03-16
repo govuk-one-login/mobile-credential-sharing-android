@@ -50,9 +50,11 @@ data object VerifierRoutes {
             )
             configureScannedInvalidQrRoute(
                 onTryAgainClick = {
-                    navController.popBackStack()
                     navController.navigate(VerifyCredentialRoute) {
-                        popUpTo<VerifyCredentialRoute> { inclusive = true }
+                        popUpTo<VerifierRoutes> {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
                     }
                 }
             )

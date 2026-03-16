@@ -35,8 +35,8 @@ dependencies {
         libs.androidx.camera.lifecycle,
         projects.bluetooth,
         projects.core,
-        projects.security,
-        projects.cameraService
+        projects.cameraService,
+        projects.security
     ).forEach(::api)
 
     listOf(projects.models)
@@ -51,6 +51,7 @@ dependencies {
     listOf(
         libs.com.google.test.parameter.injector,
         libs.junit,
+        projects.cameraService,
         projects.models,
         testFixtures(projects.security)
     ).forEach(::testFixturesApi)

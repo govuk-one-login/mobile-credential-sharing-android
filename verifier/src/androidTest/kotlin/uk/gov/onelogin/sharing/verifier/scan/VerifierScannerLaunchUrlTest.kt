@@ -2,13 +2,11 @@ package uk.gov.onelogin.sharing.verifier.scan
 
 import android.content.Context
 import android.content.res.Resources
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert
@@ -17,18 +15,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.verifier.scan.state.CompleteVerifierScannerState
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
 
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalPermissionsApi::class)
 class VerifierScannerLaunchUrlTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val model = VerifierScannerViewModel(
-        state = CompleteVerifierScannerState(),
-        orchestrator = FakeOrchestrator()
-    )
+
     private val resources: Resources = context.resources
 
     @get:Rule
@@ -52,17 +45,22 @@ class VerifierScannerLaunchUrlTest {
 
     @Test
     fun validUrlsDeferToOnValidBarcodeLambda() = runTest {
+        val fakeOrchestrator = FakeOrchestrator()
+        val model = VerifierScannerViewModel(orchestrator = fakeOrchestrator)
+
         composeTestRule.run {
             var hasNavigatedViaValidBarcode = false
 
             render(
-                model,
+                model = model,
                 onValidBarcode = { hasNavigatedViaValidBarcode = true }
             )
 
             waitForIdle()
 
-            model.update(BarcodeDataResultStubs.validBarcodeDataResult)
+            fakeOrchestrator.processQrCode(
+                BarcodeDataResultStubs.validBarcodeDataResult
+            )
 
             waitForIdle()
 
@@ -72,16 +70,22 @@ class VerifierScannerLaunchUrlTest {
 
     @Test
     fun invalidUrlsDeferToOnInvalidBarcodeLambda() = runTest {
+        val fakeOrchestrator = FakeOrchestrator()
+        val model = VerifierScannerViewModel(orchestrator = fakeOrchestrator)
+
         composeTestRule.run {
             var hasNavigatedViaInvalidBarcode = false
+
             render(
-                model,
+                model = model,
                 onInvalidBarcode = { hasNavigatedViaInvalidBarcode = true }
             )
 
             waitForIdle()
 
-            model.update(BarcodeDataResultStubs.invalidBarcodeDataResultOne)
+            fakeOrchestrator.processQrCode(
+                BarcodeDataResultStubs.invalidBarcodeDataResultOne
+            )
 
             waitForIdle()
 
@@ -91,16 +95,15 @@ class VerifierScannerLaunchUrlTest {
 
     private fun render(
         model: VerifierScannerViewModel,
-        modifier: Modifier = Modifier,
         onInvalidBarcode: (String) -> Unit = {},
         onValidBarcode: (String) -> Unit = {}
     ) {
         composeTestRule.setContent {
             VerifierScanner(
-                modifier = modifier,
                 viewModel = model,
                 onInvalidBarcode = onInvalidBarcode,
-                onValidBarcode = onValidBarcode
+                onValidBarcode = onValidBarcode,
+                scanner = {}
             )
         }
     }

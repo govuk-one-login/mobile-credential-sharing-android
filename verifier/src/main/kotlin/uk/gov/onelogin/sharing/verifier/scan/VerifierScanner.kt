@@ -4,23 +4,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import uk.gov.onelogin.sharing.cameraService.scan.Scanner
 import uk.gov.onelogin.sharing.verifier.VerifierNavigationEvents
+import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 
 @Composable
 fun VerifierScanner(
-    modifier: Modifier = Modifier,
     viewModel: VerifierScannerViewModel = metroViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    scanner: @Composable () -> Unit,
     onInvalidBarcode: (String) -> Unit = {},
     onValidBarcode: (String) -> Unit = {}
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val currentOnInvalidBarcode by rememberUpdatedState(onInvalidBarcode)
     val currentOnValidBarcode by rememberUpdatedState(onValidBarcode)
@@ -41,5 +42,7 @@ fun VerifierScanner(
         }
     }
 
-    Scanner()
+    if (uiState is VerifierUiState.StartScanner) {
+        scanner()
+    }
 }

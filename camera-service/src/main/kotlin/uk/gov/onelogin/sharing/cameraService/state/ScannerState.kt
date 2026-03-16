@@ -21,17 +21,13 @@ sealed interface ScannerState {
      * Property bag Interface that combines all of the StateFlow based Interfaces.
      *
      * @see BarcodeDataResultState.State
-     * @see PreviouslyDeniedPermissionState.State
      */
-    interface States :
-        BarcodeDataResultState.State
+    interface States : BarcodeDataResultState.State
 
     /**
      * Interface that combines all of the StateFlow updater Interfaces.
      *
      * @see BarcodeDataResultState.Updater
-     * @see PreviouslyDeniedPermissionState.Updater
      */
-    interface Updaters :
-        BarcodeDataResultState.Updater
+    interface Updaters : BarcodeDataResultState.Updater
 }

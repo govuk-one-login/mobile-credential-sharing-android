@@ -117,16 +117,12 @@ class VerifierScannerRule(
      * Due to issues with the metro dependency injection framework's compiler, don't use this
      * in android instrumentation tests.
      */
-    fun render(
-        modifier: Modifier = Modifier,
-        onInvalidBarcode: (String) -> Unit = {},
-        onValidBarcode: (String) -> Unit = {}
-    ) {
+    fun render(onInvalidBarcode: (String) -> Unit = {}, onValidBarcode: (String) -> Unit = {}) {
         setContent {
             VerifierScanner(
-                modifier = modifier,
                 onInvalidBarcode = onInvalidBarcode,
-                onValidBarcode = onValidBarcode
+                onValidBarcode = onValidBarcode,
+                scanner = {}
             )
         }
     }

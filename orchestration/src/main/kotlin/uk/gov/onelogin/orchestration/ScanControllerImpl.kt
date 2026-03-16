@@ -5,15 +5,17 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
-import uk.gov.onelogin.sharing.cameraService.scan.ScanObserver
+import uk.gov.onelogin.sharing.cameraService.scan.ScanController
 
-@ContributesBinding(ViewModelScope::class, binding = binding<ScanObserver>())
+@ContributesBinding(ViewModelScope::class, binding = binding<ScanController>())
 @Inject
-class ScanObserverImpl(
-    private val orchestrator: Orchestrator.Verifier
-) : ScanObserver {
+class ScanControllerImpl(private val orchestrator: Orchestrator.Verifier) : ScanController {
 
     override fun onScanResult(result: BarcodeDataResult) {
         orchestrator.processQrCode(result)
+    }
+
+    override fun reset() {
+        orchestrator.cancel()
     }
 }

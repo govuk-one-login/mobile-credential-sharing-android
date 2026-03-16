@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 
 /**
@@ -17,11 +16,5 @@ object VerifierScannerViewModelHelper {
      * - [Android developer documentation: Testing StateFlow](https://developer.android.com/kotlin/flow/test#stateflows)
      */
     fun TestScope.monitor(model: VerifierScannerViewModel) {
-        listOf(
-            model.hasPreviouslyDeniedPermission,
-            model.barcodeDataResult
-        ).forEach {
-            backgroundScope.launch { it.collect {} }
-        }
     }
 }

@@ -4,7 +4,10 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +24,7 @@ import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnS
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
+import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
@@ -35,6 +39,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 @SingleIn(AppScope::class)
 class VerifierOrchestrator(
     private val logger: Logger,
+    @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val prerequisiteGate: PrerequisiteGate,
     private val sessionFactory: SessionFactory<VerifierSession>
 ) : Orchestrator.Verifier {
@@ -43,15 +48,16 @@ class VerifierOrchestrator(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val verifierSessionState: StateFlow<VerifierSessionState> =
-        sessionFlow. flatMapLatest { session ->
+        sessionFlow.flatMapLatest { session ->
             session.currentState
         }.stateIn(
-            scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main.immediate),
+            scope = appCoroutineScope,
             started = SharingStarted.Eagerly,
             initialValue = VerifierSessionState.NotStarted
         )
 
     override fun start() {
+        println("Starting VO current state is ${verifierSessionState.value}")
         if (sessionFlow.value.isComplete()) {
             sessionFlow.value = sessionFactory.create().also {
                 logger.debug(

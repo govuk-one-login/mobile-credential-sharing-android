@@ -8,9 +8,8 @@ import uk.gov.onelogin.sharing.cameraService.scan.OrchestratorInteractor
 
 @ContributesBinding(ViewModelScope::class, binding = binding<OrchestratorInteractor>())
 @Inject
-class OrchestratorInteractorImpl(
-    private val orchestrator: Orchestrator.Verifier
-) : OrchestratorInteractor {
+class OrchestratorInteractorImpl(private val orchestrator: Orchestrator.Verifier) :
+    OrchestratorInteractor {
 
     override fun cancel() {
         orchestrator.cancel()
