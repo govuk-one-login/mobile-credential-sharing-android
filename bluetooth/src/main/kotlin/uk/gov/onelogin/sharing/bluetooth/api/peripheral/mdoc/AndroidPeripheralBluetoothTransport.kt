@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.SingleIn
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -87,8 +88,10 @@ class AndroidPeripheralBluetoothTransport(
         gattServerManager.open(serviceUuid)
     }
 
-    override suspend fun stop(serviceUuid: UUID) {
-        notifySessionEnd(serviceUuid)
+    override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean) {
+        if (sendEndCommand) {
+            notifySessionEnd(serviceUuid)
+        }
         bleAdvertiser.stopAdvertise()
         gattServerManager.close()
         bluetoothStateMonitor.stop()

@@ -122,7 +122,10 @@ class AndroidMdocSessionManagerTest {
         sessionManager.state.test {
             assertEquals(PeripheralBluetoothState.AdvertisingStarted, awaitItem())
 
-            sessionManager.stop(uuid)
+            sessionManager.stop(
+                serviceUuid = uuid,
+                sendEndCommand = true
+            )
 
             assertEquals(1, advertiser.stopCalls)
             assertEquals(PeripheralBluetoothState.AdvertisingStopped, awaitItem())

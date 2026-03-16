@@ -101,6 +101,7 @@ class AndroidGattServerManager(
         gattServer = null
         connectedDevice = null
         isSessionEnd = false
+        mtu = MIN_MTU
         _events.tryEmit(GattServerEvent.ServiceStopped)
     }
 
@@ -133,7 +134,6 @@ class AndroidGattServerManager(
 
             event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
                 connectedDevice = null
-                isSessionEnd = false
                 GattServerEvent.Disconnected(address, isSessionEnd)
             }
 

@@ -33,8 +33,14 @@ interface PeripheralBluetoothTransport {
 
     /**
      * Stops the BLE advertising and GATT service.
+     *
+     * @param serviceUuid The [UUID] of the service to send the end command
+     * @param sendEndCommand Used trigger the state end (0x02) command.
+     * If the peripheral tiggers the disconnection, it should send the end command
+     * before the teardown
+     * If the disconnection is triggered from the other side, it shouldn't send the end command
      */
-    suspend fun stop(serviceUuid: UUID)
+    suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean)
 
     /**
      * Notifies the client to end the session with end code 0x02

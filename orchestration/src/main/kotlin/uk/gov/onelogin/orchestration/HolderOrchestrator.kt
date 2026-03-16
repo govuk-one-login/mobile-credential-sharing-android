@@ -2,12 +2,21 @@ package uk.gov.onelogin.orchestration
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
+import kotlin.math.log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
+import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -35,6 +44,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 
+@SingleIn(AppScope::class)
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
     private val logger: Logger,
@@ -44,12 +54,31 @@ class HolderOrchestrator(
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val prerequisiteGate: PrerequisiteGate
 ) : Orchestrator.Holder {
-    private var session: HolderSession = sessionFactory.create()
-    override var holderSessionState: SharedFlow<HolderSessionState> = session.currentState
+    private var transportStateJob: Job? = null
+    private val sessionFlow = MutableStateFlow(sessionFactory.create())
+    private val session: HolderSession
+        get() = sessionFlow.value
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override var holderSessionState: StateFlow<HolderSessionState> = sessionFlow
+        .flatMapLatest { it.currentState }
+        .stateIn(
+            scope = appCoroutineScope,
+            started = SharingStarted.Eagerly,
+            initialValue = sessionFlow.value.currentState.value
+        )
+
+    init {
+        transportStateJob = appCoroutineScope.launch {
+            peripheralBluetoothTransport.state.collect {
+                handleMdocState(it)
+            }
+        }
+    }
 
     override fun start() {
         if (session.isComplete()) {
-            session = sessionFactory.create().also {
+            sessionFlow.value = sessionFactory.create().also {
                 logger.debug(
                     logTag,
                     recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
@@ -101,12 +130,6 @@ class HolderOrchestrator(
                 safeTransitionTo(HolderSessionState.ReadyToPresent)
 
                 appCoroutineScope.launch {
-                    peripheralBluetoothTransport.state.collect {
-                        handleMdocState(it)
-                    }
-                }
-
-                appCoroutineScope.launch {
                     peripheralBluetoothTransport.start(
                         serviceUuid = session.sessionContext.sessionUuid
                     )
@@ -137,11 +160,11 @@ class HolderOrchestrator(
             exceptionWrapper = ::OrchestratorCannotCancelException
         )
 
-        stopAdvertising()
+        stopAdvertising(sendEndCommand = true)
     }
 
     override fun reset() {
-        session = sessionFactory.create().also {
+        sessionFlow.value = sessionFactory.create().also {
             logger.debug(
                 logTag,
                 createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
@@ -149,9 +172,12 @@ class HolderOrchestrator(
         }
     }
 
-    private fun stopAdvertising() {
+    private fun stopAdvertising(sendEndCommand: Boolean) {
         appCoroutineScope.launch {
-            peripheralBluetoothTransport.stop(session.sessionContext.sessionUuid)
+            peripheralBluetoothTransport.stop(
+                serviceUuid = session.sessionContext.sessionUuid,
+                sendEndCommand = sendEndCommand
+            )
         }
     }
 
@@ -197,8 +223,12 @@ class HolderOrchestrator(
                         logTag,
                         "BLE session terminated successfully via GATT End command"
                     )
+                    stopAdvertising(sendEndCommand = false)
                 } else {
                     logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
+
+                    stopAdvertising(sendEndCommand = true)
+
                     safeTransitionTo(
                         HolderSessionState.Complete.Failed(
                             SessionError(
@@ -213,8 +243,6 @@ class HolderOrchestrator(
                         )
                     )
                 }
-
-                stopAdvertising()
             }
 
             is PeripheralBluetoothState.Error -> {
