@@ -19,9 +19,9 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  * @param transitionMap The [Map] of valid transitions. Used within [transitionTo]. Defaults to
  * [validHolderTransitions].
  */
-data class HolderSessionImpl(
+class HolderSessionImpl(
     private val logger: Logger,
-    private val initialContext: HolderSessionContext,
+    initialContext: HolderSessionContext,
     private val internalState: MutableStateFlow<HolderSessionState> =
         MutableStateFlow(HolderSessionState.NotStarted),
     private val transitionMap: HolderSessionStateTransitions = validHolderTransitions
@@ -66,5 +66,25 @@ data class HolderSessionImpl(
             StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION,
             throwable
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as HolderSessionImpl
+
+        if (internalState != other.internalState) return false
+        if (transitionMap != other.transitionMap) return false
+        if (_sessionContext != other._sessionContext) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = internalState.hashCode()
+        result = 31 * result + transitionMap.hashCode()
+        result = 31 * result + _sessionContext.hashCode()
+        return result
     }
 }

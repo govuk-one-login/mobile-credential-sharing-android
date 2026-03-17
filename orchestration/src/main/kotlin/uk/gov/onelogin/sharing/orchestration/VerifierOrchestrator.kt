@@ -31,7 +31,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate.Comp
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
@@ -39,7 +39,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,
-    private val sessionFactory: SessionFactory<VerifierSessionImpl>,
+    private val sessionFactory: SessionFactory<VerifierSession>,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope
 ) : Orchestrator.Verifier {
 

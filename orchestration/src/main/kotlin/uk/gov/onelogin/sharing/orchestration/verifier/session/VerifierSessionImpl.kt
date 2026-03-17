@@ -19,9 +19,9 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  * @param transitionMap The [Map] of valid transitions. Used within [transitionTo]. Defaults to
  * [validVerifierTransitions].
  */
-data class VerifierSessionImpl(
+class VerifierSessionImpl(
     private val logger: Logger,
-    private var internalState: MutableStateFlow<VerifierSessionState> =
+    private val internalState: MutableStateFlow<VerifierSessionState> =
         MutableStateFlow(VerifierSessionState.NotStarted),
     private val transitionMap: VerifierSessionStateTransitions = validVerifierTransitions
 ) : VerifierSession {
@@ -57,5 +57,23 @@ data class VerifierSessionImpl(
             StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION,
             throwable
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as VerifierSessionImpl
+
+        if (internalState != other.internalState) return false
+        if (transitionMap != other.transitionMap) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = internalState.hashCode()
+        result = 31 * result + transitionMap.hashCode()
+        return result
     }
 }

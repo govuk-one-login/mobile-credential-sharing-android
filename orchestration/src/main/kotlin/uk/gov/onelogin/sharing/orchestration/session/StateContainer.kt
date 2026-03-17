@@ -21,7 +21,15 @@ interface StateContainer<State : Any> {
         StateContainer<State>,
         Transitional<State> {
 
-        fun canTransition(state: State): Boolean {
+        /**
+         * Validates then updates the [StateContainer.currentState] to [state].
+         *
+         * Implementations usually update the [StateContainer.currentState] property.
+         *
+         * @throws IllegalStateException when the provided [state] cannot be transitioned to.
+         */
+        @Throws(IllegalStateException::class)
+        fun transitionTo(state: State) {
             try {
                 val availableTransitions: Set<KClass<out State>> = getAvailableTransitions()
 
@@ -40,21 +48,7 @@ interface StateContainer<State : Any> {
                 throw exception
             }
 
-            return true
-        }
-
-        /**
-         * Validates then updates the [StateContainer.currentState] to [state].
-         *
-         * Implementations usually update the [StateContainer.currentState] property.
-         *
-         * @throws IllegalStateException when the provided [state] cannot be transitioned to.
-         */
-        @Throws(IllegalStateException::class)
-        fun transitionTo(state: State) {
-            if (canTransition(state)) {
-                update(state)
-            }
+            update(state)
         }
     }
 

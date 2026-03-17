@@ -33,7 +33,7 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSe
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
@@ -46,7 +46,7 @@ import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceReque
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
     private val logger: Logger,
-    private val sessionFactory: SessionFactory<HolderSessionImpl>,
+    private val sessionFactory: SessionFactory<HolderSession>,
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
