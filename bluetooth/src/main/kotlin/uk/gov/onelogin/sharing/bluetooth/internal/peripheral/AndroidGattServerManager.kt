@@ -14,7 +14,7 @@ import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager

@@ -9,7 +9,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.MainDispatcherRule

@@ -3,7 +3,7 @@ import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 
 @DependencyGraph(AppScope::class)
 interface CredentialSharingAppGraph {

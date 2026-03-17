@@ -5,7 +5,7 @@ import java.security.interfaces.ECPublicKey
 import kotlin.test.assertNotEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.getSharedSecret
 import uk.gov.onelogin.sharing.security.cbor.decoders.SessionTranscriptStub.validSessionTranscript

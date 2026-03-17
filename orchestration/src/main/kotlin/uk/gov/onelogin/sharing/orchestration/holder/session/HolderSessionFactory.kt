@@ -4,7 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import java.security.interfaces.ECPublicKey
 import java.util.UUID
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM

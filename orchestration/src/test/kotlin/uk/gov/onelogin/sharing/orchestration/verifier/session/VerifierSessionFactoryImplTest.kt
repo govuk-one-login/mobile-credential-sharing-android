@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import org.hamcrest.Matcher
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactoryImplTest
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers

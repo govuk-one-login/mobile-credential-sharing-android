@@ -11,7 +11,7 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory

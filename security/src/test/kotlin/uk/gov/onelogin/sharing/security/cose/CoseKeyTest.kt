@@ -5,7 +5,7 @@ import kotlin.test.assertNotNull
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.security.cbor.decodeSessionEstablishmentModel
