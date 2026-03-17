@@ -22,9 +22,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
-import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.sessionSecurity
-import uk.gov.onelogin.sharing.security.cose.DefaultCoseKeyToString
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableGrantedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.genericErrorState
@@ -48,12 +45,11 @@ class ConnectWithHolderDeviceScreenTest {
         bluetoothAdapterProvider: BluetoothAdapterProvider = enabledBluetoothAdapter
     ): SessionEstablishmentViewModel = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
+        verifierSessionFactory = { mdocVerifierSession },
         scanner = fakeBluetoothScanner,
         logger = logger,
         bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
-        verifierSessionFactory = { mdocVerifierSession },
-        savedStateHandle = SavedStateHandle(),
-        orchestrator = FakeOrchestrator()
+        savedStateHandle = SavedStateHandle()
     )
 
     @Before

@@ -39,7 +39,6 @@ import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
-import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
@@ -59,8 +58,7 @@ class SessionEstablishmentViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val logger: Logger,
     private val bluetoothStatusMonitor: BluetoothStateMonitor,
-    @Assisted private val savedStateHandle: SavedStateHandle,
-    private val orchestrator: Orchestrator.Verifier
+    @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel(),
     Receiver<ConnectWithHolderDeviceEvent> {
     private val initialState = ConnectWithHolderDeviceState(
