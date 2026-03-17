@@ -65,14 +65,14 @@ class VerifierSessionImpl(
 
         other as VerifierSessionImpl
 
-        if (internalState != other.internalState) return false
+        if (internalState.value != other.internalState.value) return false
         if (transitionMap != other.transitionMap) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = internalState.hashCode()
+        var result = internalState.value.hashCode()
         result = 31 * result + transitionMap.hashCode()
         return result
     }

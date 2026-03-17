@@ -74,7 +74,7 @@ class HolderSessionImpl(
 
         other as HolderSessionImpl
 
-        if (internalState != other.internalState) return false
+        if (internalState.value != other.internalState.value) return false
         if (transitionMap != other.transitionMap) return false
         if (_sessionContext != other._sessionContext) return false
 
@@ -82,7 +82,7 @@ class HolderSessionImpl(
     }
 
     override fun hashCode(): Int {
-        var result = internalState.hashCode()
+        var result = internalState.value.hashCode()
         result = 31 * result + transitionMap.hashCode()
         result = 31 * result + _sessionContext.hashCode()
         return result
