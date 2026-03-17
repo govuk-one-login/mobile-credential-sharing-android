@@ -22,16 +22,13 @@ class HolderSessionImplTest {
 
     private var initialState: HolderSessionState = HolderSessionState.NotStarted
 
-    private val stateFlow: MutableStateFlow<HolderSessionState> by lazy {
-        MutableStateFlow(initialState)
-    }
     private var validTransitions = validHolderTransitions
 
     private val logger = SystemLogger()
     private val session by lazy {
         HolderSessionImpl(
             logger = logger,
-            internalState = stateFlow,
+            internalState = MutableStateFlow(initialState),
             transitionMap = validTransitions,
             initialContext = holderSessionContextStub
         )

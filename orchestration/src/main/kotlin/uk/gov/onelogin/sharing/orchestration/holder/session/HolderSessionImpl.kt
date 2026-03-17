@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  *
  * Internally, the [transitionTo] function uses [update] instead of [kotlinx.coroutines.flow.MutableStateFlow.emit].
  *
- * @param internalState The [HolderSessionState] that the [currentState] begins with. Defaults to a
+ * @param internalState The [HolderSessionState] that the session begins with. Defaults to a
  * [kotlinx.coroutines.flow.MutableStateFlow] beginning with [HolderSessionState.NotStarted].
  * @param transitionMap The [Map] of valid transitions. Used within [transitionTo]. Defaults to
  * [validHolderTransitions].
@@ -66,5 +66,25 @@ class HolderSessionImpl(
             StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION,
             throwable
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as HolderSessionImpl
+
+        if (internalState.value != other.internalState.value) return false
+        if (transitionMap != other.transitionMap) return false
+        if (_sessionContext != other._sessionContext) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = internalState.value.hashCode()
+        result = 31 * result + transitionMap.hashCode()
+        result = 31 * result + _sessionContext.hashCode()
+        return result
     }
 }

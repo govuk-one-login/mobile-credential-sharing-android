@@ -6,9 +6,11 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -27,7 +29,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
@@ -38,6 +39,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingUserConsent
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
@@ -47,6 +49,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableR
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasThrowable
 import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
 
@@ -78,22 +81,21 @@ class HolderOrchestratorTest {
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
-    private fun createSessionFactory(): SessionFactory<HolderSession> =
-        FakeSessionFactory<HolderSession>(
-            initialStates.map { initialState ->
-                HolderSessionImpl(
-                    logger = logger,
-                    internalState = MutableStateFlow(initialState),
-                    initialContext = holderSessionContextStub
-                )
-            }
-        )
+    private fun createSessionFactory() = FakeSessionFactory(
+        initialStates.map { initialState ->
+            HolderSessionImpl(
+                logger = logger,
+                internalState = MutableStateFlow(initialState),
+                initialContext = holderSessionContextStub
+            )
+        }
+    )
 
     private fun createOrchestrator(
         peripheralBluetoothTransport: PeripheralBluetoothTransport =
             FakePeripheralBluetoothTransport(),
-        sessionFactory: SessionFactory<HolderSession> = createSessionFactory()
-    ): Orchestrator = HolderOrchestrator(
+        sessionFactory: SessionFactory<HolderSessionImpl> = createSessionFactory()
+    ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
         prerequisiteGate = gate,
@@ -108,14 +110,17 @@ class HolderOrchestratorTest {
         runTest {
             val sessionFactory = createSessionFactory()
             val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+            backgroundScope.launch {
+                orchestrator.holderSessionState.collect {}
+            }
             orchestrator.start()
 
             assert(START_ORCHESTRATION_SUCCESS in logger)
             assert(START_ORCHESTRATION_ERROR !in logger)
 
             assertThat(
-                sessionFactory as FakeSessionFactory,
-                currentSessionState(inPresentingEngagement())
+                orchestrator.holderSessionState.value,
+                inPresentingEngagement()
             )
 
             assert(
@@ -132,16 +137,17 @@ class HolderOrchestratorTest {
         )
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
-            sessionFactory as FakeSessionFactory,
-            currentSessionState(
-                hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
-            )
+            orchestrator.holderSessionState.value,
+            hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
         )
     }
 
@@ -153,6 +159,9 @@ class HolderOrchestratorTest {
         initialStates[0] = state
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         assert(startSessionAfterCompletionLog in logger)
@@ -160,8 +169,8 @@ class HolderOrchestratorTest {
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
-            sessionFactory as FakeSessionFactory,
-            currentSessionState(inPresentingEngagement())
+            orchestrator.holderSessionState.value,
+            inPresentingEngagement()
         )
     }
 
@@ -184,6 +193,9 @@ class HolderOrchestratorTest {
         initialStates[0] = state
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.cancel()
 
         assert("$CANNOT_TRANSITION_TO_STATE ${HolderSessionState.Complete.Cancelled}" in logger)
@@ -191,7 +203,7 @@ class HolderOrchestratorTest {
             "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.Complete.Cancelled}" !in logger
         )
         assertThat(
-            sessionFactory as FakeSessionFactory,
+            sessionFactory,
             currentSessionState(state)
         )
     }
@@ -204,13 +216,16 @@ class HolderOrchestratorTest {
         initialStates[0] = state
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.cancel()
 
         assert("$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.Complete.Cancelled}" in logger)
         assert("$CANNOT_TRANSITION_TO_STATE ${HolderSessionState.Complete.Cancelled}" !in logger)
         assertThat(
-            sessionFactory as FakeSessionFactory,
-            currentSessionState(isCancelled())
+            orchestrator.holderSessionState.value,
+            isCancelled()
         )
     }
 
@@ -218,11 +233,14 @@ class HolderOrchestratorTest {
     fun `Resetting the Orchestrator clears the HolderSession`() = runTest {
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.reset()
 
         assert(resetOrchestratorSessionLog in logger)
         assertThat(
-            sessionFactory as FakeSessionFactory,
+            sessionFactory,
             currentSessionState(isNotStarted())
         )
     }
@@ -231,7 +249,9 @@ class HolderOrchestratorTest {
     fun `handles advertiser started state change`() = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         assertEquals(1, peripheralBluetoothTransport.startCalls)
@@ -243,6 +263,9 @@ class HolderOrchestratorTest {
     fun `handles advertiser stopped state change`() = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         orchestrator.cancel()
@@ -260,7 +283,9 @@ class HolderOrchestratorTest {
             sessionFactory = sessionFactory,
             peripheralBluetoothTransport = peripheralBluetoothTransport
         )
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
@@ -269,8 +294,8 @@ class HolderOrchestratorTest {
 
         assert("Mdoc - Connected: $DEVICE_ADDRESS" in logger)
         assertThat(
-            sessionFactory as FakeSessionFactory,
-            currentSessionState(isProcessingEstablishment())
+            orchestrator.holderSessionState.value,
+            isProcessingEstablishment()
         )
     }
 
@@ -282,7 +307,9 @@ class HolderOrchestratorTest {
             sessionFactory = sessionFactory,
             peripheralBluetoothTransport = peripheralBluetoothTransport
         )
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
@@ -291,16 +318,26 @@ class HolderOrchestratorTest {
 
         assert("Error Mdoc - Disconnected: $DEVICE_ADDRESS" in logger)
         assertEquals(1, peripheralBluetoothTransport.stopCalls)
-        val state = (sessionFactory as FakeSessionFactory).getCurrentSession().currentState.value
-        val failed = state as HolderSessionState.Complete.Failed
-        assert(failed.error.exception is BluetoothDisconnectedException)
+
+        assertThat(
+            orchestrator.holderSessionState.value,
+            isFailed(
+                hasThrowable(
+                    instanceOf(
+                        BluetoothDisconnectedException::class.java
+                    )
+                )
+            )
+        )
     }
 
     @Test
     fun `handles device disconnected state change when session ended`() = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
@@ -314,7 +351,9 @@ class HolderOrchestratorTest {
     fun `handles error states`() = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
@@ -354,7 +393,9 @@ class HolderOrchestratorTest {
     fun `handles gatt service stopped`() = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
@@ -382,7 +423,9 @@ class HolderOrchestratorTest {
     fun `handles service added state`() = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         val uuid = UUID.randomUUID()
@@ -402,6 +445,9 @@ class HolderOrchestratorTest {
             sessionFactory = sessionFactory
         )
 
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
@@ -409,8 +455,8 @@ class HolderOrchestratorTest {
         )
 
         assertThat(
-            sessionFactory as FakeSessionFactory,
-            currentSessionState(isCancelled())
+            orchestrator.holderSessionState.value,
+            isCancelled()
         )
 
         assert("Mdoc - Ending session" in logger)
@@ -424,7 +470,9 @@ class HolderOrchestratorTest {
             peripheralBluetoothTransport = peripheralBluetoothTransport,
             sessionFactory = sessionFactory
         )
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
@@ -434,8 +482,8 @@ class HolderOrchestratorTest {
         )
 
         assertThat(
-            sessionFactory as FakeSessionFactory,
-            currentSessionState(isCancelled())
+            orchestrator.holderSessionState.value,
+            isCancelled()
         )
 
         assert(
@@ -455,7 +503,9 @@ class HolderOrchestratorTest {
             sessionFactory = sessionFactory,
             peripheralBluetoothTransport = peripheralTransport
         )
-
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
         orchestrator.start()
         advanceUntilIdle()
 

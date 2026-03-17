@@ -20,12 +20,6 @@ interface StateContainer<State : Any> {
     interface Complete<State : Any> :
         StateContainer<State>,
         Transitional<State> {
-        /**
-         * Logs the provided [message] and [throwable].
-         *
-         * Implementations usually defer to a [uk.gov.logging.api.Logger] instance.
-         */
-        fun logError(message: String, throwable: Throwable)
 
         /**
          * Validates then updates the [StateContainer.currentState] to [state].
@@ -64,6 +58,13 @@ interface StateContainer<State : Any> {
      * Most commonly implemented alongside the [StateContainer] interface.
      */
     interface Transitional<State : Any> {
+        /**
+         * Logs the provided [message] and [throwable].
+         *
+         * Implementations usually defer to a [uk.gov.logging.api.Logger] instance.
+         */
+        fun logError(message: String, throwable: Throwable)
+
         /**
          * @return A [Set] of applicable [State] classes that can be transitioned towards.
          * @throws IllegalStateException when there are no available transitions available.

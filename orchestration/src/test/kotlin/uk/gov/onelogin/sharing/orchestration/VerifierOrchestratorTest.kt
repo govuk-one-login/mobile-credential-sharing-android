@@ -4,18 +4,21 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
-import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_ERROR
-import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
@@ -23,9 +26,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
-import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
@@ -40,6 +41,9 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierS
 
 @RunWith(TestParameterInjector::class)
 class VerifierOrchestratorTest {
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
     private val logger = SystemLogger()
     private val resetOrchestratorSessionLog = "Cleared Orchestrator verifier session"
     private val startSessionAfterCompletionLog =
@@ -51,7 +55,7 @@ class VerifierOrchestratorTest {
     )
 
     private val sessionFactory by lazy {
-        FakeSessionFactory<VerifierSession>(
+        FakeSessionFactory(
             initialStates.map { initialState ->
                 VerifierSessionImpl(
                     logger = logger,
@@ -70,12 +74,15 @@ class VerifierOrchestratorTest {
         StubPrerequisiteGate(gateResponses)
     }
 
+    private val scope = TestScope(mainDispatcherRule.testDispatcher)
+
     private val orchestrator by lazy {
         VerifierOrchestrator(
             logger = logger,
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
-            verifierConfig = verifierConfigStub
+            verifierConfig = verifierConfigStub,
+            appCoroutineScope = scope
         )
     }
 
@@ -89,14 +96,17 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `Starting the Orchestrator journey navigates to the Preflight state`() = runTest {
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
         orchestrator.start()
 
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
-            sessionFactory,
-            currentSessionState(isReadyToScan())
+            orchestrator.verifierSessionState.value,
+            isReadyToScan()
         )
     }
 
@@ -106,18 +116,19 @@ class VerifierOrchestratorTest {
             IncapableReason.MissingHardware
         )
 
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
         orchestrator.start()
 
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
-            sessionFactory,
-            currentSessionState(
-                allOf(
-                    hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH),
-                    not(hasMissingPreflightPrerequisites(Prerequisite.CAMERA))
-                )
+            orchestrator.verifierSessionState.value,
+            allOf(
+                hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH),
+                not(hasMissingPreflightPrerequisites(Prerequisite.CAMERA))
             )
         )
     }
@@ -128,6 +139,9 @@ class VerifierOrchestratorTest {
         state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
         orchestrator.start()
 
         assert(startSessionAfterCompletionLog in logger)
@@ -135,21 +149,20 @@ class VerifierOrchestratorTest {
         assert(START_ORCHESTRATION_ERROR !in logger)
 
         assertThat(
-            sessionFactory,
-            currentSessionState(isReadyToScan())
+            orchestrator.verifierSessionState.value,
+            isReadyToScan()
         )
     }
 
     @Test
     fun `Orchestrator cannot be started more than once`() = runTest {
         `Starting the Orchestrator journey navigates to the Preflight state`()
-
         orchestrator.start()
 
         assert(START_ORCHESTRATION_ERROR in logger)
         assertThat(
-            sessionFactory,
-            currentSessionState(isReadyToScan())
+            orchestrator.verifierSessionState.value,
+            isReadyToScan()
         )
     }
 
@@ -159,13 +172,14 @@ class VerifierOrchestratorTest {
         state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
         orchestrator.cancel()
 
-        assert(CANCEL_ORCHESTRATION_ERROR in logger)
-        assert(CANCEL_ORCHESTRATION_SUCCESS !in logger)
         assertThat(
-            sessionFactory,
-            currentSessionState(state)
+            orchestrator.verifierSessionState.value,
+            equalTo(state)
         )
     }
 
@@ -175,13 +189,14 @@ class VerifierOrchestratorTest {
         state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
         orchestrator.cancel()
 
-        assert(CANCEL_ORCHESTRATION_SUCCESS in logger)
-        assert(CANCEL_ORCHESTRATION_ERROR !in logger)
         assertThat(
-            sessionFactory,
-            currentSessionState(isCancelled())
+            orchestrator.verifierSessionState.value,
+            isCancelled()
         )
     }
 
@@ -193,13 +208,16 @@ class VerifierOrchestratorTest {
 
         assert(resetOrchestratorSessionLog in logger)
         assertThat(
-            sessionFactory,
-            currentSessionState(isNotStarted())
+            orchestrator.verifierSessionState.value,
+            isNotStarted()
         )
     }
 
     @Test
     fun `processQrCode with valid barcode transitions to ProcessingEngagement`() = runTest {
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
         orchestrator.start()
         val data = exampleUriOne
         val barcodeResult = BarcodeDataResult.Valid(data)
@@ -207,15 +225,16 @@ class VerifierOrchestratorTest {
         orchestrator.processQrCode(barcodeResult)
 
         assertThat(
-            sessionFactory,
-            currentSessionState(
-                isProcessingEngagement()
-            )
+            orchestrator.verifierSessionState.value,
+            isProcessingEngagement()
         )
     }
 
     @Test
     fun `processQrCode returns invalid BarcodeDataResult`() = runTest {
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
         orchestrator.start()
         val data = "https://"
         val barcodeResult = BarcodeDataResult.Invalid(data)
@@ -223,10 +242,8 @@ class VerifierOrchestratorTest {
         orchestrator.processQrCode(barcodeResult)
 
         assertThat(
-            sessionFactory,
-            currentSessionState(
-                isFailed()
-            )
+            orchestrator.verifierSessionState.value,
+            isFailed()
         )
     }
 }

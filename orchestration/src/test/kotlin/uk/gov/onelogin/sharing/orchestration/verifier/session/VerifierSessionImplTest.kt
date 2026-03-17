@@ -21,16 +21,13 @@ class VerifierSessionImplTest {
 
     private var initialState: VerifierSessionState = VerifierSessionState.NotStarted
 
-    private val stateFlow: MutableStateFlow<VerifierSessionState> by lazy {
-        MutableStateFlow(initialState)
-    }
     private var validTransitions = validVerifierTransitions
 
     private val logger = SystemLogger()
     private val session by lazy {
         VerifierSessionImpl(
             logger = logger,
-            internalState = stateFlow,
+            internalState = MutableStateFlow(initialState),
             transitionMap = validTransitions
         )
     }
