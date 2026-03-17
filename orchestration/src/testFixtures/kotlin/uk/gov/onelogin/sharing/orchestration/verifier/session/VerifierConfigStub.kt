@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
-import uk.gov.onelogin.VerificationRequest
-import uk.gov.onelogin.VerifierConfig
+import uk.gov.onelogin.sharing.orchestration.VerificationRequest
+import uk.gov.onelogin.sharing.orchestration.VerifierConfig
 
 object VerifierConfigStub {
     val verifierConfigStub = VerifierConfig(

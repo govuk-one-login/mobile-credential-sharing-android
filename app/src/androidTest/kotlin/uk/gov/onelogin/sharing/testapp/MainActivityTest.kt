@@ -11,11 +11,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialGraph
-import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
+import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
+import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)

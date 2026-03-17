@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
@@ -40,6 +39,7 @@ import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission

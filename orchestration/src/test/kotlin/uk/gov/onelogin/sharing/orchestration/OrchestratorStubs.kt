@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.orchestration
 
 data object OrchestratorStubs {
     /**
-     * Duplicate of [uk.gov.onelogin.orchestration.Orchestrator.LogMessages] for testing
+     * Duplicate of [Orchestrator.LogMessages] for testing
      * purposes.
      *
      * Ensures that unit tests fail when production logging messages update without changing

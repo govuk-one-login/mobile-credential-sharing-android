@@ -5,11 +5,11 @@ import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialGraph
-import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
+import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
+import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 
 /**
  * Helper function to create a [CredentialSharingAppGraph] instance for use in tests.

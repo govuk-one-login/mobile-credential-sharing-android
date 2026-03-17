@@ -11,11 +11,11 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
-import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialGraph
-import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
+import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
+import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 
 class MainActivityRule(
     composeTestRule: ComposeContentTestRule,

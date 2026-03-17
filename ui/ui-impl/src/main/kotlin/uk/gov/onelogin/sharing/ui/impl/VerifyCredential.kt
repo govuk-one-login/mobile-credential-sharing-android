@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
-import uk.gov.onelogin.sharing.di.api.verifier.CredentialVerifier
+import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 import uk.gov.onelogin.sharing.ui.impl.di.VerifierUiGraph
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes

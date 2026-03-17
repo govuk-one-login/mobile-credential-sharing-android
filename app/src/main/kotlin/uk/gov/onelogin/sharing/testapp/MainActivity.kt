@@ -8,10 +8,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.security.cert.Certificate
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.VerificationRequest
-import uk.gov.onelogin.VerifierConfig
-import uk.gov.onelogin.sharing.di.api.presenter.PresentCredentialSdk
-import uk.gov.onelogin.sharing.di.api.verifier.VerifyCredentialSdk
+import uk.gov.onelogin.sharing.orchestration.VerificationRequest
+import uk.gov.onelogin.sharing.orchestration.VerifierConfig
+import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

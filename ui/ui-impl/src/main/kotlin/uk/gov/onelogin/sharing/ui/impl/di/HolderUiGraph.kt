@@ -4,9 +4,9 @@ import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
-import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.core.HolderUiScope
-import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 
 /**
  * Dependency graph for the UI implementation module.

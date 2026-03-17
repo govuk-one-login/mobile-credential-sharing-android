@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.sdk
 
-import uk.gov.onelogin.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.di.api.presenter.CredentialPresenter
-import uk.gov.onelogin.sharing.di.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 
 class FakeCredentialPresenter(
     override val appGraph: CredentialSharingAppGraph,

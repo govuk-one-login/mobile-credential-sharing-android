@@ -17,8 +17,6 @@ import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.C
 @ContributesBinding(AppScope::class)
 class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
 
-    private var decryptionCounter = 1
-
     /**
      * Decrypt a "data" payload from a SessionEstablishment or SessionData message
      *
@@ -32,14 +30,21 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
      * @return [ByteArray] object representing the plaintext decrypted response
      */
 
-    override fun decryptPayload(key: ByteArray, data: ByteArray, role: DeviceRole): ByteArray {
+    override fun decryptPayload(
+        key: ByteArray,
+        data: ByteArray,
+        role: DeviceRole,
+        decryptCounter: UInt
+    ): ByteArray {
         val nistInitialisationVector = createNistInitialisationVector(
             role.nistInitialisationVectorIdentifier,
-            decryptionCounter.toUInt()
+            decryptCounter
         )
 
         try {
             val decryptedData = Cipher.getInstance(AES_256_TRANSFORMATION).run {
+                logger.debug(logTag, "Decrypt Counter = $decryptCounter")
+
                 init(
                     Cipher.DECRYPT_MODE,
                     SecretKeySpec(
@@ -55,7 +60,6 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
                     data
                 )
             }
-            decryptionCounter += 1
             logger.debug(logTag, "successful decryption")
             return decryptedData
         } catch (e: AEADBadTagException) {
