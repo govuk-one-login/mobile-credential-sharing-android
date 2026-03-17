@@ -39,8 +39,6 @@ class AndroidPeripheralBluetoothTransport(
     private val _bluetoothStatus = MutableStateFlow(BluetoothStatus.UNKNOWN)
     override val bluetoothStatus: StateFlow<BluetoothStatus> = _bluetoothStatus
 
-    private val connectedDevices = mutableSetOf<String>()
-
     init {
         coroutineScope.launch {
             bleAdvertiser.state.collect {
@@ -95,6 +93,7 @@ class AndroidPeripheralBluetoothTransport(
         bleAdvertiser.stopAdvertise()
         gattServerManager.close()
         bluetoothStateMonitor.stop()
+        _state.value = PeripheralBluetoothState.Idle
     }
 
     override suspend fun notifySessionEnd(serviceUuid: UUID) {
@@ -128,18 +127,12 @@ class AndroidPeripheralBluetoothTransport(
 
     private fun handleGattEvent(event: GattServerEvent) {
         when (event) {
-            is GattServerEvent.Connected -> {
-                if (connectedDevices.add(event.address)) {
-                    _state.value = PeripheralBluetoothState.Connected(event.address)
-                }
-            }
+            is GattServerEvent.Connected ->
+                _state.value = PeripheralBluetoothState.Connected(event.address)
 
-            is GattServerEvent.Disconnected -> {
-                if (connectedDevices.remove(event.address)) {
+            is GattServerEvent.Disconnected ->
                     _state.value =
                         PeripheralBluetoothState.Disconnected(event.address, event.isSessionEnd)
-                }
-            }
 
             is GattServerEvent.Error ->
                 _state.value = PeripheralBluetoothState.Error(
