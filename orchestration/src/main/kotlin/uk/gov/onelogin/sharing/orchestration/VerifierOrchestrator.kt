@@ -4,16 +4,22 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
+import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_ERROR
-import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANCEL_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
@@ -33,22 +39,43 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,
-    private val sessionFactory: SessionFactory<VerifierSession>
+    private val sessionFactory: SessionFactory<VerifierSession>,
+    @param:ApplicationScope private val appCoroutineScope: CoroutineScope
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val verifierSessionState = sessionFlow.flatMapLatest { it.currentState }
+    override val verifierSessionState: StateFlow<VerifierSessionState> = sessionFlow.flatMapLatest {
+        it.currentState
+    }.stateIn(
+        appCoroutineScope,
+        SharingStarted.Eagerly,
+        sessionFlow.value.currentState.value
+    )
 
     override fun start() {
         if (sessionFlow.value.isComplete()) {
-            sessionFlow.value = sessionFactory.create().also {
-                logger.debug(
-                    logTag,
-                    recreateSessionOnStartMessage(Orchestrator.Verifier.JOURNEY_NAME)
-                )
+            sessionFlow.update {
+                sessionFactory.create().also {
+                    logger.debug(
+                        logTag,
+                        recreateSessionOnStartMessage(Orchestrator.Verifier.JOURNEY_NAME)
+                    )
+                }
             }
+        }
+
+        if (verifierSessionState.value !is VerifierSessionState.NotStarted) {
+            logger.error(
+                logTag,
+                START_ORCHESTRATION_ERROR,
+                OrchestratorCannotStartException(
+                    START_ORCHESTRATION_ERROR,
+                    IllegalStateException("Journey already in progress")
+                )
+            )
+            return
         }
 
         try {
@@ -68,7 +95,9 @@ class VerifierOrchestrator(
             }
 
             if (prerequisiteResponse.meetsPrerequisites()) {
-                sessionFlow.value.transitionTo(VerifierSessionState.ReadyToScan)
+                safeTransitionTo(
+                    VerifierSessionState.ReadyToScan
+                )
             } else {
                 handleStartPrerequisiteFailure(prerequisiteResponse)
             }
@@ -91,19 +120,19 @@ class VerifierOrchestrator(
             PrerequisiteResponse.MeetsPrerequisites != it
         }
             .let(VerifierSessionState::Preflight)
-            .let(sessionFlow.value::transitionTo)
+            .let { safeTransitionTo(state = it, logMessage = START_ORCHESTRATION_ERROR) }
     }
 
     override fun processQrCode(qrCode: BarcodeDataResult) {
         when (qrCode) {
-            is BarcodeDataResult.Valid -> sessionFlow.value.transitionTo(
+            is BarcodeDataResult.Valid -> safeTransitionTo(
                 VerifierSessionState.ProcessingEngagement(
                     qrCode.data
                 )
             )
 
             is BarcodeDataResult.Invalid -> {
-                sessionFlow.value.transitionTo(
+                safeTransitionTo(
                     VerifierSessionState.Complete.Failed(
                         SessionError(
                             message = qrCode.data,
@@ -118,29 +147,34 @@ class VerifierOrchestrator(
     }
 
     override fun cancel() {
-        try {
-            println(sessionFlow.value.currentState)
-            sessionFlow.value.transitionTo(
-                VerifierSessionState.Complete.Cancelled
-            )
-            logger.debug(logTag, CANCEL_ORCHESTRATION_SUCCESS)
-        } catch (exception: IllegalStateException) {
-            CANCEL_ORCHESTRATION_ERROR.let { logMessage ->
-                logger.error(
+        safeTransitionTo(
+            state = VerifierSessionState.Complete.Cancelled,
+            exceptionWrapper = ::OrchestratorCannotCancelException
+        )
+    }
+
+    override fun reset() {
+        sessionFlow.update {
+            sessionFactory.create().also {
+                logger.debug(
                     logTag,
-                    logMessage,
-                    OrchestratorCannotCancelException(logMessage, exception)
+                    createSessionResetMessage(Orchestrator.Verifier.JOURNEY_NAME)
                 )
             }
         }
     }
 
-    override fun reset() {
-        sessionFlow.value = sessionFactory.create().also {
-            logger.debug(
-                logTag,
-                createSessionResetMessage(Orchestrator.Verifier.JOURNEY_NAME)
-            )
+    private fun safeTransitionTo(
+        state: VerifierSessionState,
+        logMessage: String = "$CANNOT_TRANSITION_TO_STATE $state",
+        exceptionWrapper: ((String, Throwable) -> Exception)? = null
+    ) {
+        try {
+            sessionFlow.value.transitionTo(state)
+            logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
+        } catch (exception: IllegalStateException) {
+            val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
+            logger.error(logTag, logMessage, loggedException)
         }
     }
 }

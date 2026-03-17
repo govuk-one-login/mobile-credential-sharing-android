@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
@@ -54,17 +55,15 @@ class HolderOrchestrator(
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
-    private val session: HolderSession
-        get() = sessionFlow.value
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override var holderSessionState: StateFlow<HolderSessionState> = sessionFlow
-        .flatMapLatest { it.currentState }
-        .stateIn(
-            scope = appCoroutineScope,
-            started = SharingStarted.Eagerly,
-            initialValue = sessionFlow.value.currentState.value
-        )
+    override val holderSessionState: StateFlow<HolderSessionState> = sessionFlow.flatMapLatest {
+        it.currentState
+    }.stateIn(
+        appCoroutineScope,
+        SharingStarted.Eagerly,
+        sessionFlow.value.currentState.value
+    )
 
     init {
         transportStateJob = appCoroutineScope.launch {
@@ -75,16 +74,18 @@ class HolderOrchestrator(
     }
 
     override fun start() {
-        if (session.isComplete()) {
-            sessionFlow.value = sessionFactory.create().also {
-                logger.debug(
-                    logTag,
-                    recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
-                )
+        if (sessionFlow.value.isComplete()) {
+            sessionFlow.update {
+                sessionFactory.create().also {
+                    logger.debug(
+                        logTag,
+                        recreateSessionOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
+                    )
+                }
             }
         }
 
-        if (session.currentState.value !is HolderSessionState.NotStarted) {
+        if (holderSessionState.value !is HolderSessionState.NotStarted) {
             logger.error(
                 logTag,
                 START_ORCHESTRATION_ERROR,
@@ -129,11 +130,11 @@ class HolderOrchestrator(
 
                 appCoroutineScope.launch {
                     peripheralBluetoothTransport.start(
-                        serviceUuid = session.sessionContext.sessionUuid
+                        serviceUuid = sessionFlow.value.sessionContext.sessionUuid
                     )
                 }
 
-                val qrCode = session.sessionContext.qrCode
+                val qrCode = sessionFlow.value.sessionContext.qrCode
                 if (qrCode.isNotEmpty()) {
                     safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
                 }
@@ -162,18 +163,20 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
-        sessionFlow.value = sessionFactory.create().also {
-            logger.debug(
-                logTag,
-                createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
-            )
+        sessionFlow.update {
+            sessionFactory.create().also {
+                logger.debug(
+                    logTag,
+                    createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
+                )
+            }
         }
     }
 
     private fun stopAdvertising(sendEndCommand: Boolean) {
         appCoroutineScope.launch {
             peripheralBluetoothTransport.stop(
-                serviceUuid = session.sessionContext.sessionUuid,
+                serviceUuid = sessionFlow.value.sessionContext.sessionUuid,
                 sendEndCommand = sendEndCommand
             )
         }
@@ -188,7 +191,7 @@ class HolderOrchestrator(
                 logger.debug(
                     logTag,
                     "Mdoc - Advertising Started UUID: " +
-                        "${session.sessionContext.sessionUuid}"
+                        "${sessionFlow.value.sessionContext.sessionUuid}"
                 )
             }
 
@@ -272,7 +275,7 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.MessageReceived -> {
-                val keypair = session.sessionContext.keyPair?.private
+                val keypair = sessionFlow.value.sessionContext.keyPair?.private
                 if (keypair !is ECPrivateKey) {
                     logger.error(
                         logTag,
@@ -283,13 +286,13 @@ class HolderOrchestrator(
 
                 val deviceRequest = decryptDeviceRequestUseCase.execute(
                     sessionEstablishmentBytes = state.message,
-                    engagement = session.sessionContext.engagement,
+                    engagement = sessionFlow.value.sessionContext.engagement,
                     holderPrivateKey = keypair,
-                    decryptCounter = session.sessionContext.decryptCounter
+                    decryptCounter = sessionFlow.value.sessionContext.decryptCounter
                 )
 
                 // only increment decrypt counter if decryption was successful
-                session.updateSessionContext {
+                sessionFlow.value.updateSessionContext {
                     it.copy(decryptCounter = it.decryptCounter + 1u)
                 }
 
@@ -316,11 +319,11 @@ class HolderOrchestrator(
 
     private fun safeTransitionTo(
         state: HolderSessionState,
-        logMessage: String = CANNOT_TRANSITION_TO_STATE.format(session.currentState.value, state),
+        logMessage: String = CANNOT_TRANSITION_TO_STATE.format(sessionFlow.value.currentState.value, state),
         exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
         try {
-            session.transitionTo(state)
+            sessionFlow.value.transitionTo(state)
             logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
         } catch (exception: IllegalStateException) {
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
