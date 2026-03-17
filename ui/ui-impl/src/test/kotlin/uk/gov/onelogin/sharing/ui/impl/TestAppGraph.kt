@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.Logger
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.sdk.di.CredentialSharingAppGraph
 
 /**
  * Helper function to create a [CredentialSharingAppGraph] instance for use in tests.

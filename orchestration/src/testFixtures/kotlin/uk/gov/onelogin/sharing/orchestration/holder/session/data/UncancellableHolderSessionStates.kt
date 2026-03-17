@@ -7,7 +7,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateSt
 /**
  * Parameterised test input for [HolderSessionState] objects that can't transition to
  * [HolderSessionState.Complete.Cancelled] within the
- * [uk.gov.onelogin.orchestration.HolderOrchestrator], as per the [uk.gov.onelogin.sharing.orchestration.holder.session.validHolderTransitions] [Map].
+ * [uk.gov.onelogin.sharing.orchestration.HolderOrchestrator], as per the [uk.gov.onelogin.sharing.orchestration.holder.session.validHolderTransitions] [Map].
  */
 class UncancellableHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*>? = listOf(

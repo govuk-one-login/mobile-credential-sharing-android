@@ -1,4 +1,4 @@
-package uk.gov.onelogin.orchestration
+package uk.gov.onelogin.sharing.orchestration
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -15,16 +15,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.createSessionResetMessage
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
-import uk.gov.onelogin.orchestration.exceptions.BluetoothDisconnectedException
-import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotCancelException
-import uk.gov.onelogin.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransportError
@@ -33,6 +23,16 @@ import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
+import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
+import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
+import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
@@ -278,8 +278,14 @@ class HolderOrchestrator(
                 val deviceRequest = decryptDeviceRequestUseCase.execute(
                     sessionEstablishmentBytes = state.message,
                     engagement = sessionFlow.value.sessionContext.engagement,
-                    holderPrivateKey = keypair
+                    holderPrivateKey = keypair,
+                    decryptCounter = sessionFlow.value.sessionContext.decryptCounter
                 )
+
+                // only increment decrypt counter if decryption was successful
+                sessionFlow.value.updateSessionContext {
+                    it.copy(decryptCounter = it.decryptCounter + 1u)
+                }
 
                 safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
             }

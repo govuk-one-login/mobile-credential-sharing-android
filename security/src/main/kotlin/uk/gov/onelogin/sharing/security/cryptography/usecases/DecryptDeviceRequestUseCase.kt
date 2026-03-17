@@ -7,6 +7,7 @@ fun interface DecryptDeviceRequestUseCase {
     fun execute(
         sessionEstablishmentBytes: ByteArray,
         engagement: String,
-        holderPrivateKey: PrivateKey
+        holderPrivateKey: PrivateKey,
+        decryptCounter: UInt
     ): DeviceRequest
 }

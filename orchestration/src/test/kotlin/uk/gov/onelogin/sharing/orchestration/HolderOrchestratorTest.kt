@@ -1,4 +1,4 @@
-package uk.gov.onelogin.orchestration
+package uk.gov.onelogin.sharing.orchestration
 
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -17,9 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
-import uk.gov.onelogin.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
-import uk.gov.onelogin.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
@@ -27,8 +24,11 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
@@ -37,6 +37,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionCo
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingUserConsent
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
@@ -85,7 +86,7 @@ class HolderOrchestratorTest {
             HolderSessionImpl(
                 logger = logger,
                 internalState = MutableStateFlow(initialState),
-                sessionContext = holderSessionContextStub
+                initialContext = holderSessionContextStub
             )
         }
     )
@@ -507,7 +508,10 @@ class HolderOrchestratorTest {
         orchestrator.start()
         advanceUntilIdle()
 
-        orchestrator.holderSessionState.test {
+        val currentSession = (sessionFactory as FakeSessionFactory).getCurrentSession()
+        assertEquals(1u, currentSession.sessionContext.decryptCounter)
+
+        (orchestrator as HolderOrchestrator).holderSessionState.test {
             assertEquals(
                 HolderSessionState.PresentingEngagement(
                     holderSessionContextStub.qrCode
@@ -535,5 +539,12 @@ class HolderOrchestratorTest {
                 awaitItem()
             )
         }
+
+        assertThat(
+            sessionFactory,
+            currentSessionState(isAwaitingUserConsent())
+        )
+
+        assertEquals(2u, currentSession.sessionContext.decryptCounter)
     }
 }

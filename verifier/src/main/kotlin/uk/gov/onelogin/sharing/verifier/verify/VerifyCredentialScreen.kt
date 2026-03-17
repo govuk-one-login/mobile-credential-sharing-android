@@ -10,9 +10,9 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
-import uk.gov.onelogin.orchestration.Orchestrator.Verifier.Companion.requiredPermissions
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.permissions.BluetoothPermissionPrompt
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.Verifier.Companion.requiredPermissions
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
 @Suppress("ComposableLambdaParameterNaming")

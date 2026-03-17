@@ -1,4 +1,4 @@
-package uk.gov.onelogin.orchestration
+package uk.gov.onelogin.sharing.orchestration
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector

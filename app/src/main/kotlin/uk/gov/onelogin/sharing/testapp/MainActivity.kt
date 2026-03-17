@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.CredentialSharingSdk
+import uk.gov.onelogin.sharing.sdk.CredentialSharingSdk
 import uk.gov.onelogin.sharing.ui.api.VerificationRequest
 import uk.gov.onelogin.sharing.ui.impl.CredentialPresenterImpl
 import uk.gov.onelogin.sharing.ui.impl.CredentialVerifierImpl

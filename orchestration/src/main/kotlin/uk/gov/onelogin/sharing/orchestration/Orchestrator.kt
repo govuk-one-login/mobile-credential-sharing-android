@@ -1,4 +1,4 @@
-package uk.gov.onelogin.orchestration
+package uk.gov.onelogin.sharing.orchestration
 
 import android.Manifest
 import kotlinx.coroutines.flow.Flow
