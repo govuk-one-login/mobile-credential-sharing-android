@@ -51,7 +51,7 @@ class VerifierOrchestrator(
     }.stateIn(
         appCoroutineScope,
         SharingStarted.Eagerly,
-        VerifierSessionState.NotStarted
+        sessionFlow.value.currentState.value
     )
 
     override fun start() {

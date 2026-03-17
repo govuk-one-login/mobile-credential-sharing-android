@@ -52,20 +52,20 @@ class HolderOrchestrator(
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val prerequisiteGate: PrerequisiteGate
 ) : Orchestrator.Holder {
-    private val session = MutableStateFlow(sessionFactory.create())
+    private val sessionFlow = MutableStateFlow(sessionFactory.create())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val holderSessionState: StateFlow<HolderSessionState> = session.flatMapLatest {
+    override val holderSessionState: StateFlow<HolderSessionState> = sessionFlow.flatMapLatest {
         it.currentState
     }.stateIn(
         appCoroutineScope,
         SharingStarted.Eagerly,
-        HolderSessionState.NotStarted
+        sessionFlow.value.currentState.value
     )
 
     override fun start() {
-        if (session.value.isComplete()) {
-            session.update {
+        if (sessionFlow.value.isComplete()) {
+            sessionFlow.update {
                 sessionFactory.create().also {
                     logger.debug(
                         logTag,
@@ -126,11 +126,11 @@ class HolderOrchestrator(
 
                 appCoroutineScope.launch {
                     peripheralBluetoothTransport.start(
-                        serviceUuid = session.value.sessionContext.sessionUuid
+                        serviceUuid = sessionFlow.value.sessionContext.sessionUuid
                     )
                 }
 
-                val qrCode = session.value.sessionContext.qrCode
+                val qrCode = sessionFlow.value.sessionContext.qrCode
                 if (qrCode.isNotEmpty()) {
                     safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
                 }
@@ -159,7 +159,7 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
-        session.update {
+        sessionFlow.update {
             sessionFactory.create().also {
                 logger.debug(
                     logTag,
@@ -184,7 +184,7 @@ class HolderOrchestrator(
                 logger.debug(
                     logTag,
                     "Mdoc - Advertising Started UUID: " +
-                        "${session.value.sessionContext.sessionUuid}"
+                        "${sessionFlow.value.sessionContext.sessionUuid}"
                 )
             }
 
@@ -266,7 +266,7 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.MessageReceived -> {
-                val keypair = session.value.sessionContext.keyPair?.private
+                val keypair = sessionFlow.value.sessionContext.keyPair?.private
                 if (keypair !is ECPrivateKey) {
                     logger.error(
                         logTag,
@@ -277,7 +277,7 @@ class HolderOrchestrator(
 
                 val deviceRequest = decryptDeviceRequestUseCase.execute(
                     sessionEstablishmentBytes = state.message,
-                    engagement = session.value.sessionContext.engagement,
+                    engagement = sessionFlow.value.sessionContext.engagement,
                     holderPrivateKey = keypair
                 )
 
@@ -308,7 +308,7 @@ class HolderOrchestrator(
         exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
         try {
-            session.value.transitionTo(state)
+            sessionFlow.value.transitionTo(state)
             logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
         } catch (exception: IllegalStateException) {
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
