@@ -101,7 +101,8 @@ class HolderOrchestratorTest {
         prerequisiteGate = gate,
         peripheralBluetoothTransport = peripheralBluetoothTransport,
         appCoroutineScope = scope,
-        decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase
+        decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
+        credentialProvider = FakeCredentialProvider()
     )
 
     @Test

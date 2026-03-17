@@ -8,7 +8,6 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,13 +18,14 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 
 @Inject
 @ViewModelKey(VerifyCredentialViewModel::class)
-@ContributesIntoMap(ViewModelScope::class)
+@ContributesIntoMap(VerifierUiScope::class)
 @OptIn(ExperimentalPermissionsApi::class)
 class VerifyCredentialViewModel(
     private val logger: Logger,

@@ -10,8 +10,8 @@ import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.presentation.HolderHomeRoute
-import uk.gov.onelogin.sharing.ui.api.CredentialPresenter
-import uk.gov.onelogin.sharing.ui.impl.di.CredentialSharingUiGraph
+import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 
 /**
  * Composable entry point for the Holder role (credential sharing).
@@ -24,9 +24,9 @@ import uk.gov.onelogin.sharing.ui.impl.di.CredentialSharingUiGraph
  */
 @Composable
 fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifier) {
-    val uiGraph = remember(component.appGraph) {
-        createGraphFactory<CredentialSharingUiGraph.Factory>()
-            .create(component.appGraph)
+    val uiGraph = remember(component.appGraph, component.orchestrator) {
+        createGraphFactory<HolderUiGraph.Factory>()
+            .create(component.appGraph, component.orchestrator)
     }
 
     val navController = rememberNavController()

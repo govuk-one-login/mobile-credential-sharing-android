@@ -3,10 +3,10 @@ package uk.gov.onelogin.sharing.verifier.scan.state
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResultState
 import uk.gov.onelogin.sharing.cameraService.data.MutableBarcodeDataResultState
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.verifier.scan.state.permission.MutablePreviouslyDeniedPermissionState
 import uk.gov.onelogin.sharing.verifier.scan.state.permission.PreviouslyDeniedPermissionState
 
@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.permission.PreviouslyDeniedPe
  * By default, all constructor parameters are implementations backed by [MutableStateFlow] objects.
  */
 @Inject
-@ContributesBinding(ViewModelScope::class, binding = binding<VerifierScannerState.Complete>())
+@ContributesBinding(VerifierUiScope::class, binding = binding<VerifierScannerState.Complete>())
 class CompleteVerifierScannerState(
     barcodeDataResultState: BarcodeDataResultState.Complete = MutableBarcodeDataResultState(),
     previouslyDeniedPermissionState: PreviouslyDeniedPermissionState.Complete =

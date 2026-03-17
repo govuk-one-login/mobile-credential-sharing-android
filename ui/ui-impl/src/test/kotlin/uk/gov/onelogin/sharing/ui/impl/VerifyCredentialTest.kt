@@ -6,6 +6,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -16,7 +17,11 @@ class VerifyCredentialTest {
     @Test
     fun `renders verifier flow`() {
         val appGraph = createTestAppGraph()
-        val verifier = FakeCredentialVerifier(appGraph)
+        val verifierGraph = createTestVerifierGraph(appGraph)
+        val verifier = FakeCredentialVerifier(
+            appGraph = appGraph,
+            orchestrator = verifierGraph.verifierOrchestrator()
+        )
 
         composeTestRule.setContent {
             VerifyCredential(component = verifier)

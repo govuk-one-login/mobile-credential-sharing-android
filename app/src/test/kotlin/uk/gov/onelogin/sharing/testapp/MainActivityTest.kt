@@ -11,9 +11,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.sdk.di.CredentialSharingAppGraph
-import uk.gov.onelogin.sharing.ui.impl.FakeCredentialPresenter
-import uk.gov.onelogin.sharing.ui.impl.FakeCredentialVerifier
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
+import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
+import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
+import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
+import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
@@ -24,10 +28,21 @@ class MainActivityTest {
             logger = SystemLogger()
         )
 
+    val holderGraph = createGraphFactory<PresentCredentialGraph.Factory>()
+        .create(appGraph = appGraph, credentialProvider = FakeCredentialProvider())
+
+    val verifierGraph = createGraphFactory<VerifyCredentialGraph.Factory>()
+        .create(
+            appGraph = appGraph,
+            verifierConfig = verifierConfigStub
+        )
+
     @get:Rule
     val composeTestRule = MainActivityRule(
         composeTestRule = createComposeRule(),
-        appGraph = appGraph
+        appGraph = appGraph,
+        holderGraph = holderGraph,
+        verifierGraph = verifierGraph
     )
 
     @Test
@@ -53,8 +68,14 @@ class MainActivityTest {
         val restorationTester = StateRestorationTester(composeTestRule)
         restorationTester.setContent {
             TestAppScreen(
-                credentialPresenter = FakeCredentialPresenter(appGraph),
-                credentialVerifier = FakeCredentialVerifier(appGraph)
+                credentialPresenter = FakeCredentialPresenter(
+                    appGraph = appGraph,
+                    orchestrator = holderGraph.holderOrchestrator()
+                ),
+                credentialVerifier = FakeCredentialVerifier(
+                    appGraph = appGraph,
+                    orchestrator = verifierGraph.verifierOrchestrator()
+                )
             )
         }
 

@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.ui.api
+package uk.gov.onelogin.sharing.orchestration
 
 /**
  * Provider interface for Holder role.

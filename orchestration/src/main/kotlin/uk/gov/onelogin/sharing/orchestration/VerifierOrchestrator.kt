@@ -40,6 +40,8 @@ class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,
     private val sessionFactory: SessionFactory<VerifierSession>,
+    @Suppress("UnusedPrivateProperty")
+    private val verifierConfig: VerifierConfig,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope
 ) : Orchestrator.Verifier {
 

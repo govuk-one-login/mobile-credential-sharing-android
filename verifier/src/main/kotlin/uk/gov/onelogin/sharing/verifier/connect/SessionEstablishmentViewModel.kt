@@ -16,7 +16,6 @@ import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -37,6 +36,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -79,7 +79,7 @@ class SessionEstablishmentViewModel(
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(SessionEstablishmentViewModel::class)
-    @ContributesIntoMap(ViewModelScope::class)
+    @ContributesIntoMap(VerifierUiScope::class)
     interface Factory : ViewModelAssistedFactory {
         fun create(@Assisted savedStateHandle: SavedStateHandle): SessionEstablishmentViewModel
 
