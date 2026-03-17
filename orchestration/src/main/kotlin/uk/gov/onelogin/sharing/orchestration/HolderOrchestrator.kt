@@ -88,7 +88,7 @@ class HolderOrchestrator(
             }
         }
 
-        if (holderSessionState.value !is HolderSessionState.NotStarted) {
+        if (sessionFlow.value.currentState.value !is HolderSessionState.NotStarted) {
             logger.error(
                 logTag,
                 START_ORCHESTRATION_ERROR,
@@ -322,7 +322,10 @@ class HolderOrchestrator(
 
     private fun safeTransitionTo(
         state: HolderSessionState,
-        logMessage: String = CANNOT_TRANSITION_TO_STATE.format(sessionFlow.value.currentState.value, state),
+        logMessage: String = CANNOT_TRANSITION_TO_STATE.format(
+            sessionFlow.value.currentState.value,
+            state
+        ),
         exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
         try {

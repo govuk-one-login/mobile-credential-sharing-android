@@ -93,7 +93,6 @@ class AndroidPeripheralBluetoothTransport(
         bleAdvertiser.stopAdvertise()
         gattServerManager.close()
         bluetoothStateMonitor.stop()
-        _state.value = PeripheralBluetoothState.Idle
     }
 
     override suspend fun notifySessionEnd(serviceUuid: UUID) {
@@ -131,8 +130,8 @@ class AndroidPeripheralBluetoothTransport(
                 _state.value = PeripheralBluetoothState.Connected(event.address)
 
             is GattServerEvent.Disconnected ->
-                    _state.value =
-                        PeripheralBluetoothState.Disconnected(event.address, event.isSessionEnd)
+                _state.value =
+                    PeripheralBluetoothState.Disconnected(event.address, event.isSessionEnd)
 
             is GattServerEvent.Error ->
                 _state.value = PeripheralBluetoothState.Error(

@@ -68,7 +68,7 @@ class VerifierOrchestrator(
             }
         }
 
-        if (verifierSessionState.value !is VerifierSessionState.NotStarted) {
+        if (sessionFlow.value.currentState.value !is VerifierSessionState.NotStarted) {
             logger.error(
                 logTag,
                 START_ORCHESTRATION_ERROR,
