@@ -36,9 +36,9 @@ The user doesn't pre-select a credential prior to session initialisation. The SD
 Verifier's attribute requirements after establishing a secure connection. Data exchange proceeds as
 follows:
 
-1. The SDK receives the `DeviceRequest` and queries the Host App via the `CredentialProvider`.
-2. The SDK (or Host App) presents the consent UI based on the requested attributes.
-3. Following consent, the Host App provides the requested data and cryptographic signatures.
+1. The SDK receives the `DeviceRequest` and queries the consumer via the `CredentialProvider`.
+2. The SDK (or consumer) presents the consent UI based on the requested attributes.
+3. Following consent, the consumer provides the requested data and cryptographic signatures.
 
 ---
 
@@ -90,14 +90,14 @@ Wallet [Technical Documentation](https://docs.wallet.service.gov.uk/consuming-an
 
 ### Integration Guide: Holder Role
 
-The **Host App** adopting the Holder role provisions and stores credentials securely. It acts as the
+The **consumer** adopting the Holder role provisions and stores credentials securely. It acts as the
 secure vault, supplying both issuer-signed data and device signatures when a Verifier initiates a
 request.
 
-To maintain cryptographic boundaries, the Host App provides the exact CBOR `IssuerSignedItem` bytes
-originally signed by the Issuer, and the SDK doesn't sign these attributes. To prove device possession
+To maintain cryptographic boundaries, the consumer provides the exact CBOR `IssuerSignedItem` bytes
+originally signed by the Issuer. The SDK doesn't sign these attributes. To prove device possession
 and bind the credential to the current BLE session, the SDK constructs a `DeviceAuthentication`
-payload, which the Host App then signs using the credential's Android Keystore private key. Finally,
+payload, which the consumer then signs using the credential's Android Keystore private key. Finally,
 the SDK handles all mdoc session encryption for the transport tunnel.
 
 #### 1. Importing the module
@@ -121,7 +121,7 @@ interface CredentialProvider {
 }
 ```
 
-The `CredentialRequest` contains an array of docTypes to be provided:
+The `CredentialRequest` contains an array of document types that the verifier requests:
 
 ```kotlin
 data class CredentialRequest(
@@ -134,23 +134,26 @@ data class Credential(
 )
 ```
 
-Initially `getCredentials` will always return an array of exactly **one** element: the decrypted raw CBOR data for the user's mDL credential.
+Initially `getCredentials` always returns an array of exactly **one** element: the decrypted raw CBOR data for the user's mDL credential.
 
-#### 3. Initialise the Holder Module
+#### 3. Initialise the SDK and create a Presenter
 
-The Host App initialises the sharing module by injecting the provider.
+The consumer initialises the SDK with the app context and a logger, then creates a
+`CredentialPresenter` by passing the `CredentialProvider` implementation.
 
 ```kotlin
-val credentialProvider = MyCredentialProvider()
-val presenter = rememberCredentialPresenter(
-  credentialProvider,
-  logger
+val sdk = CredentialSharingSdkImpl(
+  applicationContext = context,
+  logger = logger
 )
+
+val credentialProvider = MyCredentialProvider()
+val presenter = sdk.presentCredentialSdk.presenter(credentialProvider)
 ```
 
 #### 4. Present the Share Flow
 
-The host adds the presenter's flow to its view hierarchy, which triggers the sharing journey to start:
+The consumer adds the presenter's flow to its view hierarchy, which triggers the sharing journey to start:
 
 ```kotlin
 ShareCredential(
@@ -159,23 +162,21 @@ ShareCredential(
 )
 ```
 
-This pattern mirrors the CRIOrchestrator implementation.
-
 ---
 
 ### Integration Guide: Verifier Role
 
-The **Host App** adopting the Verifier role requests attributes and consumes the verified response.
+The **consumer** adopting the Verifier role requests attributes and consumes the verified response.
 It acts as the trust anchor, supplying the SDK with the Root Certificates of trusted issuers.
 
 To maintain cryptographic boundaries, the SDK handles the complete transaction lifecycle: it manages
 the camera scanner, establishes the secure BLE tunnel, decrypts the `DeviceResponse`, and
-cryptographically validates the Issuer's signature and data integrity. The Host App defines the
+cryptographically validates the Issuer's signature and data integrity. The consumer defines the
 request and receives the validated data.
 
 #### 1. Initialise the Verifier Module
 
-The Host App initialises the Verifier module, injecting the Root Certificates used to validate the
+The consumer initialises the Verifier module, injecting the Root Certificates used to validate the
 Issuer's signature on the credential. The SDK utilises an internal `PrerequisiteGate` to resolve
 transport availability at runtime.
 
@@ -190,7 +191,7 @@ val verifier = CredentialVerifier(trustedCertificates = trustedRoots)
 
 #### 2. Request Attributes
 
-The Host App defines the `CredentialRequest` up front. This specifies the document type and the
+The consumer defines the `CredentialRequest` up front. This specifies the document type and the
 required attributes.
 
 ```kotlin
@@ -203,7 +204,7 @@ val request = CredentialRequest(
 #### 3. Start Verification & Process Response
 
 The SDK takes control of the flow: it launches the camera, scans the engagement QR code, establishes
-the BLE connection, transmits the request, and validates the response. The Host App awaits the
+the BLE connection, transmits the request, and validates the response. The consumer awaits the
 final, cryptographically verified data.
 
 ```kotlin
@@ -216,7 +217,7 @@ lifecycleScope.launch {
         )
 
         // The SDK has already validated the MSO signature and hash integrity. 
-        // The Host App can safely proceed with the verified flow.
+        // The consumer can safely proceed with the verified flow.
         val ageOver18 = verifiedData.getValue("age_over_18") as? Boolean
         val familyName = verifiedData.getValue("family_name") as? String
 
