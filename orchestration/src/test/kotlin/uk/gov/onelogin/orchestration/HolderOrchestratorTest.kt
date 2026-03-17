@@ -458,6 +458,9 @@ class HolderOrchestratorTest {
         orchestrator.start()
         advanceUntilIdle()
 
+        val currentSession = (sessionFactory as FakeSessionFactory).getCurrentSession()
+        assertEquals(1u, currentSession.sessionContext.decryptCounter)
+
         (orchestrator as HolderOrchestrator).holderSessionState.test {
             assertEquals(
                 HolderSessionState.PresentingEngagement(
@@ -488,8 +491,10 @@ class HolderOrchestratorTest {
         }
 
         assertThat(
-            sessionFactory as FakeSessionFactory,
+            sessionFactory,
             currentSessionState(isAwaitingUserConsent())
         )
+
+        assertEquals(2u, currentSession.sessionContext.decryptCounter)
     }
 }

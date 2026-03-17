@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.security.cryptography.usecases
 
 import java.security.interfaces.ECPrivateKey
 import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
 import uk.gov.logging.testdouble.SystemLogger
@@ -69,6 +70,11 @@ class DecryptDeviceRequestUseCaseImplTest {
         assertSame(
             SessionKeyGenerator.Companion.DeviceRole.VERIFIER,
             fakeSessionSecurity.lastDecryptRole
+        )
+
+        assertEquals(
+            1u,
+            fakeSessionSecurity.lastDecryptCounter
         )
     }
 }
