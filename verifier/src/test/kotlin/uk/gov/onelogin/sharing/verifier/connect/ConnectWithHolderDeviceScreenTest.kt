@@ -22,6 +22,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.sessionSecurity
 import uk.gov.onelogin.sharing.security.cose.DefaultCoseKeyToString
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
@@ -51,7 +52,8 @@ class ConnectWithHolderDeviceScreenTest {
         logger = logger,
         bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
         verifierSessionFactory = { mdocVerifierSession },
-        savedStateHandle = SavedStateHandle()
+        savedStateHandle = SavedStateHandle(),
+        orchestrator = FakeOrchestrator()
     )
 
     @Before

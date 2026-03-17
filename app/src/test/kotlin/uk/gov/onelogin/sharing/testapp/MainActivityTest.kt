@@ -11,7 +11,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.sdk.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.ui.impl.FakeCredentialPresenter
+import uk.gov.onelogin.sharing.ui.impl.FakeCredentialVerifier
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
@@ -51,8 +53,8 @@ class MainActivityTest {
         val restorationTester = StateRestorationTester(composeTestRule)
         restorationTester.setContent {
             TestAppScreen(
-                ui = FakeCredentialSharingUi(),
-                sdk = FakeCredentialSharingSdk(appGraph)
+                credentialPresenter = FakeCredentialPresenter(appGraph),
+                credentialVerifier = FakeCredentialVerifier(appGraph)
             )
         }
 

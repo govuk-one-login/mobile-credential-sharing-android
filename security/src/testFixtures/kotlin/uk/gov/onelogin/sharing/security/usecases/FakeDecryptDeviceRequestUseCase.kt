@@ -9,6 +9,7 @@ class FakeDecryptDeviceRequestUseCase : DecryptDeviceRequestUseCase {
     override fun execute(
         sessionEstablishmentBytes: ByteArray,
         engagement: String,
-        holderPrivateKey: PrivateKey
+        holderPrivateKey: PrivateKey,
+        decryptCounter: UInt
     ): DeviceRequest = deviceRequestStub
 }

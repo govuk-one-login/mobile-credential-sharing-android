@@ -1,67 +1,53 @@
 package uk.gov.onelogin.sharing.verifier.scan
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import androidx.lifecycle.repeatOnLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
-import uk.gov.onelogin.orchestration.Orchestrator.Verifier.Companion.requiredPermissions
-import uk.gov.onelogin.sharing.verifier.scan.callbacks.VerifierScannerBarcodeScanCallback
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResult
+import uk.gov.onelogin.sharing.cameraService.scan.QrScannerCallback
+import uk.gov.onelogin.sharing.verifier.VerifierNavigationEvents
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun VerifierScanner(
     modifier: Modifier = Modifier,
     viewModel: VerifierScannerViewModel = metroViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    permissionState: MultiplePermissionsState =
-        rememberMultiplePermissionsState(
-            permissions = requiredPermissions
-        ) { permissionMap ->
-            viewModel.update(permissionMap.values.all { it })
-        },
     onInvalidBarcode: (String) -> Unit = {},
     onValidBarcode: (String) -> Unit = {}
 ) {
-    val hasPreviouslyDeniedPermission: Boolean by viewModel
-        .hasPreviouslyDeniedPermission
-        .collectAsStateWithLifecycle()
+    val currentOnInvalidBarcode by rememberUpdatedState(onInvalidBarcode)
+    val currentOnValidBarcode by rememberUpdatedState(onValidBarcode)
 
-    val barcodeScanResultCallback: BarcodeScanResult.Callback = VerifierScannerBarcodeScanCallback(
-        onDataFound = viewModel::update
-    )
+    LaunchedEffect(viewModel.navigationEvents) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.navigationEvents.collect { event ->
+                when (event) {
+                    is VerifierNavigationEvents.NavigateToDiagnostic -> currentOnValidBarcode(
+                        event.qrCode
+                    )
 
-    val uri: BarcodeDataResult by viewModel.barcodeDataResult.collectAsStateWithLifecycle()
-
-    when (uri) {
-        is BarcodeDataResult.Valid -> {
-            onValidBarcode((uri as BarcodeDataResult.Valid).data).also {
-                viewModel.resetBarcodeData()
+                    is VerifierNavigationEvents.NavigateToInvalidScreen -> currentOnInvalidBarcode(
+                        event.qrCode
+                    )
+                }
             }
-        }
-
-        is BarcodeDataResult.Invalid -> {
-            onInvalidBarcode((uri as BarcodeDataResult.Invalid).data).also {
-                viewModel.resetBarcodeData()
-            }
-        }
-
-        else -> {
-            VerifierScannerContent(
-                lifecycleOwner = lifecycleOwner,
-                onUpdatePreviouslyDeniedPermission = viewModel::update,
-                hasPreviouslyDeniedPermission = hasPreviouslyDeniedPermission,
-                permissionState = permissionState,
-                modifier = modifier,
-                barcodeScanResultCallback = barcodeScanResultCallback
-            )
         }
     }
+
+    val barcodeScanResultCallback: BarcodeScanResult.Callback = QrScannerCallback(
+        onQrDetected = viewModel::update
+    )
+
+    VerifierScannerContent(
+        lifecycleOwner = lifecycleOwner,
+        modifier = modifier,
+        barcodeScanResultCallback = barcodeScanResultCallback
+    )
 }

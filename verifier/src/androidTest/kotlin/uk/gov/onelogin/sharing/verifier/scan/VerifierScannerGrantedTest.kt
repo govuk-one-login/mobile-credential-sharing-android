@@ -8,14 +8,12 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
-import uk.gov.onelogin.orchestration.Orchestrator.Verifier.Companion.requiredPermissions
 import uk.gov.onelogin.sharing.core.PermissionListExtensions.toGrantPermissionsRule
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.Verifier.Companion.requiredPermissions
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -39,11 +37,6 @@ class VerifierScannerGrantedTest {
             setContent {
                 VerifierScannerContent(
                     lifecycleOwner = LocalLifecycleOwner.current,
-                    onUpdatePreviouslyDeniedPermission = {},
-                    hasPreviouslyDeniedPermission = false,
-                    permissionState = rememberMultiplePermissionsState(
-                        requiredPermissions
-                    ),
                     barcodeScanResultCallback = { _, _ -> }
                 )
             }
@@ -58,12 +51,7 @@ class VerifierScannerGrantedTest {
             setContent {
                 VerifierScannerContent(
                     lifecycleOwner = LocalLifecycleOwner.current,
-                    hasPreviouslyDeniedPermission = false,
-                    onUpdatePreviouslyDeniedPermission = {},
-                    permissionState = rememberMultiplePermissionsState(
-                        requiredPermissions
-                    ),
-                    barcodeScanResultCallback = BarcodeScanResult.Callback { _, _ -> }
+                    barcodeScanResultCallback = { _, _ -> }
                 )
             }
             assertCameraViewfinderIsDisplayed()

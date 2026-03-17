@@ -10,14 +10,14 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 /**
  * Parameterised test input for valid [uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState] objects that can transition to
  * [uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled] within the
- * [uk.gov.onelogin.orchestration.HolderOrchestrator], as per the [uk.gov.onelogin.sharing.orchestration.holder.session.validHolderTransitions] [Map].
+ * [uk.gov.onelogin.sharing.orchestration.HolderOrchestrator], as per the [uk.gov.onelogin.sharing.orchestration.holder.session.validHolderTransitions] [Map].
  */
 class CancellableVerifierSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*>? = listOf(
         preflightEmptyPermissions,
         ReadyToScan,
         Connecting,
-        ProcessingEngagement,
+        ProcessingEngagement(""),
         Verifying
     )
 }

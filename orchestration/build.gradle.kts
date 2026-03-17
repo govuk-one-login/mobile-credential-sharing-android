@@ -35,7 +35,8 @@ dependencies {
         libs.androidx.camera.lifecycle,
         projects.bluetooth,
         projects.core,
-        projects.security
+        projects.security,
+        projects.cameraService
     ).forEach(::api)
 
     listOf(projects.models)

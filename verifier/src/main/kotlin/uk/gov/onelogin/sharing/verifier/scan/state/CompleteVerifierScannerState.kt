@@ -5,8 +5,8 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultState
-import uk.gov.onelogin.sharing.verifier.scan.state.data.MutableBarcodeDataResultState
+import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResultState
+import uk.gov.onelogin.sharing.cameraService.data.MutableBarcodeDataResultState
 import uk.gov.onelogin.sharing.verifier.scan.state.permission.MutablePreviouslyDeniedPermissionState
 import uk.gov.onelogin.sharing.verifier.scan.state.permission.PreviouslyDeniedPermissionState
 
