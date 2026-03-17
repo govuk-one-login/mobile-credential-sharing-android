@@ -26,12 +26,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
-import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
-import uk.gov.onelogin.sharing.core.R.string.bluetooth_disconnected_unexpectedly
-import uk.gov.onelogin.sharing.core.R.string.bluetooth_permissions_revoked
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
@@ -72,12 +68,6 @@ fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewMod
         multiplePermissionsState,
         hasPreviouslyRequestedPermission
     ) { viewModel.updateBluetoothPermissions(true) }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.onScreenDisposed()
-        }
-    }
 }
 
 @Composable

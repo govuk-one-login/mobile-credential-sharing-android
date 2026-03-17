@@ -274,10 +274,6 @@ class SessionEstablishmentViewModel(
         super.onCleared()
     }
 
-    fun resetOrchestrator() {
-        orchestrator.cancel()
-    }
-
     private fun updateEngagementData(base64EncodedEngagement: String) {
         updateState {
             it.copy(
