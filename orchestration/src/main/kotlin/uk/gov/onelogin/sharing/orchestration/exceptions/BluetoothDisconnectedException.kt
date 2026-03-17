@@ -1,4 +1,4 @@
-package uk.gov.onelogin.orchestration.exceptions
+package uk.gov.onelogin.sharing.orchestration.exceptions
 
 data class BluetoothDisconnectedException(
     override val message: String,

@@ -11,7 +11,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.SystemLogger
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.sdk.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.ui.impl.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.FakeCredentialVerifier
 

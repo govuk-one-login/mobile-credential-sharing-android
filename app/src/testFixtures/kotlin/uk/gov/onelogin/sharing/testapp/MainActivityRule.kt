@@ -11,7 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
-import uk.gov.onelogin.sharing.di.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.sdk.di.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.ui.impl.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.FakeCredentialVerifier
 

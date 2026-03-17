@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
 /**
  * [SessionFactory] implementation that provides new instances of [HolderSession].
  *
- * @see uk.gov.onelogin.orchestration.HolderOrchestrator
+ * @see uk.gov.onelogin.sharing.orchestration.HolderOrchestrator
  */
 @ContributesBinding(scope = AppScope::class)
 class HolderSessionFactory(
