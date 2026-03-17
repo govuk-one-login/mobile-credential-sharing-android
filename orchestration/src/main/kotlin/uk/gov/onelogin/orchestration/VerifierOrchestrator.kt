@@ -9,7 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import uk.gov.logging.api.Logger
@@ -46,8 +46,8 @@ class VerifierOrchestrator(
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val verifierSessionState: StateFlow<VerifierSessionState> = sessionFlow.map {
-        it.getCurrentState()
+    override val verifierSessionState: StateFlow<VerifierSessionState> = sessionFlow.flatMapLatest {
+        it.currentState
     }.stateIn(
         appCoroutineScope,
         SharingStarted.Eagerly,
@@ -170,9 +170,7 @@ class VerifierOrchestrator(
         exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
         try {
-            if (sessionFlow.value.canTransition(state)) {
-                sessionFlow.update { it.copy(internalState = state) }
-            }
+            sessionFlow.value.transitionTo(state)
             logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
         } catch (exception: IllegalStateException) {
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception

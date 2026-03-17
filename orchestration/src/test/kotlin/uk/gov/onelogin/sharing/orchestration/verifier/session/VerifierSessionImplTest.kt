@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.verifier.session
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameters
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
@@ -26,7 +27,7 @@ class VerifierSessionImplTest {
     private val session by lazy {
         VerifierSessionImpl(
             logger = logger,
-            internalState = initialState,
+            internalState = MutableStateFlow(initialState),
             transitionMap = validTransitions
         )
     }
@@ -45,7 +46,7 @@ class VerifierSessionImplTest {
         MatcherAssert.assertThat(
             exception.message,
             CoreMatchers.equalTo(
-                "Current state (${session.getCurrentState()::class.java.simpleName}) " +
+                "Current state (${session.currentState.value::class.java.simpleName}) " +
                     "cannot transition to: ${transition::class.java.simpleName}"
             )
         )

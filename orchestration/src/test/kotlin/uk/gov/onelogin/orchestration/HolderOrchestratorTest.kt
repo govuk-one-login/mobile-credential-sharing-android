@@ -5,6 +5,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -83,7 +84,7 @@ class HolderOrchestratorTest {
         initialStates.map { initialState ->
             HolderSessionImpl(
                 logger = logger,
-                internalState = initialState,
+                internalState = MutableStateFlow(initialState),
                 sessionContext = holderSessionContextStub
             )
         }

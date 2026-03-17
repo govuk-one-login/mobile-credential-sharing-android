@@ -3,6 +3,7 @@ package uk.gov.onelogin.orchestration
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.assertEquals
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -57,7 +58,7 @@ class VerifierOrchestratorTest {
             initialStates.map { initialState ->
                 VerifierSessionImpl(
                     logger = logger,
-                    internalState = initialState
+                    internalState = MutableStateFlow(initialState)
                 )
             }
         )

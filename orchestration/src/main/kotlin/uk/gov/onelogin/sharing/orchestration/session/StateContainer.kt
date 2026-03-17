@@ -8,8 +8,8 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer.Transitional
 /**
  * Declares that an implementation exposes [State] objects via a kotlin [StateFlow].
  */
-fun interface StateContainer<State : Any> {
-    fun getCurrentState(): State
+interface StateContainer<State : Any> {
+    val currentState: StateFlow<State>
 
     /**
      * Interface that contains all of the [StateContainer] sub-interfaces.
@@ -27,7 +27,7 @@ fun interface StateContainer<State : Any> {
 
                 check(state::class in availableTransitions) {
                     cannotTransitionTo(
-                        fromStateName = getCurrentState()::class.java.simpleName,
+                        fromStateName = currentState.value::class.java.simpleName,
                         toStateName = state::class.java.simpleName
                     )
                 }

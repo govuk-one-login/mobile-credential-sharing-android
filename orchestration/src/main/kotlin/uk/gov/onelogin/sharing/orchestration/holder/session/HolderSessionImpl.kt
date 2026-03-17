@@ -1,8 +1,10 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import kotlin.reflect.KClass
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import uk.gov.logging.api.Logger
-import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 
@@ -20,30 +22,34 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 data class HolderSessionImpl(
     private val logger: Logger,
     override val sessionContext: HolderSessionContext,
-    private var internalState: HolderSessionState = HolderSessionState.NotStarted,
+    private var internalState: MutableStateFlow<HolderSessionState> =
+        MutableStateFlow(HolderSessionState.NotStarted),
     private val transitionMap: HolderSessionStateTransitions = validHolderTransitions
-) : HolderSession,
-    Completable by internalState {
+) : HolderSession {
 
-    override fun getCurrentState(): HolderSessionState = internalState
+    override val currentState: StateFlow<HolderSessionState> = internalState
+
+    override fun isComplete(): Boolean = currentState.value.isComplete()
 
     override fun getAvailableTransitions(): Set<KClass<out HolderSessionState>> =
-        checkNotNull(transitionMap[internalState::class]) {
+        checkNotNull(transitionMap[currentState.value::class]) {
             StateContainer.Transitional.LogMessages.cannotFindTransitions(
-                internalState::class.java.simpleName
+                currentState.value::class.java.simpleName
             )
         }
 
     override fun update(state: HolderSessionState) {
-        val previousState = internalState
-        internalState = state
-        logger.debug(
-            logTag,
-            StateContainer.Transitional.LogMessages.performedTransition(
-                fromStateName = previousState::class.java.simpleName,
-                toStateName = state::class.java.simpleName
-            )
-        )
+        internalState.update { previousState ->
+            state.also {
+                logger.debug(
+                    logTag,
+                    StateContainer.Transitional.LogMessages.performedTransition(
+                        fromStateName = previousState::class.java.simpleName,
+                        toStateName = state::class.java.simpleName
+                    )
+                )
+            }
+        }
     }
 
     override fun logError(message: String, throwable: Throwable) {
