@@ -16,7 +16,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +25,6 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
 import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
-import uk.gov.onelogin.sharing.holder.presentation.BluetoothState
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
@@ -72,7 +70,6 @@ class HolderWelcomeScreenTest {
             HolderScreenContent(
                 contentState = HolderWelcomeUiState(
                     qrData = "Fake90109jec",
-                    bluetoothState = BluetoothState.Enabled,
                     hasBluetoothPermissions = true
                 ),
                 multiplePermissionsState = bluetoothPermissionsGranted,
@@ -108,10 +105,6 @@ class HolderWelcomeScreenTest {
         viewModel.updateBluetoothPermissions(true)
 
         composeTestRule.waitForIdle()
-        assertEquals(
-            BluetoothState.Unknown,
-            viewModel.uiState.value.bluetoothState
-        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -122,8 +115,7 @@ class HolderWelcomeScreenTest {
             render(
                 state = HolderWelcomeUiState(
                     qrData = "fakestring",
-                    hasBluetoothPermissions = true,
-                    bluetoothState = BluetoothState.Enabled
+                    hasBluetoothPermissions = true
                 )
             )
             advanceUntilIdle()
@@ -150,29 +142,10 @@ class HolderWelcomeScreenTest {
     }
 
     @Test
-    fun shouldShowEnableBluetoothPromptWhenSetToTrueAndPermissionsSetTrue() = runTest {
-        composeTestRule.apply {
-            render(
-                HolderWelcomeUiState(
-                    showEnableBluetoothPrompt = true,
-                    hasBluetoothPermissions = true
-                )
-            )
-        }
-
-        advanceUntilIdle()
-
-        composeTestRule.onNodeWithTag(
-            "EnableBluetoothPrompt"
-        ).assertIsDisplayed()
-    }
-
-    @Test
     fun shouldNotShowEnableBluetoothPromptIfHasBluetoothPermissionsIsFalse() = runTest {
         composeTestRule.apply {
             render(
                 HolderWelcomeUiState(
-                    showEnableBluetoothPrompt = true,
                     hasBluetoothPermissions = false
                 )
             )

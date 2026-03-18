@@ -26,7 +26,6 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
-import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
@@ -34,7 +33,6 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButt
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.holder.R.string.bluetooth_turned_off_holder
 
 private const val QR_SIZE = 800
 
@@ -80,11 +78,6 @@ fun HolderScreenContent(
     when {
         contentState.showErrorScreen -> {
             ErrorScreen(errorText = contentState.errorMessage)
-        }
-
-        contentState.showEnableBluetoothPrompt &&
-            contentState.hasBluetoothPermissions == true -> {
-            EnableBluetoothPrompt(denialText = bluetooth_turned_off_holder)
         }
 
         contentState.hasBluetoothPermissions == true -> {
