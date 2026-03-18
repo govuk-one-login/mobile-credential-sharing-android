@@ -10,7 +10,7 @@ import org.hamcrest.MatcherAssert
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.InvalidVerifierSessionStateTransitions

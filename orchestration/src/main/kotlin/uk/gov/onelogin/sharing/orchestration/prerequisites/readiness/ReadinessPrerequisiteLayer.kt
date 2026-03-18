@@ -5,7 +5,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraState
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.bluetoothManager
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite

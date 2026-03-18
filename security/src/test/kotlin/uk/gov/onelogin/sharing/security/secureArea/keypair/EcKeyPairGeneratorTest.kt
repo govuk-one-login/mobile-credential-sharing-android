@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.security.secureArea.keypair
 import java.security.interfaces.ECPublicKey
 import junit.framework.TestCase
 import org.junit.Test
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.ALGORITHM
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.INVALID_ALGORITHM

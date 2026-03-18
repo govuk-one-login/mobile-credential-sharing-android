@@ -5,7 +5,7 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertFailsWith
 import org.junit.Before
 import org.junit.Test
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateSessionKey
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole

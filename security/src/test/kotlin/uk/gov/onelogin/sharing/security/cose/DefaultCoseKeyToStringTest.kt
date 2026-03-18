@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.security.cose
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.SecurityDeserializerStub.embeddedCoseKey
 import uk.gov.onelogin.sharing.security.SecurityDeserializerStub.validCoseKey
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
