@@ -22,14 +22,14 @@ class VerificationRequestTest {
     }
 
     @Test
-    fun `typed with custom document type and custom elements`() {
+    fun `typed with custom document type`() {
         val request = VerificationRequest.typed(
             documentType = DocumentType.Custom("org.example.custom"),
-            requestElements = listOf(RequestElement.Custom("custom_field"))
+            requestElements = listOf(RequestElement.Portrait)
         )
 
         assertEquals("org.example.custom", request.documentType)
-        assertEquals(listOf("custom_field"), request.requestedElements)
+        assertEquals(listOf("portrait"), request.requestedElements)
     }
 
     @Test

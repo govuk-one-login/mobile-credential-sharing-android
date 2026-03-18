@@ -18,6 +18,10 @@ import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        private const val AGE_21 = 21
+    }
+
     @Inject
     lateinit var presentCredentialSdk: PresentCredentialSdk
 
@@ -35,7 +39,7 @@ class MainActivity : ComponentActivity() {
             documentType = DocumentType.Mdl,
             requestElements = listOf(
                 RequestElement.GivenName,
-                RequestElement.AgeOver(21),
+                RequestElement.AgeOver(AGE_21),
                 RequestElement.FamilyName,
                 RequestElement.Portrait
             )
