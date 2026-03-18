@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.sdk.internal.verifier
 
-import uk.gov.onelogin.sharing.orchestration.VerifierConfig
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph

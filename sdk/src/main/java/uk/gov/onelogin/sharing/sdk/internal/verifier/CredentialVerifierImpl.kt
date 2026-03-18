@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.sdk.internal.verifier
 
 import java.security.cert.Certificate
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.VerificationRequest
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 

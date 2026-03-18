@@ -7,8 +7,8 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.VerificationRequest
-import uk.gov.onelogin.sharing.orchestration.VerifierConfig
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.sdk.internal.verifier.CredentialVerifierImpl

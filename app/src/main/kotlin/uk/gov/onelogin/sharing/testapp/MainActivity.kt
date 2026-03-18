@@ -8,8 +8,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.security.cert.Certificate
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.orchestration.VerificationRequest
-import uk.gov.onelogin.sharing.orchestration.VerifierConfig
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.RequestElement
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 
@@ -29,9 +31,14 @@ class MainActivity : ComponentActivity() {
         val holder = presentCredentialSdk
             .presenter(SampleCredentialProvider())
 
-        val verificationRequest = VerificationRequest(
-            documentType = "org.iso.18013.5.1.mDL",
-            requestedElements = listOf("given_name", "age_over_21", "family_name", "portrait")
+        val verificationRequest = VerificationRequest.typed(
+            documentType = DocumentType.Mdl,
+            requestElements = listOf(
+                RequestElement.GivenName,
+                RequestElement.AgeOver(21),
+                RequestElement.FamilyName,
+                RequestElement.Portrait
+            )
         )
         val trustedCertificates: List<Certificate> = emptyList()
 
