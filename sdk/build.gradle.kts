@@ -32,6 +32,10 @@ dependencies {
         libs.metro.runtime,
         testFixtures(projects.orchestration)
     ).forEach(::testFixturesImplementation)
+
+    listOf(
+        testFixtures(projects.orchestration)
+    ).forEach(::testImplementation)
 }
 
 mavenPublishingConfig {

@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.security.engagement
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.Base64
 import java.util.UUID
 import uk.gov.logging.api.Logger

@@ -42,6 +42,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
 
+@Suppress("LongParameterList")
 @SingleIn(AppScope::class)
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
@@ -50,7 +51,9 @@ class HolderOrchestrator(
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
-    private val prerequisiteGate: PrerequisiteGate
+    private val prerequisiteGate: PrerequisiteGate,
+    @Suppress("UnusedPrivateProperty")
+    private val credentialProvider: CredentialProvider
 ) : Orchestrator.Holder {
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
 

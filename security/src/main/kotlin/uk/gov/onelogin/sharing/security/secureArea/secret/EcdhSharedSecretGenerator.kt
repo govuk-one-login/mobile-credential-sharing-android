@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.security.secureArea.secret
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.security.InvalidKeyException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey

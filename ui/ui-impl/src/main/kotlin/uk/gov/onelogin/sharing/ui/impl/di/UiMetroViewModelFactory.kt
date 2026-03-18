@@ -3,13 +3,13 @@ package uk.gov.onelogin.sharing.ui.impl.di
 import androidx.lifecycle.ViewModel
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Provider
-import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlin.reflect.KClass
+import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 
 /**
  * A concrete implementation of [MetroViewModelFactory] for the UI module.
@@ -19,10 +19,13 @@ import kotlin.reflect.KClass
  *
  */
 @ContributesBinding(
-    ViewModelScope::class,
+    HolderUiScope::class,
     binding = binding<MetroViewModelFactory>()
 )
-@SingleIn(ViewModelScope::class)
+@ContributesBinding(
+    VerifierUiScope::class,
+    binding = binding<MetroViewModelFactory>()
+)
 class UiMetroViewModelFactory(
     override val viewModelProviders: Map<KClass<out ViewModel>, Provider<ViewModel>>,
     override val assistedFactoryProviders: Map<

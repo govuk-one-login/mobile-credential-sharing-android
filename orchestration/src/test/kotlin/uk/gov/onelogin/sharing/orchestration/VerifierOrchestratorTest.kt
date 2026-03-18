@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
@@ -80,6 +81,7 @@ class VerifierOrchestratorTest {
             logger = logger,
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
+            verifierConfig = verifierConfigStub,
             appCoroutineScope = scope
         )
     }

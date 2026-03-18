@@ -6,8 +6,8 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanSettings
 import android.os.ParcelUuid
 import androidx.annotation.RequiresPermission
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.concurrent.CancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -17,9 +17,11 @@ import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerCallback.Companion.toLeScanCallback
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
+@ContributesBinding(VerifierUiScope::class)
 class AndroidBluetoothScanner(
     val bluetoothAdapterProvider: BluetoothAdapterProvider,
     val logger: Logger

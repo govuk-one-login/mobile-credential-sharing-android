@@ -1,12 +1,14 @@
 package uk.gov.onelogin.sharing.verifier.session
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineScope
 import uk.gov.logging.api.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
+@ContributesBinding(VerifierUiScope::class)
 class VerifierSessionFactoryImpl(
     private val bluetoothCentralFactory: BluetoothCentralFactory,
     private val logger: Logger
