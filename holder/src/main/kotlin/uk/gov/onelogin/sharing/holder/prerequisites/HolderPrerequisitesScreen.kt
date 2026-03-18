@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import kotlinx.coroutines.flow.map
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.holder.R
@@ -34,14 +33,13 @@ internal fun HolderPrerequisitesScreen(
     val currentOnHandlePreflight by rememberUpdatedState(onHandlePreflight)
     val currentOnPresentEngagement by rememberUpdatedState(onPresentEngagement)
     val state: HolderSessionState by viewModel.holderSessionState.collectAsStateWithLifecycle()
-    val progressTextResource: Int? by viewModel
-        .holderSessionState
-        .map(::calculateProgressTextFrom)
-        .collectAsStateWithLifecycle(initialValue = calculateProgressTextFrom(state))
+    val progressTextResource: String? = calculateProgressTextFrom(state)?.let {
+        stringResource(it)
+    }
 
     HolderPrerequisitesContent(
         modifier = modifier,
-        progressText = progressTextResource?.let { stringResource(it) }
+        progressText = progressTextResource
     )
 
     LaunchedEffect(state) {
