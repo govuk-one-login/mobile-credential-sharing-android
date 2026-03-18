@@ -70,11 +70,10 @@ class AndroidPeripheralBluetoothTransport(
                 }
             }
         }
-
-        bluetoothStateMonitor.start()
     }
 
     override suspend fun start(serviceUuid: UUID) {
+        bluetoothStateMonitor.start()
         try {
             bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid))
         } catch (e: StartAdvertisingException) {
