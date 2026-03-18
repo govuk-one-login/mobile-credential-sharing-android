@@ -8,8 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
-import uk.gov.onelogin.sharing.holder.presentation.HolderHomeRoute
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 
@@ -36,7 +36,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     ) {
         NavHost(
             navController = navController,
-            startDestination = HolderHomeRoute,
+            startDestination = HolderRoutes,
             modifier = modifier
         ) {
             configureHolderRoutes()

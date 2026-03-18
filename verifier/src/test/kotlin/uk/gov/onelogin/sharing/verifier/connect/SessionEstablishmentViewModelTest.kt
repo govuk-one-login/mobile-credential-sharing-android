@@ -26,8 +26,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.LogEntry
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.LogEntry
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
@@ -41,7 +41,6 @@ import uk.gov.onelogin.sharing.bluetooth.scanner.DummyBluetoothScanner
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
-import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.permissionUpdateGranted
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEventStubs.startScanningDummyServiceUuid
@@ -74,13 +73,12 @@ class SessionEstablishmentViewModelTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle()
     ) = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
+        verifierSessionFactory = { fakeVerifierSession },
         scanner = scanner,
         dispatcher = mainDispatcherRule.testDispatcher,
         logger = logger,
         bluetoothStatusMonitor = fakeBluetoothStateMonitor,
-        verifierSessionFactory = { fakeVerifierSession },
-        savedStateHandle = savedStateHandle,
-        orchestrator = FakeOrchestrator()
+        savedStateHandle = savedStateHandle
     )
 
     @Test

@@ -3,8 +3,8 @@ package uk.gov.onelogin.sharing.ui.impl
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
-import uk.gov.logging.api.Logger
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph

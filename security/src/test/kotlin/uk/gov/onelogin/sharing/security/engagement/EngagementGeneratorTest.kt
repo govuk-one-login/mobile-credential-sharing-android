@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.security.engagement
 
 import org.junit.Assert.assertNotNull
 import org.junit.Test
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.security.cose.CoseKey
 import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.qrCodeEngagementUuid

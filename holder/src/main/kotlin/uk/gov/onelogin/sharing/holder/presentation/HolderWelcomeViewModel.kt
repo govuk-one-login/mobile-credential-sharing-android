@@ -17,10 +17,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.HolderUiScope
-import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
-import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -105,21 +103,6 @@ class HolderWelcomeViewModel(
             val savedStateHandle = extras.createSavedStateHandle()
             return create(savedStateHandle)
         }
-    }
-
-    fun onScreenDisposed() {
-        @RequiresImplementation(
-            details = [
-                ImplementationDetail(
-                    ticket = "UI",
-                    description = "We don't have an explicit back button or way to test this atm" +
-                        "so will send end command onNavBack to test closing the connection" +
-                        "for now."
-                )
-            ]
-        )
-        orchestrator.cancel()
-        logger.debug(logTag, "Holder stopped advertising during session")
     }
 }
 

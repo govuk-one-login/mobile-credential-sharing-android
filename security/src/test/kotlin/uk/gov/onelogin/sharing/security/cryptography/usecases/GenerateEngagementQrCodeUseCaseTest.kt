@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.security.cryptography.usecases
 import java.util.UUID
 import kotlin.test.assertEquals
 import org.junit.Test
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.FakeSessionSecurity
 import uk.gov.onelogin.sharing.security.engagement.Engagement
 import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator

@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.security.cbor.decoders
 
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.security.cbor.deriveSessionTranscript
 
 class SessionTranscriptDecoders : TestParametersValuesProvider() {

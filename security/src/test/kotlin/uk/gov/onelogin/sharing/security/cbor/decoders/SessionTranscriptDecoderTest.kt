@@ -7,8 +7,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.api.Logger
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.security.DecoderStub.VALID_TRANSCRIPT
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.MOCK_E_READER_KEY

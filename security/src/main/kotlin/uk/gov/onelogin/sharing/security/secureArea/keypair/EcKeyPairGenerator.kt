@@ -6,7 +6,7 @@ import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPair
 import java.security.NoSuchAlgorithmException
 import java.security.spec.ECGenParameterSpec
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.secureArea.KeyPairGenerator
 

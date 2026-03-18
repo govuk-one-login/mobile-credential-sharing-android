@@ -55,7 +55,19 @@ fun TestAppScreen(
         modifier = modifier,
         onOpenHolder = { destination = CredentialSharingDestination.Holder },
         onOpenVerifier = { destination = CredentialSharingDestination.Verifier },
-        onCloseFlow = { destination = null },
+        onCloseFlow = {
+            when (destination) {
+                is CredentialSharingDestination.Holder ->
+                    credentialPresenter.orchestrator
+
+                is CredentialSharingDestination.Verifier ->
+                    credentialVerifier.orchestrator
+
+                else -> null
+            }?.cancel()
+
+            destination = null
+        },
         sharingDialogVisible = sharingDialogVisible,
         content = {
             when (destination) {

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.exc.StreamReadException
 import com.fasterxml.jackson.databind.DatabindException
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.security.cbor.base64Decode
 import uk.gov.onelogin.sharing.security.cbor.encodeCbor
