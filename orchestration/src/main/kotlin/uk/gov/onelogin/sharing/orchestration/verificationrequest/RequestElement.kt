@@ -1,18 +1,19 @@
 package uk.gov.onelogin.sharing.orchestration.verificationrequest
 
-@Suppress("MagicNumber")
+const val MAX_LENGTH = 150
+
 sealed interface RequestElement {
     val value: String
     fun validate(data: Any): Boolean
 
     data object FamilyName : RequestElement {
         override val value = "family_name"
-        override fun validate(data: Any) = data is String && data.length <= 150
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
     data object GivenName : RequestElement {
         override val value = "given_name"
-        override fun validate(data: Any) = data is String && data.length <= 150
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
     data object BirthDate : RequestElement {
@@ -37,12 +38,12 @@ sealed interface RequestElement {
 
     data object IssuingAuthority : RequestElement {
         override val value = "issuing_authority"
-        override fun validate(data: Any) = data is String && data.length <= 150
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
     data object DocumentNumber : RequestElement {
         override val value = "document_number"
-        override fun validate(data: Any) = data is String && data.length <= 150
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
     data object Portrait : RequestElement {
@@ -52,7 +53,7 @@ sealed interface RequestElement {
 
     data object BirthPlace : RequestElement {
         override val value = "birth_place"
-        override fun validate(data: Any) = data is String && data.length <= 150
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
     data object DrivingPrivileges : RequestElement {
@@ -67,17 +68,17 @@ sealed interface RequestElement {
 
     data object ResidentAddress : RequestElement {
         override val value = "resident_address"
-        override fun validate(data: Any) = data is String && data.length <= 150
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
     data object ResidentPostalCode : RequestElement {
         override val value = "resident_postal_code"
-        override fun validate(data: Any) = data is String && data.length <= 150
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
     data object ResidentCity : RequestElement {
         override val value = "resident_city"
-        override fun validate(data: Any) = data is String && data.length <= 150
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
     data class AgeOver(val age: Int) : RequestElement {
@@ -85,8 +86,12 @@ sealed interface RequestElement {
             require(age in 0..99) { "age must be between 0 and 99, was $age" }
         }
 
-        override val value = "age_over_$age"
+        override val value = "age_over_%02d".format(age)
         override fun validate(data: Any) = data is Boolean
+    }
+
+    data class Custom(override val value: String) : RequestElement {
+        override fun validate(data: Any) = true
     }
 
     companion object {

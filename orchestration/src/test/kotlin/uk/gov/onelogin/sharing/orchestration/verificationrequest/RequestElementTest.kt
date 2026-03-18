@@ -147,11 +147,16 @@ class RequestElementTest {
 
     class AgeOverTests {
         @Test
-        fun `value formats with age`() =
+        fun `value formats with zero-padded age`() =
             assertEquals("age_over_18", RequestElement.AgeOver(18).value)
 
         @Test
-        fun `accepts boundary 0`() = assertEquals("age_over_0", RequestElement.AgeOver(0).value)
+        fun `accepts boundary 0 with padding`() =
+            assertEquals("age_over_00", RequestElement.AgeOver(0).value)
+
+        @Test
+        fun `pads single digit`() =
+            assertEquals("age_over_01", RequestElement.AgeOver(1).value)
 
         @Test
         fun `accepts boundary 99`() = assertEquals("age_over_99", RequestElement.AgeOver(99).value)
@@ -174,5 +179,20 @@ class RequestElementTest {
 
         @Test
         fun `rejects non-boolean`() = assertFalse(RequestElement.AgeOver(18).validate("true"))
+    }
+
+    class CustomTests {
+        @Test
+        fun `value matches provided string`() =
+            assertEquals("custom_attr", RequestElement.Custom("custom_attr").value)
+
+        @Test
+        fun `validates any type`() = assertTrue(RequestElement.Custom("x").validate("string"))
+
+        @Test
+        fun `validates int`() = assertTrue(RequestElement.Custom("x").validate(123))
+
+        @Test
+        fun `validates boolean`() = assertTrue(RequestElement.Custom("x").validate(true))
     }
 }
