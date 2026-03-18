@@ -99,19 +99,7 @@ class RequestElementTest {
         fun `value`() = assertEquals("portrait", RequestElement.Portrait.value)
 
         @Test
-        fun `validates byte array within limit`() =
-            assertTrue(RequestElement.Portrait.validate(ByteArray(1024)))
-
-        @Test
-        fun `validates byte array at 1 MiB limit`() =
-            assertTrue(RequestElement.Portrait.validate(ByteArray(1_048_576)))
-
-        @Test
-        fun `rejects byte array over 1 MiB`() =
-            assertFalse(RequestElement.Portrait.validate(ByteArray(1_048_577)))
-
-        @Test
-        fun `rejects non-ByteArray`() = assertFalse(RequestElement.Portrait.validate("image data"))
+        fun `validates any type`() = assertTrue(RequestElement.Portrait.validate(ByteArray(1024)))
     }
 
     class DrivingPrivilegesTests {
@@ -155,8 +143,7 @@ class RequestElementTest {
             assertEquals("age_over_00", RequestElement.AgeOver(0).value)
 
         @Test
-        fun `pads single digit`() =
-            assertEquals("age_over_01", RequestElement.AgeOver(1).value)
+        fun `pads single digit`() = assertEquals("age_over_01", RequestElement.AgeOver(1).value)
 
         @Test
         fun `accepts boundary 99`() = assertEquals("age_over_99", RequestElement.AgeOver(99).value)

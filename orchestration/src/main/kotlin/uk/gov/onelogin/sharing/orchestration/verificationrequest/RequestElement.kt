@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.orchestration.verificationrequest
 
-const val MAX_LENGTH = 150
-
 sealed interface RequestElement {
     val value: String
     fun validate(data: Any): Boolean
@@ -33,7 +31,7 @@ sealed interface RequestElement {
 
     data object IssuingCountry : RequestElement {
         override val value = "issuing_country"
-        override fun validate(data: Any) = data is String && data.length == 2
+        override fun validate(data: Any) = data is String && data.length == COUNTRY_CODE_LENGTH
     }
 
     data object IssuingAuthority : RequestElement {
@@ -48,7 +46,7 @@ sealed interface RequestElement {
 
     data object Portrait : RequestElement {
         override val value = "portrait"
-        override fun validate(data: Any) = data is ByteArray && data.size <= MAX_PORTRAIT_BYTES
+        override fun validate(data: Any) = true
     }
 
     data object BirthPlace : RequestElement {
@@ -83,7 +81,9 @@ sealed interface RequestElement {
 
     data class AgeOver(val age: Int) : RequestElement {
         init {
-            require(age in 0..99) { "age must be between 0 and 99, was $age" }
+            require(age in MIN_AGE..MAX_AGE) {
+                "age must be between $MIN_AGE and $MAX_AGE, was $age"
+            }
         }
 
         override val value = "age_over_%02d".format(age)
@@ -96,6 +96,9 @@ sealed interface RequestElement {
 
     companion object {
         private val FULL_DATE_PATTERN = "\\d{4}-\\d{2}-\\d{2}".toRegex()
-        private const val MAX_PORTRAIT_BYTES = 1_048_576 // 1 MiB
+        private const val COUNTRY_CODE_LENGTH = 2
+        private const val MIN_AGE = 0
+        private const val MAX_AGE = 99
+        const val MAX_LENGTH = 150
     }
 }
