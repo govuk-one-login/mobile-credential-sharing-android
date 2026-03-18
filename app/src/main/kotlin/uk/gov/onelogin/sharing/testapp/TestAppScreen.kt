@@ -58,10 +58,10 @@ fun TestAppScreen(
         onCloseFlow = {
             when (destination) {
                 is CredentialSharingDestination.Holder ->
-                    credentialPresenter.appGraph.holderOrchestrator()
+                    credentialPresenter.orchestrator
 
                 is CredentialSharingDestination.Verifier ->
-                    credentialVerifier.appGraph.verifierOrchestrator()
+                    credentialVerifier.orchestrator
 
                 else -> null
             }?.cancel()
