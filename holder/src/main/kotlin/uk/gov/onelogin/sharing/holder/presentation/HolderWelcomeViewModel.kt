@@ -78,8 +78,6 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            orchestrator.start()
-
             orchestrator.holderSessionState.collect { currentSate ->
                 if (currentSate is HolderSessionState.Complete.Failed) {
                     errorMessage.update { currentSate.error.message }

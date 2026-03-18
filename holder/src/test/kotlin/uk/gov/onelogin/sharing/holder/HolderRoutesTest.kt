@@ -14,7 +14,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.presentation.HolderHomeRoute
+import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 
 @RunWith(AndroidJUnit4::class)
 class HolderRoutesTest {
@@ -35,15 +35,15 @@ class HolderRoutesTest {
 
             NavHost(
                 navController = controller,
-                startDestination = HolderHomeRoute
+                startDestination = HolderPresentQrRoute
             ) {
-                composable<HolderHomeRoute> {}
+                composable<HolderPresentQrRoute> {}
             }
         }
 
         testScheduler.advanceUntilIdle()
 
-        val route = controller.currentBackStackEntry?.toRoute<HolderHomeRoute>()
+        val route = controller.currentBackStackEntry?.toRoute<HolderPresentQrRoute>()
 
         assertNotNull(route)
     }

@@ -10,22 +10,22 @@ import uk.gov.onelogin.sharing.holder.R
  */
 enum class DeferredStringsXmlData(
     @param:StringRes val defersTo: Int,
-    @param:StringRes val resourceId: Int,
+    @param:StringRes val resourceId: Int
 ) {
     HOLDER_PREREQUISITES_NOT_STARTED(
         defersTo = R.string.checking_journey_requirements,
-        resourceId = R.string.holder_prerequisites_not_started,
+        resourceId = R.string.holder_prerequisites_not_started
     ),
     HOLDER_PREREQUISITES_PREFLIGHT(
         defersTo = R.string.have_not_met_requirements,
-        resourceId = R.string.holder_prerequisites_preflight,
+        resourceId = R.string.holder_prerequisites_preflight
     ),
     HOLDER_PREREQUISITES_PRESENTING_ENGAGEMENT(
         defersTo = R.string.creating_qr_code,
-        resourceId = R.string.holder_prerequisites_presenting_engagement,
+        resourceId = R.string.holder_prerequisites_presenting_engagement
     ),
     HOLDER_PREREQUISITES_READY_TO_PRESENT(
         defersTo = R.string.generating_qr_code_data,
-        resourceId = R.string.holder_prerequisites_ready_to_present,
-    ),
+        resourceId = R.string.holder_prerequisites_ready_to_present
+    )
 }

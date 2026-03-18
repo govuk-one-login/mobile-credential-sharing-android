@@ -39,7 +39,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
             startDestination = HolderRoutes,
             modifier = modifier
         ) {
-            configureHolderRoutes()
+            configureHolderRoutes(navController)
         }
     }
 }
