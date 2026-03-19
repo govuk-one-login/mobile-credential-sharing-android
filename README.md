@@ -5,7 +5,7 @@
 
 This SDK provides an ISO 18013-5 compliant framework for **Holder** (credential sharing) and *
 *Verifier** (credential requesting) roles. Consuming applications adopt the role relevant to their
-use case (e.g., an identity wallet adopts the Holder role; a relying party app adopts the Verifier
+use case (for example, an identity wallet adopts the Holder role; a relying party app adopts the Verifier
 role).
 
 The current implementation includes a demo app and implements ISO 18013-5 for in-person Bluetooth
@@ -17,7 +17,7 @@ Internal team members can find the team ways of working on Confluence.
 
 The SDK implements the ISO 18013-5 specification:
 
-- **Device Engagement:** Generates and scans QR codes; broadcasts and connects over BLE/NFC.
+- **Device Engagement:** Generates and scans QR codes; broadcasts and connects over Bluetooth Low Energy (BLE)/NFC.
 - **Session Management:** Establishes secure channels (mdoc session encryption).
 - **Message Passing:** Creates, transmits, and parses `DeviceRequests` and `DeviceResponses`.
 

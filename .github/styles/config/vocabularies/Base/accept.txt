@@ -9,3 +9,5 @@ SDK
 TBC
 proxying
 Keystore
+mdoc
+Verifier's

@@ -47,11 +47,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/android-setup
       - name: Run vale prose linting
-        uses: errata-ai/vale-action@d89dee975228ae261d22c15adcd03578634d429c # v2.1.1
-        with:
-          fail_on_error: true
-          reporter: github-pr-check
-          version: latest
+        run: ./scripts/lint/vale/run
 
   gradle_linting:
     runs-on: ubuntu-latest
