@@ -5,7 +5,7 @@
 
 This SDK provides an ISO 18013-5 compliant framework for **Holder** (credential sharing) and *
 *Verifier** (credential requesting) roles. Consuming applications adopt the role relevant to their
-use case (for example, an identity wallet adopts the Holder role; a relying party app adopts the Verifier
+use case (for example, an identity wallet adopts the Holder role, and a relying party app adopts the Verifier
 role).
 
 The current implementation includes a demo app and implements ISO 18013-5 for in-person Bluetooth
@@ -17,7 +17,7 @@ Internal team members can find the team ways of working on Confluence.
 
 The SDK implements the ISO 18013-5 specification:
 
-- **Device Engagement:** Generates and scans QR codes; broadcasts and connects over Bluetooth Low Energy (BLE)/NFC.
+- **Device Engagement:** Generates and scans QR codes, broadcasts and connects over Bluetooth Low Energy (BLE).
 - **Session Management:** Establishes secure channels (mdoc session encryption).
 - **Message Passing:** Creates, transmits, and parses `DeviceRequests` and `DeviceResponses`.
 
@@ -32,8 +32,8 @@ This repository contains packages for:
 
 ### Credential Provisioning Flow
 
-The user does not pre-select a credential prior to session initialisation. Verifier attribute
-requirements are determined after a secure connection is established. Data exchange proceeds as
+The user doesn't pre-select a credential prior to session initialisation. The SDK determines the
+Verifier's attribute requirements after establishing a secure connection. Data exchange proceeds as
 follows:
 
 1. The SDK receives the `DeviceRequest` and queries the Host App via the `CredentialProvider`.
@@ -95,8 +95,8 @@ secure vault, supplying both issuer-signed data and device signatures when a Ver
 request.
 
 To maintain cryptographic boundaries, the Host App provides the exact CBOR `IssuerSignedItem` bytes
-originally signed by the Issuer; the SDK does not sign these attributes. To prove device possession
-and bind the credential to the current BLE/NFC session, the SDK constructs a `DeviceAuthentication`
+originally signed by the Issuer, and the SDK doesn't sign these attributes. To prove device possession
+and bind the credential to the current BLE session, the SDK constructs a `DeviceAuthentication`
 payload, which the Host App then signs using the credential's Android Keystore private key. Finally,
 the SDK handles all mdoc session encryption for the transport tunnel.
 
