@@ -26,7 +26,8 @@ class FakeOrchestrator(
     override fun processQrCode(qrCode: BarcodeDataResult) {
         when (qrCode) {
             is BarcodeDataResult.Valid -> {
-                initialVerifierState.value = VerifierSessionState.ReadyToScan
+                initialVerifierState.value =
+                    VerifierSessionState.ProcessingEngagement(qrCode.data)
             }
 
             is BarcodeDataResult.Invalid -> {
@@ -38,9 +39,7 @@ class FakeOrchestrator(
                 )
             }
 
-            BarcodeDataResult.NotFound -> {
-                initialVerifierState.value = VerifierSessionState.ReadyToScan
-            }
+            BarcodeDataResult.NotFound -> Unit
         }
     }
 
