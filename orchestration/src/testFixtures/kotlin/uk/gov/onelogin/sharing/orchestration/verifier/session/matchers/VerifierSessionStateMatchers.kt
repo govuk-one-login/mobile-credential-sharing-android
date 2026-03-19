@@ -41,8 +41,8 @@ object VerifierSessionStateMatchers {
         VerifierSessionState.ReadyToScan
     )
 
-    fun isProcessingEngagement(): Matcher<VerifierSessionState> = instanceOf(
-        VerifierSessionState.ProcessingEngagement::class.java
+    fun isProcessingEngagement(): Matcher<VerifierSessionState> = equalTo(
+        VerifierSessionState.ProcessingEngagement
     )
 
     fun isConnecting(): Matcher<VerifierSessionState> = equalTo(

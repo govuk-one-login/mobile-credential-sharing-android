@@ -47,7 +47,7 @@ sealed class VerifierSessionState : Completable {
      * State for handling the Session engagement data obtained from a successfully connected holder
      * device.
      */
-    data class ProcessingEngagement(val qrCode: String) : VerifierSessionState()
+    data object ProcessingEngagement : VerifierSessionState()
 
     /**
      * State for validating the successfully handled Session engagement data.

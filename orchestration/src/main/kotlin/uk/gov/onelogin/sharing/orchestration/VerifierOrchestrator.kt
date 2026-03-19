@@ -144,7 +144,7 @@ class VerifierOrchestrator(
         when (qrCode) {
             is BarcodeDataResult.Valid -> {
                 safeTransitionTo(
-                    VerifierSessionState.ProcessingEngagement(qrCode.data)
+                    VerifierSessionState.ProcessingEngagement
                 )
 
                 val engagementData = decodeDeviceEngagement(qrCode.data, logger)
