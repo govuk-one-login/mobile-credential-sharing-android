@@ -25,7 +25,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
-import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
+import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 
 @RunWith(RobolectricTestParameterInjector::class)
 class HolderPrerequisitesScreenTest {

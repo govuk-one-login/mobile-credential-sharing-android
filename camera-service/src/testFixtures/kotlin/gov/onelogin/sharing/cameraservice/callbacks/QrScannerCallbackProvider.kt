@@ -8,7 +8,7 @@ import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Compa
 import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Companion.urlQrCode
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
-import uk.gov.onelogin.sharing.security.DecoderStub
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub
 
 /**
  * [TestParametersValuesProvider] implementation that facilitates parameterized testing for

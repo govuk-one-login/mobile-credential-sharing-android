@@ -42,7 +42,7 @@ dependencies {
     listOf(
         libs.com.google.test.parameter.injector,
         testFixtures(projects.core),
-        testFixtures(projects.security),
+        testFixtures(projects.cryptoService),
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera)
     ).forEach(::testFixturesImplementation)
 

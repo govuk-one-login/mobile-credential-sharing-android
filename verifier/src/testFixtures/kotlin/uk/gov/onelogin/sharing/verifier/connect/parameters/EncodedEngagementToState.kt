@@ -4,8 +4,8 @@ import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import org.hamcrest.CoreMatchers
 import org.hamcrest.Matchers
-import uk.gov.onelogin.sharing.security.DecoderStub
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatchers
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
 

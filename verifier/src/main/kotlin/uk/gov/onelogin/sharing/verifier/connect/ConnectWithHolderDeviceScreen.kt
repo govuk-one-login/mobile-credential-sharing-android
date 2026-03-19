@@ -32,9 +32,9 @@ import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
-import uk.gov.onelogin.sharing.security.cbor.decodeDeviceEngagement
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceRetrievalMethodDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceRetrievalMethodDto
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable

@@ -7,7 +7,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateSt
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.successStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userCancellation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userJourneyFailure
-import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 
 class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =

@@ -41,7 +41,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
-import uk.gov.onelogin.sharing.security.cryptography.usecases.DecryptDeviceRequestUseCase
+import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 
 @Suppress("LongParameterList")
 @SingleIn(AppScope::class)

@@ -34,7 +34,7 @@ dependencies {
         libs.metro.viewmodel.compose,
         testFixtures(projects.core),
         testFixtures(projects.orchestration),
-        testFixtures(projects.security),
+        testFixtures(projects.cryptoService),
         testFixtures(projects.sdk)
     ).forEach(::androidTestImplementation)
 
@@ -43,7 +43,7 @@ dependencies {
         projects.core,
         projects.cameraService,
         projects.models,
-        projects.security,
+        projects.cryptoService,
         projects.orchestration,
         projects.sdk
     ).forEach(::api)
@@ -60,7 +60,7 @@ dependencies {
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),
-        testFixtures(projects.security),
+        testFixtures(projects.cryptoService),
         testFixtures(projects.orchestration),
         testFixtures(projects.sdk)
     ).forEach(::testFixturesImplementation)
@@ -69,7 +69,7 @@ dependencies {
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.core),
         testFixtures(projects.bluetooth),
-        testFixtures(projects.security),
+        testFixtures(projects.cryptoService),
         testFixtures(projects.orchestration),
         testFixtures(projects.sdk)
     ).forEach(::testImplementation)

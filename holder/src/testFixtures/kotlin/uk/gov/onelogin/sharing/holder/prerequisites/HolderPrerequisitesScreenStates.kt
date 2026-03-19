@@ -4,7 +4,7 @@ import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.preflightEmptyPermissions
-import uk.gov.onelogin.sharing.security.engagement.EngagementGeneratorStub.BASE64_ENCODED_DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.cryptoService.engagement.EngagementGeneratorStub.BASE64_ENCODED_DEVICE_ENGAGEMENT
 
 class HolderPrerequisitesScreenStates : TestParametersValuesProvider() {
 

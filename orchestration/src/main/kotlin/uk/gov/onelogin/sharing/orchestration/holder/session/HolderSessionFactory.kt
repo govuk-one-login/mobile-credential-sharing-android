@@ -6,11 +6,11 @@ import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
-import uk.gov.onelogin.sharing.security.cose.CoseKey
-import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
-import uk.gov.onelogin.sharing.security.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
-import uk.gov.onelogin.sharing.security.engagement.Engagement
-import uk.gov.onelogin.sharing.security.secureArea.SessionSecurity
+import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
+import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
+import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
+import uk.gov.onelogin.sharing.cryptoService.engagement.Engagement
+import uk.gov.onelogin.sharing.cryptoService.secureArea.SessionSecurity
 
 /**
  * [SessionFactory] implementation that provides new instances of [HolderSession].

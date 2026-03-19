@@ -50,8 +50,8 @@ import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasThrowable
-import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
-import uk.gov.onelogin.sharing.security.usecases.FakeDecryptDeviceRequestUseCase
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)

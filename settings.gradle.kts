@@ -45,7 +45,7 @@ listOf(
     ":models",
     ":orchestration",
     ":sdk",
-    ":security",
+    ":crypto-service",
     ":verifier",
     ":ui:ui-api",
     ":ui:ui-impl"
