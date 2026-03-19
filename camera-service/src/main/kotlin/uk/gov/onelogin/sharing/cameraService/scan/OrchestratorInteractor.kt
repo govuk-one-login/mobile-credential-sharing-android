@@ -1,5 +1,5 @@
 package uk.gov.onelogin.sharing.cameraService.scan
 
-interface OrchestratorInteractor {
+fun interface OrchestratorInteractor {
     fun cancel()
 }

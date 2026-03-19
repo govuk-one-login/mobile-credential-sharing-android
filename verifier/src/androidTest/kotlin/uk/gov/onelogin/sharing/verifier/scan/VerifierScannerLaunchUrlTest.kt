@@ -102,9 +102,8 @@ class VerifierScannerLaunchUrlTest {
             VerifierScanner(
                 viewModel = model,
                 onInvalidBarcode = onInvalidBarcode,
-                onValidBarcode = onValidBarcode,
-                scanner = {}
-            )
+                onValidBarcode = onValidBarcode
+            ) {}
         }
     }
 }

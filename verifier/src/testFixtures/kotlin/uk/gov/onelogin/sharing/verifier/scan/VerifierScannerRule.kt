@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
@@ -20,8 +18,6 @@ import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasFlags
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
 import org.hamcrest.CoreMatchers.allOf
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_PERMANENT_DENIAL_BUTTON
@@ -121,9 +117,8 @@ class VerifierScannerRule(
         setContent {
             VerifierScanner(
                 onInvalidBarcode = onInvalidBarcode,
-                onValidBarcode = onValidBarcode,
-                scanner = {}
-            )
+                onValidBarcode = onValidBarcode
+            ) {}
         }
     }
 }

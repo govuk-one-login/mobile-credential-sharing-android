@@ -6,14 +6,14 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.cameraService.state.ScannerState
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 
-@ContributesIntoMap(ViewModelScope::class, binding = binding<ViewModel>())
+@ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())
 @Inject
 @ViewModelKey(ScannerViewModel::class)
 class ScannerViewModel(state: ScannerState.Complete, private val observer: ScanController) :
@@ -25,14 +25,9 @@ class ScannerViewModel(state: ScannerState.Complete, private val observer: ScanC
 
             barcodeDataResult.collectLatest {
                 when (it) {
-                    is BarcodeDataResult.Invalid -> {
-                        observer.onScanResult(it)
-                        resetBarcodeData()
-                    }
-
                     BarcodeDataResult.NotFound -> Unit
 
-                    is BarcodeDataResult.Valid -> {
+                    else -> {
                         observer.onScanResult(it)
                         resetBarcodeData()
                     }

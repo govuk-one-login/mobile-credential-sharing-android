@@ -38,9 +38,10 @@ object VerifierScanRoute {
             ) {
                 VerifierScanner(
                     onInvalidBarcode = onInvalidBarcode,
-                    onValidBarcode = onValidBarcode,
-                    scanner = { Scanner() }
-                )
+                    onValidBarcode = onValidBarcode
+                ) {
+                    Scanner()
+                }
             }
         }
     }
