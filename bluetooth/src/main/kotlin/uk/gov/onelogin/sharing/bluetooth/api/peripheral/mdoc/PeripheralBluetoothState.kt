@@ -54,7 +54,7 @@ sealed interface PeripheralBluetoothState {
      * A session end command has been received from the client or server manager
      *
      */
-    data class PeripheralBluetoothEnded(val status: SessionEndStates) : PeripheralBluetoothState
+    data class Ended(val status: SessionEndStates) : PeripheralBluetoothState
 
     data class MessageReceived(val message: ByteArray) : PeripheralBluetoothState
 }

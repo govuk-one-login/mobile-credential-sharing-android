@@ -456,7 +456,7 @@ class HolderOrchestratorTest {
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.PeripheralBluetoothEnded(SessionEndStates.SUCCESS)
+            PeripheralBluetoothState.Ended(SessionEndStates.SUCCESS)
         )
 
         assertThat(
@@ -481,7 +481,7 @@ class HolderOrchestratorTest {
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.PeripheralBluetoothEnded(
+            PeripheralBluetoothState.Ended(
                 SessionEndStates.NOTIFY_CLIENT_FAILED
             )
         )

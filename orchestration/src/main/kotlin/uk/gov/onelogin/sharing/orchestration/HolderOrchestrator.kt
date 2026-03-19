@@ -264,7 +264,7 @@ class HolderOrchestrator(
             is PeripheralBluetoothState.ServiceAdded ->
                 logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
 
-            is PeripheralBluetoothState.PeripheralBluetoothEnded -> {
+            is PeripheralBluetoothState.Ended -> {
                 safeTransitionTo(HolderSessionState.Complete.Cancelled)
 
                 if (state.status == SessionEndStates.SUCCESS) {

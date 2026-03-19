@@ -157,7 +157,7 @@ class AndroidPeripheralBluetoothTransport(
             }
 
             is GattServerEvent.SessionEnd -> {
-                _state.value = PeripheralBluetoothState.PeripheralBluetoothEnded(event.status)
+                _state.value = PeripheralBluetoothState.Ended(event.status)
                 logger.debug(
                     logTag,
                     "Mdoc - Session end command was received. Closing connection"
