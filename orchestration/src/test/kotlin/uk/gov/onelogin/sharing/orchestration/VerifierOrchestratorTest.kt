@@ -16,6 +16,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
@@ -36,7 +39,6 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierS
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
-import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isProcessingEngagement
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 
 @RunWith(TestParameterInjector::class)
@@ -74,6 +76,8 @@ class VerifierOrchestratorTest {
         StubPrerequisiteGate(gateResponses)
     }
 
+    private val centralBluetoothTransport = FakeCentralBluetoothTransport()
+
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
 
     private val orchestrator by lazy {
@@ -82,6 +86,7 @@ class VerifierOrchestratorTest {
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
             verifierConfig = verifierConfigStub,
+            centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope
         )
     }
@@ -214,19 +219,18 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `processQrCode with valid barcode transitions to ProcessingEngagement`() = runTest {
+    fun `processQrCode with valid barcode but no engagement UUID fails`() = runTest {
         backgroundScope.launch {
             orchestrator.verifierSessionState.collect {}
         }
         orchestrator.start()
-        val data = exampleUriOne
-        val barcodeResult = BarcodeDataResult.Valid(data)
+        val barcodeResult = BarcodeDataResult.Valid(exampleUriOne)
 
         orchestrator.processQrCode(barcodeResult)
 
         assertThat(
             orchestrator.verifierSessionState.value,
-            isProcessingEngagement()
+            isFailed()
         )
     }
 
@@ -245,5 +249,74 @@ class VerifierOrchestratorTest {
             orchestrator.verifierSessionState.value,
             isFailed()
         )
+    }
+
+    @Test
+    fun `bluetooth disconnection transitions to Failed`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Disconnected("address", false)
+        )
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed()
+        )
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `bluetooth session end disconnection does not transition to Failed`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Disconnected("address", true)
+        )
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            not(isFailed())
+        )
+    }
+
+    @Test
+    fun `bluetooth error transitions to Failed and stops transport`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Error(CentralBluetoothTransportError.SCAN_FAILED)
+        )
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed()
+        )
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `cancel stops bluetooth transport`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+
+        orchestrator.cancel()
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isCancelled()
+        )
+        assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 }

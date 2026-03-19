@@ -12,10 +12,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -23,6 +28,7 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
+import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
@@ -35,6 +41,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
+@Suppress("LongParameterList")
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 @SingleIn(AppScope::class)
 class VerifierOrchestrator(
@@ -43,6 +50,7 @@ class VerifierOrchestrator(
     private val sessionFactory: SessionFactory<VerifierSession>,
     @Suppress("UnusedPrivateProperty")
     private val verifierConfig: VerifierConfig,
+    private val centralBluetoothTransport: CentralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope
 ) : Orchestrator.Verifier {
 
@@ -56,6 +64,12 @@ class VerifierOrchestrator(
         SharingStarted.Eagerly,
         sessionFlow.value.currentState.value
     )
+
+    init {
+        appCoroutineScope.launch {
+            centralBluetoothTransport.state.collect { handleCentralBluetoothState(it) }
+        }
+    }
 
     override fun start() {
         if (sessionFlow.value.isComplete()) {
@@ -128,18 +142,40 @@ class VerifierOrchestrator(
 
     override fun processQrCode(qrCode: BarcodeDataResult) {
         when (qrCode) {
-            is BarcodeDataResult.Valid -> safeTransitionTo(
-                VerifierSessionState.ProcessingEngagement(
-                    qrCode.data
+            is BarcodeDataResult.Valid -> {
+                safeTransitionTo(
+                    VerifierSessionState.ProcessingEngagement(qrCode.data)
                 )
-            )
+
+                val engagementData = decodeDeviceEngagement(qrCode.data, logger)
+                val serviceUuid = engagementData?.getFirstPeripheralServerModeUuid()
+
+                if (serviceUuid != null) {
+                    safeTransitionTo(VerifierSessionState.Connecting)
+                    centralBluetoothTransport.scanAndConnect(serviceUuid)
+                } else {
+                    logger.error(logTag, "No service UUID found in engagement data")
+                    safeTransitionTo(
+                        VerifierSessionState.Complete.Failed(
+                            SessionError(
+                                message = "No service UUID in engagement data",
+                                exception = IllegalArgumentException(
+                                    "No service UUID in engagement data"
+                                )
+                            )
+                        )
+                    )
+                }
+            }
 
             is BarcodeDataResult.Invalid -> {
                 safeTransitionTo(
                     VerifierSessionState.Complete.Failed(
                         SessionError(
                             message = qrCode.data,
-                            exception = IllegalArgumentException("Qr Code is an unsupported format")
+                            exception = IllegalArgumentException(
+                                "Qr Code is an unsupported format"
+                            )
                         )
                     )
                 )
@@ -154,6 +190,8 @@ class VerifierOrchestrator(
             state = VerifierSessionState.Complete.Cancelled,
             exceptionWrapper = ::OrchestratorCannotCancelException
         )
+
+        centralBluetoothTransport.stop()
     }
 
     override fun reset() {
@@ -165,6 +203,77 @@ class VerifierOrchestrator(
                 )
             }
         }
+    }
+
+    @Suppress("ComplexMethod")
+    private fun handleCentralBluetoothState(state: CentralBluetoothState) {
+        logger.debug(logTag, "state = $state")
+
+        when (state) {
+            CentralBluetoothState.Idle -> Unit
+
+            CentralBluetoothState.Scanning ->
+                logger.debug(logTag, "BLE - Scanning for peripheral")
+
+            CentralBluetoothState.Connecting ->
+                logger.debug(logTag, "BLE - Connecting to peripheral")
+
+            is CentralBluetoothState.Connected ->
+                logger.debug(logTag, "BLE - Connected: ${state.address}")
+
+            CentralBluetoothState.ConnectionStateStarted ->
+                logger.debug(logTag, "BLE - Connection state started")
+
+            is CentralBluetoothState.Disconnected -> {
+                if (state.isSessionEnd) {
+                    logger.debug(
+                        logTag,
+                        "BLE session terminated successfully via GATT End command"
+                    )
+                } else {
+                    logger.debug(logTag, "BLE - Disconnected: ${state.address}")
+
+                    centralBluetoothTransport.stop()
+
+                    safeTransitionTo(
+                        VerifierSessionState.Complete.Failed(
+                            SessionError(
+                                "Device ${state.address} disconnected unexpectedly",
+                                BluetoothDisconnectedException(
+                                    "Bluetooth disconnected unexpectedly",
+                                    IllegalStateException(
+                                        "Device ${state.address} disconnected unexpectedly"
+                                    )
+                                )
+                            )
+                        )
+                    )
+                }
+            }
+
+            is CentralBluetoothState.Error ->
+                handleError(state.reason)
+
+            is CentralBluetoothState.CentralBluetoothEnded -> {
+                logger.debug(logTag, "BLE - Session ended: ${state.status}")
+                centralBluetoothTransport.stop()
+            }
+        }
+    }
+
+    private fun handleError(reason: CentralBluetoothTransportError) {
+        logger.error(logTag, "BLE - Error: $reason")
+
+        centralBluetoothTransport.stop()
+
+        safeTransitionTo(
+            VerifierSessionState.Complete.Failed(
+                SessionError(
+                    message = "Bluetooth error: $reason",
+                    exception = IllegalStateException("Bluetooth error: $reason")
+                )
+            )
+        )
     }
 
     private fun safeTransitionTo(
