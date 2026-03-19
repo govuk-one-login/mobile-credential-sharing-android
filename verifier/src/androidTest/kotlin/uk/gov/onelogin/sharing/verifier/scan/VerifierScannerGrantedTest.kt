@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.cameraService.scan.VerifierScannerContent
 import uk.gov.onelogin.sharing.core.PermissionListExtensions.toGrantPermissionsRule
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.Verifier.Companion.requiredPermissions
 

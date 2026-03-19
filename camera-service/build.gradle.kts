@@ -51,6 +51,10 @@ dependencies {
         testFixtures(projects.core),
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera)
     ).forEach(::testImplementation)
+
+    listOf(
+        testFixtures(projects.core)
+    ).forEach(::androidTestImplementation)
 }
 
 mavenPublishingConfig {
