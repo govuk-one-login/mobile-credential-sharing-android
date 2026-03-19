@@ -6,18 +6,18 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.core.VerifierUiScope
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.verifier.VerifierNavigationEvents
 import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 
-@ContributesIntoMap(ViewModelScope::class, binding = binding<ViewModel>())
+@ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())
 @Inject
 @ViewModelKey(VerifierScannerViewModel::class)
 class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) : ViewModel() {

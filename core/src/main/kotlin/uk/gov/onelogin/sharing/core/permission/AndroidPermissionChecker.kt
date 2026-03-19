@@ -5,10 +5,12 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
+import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 
 @ContributesBinding(AppScope::class)
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(HolderUiScope::class)
+@ContributesBinding(VerifierUiScope::class)
 open class AndroidPermissionChecker(private val context: Context) : PermissionChecker {
     override fun checkPermissions(permissions: List<String>): PermissionChecker.Response {
         val missingPermissions = permissions

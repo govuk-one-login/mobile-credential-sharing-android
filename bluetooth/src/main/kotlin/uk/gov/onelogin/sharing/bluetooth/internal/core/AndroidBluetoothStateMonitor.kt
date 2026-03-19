@@ -10,15 +10,15 @@ import android.content.IntentFilter
 import android.os.Build
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(VerifierUiScope::class)
 @ContributesBinding(AppScope::class)
 class AndroidBluetoothStateMonitor(private val appContext: Context, private val logger: Logger) :
     BluetoothStateMonitor {
@@ -26,6 +26,7 @@ class AndroidBluetoothStateMonitor(private val appContext: Context, private val 
         replay = 1
     )
     override val states: SharedFlow<BluetoothStatus> = _states
+    private var isRegistered = false
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -49,6 +50,8 @@ class AndroidBluetoothStateMonitor(private val appContext: Context, private val 
     }
 
     override fun start() {
+        if (isRegistered) return
+
         val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
         val broadcastPermission =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -74,6 +77,8 @@ class AndroidBluetoothStateMonitor(private val appContext: Context, private val 
             )
         }
 
+        isRegistered = true
+
         val adapter = appContext
             .getSystemService(BluetoothManager::class.java)
             ?.adapter
@@ -87,6 +92,9 @@ class AndroidBluetoothStateMonitor(private val appContext: Context, private val 
     }
 
     override fun stop() {
+        if (!isRegistered) return
+        isRegistered = false
+
         try {
             appContext.unregisterReceiver(receiver)
         } catch (e: IllegalArgumentException) {

@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(AppScope::class)

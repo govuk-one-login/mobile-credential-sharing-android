@@ -78,7 +78,8 @@ dependencies {
         libs.androidx.navigation.testing,
         libs.bundles.testing.instrumentation,
         libs.hilt.android.testing,
-        libs.uk.gov.logging.testdouble
+        libs.uk.gov.logging.testdouble,
+        testFixtures(projects.orchestration)
     ).forEach(::androidTestImplementation)
 
     listOf(
@@ -112,7 +113,8 @@ dependencies {
         libs.com.google.test.parameter.injector,
         testFixtures(projects.holder),
         testFixtures(projects.ui.uiImpl),
-        testFixtures(projects.verifier)
+        testFixtures(projects.verifier),
+        testFixtures(projects.sdk)
     ).forEach(::testFixturesApi)
 
     listOf(
@@ -129,6 +131,8 @@ dependencies {
         libs.bundles.testing.unit,
         libs.metro.runtime,
         libs.uk.gov.logging.testdouble,
-        testFixtures(projects.holder)
+        testFixtures(projects.holder),
+        testFixtures(projects.orchestration),
+        testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 }

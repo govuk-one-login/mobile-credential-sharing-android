@@ -1,14 +1,14 @@
 package uk.gov.onelogin.sharing.verifier.session
 
 import android.bluetooth.BluetoothDevice
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(AppScope::class)
 class MdocVerifierSession(
     private val gattClientManager: GattClientManager,
     private val bluetoothStateMonitor: BluetoothStateMonitor,

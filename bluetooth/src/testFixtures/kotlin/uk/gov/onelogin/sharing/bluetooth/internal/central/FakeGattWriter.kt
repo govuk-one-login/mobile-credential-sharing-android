@@ -22,5 +22,5 @@ class FakeGattWriter(val success: Boolean = true) : GattWriter {
         device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
-    ): Boolean = true
+    ): Boolean = success
 }

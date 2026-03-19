@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import uk.gov.onelogin.sharing.ui.api.CredentialPresenter
-import uk.gov.onelogin.sharing.ui.api.CredentialVerifier
+import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 import uk.gov.onelogin.sharing.ui.impl.ShareCredential
 import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
 
@@ -55,7 +55,19 @@ fun TestAppScreen(
         modifier = modifier,
         onOpenHolder = { destination = CredentialSharingDestination.Holder },
         onOpenVerifier = { destination = CredentialSharingDestination.Verifier },
-        onCloseFlow = { destination = null },
+        onCloseFlow = {
+            when (destination) {
+                is CredentialSharingDestination.Holder ->
+                    credentialPresenter.orchestrator
+
+                is CredentialSharingDestination.Verifier ->
+                    credentialVerifier.orchestrator
+
+                else -> null
+            }?.cancel()
+
+            destination = null
+        },
         sharingDialogVisible = sharingDialogVisible,
         content = {
             when (destination) {

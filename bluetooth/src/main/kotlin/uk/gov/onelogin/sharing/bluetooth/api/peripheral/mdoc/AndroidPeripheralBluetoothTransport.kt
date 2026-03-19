@@ -2,12 +2,14 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.SingleIn
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
@@ -27,13 +29,15 @@ class AndroidPeripheralBluetoothTransport(
     @ApplicationScope coroutineScope: CoroutineScope,
     private val logger: Logger
 ) : PeripheralBluetoothTransport {
+    companion object {
+        private const val BLE_SEND_NOTIFICATION_DELAY = 200L
+    }
+
     private val _state = MutableStateFlow<PeripheralBluetoothState>(PeripheralBluetoothState.Idle)
     override val state: StateFlow<PeripheralBluetoothState> = _state
 
     private val _bluetoothStatus = MutableStateFlow(BluetoothStatus.UNKNOWN)
     override val bluetoothStatus: StateFlow<BluetoothStatus> = _bluetoothStatus
-
-    private val connectedDevices = mutableSetOf<String>()
 
     init {
         coroutineScope.launch {
@@ -66,11 +70,10 @@ class AndroidPeripheralBluetoothTransport(
                 }
             }
         }
-
-        bluetoothStateMonitor.start()
     }
 
     override suspend fun start(serviceUuid: UUID) {
+        bluetoothStateMonitor.start()
         try {
             bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid))
         } catch (e: StartAdvertisingException) {
@@ -82,14 +85,21 @@ class AndroidPeripheralBluetoothTransport(
         gattServerManager.open(serviceUuid)
     }
 
-    override suspend fun stop() {
+    override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean) {
+        if (sendEndCommand) {
+            notifySessionEnd(serviceUuid)
+        }
         bleAdvertiser.stopAdvertise()
         gattServerManager.close()
         bluetoothStateMonitor.stop()
     }
 
-    override fun notifySessionEnd(serviceUuid: UUID) {
-        gattServerManager.notifySessionEnd(serviceUuid)
+    override suspend fun notifySessionEnd(serviceUuid: UUID) {
+        val result = gattServerManager.notifySessionEnd(serviceUuid)
+        if (result == SessionEndStateQueued.Success) {
+            // allow time for the END notification to be sent before closing the GATT server
+            delay(BLE_SEND_NOTIFICATION_DELAY)
+        }
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {
@@ -115,18 +125,12 @@ class AndroidPeripheralBluetoothTransport(
 
     private fun handleGattEvent(event: GattServerEvent) {
         when (event) {
-            is GattServerEvent.Connected -> {
-                if (connectedDevices.add(event.address)) {
-                    _state.value = PeripheralBluetoothState.Connected(event.address)
-                }
-            }
+            is GattServerEvent.Connected ->
+                _state.value = PeripheralBluetoothState.Connected(event.address)
 
-            is GattServerEvent.Disconnected -> {
-                if (connectedDevices.remove(event.address)) {
-                    _state.value =
-                        PeripheralBluetoothState.Disconnected(event.address, event.isSessionEnd)
-                }
-            }
+            is GattServerEvent.Disconnected ->
+                _state.value =
+                    PeripheralBluetoothState.Disconnected(event.address, event.isSessionEnd)
 
             is GattServerEvent.Error ->
                 _state.value = PeripheralBluetoothState.Error(

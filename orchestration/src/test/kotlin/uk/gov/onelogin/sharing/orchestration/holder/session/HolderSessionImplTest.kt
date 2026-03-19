@@ -10,7 +10,7 @@ import org.hamcrest.MatcherAssert
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.InvalidHolderSessionStateTransitions
@@ -22,18 +22,15 @@ class HolderSessionImplTest {
 
     private var initialState: HolderSessionState = HolderSessionState.NotStarted
 
-    private val stateFlow: MutableStateFlow<HolderSessionState> by lazy {
-        MutableStateFlow(initialState)
-    }
     private var validTransitions = validHolderTransitions
 
     private val logger = SystemLogger()
     private val session by lazy {
         HolderSessionImpl(
             logger = logger,
-            internalState = stateFlow,
+            internalState = MutableStateFlow(initialState),
             transitionMap = validTransitions,
-            sessionContext = holderSessionContextStub
+            initialContext = holderSessionContextStub
         )
     }
 

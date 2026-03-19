@@ -4,7 +4,7 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 
@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
  *
  * Internally, the [transitionTo] function uses [update] instead of [kotlinx.coroutines.flow.MutableStateFlow.emit].
  *
- * @param internalState The [VerifierSessionState] that the [currentState] begins with.
+ * @param internalState The [VerifierSessionState] that the session begins with.
  * Defaults to a [kotlinx.coroutines.flow.MutableStateFlow] beginning with [VerifierSessionState.NotStarted].
  * @param transitionMap The [Map] of valid transitions. Used within [transitionTo]. Defaults to
  * [validVerifierTransitions].
@@ -57,5 +57,23 @@ class VerifierSessionImpl(
             StateContainer.Transitional.LogMessages.CANNOT_COMPLETE_TRANSITION,
             throwable
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as VerifierSessionImpl
+
+        if (internalState.value != other.internalState.value) return false
+        if (transitionMap != other.transitionMap) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = internalState.value.hashCode()
+        result = 31 * result + transitionMap.hashCode()
+        return result
     }
 }

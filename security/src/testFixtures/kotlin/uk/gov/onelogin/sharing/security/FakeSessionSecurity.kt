@@ -11,6 +11,7 @@ class FakeSessionSecurity : SessionSecurity {
 
     var lastDecryptData: ByteArray? = null
     var lastDecryptRole: DeviceRole? = null
+    var lastDecryptCounter: UInt? = null
 
     private lateinit var sessionKeyPair: KeyPair
 
@@ -29,9 +30,15 @@ class FakeSessionSecurity : SessionSecurity {
         role: DeviceRole
     ): ByteArray = byteArrayOf(2)
 
-    override fun decryptPayload(key: ByteArray, data: ByteArray, role: DeviceRole): ByteArray {
+    override fun decryptPayload(
+        key: ByteArray,
+        data: ByteArray,
+        role: DeviceRole,
+        decryptCounter: UInt
+    ): ByteArray {
         lastDecryptData = data
         lastDecryptRole = role
+        lastDecryptCounter = decryptCounter
         return plaintextToReturn
     }
 }

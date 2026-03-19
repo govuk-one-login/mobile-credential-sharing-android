@@ -5,11 +5,11 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.bluetoothManager
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 
 @ContributesBinding(AppScope::class)
-@ContributesBinding(ViewModelScope::class)
+@ContributesBinding(VerifierUiScope::class)
 class AndroidBluetoothAdapterProvider(val context: Context) : BluetoothAdapterProvider {
     private val bluetoothManager by lazy { context.bluetoothManager!! }
 

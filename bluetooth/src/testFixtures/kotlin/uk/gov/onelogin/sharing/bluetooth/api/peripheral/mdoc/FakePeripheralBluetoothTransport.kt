@@ -25,7 +25,7 @@ class FakePeripheralBluetoothTransport(
         _state.value = PeripheralBluetoothState.AdvertisingStarted
     }
 
-    override suspend fun stop() {
+    override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean) {
         stopCalls++
         _state.value = PeripheralBluetoothState.AdvertisingStopped
     }
@@ -38,7 +38,7 @@ class FakePeripheralBluetoothTransport(
         _bluetoothStatus.value = state
     }
 
-    override fun notifySessionEnd(serviceUuid: UUID) {
+    override suspend fun notifySessionEnd(serviceUuid: UUID) {
         lastUuid = serviceUuid
     }
 }

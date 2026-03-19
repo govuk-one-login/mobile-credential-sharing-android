@@ -5,7 +5,7 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertFailsWith
 import org.junit.Before
 import org.junit.Test
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.SessionEstablishmentStub.expectedSessionEstablishmentDto
 import uk.gov.onelogin.sharing.security.SessionSecurityTestStub.generateSessionKey
 import uk.gov.onelogin.sharing.security.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
@@ -31,9 +31,10 @@ class AesGcmEncryptionTest {
         assertContentEquals(
             VALID_DECRYPTED_DATA_BYTES,
             aesEncryption.decryptPayload(
-                readerSk,
-                data,
-                DeviceRole.VERIFIER
+                key = readerSk,
+                data = data,
+                role = DeviceRole.VERIFIER,
+                decryptCounter = 1u
             )
         )
 
@@ -41,16 +42,19 @@ class AesGcmEncryptionTest {
     }
 
     @Test
-    fun `when correct key and role supplied, and decryption ran again, bytes do not match`() {
+    fun `throws exception when invalid decrypt counter provided`() {
         val data = expectedSessionEstablishmentDto.data.copyOf()
         val readerSk = generateSessionKey(DeviceRole.VERIFIER)
+        val stubbedDecryptCounter = 1u
+        val invalidDecryptCounter = 2u
 
         assertContentEquals(
             VALID_DECRYPTED_DATA_BYTES,
             aesEncryption.decryptPayload(
-                readerSk,
-                data,
-                DeviceRole.VERIFIER
+                key = readerSk,
+                data = data,
+                role = DeviceRole.VERIFIER,
+                decryptCounter = stubbedDecryptCounter
             )
         )
 
@@ -58,9 +62,10 @@ class AesGcmEncryptionTest {
 
         assertFailsWith(AEADBadTagException::class) {
             aesEncryption.decryptPayload(
-                readerSk,
-                data,
-                DeviceRole.VERIFIER
+                key = readerSk,
+                data = data,
+                role = DeviceRole.VERIFIER,
+                decryptCounter = invalidDecryptCounter
             )
         }
 
@@ -74,9 +79,10 @@ class AesGcmEncryptionTest {
 
         assertFailsWith(AEADBadTagException::class) {
             aesEncryption.decryptPayload(
-                holderSk,
-                data,
-                DeviceRole.VERIFIER
+                key = holderSk,
+                data = data,
+                role = DeviceRole.VERIFIER,
+                decryptCounter = 1u
             ).contentEquals(
                 VALID_DECRYPTED_DATA_BYTES
             )
@@ -94,9 +100,10 @@ class AesGcmEncryptionTest {
 
         assertFailsWith(AEADBadTagException::class) {
             aesEncryption.decryptPayload(
-                readerSk,
-                data,
-                DeviceRole.VERIFIER
+                key = readerSk,
+                data = data,
+                role = DeviceRole.VERIFIER,
+                decryptCounter = 1u
             )
         }
 
@@ -110,9 +117,10 @@ class AesGcmEncryptionTest {
 
         assertFailsWith(AEADBadTagException::class) {
             aesEncryption.decryptPayload(
-                readerSk,
-                data,
-                DeviceRole.VERIFIER
+                key = readerSk,
+                data = data,
+                role = DeviceRole.VERIFIER,
+                decryptCounter = 1u
             )
         }
 

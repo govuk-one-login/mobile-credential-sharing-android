@@ -19,13 +19,14 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
@@ -51,6 +52,8 @@ class AndroidGattServerManagerTest {
         )
     )
     private val fakePermissionChecker = StubBluetoothPermissionChecker()
+    private val fakeGattWriter = FakeGattWriter()
+    private val logger = SystemLogger()
 
     private lateinit var manager: AndroidGattServerManager
     private val uuid = UUID.randomUUID()
@@ -62,8 +65,8 @@ class AndroidGattServerManagerTest {
             bluetoothManager = bluetoothManager,
             gattServiceFactory = { fakeGattService },
             permissionsChecker = fakePermissionChecker,
-            logger = SystemLogger(),
-            gattWriter = FakeGattWriter()
+            logger = logger,
+            gattWriter = fakeGattWriter
         )
     }
 
@@ -384,33 +387,55 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `notifySessionEnd sends END code and emits SessionEnd event`() = runTest {
+    fun `sends BLE session end command successfully when device connected`() = runTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
-        val serviceUuid = UUID.randomUUID()
-
-        every {
-            bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
-        } returns listOf(device)
 
         manager.open(uuid)
 
-        manager.events.test {
-            callbackSlot.captured.onConnectionStateChange(
-                device,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothProfile.STATE_CONNECTED
-            )
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
 
-            assertEquals(
-                GattServerEvent.Connected(DEVICE_ADDRESS),
-                awaitItem()
-            )
+        val result = manager.notifySessionEnd(uuid)
 
-            manager.notifySessionEnd(serviceUuid)
+        assertEquals(SessionEndStateQueued.Success, result)
+    }
 
-            val event = awaitItem()
-            assert(event is GattServerEvent.SessionEnd)
-        }
+    @Test
+    fun `does not send BLE session end command when no device connected`() = runTest {
+        manager.open(uuid)
+
+        val result = manager.notifySessionEnd(uuid)
+
+        assertEquals(SessionEndStateQueued.NoDeviceConnected, result)
+    }
+
+    @Test
+    fun `returns failed state when BLE session end command fails to queue command`() = runTest {
+        val fakeGattWriter = FakeGattWriter(success = false)
+        val manager = AndroidGattServerManager(
+            context = context,
+            bluetoothManager = bluetoothManager,
+            gattServiceFactory = { fakeGattService },
+            permissionsChecker = fakePermissionChecker,
+            logger = logger,
+            gattWriter = fakeGattWriter
+        )
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        val result = manager.notifySessionEnd(uuid)
+
+        assertEquals(SessionEndStateQueued.Failed, result)
     }
 
     @Test

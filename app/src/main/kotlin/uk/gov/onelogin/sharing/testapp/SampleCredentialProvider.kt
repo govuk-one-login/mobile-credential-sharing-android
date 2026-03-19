@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.testapp
 
-import uk.gov.onelogin.sharing.ui.api.Credential
-import uk.gov.onelogin.sharing.ui.api.CredentialProvider
-import uk.gov.onelogin.sharing.ui.api.CredentialRequest
+import uk.gov.onelogin.sharing.orchestration.Credential
+import uk.gov.onelogin.sharing.orchestration.CredentialProvider
+import uk.gov.onelogin.sharing.orchestration.CredentialRequest
 
 /**
  * Sample implementation of [CredentialProvider] for demonstration purposes.

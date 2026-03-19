@@ -11,19 +11,20 @@ import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.Logger
-import uk.gov.onelogin.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
-import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
+import kotlinx.coroutines.plus
+import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @AssistedInject
@@ -39,53 +40,68 @@ class HolderWelcomeViewModel(
         private const val PREVIOUSLY_HAD_PERMISSIONS_KEY = "previouslyHadPermissions"
     }
 
-    private val initialState = HolderWelcomeUiState(
-        previouslyHadPermissions = savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] ?: false
+    private val previouslyHadPermissions = MutableStateFlow(
+        savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] ?: false
     )
+    private val hasBluetoothPermissions = MutableStateFlow<Boolean?>(null)
 
-    private val _uiState = MutableStateFlow(initialState)
-    val uiState: StateFlow<HolderWelcomeUiState> = _uiState
+    private val shouldShowErrorScreen = MutableStateFlow(false)
+    private val errorMessage = MutableStateFlow("")
+
+    val uiState: StateFlow<HolderWelcomeUiState> = combine(
+        orchestrator.holderSessionState,
+        shouldShowErrorScreen,
+        previouslyHadPermissions,
+        errorMessage,
+        hasBluetoothPermissions
+    ) {
+            orchestratorSessionState,
+            shouldShowError,
+            previouslyHadPermissions,
+            errorMessage,
+            hasBluetoothPermissions
+        ->
+        HolderWelcomeUiState(
+            qrData = (orchestratorSessionState as? HolderSessionState.PresentingEngagement)?.qrData,
+            hasBluetoothPermissions = hasBluetoothPermissions,
+            showErrorScreen = shouldShowError,
+            errorMessage = errorMessage,
+            previouslyHadPermissions = previouslyHadPermissions
+        )
+    }.stateIn(
+        viewModelScope.plus(dispatcher),
+        SharingStarted.Eagerly,
+        HolderWelcomeUiState(
+            previouslyHadPermissions = savedStateHandle[PREVIOUSLY_HAD_PERMISSIONS_KEY] ?: false
+        )
+    )
 
     init {
         viewModelScope.launch(dispatcher) {
-            orchestrator.start()
-
             orchestrator.holderSessionState.collect { currentSate ->
-                when (currentSate) {
-                    is HolderSessionState.PresentingEngagement -> _uiState.update {
-                        it.copy(qrData = currentSate.qrData)
-                    }
-
-                    is HolderSessionState.Complete.Failed -> _uiState.update {
-                        it.copy(
-                            showErrorScreen = true,
-                            errorMessage = currentSate.error.message
-                        )
-                    }
-
-                    else -> Unit
+                if (currentSate is HolderSessionState.Complete.Failed) {
+                    errorMessage.update { currentSate.error.message }
+                    shouldShowErrorScreen.update { true }
                 }
             }
         }
     }
 
     fun updateBluetoothPermissions(granted: Boolean) {
-        val hadPermissionsPreviously = _uiState.value.previouslyHadPermissions
+        val hadPermissionsPreviously = previouslyHadPermissions.value
         val shouldShowError = hadPermissionsPreviously && !granted
         val grantedPermissionsForFirstTime = !hadPermissionsPreviously && granted
 
-        _uiState.update { state ->
-            state.copy(
-                hasBluetoothPermissions = granted,
-                previouslyHadPermissions = hadPermissionsPreviously || granted,
-                showErrorScreen = shouldShowError,
-                errorMessage = if (shouldShowError) {
-                    "Bluetooth permissions were revoked during the session"
-                } else {
-                    "Bluetooth disconnected"
-                }
-            )
+        hasBluetoothPermissions.update { granted }
+        errorMessage.update {
+            if (shouldShowError) {
+                "Bluetooth permissions were revoked during the session"
+            } else {
+                "Bluetooth disconnected"
+            }
         }
+        previouslyHadPermissions.update { hadPermissionsPreviously || granted }
+        shouldShowErrorScreen.update { shouldShowError }
 
         if (shouldShowError) {
             logger.debug(logTag, "Error - Permissions were revoked during the session")
@@ -98,7 +114,7 @@ class HolderWelcomeViewModel(
 
     @AssistedFactory
     @ViewModelAssistedFactoryKey(HolderWelcomeViewModel::class)
-    @ContributesIntoMap(ViewModelScope::class)
+    @ContributesIntoMap(HolderUiScope::class)
     interface Factory : ViewModelAssistedFactory {
         fun create(@Assisted savedStateHandle: SavedStateHandle): HolderWelcomeViewModel
         override fun create(extras: CreationExtras): HolderWelcomeViewModel {
@@ -106,30 +122,12 @@ class HolderWelcomeViewModel(
             return create(savedStateHandle)
         }
     }
-
-    fun onScreenDisposed() {
-        @RequiresImplementation(
-            details = [
-                ImplementationDetail(
-                    ticket = "UI",
-                    description = "We don't have an explicit back button or way to test this atm" +
-                        "so will send end command onNavBack to test closing the connection" +
-                        "for now."
-                )
-            ]
-        )
-        orchestrator.cancel()
-        logger.debug(logTag, "Holder stopped advertising during session")
-    }
 }
 
 data class HolderWelcomeUiState(
     val qrData: String? = null,
-    val bluetoothState: BluetoothState = BluetoothState.Unknown,
     val hasBluetoothPermissions: Boolean? = null,
     val showErrorScreen: Boolean = false,
     val errorMessage: String = "",
-    val previouslyHadPermissions: Boolean = false,
-    val showEnableBluetoothPrompt: Boolean = false,
-    val deviceRequest: DeviceRequest? = null
+    val previouslyHadPermissions: Boolean = false
 )

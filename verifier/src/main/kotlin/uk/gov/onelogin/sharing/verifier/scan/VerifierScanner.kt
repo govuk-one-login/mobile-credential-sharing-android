@@ -15,9 +15,9 @@ import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 
 @Composable
 fun VerifierScanner(
+    scanner: @Composable () -> Unit,
     viewModel: VerifierScannerViewModel = metroViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    scanner: @Composable () -> Unit,
     onInvalidBarcode: (String) -> Unit = {},
     onValidBarcode: (String) -> Unit = {}
 ) {

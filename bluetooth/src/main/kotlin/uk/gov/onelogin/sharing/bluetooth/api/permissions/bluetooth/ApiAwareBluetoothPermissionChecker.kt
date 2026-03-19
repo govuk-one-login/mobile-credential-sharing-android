@@ -4,9 +4,10 @@ import android.os.Build
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
-import dev.zacsweers.metrox.viewmodel.ViewModelScope
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.Api31BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.permissions.bluetooth.truthyBluetoothPermissionChecker
+import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 /**
@@ -14,7 +15,8 @@ import uk.gov.onelogin.sharing.core.permission.PermissionChecker
  * Android-powered device's [android.os.Build.VERSION.SDK_INT].
  */
 @ContributesBinding(AppScope::class, binding = binding<BluetoothPermissionChecker>())
-@ContributesBinding(ViewModelScope::class, binding = binding<BluetoothPermissionChecker>())
+@ContributesBinding(HolderUiScope::class, binding = binding<BluetoothPermissionChecker>())
+@ContributesBinding(VerifierUiScope::class, binding = binding<BluetoothPermissionChecker>())
 class ApiAwareBluetoothPermissionChecker(private val checker: PermissionChecker) :
     BluetoothPermissionChecker {
 

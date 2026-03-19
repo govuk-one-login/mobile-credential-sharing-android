@@ -1,9 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import uk.gov.onelogin.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -22,19 +20,16 @@ class FakeOrchestrator(
     Orchestrator.Verifier,
     Resettable {
 
-    override val holderSessionState: SharedFlow<HolderSessionState> = initialHolderState
+    override val holderSessionState: StateFlow<HolderSessionState> = initialHolderState
     override val verifierSessionState: StateFlow<VerifierSessionState> = initialVerifierState
 
-    override fun processQrCode(
-        qrCode: BarcodeDataResult
-    ) {
+    override fun processQrCode(qrCode: BarcodeDataResult) {
         when (qrCode) {
             is BarcodeDataResult.Valid -> {
                 initialVerifierState.value = VerifierSessionState.ReadyToScan
             }
 
             is BarcodeDataResult.Invalid -> {
-
                 initialVerifierState.value = VerifierSessionState.Complete.Failed(
                     error = SessionError(
                         message = qrCode.data,

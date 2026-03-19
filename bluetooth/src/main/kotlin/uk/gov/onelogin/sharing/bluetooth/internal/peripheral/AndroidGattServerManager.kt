@@ -2,7 +2,9 @@ package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
@@ -14,13 +16,14 @@ import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import uk.gov.logging.api.Logger
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
@@ -49,6 +52,7 @@ class AndroidGattServerManager(
     )
     override val events: SharedFlow<GattServerEvent> = _events
     private var gattServer: BluetoothGattServer? = null
+    private var connectedDevice: BluetoothDevice? = null
 
     @SuppressLint("MissingPermission")
     private val eventEmitter = GattEventEmitter {
@@ -95,6 +99,9 @@ class AndroidGattServerManager(
     override fun close() {
         gattServer?.close()
         gattServer = null
+        connectedDevice = null
+        isSessionEnd = false
+        mtu = MIN_MTU
         _events.tryEmit(GattServerEvent.ServiceStopped)
     }
 
@@ -116,7 +123,28 @@ class AndroidGattServerManager(
     }
 
     private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
-        _events.tryEmit(event.toGattServerEvent(isSessionEnd))
+        val address = event.device.address
+
+        val event = when {
+            event.status == BluetoothGatt.GATT_SUCCESS &&
+                event.newState == BluetoothProfile.STATE_CONNECTED -> {
+                connectedDevice = event.device
+                GattServerEvent.Connected(address)
+            }
+
+            event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
+                connectedDevice = null
+                GattServerEvent.Disconnected(address, isSessionEnd)
+            }
+
+            else -> GattServerEvent.UnsupportedEvent(
+                event.device.address,
+                event.status,
+                event.newState
+            )
+        }
+
+        _events.tryEmit(event)
     }
 
     private fun handleServiceAdded(event: GattServerCallbackEvent.ServiceAdded) {
@@ -182,37 +210,33 @@ class AndroidGattServerManager(
      * the readers characteristic.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun notifySessionEnd(serviceUuid: UUID) {
-        val server = gattServer ?: return
-        val characteristic =
-            server.getService(serviceUuid)?.getCharacteristic(STATE_UUID) ?: return
-        val connectedDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
+    override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued {
+        val server = gattServer ?: return SessionEndStateQueued.Failed
+        val characteristic: BluetoothGattCharacteristic =
+            server.getService(serviceUuid)?.getCharacteristic(STATE_UUID)
+                ?: return SessionEndStateQueued.Failed
         val endValue = byteArrayOf(MdocState.END.code)
 
-        if (connectedDevices.isEmpty()) {
-            logger.error(logTag, "failed to notify client with END command: No devices connected")
-            _events.tryEmit(GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED))
-            return
+        val device = connectedDevice
+        if (device == null) {
+            logger.debug(logTag, "END command not sent - No device connected")
+            return SessionEndStateQueued.NoDeviceConnected
         }
 
-        connectedDevices.forEach { device ->
-            val notificationResult =
-                gattWriter.notifyAndWriteToClientCharacteristic(
-                    server,
-                    device,
-                    characteristic,
-                    endValue
-                )
+        val notificationResult = gattWriter.notifyAndWriteToClientCharacteristic(
+            server,
+            device,
+            characteristic,
+            endValue
+        )
 
-            val event =
-                if (notificationResult) {
-                    logger.debug(logTag, "GATT: Notified state characteristic with 0x02")
-                    GattServerEvent.SessionEnd(SUCCESS)
-                } else {
-                    GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
-                }
+        return if (notificationResult) {
+            logger.debug(logTag, "GATT: Notified state characteristic with 0x02")
             isSessionEnd = true
-            _events.tryEmit(event)
+            SessionEndStateQueued.Success
+        } else {
+            logger.error(logTag, "failed to notify client with END command: notification failed")
+            SessionEndStateQueued.Failed
         }
     }
 }

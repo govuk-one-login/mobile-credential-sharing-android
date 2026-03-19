@@ -5,7 +5,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.fail
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
-import uk.gov.logging.testdouble.SystemLogger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.rsaKeyPair
 import uk.gov.onelogin.sharing.security.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
 
