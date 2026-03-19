@@ -2,12 +2,12 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import org.hamcrest.Matcher
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
+import uk.gov.onelogin.sharing.cryptoService.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactoryImplTest
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatchers
-import uk.gov.onelogin.sharing.security.FakeSessionSecurity
-import uk.gov.onelogin.sharing.security.engagement.FakeEngagementGenerator
 
 class HolderSessionFactoryImplTest :
     SessionFactoryImplTest<StateContainer<in HolderSessionState>> {

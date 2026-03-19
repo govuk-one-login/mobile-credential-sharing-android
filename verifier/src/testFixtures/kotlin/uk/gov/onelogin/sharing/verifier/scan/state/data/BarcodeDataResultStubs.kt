@@ -3,8 +3,8 @@ package uk.gov.onelogin.sharing.verifier.scan.state.data
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriTwo
-import uk.gov.onelogin.sharing.security.DecoderStub.INVALID_CBOR
-import uk.gov.onelogin.sharing.security.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 
 /**
  * Wrapper object containing test data for [BarcodeDataResult].

@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
-import uk.gov.onelogin.sharing.security.DeviceRequestStub.deviceRequestStub
 
 /**
  * Parameterised test input for valid [HolderSessionState] objects that can transition to

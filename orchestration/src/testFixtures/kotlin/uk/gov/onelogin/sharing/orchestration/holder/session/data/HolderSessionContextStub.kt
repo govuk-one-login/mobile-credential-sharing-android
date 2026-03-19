@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session.data
 
 import java.util.UUID
+import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
-import uk.gov.onelogin.sharing.security.SessionSecurityTestStub
 
 object HolderSessionContextStub {
 

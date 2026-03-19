@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.connect
 
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
 
 /**
  * Property bag data class for holding the [ConnectWithHolderDeviceScreen] composable UI state.

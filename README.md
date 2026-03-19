@@ -27,7 +27,7 @@ This repository contains packages for:
 - [Core features](./core): Common capabilities across the code base
 - [Holder](./holder): securely share a credential with a verifier
 - [Models](./models): representing data models in Concise Binary Object Representation (CBOR) format
-- [Security](./security): encryption and decryption of data for transit
+- [CryptoService](./crypto-service): encryption and decryption of data for transit
 - [Verifier](./verifier): securely receive and verify a credential from a holder
 
 ### Credential Provisioning Flow
@@ -59,7 +59,7 @@ namespace Models {
     class DeviceResponse
 }
 
-namespace Security {
+namespace CryptoService {
     class EncryptionSession
     class DecryptionSession
 }

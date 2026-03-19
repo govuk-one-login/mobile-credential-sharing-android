@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.verifier.connect
 
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matcher
-import uk.gov.onelogin.sharing.security.cbor.dto.DeviceEngagementDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
 import uk.gov.onelogin.sharing.verifier.connect.matchers.HasBase64EncodedEngagement
 import uk.gov.onelogin.sharing.verifier.connect.matchers.HasBluetoothEnabled
 import uk.gov.onelogin.sharing.verifier.connect.matchers.HasDeviceEngagementDto
