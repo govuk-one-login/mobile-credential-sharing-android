@@ -23,6 +23,10 @@ dependencies {
     listOf(
         projects.orchestration
     ).forEach(::api)
+
+    listOf(
+        libs.metro.viewmodel.compose
+    ).forEach(::implementation)
 }
 
 dependencies {
@@ -30,6 +34,7 @@ dependencies {
         projects.core,
         projects.orchestration,
         libs.metro.runtime,
+        libs.metro.viewmodel.compose,
         testFixtures(projects.orchestration)
     ).forEach(::testFixturesImplementation)
 
