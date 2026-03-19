@@ -8,13 +8,13 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_OPTIONS
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_OPTIONS_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.bleOptionNodes
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 
 class BleOptionsTest {
 

@@ -8,8 +8,6 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_RETRIEVAL_METHOD_SERVER_MODE
 import uk.gov.onelogin.sharing.cryptoService.DeviceEngagementStub.deviceRetrievalNodes
@@ -17,6 +15,8 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializ
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceRetrievalMethodSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 
 class BleDeviceRetrievalMethodTest {
     private fun testMapper(): ObjectMapper = CBORMapper.builder(CBORFactory())

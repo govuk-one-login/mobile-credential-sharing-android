@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService
 
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishment
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishment
 
 /**
  * Converts a [SessionEstablishmentDto] into its corresponding domain model, [SessionEstablishment].

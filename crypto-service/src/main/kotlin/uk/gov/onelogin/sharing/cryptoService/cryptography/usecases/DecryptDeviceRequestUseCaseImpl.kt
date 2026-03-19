@@ -9,7 +9,6 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoder
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveSessionTranscript
@@ -17,6 +16,7 @@ import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
 @ContributesBinding(scope = AppScope::class, binding = binding<DecryptDeviceRequestUseCase>())
 class DecryptDeviceRequestUseCaseImpl(

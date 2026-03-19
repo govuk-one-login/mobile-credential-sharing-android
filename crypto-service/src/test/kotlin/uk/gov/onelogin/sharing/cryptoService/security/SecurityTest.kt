@@ -8,11 +8,11 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.models.mdoc.security.Security
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.SECURITY
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.SECURITY_EXPECTED_BASE64
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.securityNodes
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SecuritySerializer
+import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 class SecurityTest {
     private fun testMapper(): ObjectMapper = CBORMapper.builder(CBORFactory())

@@ -1,10 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
-import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
-import uk.gov.onelogin.sharing.models.mdoc.security.Security
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.CoseKeySerializer
@@ -15,6 +11,10 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerial
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SecuritySerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SessionEstablishmentSerializer
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
+import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
+import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 /**
  * A private generic function that takes ('Any') map of custom serializers to encode using

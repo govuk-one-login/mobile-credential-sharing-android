@@ -6,10 +6,10 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoderImpl
 import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromHexStringFile
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
 class DeviceRequestDecoderImplTest {
     private val deviceRequestExample1 = getByteArrayFromHexStringFile(

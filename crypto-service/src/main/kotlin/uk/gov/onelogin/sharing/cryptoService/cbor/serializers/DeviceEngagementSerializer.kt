@@ -3,10 +3,10 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.serializers
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborPropertyIds.PROPERTY_ID_0
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborPropertyIds.PROPERTY_ID_1
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborPropertyIds.PROPERTY_ID_2
+import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 
 class DeviceEngagementSerializer :
     StdSerializer<DeviceEngagement>(

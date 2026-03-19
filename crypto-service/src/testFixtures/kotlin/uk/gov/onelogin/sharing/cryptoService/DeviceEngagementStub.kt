@@ -4,12 +4,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_TYPE
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_VERSION
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
-import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
-import uk.gov.onelogin.sharing.models.mdoc.security.Security
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.UUID_16_BIT
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.bleOptionNodes
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.SECURITY
@@ -22,6 +16,12 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SecuritySerializer
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_TYPE
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_VERSION
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
+import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
+import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 object DeviceEngagementStub {
     val deviceEngagementSerializers: Map<Class<*>, StdSerializer<*>> = mapOf(

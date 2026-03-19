@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.cryptoService
 
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.UUID_16_BIT
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.BleOptionsDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceRetrievalMethodDto
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 
 object DeviceRetrievalMethodsDeserializerStub {
     val expectedMethods = listOf(
