@@ -12,7 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class VerifierScannerContentTest {
+class ScannerContentTest {
 
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
@@ -25,7 +25,7 @@ class VerifierScannerContentTest {
     @Test
     fun cameraViewfinderIsDisplayed() {
         composeTestRule.setContent {
-            VerifierScannerContent(
+            ScannerContent(
                 lifecycleOwner = LocalLifecycleOwner.current,
                 barcodeScanResultCallback = { _, _ -> }
             )
@@ -33,6 +33,18 @@ class VerifierScannerContentTest {
 
         composeTestRule
             .onNodeWithTag("cameraViewfinder")
+            .assertExists()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun scannerContentPreviewIsDisplayed() {
+        composeTestRule.setContent {
+            ScannerContentPreview()
+        }
+
+        composeTestRule
+            .onNodeWithTag("preview")
             .assertExists()
             .assertIsDisplayed()
     }

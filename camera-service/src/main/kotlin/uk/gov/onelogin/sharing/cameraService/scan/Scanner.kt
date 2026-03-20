@@ -17,7 +17,7 @@ fun Scanner(
         onQrDetected = viewModel::update
     )
 
-    VerifierScannerContent(
+    ScannerContent(
         lifecycleOwner = lifecycleOwner,
         modifier = modifier,
         barcodeScanResultCallback = barcodeScanResultCallback

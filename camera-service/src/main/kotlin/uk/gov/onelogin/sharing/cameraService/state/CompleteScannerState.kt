@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.core.VerifierUiScope
 @Inject
 @ContributesBinding(VerifierUiScope::class, binding = binding<ScannerState.Complete>())
 @SingleIn(VerifierUiScope::class)
-class CompleteVerifierScannerState(
+class CompleteScannerState(
     barcodeDataResultState: BarcodeDataResultState.Complete = MutableBarcodeDataResultState()
 ) : BarcodeDataResultState.Complete by barcodeDataResultState,
     ScannerState.Complete

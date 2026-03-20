@@ -12,7 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.cameraService.scan.VerifierScannerContent
+import uk.gov.onelogin.sharing.cameraService.scan.ScannerContent
 import uk.gov.onelogin.sharing.core.PermissionListExtensions.toGrantPermissionsRule
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.Verifier.Companion.requiredPermissions
 
@@ -36,7 +36,7 @@ class VerifierScannerGrantedTest {
     fun permissionGrantedTextIsShown() = runTest {
         composeTestRule.run {
             setContent {
-                VerifierScannerContent(
+                ScannerContent(
                     lifecycleOwner = LocalLifecycleOwner.current,
                     barcodeScanResultCallback = { _, _ -> }
                 )
@@ -50,7 +50,7 @@ class VerifierScannerGrantedTest {
     fun permissionGrantedTextRenderedWithPermissionState() = runTest {
         composeTestRule.run {
             setContent {
-                VerifierScannerContent(
+                ScannerContent(
                     lifecycleOwner = LocalLifecycleOwner.current,
                     barcodeScanResultCallback = { _, _ -> }
                 )

@@ -7,13 +7,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
-import uk.gov.onelogin.sharing.cameraService.state.CompleteVerifierScannerState
+import uk.gov.onelogin.sharing.cameraService.state.CompleteScannerState
 
 class ScannerViewModelTest {
 
     private val model by lazy {
         ScannerViewModel(
-            state = CompleteVerifierScannerState(),
+            state = CompleteScannerState(),
             observer = FakeScanController()
         )
     }

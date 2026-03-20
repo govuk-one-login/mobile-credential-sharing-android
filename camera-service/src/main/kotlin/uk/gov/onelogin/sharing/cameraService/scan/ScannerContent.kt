@@ -33,7 +33,7 @@ import uk.gov.android.ui.theme.m3.QrScannerOverlayDefaults
 import uk.gov.android.ui.theme.spacingDouble
 
 @Composable
-fun VerifierScannerContent(
+fun ScannerContent(
     lifecycleOwner: LifecycleOwner,
     barcodeScanResultCallback: BarcodeScanResult.Callback,
     modifier: Modifier = Modifier,
@@ -77,14 +77,14 @@ fun VerifierScannerContent(
 
 @Composable
 @androidx.compose.ui.tooling.preview.Preview
-internal fun VerifierScannerContentPreview() {
+internal fun ScannerContentPreview() {
     GdsTheme {
         Column(
             modifier = Modifier
                 .background(GdsLocalColorScheme.current.rowBackground)
                 .padding(spacingDouble)
         ) {
-            VerifierScannerContent(
+            ScannerContent(
                 lifecycleOwner = LocalLifecycleOwner.current,
                 modifier = Modifier.testTag("preview"),
                 barcodeScanResultCallback = { _, _ -> }

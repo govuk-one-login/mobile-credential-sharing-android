@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 @RunWith(AndroidJUnit4::class)
 class CompleteScannerStateTest {
 
-    private val state: ScannerState.Complete = CompleteVerifierScannerState()
+    private val state: ScannerState.Complete = CompleteScannerState()
 
     @Test
     fun initialState() {
