@@ -67,6 +67,7 @@ class AndroidCentralBluetoothTransport(
     }
 
     override fun scanAndConnect(serviceUuid: ByteArray) {
+        scanJob?.cancel()
         bluetoothStateMonitor.start()
         _state.value = CentralBluetoothState.Scanning
 
