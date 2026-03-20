@@ -116,21 +116,15 @@ class AndroidGattClientManager(
             value = endVal
         )
 
-        val event =
-            if (writeSuccess) {
-                logger.debug(logTag, "GATT: Wrote 0x02 to State characteristic")
-                logger.debug(
-                    logTag,
-                    "BLE session terminated successfully via GATT End command"
-                )
-                isSessionEnd = true
-                GattClientEvent.SessionEnd(SessionEndStates.SUCCESS)
-            } else {
-                GattClientEvent.SessionEnd(SessionEndStates.WRITE_TO_SERVER_FAILED)
-            }
+        if (!writeSuccess) return SessionEndStates.WRITE_TO_SERVER_FAILED
 
-        _events.tryEmit(event)
-        return event.sessionEndStates
+        logger.debug(logTag, "GATT: Wrote 0x02 to State characteristic")
+        logger.debug(
+            logTag,
+            "BLE session terminated successfully via GATT End command"
+        )
+        isSessionEnd = true
+        return SessionEndStates.SUCCESS
     }
 
     private fun handleGattEvent(event: GattEvent) {

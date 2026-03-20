@@ -571,7 +571,6 @@ internal class AndroidGattClientManagerTest {
         testEvents {
             val result = manager.notifySessionEnd()
             assertEquals(SessionEndStates.SUCCESS, result)
-            assertEquals(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS), awaitItem())
         }
     }
 
@@ -589,10 +588,6 @@ internal class AndroidGattClientManagerTest {
         testEvents {
             val result = manager.notifySessionEnd()
             assertEquals(SessionEndStates.WRITE_TO_SERVER_FAILED, result)
-            assertEquals(
-                GattClientEvent.SessionEnd(SessionEndStates.WRITE_TO_SERVER_FAILED),
-                awaitItem()
-            )
         }
     }
 
