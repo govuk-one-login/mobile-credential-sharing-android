@@ -191,7 +191,7 @@ class VerifierOrchestrator(
             exceptionWrapper = ::OrchestratorCannotCancelException
         )
 
-        centralBluetoothTransport.stop()
+        stopCentralTransport()
     }
 
     override fun reset() {
@@ -203,6 +203,10 @@ class VerifierOrchestrator(
                 )
             }
         }
+    }
+
+    private fun stopCentralTransport() {
+        appCoroutineScope.launch { centralBluetoothTransport.stop() }
     }
 
     @Suppress("ComplexMethod")
@@ -233,7 +237,7 @@ class VerifierOrchestrator(
                 } else {
                     logger.debug(logTag, "BLE - Disconnected: ${state.address}")
 
-                    centralBluetoothTransport.stop()
+                    stopCentralTransport()
 
                     safeTransitionTo(
                         VerifierSessionState.Complete.Failed(
@@ -256,7 +260,7 @@ class VerifierOrchestrator(
 
             is CentralBluetoothState.CentralBluetoothEnded -> {
                 logger.debug(logTag, "BLE - Session ended: ${state.status}")
-                centralBluetoothTransport.stop()
+                stopCentralTransport()
             }
         }
     }
@@ -264,7 +268,7 @@ class VerifierOrchestrator(
     private fun handleError(reason: CentralBluetoothTransportError) {
         logger.error(logTag, "BLE - Error: $reason")
 
-        centralBluetoothTransport.stop()
+        stopCentralTransport()
 
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(
