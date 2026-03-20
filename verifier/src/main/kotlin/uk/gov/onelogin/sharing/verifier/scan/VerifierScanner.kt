@@ -9,7 +9,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.onelogin.sharing.verifier.VerifierNavigationEvents
 import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState

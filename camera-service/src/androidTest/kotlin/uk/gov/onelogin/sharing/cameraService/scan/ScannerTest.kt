@@ -4,15 +4,16 @@ import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
+import gov.onelogin.sharing.cameraservice.scan.FakeScanController
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.cameraService.state.CompleteVerifierScannerState
 
 @RunWith(AndroidJUnit4::class)
-class VerifierScannerContentTest {
+class ScannerTest {
 
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
@@ -22,13 +23,15 @@ class VerifierScannerContentTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val viewModel = ScannerViewModel(
+        state = CompleteVerifierScannerState(),
+        observer = FakeScanController()
+    )
+
     @Test
     fun cameraViewfinderIsDisplayed() {
         composeTestRule.setContent {
-            VerifierScannerContent(
-                lifecycleOwner = LocalLifecycleOwner.current,
-                barcodeScanResultCallback = { _, _ -> }
-            )
+            Scanner(viewModel = viewModel)
         }
 
         composeTestRule

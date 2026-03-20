@@ -5,17 +5,16 @@ import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResultState
 sealed interface ScannerState {
 
     /**
-     * Interface that combines both [States] and [Updaters].
+     * Interface that combines both [States].
      *
-     * @sample uk.gov.onelogin.sharing.verifier.scan.VerifierScannerViewModel
+     * @sample uk.gov.onelogin.sharing.cameraService.scan.ScannerViewModel
      *
      * @see States
-     * @see Updaters
+     *
      */
     interface Complete :
         BarcodeDataResultState.Complete,
-        States,
-        Updaters
+        States
 
     /**
      * Property bag Interface that combines all of the StateFlow based Interfaces.
@@ -23,11 +22,4 @@ sealed interface ScannerState {
      * @see BarcodeDataResultState.State
      */
     interface States : BarcodeDataResultState.State
-
-    /**
-     * Interface that combines all of the StateFlow updater Interfaces.
-     *
-     * @see BarcodeDataResultState.Updater
-     */
-    interface Updaters : BarcodeDataResultState.Updater
 }

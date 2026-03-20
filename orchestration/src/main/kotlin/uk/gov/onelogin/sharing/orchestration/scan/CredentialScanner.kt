@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.sdk.api.verifier
+package uk.gov.onelogin.sharing.orchestration.scan
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -7,21 +7,20 @@ import androidx.compose.ui.Modifier
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import uk.gov.onelogin.sharing.cameraService.scan.Scanner
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
 
 /**
- * Composable that provides a QR code scanner for the Verifier role.
+ * Composable that provides a standalone QR code scanner for the Verifier role.
+ * Use this if you're not using the pre-built verifier UI module.
  *
- * This handles all internal dependency wiring. Consumers only need a [CredentialVerifier]
- * instance obtained from the SDK.
- *
- * @param credentialVerifier The verifier instance from the SDK.
+ * @param orchestrator The verifier orchestrator instance.
  * @param modifier Optional [Modifier] to apply to the scanner.
  */
 @Composable
-fun VerifierScanner(credentialVerifier: CredentialVerifier, modifier: Modifier = Modifier) {
-    val factory = remember(credentialVerifier.orchestrator) {
+fun CredentialScanner(orchestrator: Orchestrator.Verifier, modifier: Modifier = Modifier) {
+    val factory = remember(orchestrator) {
         createGraphFactory<ScannerGraph.Factory>()
-            .create(credentialVerifier.orchestrator)
+            .create(orchestrator)
             .metroViewModelFactory
     }
 
