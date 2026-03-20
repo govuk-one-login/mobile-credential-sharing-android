@@ -22,7 +22,7 @@ class FakeCentralBluetoothTransport(
         lastServiceUuid = serviceUuid
     }
 
-    override fun stop() {
+    override suspend fun stop() {
         stopCalls++
     }
 

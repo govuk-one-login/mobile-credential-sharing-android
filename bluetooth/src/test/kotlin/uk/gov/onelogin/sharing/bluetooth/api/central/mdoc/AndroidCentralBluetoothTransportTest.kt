@@ -195,6 +195,15 @@ class AndroidCentralBluetoothTransportTest {
     }
 
     @Test
+    fun `stop cancels scan and disconnects`() = testScope.runTest {
+        transport.scanAndConnect(serviceUuid)
+        transport.stop()
+
+        assertEquals(1, gattClientManager.disconnectCalls)
+        assertEquals(1, bluetoothStateMonitor.stopCalls)
+    }
+
+    @Test
     fun `bluetooth OFF stops transport`() = runTest {
         bluetoothStateMonitor.emit(BluetoothStatus.OFF)
 

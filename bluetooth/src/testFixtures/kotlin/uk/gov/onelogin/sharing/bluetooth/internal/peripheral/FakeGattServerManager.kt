@@ -15,21 +15,22 @@ class FakeGattServerManager : GattServerManager {
 
     var openCalls = 0
     var closeCalls = 0
-    var writeSessionEnd: Boolean = true
+    var notifySessionEnd: Boolean = true
 
     override fun open(serviceUuid: UUID) {
         openCalls++
     }
 
-    override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued = if (writeSessionEnd) {
-        _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
-        SessionEndStateQueued.Success
-    } else {
-        _events.tryEmit(
-            GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
-        )
-        SessionEndStateQueued.Success
-    }
+    override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued =
+        if (notifySessionEnd) {
+            _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
+            SessionEndStateQueued.Success
+        } else {
+            _events.tryEmit(
+                GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
+            )
+            SessionEndStateQueued.Success
+        }
 
     override fun close() {
         closeCalls++

@@ -30,5 +30,5 @@ interface CentralBluetoothTransport {
     /**
      * Stops the BLE session, optionally sending a session end command first.
      */
-    fun stop()
+    suspend fun stop()
 }

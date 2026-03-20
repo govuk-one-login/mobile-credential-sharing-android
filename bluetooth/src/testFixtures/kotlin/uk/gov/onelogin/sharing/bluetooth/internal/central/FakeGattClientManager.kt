@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 class FakeGattClientManager : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>()
@@ -22,8 +23,7 @@ class FakeGattClientManager : GattClientManager {
         disconnectCalls++
     }
 
-    override fun writeSessionEnd() {
-    }
+    override fun notifySessionEnd(): SessionEndStates = SessionEndStates.SUCCESS
 
     suspend fun emitEvent(event: GattClientEvent) {
         _events.emit(event)

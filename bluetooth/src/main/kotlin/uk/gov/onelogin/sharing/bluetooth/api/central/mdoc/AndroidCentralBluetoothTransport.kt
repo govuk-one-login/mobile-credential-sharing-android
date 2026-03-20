@@ -5,6 +5,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -16,6 +17,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -49,7 +52,10 @@ class AndroidCentralBluetoothTransport(
                     BluetoothStatus.OFF,
                     BluetoothStatus.TURNING_OFF -> {
                         _bluetoothStatus.value = BluetoothStatus.OFF
-                        stop()
+                        scanJob?.cancel()
+                        scanJob = null
+                        gattClientManager.disconnect()
+                        bluetoothStateMonitor.stop()
                     }
 
                     BluetoothStatus.ON -> _bluetoothStatus.value = BluetoothStatus.ON
@@ -84,12 +90,19 @@ class AndroidCentralBluetoothTransport(
         }
     }
 
-    override fun stop() {
+    override suspend fun stop() {
         scanJob?.cancel()
         scanJob = null
-        gattClientManager.writeSessionEnd()
+        notifySessionEnd()
         gattClientManager.disconnect()
         bluetoothStateMonitor.stop()
+    }
+
+    private suspend fun notifySessionEnd() {
+        val result = gattClientManager.notifySessionEnd()
+        if (result == SessionEndStates.SUCCESS) {
+            delay(BLE_SEND_NOTIFICATION_DELAY)
+        }
     }
 
     private fun handleGattClientEvent(event: GattClientEvent) {

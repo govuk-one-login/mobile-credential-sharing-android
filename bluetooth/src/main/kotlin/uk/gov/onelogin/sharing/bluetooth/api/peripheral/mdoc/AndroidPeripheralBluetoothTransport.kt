@@ -18,6 +18,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
@@ -29,9 +30,6 @@ class AndroidPeripheralBluetoothTransport(
     @ApplicationScope coroutineScope: CoroutineScope,
     private val logger: Logger
 ) : PeripheralBluetoothTransport {
-    companion object {
-        private const val BLE_SEND_NOTIFICATION_DELAY = 200L
-    }
 
     private val _state = MutableStateFlow<PeripheralBluetoothState>(PeripheralBluetoothState.Idle)
     override val state: StateFlow<PeripheralBluetoothState> = _state

@@ -97,15 +97,16 @@ class AndroidGattClientManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun writeSessionEnd() {
-        val gatt = bluetoothGatt.let { bluetoothGatt } ?: return
+    override fun notifySessionEnd(): SessionEndStates {
+        val gatt =
+            bluetoothGatt.let { bluetoothGatt } ?: return SessionEndStates.WRITE_TO_SERVER_FAILED
 
         val state = gatt
             .getService(serviceUuid)
             .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
             INVALID_SERVICE
-        )
+        ).let { SessionEndStates.WRITE_TO_SERVER_FAILED }
 
         val endVal = byteArrayOf(MdocState.END.code)
 
@@ -129,6 +130,7 @@ class AndroidGattClientManager(
             }
 
         _events.tryEmit(event)
+        return event.sessionEndStates
     }
 
     private fun handleGattEvent(event: GattEvent) {
