@@ -80,7 +80,7 @@ class DeviceRequestDecoderImplTest {
 
     private companion object {
         private const val CBOR_FILE_PATH =
-            "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cbor/deserializers/"
+            "src/testFixtures/resources/uk/gov/onelogin/sharing/crypto-service/cbor/deserializers/"
 
         private const val DOC_TYPE = "org.iso.18013.5.1.mDL"
 

@@ -4,7 +4,7 @@ import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromFile
 
 object CryptoStub {
     const val BINARY_PACKAGE_PATH =
-        "src/testFixtures/resources/uk/gov/onelogin/sharing/security/cryptography/java/"
+        "src/testFixtures/resources/uk/gov/onelogin/sharing/crypto-service/cryptography/java/"
 
     const val VALID_SALT =
         "66ea34bad309a58e255831be8a6a89d8f3d5e730af49ac687c2dee82f3b5041b"

@@ -4,7 +4,7 @@ import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromFile
 
 object SessionStubs {
     private const val SECURITY_BINARY_PACKAGE_PATH =
-        "src/testFixtures/resources/uk/gov/onelogin/sharing/security/"
+        "src/testFixtures/resources/uk/gov/onelogin/sharing/crypto-service/"
 
     val VALID_SKREADER_BYTES = getByteArrayFromFile(
         SECURITY_BINARY_PACKAGE_PATH,

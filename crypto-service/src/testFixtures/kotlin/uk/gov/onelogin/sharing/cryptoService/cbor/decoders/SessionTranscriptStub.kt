@@ -6,7 +6,7 @@ object SessionTranscriptStub {
     val validSessionTranscript: ByteArray =
         (
             "src/testFixtures/resources" +
-                "/uk/gov/onelogin/sharing/security/cbor/decoders/session/transcript" +
+                "/uk/gov/onelogin/sharing/crypto-service/cbor/decoders/session/transcript" +
                 "/validSessionEstablishment.txt"
             )
             .let(::File)
