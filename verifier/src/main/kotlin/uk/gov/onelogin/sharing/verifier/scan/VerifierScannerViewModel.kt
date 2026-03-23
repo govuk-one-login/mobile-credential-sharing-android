@@ -22,7 +22,9 @@ import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 @ViewModelKey(VerifierScannerViewModel::class)
 class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) : ViewModel() {
 
-    private val _navigationEvents = MutableSharedFlow<VerifierNavigationEvents>()
+    private val _navigationEvents = MutableSharedFlow<VerifierNavigationEvents>(
+        extraBufferCapacity = 1
+    )
     val navigationEvents = _navigationEvents.asSharedFlow()
 
     private val _uiState = MutableStateFlow<VerifierUiState>(VerifierUiState.Loading)
@@ -41,8 +43,8 @@ class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) 
                         orchestrator.reset()
                     }
 
-                    is VerifierSessionState.ProcessingEngagement -> _navigationEvents.emit(
-                        VerifierNavigationEvents.NavigateToDiagnostic(it.qrCode)
+                    is VerifierSessionState.Connecting -> _navigationEvents.emit(
+                        VerifierNavigationEvents.NavigateToDiagnostic
                     )
 
                     is VerifierSessionState.ReadyToScan -> {

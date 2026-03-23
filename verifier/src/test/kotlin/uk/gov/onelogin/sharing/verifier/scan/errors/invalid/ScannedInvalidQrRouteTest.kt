@@ -62,7 +62,7 @@ class ScannedInvalidQrRouteTest {
 
             NavHost(
                 navController = controller,
-                startDestination = ConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
+                startDestination = ConnectWithHolderDeviceRoute
             ) {
                 composable<ConnectWithHolderDeviceRoute> {}
                 composable<ScannedInvalidQrRoute> {}

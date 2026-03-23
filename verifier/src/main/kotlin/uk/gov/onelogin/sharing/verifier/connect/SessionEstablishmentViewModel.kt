@@ -39,12 +39,10 @@ import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
-import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.StartScanning
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.StopScanning
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.UpdateEngagementData
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.UpdatePermission
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
@@ -196,7 +194,6 @@ class SessionEstablishmentViewModel(
      * @see updateHasRequestPermissions
      * @see scanForDevice
      * @see stopScanning
-     * @see updateEngagementData
      * @see updatePermissions
      */
     @OptIn(ExperimentalPermissionsApi::class)
@@ -209,9 +206,6 @@ class SessionEstablishmentViewModel(
 
         is StartScanning ->
             scanForDevice(event.uuid)
-
-        is UpdateEngagementData ->
-            updateEngagementData(event.base64EncodedEngagement)
 
         is UpdatePermission ->
             updatePermissions(event.state)
@@ -270,15 +264,6 @@ class SessionEstablishmentViewModel(
         mdocVerifierSession.stop()
         receive(StopScanning)
         super.onCleared()
-    }
-
-    private fun updateEngagementData(base64EncodedEngagement: String) {
-        updateState {
-            it.copy(
-                base64EncodedEngagement = base64EncodedEngagement,
-                engagementData = decodeDeviceEngagement(base64EncodedEngagement, logger)
-            )
-        }
     }
 
     private fun updateHasRequestPermissions(requestedPerms: Boolean) {

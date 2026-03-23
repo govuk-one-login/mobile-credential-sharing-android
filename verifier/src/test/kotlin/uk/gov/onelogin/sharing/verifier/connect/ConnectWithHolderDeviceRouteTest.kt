@@ -42,9 +42,7 @@ class ConnectWithHolderDeviceRouteTest {
 
             NavHost(
                 navController = controller,
-                startDestination = ConnectWithHolderDeviceRoute(
-                    validWithCorrectBluetoothSetup.base64EncodedEngagement!!
-                )
+                startDestination = ConnectWithHolderDeviceRoute
             ) {
                 composable<ConnectWithHolderDeviceRoute> {}
                 composable<ScannedInvalidQrRoute> {}

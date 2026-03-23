@@ -28,7 +28,7 @@ object VerifierScanRoute {
     @OptIn(ExperimentalPermissionsApi::class)
     fun NavGraphBuilder.configureVerifierScannerRoute(
         onInvalidBarcode: (String) -> Unit = {},
-        onValidBarcode: (String) -> Unit = {}
+        onValidBarcode: () -> Unit = {}
     ) {
         composable<VerifierScanRoute> {
             Column(

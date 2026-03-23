@@ -18,7 +18,7 @@ fun VerifierScanner(
     viewModel: VerifierScannerViewModel = metroViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onInvalidBarcode: (String) -> Unit = {},
-    onValidBarcode: (String) -> Unit = {},
+    onValidBarcode: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -30,9 +30,7 @@ fun VerifierScanner(
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.navigationEvents.collect { event ->
                 when (event) {
-                    is VerifierNavigationEvents.NavigateToDiagnostic -> currentOnValidBarcode(
-                        event.qrCode
-                    )
+                    is VerifierNavigationEvents.NavigateToDiagnostic -> currentOnValidBarcode()
 
                     is VerifierNavigationEvents.NavigateToInvalidScreen -> currentOnInvalidBarcode(
                         event.qrCode

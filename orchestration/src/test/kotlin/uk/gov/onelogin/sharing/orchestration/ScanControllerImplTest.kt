@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.orchestration
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 class ScanControllerImplTest {
 
@@ -16,12 +17,8 @@ class ScanControllerImplTest {
         scanController.onScanResult(result)
 
         assertEquals(
-            "mdoc:test",
-            (
-                fakeOrchestrator.initialVerifierState.value as?
-                    uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
-                        .ProcessingEngagement
-                )?.qrCode
+            VerifierSessionState.Connecting,
+            fakeOrchestrator.initialVerifierState.value
         )
     }
 

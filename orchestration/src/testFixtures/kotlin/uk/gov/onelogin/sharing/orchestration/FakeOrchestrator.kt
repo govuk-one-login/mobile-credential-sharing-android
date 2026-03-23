@@ -27,7 +27,7 @@ class FakeOrchestrator(
         when (qrCode) {
             is BarcodeDataResult.Valid -> {
                 initialVerifierState.value =
-                    VerifierSessionState.ProcessingEngagement(qrCode.data)
+                    VerifierSessionState.Connecting
             }
 
             is BarcodeDataResult.Invalid -> {

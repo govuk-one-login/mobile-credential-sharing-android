@@ -22,11 +22,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableDeniedState
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.decodableGrantedState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.genericErrorState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.undecodableState
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateStubs.validWithCorrectBluetoothSetup
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
@@ -116,103 +113,6 @@ class ConnectWithHolderDeviceScreenTest {
             composeTestRule.assertBluetoothPromptIsNotDisplayed()
         }
 
-    @Test
-    fun cannotDecodeProvidedCborString() = runTest {
-        testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
-
-        composeTestRule.run {
-            render(
-                undecodableState,
-                Modifier,
-                testViewModel,
-                bluetoothPermissionsGranted
-            )
-            assertBasicInformationIsDisplayed()
-            assertDecodingErrorIsDisplayed()
-            assertDeviceEngagementDataDoesNotExist()
-            assertBluetoothPermissionIsGranted()
-            assertDeviceBluetoothIsDisabled()
-            assertIsNotSearchingForBluetoothDevices()
-        }
-    }
-
-    @Test
-    fun validCborExistsOnScreen() = runTest {
-        composeTestRule.run {
-            testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
-            render(
-                decodableDeniedState,
-                Modifier,
-                testViewModel,
-                bluetoothPermissionsGranted
-            )
-            assertBasicInformationIsDisplayed()
-            assertDecodingErrorDoesNotExist()
-            assertDeviceEngagementDataIsDisplayed()
-            assertBluetoothPermissionIsGranted()
-            assertDeviceBluetoothIsDisabled()
-            assertIsNotSearchingForBluetoothDevices()
-        }
-    }
-
-    @Test
-    fun bluetoothPermissionIsGrantedButDeviceBluetoothIsDisabled() = runTest {
-        testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
-
-        val stateForTest = decodableGrantedState
-
-        composeTestRule.waitForIdle()
-
-        composeTestRule.run {
-            render(stateForTest, Modifier, testViewModel, bluetoothPermissionsGranted)
-            assertBasicInformationIsDisplayed()
-            assertDecodingErrorDoesNotExist()
-            assertDeviceEngagementDataIsDisplayed()
-            assertBluetoothPermissionIsGranted()
-            assertDeviceBluetoothIsDisabled()
-            assertIsNotSearchingForBluetoothDevices()
-        }
-    }
-
-    @Test
-    fun bluetoothPermissionIsGranted() = runTest {
-        testViewModel = createViewModel(bluetoothAdapterProvider = disabledBluetoothAdapter)
-        composeTestRule.run {
-            render(
-                decodableGrantedState,
-                Modifier,
-                testViewModel,
-                bluetoothPermissionsGranted
-            )
-            assertBasicInformationIsDisplayed()
-            assertDecodingErrorDoesNotExist()
-            assertDeviceEngagementDataIsDisplayed()
-            assertBluetoothPermissionIsGranted()
-            assertDeviceBluetoothIsDisabled()
-            assertIsNotSearchingForBluetoothDevices()
-        }
-    }
-
-    @Test
-    fun grantedAndEnabledBluetoothWithValidCborStartsScanning() = runTest {
-        testViewModel = createViewModel()
-
-        composeTestRule.run {
-            render(
-                validWithCorrectBluetoothSetup,
-                Modifier,
-                testViewModel,
-                bluetoothPermissionsGranted
-            )
-            assertBasicInformationIsDisplayed()
-            assertDecodingErrorDoesNotExist()
-            assertDeviceEngagementDataIsDisplayed()
-            assertBluetoothPermissionIsGranted()
-            assertDeviceBluetoothIsEnabled()
-            assertIsSearchingForBluetoothDevices()
-        }
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `LaunchedEffect collects navEvents and calls onConnectionError`() = runTest {
@@ -237,14 +137,6 @@ class ConnectWithHolderDeviceScreenTest {
                 ConnectWithHolderDeviceError.GenericError,
                 receivedError
             )
-        }
-    }
-
-    @Test
-    fun connectWithHolderDevicePreviewRendersWithValidCbor() = runTest {
-        composeTestRule.run {
-            renderPreview(state = validWithCorrectBluetoothSetup)
-            assertBasicInformationIsDisplayed()
         }
     }
 }
