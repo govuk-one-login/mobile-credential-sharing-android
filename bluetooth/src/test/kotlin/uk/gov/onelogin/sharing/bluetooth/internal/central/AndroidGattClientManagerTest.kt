@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.os.Build
@@ -347,7 +348,7 @@ internal class AndroidGattClientManagerTest {
                 )
 
                 assert(
-                    logger.contains("Gatt Service does not have a server to client characteristic")
+                    logger.contains(INVALID_SERVICE)
                 )
             }
         }
@@ -588,6 +589,123 @@ internal class AndroidGattClientManagerTest {
         testEvents {
             val result = manager.notifySessionEnd()
             assertEquals(SessionEndStates.WRITE_TO_SERVER_FAILED, result)
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `writes CCCD descriptor after successful subscription`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every {
+            bluetoothGatt.setCharacteristicNotification(any(), true)
+        } returns true
+
+        val stateDescriptor = mockk<BluetoothGattDescriptor>(relaxed = true)
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every {
+            stateCharacteristic.getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
+        } returns
+            stateDescriptor
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        val s2cDescriptor = mockk<BluetoothGattDescriptor>(relaxed = true)
+        val s2cCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every {
+            s2cCharacteristic.getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
+        } returns
+            s2cDescriptor
+        every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns
+            s2cCharacteristic
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            verify { bluetoothGatt.writeDescriptor(stateDescriptor) }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `writes next CCCD descriptor after first descriptor write succeeds`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every {
+            bluetoothGatt.setCharacteristicNotification(any(), true)
+        } returns true
+
+        val stateDescriptor = mockk<BluetoothGattDescriptor>(relaxed = true)
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every {
+            stateCharacteristic.getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
+        } returns
+            stateDescriptor
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        val s2cDescriptor = mockk<BluetoothGattDescriptor>(relaxed = true)
+        val s2cCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every {
+            s2cCharacteristic.getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
+        } returns
+            s2cDescriptor
+        every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns
+            s2cCharacteristic
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            callbackSlot.captured.onDescriptorWrite(
+                bluetoothGatt,
+                stateDescriptor,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            verify { bluetoothGatt.writeDescriptor(s2cDescriptor) }
+        }
+    }
+
+    @Test
+    fun `emits error when CCCD descriptor write fails`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+        every {
+            bluetoothGatt.setCharacteristicNotification(any(), true)
+        } returns true
+
+        val stateDescriptor = mockk<BluetoothGattDescriptor>(relaxed = true)
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every {
+            stateCharacteristic.getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
+        } returns
+            stateDescriptor
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        val s2cCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns
+            s2cCharacteristic
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServicesDiscovered(
+                bluetoothGatt,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            callbackSlot.captured.onDescriptorWrite(
+                bluetoothGatt,
+                stateDescriptor,
+                BluetoothGatt.GATT_FAILURE
+            )
+
+            assertEquals(
+                GattClientEvent.Error(ClientError.FAILED_TO_SUBSCRIBE),
+                awaitItem()
+            )
         }
     }
 

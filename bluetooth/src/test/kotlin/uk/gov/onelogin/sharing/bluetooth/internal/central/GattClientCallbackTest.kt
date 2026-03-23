@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.assertEquals
@@ -82,6 +83,24 @@ class GattClientCallbackTest {
         val event = fakeEmitter.events.single() as GattEvent.CharacteristicWrite
         assertEquals(DEVICE_ADDRESS, event.gatt.device.address)
         assertEquals(characteristic, event.characteristic)
+        assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
+    }
+
+    @Test
+    fun `onDescriptorWrite emits DescriptorWrite event`() {
+        val descriptor = mockk<BluetoothGattDescriptor>()
+
+        callback.onDescriptorWrite(
+            gatt,
+            descriptor,
+            BluetoothGatt.GATT_SUCCESS
+        )
+
+        assertEquals(1, fakeEmitter.events.size)
+
+        val event = fakeEmitter.events.single() as GattEvent.DescriptorWrite
+        assertEquals(DEVICE_ADDRESS, event.gatt.device.address)
+        assertEquals(descriptor, event.descriptor)
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
     }
 }

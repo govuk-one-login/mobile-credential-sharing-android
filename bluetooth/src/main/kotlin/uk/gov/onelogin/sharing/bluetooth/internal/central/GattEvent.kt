@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 
 internal sealed interface GattEvent {
     data class ConnectionStateChange(val gatt: BluetoothGatt, val status: Int, val newState: Int) :
@@ -21,5 +22,11 @@ internal sealed interface GattEvent {
         val gatt: BluetoothGatt?,
         val characteristic: BluetoothGattCharacteristic,
         val value: ByteArray? = null
+    ) : GattEvent
+
+    data class DescriptorWrite(
+        val gatt: BluetoothGatt,
+        val descriptor: BluetoothGattDescriptor,
+        val status: Int
     ) : GattEvent
 }

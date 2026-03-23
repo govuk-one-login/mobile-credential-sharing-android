@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import androidx.annotation.RequiresPermission
@@ -48,6 +49,7 @@ class AndroidGattClientManager(
     }
     private var mtu = MIN_MTU
     private var isSessionEnd = false
+    private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (!permissionChecker.hasBluetoothPermissions()) {
@@ -135,6 +137,7 @@ class AndroidGattClientManager(
                 is GattEvent.MtuChange -> changedMtu(event)
                 is GattEvent.CharacteristicWrite -> characteristicWritten(event)
                 is GattEvent.CharacteristicChanged -> handleCharacteristicChanged(event)
+                is GattEvent.DescriptorWrite -> descriptorWritten(event)
             }
         } catch (e: SecurityException) {
             logger.error(logTag, "Security exception", e)
@@ -218,32 +221,68 @@ class AndroidGattClientManager(
         val mtuRequestSuccess = gatt.requestMtu(MtuValues.MAX_MTU)
         logger.debug(logTag, "Request max MTU success: $mtuRequestSuccess")
 
-        val state = service
-            .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
-            ClientError.INVALID_SERVICE,
-            INVALID_SERVICE
-        )
+        val state = service.getCharacteristic(GattUuids.STATE_UUID)
+        val serverToClient = service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
 
-        val serverToClient = service
-            .getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) ?: return handleError(
-            ClientError.INVALID_SERVICE,
-            "Gatt Service does not have a server to client characteristic"
-        )
+        if (state == null || serverToClient == null) {
+            handleError(ClientError.INVALID_SERVICE, INVALID_SERVICE)
+            return
+        }
 
-        // Subscribe to inbound messages
+        // Enable local notification listeners
         val success = gatt.setCharacteristicNotification(
             state,
             true
         ) && gatt.setCharacteristicNotification(serverToClient, true)
 
-        if (success) {
-            logger.debug(logTag, "subscribed to bluetooth characteristic changes")
-        } else {
+        if (!success) {
             handleError(
                 ClientError.FAILED_TO_SUBSCRIBE,
                 "Failed to subscribe to characteristics"
             )
+            return
         }
+
+        // Queue CCCD descriptor writes to inform the remote peripheral.
+        // Without this, iOS never receives the didSubscribeTo callback.
+        listOf(state, serverToClient).forEach { characteristic ->
+            characteristic
+                .getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
+                ?.let { pendingDescriptorWrites.addLast(it) }
+        }
+
+        writeNextDescriptor(gatt)
+    }
+
+    @Suppress("DEPRECATION")
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun writeNextDescriptor(gatt: BluetoothGatt) {
+        val descriptor = pendingDescriptorWrites.removeFirstOrNull() ?: run {
+            logger.debug(logTag, "All CCCD descriptors written")
+            return
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            gatt.writeDescriptor(
+                descriptor,
+                BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            )
+        } else {
+            descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            gatt.writeDescriptor(descriptor)
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun descriptorWritten(event: GattEvent.DescriptorWrite) {
+        if (event.status != BluetoothGatt.GATT_SUCCESS) {
+            return handleError(
+                ClientError.FAILED_TO_SUBSCRIBE,
+                "Failed to write CCCD descriptor: status=${event.status}"
+            )
+        }
+        logger.debug(logTag, "CCCD descriptor written for: ${event.descriptor.characteristic.uuid}")
+        writeNextDescriptor(event.gatt)
     }
 
     @Suppress("DEPRECATION")
