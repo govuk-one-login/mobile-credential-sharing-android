@@ -27,21 +27,6 @@ sealed interface ConnectWithHolderDeviceEvent {
     data class RequestedPermission(val hasRequestedPermission: Boolean) :
         ConnectWithHolderDeviceEvent
 
-    data class StartScanning(val uuid: ByteArray) : ConnectWithHolderDeviceEvent {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as StartScanning
-
-            return uuid.contentEquals(other.uuid)
-        }
-
-        override fun hashCode(): Int = uuid.contentHashCode()
-    }
-
-    data object StopScanning : ConnectWithHolderDeviceEvent
-
     data class UpdatePermission
     @OptIn(ExperimentalPermissionsApi::class)
     constructor(
