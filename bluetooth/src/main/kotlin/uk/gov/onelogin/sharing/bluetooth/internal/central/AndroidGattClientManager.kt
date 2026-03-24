@@ -50,6 +50,8 @@ class AndroidGattClientManager(
     private var mtu = MIN_MTU
     private var isSessionEnd = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
+    private var mtuNegotiated = false
+    private var descriptorsComplete = false
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (!permissionChecker.hasBluetoothPermissions()) {
@@ -62,6 +64,9 @@ class AndroidGattClientManager(
         }
 
         this.serviceUuid = serviceUuid
+        mtuNegotiated = false
+        descriptorsComplete = false
+        pendingDescriptorWrites.clear()
         _events.tryEmit(GattClientEvent.Connecting)
 
         bluetoothGatt = try {
@@ -243,24 +248,20 @@ class AndroidGattClientManager(
             return
         }
 
-        // Queue CCCD descriptor writes to inform the remote peripheral.
-        // Without this, iOS never receives the didSubscribeTo callback.
+        logger.debug(logTag, "Notifications enabled, checking CCCD descriptors")
+
+        // Queue CCCD descriptor writes for after MTU negotiation completes.
         listOf(state, serverToClient).forEach { characteristic ->
             characteristic
                 .getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
                 ?.let { pendingDescriptorWrites.addLast(it) }
         }
-
-        writeNextDescriptor(gatt)
     }
 
     @Suppress("DEPRECATION")
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun writeNextDescriptor(gatt: BluetoothGatt) {
-        val descriptor = pendingDescriptorWrites.removeFirstOrNull() ?: run {
-            logger.debug(logTag, "All CCCD descriptors written")
-            return
-        }
+        val descriptor = pendingDescriptorWrites.removeFirstOrNull() ?: return
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             gatt.writeDescriptor(
@@ -282,24 +283,42 @@ class AndroidGattClientManager(
             )
         }
         logger.debug(logTag, "CCCD descriptor written for: ${event.descriptor.characteristic.uuid}")
-        writeNextDescriptor(event.gatt)
+        if (pendingDescriptorWrites.isNotEmpty()) {
+            writeNextDescriptor(event.gatt)
+        } else {
+            logger.debug(logTag, "All CCCD descriptors written")
+            descriptorsComplete = true
+            writeStartStateIfReady()
+        }
     }
 
     @Suppress("DEPRECATION")
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun changedMtu(event: GattEvent.MtuChange) {
-        val gatt = bluetoothGatt.let { bluetoothGatt } ?: return
         logger.debug(logTag, "MTU negotiated: ${event.mtu}")
         mtu = event.mtu
+        mtuNegotiated = true
 
+        if (pendingDescriptorWrites.isNotEmpty()) {
+            writeNextDescriptor(event.gatt)
+        } else {
+            descriptorsComplete = true
+            writeStartStateIfReady()
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun writeStartStateIfReady() {
+        if (!mtuNegotiated || !descriptorsComplete) return
+
+        val gatt = bluetoothGatt ?: return
         val state = gatt
             .getService(serviceUuid)
-            .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
+            ?.getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
             INVALID_SERVICE
         )
 
-        // Set the state value to start
         val startValue = byteArrayOf(MdocState.START.code)
         val writeSuccess = gattWriter.writeCharacteristic(
             gatt = gatt,
