@@ -209,59 +209,38 @@ class VerifierOrchestrator(
         appCoroutineScope.launch { centralBluetoothTransport.stop() }
     }
 
-    @Suppress("ComplexMethod")
     private fun handleCentralBluetoothState(state: CentralBluetoothState) {
-        logger.debug(logTag, "state = $state")
+        logger.debug(logTag, "BLE state = $state")
 
         when (state) {
-            CentralBluetoothState.Idle -> Unit
-
-            CentralBluetoothState.Scanning ->
-                logger.debug(logTag, "BLE - Scanning for peripheral")
-
-            CentralBluetoothState.Connecting ->
-                logger.debug(logTag, "BLE - Connecting to peripheral")
-
-            is CentralBluetoothState.Connected ->
-                logger.debug(logTag, "BLE - Connected: ${state.address}")
-
-            CentralBluetoothState.ConnectionStateStarted ->
-                logger.debug(logTag, "BLE - Connection state started")
-
             is CentralBluetoothState.Disconnected -> {
-                if (state.isSessionEnd) {
-                    logger.debug(
-                        logTag,
-                        "BLE session terminated successfully via GATT End command"
-                    )
-                } else {
-                    logger.debug(logTag, "BLE - Disconnected: ${state.address}")
+                if (state.isSessionEnd) return
 
-                    stopCentralTransport()
+                stopCentralTransport()
 
-                    safeTransitionTo(
-                        VerifierSessionState.Complete.Failed(
-                            SessionError(
-                                "Device ${state.address} disconnected unexpectedly",
-                                BluetoothDisconnectedException(
-                                    "Bluetooth disconnected unexpectedly",
-                                    IllegalStateException(
-                                        "Device ${state.address} disconnected unexpectedly"
-                                    )
+                safeTransitionTo(
+                    VerifierSessionState.Complete.Failed(
+                        SessionError(
+                            "Device ${state.address} disconnected unexpectedly",
+                            BluetoothDisconnectedException(
+                                "Bluetooth disconnected unexpectedly",
+                                IllegalStateException(
+                                    "Device ${state.address} disconnected unexpectedly"
                                 )
                             )
                         )
                     )
-                }
+                )
             }
 
             is CentralBluetoothState.Error ->
                 handleError(state.reason)
 
             is CentralBluetoothState.CentralBluetoothEnded -> {
-                logger.debug(logTag, "BLE - Session ended: ${state.status}")
                 stopCentralTransport()
             }
+
+            else -> Unit
         }
     }
 
