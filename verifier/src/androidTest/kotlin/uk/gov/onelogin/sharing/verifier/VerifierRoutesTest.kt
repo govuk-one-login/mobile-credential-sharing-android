@@ -65,7 +65,7 @@ class VerifierRoutesTest {
     fun validQrCodesNavigateToConnectingWithHolder() = runTest {
         composeTestRule.setContent {
             SetupNavHost {
-                controller.navigate(ConnectWithHolderDeviceRoute(validBarcodeDataResult))
+                controller.navigate(ConnectWithHolderDeviceRoute)
             }
         }
 

@@ -42,9 +42,6 @@ sealed interface ConnectWithHolderDeviceEvent {
 
     data object StopScanning : ConnectWithHolderDeviceEvent
 
-    data class UpdateEngagementData(val base64EncodedEngagement: String) :
-        ConnectWithHolderDeviceEvent
-
     data class UpdatePermission
     @OptIn(ExperimentalPermissionsApi::class)
     constructor(

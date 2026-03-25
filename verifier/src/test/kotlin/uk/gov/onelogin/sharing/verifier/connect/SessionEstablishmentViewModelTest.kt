@@ -49,7 +49,6 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceStateMatc
 import uk.gov.onelogin.sharing.verifier.connect.SessionEstablishmentViewModel.Companion.PREVIOUSLY_HAD_PERMISSIONS_KEY
 import uk.gov.onelogin.sharing.verifier.connect.SessionEstablishmentViewModelMatchers.hasUiState
 import uk.gov.onelogin.sharing.verifier.connect.parameters.BluetoothStatusesToEnabledFlag
-import uk.gov.onelogin.sharing.verifier.connect.parameters.EncodedEngagementToState
 import uk.gov.onelogin.sharing.verifier.connect.parameters.PermissionsToLogMessages
 import uk.gov.onelogin.sharing.verifier.session.FakeVerifierSession
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
@@ -387,24 +386,6 @@ class SessionEstablishmentViewModelTest {
         viewModel = createViewModel(scanner)
 
         fakeBluetoothStateMonitor.emit(status)
-
-        assertThat(
-            viewModel,
-            hasUiState(assertion)
-        )
-    }
-
-    @Test
-    @TestParameters(valuesProvider = EncodedEngagementToState::class)
-    fun `Updating encoded data affects the UI state`(
-        input: String,
-        assertion: Matcher<ConnectWithHolderDeviceState>
-    ) = runTest {
-        viewModel = createViewModel(scanner)
-
-        viewModel.receive(
-            ConnectWithHolderDeviceEvent.UpdateEngagementData(input)
-        )
 
         assertThat(
             viewModel,

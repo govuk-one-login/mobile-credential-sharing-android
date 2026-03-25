@@ -40,7 +40,6 @@ import uk.gov.onelogin.sharing.verifier.R
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun ConnectWithHolderDeviceScreen(
-    base64EncodedEngagement: String,
     modifier: Modifier = Modifier,
     viewModel: SessionEstablishmentViewModel = metroViewModel(),
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
@@ -54,12 +53,6 @@ fun ConnectWithHolderDeviceScreen(
     val latestOnConnectionError by rememberUpdatedState(onConnectionError)
 
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(base64EncodedEngagement) {
-        viewModel.receive(
-            ConnectWithHolderDeviceEvent.UpdateEngagementData(base64EncodedEngagement)
-        )
-    }
 
     LaunchedEffect(Unit) {
         viewModel.navEvents.collect {

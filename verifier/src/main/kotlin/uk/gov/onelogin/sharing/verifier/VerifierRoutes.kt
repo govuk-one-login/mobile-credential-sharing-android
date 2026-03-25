@@ -5,8 +5,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.configureConnectWithHolderDeviceRoute
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute.Companion.navigateToConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.configureConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.navigateToBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
@@ -45,7 +45,7 @@ data object VerifierRoutes {
                     navController.navigateToScannedInvalidQrRoute(uri = it)
                 },
                 onValidBarcode = {
-                    navController.navigateToConnectWithHolderDeviceRoute(uri = it)
+                    navController.navigateToConnectWithHolderDeviceRoute()
                 }
             )
             configureScannedInvalidQrRoute(

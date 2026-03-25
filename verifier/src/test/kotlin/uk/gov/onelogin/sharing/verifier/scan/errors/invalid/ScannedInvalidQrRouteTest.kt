@@ -18,7 +18,6 @@ import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
 
 @RunWith(AndroidJUnit4::class)
 class ScannedInvalidQrRouteTest {
@@ -62,7 +61,7 @@ class ScannedInvalidQrRouteTest {
 
             NavHost(
                 navController = controller,
-                startDestination = ConnectWithHolderDeviceRoute(validBarcodeDataResult)
+                startDestination = ConnectWithHolderDeviceRoute
             ) {
                 composable<ConnectWithHolderDeviceRoute> {}
                 composable<ScannedInvalidQrRoute> {}

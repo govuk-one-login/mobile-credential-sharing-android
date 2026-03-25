@@ -102,7 +102,7 @@ class VerifierScannerLaunchUrlTest {
     private fun render(
         model: VerifierScannerViewModel,
         onInvalidBarcode: (String) -> Unit = {},
-        onValidBarcode: (String) -> Unit = {}
+        onValidBarcode: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             VerifierScanner(
