@@ -20,11 +20,14 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 fun CredentialScanner(orchestrator: Orchestrator.Verifier, modifier: Modifier = Modifier) {
     val factory = remember(orchestrator) {
         createGraphFactory<ScannerGraph.Factory>()
-            .create(orchestrator)
+            .create()
             .metroViewModelFactory
     }
 
     CompositionLocalProvider(LocalMetroViewModelFactory provides factory) {
-        Scanner(modifier = modifier)
+        Scanner(
+            modifier = modifier,
+            onScanResult = {}
+        )
     }
 }

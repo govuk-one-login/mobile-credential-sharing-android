@@ -38,7 +38,7 @@ class ScannedInvalidQrRouteTest {
 
             NavHost(
                 navController = controller,
-                startDestination = ScannedInvalidQrRoute(invalidBarcodeDataResultOne.data)
+                startDestination = ScannedInvalidQrRoute(invalidBarcodeDataResultOne)
             ) {
                 configureScannedInvalidQrRoute(
                     onTryAgainClick = { hasClickedOnTryAgain = true }
@@ -62,13 +62,13 @@ class ScannedInvalidQrRouteTest {
 
             NavHost(
                 navController = controller,
-                startDestination = ConnectWithHolderDeviceRoute(validBarcodeDataResult.data)
+                startDestination = ConnectWithHolderDeviceRoute(validBarcodeDataResult)
             ) {
                 composable<ConnectWithHolderDeviceRoute> {}
                 composable<ScannedInvalidQrRoute> {}
             }
 
-            controller.navigateToScannedInvalidQrRoute(invalidBarcodeDataResultOne.data)
+            controller.navigateToScannedInvalidQrRoute(invalidBarcodeDataResultOne)
         }
 
         testScheduler.advanceUntilIdle()

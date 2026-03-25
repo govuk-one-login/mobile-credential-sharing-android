@@ -38,12 +38,13 @@ class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) 
                         _navigationEvents.emit(
                             VerifierNavigationEvents.NavigateToInvalidScreen(it.reason)
                         )
-                        orchestrator.reset()
                     }
 
-                    is VerifierSessionState.ProcessingEngagement -> _navigationEvents.emit(
-                        VerifierNavigationEvents.NavigateToDiagnostic(it.qrCode)
-                    )
+                    is VerifierSessionState.Connecting -> {
+                        _navigationEvents.emit(
+                            VerifierNavigationEvents.NavigateToDiagnostic(it.qrCode)
+                        )
+                    }
 
                     is VerifierSessionState.ReadyToScan -> {
                         _uiState.emit(VerifierUiState.StartScanner)
@@ -53,5 +54,9 @@ class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) 
                 }
             }
         }
+    }
+
+    fun handleQrCodeScanned(qrCode: String?) {
+        orchestrator.processQrCode(qrCode)
     }
 }

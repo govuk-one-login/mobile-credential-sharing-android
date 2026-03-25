@@ -42,7 +42,11 @@ object VerifierSessionStateMatchers {
     )
 
     fun isProcessingEngagement(): Matcher<VerifierSessionState> = equalTo(
-        VerifierSessionState.ProcessingEngagement("https://this.is.a.test")
+        VerifierSessionState.ProcessingEngagement
+    )
+
+    fun isConnecting(): Matcher<VerifierSessionState> = instanceOf(
+        VerifierSessionState.Connecting::class.java
     )
 
     fun isFailed(): Matcher<VerifierSessionState> = instanceOf(

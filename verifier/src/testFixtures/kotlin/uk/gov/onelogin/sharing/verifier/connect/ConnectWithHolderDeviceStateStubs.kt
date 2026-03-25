@@ -16,7 +16,7 @@ data object ConnectWithHolderDeviceStateStubs {
      */
     val undecodableState = ConnectWithHolderDeviceState(
         isBluetoothEnabled = true,
-        base64EncodedEngagement = undecodeableBarcodeDataResult.data,
+        base64EncodedEngagement = undecodeableBarcodeDataResult,
         hasAllPermissions = false
     )
 
@@ -28,7 +28,7 @@ data object ConnectWithHolderDeviceStateStubs {
      */
     val decodableDeniedState = ConnectWithHolderDeviceState(
         isBluetoothEnabled = true,
-        base64EncodedEngagement = validBarcodeDataResult.data,
+        base64EncodedEngagement = validBarcodeDataResult,
         hasAllPermissions = false
     )
 
@@ -40,7 +40,7 @@ data object ConnectWithHolderDeviceStateStubs {
      */
     val decodableGrantedState = ConnectWithHolderDeviceState(
         isBluetoothEnabled = true,
-        base64EncodedEngagement = validBarcodeDataResult.data,
+        base64EncodedEngagement = validBarcodeDataResult,
         hasAllPermissions = true
     )
 
@@ -52,12 +52,12 @@ data object ConnectWithHolderDeviceStateStubs {
      */
     val validWithCorrectBluetoothSetup = ConnectWithHolderDeviceState(
         isBluetoothEnabled = true,
-        base64EncodedEngagement = validBarcodeDataResult.data,
+        base64EncodedEngagement = validBarcodeDataResult,
         hasAllPermissions = true
     )
 
     val genericErrorState = ConnectWithHolderDeviceState(
-        base64EncodedEngagement = validBarcodeDataResult.data,
+        base64EncodedEngagement = validBarcodeDataResult,
         hasAllPermissions = true,
         isBluetoothEnabled = true
     )

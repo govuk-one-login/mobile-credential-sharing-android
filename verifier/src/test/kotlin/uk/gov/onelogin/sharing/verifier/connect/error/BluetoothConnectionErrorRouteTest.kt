@@ -38,7 +38,7 @@ class BluetoothConnectionErrorRouteTest {
                 NavHost(
                     navController = controller,
                     startDestination = ConnectWithHolderDeviceRoute(
-                        validBarcodeDataResult.data
+                        validBarcodeDataResult
                     )
                 ) {
                     composable<ConnectWithHolderDeviceRoute> {}

@@ -13,9 +13,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
+import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -35,15 +37,16 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
-@ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 @SingleIn(AppScope::class)
+@ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,
     private val sessionFactory: SessionFactory<VerifierSession>,
     @Suppress("UnusedPrivateProperty")
     private val verifierConfig: VerifierConfig,
-    @param:ApplicationScope private val appCoroutineScope: CoroutineScope
+    @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
+    private val barcodeParser: QrParser
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -126,30 +129,43 @@ class VerifierOrchestrator(
             .let { safeTransitionTo(state = it, logMessage = START_ORCHESTRATION_ERROR) }
     }
 
-    override fun processQrCode(qrCode: BarcodeDataResult) {
-        when (qrCode) {
-            is BarcodeDataResult.Valid -> safeTransitionTo(
-                VerifierSessionState.ProcessingEngagement(
-                    qrCode.data
-                )
-            )
+    override fun processQrCode(qrCode: String?) {
+        val result = barcodeParser.parse(qrCode)
 
-            is BarcodeDataResult.Invalid -> {
+        if (result is QrScanResult.NotFound) {
+            return
+        }
+
+        safeTransitionTo(
+            VerifierSessionState.ProcessingEngagement
+        )
+
+        when (result) {
+            is QrScanResult.Invalid -> {
                 safeTransitionTo(
                     VerifierSessionState.Complete.Failed(
                         SessionError(
-                            message = qrCode.data,
+                            message = result.rawValue,
                             exception = IllegalArgumentException("Qr Code is an unsupported format")
                         )
                     )
                 )
             }
 
-            else -> Unit
+            QrScanResult.NotFound -> Unit
+
+            is QrScanResult.Success -> {
+                decodeDeviceEngagement(result.value, logger)
+                safeTransitionTo(
+                    VerifierSessionState.Connecting(result.value)
+                )
+            }
         }
     }
 
     override fun cancel() {
+        if (sessionFlow.value.isComplete()) return
+
         safeTransitionTo(
             state = VerifierSessionState.Complete.Cancelled,
             exceptionWrapper = ::OrchestratorCannotCancelException

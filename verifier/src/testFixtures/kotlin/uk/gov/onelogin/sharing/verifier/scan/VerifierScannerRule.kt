@@ -118,7 +118,7 @@ class VerifierScannerRule(
             VerifierScanner(
                 onInvalidBarcode = onInvalidBarcode,
                 onValidBarcode = onValidBarcode
-            ) {}
+            )
         }
     }
 }

@@ -272,6 +272,7 @@ class SessionEstablishmentViewModel(
         super.onCleared()
     }
 
+    // Will need to move this to the orchestrator - decodeDeviceEngagement
     private fun updateEngagementData(base64EncodedEngagement: String) {
         updateState {
             it.copy(

@@ -16,11 +16,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
+import uk.gov.onelogin.sharing.core.data.UriTestData.mdocExampleUriOne
+import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
@@ -34,9 +35,9 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerif
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.UncancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isConnecting
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
-import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isProcessingEngagement
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 
 @RunWith(TestParameterInjector::class)
@@ -82,7 +83,8 @@ class VerifierOrchestratorTest {
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
             verifierConfig = verifierConfigStub,
-            appCoroutineScope = scope
+            appCoroutineScope = scope,
+            barcodeParser = FakeQrParser()
         )
     }
 
@@ -214,20 +216,28 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `processQrCode with valid barcode transitions to ProcessingEngagement`() = runTest {
+    fun `processQrCode with valid barcode transitions to Connecting`() = runTest {
         backgroundScope.launch {
             orchestrator.verifierSessionState.collect {}
         }
-        orchestrator.start()
-        val data = exampleUriOne
-        val barcodeResult = BarcodeDataResult.Valid(data)
 
-        orchestrator.processQrCode(barcodeResult)
+        val data = mdocExampleUriOne
+
+        orchestrator.start()
+
+        orchestrator.processQrCode(data)
 
         assertThat(
             orchestrator.verifierSessionState.value,
-            isProcessingEngagement()
+            isConnecting()
         )
+
+        val currentState =
+            orchestrator.verifierSessionState.value as VerifierSessionState.Connecting
+        assertEquals("testEngagement", currentState.qrCode)
+
+        assert("$TRANSITION_SUCCESSFUL_TO_STATE ProcessingEngagement" in logger)
+        assert("$TRANSITION_SUCCESSFUL_TO_STATE $currentState" in logger)
     }
 
     @Test
@@ -237,13 +247,61 @@ class VerifierOrchestratorTest {
         }
         orchestrator.start()
         val data = "https://"
-        val barcodeResult = BarcodeDataResult.Invalid(data)
 
-        orchestrator.processQrCode(barcodeResult)
+        orchestrator.processQrCode(data)
 
         assertThat(
             orchestrator.verifierSessionState.value,
             isFailed()
+        )
+
+        val state = orchestrator.verifierSessionState.value as VerifierSessionState.Complete.Failed
+        assertEquals("https://", state.error.message)
+        assertEquals("Qr Code is an unsupported format", state.error.exception?.message)
+    }
+
+    @Test
+    fun `processQrCode with null barcode does nothing`() = runTest {
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+        orchestrator.start()
+
+        orchestrator.processQrCode(null)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isReadyToScan()
+        )
+    }
+
+    @Test
+    fun `processQrCode with empty barcode does nothing`() = runTest {
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+        orchestrator.start()
+
+        orchestrator.processQrCode("")
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isReadyToScan()
+        )
+    }
+
+    @Test
+    fun `processQrCode does nothing when session is in an invalid state for scanning`() = runTest {
+        initialStates[0] = VerifierSessionState.Verifying
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+
+        orchestrator.processQrCode(mdocExampleUriOne)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            equalTo(VerifierSessionState.Verifying)
         )
     }
 }

@@ -14,10 +14,10 @@ class EncodedEngagementToState : TestParametersValuesProvider() {
         listOf(
             Triple(
                 "Valid data also updates Device Engagement DTO",
-                BarcodeDataResultStubs.validBarcodeDataResult.data,
+                BarcodeDataResultStubs.validBarcodeDataResult,
                 Matchers.allOf(
                     ConnectWithHolderDeviceStateMatchers.hasBase64EncodedEngagement(
-                        BarcodeDataResultStubs.validBarcodeDataResult.data
+                        BarcodeDataResultStubs.validBarcodeDataResult
                     ),
                     ConnectWithHolderDeviceStateMatchers.hasDeviceEngagementDto(
                         DecoderStub.validDeviceEngagementDto
@@ -26,10 +26,10 @@ class EncodedEngagementToState : TestParametersValuesProvider() {
             ),
             Triple(
                 "Invalid data keeps Device Engagement DTO as null",
-                BarcodeDataResultStubs.undecodeableBarcodeDataResult.data,
+                BarcodeDataResultStubs.undecodeableBarcodeDataResult,
                 CoreMatchers.allOf(
                     ConnectWithHolderDeviceStateMatchers.hasBase64EncodedEngagement(
-                        BarcodeDataResultStubs.undecodeableBarcodeDataResult.data
+                        BarcodeDataResultStubs.undecodeableBarcodeDataResult
                     ),
                     ConnectWithHolderDeviceStateMatchers.hasDeviceEngagementDto(
                         CoreMatchers.nullValue(

@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
+import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
@@ -53,7 +54,9 @@ class HolderWelcomeScreenRule(
             logger = SystemLogger(),
             dispatcher = Dispatchers.Main,
             savedStateHandle = SavedStateHandle(),
-            orchestrator = FakeOrchestrator()
+            orchestrator = FakeOrchestrator(
+                parser = FakeQrParser()
+            )
         )
     }
 

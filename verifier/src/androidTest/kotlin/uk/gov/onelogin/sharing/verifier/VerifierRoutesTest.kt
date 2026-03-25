@@ -50,7 +50,7 @@ class VerifierRoutesTest {
     fun invalidQrNavigatesBackToScannerWhenTryingAgain() = runTest {
         composeTestRule.setContent {
             SetupNavHost {
-                controller.navigate(ScannedInvalidQrRoute(invalidBarcodeDataResultOne.data))
+                controller.navigate(ScannedInvalidQrRoute(invalidBarcodeDataResultOne))
             }
         }
 
@@ -65,7 +65,7 @@ class VerifierRoutesTest {
     fun validQrCodesNavigateToConnectingWithHolder() = runTest {
         composeTestRule.setContent {
             SetupNavHost {
-                controller.navigate(ConnectWithHolderDeviceRoute(validBarcodeDataResult.data))
+                controller.navigate(ConnectWithHolderDeviceRoute(validBarcodeDataResult))
             }
         }
 
