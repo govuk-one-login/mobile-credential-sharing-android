@@ -1,0 +1,18 @@
+package uk.gov.onelogin.sharing.holder.consent
+
+import androidx.lifecycle.ViewModel
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import kotlinx.coroutines.flow.StateFlow
+import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+
+@Inject
+@ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
+@ViewModelKey(HolderConsentViewModel::class)
+class HolderConsentViewModel(orchestrator: Orchestrator.Holder) : ViewModel() {
+    val holderSessionState: StateFlow<HolderSessionState> = orchestrator.holderSessionState
+}
