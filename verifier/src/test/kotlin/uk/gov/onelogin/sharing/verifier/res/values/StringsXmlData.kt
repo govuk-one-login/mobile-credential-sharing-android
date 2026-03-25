@@ -21,10 +21,6 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Generic error",
         resourceId = R.string.generic_error
     ),
-    DECODED_DEVICE_ENGAGEMENT_DATA(
-        expected = "Decoded device engagement data:",
-        resourceId = R.string.decoded_device_engagement_data
-    ),
     DID_NOT_SCAN_DIGITAL_CREDENTIAL_QR(
         expected = "The scanned QR code didn’t contain a digital credential. " +
             "Please check the correct QR code to scan, then try again.",
@@ -41,14 +37,6 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     OPEN_APP_PERMISSIONS(
         expected = "Open app permissions",
         resourceId = R.string.open_app_permissions
-    ),
-    SEARCHING_FOR_UUIDS(
-        expected = "Searching for UUIDs:",
-        resourceId = R.string.searching_for_uuids
-    ),
-    SUCCESSFULLY_SCANNED_QR_CODE_DATA(
-        expected = "Successfully scanned QR code data:",
-        resourceId = R.string.successfully_scanned_qr_code_data
     ),
     TRY_AGAIN(
         expected = "Try again",

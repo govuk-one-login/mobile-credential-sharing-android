@@ -17,24 +17,8 @@ enum class ConnectWithHolderDeviceDeferredStringsXmlData(
         defersTo = bluetoothR.string.bluetooth_device_state,
         resourceId = R.string.connect_with_holder_bluetooth_state
     ),
-    CONNECT_WITH_HOLDER_DECODED_DATA(
-        defersTo = R.string.decoded_device_engagement_data,
-        resourceId = R.string.connect_with_holder_decoded_data
-    ),
-    CONNECT_WITH_HOLDER_DECODE_ERROR(
-        defersTo = R.string.generic_error,
-        resourceId = R.string.connect_with_holder_error_decode
-    ),
-    CONNECT_WITH_HOLDER_HEADING(
-        defersTo = R.string.successfully_scanned_qr_code_data,
-        resourceId = R.string.connect_with_holder_heading
-    ),
     CONNECT_WITH_HOLDER_PERMISSION_STATE(
         defersTo = bluetoothR.string.bluetooth_permission_state,
         resourceId = R.string.connect_with_holder_permission_state
-    ),
-    CONNECT_WITH_HOLDER_SEARCHING_FOR_UUIDS(
-        defersTo = R.string.searching_for_uuids,
-        resourceId = R.string.connect_with_holder_searching_for_uuids
     )
 }

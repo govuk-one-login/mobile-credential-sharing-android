@@ -16,24 +16,16 @@ import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactoryKey
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
-import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.core.Receiver
 import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.VerifierUiScope
@@ -41,8 +33,6 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.StartScanning
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.StopScanning
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.UpdatePermission
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
 import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
@@ -52,8 +42,6 @@ import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 class SessionEstablishmentViewModel(
     private val bluetoothAdapterProvider: BluetoothAdapterProvider,
     verifierSessionFactory: VerifierSessionFactory,
-    private val scanner: BluetoothScanner,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val logger: Logger,
     private val bluetoothStatusMonitor: BluetoothStateMonitor,
     @Assisted private val savedStateHandle: SavedStateHandle
@@ -70,7 +58,6 @@ class SessionEstablishmentViewModel(
     )
     val navEvents: SharedFlow<ConnectWithHolderDeviceNavEvent> = _navEvents
 
-    private var scannerJob: Job? = null
     val mdocVerifierSession = verifierSessionFactory.create(viewModelScope)
 
     @AssistedFactory
@@ -192,8 +179,6 @@ class SessionEstablishmentViewModel(
     /**
      * @see connect
      * @see updateHasRequestPermissions
-     * @see scanForDevice
-     * @see stopScanning
      * @see updatePermissions
      */
     @OptIn(ExperimentalPermissionsApi::class)
@@ -204,65 +189,13 @@ class SessionEstablishmentViewModel(
         is RequestedPermission ->
             updateHasRequestPermissions(event.hasRequestedPermission)
 
-        is StartScanning ->
-            scanForDevice(event.uuid)
-
         is UpdatePermission ->
             updatePermissions(event.state)
-
-        StopScanning ->
-            stopScanning()
-    }
-
-    private fun scanForDevice(uuid: ByteArray) {
-        scannerJob = viewModelScope.launch(dispatcher) {
-            try {
-                withTimeout(SCAN_PERIOD) {
-                    when (val scanResult = scanner.scan(uuid).first()) {
-                        is ScanEvent.DeviceFound -> {
-                            logger.debug(
-                                logTag,
-                                "Bluetooth device found: ${scanResult.device.address}"
-                            )
-
-                            receive(
-                                ConnectToDevice(
-                                    scanResult.device,
-                                    uuid
-                                )
-                            )
-                        }
-
-                        is ScanEvent.ScanFailed -> {
-                            _navEvents.tryEmit(
-                                ConnectWithHolderDeviceNavEvent.NavigateToError(
-                                    ConnectWithHolderDeviceError.GenericError
-                                )
-                            )
-                            logger.debug(logTag, "Scan failed: ${scanResult.failure}")
-                        }
-                    }
-                }
-            } catch (exception: TimeoutCancellationException) {
-                logger.debug(
-                    logTag,
-                    "$exception"
-                )
-            }
-        }
-    }
-
-    private fun stopScanning() {
-        if (scannerJob?.isActive == true) {
-            logger.debug(logTag, "Terminating session")
-            scannerJob?.cancel()
-        }
     }
 
     override fun onCleared() {
-        logger.debug(logTag, "VM cleared, stopping scanner")
+        logger.debug(logTag, "VM cleared")
         mdocVerifierSession.stop()
-        receive(StopScanning)
         super.onCleared()
     }
 
@@ -312,7 +245,6 @@ class SessionEstablishmentViewModel(
     }
 
     companion object {
-        const val SCAN_PERIOD = 15_000L
         const val PREVIOUSLY_HAD_PERMISSIONS_KEY = "previouslyHadPermissions"
     }
 }

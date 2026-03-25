@@ -18,7 +18,6 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider.Companion.disabledBluetoothAdapter
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider.Companion.enabledBluetoothAdapter
-import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
@@ -43,7 +42,6 @@ class ConnectWithHolderDeviceScreenTest {
     ): SessionEstablishmentViewModel = SessionEstablishmentViewModel(
         bluetoothAdapterProvider = bluetoothAdapterProvider,
         verifierSessionFactory = { mdocVerifierSession },
-        scanner = fakeBluetoothScanner,
         logger = logger,
         bluetoothStatusMonitor = FakeBluetoothStateMonitor(),
         savedStateHandle = SavedStateHandle()
@@ -60,7 +58,6 @@ class ConnectWithHolderDeviceScreenTest {
     }
 
     private val mdocVerifierSession = FakeVerifierSession()
-    private val fakeBluetoothScanner = FakeAndroidBluetoothScanner()
 
     @Test
     fun `opens system Bluetooth alert when the Bluetooth is disabled`() = runTest {

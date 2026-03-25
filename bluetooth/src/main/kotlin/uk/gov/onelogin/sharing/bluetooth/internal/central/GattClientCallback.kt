@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 
 internal class GattClientCallback(private val gattEventEmitter: GattClientEventEmitter) :
     BluetoothGattCallback() {
@@ -60,6 +61,20 @@ internal class GattClientCallback(private val gattEventEmitter: GattClientEventE
                 gatt = gatt,
                 characteristic = characteristic,
                 value = value
+            )
+        )
+    }
+
+    override fun onDescriptorWrite(
+        gatt: BluetoothGatt,
+        descriptor: BluetoothGattDescriptor,
+        status: Int
+    ) {
+        gattEventEmitter.emit(
+            GattEvent.DescriptorWrite(
+                gatt = gatt,
+                descriptor = descriptor,
+                status = status
             )
         )
     }
