@@ -29,8 +29,13 @@ sealed class HolderSessionState : Completable {
      *
      * @param missingPrerequisites The list of [Prerequisite]s required to perform the journey in
      * it's entirety.
+     * @param onComplete The behaviour to call after a User action. Usually, this means performing
+     * preflight checks again. Defaults to `{}`, meaning no additional behaviour occurs.
      */
-    data class Preflight(val missingPrerequisites: Map<Prerequisite, PrerequisiteResponse>) :
+    data class Preflight(
+        val missingPrerequisites: Map<Prerequisite, PrerequisiteResponse>,
+        val onComplete: () -> Unit = {},
+    ) :
         HolderSessionState()
 
     /**

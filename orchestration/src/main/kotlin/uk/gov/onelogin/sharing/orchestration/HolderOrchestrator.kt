@@ -100,6 +100,10 @@ class HolderOrchestrator(
             return
         }
 
+        performPreflightChecks()
+    }
+
+    private fun performPreflightChecks() {
         try {
             prerequisiteGate.checkPrerequisites(
                 Prerequisite.BLUETOOTH
@@ -148,9 +152,10 @@ class HolderOrchestrator(
             is PrerequisiteResponse.Unauthorized ->
                 safeTransitionTo(
                     HolderSessionState.Preflight(
-                        mapOf(
+                        missingPrerequisites = mapOf(
                             Prerequisite.BLUETOOTH to prerequisiteCheck
-                        )
+                        ),
+                        onComplete = ::performPreflightChecks,
                     )
                 )
         }

@@ -95,6 +95,10 @@ class VerifierOrchestrator(
             return
         }
 
+        performPreflightChecks()
+    }
+
+    private fun performPreflightChecks() {
         try {
             val prerequisites = listOf(
                 Prerequisite.BLUETOOTH,
@@ -136,7 +140,12 @@ class VerifierOrchestrator(
         responseMap.filterValues {
             PrerequisiteResponse.MeetsPrerequisites != it
         }
-            .let(VerifierSessionState::Preflight)
+            .let { missingPrerequisites ->
+                VerifierSessionState.Preflight(
+                    missingPrerequisites = missingPrerequisites,
+                    onComplete = ::performPreflightChecks
+                )
+            }
             .let { safeTransitionTo(state = it, logMessage = START_ORCHESTRATION_ERROR) }
     }
 
