@@ -29,7 +29,7 @@ class FakeOrchestrator(
         when (val result = parser.parse(qrCode)) {
             is QrScanResult.Success -> {
                 initialVerifierState.value =
-                    VerifierSessionState.Connecting(result.value)
+                    VerifierSessionState.Connecting
             }
 
             is QrScanResult.Invalid -> {

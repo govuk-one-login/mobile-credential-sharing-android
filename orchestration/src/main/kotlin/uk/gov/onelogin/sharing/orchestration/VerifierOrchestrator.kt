@@ -53,7 +53,7 @@ class VerifierOrchestrator(
     private val verifierConfig: VerifierConfig,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val barcodeParser: QrParser,
-    private val centralBluetoothTransport: CentralBluetoothTransport,
+    private val centralBluetoothTransport: CentralBluetoothTransport
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -159,7 +159,7 @@ class VerifierOrchestrator(
                 val serviceUuid = engagementData?.getFirstPeripheralServerModeUuid()
 
                 if (serviceUuid != null) {
-                    safeTransitionTo(VerifierSessionState.Connecting(result.value))
+                    safeTransitionTo(VerifierSessionState.Connecting)
                     centralBluetoothTransport.scanAndConnect(serviceUuid)
                 } else {
                     logger.error(logTag, "No service UUID found in engagement data")

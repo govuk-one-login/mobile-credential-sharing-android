@@ -19,8 +19,7 @@ fun VerifierScanner(
     viewModel: VerifierScannerViewModel = metroViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onInvalidBarcode: (String) -> Unit = {},
-    onValidBarcode: (String) -> Unit = {},
-    content: @Composable () -> Unit
+    onValidBarcode: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

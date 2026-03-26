@@ -11,5 +11,6 @@ data class ConnectWithHolderDeviceState(
     val hasAllPermissions: Boolean = false,
     val hasRequestedPermissions: Boolean = false,
     val connectionStateStarted: Boolean = false,
-    val previouslyHadPermissions: Boolean = false
+    val previouslyHadPermissions: Boolean = false,
+    val isLoading: Boolean = false
 )

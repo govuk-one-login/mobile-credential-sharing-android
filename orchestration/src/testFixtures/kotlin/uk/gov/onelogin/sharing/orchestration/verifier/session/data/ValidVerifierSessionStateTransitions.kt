@@ -59,7 +59,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         private val processingEngagementTransitions = listOf(
             "User cancels whilst processing engagement" to userCancellation,
             "Cannot successfully process engagement" to userJourneyFailure,
-            "Begins validating the shared digital credential" to Connecting("")
+            "Begins validating the shared digital credential" to Connecting
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -75,7 +75,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                Connecting(""),
+                Connecting,
                 transition
             )
         }

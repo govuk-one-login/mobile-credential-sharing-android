@@ -30,7 +30,7 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
     companion object {
         private val notStartedTransitions = listOf(
             NotStarted,
-            Connecting(""),
+            Connecting,
             ProcessingEngagement,
             Verifying,
             successStub,
@@ -43,7 +43,7 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         private val preflightTransitions = listOf(
             NotStarted,
             preflightEmptyPermissions,
-            Connecting(""),
+            Connecting,
             Verifying,
             successStub
         ).map {
@@ -53,7 +53,7 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             NotStarted,
             preflightEmptyPermissions,
             ReadyToScan,
-            Connecting(""),
+            Connecting,
             Verifying,
             successStub
         ).map {
@@ -63,11 +63,11 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             NotStarted,
             preflightEmptyPermissions,
             ReadyToScan,
-            Connecting(""),
+            Connecting,
             ProcessingEngagement,
             successStub
         ).map {
-            Connecting("") to it
+            Connecting to it
         }
         private val processingEngagementTransitions = listOf(
             NotStarted,
@@ -82,7 +82,7 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             NotStarted,
             preflightEmptyPermissions,
             ReadyToScan,
-            Connecting(""),
+            Connecting,
             ProcessingEngagement
         ).map {
             Verifying to it

@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -20,11 +21,11 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransp
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.data.UriTestData.mdocExampleUriOne
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
@@ -39,9 +40,9 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.data.Uncancellable
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isConnecting
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
-import kotlin.test.assertEquals
 
 @RunWith(TestParameterInjector::class)
 class VerifierOrchestratorTest {
@@ -227,7 +228,7 @@ class VerifierOrchestratorTest {
             orchestrator.verifierSessionState.collect {}
         }
 
-        val data = mdocExampleUriOne
+        val data = VALID_MDOC_URI
 
         orchestrator.start()
 
@@ -240,7 +241,6 @@ class VerifierOrchestratorTest {
 
         val currentState =
             orchestrator.verifierSessionState.value as VerifierSessionState.Connecting
-        assertEquals("testEngagement", currentState.qrCode)
 
         assert("$TRANSITION_SUCCESSFUL_TO_STATE ProcessingEngagement" in logger)
         assert("$TRANSITION_SUCCESSFUL_TO_STATE $currentState" in logger)
@@ -303,7 +303,7 @@ class VerifierOrchestratorTest {
             orchestrator.verifierSessionState.collect {}
         }
 
-        orchestrator.processQrCode(mdocExampleUriOne)
+        orchestrator.processQrCode(VALID_MDOC_URI)
 
         assertThat(
             orchestrator.verifierSessionState.value,
@@ -313,7 +313,7 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `bluetooth disconnection transitions to Failed`() = runTest {
-        initialStates[0] = VerifierSessionState.Connecting("")
+        initialStates[0] = VerifierSessionState.Connecting
         backgroundScope.launch {
             orchestrator.verifierSessionState.collect {}
         }
@@ -331,7 +331,7 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `bluetooth session end disconnection does not transition to Failed`() = runTest {
-        initialStates[0] = VerifierSessionState.Connecting("")
+        initialStates[0] = VerifierSessionState.Connecting
         backgroundScope.launch {
             orchestrator.verifierSessionState.collect {}
         }
@@ -348,7 +348,7 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `bluetooth error transitions to Failed and stops transport`() = runTest {
-        initialStates[0] = VerifierSessionState.Connecting("")
+        initialStates[0] = VerifierSessionState.Connecting
         backgroundScope.launch {
             orchestrator.verifierSessionState.collect {}
         }
@@ -366,7 +366,7 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `cancel stops bluetooth transport`() = runTest {
-        initialStates[0] = VerifierSessionState.Connecting("")
+        initialStates[0] = VerifierSessionState.Connecting
         backgroundScope.launch {
             orchestrator.verifierSessionState.collect {}
         }
