@@ -62,7 +62,7 @@ class VerifierScannerLaunchUrlTest {
 
             waitForIdle()
 
-            model.handleQrCodeScanned(
+            model.orchestrator.processQrCode(
                 DecoderStub.VALID_MDOC_URI
             )
 

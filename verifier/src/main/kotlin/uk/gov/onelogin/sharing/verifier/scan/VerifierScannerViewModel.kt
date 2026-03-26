@@ -20,7 +20,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 @ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())
 @Inject
 @ViewModelKey(VerifierScannerViewModel::class)
-class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) : ViewModel() {
+class VerifierScannerViewModel(val orchestrator: Orchestrator.Verifier) : ViewModel() {
 
     private val _navigationEvents = MutableSharedFlow<VerifierNavigationEvents>(
         extraBufferCapacity = 1
@@ -54,9 +54,5 @@ class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) 
                 }
             }
         }
-    }
-
-    fun handleQrCodeScanned(qrCode: String?) {
-        orchestrator.processQrCode(qrCode)
     }
 }

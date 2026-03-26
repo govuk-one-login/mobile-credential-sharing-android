@@ -218,6 +218,8 @@ class VerifierOrchestrator(
     }
 
     private fun handleCentralBluetoothState(state: CentralBluetoothState) {
+        if (sessionFlow.value.isComplete()) return
+
         logger.debug(logTag, "BLE state = $state")
 
         when (state) {

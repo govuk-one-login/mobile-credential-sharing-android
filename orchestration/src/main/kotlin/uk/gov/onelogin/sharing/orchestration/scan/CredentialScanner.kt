@@ -27,7 +27,9 @@ fun CredentialScanner(orchestrator: Orchestrator.Verifier, modifier: Modifier = 
     CompositionLocalProvider(LocalMetroViewModelFactory provides factory) {
         Scanner(
             modifier = modifier,
-            onScanResult = {}
+            onScanResult = {
+                orchestrator.processQrCode(it)
+            }
         )
     }
 }

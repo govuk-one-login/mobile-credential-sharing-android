@@ -5,8 +5,6 @@ import android.util.Log
 import com.google.mlkit.vision.barcode.common.Barcode
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 
-const val QR_CODE_SCHEME = "mdoc:"
-
 /**
  * [BarcodeScanResult.Callback] implementation that defers to the [onQrDetected] lambda when
  * finding an applicable [Uri].
