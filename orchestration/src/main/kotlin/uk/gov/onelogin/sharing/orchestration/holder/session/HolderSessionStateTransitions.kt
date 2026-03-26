@@ -41,7 +41,8 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
         Preflight::class,
         ReadyToPresent::class
     ),
-    Preflight::class to singleton(
+    Preflight::class to setOf(
+        Preflight::class,
         ReadyToPresent::class
     ) + fullErrorHandling,
     ReadyToPresent::class to singleton(

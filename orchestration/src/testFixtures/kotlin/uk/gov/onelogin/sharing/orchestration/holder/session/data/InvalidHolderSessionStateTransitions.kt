@@ -36,7 +36,6 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
 
         private val preflightTransitions = listOf(
             HolderSessionState.NotStarted,
-            HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.PresentingEngagement(""),
             HolderSessionState.ProcessingEstablishment,
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),

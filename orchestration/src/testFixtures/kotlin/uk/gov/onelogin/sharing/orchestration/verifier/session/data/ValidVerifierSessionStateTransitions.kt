@@ -35,6 +35,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             )
         }
         private val preflightTransitions = listOf(
+            "User still isn't meeting prerequisites" to preflightEmptyPermissions,
             "User cancels during permission request" to userCancellation,
             "User permanently denies requested permissions" to userJourneyFailure,
             "User allows all requested permissions" to ReadyToScan

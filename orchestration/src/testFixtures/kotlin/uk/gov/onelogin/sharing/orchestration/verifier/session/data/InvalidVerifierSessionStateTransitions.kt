@@ -42,7 +42,6 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
 
         private val preflightTransitions = listOf(
             NotStarted,
-            preflightEmptyPermissions,
             Connecting,
             Verifying,
             successStub
