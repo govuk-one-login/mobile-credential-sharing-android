@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
@@ -96,10 +95,10 @@ class HolderConsentScreenTest {
             composeTestRule.assertTitleIsDisplayed()
             composeTestRule.assertAcceptButtonIsDisplayed()
             composeTestRule.assertDenyButtonIsDisplayed()
-            composeTestRule.assertElementIsDisplayed("family_name")
-            composeTestRule.assertElementIsDisplayed("document_number")
-            composeTestRule.assertElementIsDisplayed("portrait")
-            assertTrue { composeTestRule.assertAllElementsDisplayed("false") }
+            composeTestRule.assertElementsDisplayed("family_name")
+            composeTestRule.assertElementsDisplayed("document_number")
+            composeTestRule.assertElementsDisplayed("portrait")
+            composeTestRule.assertElementsDisplayed("false")
         }
 
     @Test
@@ -112,9 +111,8 @@ class HolderConsentScreenTest {
             composeTestRule.setContent { Render() }
 
             composeTestRule.assertTitleIsDisplayed()
-            composeTestRule.assertElementIsDisplayed("family_name")
-            assertTrue { composeTestRule.assertAllElementsDisplayed("true") }
-            assertTrue { composeTestRule.assertAllElementsDisplayed("false") }
+            composeTestRule.assertElementsDisplayed("family_name — Intent to retain: true")
+            composeTestRule.assertElementsDisplayed("portrait — Intent to retain: false")
         }
 
     @Test
@@ -125,7 +123,7 @@ class HolderConsentScreenTest {
 
         composeTestRule.setContent { Render() }
 
-        composeTestRule.assertElementIsDisplayed("org.iso.18013.5.1.mDL")
+        composeTestRule.assertElementsDisplayed("org.iso.18013.5.1.mDL")
     }
 
     @Test
@@ -136,7 +134,7 @@ class HolderConsentScreenTest {
 
         composeTestRule.setContent { Render() }
 
-        assertTrue { composeTestRule.assertAllElementsDisplayed("org.iso.18013.5.1") }
+        composeTestRule.assertElementsDisplayed("org.iso.18013.5.1")
     }
 
     @Test

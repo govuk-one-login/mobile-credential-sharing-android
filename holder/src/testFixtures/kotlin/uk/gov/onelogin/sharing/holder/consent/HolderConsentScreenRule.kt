@@ -28,13 +28,8 @@ class HolderConsentScreenRule(
         resources.getString(R.string.holder_consent_deny)
     ).assertIsDisplayed()
 
-    fun assertElementIsDisplayed(text: String) = onNodeWithText(
-        text,
-        substring = true
-    ).assertIsDisplayed()
-
-    fun assertAllElementsDisplayed(text: String) = onAllNodesWithText(
-        text,
-        substring = true
-    ).fetchSemanticsNodes().isNotEmpty()
+    fun assertElementsDisplayed(text: String) {
+        val nodes = onAllNodesWithText(text, substring = true).fetchSemanticsNodes()
+        assert(nodes.isNotEmpty()) { "No nodes found containing '$text'" }
+    }
 }
