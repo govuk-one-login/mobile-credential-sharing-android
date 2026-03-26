@@ -71,8 +71,8 @@ class SessionEstablishmentViewModel(
                     ImplementationDetail(
                         ticket = "NA",
                         description = "Need to replace the disconnect scenarios. State from " +
-                                "orchestrator to be observed instead of the now removed " +
-                                "mdocVerifierSessionState"
+                            "orchestrator to be observed instead of the now removed " +
+                            "mdocVerifierSessionState"
                     )
                 ]
             )
