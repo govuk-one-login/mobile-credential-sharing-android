@@ -12,7 +12,7 @@ object DeviceRequestStub {
                 ItemsRequest(
                     docType = "MDL",
                     nameSpaces = mapOf(
-                        "rg.iso.18013.5.1" to mapOf(
+                        "org.iso.18013.5.1" to mapOf(
                             "age_over_18" to false
                         )
                     )
