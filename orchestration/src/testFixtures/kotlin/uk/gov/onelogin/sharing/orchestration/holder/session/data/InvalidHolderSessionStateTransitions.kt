@@ -28,8 +28,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub,
-            HolderSessionStateStubs.userCancellation,
-            HolderSessionStateStubs.userJourneyFailure
+            HolderSessionStateStubs.userCancellation
         ).map {
             HolderSessionState.NotStarted to it
         }

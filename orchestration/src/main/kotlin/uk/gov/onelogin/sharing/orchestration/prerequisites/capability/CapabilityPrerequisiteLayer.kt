@@ -7,9 +7,9 @@ import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.bluetoothManager
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
 
 @ContributesBinding(AppScope::class)
@@ -18,7 +18,7 @@ class CapabilityPrerequisiteLayer(
     private val factory: ProcessCameraProviderFactory,
     private val logger: Logger
 ) : PrerequisiteGateLayer.Capability {
-    override fun checkCapability(prerequisite: Prerequisite): PrerequisiteResponse.Incapable? =
+    override fun checkCapability(prerequisite: Prerequisite): MissingPrerequisiteReason.Incapable? =
         when (prerequisite) {
             Prerequisite.BLUETOOTH -> handleBluetoothCapability()
             Prerequisite.CAMERA -> handleCameraCapability()
@@ -30,15 +30,15 @@ class CapabilityPrerequisiteLayer(
             )
         }
 
-    private fun handleBluetoothCapability(): PrerequisiteResponse.Incapable? = if (
+    private fun handleBluetoothCapability(): MissingPrerequisiteReason.Incapable? = if (
         context.bluetoothManager?.adapter == null
     ) {
-        PrerequisiteResponse.Incapable(IncapableReason.MissingHardware)
+        MissingPrerequisiteReason.Incapable(IncapableReason.MissingHardware)
     } else {
         null
     }
 
-    private fun handleCameraCapability(): PrerequisiteResponse.Incapable? = runCatching {
+    private fun handleCameraCapability(): MissingPrerequisiteReason.Incapable? = runCatching {
         factory.create()
     }.mapCatching { provider ->
         provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
@@ -47,9 +47,9 @@ class CapabilityPrerequisiteLayer(
             if (condition) {
                 null
             } else {
-                PrerequisiteResponse.Incapable(IncapableReason.MissingHardware)
+                MissingPrerequisiteReason.Incapable(IncapableReason.MissingHardware)
             }
         },
-        onFailure = { PrerequisiteResponse.Incapable(IncapableReason.CannotCheckCamera) }
+        onFailure = { MissingPrerequisiteReason.Incapable(IncapableReason.CannotCheckCamera) }
     )
 }

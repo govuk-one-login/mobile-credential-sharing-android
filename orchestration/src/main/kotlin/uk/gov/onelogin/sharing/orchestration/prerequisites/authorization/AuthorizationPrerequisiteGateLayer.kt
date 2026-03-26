@@ -8,9 +8,9 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 @ContributesBinding(
     AppScope::class,
@@ -24,7 +24,7 @@ class AuthorizationPrerequisiteGateLayer(
 
     override fun checkAuthorization(
         prerequisite: Prerequisite
-    ): PrerequisiteResponse.Unauthorized? = calculatePermissions(prerequisite)
+    ): MissingPrerequisiteReason.Unauthorized? = calculatePermissions(prerequisite)
         .let(::checkPermissions)
         .let(::handlePermissionResponse)
         .also {
@@ -43,10 +43,10 @@ class AuthorizationPrerequisiteGateLayer(
 
     private fun handlePermissionResponse(
         result: PermissionChecker.Response
-    ): PrerequisiteResponse.Unauthorized? = when (result) {
+    ): MissingPrerequisiteReason.Unauthorized? = when (result) {
         PermissionChecker.Response.Passed -> null
 
-        is PermissionChecker.Response.Missing -> PrerequisiteResponse.Unauthorized(
+        is PermissionChecker.Response.Missing -> MissingPrerequisiteReason.Unauthorized(
             UnauthorizedReason.MissingPermissions(
                 result.missingPermissions.toSet()
             )

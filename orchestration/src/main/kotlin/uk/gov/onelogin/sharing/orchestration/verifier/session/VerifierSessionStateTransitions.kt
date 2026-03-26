@@ -38,7 +38,8 @@ private val fullErrorHandling: Set<KClass<out VerifierSessionState>> = setOf(
 val validVerifierTransitions: VerifierSessionStateTransitions = mapOf(
     NotStarted::class to setOf(
         Preflight::class,
-        ReadyToScan::class
+        ReadyToScan::class,
+        Failed::class
     ),
     Preflight::class to setOf(
         Preflight::class,

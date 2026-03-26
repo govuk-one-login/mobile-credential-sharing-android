@@ -4,10 +4,11 @@ import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.hasKey
+import org.hamcrest.Matchers
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasPrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
 /**
@@ -22,12 +23,13 @@ object HolderSessionStateMatchers {
         vararg prerequisite: Prerequisite
     ): Matcher<HolderSessionState> = hasMissingPreflightPrerequisites(
         prerequisite
-            .map(::hasKey)
+            .map(::hasPrerequisite)
+            .map(Matchers::contains)
             .let(::allOf)
     )
 
     fun hasMissingPreflightPrerequisites(
-        matcher: Matcher<in Map<Prerequisite, PrerequisiteResponse>>
+        matcher: Matcher<in List<MissingPrerequisite>>
     ): Matcher<HolderSessionState> = HasHolderPreflightPrerequisites(matcher)
 
     fun isCancelled(): Matcher<in HolderSessionState> = equalTo(

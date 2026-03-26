@@ -2,8 +2,9 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
@@ -33,10 +34,9 @@ sealed class HolderSessionState : Completable {
      * preflight checks again. Defaults to `{}`, meaning no additional behaviour occurs.
      */
     data class Preflight(
-        val missingPrerequisites: Map<Prerequisite, PrerequisiteResponse>,
-        val onComplete: () -> Unit = {},
-    ) :
-        HolderSessionState()
+        val missingPrerequisites: List<MissingPrerequisite>,
+        val onComplete: () -> Unit = {}
+    ) : HolderSessionState()
 
     /**
      * The User's completed the [Preflight] validations, so the device is ready to

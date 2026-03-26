@@ -31,11 +31,11 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSe
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate.Companion.meetsPrerequisites
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
@@ -105,7 +105,7 @@ class VerifierOrchestrator(
                 Prerequisite.CAMERA
             )
 
-            val prerequisiteResponse = prerequisiteGate.checkPrerequisites(prerequisites).also {
+            val prerequisiteResponse = prerequisiteGate.evaluatePrerequisites(prerequisites).also {
                 logger.debug(
                     logTag,
                     completedPrerequisiteChecks(
@@ -115,10 +115,8 @@ class VerifierOrchestrator(
                 )
             }
 
-            if (prerequisiteResponse.meetsPrerequisites()) {
-                safeTransitionTo(
-                    VerifierSessionState.ReadyToScan
-                )
+            if (prerequisiteResponse.isEmpty()) {
+                safeTransitionTo(VerifierSessionState.ReadyToScan)
             } else {
                 handleStartPrerequisiteFailure(prerequisiteResponse)
             }
@@ -134,18 +132,22 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun handleStartPrerequisiteFailure(
-        responseMap: Map<Prerequisite, PrerequisiteResponse>
-    ) {
-        responseMap.filterValues {
-            PrerequisiteResponse.MeetsPrerequisites != it
-        }
-            .let { missingPrerequisites ->
-                VerifierSessionState.Preflight(
-                    missingPrerequisites = missingPrerequisites,
-                    onComplete = ::performPreflightChecks
+    private fun handleStartPrerequisiteFailure(missingPrerequisites: List<MissingPrerequisite>) {
+        if (missingPrerequisites.any { !it.isRecoverable }) {
+            VerifierSessionState.Complete.Failed(
+                SessionError(
+                    "Device cannot perform journey",
+                    SessionErrorReason.UnrecoverablePrerequisite(
+                        missingPrerequisites.filter { !it.isRecoverable }
+                    )
                 )
-            }
+            )
+        } else {
+            VerifierSessionState.Preflight(
+                missingPrerequisites = missingPrerequisites,
+                onComplete = ::performPreflightChecks
+            )
+        }
             .let { safeTransitionTo(state = it, logMessage = START_ORCHESTRATION_ERROR) }
     }
 

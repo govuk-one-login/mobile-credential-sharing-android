@@ -21,8 +21,8 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasNotReadyReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReasonMatchers.cameraAlreadyInUse
@@ -51,11 +51,11 @@ class ReadinessPrerequisiteLayerTest {
         )
     }
 
-    private val cameraAssertions: Map<CameraState.Type, Matcher<in PrerequisiteResponse>> =
+    private val cameraAssertions: Map<CameraState.Type, Matcher<in MissingPrerequisiteReason>> =
         CameraState.Type.entries.associateWith {
             hasNotReadyReason(cameraAlreadyInUse())
         }.toMutableMap().also {
-            it[CameraState.Type.CLOSED] = nullValue(PrerequisiteResponse::class.java)
+            it[CameraState.Type.CLOSED] = nullValue(MissingPrerequisiteReason::class.java)
         }
 
     @Before
@@ -146,7 +146,7 @@ class ReadinessPrerequisiteLayerTest {
 
     private fun performJourney(
         prerequisite: Prerequisite,
-        matcher: Matcher<in PrerequisiteResponse>
+        matcher: Matcher<in MissingPrerequisiteReason>
     ) {
         assertThat(
             readiness.checkReadiness(prerequisite),

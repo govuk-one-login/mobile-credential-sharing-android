@@ -20,14 +20,14 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 @Composable
 internal fun HolderPrerequisitesScreen(
     modifier: Modifier = Modifier,
     viewModel: HolderPrerequisitesViewModel = metroViewModel(),
-    onHandlePreflight: (Map<Prerequisite, PrerequisiteResponse>) -> Unit = {},
+    onHandlePreflight: (Map<Prerequisite, MissingPrerequisiteReason>) -> Unit = {},
     onPresentEngagement: () -> Unit = {}
 ) {
     val currentOnHandlePreflight by rememberUpdatedState(onHandlePreflight)

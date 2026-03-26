@@ -5,7 +5,7 @@ import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 
-class HasCurrentSession<Session : Any>(private val matcher: Matcher<in Session>) :
+internal class HasCurrentSession<Session : Any>(private val matcher: Matcher<in Session>) :
     TypeSafeMatcher<FakeSessionFactory<Session>>() {
     override fun describeTo(description: Description?) {
         matcher.describeTo(description)
