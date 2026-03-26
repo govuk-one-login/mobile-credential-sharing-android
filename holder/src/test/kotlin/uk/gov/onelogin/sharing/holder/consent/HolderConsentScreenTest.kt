@@ -1,6 +1,13 @@
 package uk.gov.onelogin.sharing.holder.consent
 
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.testing.TestNavHostController
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -142,6 +149,46 @@ class HolderConsentScreenTest {
         composeTestRule.assertAcceptButtonIsDisplayed()
         composeTestRule.assertDenyButtonIsDisplayed()
     }
+
+    @Test
+    fun `Back button is disabled and screen remains visible`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+            }
+
+            lateinit var navController: TestNavHostController
+
+            composeTestRule.setContent {
+                val context = LocalContext.current
+                navController = TestNavHostController(context).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                }
+
+                NavHost(
+                    navController = navController,
+                    startDestination = "previous"
+                ) {
+                    composable("previous") {}
+                    composable("consent") {
+                        HolderConsentScreen(viewModel = viewModel)
+                    }
+                }
+            }
+
+            composeTestRule.runOnUiThread {
+                navController.navigate("consent")
+            }
+            composeTestRule.waitForIdle()
+
+            composeTestRule.runOnUiThread {
+                val activity = navController.context as ComponentActivity
+                activity.onBackPressedDispatcher.onBackPressed()
+            }
+            composeTestRule.waitForIdle()
+
+            assertEquals("consent", navController.currentDestination?.route)
+        }
 
     @Composable
     private fun Render() {
