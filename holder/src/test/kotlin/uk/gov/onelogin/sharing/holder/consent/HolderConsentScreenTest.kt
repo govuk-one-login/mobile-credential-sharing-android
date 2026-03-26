@@ -16,9 +16,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -42,46 +40,26 @@ class HolderConsentScreenTest {
     }
 
     // DCMAW-16715 AC1: all IntentToRetain flags are false
-    private val deviceRequestWithoutRetain = DeviceRequest(
-        version = "1.0",
-        docRequests = listOf(
-            DocRequest(
-                ItemsRequest(
-                    docType = "org.iso.18013.5.1.mDL",
-                    nameSpaces = mapOf(
-                        "org.iso.18013.5.1" to mapOf(
-                            "family_name" to false,
-                            "document_number" to false,
-                            "driving_privileges" to false,
-                            "issue_date" to false,
-                            "expiry_date" to false,
-                            "portrait" to false
-                        )
-                    )
-                )
-            )
+    private val deviceRequestWithoutRetain = DeviceRequestStub.deviceRequest(
+        mapOf(
+            "family_name" to false,
+            "document_number" to false,
+            "driving_privileges" to false,
+            "issue_date" to false,
+            "expiry_date" to false,
+            "portrait" to false
         )
     )
 
     // DCMAW-16715 AC2: all IntentToRetain flags are true except portrait which is false
-    private val deviceRequestWithRetain = DeviceRequest(
-        version = "1.0",
-        docRequests = listOf(
-            DocRequest(
-                ItemsRequest(
-                    docType = "org.iso.18013.5.1.mDL",
-                    nameSpaces = mapOf(
-                        "org.iso.18013.5.1" to mapOf(
-                            "family_name" to true,
-                            "document_number" to true,
-                            "driving_privileges" to true,
-                            "issue_date" to true,
-                            "expiry_date" to true,
-                            "portrait" to false
-                        )
-                    )
-                )
-            )
+    private val deviceRequestWithRetain = DeviceRequestStub.deviceRequest(
+        mapOf(
+            "family_name" to true,
+            "document_number" to true,
+            "driving_privileges" to true,
+            "issue_date" to true,
+            "expiry_date" to true,
+            "portrait" to false
         )
     )
 
