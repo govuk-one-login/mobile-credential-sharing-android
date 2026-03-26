@@ -41,6 +41,7 @@ class HolderConsentScreenTest {
         HolderConsentViewModel(orchestrator = orchestrator)
     }
 
+    // DCMAW-16715 AC1: all IntentToRetain flags are false
     private val deviceRequestWithoutRetain = DeviceRequest(
         version = "1.0",
         docRequests = listOf(
@@ -62,6 +63,7 @@ class HolderConsentScreenTest {
         )
     )
 
+    // DCMAW-16715 AC2: all IntentToRetain flags are true except portrait which is false
     private val deviceRequestWithRetain = DeviceRequest(
         version = "1.0",
         docRequests = listOf(
