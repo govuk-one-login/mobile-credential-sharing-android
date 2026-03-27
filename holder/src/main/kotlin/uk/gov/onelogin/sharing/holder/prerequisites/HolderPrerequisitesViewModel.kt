@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
-@ViewModelKey(HolderPrerequisitesViewModel::class)
+@ViewModelKey
 class HolderPrerequisitesViewModel(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
     orchestrator: Orchestrator.Holder

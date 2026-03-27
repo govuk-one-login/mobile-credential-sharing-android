@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 
 @Inject
-@ViewModelKey(VerifyCredentialViewModel::class)
+@ViewModelKey
 @ContributesIntoMap(VerifierUiScope::class)
 @OptIn(ExperimentalPermissionsApi::class)
 class VerifyCredentialViewModel(
