@@ -10,9 +10,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
  * Default implementation of [VerifierCryptoService].
  */
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
-class VerifierCryptoServiceImpl(
-    private val logger: Logger
-) : VerifierCryptoService {
+class VerifierCryptoServiceImpl(private val logger: Logger) : VerifierCryptoService {
 
     override fun processEngagement(qrCodeData: String) {
         logger.debug(logTag, "processEngagement called — not yet implemented")
