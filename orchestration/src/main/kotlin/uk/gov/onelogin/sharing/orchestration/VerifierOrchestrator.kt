@@ -22,6 +22,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
+import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -53,7 +54,9 @@ class VerifierOrchestrator(
     private val verifierConfig: VerifierConfig,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val barcodeParser: QrParser,
-    private val centralBluetoothTransport: CentralBluetoothTransport
+    private val centralBluetoothTransport: CentralBluetoothTransport,
+    @Suppress("UnusedPrivateProperty")
+    private val verifierCryptoService: VerifierCryptoService
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
