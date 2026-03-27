@@ -9,14 +9,20 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
  */
 fun interface VerifierCryptoService {
     /**
-     * Processes the scanned Device Engagement data.
+     * Processes the scanned Device Engagement data and constructs the
+     * SessionTranscriptBytes.
      *
-     * Decodes and validates the engagement structure, generates the Verifier's
-     * ephemeral key pair, and derives the Session Transcript. The results are
-     * stored in the session's crypto context.
+     * Assembles the SessionTranscript array as defined in ISO 18013-5 section 12.6.1:
+     * `[DeviceEngagementBytes, EReaderKeyBytes, Handover]` where Handover is null
+     * for QR engagement. The array is then CBOR encoded and wrapped in CBOR Tag 24.
      *
      * @param qrCodeData The base64url-encoded Device Engagement string
      *   (with the `mdoc:` prefix already stripped).
+     * @param eReaderKeyTagged The Verifier's ephemeral public key in COSE key format,
+     *   wrapped in CBOR Tag 24.
+     * @return The SessionTranscriptBytes (CBOR Tag 24 wrapped SessionTranscript).
+     * @throws IllegalArgumentException if [qrCodeData] is blank or [eReaderKeyTagged]
+     *   is not a valid Tag 24 structure.
      */
-    fun processEngagement(qrCodeData: String)
+    fun processEngagement(qrCodeData: String, eReaderKeyTagged: ByteArray): ByteArray
 }
