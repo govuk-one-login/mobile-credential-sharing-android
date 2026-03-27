@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 
 @ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())
 @Inject
-@ViewModelKey(VerifierScannerViewModel::class)
+@ViewModelKey
 class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) : ViewModel() {
 
     private val _navigationEvents = MutableSharedFlow<VerifierNavigationEvents>(

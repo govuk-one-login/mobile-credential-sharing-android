@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.core.VerifierUiScope
 
 @ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())
 @Inject
-@ViewModelKey(ScannerViewModel::class)
+@ViewModelKey
 class ScannerViewModel(state: ScannerState.Complete, private val observer: ScanController) :
     ViewModel(),
     ScannerState.Complete by state {
