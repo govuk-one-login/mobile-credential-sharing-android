@@ -17,8 +17,8 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.allPermissionsGranted
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedCameraGranted
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -52,7 +52,7 @@ class VerifyCredentialScreenTest {
         composeTestRule.setContent {
             VerifyCredentialScreen(
                 viewModel = viewModel,
-                multiplePermissionsState = bluetoothPermissionsGranted
+                multiplePermissionsState = allPermissionsGranted
             )
         }
 
@@ -67,14 +67,14 @@ class VerifyCredentialScreenTest {
         composeTestRule.setContent {
             VerifyCredentialScreen(
                 viewModel = viewModel,
-                multiplePermissionsState = bluetoothPermissionsDenied
+                multiplePermissionsState = bluetoothPermissionsDeniedCameraGranted
             )
         }
 
         composeTestRule.waitForIdle()
 
         composeTestRule
-            .onNodeWithText("Enable bluetooth permissions")
+            .onNodeWithText("Please enable bluetooth permissions to continue")
             .assertIsDisplayed()
     }
 
@@ -85,7 +85,7 @@ class VerifyCredentialScreenTest {
         composeTestRule.setContent {
             VerifyCredentialScreen(
                 viewModel = viewModel,
-                multiplePermissionsState = bluetoothPermissionsGranted,
+                multiplePermissionsState = allPermissionsGranted,
                 navigateToScanner = { navigated = true }
             )
         }
@@ -101,7 +101,7 @@ class VerifyCredentialScreenTest {
         var launched = false
 
         val fakeDenied = FakeMultiplePermissionsState(
-            permissions = bluetoothPermissionsDenied.permissions,
+            permissions = bluetoothPermissionsDeniedCameraGranted.permissions,
             onLaunchPermission = {
                 launched = true
                 viewModel.onPermissionRequestLaunched()

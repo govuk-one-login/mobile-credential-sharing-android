@@ -1,10 +1,12 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
+import android.Manifest
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.isGranted
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -33,7 +35,8 @@ class VerifyCredentialViewModel(
     private val orchestrator: Orchestrator.Verifier
 ) : ViewModel() {
     private val initialState = VerifyCredentialUiState()
-    private var allGranted: Boolean? = null
+    private var cameraGranted: Boolean? = null
+    private var bluetoothGranted: Boolean? = null
     private var bluetoothStatus: BluetoothStatus? = null
     private var hasNavigated = false
 
@@ -73,7 +76,12 @@ class VerifyCredentialViewModel(
 
     fun onPermissionsChanged(permissionsState: MultiplePermissionsState) {
         logPermissions(permissionsState)
-        allGranted = permissionsState.allPermissionsGranted
+        cameraGranted = permissionsState.permissions
+            .find { it.permission == Manifest.permission.CAMERA }
+            ?.status?.isGranted
+        bluetoothGranted = permissionsState.permissions
+            .filter { it.permission != Manifest.permission.CAMERA }
+            .all { it.status.isGranted }
         checkPreconditions()
     }
 
@@ -96,20 +104,24 @@ class VerifyCredentialViewModel(
     }
 
     private fun checkPreconditions() {
-        val granted = allGranted
-        val bluetooth = bluetoothStatus
+        val camera = cameraGranted
+        val bluetooth = bluetoothGranted
+        val bluetoothState = bluetoothStatus
 
         val newState = when {
-            granted == null ->
+            camera == null || bluetooth == null ->
                 VerifyCredentialPreconditionsState.Idle
 
-            !granted ->
+            !camera ->
+                VerifyCredentialPreconditionsState.CameraAccessDenied
+
+            !bluetooth ->
                 VerifyCredentialPreconditionsState.BluetoothAccessDenied
 
-            bluetooth == null ->
+            bluetoothState == null ->
                 VerifyCredentialPreconditionsState.Idle
 
-            bluetooth == BluetoothStatus.ON ->
+            bluetoothState == BluetoothStatus.ON ->
                 VerifyCredentialPreconditionsState.Met
 
             else ->
