@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.cameraService.scan.Scanner
-import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
+import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
 
 /**
  * Serialization object used as a navigation route. Maps to the [VerifierScanner] composable UI.
@@ -53,7 +53,7 @@ object VerifierScanRoute {
     }
 
     fun NavController.navigateToVerifierScanFromRoot() = navigate(VerifierScanRoute) {
-        popUpTo<VerifyCredentialRoute> {
+        popUpTo<VerifierPrerequisitesRoute> {
             inclusive = true
         }
     }

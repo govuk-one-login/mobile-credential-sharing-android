@@ -21,8 +21,7 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScannerRule
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
-import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs.validBarcodeDataResult
-import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
+import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
 
 @RunWith(AndroidJUnit4::class)
 class VerifierRoutesTest {
@@ -86,8 +85,8 @@ class VerifierRoutesTest {
             navController = controller,
             startDestination = VerifierRoutes
         ) {
-            navigation<VerifierRoutes>(startDestination = VerifyCredentialRoute) {
-                composable<VerifyCredentialRoute> {}
+            navigation<VerifierRoutes>(startDestination = VerifierPrerequisitesRoute) {
+                composable<VerifierPrerequisitesRoute> {}
                 composable<VerifierScanRoute> {}
                 composable<ScannedInvalidQrRoute> {}
                 composable<ConnectWithHolderDeviceRoute> {}

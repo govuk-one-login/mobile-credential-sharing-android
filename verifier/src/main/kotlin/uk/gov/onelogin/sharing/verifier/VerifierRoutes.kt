@@ -12,8 +12,8 @@ import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRo
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
-import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute
-import uk.gov.onelogin.sharing.verifier.verify.VerifyCredentialRoute.configureVerifyCredentialRoute
+import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesNavigationExt.configureVerifierPrerequisitesRoute
+import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
 
 /**
  * Serializable data object that acts as a navigation route for the Wallet sharing verifier module.
@@ -36,10 +36,8 @@ data object VerifierRoutes {
      * @see configureScannedInvalidQrRoute
      */
     fun NavGraphBuilder.configureVerifierRoutes(navController: NavHostController) {
-        navigation<VerifierRoutes>(startDestination = VerifyCredentialRoute) {
-            configureVerifyCredentialRoute(
-                navController
-            )
+        navigation<VerifierRoutes>(startDestination = VerifierPrerequisitesRoute) {
+            configureVerifierPrerequisitesRoute(navController)
             configureVerifierScannerRoute(
                 onInvalidBarcode = {
                     navController.navigateToScannedInvalidQrRoute(uri = it)
@@ -50,7 +48,7 @@ data object VerifierRoutes {
             )
             configureScannedInvalidQrRoute(
                 onTryAgainClick = {
-                    navController.navigate(VerifyCredentialRoute) {
+                    navController.navigate(VerifierPrerequisitesRoute) {
                         popUpTo<VerifierRoutes> {
                             inclusive = true
                         }
