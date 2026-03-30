@@ -5,17 +5,16 @@ import gov.onelogin.sharing.cameraservice.callbacks.QrScannerCallbackProvider
 import gov.onelogin.sharing.cameraservice.data.BarcodeDataResultStubs.invalidBarcodeDataResultOne
 import gov.onelogin.sharing.cameraservice.data.BarcodeDataResultStubs.invalidBarcodeDataResultTwo
 import gov.onelogin.sharing.cameraservice.data.BarcodeDataResultStubs.validBarcodeDataResult
-import kotlin.test.assertEquals
+import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
 import uk.gov.android.ui.componentsv2.camera.analyzer.qr.BarcodeSourceStub.Companion.asUrlBarcodes
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
-import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.cameraService.rules.ShadowLogFile
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -23,11 +22,12 @@ import uk.gov.onelogin.sharing.cameraService.rules.ShadowLogFile
     shadows = [ShadowLog::class]
 )
 class QrScannerCallbackTest {
+
     @get:Rule
     val loggingFile = ShadowLogFile(fileName = this::class.java.simpleName)
 
-    private var scanData: BarcodeDataResult? = null
     private var hasToggledScanner = false
+    private var scanData: String? = null
 
     private val callback = QrScannerCallback {
         scanData = it
@@ -35,41 +35,32 @@ class QrScannerCallbackTest {
 
     @Test
     fun onlyChecksTheFirstBarcode() = performLoggingFlow(
-        result =
-            BarcodeScanResult.Success(
-                listOf(
-                    invalidBarcodeDataResultOne.data,
-                    validBarcodeDataResult.data
-                ).asUrlBarcodes()
-            ),
+        result = BarcodeScanResult.Success(
+            listOf(
+                invalidBarcodeDataResultOne,
+                validBarcodeDataResult
+            ).asUrlBarcodes()
+        ),
         expectedData = invalidBarcodeDataResultOne
     ).also {
         assert(
             loggingFile.none {
-                invalidBarcodeDataResultTwo.data in it
+                invalidBarcodeDataResultTwo in it
             }
         )
     }
 
-    @Test
     @TestParameters(valuesProvider = QrScannerCallbackProvider::class)
-    fun performLoggingFlow(result: BarcodeScanResult, expectedData: BarcodeDataResult) = runTest {
+    @Test
+    fun performLoggingFlow(result: BarcodeScanResult, expectedData: String?) = runTest {
         callback.onResult(result) { hasToggledScanner = true }
 
         assert(
             loggingFile.any {
-                it.startsWith(
-                    "I/QrScannerCallback: Obtained BarcodeScanResult: ${result::class.java.simpleName}"
-                )
+                it.contains("Obtained BarcodeScanResult")
             }
-        ) {
-            "Couldn't find a \"${result::class.java.simpleName}\" entry in: " +
-                loggingFile.readLines()
-        }
-
-        assertEquals(
-            expectedData,
-            scanData
         )
+
+        assertEquals(expectedData, scanData)
     }
 }

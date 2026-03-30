@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
@@ -19,16 +18,22 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
-import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
+import uk.gov.onelogin.sharing.core.data.UriTestData.mdocExampleUriOne
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
+import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
+import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
+import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
@@ -37,6 +42,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerif
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.UncancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isConnecting
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
@@ -67,10 +73,7 @@ class VerifierOrchestratorTest {
         )
     }
 
-    private var gateResponses: MutableMap<Prerequisite, PrerequisiteResponse> =
-        Prerequisite.entries.associateWith {
-            PrerequisiteResponse.MeetsPrerequisites
-        }.toMutableMap()
+    private var gateResponses: MutableList<MissingPrerequisite> = mutableListOf()
 
     private val gate by lazy {
         StubPrerequisiteGate(gateResponses)
@@ -87,7 +90,8 @@ class VerifierOrchestratorTest {
             sessionFactory = sessionFactory,
             verifierConfig = verifierConfigStub,
             centralBluetoothTransport = centralBluetoothTransport,
-            appCoroutineScope = scope
+            appCoroutineScope = scope,
+            barcodeParser = FakeQrParser()
         )
     }
 
@@ -117,8 +121,13 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
-        gateResponses[Prerequisite.BLUETOOTH] = PrerequisiteResponse.Incapable(
-            IncapableReason.MissingHardware
+        gateResponses.add(
+            MissingPrerequisite(
+                Prerequisite.BLUETOOTH,
+                MissingPrerequisiteReason.NotReady(
+                    NotReadyReason.BluetoothTurnedOff
+                )
+            )
         )
 
         backgroundScope.launch {
@@ -131,9 +140,33 @@ class VerifierOrchestratorTest {
 
         assertThat(
             orchestrator.verifierSessionState.value,
-            allOf(
-                hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH),
-                not(hasMissingPreflightPrerequisites(Prerequisite.CAMERA))
+            hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+        )
+    }
+
+    @Test
+    fun `Incapable prerequisite check responses transition to failed`() = runTest {
+        gateResponses.add(
+            MissingPrerequisite(
+                Prerequisite.BLUETOOTH,
+                MissingPrerequisiteReason.Incapable(
+                    IncapableReason.MissingHardware
+                )
+            )
+        )
+
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+        orchestrator.start()
+
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(
+                hasReason(isUnrecoverablePrerequisite())
             )
         )
     }
@@ -219,19 +252,27 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `processQrCode with valid barcode but no engagement UUID fails`() = runTest {
+    fun `processQrCode with valid barcode transitions to Connecting`() = runTest {
         backgroundScope.launch {
             orchestrator.verifierSessionState.collect {}
         }
-        orchestrator.start()
-        val barcodeResult = BarcodeDataResult.Valid(exampleUriOne)
 
-        orchestrator.processQrCode(barcodeResult)
+        val data = VALID_MDOC_URI
+
+        orchestrator.start()
+
+        orchestrator.processQrCode(data)
 
         assertThat(
             orchestrator.verifierSessionState.value,
-            isFailed()
+            isConnecting()
         )
+
+        val currentState =
+            orchestrator.verifierSessionState.value as VerifierSessionState.Connecting
+
+        assert("$TRANSITION_SUCCESSFUL_TO_STATE ProcessingEngagement" in logger)
+        assert("$TRANSITION_SUCCESSFUL_TO_STATE $currentState" in logger)
     }
 
     @Test
@@ -241,13 +282,57 @@ class VerifierOrchestratorTest {
         }
         orchestrator.start()
         val data = "https://"
-        val barcodeResult = BarcodeDataResult.Invalid(data)
 
-        orchestrator.processQrCode(barcodeResult)
+        orchestrator.processQrCode(data)
 
         assertThat(
             orchestrator.verifierSessionState.value,
             isFailed()
+        )
+    }
+
+    @Test
+    fun `processQrCode with null barcode does nothing`() = runTest {
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+        orchestrator.start()
+
+        orchestrator.processQrCode(null)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isReadyToScan()
+        )
+    }
+
+    @Test
+    fun `processQrCode with empty barcode does nothing`() = runTest {
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+        orchestrator.start()
+
+        orchestrator.processQrCode("")
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isReadyToScan()
+        )
+    }
+
+    @Test
+    fun `processQrCode does nothing when session is in an invalid state for scanning`() = runTest {
+        initialStates[0] = VerifierSessionState.Verifying
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            equalTo(VerifierSessionState.Verifying)
         )
     }
 

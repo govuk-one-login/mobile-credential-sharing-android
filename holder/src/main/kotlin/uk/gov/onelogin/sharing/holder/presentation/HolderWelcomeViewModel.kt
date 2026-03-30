@@ -48,6 +48,8 @@ class HolderWelcomeViewModel(
     private val shouldShowErrorScreen = MutableStateFlow(false)
     private val errorMessage = MutableStateFlow("")
 
+    val holderSessionState: StateFlow<HolderSessionState> = orchestrator.holderSessionState
+
     val uiState: StateFlow<HolderWelcomeUiState> = combine(
         orchestrator.holderSessionState,
         shouldShowErrorScreen,

@@ -5,17 +5,24 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.Do
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 object DeviceRequestStub {
-    val deviceRequestStub = DeviceRequest(
+    private const val MDL_DOC_TYPE = "org.iso.18013.5.1.mDL"
+    private const val MDL_NAMESPACE = "org.iso.18013.5.1"
+
+    val deviceRequestStub = deviceRequest(
+        mapOf("age_over_18" to false)
+    )
+
+    fun deviceRequest(
+        elements: Map<String, Boolean>,
+        docType: String = MDL_DOC_TYPE,
+        nameSpace: String = MDL_NAMESPACE
+    ) = DeviceRequest(
         version = "1.0",
         docRequests = listOf(
             DocRequest(
                 ItemsRequest(
-                    docType = "MDL",
-                    nameSpaces = mapOf(
-                        "rg.iso.18013.5.1" to mapOf(
-                            "age_over_18" to false
-                        )
-                    )
+                    docType = docType,
+                    nameSpaces = mapOf(nameSpace to elements)
                 )
             )
         )

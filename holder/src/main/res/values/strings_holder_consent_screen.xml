@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_consent_title">Confirm the credential attributes to share</string>
+    <string name="holder_consent_accept">Accept</string>
+    <string name="holder_consent_deny">Deny</string>
+    <string name="holder_consent_intent_to_retain">Intent to retain: %1$s</string>
+</resources>

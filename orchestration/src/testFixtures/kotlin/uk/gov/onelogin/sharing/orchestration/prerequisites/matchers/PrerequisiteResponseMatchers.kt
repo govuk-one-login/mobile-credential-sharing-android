@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.matchers
 
 import org.hamcrest.Matcher
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReasonMatchers.isMissingPermissions
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
@@ -11,19 +11,20 @@ object PrerequisiteResponseMatchers {
 
     fun hasUnauthorizedPermissions(
         matcher: Matcher<in Iterable<String>>
-    ): Matcher<PrerequisiteResponse> = hasUnauthorizedReason(
+    ): Matcher<MissingPrerequisiteReason> = hasUnauthorizedReason(
         isMissingPermissions(
             matcher
         )
     )
 
-    fun hasIncapableReason(matcher: Matcher<in IncapableReason>): Matcher<PrerequisiteResponse> =
-        HasIncapableReason(matcher)
+    fun hasIncapableReason(
+        matcher: Matcher<in IncapableReason>
+    ): Matcher<MissingPrerequisiteReason> = HasIncapableReason(matcher)
 
-    fun hasNotReadyReason(matcher: Matcher<in NotReadyReason>): Matcher<PrerequisiteResponse> =
+    fun hasNotReadyReason(matcher: Matcher<in NotReadyReason>): Matcher<MissingPrerequisiteReason> =
         HasNotReadyReason(matcher)
 
     fun hasUnauthorizedReason(
         matcher: Matcher<in UnauthorizedReason>
-    ): Matcher<PrerequisiteResponse> = HasUnauthorizedReason(matcher)
+    ): Matcher<MissingPrerequisiteReason> = HasUnauthorizedReason(matcher)
 }

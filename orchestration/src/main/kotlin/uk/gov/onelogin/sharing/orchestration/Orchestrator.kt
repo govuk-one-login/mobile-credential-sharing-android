@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.orchestration
 import android.Manifest
 import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
-import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
@@ -36,7 +35,7 @@ interface Orchestrator : Resettable {
     interface Verifier : Orchestrator {
         val verifierSessionState: StateFlow<VerifierSessionState>
 
-        fun processQrCode(qrCode: BarcodeDataResult)
+        fun processQrCode(qrCode: String?)
 
         companion object {
             const val JOURNEY_NAME: String = "verifier"

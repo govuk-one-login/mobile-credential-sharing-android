@@ -11,7 +11,7 @@ androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/
 com-google-test-parameter-injector = "1.21" # https://github.com/google/TestParameterInjector
 com-google-guava-android = "33.5.0-android" # https://github.com/google/guava/releases
 compose-lint-rules = "0.5.6" # https://github.com/mrmans0n/compose-rules/releases/
-composeBom = "2026.03.00" # https://developer.android.com/jetpack/androidx/releases/compose
+composeBom = "2026.03.01" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.18.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
 detekt = "1.23.8" # https://github.com/detekt/detekt/releases
 espressoCore = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#3.7.0
@@ -25,7 +25,7 @@ kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.coll
 kotlinx-bytestring = "0.9.0"
 ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
-metro = "0.11.4"  # https://github.com/ZacSweers/Metro/releases
+metro = "0.12.0"  # https://github.com/ZacSweers/Metro/releases
 mockk = "1.14.9" # https://github.com/mockk/mockk/releases
 robolectric = "4.16.1" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.59.0" # https://github.com/takahirom/roborazzi/releases
@@ -33,7 +33,7 @@ sonarqube = "7.1.0.6387" # https://github.com/SonarSource/sonar-scanner-gradle/r
 spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "0.39.9" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
-uk-gov-ui = "15.0.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
+uk-gov-ui = "15.1.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 [libraries]

@@ -22,7 +22,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
     companion object {
         private val notStartedTransitions = listOf(
             "Holder session begins initialising" to preflightEmptyPermissions,
-            "Holder session meets all prerequisites" to HolderSessionState.ReadyToPresent
+            "Holder session meets all prerequisites" to HolderSessionState.ReadyToPresent,
+            "Incapable device fails prerequisite checks" to userJourneyFailure
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -31,6 +32,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             )
         }
         private val preflightTransitions = listOf(
+            "User still isn't meeting prerequisites" to preflightEmptyPermissions,
             "User cancels during permission request" to userCancellation,
             "User permanently denies requested permissions" to userJourneyFailure,
             "User allows all requested permissions" to HolderSessionState.ReadyToPresent

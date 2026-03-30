@@ -14,6 +14,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub
+import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.verifier.scan.state.data.BarcodeDataResultStubs
 
@@ -45,7 +47,9 @@ class VerifierScannerLaunchUrlTest {
 
     @Test
     fun validUrlsDeferToOnValidBarcodeLambda() = runTest {
-        val fakeOrchestrator = FakeOrchestrator()
+        val fakeOrchestrator = FakeOrchestrator(
+            parser = FakeQrParser()
+        )
         val model = VerifierScannerViewModel(orchestrator = fakeOrchestrator)
 
         composeTestRule.run {
@@ -58,8 +62,8 @@ class VerifierScannerLaunchUrlTest {
 
             waitForIdle()
 
-            fakeOrchestrator.processQrCode(
-                BarcodeDataResultStubs.validBarcodeDataResult
+            model.orchestrator.processQrCode(
+                DecoderStub.VALID_MDOC_URI
             )
 
             waitForIdle()
@@ -70,7 +74,9 @@ class VerifierScannerLaunchUrlTest {
 
     @Test
     fun invalidUrlsDeferToOnInvalidBarcodeLambda() = runTest {
-        val fakeOrchestrator = FakeOrchestrator()
+        val fakeOrchestrator = FakeOrchestrator(
+            parser = FakeQrParser()
+        )
         val model = VerifierScannerViewModel(orchestrator = fakeOrchestrator)
 
         composeTestRule.run {
@@ -103,7 +109,7 @@ class VerifierScannerLaunchUrlTest {
                 viewModel = model,
                 onInvalidBarcode = onInvalidBarcode,
                 onValidBarcode = onValidBarcode
-            ) {}
+            )
         }
     }
 }

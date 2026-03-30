@@ -26,7 +26,8 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
     companion object {
         private val notStartedTransitions = listOf(
             "Verifier session begins initialising" to preflightEmptyPermissions,
-            "Verifier session is ready to scan" to ReadyToScan
+            "Verifier session is ready to scan" to ReadyToScan,
+            "Incapable device fails prerequisite checks" to userJourneyFailure
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -35,6 +36,7 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             )
         }
         private val preflightTransitions = listOf(
+            "User still isn't meeting prerequisites" to preflightEmptyPermissions,
             "User cancels during permission request" to userCancellation,
             "User permanently denies requested permissions" to userJourneyFailure,
             "User allows all requested permissions" to ReadyToScan

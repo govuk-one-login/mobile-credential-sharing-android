@@ -3,21 +3,21 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites.matchers
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 
 internal class HasIncapableReason(private val matcher: Matcher<in IncapableReason>) :
-    TypeSafeMatcher<PrerequisiteResponse>() {
+    TypeSafeMatcher<MissingPrerequisiteReason>() {
     override fun describeTo(description: Description?) = matcher.describeTo(description)
 
     override fun describeMismatchSafely(
-        item: PrerequisiteResponse?,
+        item: MissingPrerequisiteReason?,
         mismatchDescription: Description?
     ) = matcher.describeMismatch(
-        (item as? PrerequisiteResponse.Incapable)?.reason,
+        (item as? MissingPrerequisiteReason.Incapable)?.reason,
         mismatchDescription
     )
 
-    override fun matchesSafely(item: PrerequisiteResponse?): Boolean =
-        matcher.matches((item as? PrerequisiteResponse.Incapable)?.reason)
+    override fun matchesSafely(item: MissingPrerequisiteReason?): Boolean =
+        matcher.matches((item as? MissingPrerequisiteReason.Incapable)?.reason)
 }

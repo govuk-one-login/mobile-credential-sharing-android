@@ -37,10 +37,11 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancel
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 
 @Suppress("LongParameterList")
@@ -100,10 +101,14 @@ class HolderOrchestrator(
             return
         }
 
+        performPreflightChecks()
+    }
+
+    private fun performPreflightChecks() {
         try {
-            prerequisiteGate.checkPrerequisites(
+            prerequisiteGate.evaluatePrerequisites(
                 Prerequisite.BLUETOOTH
-            )[Prerequisite.BLUETOOTH].also {
+            ).also {
                 logger.debug(
                     logTag,
                     completedPrerequisiteChecks(
@@ -111,7 +116,7 @@ class HolderOrchestrator(
                         response = it
                     )
                 )
-            }?.let { prerequisiteCheck ->
+            }.let { prerequisiteCheck ->
                 handleStartPrerequisiteCheck(prerequisiteCheck)
                 logger.debug(logTag, START_ORCHESTRATION_SUCCESS)
             }
@@ -126,33 +131,39 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleStartPrerequisiteCheck(prerequisiteCheck: PrerequisiteResponse) {
-        when (prerequisiteCheck) {
-            PrerequisiteResponse.MeetsPrerequisites -> {
-                safeTransitionTo(HolderSessionState.ReadyToPresent)
+    private fun handleStartPrerequisiteCheck(prerequisiteCheck: List<MissingPrerequisite>) {
+        if (prerequisiteCheck.isEmpty()) {
+            safeTransitionTo(HolderSessionState.ReadyToPresent)
 
-                appCoroutineScope.launch {
-                    peripheralBluetoothTransport.start(
-                        serviceUuid = sessionFlow.value.sessionContext.sessionUuid
-                    )
-                }
-
-                val qrCode = sessionFlow.value.sessionContext.qrCode
-                if (qrCode.isNotEmpty()) {
-                    safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
-                }
+            appCoroutineScope.launch {
+                peripheralBluetoothTransport.start(
+                    serviceUuid = sessionFlow.value.sessionContext.sessionUuid
+                )
             }
 
-            is PrerequisiteResponse.Incapable,
-            is PrerequisiteResponse.NotReady,
-            is PrerequisiteResponse.Unauthorized ->
-                safeTransitionTo(
-                    HolderSessionState.Preflight(
-                        mapOf(
-                            Prerequisite.BLUETOOTH to prerequisiteCheck
+            val qrCode = sessionFlow.value.sessionContext.qrCode
+            if (qrCode.isNotEmpty()) {
+                safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
+            }
+        } else {
+            val checkResponse = prerequisiteCheck[0]
+
+            when {
+                !checkResponse.isRecoverable -> {
+                    HolderSessionState.Complete.Failed(
+                        SessionError(
+                            "Device cannot perform journey",
+                            SessionErrorReason.UnrecoverablePrerequisite(checkResponse)
                         )
                     )
-                )
+                }
+
+                else ->
+                    HolderSessionState.Preflight(
+                        missingPrerequisites = prerequisiteCheck,
+                        onComplete = ::performPreflightChecks
+                    )
+            }.let(::safeTransitionTo)
         }
     }
 

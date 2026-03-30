@@ -12,20 +12,28 @@ class PrerequisiteGateImpl(
     private val logger: Logger,
     private val readiness: PrerequisiteGateLayer.Readiness
 ) : PrerequisiteGate {
-    override fun checkPrerequisites(
+    override fun evaluatePrerequisites(
         prerequisites: Iterable<Prerequisite>
-    ): Map<Prerequisite, PrerequisiteResponse> = prerequisites.associateWith { prerequisite ->
-        authorization.checkAuthorization(
-            prerequisite
-        ) ?: capability.checkCapability(
-            prerequisite
-        ) ?: readiness.checkReadiness(
-            prerequisite
-        ) ?: PrerequisiteResponse.MeetsPrerequisites
+    ): List<MissingPrerequisite> = prerequisites.mapNotNull { prerequisite ->
+        evaluatePrerequisite(prerequisite)?.let { response ->
+            MissingPrerequisite(
+                prerequisite = prerequisite,
+                reason = response
+            )
+        }
     }.also {
         logger.debug(
             logTag,
             "Performed prerequisite checks for: $prerequisites"
         )
     }
+
+    private fun evaluatePrerequisite(prerequisite: Prerequisite): MissingPrerequisiteReason? =
+        authorization.checkAuthorization(
+            prerequisite
+        ) ?: capability.checkCapability(
+            prerequisite
+        ) ?: readiness.checkReadiness(
+            prerequisite
+        )
 }
