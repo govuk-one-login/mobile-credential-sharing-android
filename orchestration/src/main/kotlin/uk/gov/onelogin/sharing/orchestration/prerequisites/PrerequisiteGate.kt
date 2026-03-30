@@ -1,19 +1,15 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites
 
+/**
+ * Abstraction for performing various forms of checks based on [Prerequisite] input.
+ *
+ * @see PrerequisiteGateLayer
+ */
 fun interface PrerequisiteGate {
-    fun checkPrerequisites(
-        prerequisites: Iterable<Prerequisite>
-    ): Map<Prerequisite, PrerequisiteResponse>
+    fun evaluatePrerequisites(prerequisites: Iterable<Prerequisite>): List<MissingPrerequisite>
 
-    fun checkPrerequisites(
-        vararg prerequisites: Prerequisite
-    ): Map<Prerequisite, PrerequisiteResponse> = checkPrerequisites(
-        prerequisites.toList()
-    )
-
-    companion object {
-        fun Map<Prerequisite, PrerequisiteResponse>.meetsPrerequisites(): Boolean = values.all {
-            it == PrerequisiteResponse.MeetsPrerequisites
-        }
-    }
+    fun evaluatePrerequisites(vararg prerequisites: Prerequisite): List<MissingPrerequisite> =
+        evaluatePrerequisites(
+            prerequisites.toList()
+        )
 }

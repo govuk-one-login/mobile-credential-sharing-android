@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
@@ -26,11 +25,15 @@ import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
+import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
@@ -70,10 +73,7 @@ class VerifierOrchestratorTest {
         )
     }
 
-    private var gateResponses: MutableMap<Prerequisite, PrerequisiteResponse> =
-        Prerequisite.entries.associateWith {
-            PrerequisiteResponse.MeetsPrerequisites
-        }.toMutableMap()
+    private var gateResponses: MutableList<MissingPrerequisite> = mutableListOf()
 
     private val gate by lazy {
         StubPrerequisiteGate(gateResponses)
@@ -121,8 +121,13 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
-        gateResponses[Prerequisite.BLUETOOTH] = PrerequisiteResponse.Incapable(
-            IncapableReason.MissingHardware
+        gateResponses.add(
+            MissingPrerequisite(
+                Prerequisite.BLUETOOTH,
+                MissingPrerequisiteReason.NotReady(
+                    NotReadyReason.BluetoothTurnedOff
+                )
+            )
         )
 
         backgroundScope.launch {
@@ -135,9 +140,33 @@ class VerifierOrchestratorTest {
 
         assertThat(
             orchestrator.verifierSessionState.value,
-            allOf(
-                hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH),
-                not(hasMissingPreflightPrerequisites(Prerequisite.CAMERA))
+            hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+        )
+    }
+
+    @Test
+    fun `Incapable prerequisite check responses transition to failed`() = runTest {
+        gateResponses.add(
+            MissingPrerequisite(
+                Prerequisite.BLUETOOTH,
+                MissingPrerequisiteReason.Incapable(
+                    IncapableReason.MissingHardware
+                )
+            )
+        )
+
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+        orchestrator.start()
+
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(
+                hasReason(isUnrecoverablePrerequisite())
             )
         )
     }
@@ -260,10 +289,6 @@ class VerifierOrchestratorTest {
             orchestrator.verifierSessionState.value,
             isFailed()
         )
-
-        val state = orchestrator.verifierSessionState.value as VerifierSessionState.Complete.Failed
-        assertEquals("https://", state.error.message)
-        assertEquals("Qr Code is an unsupported format", state.error.exception?.message)
     }
 
     @Test

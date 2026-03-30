@@ -44,14 +44,19 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
+import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReason
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
-import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasThrowable
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.UnrecoverableThrowableMatchers.hasSessionErrorThrowable
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverableThrowable
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -70,13 +75,10 @@ class HolderOrchestratorTest {
         HolderSessionState.NotStarted
     )
 
-    private var prerequisiteResponse: MutableMap<Prerequisite, PrerequisiteResponse> =
-        Prerequisite.entries.associateWith {
-            PrerequisiteResponse.MeetsPrerequisites
-        }.toMutableMap()
+    private var prerequisiteResponses: MutableList<MissingPrerequisite> = mutableListOf()
 
     private val gate by lazy {
-        StubPrerequisiteGate(prerequisiteResponse)
+        StubPrerequisiteGate(prerequisiteResponses)
     }
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
@@ -132,8 +134,13 @@ class HolderOrchestratorTest {
 
     @Test
     fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
-        prerequisiteResponse[Prerequisite.BLUETOOTH] = PrerequisiteResponse.Incapable(
-            IncapableReason.MissingHardware
+        prerequisiteResponses.add(
+            MissingPrerequisite(
+                Prerequisite.BLUETOOTH,
+                MissingPrerequisiteReason.NotReady(
+                    NotReadyReason.BluetoothTurnedOff
+                )
+            )
         )
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
@@ -148,6 +155,34 @@ class HolderOrchestratorTest {
         assertThat(
             orchestrator.holderSessionState.value,
             hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+        )
+    }
+
+    @Test
+    fun `Incapable prerequisite check responses transition to failed`() = runTest {
+        prerequisiteResponses.add(
+            MissingPrerequisite(
+                Prerequisite.BLUETOOTH,
+                MissingPrerequisiteReason.Incapable(
+                    IncapableReason.MissingHardware
+                )
+            )
+        )
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
+        orchestrator.start()
+
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
+
+        assertThat(
+            orchestrator.holderSessionState.value,
+            isFailed(
+                hasReason(isUnrecoverablePrerequisite())
+            )
         )
     }
 
@@ -327,9 +362,11 @@ class HolderOrchestratorTest {
         assertThat(
             orchestrator.holderSessionState.value,
             isFailed(
-                hasThrowable(
-                    instanceOf(
-                        BluetoothDisconnectedException::class.java
+                hasReason(
+                    isUnrecoverableThrowable(
+                        hasSessionErrorThrowable(
+                            instanceOf(BluetoothDisconnectedException::class.java)
+                        )
                     )
                 )
             )

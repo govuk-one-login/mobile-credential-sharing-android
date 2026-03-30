@@ -1,17 +1,17 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.capability
 
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 
 class FakePrerequisiteCapabilityGate(
-    private val result: Map<Prerequisite, PrerequisiteResponse.Incapable?>
+    private val result: Map<Prerequisite, MissingPrerequisiteReason.Incapable?>
 ) : PrerequisiteGateLayer.Capability {
 
     constructor(
-        result: PrerequisiteResponse.Incapable? = null
+        result: MissingPrerequisiteReason.Incapable? = null
     ) : this(Prerequisite.entries.associateWith { result })
 
-    override fun checkCapability(prerequisite: Prerequisite): PrerequisiteResponse.Incapable? =
+    override fun checkCapability(prerequisite: Prerequisite): MissingPrerequisiteReason.Incapable? =
         result[prerequisite]
 }

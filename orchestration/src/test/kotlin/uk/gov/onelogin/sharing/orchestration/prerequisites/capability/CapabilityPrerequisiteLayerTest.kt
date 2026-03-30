@@ -12,8 +12,8 @@ import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReasonMatchers.cannotCheckCamera
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReasonMatchers.isMissingHardware
@@ -121,7 +121,7 @@ class CapabilityPrerequisiteLayerTest {
 
     private fun performJourney(
         prerequisite: Prerequisite,
-        matcher: Matcher<in PrerequisiteResponse>
+        matcher: Matcher<in MissingPrerequisiteReason>
     ) {
         assertThat(
             capability.checkCapability(prerequisite),

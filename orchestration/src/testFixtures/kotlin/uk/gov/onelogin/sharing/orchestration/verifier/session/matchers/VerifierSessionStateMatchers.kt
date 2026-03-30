@@ -4,9 +4,11 @@ import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.hasKey
+import org.hamcrest.Matchers
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasPrerequisite
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 /**
@@ -21,12 +23,13 @@ object VerifierSessionStateMatchers {
         vararg prerequisite: Prerequisite
     ): Matcher<VerifierSessionState> = hasMissingPreflightPrerequisites(
         prerequisite
-            .map(::hasKey)
+            .map(::hasPrerequisite)
+            .map(Matchers::contains)
             .let(::allOf)
     )
 
     fun hasMissingPreflightPrerequisites(
-        matcher: Matcher<in Map<Prerequisite, PrerequisiteResponse>>
+        matcher: Matcher<in List<MissingPrerequisite>>
     ): Matcher<VerifierSessionState> = HasVerifierPreflightPrerequisites(matcher)
 
     fun isCancelled(): Matcher<VerifierSessionState> = equalTo(
@@ -52,4 +55,7 @@ object VerifierSessionStateMatchers {
     fun isFailed(): Matcher<VerifierSessionState> = instanceOf(
         VerifierSessionState.Complete.Failed::class.java
     )
+
+    fun isFailed(matcher: Matcher<in SessionError>): Matcher<VerifierSessionState> =
+        IsFailed(matcher)
 }

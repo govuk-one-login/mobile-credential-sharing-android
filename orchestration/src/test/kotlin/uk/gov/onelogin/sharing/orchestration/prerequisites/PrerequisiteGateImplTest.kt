@@ -4,10 +4,9 @@ import android.Manifest
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
-import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
-import org.hamcrest.Matchers.hasEntry
+import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.After
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
@@ -15,6 +14,8 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.Unautho
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.FakePrerequisiteCapabilityGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReasonMatchers.isMissingHardware
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasPrerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasIncapableReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasNotReadyReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasUnauthorizedPermissions
@@ -24,11 +25,12 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyRea
 
 class PrerequisiteGateImplTest {
 
-    private var authorizationResult: MutableMap<Prerequisite, PrerequisiteResponse.Unauthorized?> =
+    private var authorizationResult:
+        MutableMap<Prerequisite, MissingPrerequisiteReason.Unauthorized?> =
         mutableMapOf()
-    private var capabilityResult: MutableMap<Prerequisite, PrerequisiteResponse.Incapable?> =
+    private var capabilityResult: MutableMap<Prerequisite, MissingPrerequisiteReason.Incapable?> =
         mutableMapOf()
-    private var readinessResult: MutableMap<Prerequisite, PrerequisiteResponse.NotReady?> =
+    private var readinessResult: MutableMap<Prerequisite, MissingPrerequisiteReason.NotReady?> =
         mutableMapOf()
 
     private val prerequisite = Prerequisite.BLUETOOTH
@@ -67,50 +69,32 @@ class PrerequisiteGateImplTest {
     }
 
     @Test
-    fun `Response maps to provided Prerequisites`() = runTest {
-        val prerequisites = listOf(
-            Prerequisite.BLUETOOTH,
-            Prerequisite.CAMERA
-        )
-        val result = gate.checkPrerequisites(prerequisites)
-
-        assertThat(
-            result.size,
-            equalTo(prerequisites.size)
-        )
-    }
-
-    @Test
-    fun `Responses are grouped based on prerequisite`() = runTest {
+    fun `Missing prerequisites are within a list`() = runTest {
         setupCapabilityFailure(
             prerequisite = Prerequisite.CAMERA
         )
-        val result = gate.checkPrerequisites(Prerequisite.entries)
+        val result = gate.evaluatePrerequisites(Prerequisite.entries)
 
         assertThat(
             result,
             allOf(
-                hasEntry(
-                    equalTo(Prerequisite.CAMERA),
-                    hasIncapableReason(isMissingHardware())
-                ),
-                hasEntry(
-                    equalTo(Prerequisite.BLUETOOTH),
-                    equalTo(PrerequisiteResponse.MeetsPrerequisites)
+                hasSize(1),
+                contains(
+                    allOf(
+                        hasPrerequisite(Prerequisite.CAMERA),
+                        hasReason(hasIncapableReason(isMissingHardware()))
+                    )
                 )
             )
         )
     }
 
     @Test
-    fun `Meets all prerequisites`() = runTest {
-        val result = gate.checkPrerequisites(prerequisite)
+    fun `Meeting all prerequisites returns an empty list`() = runTest {
+        val result = gate.evaluatePrerequisites(prerequisite)
         assertThat(
             result,
-            hasEntry(
-                prerequisite,
-                PrerequisiteResponse.MeetsPrerequisites
-            )
+            hasSize(0)
         )
     }
 
@@ -119,11 +103,15 @@ class PrerequisiteGateImplTest {
         setupAuthorizationFailure()
 
         assertThat(
-            gate.checkPrerequisites(prerequisite),
-            hasEntry(
-                equalTo(prerequisite),
-                hasUnauthorizedPermissions(
-                    contains(Manifest.permission.BLUETOOTH)
+            gate.evaluatePrerequisites(prerequisite),
+            contains(
+                allOf(
+                    hasPrerequisite(prerequisite),
+                    hasReason(
+                        hasUnauthorizedPermissions(
+                            contains(Manifest.permission.BLUETOOTH)
+                        )
+                    )
                 )
             )
         )
@@ -135,11 +123,15 @@ class PrerequisiteGateImplTest {
         setupCapabilityFailure()
 
         assertThat(
-            gate.checkPrerequisites(prerequisite),
-            hasEntry(
-                equalTo(prerequisite),
-                hasUnauthorizedPermissions(
-                    contains(Manifest.permission.BLUETOOTH)
+            gate.evaluatePrerequisites(prerequisite),
+            contains(
+                allOf(
+                    hasPrerequisite(prerequisite),
+                    hasReason(
+                        hasUnauthorizedPermissions(
+                            contains(Manifest.permission.BLUETOOTH)
+                        )
+                    )
                 )
             )
         )
@@ -148,11 +140,16 @@ class PrerequisiteGateImplTest {
     @Test
     fun `Failing capability provides an incapable reason`() = runTest {
         setupCapabilityFailure()
+
         assertThat(
-            gate.checkPrerequisites(prerequisite),
-            hasEntry(
-                equalTo(prerequisite),
-                hasIncapableReason(isMissingHardware())
+            gate.evaluatePrerequisites(prerequisite),
+            contains(
+                allOf(
+                    hasPrerequisite(prerequisite),
+                    hasReason(
+                        hasIncapableReason(isMissingHardware())
+                    )
+                )
             )
         )
     }
@@ -163,10 +160,14 @@ class PrerequisiteGateImplTest {
         setupReadinessFailure()
 
         assertThat(
-            gate.checkPrerequisites(prerequisite),
-            hasEntry(
-                equalTo(prerequisite),
-                hasIncapableReason(isMissingHardware())
+            gate.evaluatePrerequisites(prerequisite),
+            contains(
+                allOf(
+                    hasPrerequisite(prerequisite),
+                    hasReason(
+                        hasIncapableReason(isMissingHardware())
+                    )
+                )
             )
         )
     }
@@ -174,11 +175,16 @@ class PrerequisiteGateImplTest {
     @Test
     fun `Failing readiness provides a not ready reason`() = runTest {
         setupReadinessFailure()
+
         assertThat(
-            gate.checkPrerequisites(prerequisite),
-            hasEntry(
-                equalTo(prerequisite),
-                hasNotReadyReason(hasBluetoothTurnedOff())
+            gate.evaluatePrerequisites(prerequisite),
+            contains(
+                allOf(
+                    hasPrerequisite(prerequisite),
+                    hasReason(
+                        hasNotReadyReason(hasBluetoothTurnedOff())
+                    )
+                )
             )
         )
     }
@@ -189,20 +195,20 @@ class PrerequisiteGateImplTest {
             Manifest.permission.BLUETOOTH
         )
     ) {
-        authorizationResult[prerequisite] = PrerequisiteResponse.Unauthorized(reason)
+        authorizationResult[prerequisite] = MissingPrerequisiteReason.Unauthorized(reason)
     }
 
     private fun setupCapabilityFailure(
         prerequisite: Prerequisite = this.prerequisite,
         reason: IncapableReason = IncapableReason.MissingHardware
     ) {
-        capabilityResult[prerequisite] = PrerequisiteResponse.Incapable(reason)
+        capabilityResult[prerequisite] = MissingPrerequisiteReason.Incapable(reason)
     }
 
     private fun setupReadinessFailure(
         prerequisite: Prerequisite = this.prerequisite,
         reason: NotReadyReason = NotReadyReason.BluetoothTurnedOff
     ) {
-        readinessResult[prerequisite] = PrerequisiteResponse.NotReady(reason)
+        readinessResult[prerequisite] = MissingPrerequisiteReason.NotReady(reason)
     }
 }

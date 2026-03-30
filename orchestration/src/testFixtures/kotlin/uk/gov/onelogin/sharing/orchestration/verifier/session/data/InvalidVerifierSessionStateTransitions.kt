@@ -11,7 +11,6 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.preflightEmptyPermissions
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.successStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.userCancellation
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.userJourneyFailure
 
 class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
@@ -34,15 +33,13 @@ class InvalidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             ProcessingEngagement,
             Verifying,
             successStub,
-            userCancellation,
-            userJourneyFailure
+            userCancellation
         ).map {
             NotStarted to it
         }
 
         private val preflightTransitions = listOf(
             NotStarted,
-            preflightEmptyPermissions,
             Connecting,
             Verifying,
             successStub

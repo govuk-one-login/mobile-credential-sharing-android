@@ -8,9 +8,9 @@ import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.bluetoothManager
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
 
 @ContributesBinding(AppScope::class)
@@ -19,7 +19,7 @@ class ReadinessPrerequisiteLayer(
     private val factory: ProcessCameraProviderFactory,
     private val logger: Logger
 ) : PrerequisiteGateLayer.Readiness {
-    override fun checkReadiness(prerequisite: Prerequisite): PrerequisiteResponse.NotReady? =
+    override fun checkReadiness(prerequisite: Prerequisite): MissingPrerequisiteReason.NotReady? =
         when (prerequisite) {
             Prerequisite.BLUETOOTH -> handleBluetoothReadiness()
             Prerequisite.CAMERA -> handleCameraReadiness()
@@ -31,15 +31,15 @@ class ReadinessPrerequisiteLayer(
             )
         }
 
-    private fun handleBluetoothReadiness(): PrerequisiteResponse.NotReady? = if (
+    private fun handleBluetoothReadiness(): MissingPrerequisiteReason.NotReady? = if (
         context.bluetoothManager?.adapter?.isEnabled ?: false
     ) {
         null
     } else {
-        PrerequisiteResponse.NotReady(NotReadyReason.BluetoothTurnedOff)
+        MissingPrerequisiteReason.NotReady(NotReadyReason.BluetoothTurnedOff)
     }
 
-    private fun handleCameraReadiness(): PrerequisiteResponse.NotReady? = runCatching {
+    private fun handleCameraReadiness(): MissingPrerequisiteReason.NotReady? = runCatching {
         factory.create()
     }.mapCatching { provider ->
         provider.getCameraInfo(CameraSelector.DEFAULT_BACK_CAMERA).cameraState.value?.type
@@ -48,9 +48,9 @@ class ReadinessPrerequisiteLayer(
             if (state == null || CameraState.Type.CLOSED == state) {
                 null
             } else {
-                PrerequisiteResponse.NotReady(NotReadyReason.CameraAlreadyInUse)
+                MissingPrerequisiteReason.NotReady(NotReadyReason.CameraAlreadyInUse)
             }
         },
-        onFailure = { PrerequisiteResponse.NotReady(NotReadyReason.CannotCheckCamera) }
+        onFailure = { MissingPrerequisiteReason.NotReady(NotReadyReason.CannotCheckCamera) }
     )
 }

@@ -2,9 +2,14 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
 
 /**
  * Sealed interface that contains abstractions designed to verify the device state during the
- * 'Pre-flight' stage of the User journey.
+ * proceeding list of session states:
  *
+ * - `NotStarted`: Perform the checks when beginning the Orchestrator journey.
+ * - `Preflight`: Perform the checks after initially failing to meet prerequisites.
+ *
+ * @see uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
  * @see uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
+ * @see uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.NotStarted
  * @see uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Preflight
  */
 sealed interface PrerequisiteGateLayer {
@@ -17,9 +22,9 @@ sealed interface PrerequisiteGateLayer {
          * Validate the [prerequisite] capability.
          *
          * @return `null` when validations pass. Otherwise, an instance of
-         * [PrerequisiteResponse.Unauthorized].
+         * [MissingPrerequisiteReason.Unauthorized].
          */
-        fun checkAuthorization(prerequisite: Prerequisite): PrerequisiteResponse.Unauthorized?
+        fun checkAuthorization(prerequisite: Prerequisite): MissingPrerequisiteReason.Unauthorized?
     }
 
     /**
@@ -31,9 +36,9 @@ sealed interface PrerequisiteGateLayer {
          * Validate the [prerequisite] capability.
          *
          * @return `null` when validations pass. Otherwise, an instance of
-         * [PrerequisiteResponse.Incapable].
+         * [MissingPrerequisiteReason.Incapable].
          */
-        fun checkCapability(prerequisite: Prerequisite): PrerequisiteResponse.Incapable?
+        fun checkCapability(prerequisite: Prerequisite): MissingPrerequisiteReason.Incapable?
     }
 
     /**
@@ -46,8 +51,8 @@ sealed interface PrerequisiteGateLayer {
          * Validate the [prerequisite] capability.
          *
          * @return `null` when validations pass. Otherwise, an instance of
-         * [PrerequisiteResponse.NotReady].
+         * [MissingPrerequisiteReason.NotReady].
          */
-        fun checkReadiness(prerequisite: Prerequisite): PrerequisiteResponse.NotReady?
+        fun checkReadiness(prerequisite: Prerequisite): MissingPrerequisiteReason.NotReady?
     }
 }

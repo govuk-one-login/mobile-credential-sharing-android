@@ -1,14 +1,16 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites
 
-class StubPrerequisiteGate(private val results: Map<Prerequisite, PrerequisiteResponse>) :
-    PrerequisiteGate {
-    constructor(
-        result: PrerequisiteResponse
-    ) : this(Prerequisite.entries.associateWith { result })
+class StubPrerequisiteGate(private val results: List<MissingPrerequisite>) : PrerequisiteGate {
 
-    override fun checkPrerequisites(
+    constructor(
+        vararg result: MissingPrerequisite
+    ) : this(
+        results = result.toList()
+    )
+
+    override fun evaluatePrerequisites(
         prerequisites: Iterable<Prerequisite>
-    ): Map<Prerequisite, PrerequisiteResponse> = results.filterKeys { prerequisite ->
-        prerequisite in prerequisites
+    ): List<MissingPrerequisite> = results.filter { stubResult ->
+        stubResult.prerequisite in prerequisites
     }
 }

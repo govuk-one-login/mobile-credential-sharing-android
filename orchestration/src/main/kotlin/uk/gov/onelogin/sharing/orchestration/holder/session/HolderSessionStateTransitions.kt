@@ -39,9 +39,11 @@ private val fullErrorHandling: Set<KClass<out HolderSessionState>> = setOf(
 val validHolderTransitions: HolderSessionStateTransitions = mapOf(
     NotStarted::class to setOf(
         Preflight::class,
-        ReadyToPresent::class
+        ReadyToPresent::class,
+        Failed::class
     ),
-    Preflight::class to singleton(
+    Preflight::class to setOf(
+        Preflight::class,
         ReadyToPresent::class
     ) + fullErrorHandling,
     ReadyToPresent::class to singleton(
