@@ -56,7 +56,7 @@ class VerifierScanRouteTest {
 
             NavHost(
                 navController = controller,
-                startDestination = ScannedInvalidQrRoute(invalidBarcodeDataResultOne.data)
+                startDestination = ScannedInvalidQrRoute(invalidBarcodeDataResultOne)
             ) {
                 composable<VerifierScanRoute> {}
                 composable<ScannedInvalidQrRoute> {}

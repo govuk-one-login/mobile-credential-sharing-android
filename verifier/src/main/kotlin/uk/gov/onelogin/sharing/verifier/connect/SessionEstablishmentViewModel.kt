@@ -2,7 +2,6 @@
 
 package uk.gov.onelogin.sharing.verifier.connect
 
-import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.createSavedStateHandle
@@ -23,27 +22,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
-import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.core.Receiver
-import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.VerifierUiScope
+import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
+import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.ConnectToDevice
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState as OrchestratorVerifierSessionState
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.RequestedPermission
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceEvent.UpdatePermission
-import uk.gov.onelogin.sharing.verifier.session.VerifierSessionFactory
-import uk.gov.onelogin.sharing.verifier.session.VerifierSessionState
 
 @Suppress("LongParameterList")
 @AssistedInject
 class SessionEstablishmentViewModel(
-    private val bluetoothAdapterProvider: BluetoothAdapterProvider,
-    verifierSessionFactory: VerifierSessionFactory,
     private val logger: Logger,
-    private val bluetoothStatusMonitor: BluetoothStateMonitor,
+    private val verifierOrchestrator: Orchestrator.Verifier,
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel(),
     Receiver<ConnectWithHolderDeviceEvent> {
@@ -58,8 +52,6 @@ class SessionEstablishmentViewModel(
     )
     val navEvents: SharedFlow<ConnectWithHolderDeviceNavEvent> = _navEvents
 
-    val mdocVerifierSession = verifierSessionFactory.create(viewModelScope)
-
     @AssistedFactory
     @ViewModelAssistedFactoryKey(SessionEstablishmentViewModel::class)
     @ContributesIntoMap(VerifierUiScope::class)
@@ -73,129 +65,44 @@ class SessionEstablishmentViewModel(
     }
 
     init {
-        updateState {
-            it.copy(
-                isBluetoothEnabled = bluetoothAdapterProvider.isEnabled()
+        viewModelScope.launch {
+            @RequiresImplementation(
+                details = [
+                    ImplementationDetail(
+                        ticket = "NA",
+                        description = "Need to replace the disconnect scenarios. State from " +
+                            "orchestrator to be observed instead of the now removed " +
+                            "mdocVerifierSessionState"
+                    )
+                ]
             )
-        }
-
-        viewModelScope.launch {
-            mdocVerifierSession.state.collect { sessionState ->
-                when (sessionState) {
-                    VerifierSessionState.Invalid,
-                    VerifierSessionState.ServiceNotFound
-                    ->
-                        _navEvents.tryEmit(
-                            ConnectWithHolderDeviceNavEvent.NavigateToError(
-                                ConnectWithHolderDeviceError.BluetoothConfigurationError
-                            )
-                        )
-
-                    is VerifierSessionState.Error ->
-                        _navEvents.tryEmit(
-                            ConnectWithHolderDeviceNavEvent.NavigateToError(
-                                ConnectWithHolderDeviceError.GenericError
-                            )
-                        )
-
-                    is VerifierSessionState.Connected ->
-                        updateState {
-                            it.copy(
-                                connectionStateStarted = true
-                            )
-                        }
-
-                    is VerifierSessionState.Disconnected -> {
-                        val started = _uiState.value.connectionStateStarted
-                        if (started) {
-                            mdocVerifierSession.stop()
-                        }
-                        if (sessionState.isSessionEnd) {
-                            logger.debug(
-                                logTag,
-                                "BLE session terminated successfully via GATT End command"
-                            )
-                        } else {
-                            _navEvents.tryEmit(
-                                ConnectWithHolderDeviceNavEvent.NavigateToError(
-                                    ConnectWithHolderDeviceError.BluetoothConnectionError
-                                )
-                            )
-                        }
-                    }
-
-                    is VerifierSessionState.ConnectionStateStarted -> Unit
-
-                    else -> Unit
-                }
-
-                logger.debug(logTag, "Session state: $sessionState")
-            }
-        }
-
-        bluetoothStatusMonitor.start()
-        viewModelScope.launch {
-            bluetoothStatusMonitor.states.collect { bluetoothState ->
-                when (bluetoothState) {
-                    BluetoothStatus.ON,
-                    BluetoothStatus.TURNING_ON
-                    -> {
-                        updateState {
-                            it.copy(
-                                isBluetoothEnabled = true
-                            )
-                        }
-                        logger.debug(logTag, "Device bluetooth was enabled")
-                    }
-
-                    BluetoothStatus.OFF -> {
-                        updateState {
-                            it.copy(
-                                isBluetoothEnabled = false
-                            )
-                        }
-
-                        _navEvents.tryEmit(
-                            ConnectWithHolderDeviceNavEvent.NavigateToError(
-                                ConnectWithHolderDeviceError.BluetoothDisabledError
-                            )
-                        )
-
-                        mdocVerifierSession.stop()
-
-                        logger.debug(logTag, "Bluetooth turned off during session")
-                    }
-
-                    else -> Unit
+            verifierOrchestrator.verifierSessionState.collect { sessionState ->
+                updateState {
+                    it.copy(
+                        isLoading = sessionState is OrchestratorVerifierSessionState.Connecting
+                    )
                 }
             }
         }
-    }
-
-    private fun connect(device: BluetoothDevice, serviceUuid: ByteArray) {
-        mdocVerifierSession.connect(device, serviceUuid.toUUID())
     }
 
     /**
-     * @see connect
      * @see updateHasRequestPermissions
      * @see updatePermissions
      */
     @OptIn(ExperimentalPermissionsApi::class)
     override fun receive(event: ConnectWithHolderDeviceEvent) = when (event) {
-        is ConnectToDevice ->
-            connect(event.device, event.serviceUuid)
-
         is RequestedPermission ->
             updateHasRequestPermissions(event.hasRequestedPermission)
 
         is UpdatePermission ->
             updatePermissions(event.state)
+
+        else -> Unit
     }
 
     override fun onCleared() {
         logger.debug(logTag, "VM cleared")
-        mdocVerifierSession.stop()
         super.onCleared()
     }
 
@@ -233,8 +140,6 @@ class SessionEstablishmentViewModel(
                     ConnectWithHolderDeviceError.BluetoothPermissionsError
                 )
             )
-
-            mdocVerifierSession.stop()
         }
     }
 

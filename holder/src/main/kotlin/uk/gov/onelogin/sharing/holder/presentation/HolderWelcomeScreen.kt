@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,19 +35,31 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButt
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 private const val QR_SIZE = 800
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun HolderWelcomeScreen(viewModel: HolderWelcomeViewModel = assistedMetroViewModel()) {
+fun HolderWelcomeScreen(
+    viewModel: HolderWelcomeViewModel = assistedMetroViewModel(),
+    onAwaitingUserConsent: () -> Unit = {}
+) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
+    val sessionState by viewModel.holderSessionState.collectAsStateWithLifecycle()
+    val currentOnAwaitingUserConsent by rememberUpdatedState(onAwaitingUserConsent)
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     val multiplePermissionsState = rememberMultiplePermissionsState(
         permissions = bluetoothPermissions()
     ) {
         hasPreviouslyRequestedPermission = true
+    }
+
+    LaunchedEffect(sessionState) {
+        if (sessionState is HolderSessionState.AwaitingUserConsent) {
+            currentOnAwaitingUserConsent()
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
