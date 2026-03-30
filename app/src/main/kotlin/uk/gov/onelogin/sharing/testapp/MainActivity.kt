@@ -5,8 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
-import java.security.cert.Certificate
-import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.RequestElement
@@ -14,6 +12,8 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationReq
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
+import java.security.cert.Certificate
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
