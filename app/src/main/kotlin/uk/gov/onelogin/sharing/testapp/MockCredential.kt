@@ -36,4 +36,8 @@ data class MockCredential(
         result = 31 * result + privateKey.contentHashCode()
         return result
     }
+
+    override fun toString() =
+        "MockCredential(id='$id', displayName='$displayName', rawCredential= '$rawCredential')"
 }
+
