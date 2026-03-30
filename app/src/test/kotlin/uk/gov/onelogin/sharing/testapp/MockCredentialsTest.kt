@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.testapp
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.content.res.Resources
 import io.mockk.every
 import io.mockk.mockk
@@ -14,10 +15,19 @@ import org.junit.Test
 class MockCredentialsTest {
     private val base64EncodedCredential = "AQID"
 
+    private val privateKeyContent = this::class.java.classLoader
+        ?.getResourceAsStream("test_private_key.pem")
+        ?.bufferedReader()
+        ?.readText() ?: ""
+
     private val context: Context = mockk {
         every { resources } returns mockk<Resources> {
             every { openRawResource(R.raw.mock_credential) } returns
                 ByteArrayInputStream(base64EncodedCredential.toByteArray())
+        }
+        every { assets } returns mockk<AssetManager> {
+            every { open("test_private_key.pem") } returns
+                ByteArrayInputStream(privateKeyContent.toByteArray())
         }
     }
 
@@ -44,6 +54,10 @@ class MockCredentialsTest {
         every { context.resources.openRawResource(R.raw.mock_credential) } returnsMany listOf(
             ByteArrayInputStream(base64EncodedCredential.toByteArray()),
             ByteArrayInputStream(base64EncodedCredential.toByteArray())
+        )
+        every { context.assets.open("test_private_key.pem") } returnsMany listOf(
+            ByteArrayInputStream(privateKeyContent.toByteArray()),
+            ByteArrayInputStream(privateKeyContent.toByteArray())
         )
 
         val first = MockCredentials.mockCredential(context)

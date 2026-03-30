@@ -6,11 +6,11 @@ import java.util.UUID
 
 object MockCredentials {
 
-    private val privateKey: String = "-----BEGIN PRIVATE KEY-----\n" +
-        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgdpTO3ZY6wCS8ca3H\n" +
-        "B7OOwwKX+4CRNEvgjReT9NiODBKhRANCAATBOw7zuE5KONXusz2EsQJXICpOwwpW\n" +
-        "MrZWxlDG/6U1mH8v9LEtfmm4JwMcrYK9Ek0Y19/8FV4SbWyTuiKSNTSa\n" +
-        "-----END PRIVATE KEY-----".toByteArray()
+    private fun loadPrivateKey(context: Context): ByteArray =
+        context.assets.open("test_private_key.pem")
+            .bufferedReader()
+            .readText()
+            .toByteArray()
 
     fun mockCredential(context: Context): MockCredential {
         val base64 = context.resources
@@ -23,7 +23,7 @@ object MockCredentials {
             id = UUID.randomUUID().toString(),
             displayName = "Jane Doe",
             rawCredential = Base64.getUrlDecoder().decode(base64),
-            privateKey = privateKey.toByteArray()
+            privateKey = loadPrivateKey(context)
         )
     }
 }
