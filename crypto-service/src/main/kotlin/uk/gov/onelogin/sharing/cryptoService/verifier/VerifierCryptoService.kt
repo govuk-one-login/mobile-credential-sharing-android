@@ -7,7 +7,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
  * 1. [processEngagement] — Decodes the QR code, generates ephemeral keys,
  *    calculates the Session Transcript, and populates the session.
  */
-interface VerifierCryptoService {
+fun interface VerifierCryptoService {
     /**
      * Processes the scanned Device Engagement data.
      *
