@@ -18,21 +18,28 @@ class VerifierCryptoServiceImplTest {
     )
 
     @Test
-    fun `processEngagement constructs SessionTranscriptBytes successfully`() = runTest {
-        val result = service.processEngagement(VALID_ENCODED_DEVICE_ENGAGEMENT)
+    fun `processEngagement decorates context successfully`() = runTest {
+        var decoratedContext: VerifierCryptoContext? = null
 
-        assertNotNull(result.sessionTranscriptBytes)
-        assertNotNull(result.eReaderKeyTagged)
-        assertTrue(result.eReaderKeyTagged[0] == 0xD8.toByte())
-        assertTrue(result.eReaderKeyTagged[1] == 0x18.toByte())
+        service.processEngagement(VALID_ENCODED_DEVICE_ENGAGEMENT) {
+            decoratedContext = it
+            it
+        }
 
+        val context = assertNotNull(decoratedContext)
+        assertEquals(VALID_ENCODED_DEVICE_ENGAGEMENT, context.engagementString)
+        assertNotNull(context.serviceUuid)
+        val eReaderKey = assertNotNull(context.eReaderKeyTagged)
+        assertTrue(eReaderKey[0] == 0xD8.toByte())
+        assertTrue(eReaderKey[1] == 0x18.toByte())
+        assertNotNull(context.sessionTranscriptBytes)
         assert("SessionTranscriptBytes constructed successfully" in logger)
     }
 
     @Test
     fun `processEngagement throws when DeviceEngagementBytes is blank`() = runTest {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            service.processEngagement("")
+            service.processEngagement("") { it }
         }
 
         assertEquals("DeviceEngagementBytes must not be blank", exception.message)
