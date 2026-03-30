@@ -22,6 +22,7 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.data.UriTestData.mdocExampleUriOne
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
+import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -80,6 +81,7 @@ class VerifierOrchestratorTest {
     }
 
     private val centralBluetoothTransport = FakeCentralBluetoothTransport()
+    private val verifierCryptoService = FakeVerifierCryptoService()
 
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
 
@@ -91,7 +93,8 @@ class VerifierOrchestratorTest {
             verifierConfig = verifierConfigStub,
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
-            barcodeParser = FakeQrParser()
+            barcodeParser = FakeQrParser(),
+            verifierCryptoService = verifierCryptoService
         )
     }
 
