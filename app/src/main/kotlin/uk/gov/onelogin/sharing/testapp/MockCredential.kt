@@ -40,4 +40,3 @@ data class MockCredential(
     override fun toString() =
         "MockCredential(id='$id', displayName='$displayName', rawCredential= '$rawCredential')"
 }
-
