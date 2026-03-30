@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.allPermissionsGranted
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedCameraGranted
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedWithRationaleCameraGranted
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.cameraPermissionDenied
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
@@ -87,6 +88,19 @@ class VerifyCredentialViewModelTest {
 
     @Test
     fun `preconditions are not met when Bluetooth Permissions denied`() {
+        viewModel.onPermissionsChanged(bluetoothPermissionsDeniedWithRationaleCameraGranted)
+        bluetoothStateMonitor.emit(BluetoothStatus.ON)
+
+        assert(
+            viewModel.uiState.value.preconditionsState
+                is VerifyCredentialPreconditionsState.BluetoothAccessDenied
+        )
+
+        assert(logger.contains("Bluetooth permissions were denied"))
+    }
+
+    @Test
+    fun `preconditions are not met when Bluetooth Permissions permanently denied`() {
         viewModel.onPermissionsChanged(bluetoothPermissionsDeniedCameraGranted)
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
 

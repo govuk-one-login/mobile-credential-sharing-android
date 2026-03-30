@@ -41,5 +41,21 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     TRY_AGAIN(
         expected = "Try again",
         resourceId = R.string.try_again
+    ),
+    BLUETOOTH_PERMISSION_PERMANENTLY_DENIED(
+        expected = "Bluetooth permissions have been permanently denied",
+        resourceId = R.string.bluetooth_permission_permanently_denied
+    ),
+    ENABLE_BLUETOOTH_PERMISSION(
+        expected = "Please enable bluetooth permissions to continue",
+        resourceId = R.string.enable_bluetooth_permission
+    ),
+    BLUETOOTH_PERMISSION_DENIED(
+        expected = "Bluetooth permissions were denied",
+        resourceId = R.string.bluetooth_permission_denied
+    ),
+    CAMERA_PERMISSION_DENIED(
+        expected = "Camera permission was denied",
+        resourceId = R.string.camera_permission_denied
     )
 }

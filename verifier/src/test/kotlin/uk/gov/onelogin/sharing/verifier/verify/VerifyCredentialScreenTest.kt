@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.allPermissionsGranted
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedCameraGranted
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.cameraPermissionDenied
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -75,6 +76,22 @@ class VerifyCredentialScreenTest {
 
         composeTestRule
             .onNodeWithText("Please enable bluetooth permissions to continue")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `camera permission prompt is displayed when camera permission is denied`() {
+        composeTestRule.setContent {
+            VerifyCredentialScreen(
+                viewModel = viewModel,
+                multiplePermissionsState = cameraPermissionDenied
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule
+            .onNodeWithText("Please enable the camera permission to continue.")
             .assertIsDisplayed()
     }
 
