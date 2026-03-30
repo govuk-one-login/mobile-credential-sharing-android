@@ -10,6 +10,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.onelogin.sharing.cameraService.scan.Scanner
+import uk.gov.onelogin.sharing.orchestration.scan.CredentialScanner
 import uk.gov.onelogin.sharing.verifier.VerifierNavigationEvents
 import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 
@@ -18,8 +20,7 @@ fun VerifierScanner(
     viewModel: VerifierScannerViewModel = metroViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onInvalidBarcode: (String) -> Unit = {},
-    onValidBarcode: () -> Unit = {},
-    content: @Composable () -> Unit
+    onValidBarcode: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -41,6 +42,8 @@ fun VerifierScanner(
     }
 
     if (uiState is VerifierUiState.StartScanner) {
-        content()
+        CredentialScanner(
+            orchestrator = viewModel.orchestrator
+        )
     }
 }

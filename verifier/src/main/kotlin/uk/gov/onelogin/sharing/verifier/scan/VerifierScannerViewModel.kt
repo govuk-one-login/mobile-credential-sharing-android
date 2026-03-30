@@ -20,7 +20,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 @ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())
 @Inject
 @ViewModelKey
-class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) : ViewModel() {
+class VerifierScannerViewModel(val orchestrator: Orchestrator.Verifier) : ViewModel() {
 
     private val _navigationEvents = MutableSharedFlow<VerifierNavigationEvents>(
         extraBufferCapacity = 1
@@ -40,7 +40,6 @@ class VerifierScannerViewModel(private val orchestrator: Orchestrator.Verifier) 
                         _navigationEvents.emit(
                             VerifierNavigationEvents.NavigateToInvalidScreen(it.reason)
                         )
-                        orchestrator.reset()
                     }
 
                     is VerifierSessionState.Connecting -> _navigationEvents.emit(

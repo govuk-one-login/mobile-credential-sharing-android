@@ -49,7 +49,7 @@ class VerifierRoutesTest {
     fun invalidQrNavigatesBackToScannerWhenTryingAgain() = runTest {
         composeTestRule.setContent {
             SetupNavHost {
-                controller.navigate(ScannedInvalidQrRoute(invalidBarcodeDataResultOne.data))
+                controller.navigate(ScannedInvalidQrRoute(invalidBarcodeDataResultOne))
             }
         }
 

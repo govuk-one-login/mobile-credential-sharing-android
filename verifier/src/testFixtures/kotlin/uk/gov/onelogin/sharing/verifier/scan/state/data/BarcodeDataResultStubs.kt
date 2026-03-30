@@ -1,18 +1,19 @@
 package uk.gov.onelogin.sharing.verifier.scan.state.data
 
-import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriOne
 import uk.gov.onelogin.sharing.core.data.UriTestData.exampleUriTwo
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 
 /**
  * Wrapper object containing test data for [BarcodeDataResult].
  */
 object BarcodeDataResultStubs {
-    val invalidBarcodeDataResultOne = BarcodeDataResult.Invalid(exampleUriOne)
-    val invalidBarcodeDataResultTwo = BarcodeDataResult.Invalid(exampleUriTwo)
+    val invalidBarcodeDataResultOne = exampleUriOne
+    val invalidBarcodeDataResultTwo = exampleUriTwo
 
-    val validBarcodeDataResult = BarcodeDataResult.Valid(VALID_ENCODED_DEVICE_ENGAGEMENT)
-    val undecodeableBarcodeDataResult = BarcodeDataResult.Valid(INVALID_CBOR)
+    val validBarcodeDataResult = VALID_ENCODED_DEVICE_ENGAGEMENT
+    val validMdocBarcodeDataResult = VALID_MDOC_URI
+    val undecodeableBarcodeDataResult = INVALID_CBOR
 }

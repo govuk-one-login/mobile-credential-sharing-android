@@ -11,5 +11,6 @@ data object OrchestratorStubs {
     data object LogMessages {
         const val START_ORCHESTRATION_ERROR: String = "Cannot start orchestration"
         const val START_ORCHESTRATION_SUCCESS: String = "start orchestration"
+        const val TRANSITION_SUCCESSFUL_TO_STATE: String = "Transition successful to state:"
     }
 }

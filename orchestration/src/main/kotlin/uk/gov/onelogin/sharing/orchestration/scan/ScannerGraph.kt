@@ -24,7 +24,7 @@ internal abstract class ScannerGraph : ViewModelGraph {
 
     @DependencyGraph.Factory
     fun interface Factory {
-        fun create(@Provides orchestrator: Orchestrator.Verifier): ScannerGraph
+        fun create(): ScannerGraph
     }
 
     @Provides

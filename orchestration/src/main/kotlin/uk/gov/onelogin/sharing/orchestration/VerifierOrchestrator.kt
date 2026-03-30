@@ -17,10 +17,11 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
-import uk.gov.onelogin.sharing.cameraService.data.BarcodeDataResult
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
+import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -50,8 +51,9 @@ class VerifierOrchestrator(
     private val sessionFactory: SessionFactory<VerifierSession>,
     @Suppress("UnusedPrivateProperty")
     private val verifierConfig: VerifierConfig,
-    private val centralBluetoothTransport: CentralBluetoothTransport,
-    @param:ApplicationScope private val appCoroutineScope: CoroutineScope
+    @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
+    private val barcodeParser: QrParser,
+    private val centralBluetoothTransport: CentralBluetoothTransport
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -151,14 +153,20 @@ class VerifierOrchestrator(
             .let { safeTransitionTo(state = it, logMessage = START_ORCHESTRATION_ERROR) }
     }
 
-    override fun processQrCode(qrCode: BarcodeDataResult) {
-        when (qrCode) {
-            is BarcodeDataResult.Valid -> {
-                safeTransitionTo(
-                    VerifierSessionState.ProcessingEngagement
-                )
+    override fun processQrCode(qrCode: String?) {
+        val result = barcodeParser.parse(qrCode)
 
-                val engagementData = decodeDeviceEngagement(qrCode.data, logger)
+        if (result is QrScanResult.NotFound) {
+            return
+        }
+
+        safeTransitionTo(
+            VerifierSessionState.ProcessingEngagement
+        )
+
+        when (result) {
+            is QrScanResult.Success -> {
+                val engagementData = decodeDeviceEngagement(result.value, logger)
                 val serviceUuid = engagementData?.getFirstPeripheralServerModeUuid()
 
                 if (serviceUuid != null) {
@@ -179,24 +187,24 @@ class VerifierOrchestrator(
                 }
             }
 
-            is BarcodeDataResult.Invalid -> {
+            is QrScanResult.Invalid -> {
                 safeTransitionTo(
                     VerifierSessionState.Complete.Failed(
                         SessionError(
-                            message = qrCode.data,
-                            exception = IllegalArgumentException(
-                                "Qr Code is an unsupported format"
-                            )
+                            message = result.rawValue,
+                            exception = IllegalArgumentException("Qr Code is an unsupported format")
                         )
                     )
                 )
             }
 
-            else -> Unit
+            QrScanResult.NotFound -> Unit
         }
     }
 
     override fun cancel() {
+        if (sessionFlow.value.isComplete()) return
+
         safeTransitionTo(
             state = VerifierSessionState.Complete.Cancelled,
             exceptionWrapper = ::OrchestratorCannotCancelException
@@ -221,6 +229,8 @@ class VerifierOrchestrator(
     }
 
     private fun handleCentralBluetoothState(state: CentralBluetoothState) {
+        if (sessionFlow.value.isComplete()) return
+
         logger.debug(logTag, "BLE state = $state")
 
         when (state) {

@@ -12,6 +12,7 @@ import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -23,7 +24,7 @@ class HolderWelcomeViewModelTest {
     private val logger = SystemLogger()
 
     private fun createViewModel(
-        orchestrator: FakeOrchestrator = FakeOrchestrator()
+        orchestrator: FakeOrchestrator = FakeOrchestrator(parser = FakeQrParser())
     ): HolderWelcomeViewModel = HolderWelcomeViewModel(
         logger = logger,
         savedStateHandle = SavedStateHandle(),
