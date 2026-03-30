@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.core.presentation.permissions
 
 import android.Manifest
 import androidx.compose.material3.Text
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
@@ -23,10 +22,12 @@ class PermissionPromptTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val permanentlyDeniedText = "Permission permanently denied"
-    private val enablePermissionText = "Enable permission"
-    private val openSettingsText = "Open settings"
-    private val deniedText = "Permission was denied"
+    private val text = PermissionPromptText(
+        permanentlyDeniedText = "Permission permanently denied",
+        enablePermissionText = "Enable permission",
+        openSettingsText = "Open settings",
+        deniedText = "Permission was denied"
+    )
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
@@ -43,14 +44,11 @@ class PermissionPromptTest {
                     onLaunchPermission = {}
                 ),
                 hasPreviouslyRequestedPermission = true,
-                permanentlyDeniedText = permanentlyDeniedText,
-                enablePermissionText = enablePermissionText,
-                openSettingsText = openSettingsText,
-                deniedText = deniedText
+                text = text
             ) {}
         }
 
-        composeTestRule.onNodeWithText(enablePermissionText).assertIsDisplayed()
+        composeTestRule.onNodeWithText(text.enablePermissionText).assertIsDisplayed()
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
@@ -68,14 +66,11 @@ class PermissionPromptTest {
                     onLaunchPermission = {}
                 ),
                 hasPreviouslyRequestedPermission = false,
-                permanentlyDeniedText = permanentlyDeniedText,
-                enablePermissionText = enablePermissionText,
-                openSettingsText = openSettingsText,
-                deniedText = deniedText
+                text = text
             ) {}
         }
 
-        composeTestRule.onNodeWithText(enablePermissionText).assertIsDisplayed()
+        composeTestRule.onNodeWithText(text.enablePermissionText).assertIsDisplayed()
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
@@ -93,14 +88,11 @@ class PermissionPromptTest {
                     onLaunchPermission = {}
                 ),
                 hasPreviouslyRequestedPermission = true,
-                permanentlyDeniedText = permanentlyDeniedText,
-                enablePermissionText = enablePermissionText,
-                openSettingsText = openSettingsText,
-                deniedText = deniedText
+                text = text
             ) {}
         }
 
-        composeTestRule.onNodeWithText(openSettingsText).assertIsDisplayed()
+        composeTestRule.onNodeWithText(text.openSettingsText).assertIsDisplayed()
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
@@ -121,10 +113,7 @@ class PermissionPromptTest {
                     onLaunchPermission = {}
                 ),
                 hasPreviouslyRequestedPermission = true,
-                permanentlyDeniedText = permanentlyDeniedText,
-                enablePermissionText = enablePermissionText,
-                openSettingsText = openSettingsText,
-                deniedText = deniedText
+                text = text
             ) {
                 onGrantedLambdaCalled = true
                 Text(

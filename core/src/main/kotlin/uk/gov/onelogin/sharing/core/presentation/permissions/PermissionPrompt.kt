@@ -11,15 +11,19 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDeni
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 
+data class PermissionPromptText(
+    val permanentlyDeniedText: String,
+    val enablePermissionText: String,
+    val openSettingsText: String,
+    val deniedText: String
+)
+
 @Suppress("LongMethod", "ComposableLambdaParameterNaming")
 @Composable
 fun PermissionPrompt(
     multiplePermissionsState: MultiplePermissionsState,
     hasPreviouslyRequestedPermission: Boolean,
-    permanentlyDeniedText: String,
-    enablePermissionText: String,
-    openSettingsText: String,
-    deniedText: String,
+    text: PermissionPromptText,
     modifier: Modifier = Modifier,
     onGrantedPermissions: @Composable () -> Unit
 ) {
@@ -31,20 +35,20 @@ fun PermissionPrompt(
             PermanentPermissionDenialButton(
                 context = LocalContext.current,
                 modifier = modifier,
-                titleText = permanentlyDeniedText,
-                buttonText = openSettingsText
+                titleText = text.permanentlyDeniedText,
+                buttonText = text.openSettingsText
             )
         },
         onRequirePermission = { _, launchPermissions ->
             RequirePermissionButton(
-                text = enablePermissionText,
+                text = text.enablePermissionText,
                 launchPermission = launchPermissions
             )
         },
         onShowRationale = { _, launchPermissions ->
             PermissionRationaleButton(
-                text = enablePermissionText,
-                titleText = deniedText,
+                text = text.enablePermissionText,
+                titleText = text.deniedText,
                 launchPermission = launchPermissions
             )
         }
