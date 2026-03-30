@@ -55,7 +55,6 @@ class VerifierOrchestrator(
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val barcodeParser: QrParser,
     private val centralBluetoothTransport: CentralBluetoothTransport,
-    @Suppress("UnusedPrivateProperty")
     private val verifierCryptoService: VerifierCryptoService
 ) : Orchestrator.Verifier {
 
@@ -169,8 +168,28 @@ class VerifierOrchestrator(
 
         when (result) {
             is QrScanResult.Success -> {
-                sessionFlow.value.updateCryptoContext {
-                    it.copy(engagementString = result.value)
+                try {
+                    val engagementResult =
+                        verifierCryptoService.processEngagement(result.value)
+
+                    sessionFlow.value.updateCryptoContext {
+                        it.copy(
+                            engagementString = result.value,
+                            eReaderKeyTagged = engagementResult.eReaderKeyTagged,
+                            sessionTranscriptBytes = engagementResult.sessionTranscriptBytes
+                        )
+                    }
+                } catch (e: Exception) {
+                    logger.error(logTag, "Error processing engagement: ${e.message}", e)
+                    safeTransitionTo(
+                        VerifierSessionState.Complete.Failed(
+                            SessionError(
+                                message = "Error processing engagement: ${e.message}",
+                                exception = e
+                            )
+                        )
+                    )
+                    return
                 }
 
                 val engagementData = decodeDeviceEngagement(result.value, logger)
