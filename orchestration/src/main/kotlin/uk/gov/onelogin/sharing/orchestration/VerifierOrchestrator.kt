@@ -169,6 +169,10 @@ class VerifierOrchestrator(
 
         when (result) {
             is QrScanResult.Success -> {
+                sessionFlow.value.updateCryptoContext {
+                    it.copy(engagementString = result.value)
+                }
+
                 val engagementData = decodeDeviceEngagement(result.value, logger)
                 val serviceUuid = engagementData?.getFirstPeripheralServerModeUuid()
 
