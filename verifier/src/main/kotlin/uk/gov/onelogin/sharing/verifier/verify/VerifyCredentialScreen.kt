@@ -61,8 +61,12 @@ fun VerifyCredentialScreen(
             PermissionPrompt(
                 multiplePermissionsState = multiplePermissionsState,
                 hasPreviouslyRequestedPermission = uiState.hasPreviouslyRequestedPermission,
-                permanentlyDeniedText = stringResource(R.string.camera_permission_is_permanently_denied),
-                enablePermissionText = stringResource(R.string.enable_camera_permission_to_continue),
+                permanentlyDeniedText = stringResource(
+                    R.string.camera_permission_is_permanently_denied
+                ),
+                enablePermissionText = stringResource(
+                    R.string.enable_camera_permission_to_continue
+                ),
                 openSettingsText = stringResource(R.string.open_app_permissions),
                 deniedText = stringResource(R.string.camera_permission_denied)
             ) {}
@@ -72,7 +76,9 @@ fun VerifyCredentialScreen(
             PermissionPrompt(
                 multiplePermissionsState = multiplePermissionsState,
                 hasPreviouslyRequestedPermission = uiState.hasPreviouslyRequestedPermission,
-                permanentlyDeniedText = stringResource(R.string.bluetooth_permission_permanently_denied),
+                permanentlyDeniedText = stringResource(
+                    R.string.bluetooth_permission_permanently_denied
+                ),
                 enablePermissionText = stringResource(R.string.enable_bluetooth_permission),
                 openSettingsText = stringResource(R.string.open_app_permissions),
                 deniedText = stringResource(R.string.bluetooth_permission_denied)
