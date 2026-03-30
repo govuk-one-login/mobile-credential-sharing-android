@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.Verifier.Companion.req
 import uk.gov.onelogin.sharing.verifier.R
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
-@Suppress("ComposableLambdaParameterNaming")
+@Suppress("ComposableLambdaParameterNaming", "LongMethod")
 @Composable
 fun VerifyCredentialScreen(
     viewModel: VerifyCredentialViewModel = metroViewModel(),

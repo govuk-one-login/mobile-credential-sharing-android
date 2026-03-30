@@ -11,13 +11,6 @@ import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDeni
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
 
-data class PermissionPromptText(
-    val permanentlyDeniedText: String,
-    val enablePermissionText: String,
-    val openSettingsText: String,
-    val deniedText: String
-)
-
 @Suppress("LongMethod", "ComposableLambdaParameterNaming")
 @Composable
 fun PermissionPrompt(
