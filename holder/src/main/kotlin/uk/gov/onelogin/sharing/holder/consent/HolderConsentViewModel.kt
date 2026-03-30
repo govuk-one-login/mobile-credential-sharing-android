@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
-@ViewModelKey(HolderConsentViewModel::class)
+@ViewModelKey
 class HolderConsentViewModel(orchestrator: Orchestrator.Holder) : ViewModel() {
     val holderSessionState: StateFlow<HolderSessionState> = orchestrator.holderSessionState
 }
