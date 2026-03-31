@@ -42,7 +42,7 @@ class VerifierCryptoServiceImplTest {
         assertEquals("DeviceEngagementBytes must not be blank", exception.message)
         assert(
             "error constructing SessionTranscript array due to " +
-                "DeviceEngagementBytes is null" in logger
+                "DeviceEngagementBytes is blank" in logger
         )
     }
 

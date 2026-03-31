@@ -19,7 +19,7 @@ class VerifierCryptoServiceImpl(private val logger: Logger) : VerifierCryptoServ
         require(qrCodeData.isNotBlank()) {
             logger.error(
                 logTag,
-                "error constructing SessionTranscript array due to DeviceEngagementBytes is null"
+                "error constructing SessionTranscript array due to DeviceEngagementBytes is blank"
             )
             "DeviceEngagementBytes must not be blank"
         }
