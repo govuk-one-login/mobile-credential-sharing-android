@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth
 
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.os.UserManager
 
 object ContextExt {
     /**
@@ -13,4 +14,8 @@ object ContextExt {
     val Context.bluetoothManager: BluetoothManager? get() = getSystemService(
         Context.BLUETOOTH_SERVICE
     ) as? BluetoothManager
+
+    val Context.userManager: UserManager? get() = getSystemService(
+        Context.USER_SERVICE
+    ) as? UserManager
 }
