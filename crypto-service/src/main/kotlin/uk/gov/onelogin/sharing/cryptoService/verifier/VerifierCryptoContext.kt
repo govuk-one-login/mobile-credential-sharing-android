@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
 /**
  * Holds ephemeral cryptographic resources for a single Verifier transaction.
  *
- * The [VerifierCryptoService] populates this context during [processEngagement],
+ * The [VerifierCryptoService] populates this context during [VerifierSessionState.ProcessingEngagement],
  * and subsequent phases read from it.
  * When the session is discarded, these resources are released.
  */
