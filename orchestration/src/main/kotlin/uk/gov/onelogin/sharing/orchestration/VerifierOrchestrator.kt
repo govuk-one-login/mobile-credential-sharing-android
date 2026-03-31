@@ -174,8 +174,12 @@ class VerifierOrchestrator(
                     failWith("Error processing engagement: ${e.message}", e as Exception)
                 }.onSuccess {
                     val serviceUuid = sessionFlow.value.cryptoContext.serviceUuid
+                        ?: return@onSuccess failWith(
+                            "Service UUID not found in device engagement",
+                            IllegalStateException("Service UUID not found in device engagement")
+                        )
                     safeTransitionTo(VerifierSessionState.Connecting)
-                    centralBluetoothTransport.scanAndConnect(serviceUuid!!)
+                    centralBluetoothTransport.scanAndConnect(serviceUuid)
                 }
             }
 
