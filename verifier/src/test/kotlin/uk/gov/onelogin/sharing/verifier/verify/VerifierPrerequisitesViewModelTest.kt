@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.verifier.verify
 
+import app.cash.turbine.test
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -13,7 +13,6 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.preflightEmptyPermissions
-import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesViewModelExt.monitor
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPermissionsApi::class)
 class VerifierPrerequisitesViewModelTest {
@@ -37,7 +36,6 @@ class VerifierPrerequisitesViewModelTest {
 
     @Test
     fun `orchestrator calls start on init`() = runTest(dispatcherRule.testDispatcher) {
-        monitor(viewModel)
         assertEquals(1, fakeOrchestrator.startCount)
     }
 
@@ -46,14 +44,14 @@ class VerifierPrerequisitesViewModelTest {
         dispatcherRule.testDispatcher
     ) {
         sessionState = VerifierSessionState.ReadyToScan
-        monitor(viewModel)
 
-        advanceUntilIdle()
-
-        assertEquals(
-            VerifyCredentialEvents.NavigateToScanner,
-            viewModel.events.value
-        )
+        viewModel.events.test {
+            assertEquals(
+                VerifyCredentialEvents.NavigateToScanner,
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -61,13 +59,13 @@ class VerifierPrerequisitesViewModelTest {
         dispatcherRule.testDispatcher
     ) {
         sessionState = preflightEmptyPermissions
-        monitor(viewModel)
 
-        advanceUntilIdle()
-
-        assertEquals(
-            VerifyCredentialEvents.NavigateToPreflight,
-            viewModel.events.value
-        )
+        viewModel.events.test {
+            assertEquals(
+                VerifyCredentialEvents.NavigateToPreflight,
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
     }
 }
