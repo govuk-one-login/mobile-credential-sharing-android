@@ -19,5 +19,4 @@ class PrerequisiteGateV2Test {
             hasSize(0)
         )
     }
-
 }

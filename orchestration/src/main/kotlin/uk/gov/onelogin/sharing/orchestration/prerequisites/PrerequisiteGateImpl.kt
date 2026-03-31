@@ -16,7 +16,10 @@ class PrerequisiteGateImpl(
         prerequisites: Iterable<Prerequisite>
     ): List<MissingPrerequisite> = prerequisites.mapNotNull { prerequisite ->
         evaluatePrerequisite(prerequisite)?.let { response ->
-            null
+            MissingPrerequisite(
+                prerequisite = prerequisite,
+                reason = response
+            )
         }
     }.also {
         logger.debug(
