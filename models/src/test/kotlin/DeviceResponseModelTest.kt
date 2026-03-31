@@ -66,6 +66,24 @@ class DeviceResponseModelTest {
     }
 
     @Test
+    fun `DeviceResponse version defaults to 1 0`() {
+        val response = DeviceResponse(documents = null, documentErrors = null)
+        assertEquals("1.0", response.version)
+    }
+
+    @Test
+    fun `DeviceResponse status defaults to 0`() {
+        val response = DeviceResponse(documents = null, documentErrors = null)
+        assertEquals(0L, response.status)
+    }
+
+    @Test
+    fun `DeviceResponse status supports 10`() {
+        val response = DeviceResponse(documents = null, documentErrors = null, status = 10)
+        assertEquals(10L, response.status)
+    }
+
+    @Test
     fun `DeviceResponse has one document with correct docType`() {
         assertEquals(1, model.documents!!.size)
         assertEquals(docType, model.documents.first().docType)
