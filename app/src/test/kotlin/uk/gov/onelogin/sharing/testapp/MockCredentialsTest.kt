@@ -46,7 +46,7 @@ class MockCredentialsTest {
     @Test
     fun `mockCredential returns credential with a valid UUID id`() {
         val credential = MockCredentials.mockCredential(context)
-        UUID.fromString(credential.id)
+        assertEquals(UUID.fromString(credential.id).toString(), credential.id)
     }
 
     @Test
