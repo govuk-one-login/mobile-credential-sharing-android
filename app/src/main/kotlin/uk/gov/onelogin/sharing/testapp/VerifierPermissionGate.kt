@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPrompt
@@ -18,14 +19,13 @@ import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPromptTex
 
 /**
  * Temporary permission gate for the verifier flow.
- * Shows [PermissionPrompt] for camera and bluetooth permissions before invoking [onGrantAll].
+ * Creates the [MultiplePermissionsState] and delegates to [VerifierPermissionGateContent].
  *
  * Remove this once the SDK prerequisite screen handles permissions natively.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun VerifierPermissionGate(onGrantAll: () -> Unit) {
-    val currentOnAllGranted by rememberUpdatedState(onGrantAll)
     var hasPreviouslyRequested by rememberSaveable { mutableStateOf(false) }
 
     val permissionsState = rememberMultiplePermissionsState(
@@ -33,6 +33,22 @@ fun VerifierPermissionGate(onGrantAll: () -> Unit) {
     ) {
         hasPreviouslyRequested = true
     }
+
+    VerifierPermissionGateContent(
+        permissionsState = permissionsState,
+        hasPreviouslyRequested = hasPreviouslyRequested,
+        onGrantAll = onGrantAll
+    )
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+internal fun VerifierPermissionGateContent(
+    permissionsState: MultiplePermissionsState,
+    hasPreviouslyRequested: Boolean,
+    onGrantAll: () -> Unit
+) {
+    val currentOnAllGranted by rememberUpdatedState(onGrantAll)
 
     if (permissionsState.allPermissionsGranted) {
         LaunchedEffect(Unit) { currentOnAllGranted() }
