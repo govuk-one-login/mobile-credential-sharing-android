@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,7 +20,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
-import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
@@ -66,7 +66,7 @@ class AndroidCentralBluetoothTransport(
         }
     }
 
-    override fun scanAndConnect(serviceUuid: ByteArray) {
+    override fun scanAndConnect(serviceUuid: UUID) {
         scanJob?.cancel()
         bluetoothStateMonitor.start()
         _state.value = CentralBluetoothState.Scanning
@@ -77,7 +77,7 @@ class AndroidCentralBluetoothTransport(
                     logger.debug(logTag, "Device found: ${result.device.address}")
                     gattClientManager.connect(
                         device = result.device,
-                        serviceUuid = serviceUuid.toUUID()
+                        serviceUuid = serviceUuid
                     )
                 }
 

@@ -23,7 +23,6 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
 
 class AndroidCentralBluetoothTransportTest {
 
@@ -47,7 +46,7 @@ class AndroidCentralBluetoothTransportTest {
         )
     }
 
-    private val serviceUuid = java.util.UUID.randomUUID().toBytes()
+    private val serviceUuid = java.util.UUID.randomUUID()
 
     @Test
     fun `initial state is Idle`() = runTest {

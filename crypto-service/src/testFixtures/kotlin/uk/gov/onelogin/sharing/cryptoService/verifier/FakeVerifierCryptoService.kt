@@ -17,7 +17,7 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         updateContext(
             VerifierCryptoContext(
                 engagementString = qrCodeData,
-                serviceUuid = byteArrayOf(1, 2, 3)
+                serviceUuid = java.util.UUID.randomUUID()
             )
         )
     }
