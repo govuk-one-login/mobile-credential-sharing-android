@@ -11,11 +11,11 @@ import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Enclosed::class)
-class RequestElementTest {
+class MdlAttributeTest {
 
     @RunWith(Parameterized::class)
     class TextElement150CharTests(
-        private val element: RequestElement,
+        private val element: MdlAttribute,
         private val expectedValue: String
     ) {
         @Test
@@ -37,20 +37,20 @@ class RequestElementTest {
             @JvmStatic
             @Parameters(name = "{1}")
             fun data() = listOf(
-                arrayOf(RequestElement.FamilyName, "family_name"),
-                arrayOf(RequestElement.GivenName, "given_name"),
-                arrayOf(RequestElement.IssuingAuthority, "issuing_authority"),
-                arrayOf(RequestElement.DocumentNumber, "document_number"),
-                arrayOf(RequestElement.BirthPlace, "birth_place"),
-                arrayOf(RequestElement.ResidentAddress, "resident_address"),
-                arrayOf(RequestElement.ResidentPostalCode, "resident_postal_code"),
-                arrayOf(RequestElement.ResidentCity, "resident_city")
+                arrayOf(MdlAttribute.FamilyName, "family_name"),
+                arrayOf(MdlAttribute.GivenName, "given_name"),
+                arrayOf(MdlAttribute.IssuingAuthority, "issuing_authority"),
+                arrayOf(MdlAttribute.DocumentNumber, "document_number"),
+                arrayOf(MdlAttribute.BirthPlace, "birth_place"),
+                arrayOf(MdlAttribute.ResidentAddress, "resident_address"),
+                arrayOf(MdlAttribute.ResidentPostalCode, "resident_postal_code"),
+                arrayOf(MdlAttribute.ResidentCity, "resident_city")
             )
         }
     }
 
     @RunWith(Parameterized::class)
-    class FullDateTests(private val element: RequestElement, private val expectedValue: String) {
+    class FullDateTests(private val element: MdlAttribute, private val expectedValue: String) {
         @Test
         fun `value matches expected identifier`() = assertEquals(expectedValue, element.value)
 
@@ -70,116 +70,116 @@ class RequestElementTest {
             @JvmStatic
             @Parameters(name = "{1}")
             fun data() = listOf(
-                arrayOf(RequestElement.BirthDate, "birth_date"),
-                arrayOf(RequestElement.IssueDate, "issue_date"),
-                arrayOf(RequestElement.ExpiryDate, "expiry_date")
+                arrayOf(MdlAttribute.BirthDate, "birth_date"),
+                arrayOf(MdlAttribute.IssueDate, "issue_date"),
+                arrayOf(MdlAttribute.ExpiryDate, "expiry_date")
             )
         }
     }
 
     class IssuingCountryTests {
         @Test
-        fun `value`() = assertEquals("issuing_country", RequestElement.IssuingCountry.value)
+        fun `value`() = assertEquals("issuing_country", MdlAttribute.IssuingCountry.value)
 
         @Test
-        fun `validates 2 char code`() = assertTrue(RequestElement.IssuingCountry.validate("GB"))
+        fun `validates 2 char code`() = assertTrue(MdlAttribute.IssuingCountry.validate("GB"))
 
         @Test
-        fun `rejects 1 char`() = assertFalse(RequestElement.IssuingCountry.validate("G"))
+        fun `rejects 1 char`() = assertFalse(MdlAttribute.IssuingCountry.validate("G"))
 
         @Test
-        fun `rejects 3 chars`() = assertFalse(RequestElement.IssuingCountry.validate("GBR"))
+        fun `rejects 3 chars`() = assertFalse(MdlAttribute.IssuingCountry.validate("GBR"))
 
         @Test
-        fun `rejects non-string`() = assertFalse(RequestElement.IssuingCountry.validate(42))
+        fun `rejects non-string`() = assertFalse(MdlAttribute.IssuingCountry.validate(42))
     }
 
     class PortraitTests {
         @Test
-        fun `value`() = assertEquals("portrait", RequestElement.Portrait.value)
+        fun `value`() = assertEquals("portrait", MdlAttribute.Portrait.value)
 
         @Test
-        fun `validates any type`() = assertTrue(RequestElement.Portrait.validate(ByteArray(1024)))
+        fun `validates any type`() = assertTrue(MdlAttribute.Portrait.validate(ByteArray(1024)))
     }
 
     class DrivingPrivilegesTests {
         @Test
-        fun `value`() = assertEquals("driving_privileges", RequestElement.DrivingPrivileges.value)
+        fun `value`() = assertEquals("driving_privileges", MdlAttribute.DrivingPrivileges.value)
 
         @Test
-        fun `validates list`() = assertTrue(RequestElement.DrivingPrivileges.validate(listOf("B")))
+        fun `validates list`() = assertTrue(MdlAttribute.DrivingPrivileges.validate(listOf("B")))
 
         @Test
         fun `validates empty list`() =
-            assertTrue(RequestElement.DrivingPrivileges.validate(emptyList<Any>()))
+            assertTrue(MdlAttribute.DrivingPrivileges.validate(emptyList<Any>()))
 
         @Test
-        fun `rejects non-list`() = assertFalse(RequestElement.DrivingPrivileges.validate("B"))
+        fun `rejects non-list`() = assertFalse(MdlAttribute.DrivingPrivileges.validate("B"))
     }
 
     class UnDistinguishingSignTests {
         @Test
         fun `value`() =
-            assertEquals("un_distinguishing_sign", RequestElement.UnDistinguishingSign.value)
+            assertEquals("un_distinguishing_sign", MdlAttribute.UnDistinguishingSign.value)
 
         @Test
         fun `validates non-empty string`() =
-            assertTrue(RequestElement.UnDistinguishingSign.validate("UK"))
+            assertTrue(MdlAttribute.UnDistinguishingSign.validate("UK"))
 
         @Test
-        fun `rejects empty string`() = assertFalse(RequestElement.UnDistinguishingSign.validate(""))
+        fun `rejects empty string`() = assertFalse(MdlAttribute.UnDistinguishingSign.validate(""))
 
         @Test
-        fun `rejects non-string`() = assertFalse(RequestElement.UnDistinguishingSign.validate(123))
+        fun `rejects non-string`() = assertFalse(MdlAttribute.UnDistinguishingSign.validate(123))
     }
 
     class AgeOverTests {
         @Test
         fun `value formats with zero-padded age`() =
-            assertEquals("age_over_18", RequestElement.AgeOver(18).value)
+            assertEquals("age_over_18", MdlAttribute.AgeOver(18).value)
 
         @Test
         fun `accepts boundary 0 with padding`() =
-            assertEquals("age_over_00", RequestElement.AgeOver(0).value)
+            assertEquals("age_over_00", MdlAttribute.AgeOver(0).value)
 
         @Test
-        fun `pads single digit`() = assertEquals("age_over_01", RequestElement.AgeOver(1).value)
+        fun `pads single digit`() = assertEquals("age_over_01", MdlAttribute.AgeOver(1).value)
 
         @Test
-        fun `accepts boundary 99`() = assertEquals("age_over_99", RequestElement.AgeOver(99).value)
+        fun `accepts boundary 99`() = assertEquals("age_over_99", MdlAttribute.AgeOver(99).value)
 
         @Test
         fun `rejects negative`() {
-            assertThrows(IllegalArgumentException::class.java) { RequestElement.AgeOver(-1) }
+            assertThrows(IllegalArgumentException::class.java) { MdlAttribute.AgeOver(-1) }
         }
 
         @Test
         fun `rejects over 99`() {
-            assertThrows(IllegalArgumentException::class.java) { RequestElement.AgeOver(100) }
+            assertThrows(IllegalArgumentException::class.java) { MdlAttribute.AgeOver(100) }
         }
 
         @Test
-        fun `validates boolean true`() = assertTrue(RequestElement.AgeOver(18).validate(true))
+        fun `validates boolean true`() = assertTrue(MdlAttribute.AgeOver(18).validate(true))
 
         @Test
-        fun `validates boolean false`() = assertTrue(RequestElement.AgeOver(18).validate(false))
+        fun `validates boolean false`() = assertTrue(MdlAttribute.AgeOver(18).validate(false))
 
         @Test
-        fun `rejects non-boolean`() = assertFalse(RequestElement.AgeOver(18).validate("true"))
+        fun `rejects non-boolean`() = assertFalse(MdlAttribute.AgeOver(18).validate("true"))
     }
 
     class CustomTests {
         @Test
         fun `value matches provided string`() =
-            assertEquals("custom_attr", RequestElement.Custom("custom_attr").value)
+            assertEquals("custom_attr", MdlAttribute.Custom("custom_attr").value)
 
         @Test
-        fun `validates any type`() = assertTrue(RequestElement.Custom("x").validate("string"))
+        fun `validates any type`() = assertTrue(MdlAttribute.Custom("x").validate("string"))
 
         @Test
-        fun `validates int`() = assertTrue(RequestElement.Custom("x").validate(123))
+        fun `validates int`() = assertTrue(MdlAttribute.Custom("x").validate(123))
 
         @Test
-        fun `validates boolean`() = assertTrue(RequestElement.Custom("x").validate(true))
+        fun `validates boolean`() = assertTrue(MdlAttribute.Custom("x").validate(true))
     }
 }

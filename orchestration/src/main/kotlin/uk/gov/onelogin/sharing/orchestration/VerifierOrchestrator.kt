@@ -98,6 +98,7 @@ class VerifierOrchestrator(
             return
         }
 
+        logger.debug(logTag, "AttributeGroup: ${verifierConfig.verificationRequest.attributeGroup}")
         performPreflightChecks()
     }
 

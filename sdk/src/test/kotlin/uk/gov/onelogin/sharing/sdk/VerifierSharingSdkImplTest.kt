@@ -7,6 +7,8 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
@@ -24,7 +26,12 @@ class VerifierSharingSdkImplTest {
     fun `verifier returns CredentialVerifier with expected dependencies`() {
         val verificationRequest = VerificationRequest(
             documentType = "org.iso.18013.5.1.mDL",
-            requestedElements = listOf("given_name", "family_name")
+            attributeGroup = AttributeGroup(
+                mapOf(
+                    MdlAttribute.GivenName to true,
+                    MdlAttribute.FamilyName to true
+                )
+            )
         )
         val trustedCertificates = emptyList<Certificate>()
         val verifierConfig = VerifierConfig(
