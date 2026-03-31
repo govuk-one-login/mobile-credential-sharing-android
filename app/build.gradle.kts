@@ -87,6 +87,7 @@ dependencies {
     ).forEach(::kspAndroidTest)
 
     listOf(
+        projects.core, // TODO: Remove once SDK prerequisites screen handles permissions
         projects.sdk,
         projects.ui.uiApi,
         projects.ui.uiImpl
