@@ -53,7 +53,7 @@ class HolderOrchestrator(
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
-    private val prerequisiteGate: PrerequisiteGate,
+    private val prerequisiteGate: PrerequisiteGate.V1,
     @Suppress("UnusedPrivateProperty")
     private val credentialProvider: CredentialProvider
 ) : Orchestrator.Holder {

@@ -38,6 +38,7 @@ class AuthorizationPrerequisiteGateLayer(
         when (prerequisite) {
             Prerequisite.BLUETOOTH -> bluetoothPermissions()
             Prerequisite.CAMERA -> listOf(Manifest.permission.CAMERA)
+            Prerequisite.LOCATION,
             Prerequisite.UNKNOWN -> emptyList()
         }
 

@@ -48,7 +48,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 @SingleIn(AppScope::class)
 class VerifierOrchestrator(
     private val logger: Logger,
-    private val prerequisiteGate: PrerequisiteGate,
+    private val prerequisiteGate: PrerequisiteGate.V1,
     private val sessionFactory: SessionFactory<VerifierSession>,
     @Suppress("UnusedPrivateProperty")
     private val verifierConfig: VerifierConfig,

@@ -23,6 +23,7 @@ class ReadinessPrerequisiteLayer(
         when (prerequisite) {
             Prerequisite.BLUETOOTH -> handleBluetoothReadiness()
             Prerequisite.CAMERA -> handleCameraReadiness()
+            Prerequisite.LOCATION,
             Prerequisite.UNKNOWN -> null
         }.also {
             logger.debug(

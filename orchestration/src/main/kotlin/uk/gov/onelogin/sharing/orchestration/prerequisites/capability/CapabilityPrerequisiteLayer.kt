@@ -22,6 +22,7 @@ class CapabilityPrerequisiteLayer(
         when (prerequisite) {
             Prerequisite.BLUETOOTH -> handleBluetoothCapability()
             Prerequisite.CAMERA -> handleCameraCapability()
+            Prerequisite.LOCATION,
             Prerequisite.UNKNOWN -> null
         }.also {
             logger.debug(
