@@ -5,7 +5,9 @@ import uk.gov.onelogin.sharing.core.Actionable
 import uk.gov.onelogin.sharing.core.Recoverable
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 
-enum class BluetoothState : Recoverable, Actionable<PrerequisiteAction> {
+enum class BluetoothState :
+    Recoverable,
+    Actionable<PrerequisiteAction> {
     Unsupported,
     Restricted,
     PoweredOff,

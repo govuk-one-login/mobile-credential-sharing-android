@@ -6,7 +6,7 @@ import android.provider.Settings
 sealed class PrerequisiteAction {
     data class RequestPermissions(val permissions: List<String>) : PrerequisiteAction() {
         constructor(
-            vararg permissions: String,
+            vararg permissions: String
         ) : this(permissions.toList())
     }
 
@@ -15,6 +15,7 @@ sealed class PrerequisiteAction {
     data object EnableBluetooth : IntentHandoff(BluetoothAdapter.ACTION_REQUEST_ENABLE)
 
     // Requires Google Play Services SettingsClient
-    data object EnableLocationServices : PrerequisiteAction()
-
+    data object EnableLocationServices : IntentHandoff(
+        Settings.ACTION_LOCATION_SOURCE_SETTINGS
+    )
 }

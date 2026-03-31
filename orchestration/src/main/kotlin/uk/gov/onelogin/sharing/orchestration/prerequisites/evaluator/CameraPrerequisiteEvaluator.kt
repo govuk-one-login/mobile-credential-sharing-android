@@ -11,13 +11,12 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 class CameraPrerequisiteEvaluator(
     private val context: Context,
     private val factory: ProcessCameraProviderFactory,
-    permissionChecker: PermissionChecker,
+    permissionChecker: PermissionChecker
 ) : PermissionChecker by permissionChecker,
     PrerequisiteEvaluator<CameraState> {
-    override fun evaluate(): CameraState? =
-        evaluatePermissions()
-            ?: evaluateSupport()
-            ?: evaluateRestrictions()
+    override fun evaluate(): CameraState? = evaluatePermissions()
+        ?: evaluateSupport()
+        ?: evaluateRestrictions()
 
     private fun evaluatePermissions(): CameraState? =
         checkPermissions(Manifest.permission.CAMERA).let { result ->
@@ -28,19 +27,19 @@ class CameraPrerequisiteEvaluator(
         }
 
     private fun evaluateSupport(): CameraState? = runCatching {
-            factory.create()
-        }.mapCatching { provider ->
-            provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
-        }.fold(
-            onSuccess = { condition ->
-                if (condition) {
-                    null
-                } else {
-                    CameraState.Unsupported
-                }
-            },
-            onFailure = { CameraState.Unsupported }
-        )
+        factory.create()
+    }.mapCatching { provider ->
+        provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
+    }.fold(
+        onSuccess = { condition ->
+            if (condition) {
+                null
+            } else {
+                CameraState.Unsupported
+            }
+        },
+        onFailure = { CameraState.Unsupported }
+    )
 
     private fun evaluateRestrictions(): CameraState? = if (
         context.devicePolicyManager?.getCameraDisabled(null) ?: true

@@ -1,50 +1,35 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites
 
-import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
-import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
-import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.BluetoothPrerequisiteEvaluator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.CameraPrerequisiteEvaluator
+import dev.zacsweers.metro.Inject
+import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.PrerequisiteEvaluator
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 @ContributesBinding(AppScope::class)
+@Inject
 class PrerequisiteGateV2(
-    private val context: Context,
-    private val factory: ProcessCameraProviderFactory,
-    private val permissionChecker: PermissionChecker,
+    private val bluetoothEvaluator: PrerequisiteEvaluator<BluetoothState>,
+    private val cameraEvaluator: PrerequisiteEvaluator<CameraState>,
+    private val locationEvaluator: PrerequisiteEvaluator<LocationState>
 ) : PrerequisiteGate.V2 {
+
     override fun evaluatePrerequisites(
-        prerequisites: Iterable<Prerequisite>,
+        prerequisites: Iterable<Prerequisite>
     ): List<MissingPrerequisiteV2> = prerequisites.mapNotNull { prerequisite ->
         when (prerequisite) {
-            Prerequisite.BLUETOOTH -> handleBluetooth()?.let(MissingPrerequisiteV2::Bluetooth)
-            Prerequisite.CAMERA -> handleCamera()?.let(MissingPrerequisiteV2::Camera)
-            Prerequisite.LOCATION -> handleLocation()?.let(MissingPrerequisiteV2::Location)
+            Prerequisite.BLUETOOTH -> bluetoothEvaluator.evaluate()
+                ?.let(MissingPrerequisiteV2::Bluetooth)
+
+            Prerequisite.CAMERA -> cameraEvaluator.evaluate()
+                ?.let(MissingPrerequisiteV2::Camera)
+
+            Prerequisite.LOCATION -> locationEvaluator.evaluate()
+                ?.let(MissingPrerequisiteV2::Location)
+
             else -> null
         }
     }
-
-    private fun handleBluetooth(): BluetoothState? {
-        return BluetoothPrerequisiteEvaluator(
-            context = context,
-            permissionChecker = permissionChecker,
-        ).evaluate()
-    }
-
-    private fun handleCamera(): CameraState? {
-        return CameraPrerequisiteEvaluator(
-            context = context,
-            factory = factory,
-            permissionChecker = permissionChecker,
-        ).evaluate()
-    }
-
-    private fun handleLocation(): LocationState? {
-        return null
-    }
 }
-

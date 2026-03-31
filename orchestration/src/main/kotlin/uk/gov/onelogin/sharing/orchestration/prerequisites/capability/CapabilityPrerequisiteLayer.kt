@@ -21,7 +21,9 @@ class CapabilityPrerequisiteLayer(
     override fun checkCapability(prerequisite: Prerequisite): MissingPrerequisiteReason.Incapable? =
         when (prerequisite) {
             Prerequisite.BLUETOOTH -> handleBluetoothCapability()
+
             Prerequisite.CAMERA -> handleCameraCapability()
+
             Prerequisite.LOCATION,
             Prerequisite.UNKNOWN -> null
         }.also {

@@ -5,7 +5,9 @@ import uk.gov.onelogin.sharing.core.Actionable
 import uk.gov.onelogin.sharing.core.Recoverable
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 
-enum class LocationState : Recoverable, Actionable<PrerequisiteAction> {
+enum class LocationState :
+    Recoverable,
+    Actionable<PrerequisiteAction> {
     Unsupported,
     ServicesDisabled,
     PermissionNotGranted,

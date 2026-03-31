@@ -10,30 +10,28 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 
 class BluetoothPrerequisiteEvaluator(
     private val context: Context,
-    permissionChecker: PermissionChecker,
+    permissionChecker: PermissionChecker
 ) : PermissionChecker by permissionChecker,
     PrerequisiteEvaluator<BluetoothState> {
-    override fun evaluate(): BluetoothState? =
-        evaluateBluetoothPermissions()
-            ?: evaluateBluetoothSupport()
-            ?: evaluateBluetoothRestrictions()
-            ?: evaluateBluetoothReadiness()
+    override fun evaluate(): BluetoothState? = evaluatePermissions()
+        ?: evaluateSupport()
+        ?: evaluateRestrictions()
+        ?: evaluateReadiness()
 
-    private fun evaluateBluetoothPermissions(): BluetoothState? =
+    private fun evaluatePermissions(): BluetoothState? =
         BluetoothPermissionChecker.Companion.bluetoothPermissions()
             .let(::checkPermissions).let { result ->
-            when (result) {
-                PermissionChecker.Response.Passed -> null
-                is PermissionChecker.Response.Missing -> BluetoothState.PermissionNotGranted
+                when (result) {
+                    PermissionChecker.Response.Passed -> null
+                    is PermissionChecker.Response.Missing -> BluetoothState.PermissionNotGranted
+                }
             }
-        }
 
-    private fun evaluateBluetoothSupport(): BluetoothState? =
-        context.bluetoothManager?.adapter?.let {
-            BluetoothState.Unsupported
-        }
+    private fun evaluateSupport(): BluetoothState? = context.bluetoothManager?.adapter?.let {
+        BluetoothState.Unsupported
+    }
 
-    private fun evaluateBluetoothRestrictions(): BluetoothState? = if (
+    private fun evaluateRestrictions(): BluetoothState? = if (
         context.userManager?.hasUserRestriction(UserManager.DISALLOW_BLUETOOTH) ?: true
     ) {
         BluetoothState.Restricted
@@ -41,11 +39,11 @@ class BluetoothPrerequisiteEvaluator(
         null
     }
 
-    private fun evaluateBluetoothReadiness(): BluetoothState? = if (
-            context.bluetoothManager?.adapter?.isEnabled ?: false
-        ) {
-            null
-        } else {
+    private fun evaluateReadiness(): BluetoothState? = if (
+        context.bluetoothManager?.adapter?.isEnabled ?: false
+    ) {
+        null
+    } else {
         BluetoothState.PoweredOff
     }
 }

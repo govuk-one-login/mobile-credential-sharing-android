@@ -5,7 +5,9 @@ import uk.gov.onelogin.sharing.core.Actionable
 import uk.gov.onelogin.sharing.core.Recoverable
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 
-enum class CameraState : Recoverable, Actionable<PrerequisiteAction> {
+enum class CameraState :
+    Recoverable,
+    Actionable<PrerequisiteAction> {
     Unsupported,
     Restricted,
     PermissionNotGranted,
