@@ -10,7 +10,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import uk.gov.onelogin.sharing.cameraService.scan.Scanner
 import uk.gov.onelogin.sharing.orchestration.scan.CredentialScanner
 import uk.gov.onelogin.sharing.verifier.VerifierNavigationEvents
 import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
