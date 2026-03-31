@@ -5,6 +5,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -36,6 +37,7 @@ class VerifierPrerequisitesViewModelTest {
 
     @Test
     fun `orchestrator calls start on init`() = runTest(dispatcherRule.testDispatcher) {
+        backgroundScope.launch { viewModel.events.collect { } }
         assertEquals(1, fakeOrchestrator.startCount)
     }
 
