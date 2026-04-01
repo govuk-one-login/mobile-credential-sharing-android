@@ -8,6 +8,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSignedItem
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseModelTest {
 
@@ -56,13 +57,13 @@ class DeviceResponseModelTest {
             )
         ),
         documentErrors = null,
-        status = 0
+        status = Status.OK
     )
 
     @Test
     fun `DeviceResponse has correct version and status`() {
         assertEquals("1.0", model.version)
-        assertEquals(0L, model.status)
+        assertEquals(Status.OK, model.status)
     }
 
     @Test
@@ -72,15 +73,31 @@ class DeviceResponseModelTest {
     }
 
     @Test
-    fun `DeviceResponse status defaults to 0`() {
+    fun `DeviceResponse status defaults to OK`() {
         val response = DeviceResponse(documents = null, documentErrors = null)
-        assertEquals(0L, response.status)
+        assertEquals(Status.OK, response.status)
+        assertEquals(0, response.status.code)
     }
 
     @Test
-    fun `DeviceResponse status supports 10`() {
-        val response = DeviceResponse(documents = null, documentErrors = null, status = 10)
-        assertEquals(10L, response.status)
+    fun `DeviceResponse status supports GENERAL_ERROR`() {
+        val response = DeviceResponse(documents = null, documentErrors = null, status = Status.GENERAL_ERROR)
+        assertEquals(Status.GENERAL_ERROR, response.status)
+        assertEquals(10, response.status.code)
+    }
+
+    @Test
+    fun `DeviceResponse status supports CBOR_DECODING_ERROR`() {
+        val response = DeviceResponse(documents = null, documentErrors = null, status = Status.CBOR_DECODING_ERROR)
+        assertEquals(Status.CBOR_DECODING_ERROR, response.status)
+        assertEquals(11, response.status.code)
+    }
+
+    @Test
+    fun `DeviceResponse status supports CBOR_VALIDATION_ERROR`() {
+        val response = DeviceResponse(documents = null, documentErrors = null, status = Status.CBOR_VALIDATION_ERROR)
+        assertEquals(Status.CBOR_VALIDATION_ERROR, response.status)
+        assertEquals(12, response.status.code)
     }
 
     @Test
