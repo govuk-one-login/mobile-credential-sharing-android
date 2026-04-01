@@ -30,7 +30,9 @@ class BluetoothPrerequisiteEvaluator(
     private fun evaluateSupport(): BluetoothState? =
         if (context.bluetoothManager?.adapter == null) {
             BluetoothState.Unsupported
-        } else null
+        } else {
+            null
+        }
 
     private fun evaluateRestrictions(): BluetoothState? = if (
         context.userManager?.hasUserRestriction(UserManager.DISALLOW_BLUETOOTH) ?: true
