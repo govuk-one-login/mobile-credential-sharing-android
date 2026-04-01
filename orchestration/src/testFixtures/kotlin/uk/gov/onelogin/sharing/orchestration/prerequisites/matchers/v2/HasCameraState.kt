@@ -1,23 +1,8 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2
 
-import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 
-internal class HasCameraState(private val matcher: Matcher<in CameraState>) :
-    TypeSafeMatcher<MissingPrerequisiteV2>() {
-    override fun describeTo(description: Description?) = matcher.describeTo(description)
-    override fun describeMismatchSafely(
-        item: MissingPrerequisiteV2?,
-        mismatchDescription: Description?
-    ) = matcher.describeMismatch(
-        (item as? MissingPrerequisiteV2.Camera)?.state,
-        mismatchDescription
-    )
-
-    override fun matchesSafely(item: MissingPrerequisiteV2?): Boolean = matcher.matches(
-        (item as? MissingPrerequisiteV2.Camera)?.state
-    )
-}
+internal class HasCameraState(matcher: Matcher<in CameraState>) :
+    HasState<CameraState>(matcher, { (it as? MissingPrerequisiteV2.Camera)?.state })
