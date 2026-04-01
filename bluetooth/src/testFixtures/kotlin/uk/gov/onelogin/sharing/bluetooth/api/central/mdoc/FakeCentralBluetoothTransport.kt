@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
@@ -15,9 +16,9 @@ class FakeCentralBluetoothTransport(
 
     var scanAndConnectCalls = 0
     var stopCalls = 0
-    var lastServiceUuid: ByteArray? = null
+    var lastServiceUuid: UUID? = null
 
-    override fun scanAndConnect(serviceUuid: ByteArray) {
+    override fun scanAndConnect(serviceUuid: UUID) {
         scanAndConnectCalls++
         lastServiceUuid = serviceUuid
     }

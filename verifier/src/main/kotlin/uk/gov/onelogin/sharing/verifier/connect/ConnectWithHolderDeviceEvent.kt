@@ -3,26 +3,11 @@ package uk.gov.onelogin.sharing.verifier.connect
 import android.bluetooth.BluetoothDevice
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
+import java.util.UUID
 
 sealed interface ConnectWithHolderDeviceEvent {
-    data class ConnectToDevice(val device: BluetoothDevice, val serviceUuid: ByteArray) :
-        ConnectWithHolderDeviceEvent {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as ConnectToDevice
-
-            if (device != other.device) return false
-            return serviceUuid.contentEquals(other.serviceUuid)
-        }
-
-        override fun hashCode(): Int {
-            var result = device.hashCode()
-            result = 31 * result + serviceUuid.contentHashCode()
-            return result
-        }
-    }
+    data class ConnectToDevice(val device: BluetoothDevice, val serviceUuid: UUID) :
+        ConnectWithHolderDeviceEvent
 
     data class RequestedPermission(val hasRequestedPermission: Boolean) :
         ConnectWithHolderDeviceEvent

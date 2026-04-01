@@ -5,9 +5,20 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         private set
     var lastQrCodeData: String? = null
         private set
+    var exceptionToThrow: Exception? = null
 
-    override fun processEngagement(qrCodeData: String) {
+    override fun processEngagement(
+        qrCodeData: String,
+        updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
+    ) {
         processEngagementCallCount++
         lastQrCodeData = qrCodeData
+        exceptionToThrow?.let { throw it }
+        updateContext(
+            VerifierCryptoContext(
+                engagementString = qrCodeData,
+                serviceUuid = java.util.UUID.randomUUID()
+            )
+        )
     }
 }

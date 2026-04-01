@@ -8,7 +8,10 @@ class VerifierConfigTest {
 
     @Test
     fun `stores verification request and trusted certificates`() {
-        val request = VerificationRequest.raw("org.iso.18013.5.1.mDL", listOf("given_name"))
+        val request = VerificationRequest.raw(
+            "org.iso.18013.5.1.mDL",
+            mapOf("given_name" to true)
+        )
         val config = VerifierConfig(
             verificationRequest = request,
             trustedCertificates = emptyList()
@@ -20,7 +23,7 @@ class VerifierConfigTest {
 
     @Test
     fun `data class equality`() {
-        val request = VerificationRequest.raw("type", listOf("a"))
+        val request = VerificationRequest.raw("type", mapOf("a" to true))
         val a = VerifierConfig(request, emptyList())
         val b = VerifierConfig(request, emptyList())
 

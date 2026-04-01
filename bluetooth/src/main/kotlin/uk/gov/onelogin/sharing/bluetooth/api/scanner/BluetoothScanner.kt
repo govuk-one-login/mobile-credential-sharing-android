@@ -1,10 +1,11 @@
 package uk.gov.onelogin.sharing.bluetooth.api.scanner
 
+import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 
 fun interface BluetoothScanner {
-    fun scan(serviceUuid: ByteArray): Flow<ScanEvent>
+    fun scan(serviceUuid: UUID): Flow<ScanEvent>
 
     companion object {
         /**
