@@ -2,12 +2,18 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator
 
 import android.content.Context
 import android.os.UserManager
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.bluetoothManager
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.userManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 
+@ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<BluetoothState>>())
+@Inject
 class BluetoothPrerequisiteEvaluator(
     private val context: Context,
     permissionChecker: PermissionChecker
@@ -30,7 +36,9 @@ class BluetoothPrerequisiteEvaluator(
     private fun evaluateSupport(): BluetoothState? =
         if (context.bluetoothManager?.adapter == null) {
             BluetoothState.Unsupported
-        } else null
+        } else {
+            null
+        }
 
     private fun evaluateRestrictions(): BluetoothState? = if (
         context.userManager?.hasUserRestriction(UserManager.DISALLOW_BLUETOOTH) ?: true

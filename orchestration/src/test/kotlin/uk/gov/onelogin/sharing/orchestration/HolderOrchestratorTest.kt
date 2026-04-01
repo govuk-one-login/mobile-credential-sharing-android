@@ -44,12 +44,10 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
-import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReason
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
@@ -75,7 +73,7 @@ class HolderOrchestratorTest {
         HolderSessionState.NotStarted
     )
 
-    private var prerequisiteResponses: MutableList<MissingPrerequisite> = mutableListOf()
+    private var prerequisiteResponses: MutableList<MissingPrerequisiteV2> = mutableListOf()
 
     private val gate by lazy {
         StubPrerequisiteGate(prerequisiteResponses)
@@ -135,12 +133,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
         prerequisiteResponses.add(
-            MissingPrerequisite(
-                Prerequisite.BLUETOOTH,
-                MissingPrerequisiteReason.NotReady(
-                    NotReadyReason.BluetoothTurnedOff
-                )
-            )
+            MissingPrerequisiteV2.Bluetooth(BluetoothState.PoweredOff)
         )
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
@@ -161,12 +154,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Incapable prerequisite check responses transition to failed`() = runTest {
         prerequisiteResponses.add(
-            MissingPrerequisite(
-                Prerequisite.BLUETOOTH,
-                MissingPrerequisiteReason.Incapable(
-                    IncapableReason.MissingHardware
-                )
-            )
+            MissingPrerequisiteV2.Bluetooth(BluetoothState.Unsupported)
         )
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)

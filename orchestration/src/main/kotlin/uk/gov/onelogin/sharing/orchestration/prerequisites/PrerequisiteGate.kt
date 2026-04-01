@@ -14,5 +14,5 @@ fun interface PrerequisiteGate<out Response : Any> {
         )
 
     interface V1 : PrerequisiteGate<MissingPrerequisite>
-    interface V2 : PrerequisiteGate<MissingPrerequisiteV2>
+    fun interface V2 : PrerequisiteGate<MissingPrerequisiteV2>
 }
