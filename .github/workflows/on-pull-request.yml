@@ -46,6 +46,9 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/android-setup
+      - name: Install vale
+        run: brew install vale
+        shell: bash
       - name: Run vale prose linting
         run: ./scripts/lint/vale/run
 

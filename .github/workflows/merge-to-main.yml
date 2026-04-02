@@ -30,10 +30,6 @@ jobs:
         run: cog check -l
         shell: bash
 
-      - name: Run linting suites
-        run: |
-          ./scripts/lint/all
-
       - name: Run testing suites
         run: |
           ./scripts/test/all
