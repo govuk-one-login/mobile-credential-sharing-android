@@ -27,13 +27,47 @@ class DeviceResponseDto {
         val docType: String,
 
         @JsonProperty("issuerSigned")
-        val issuerSigned: EmbeddedCbor,
+        val issuerSigned: IssuerSignedDTO,
 
         @JsonProperty("deviceSigned")
-        val deviceSigned: EmbeddedCbor,
+        val deviceSigned: DeviceSignedDTO,
 
         @JsonProperty("errors")
         val errors: Map<String, Int>? = null
     )
 
+    data class IssuerSignedDTO(
+        @JsonProperty("nameSpaces")
+        val nameSpaces: Map<String, List<EmbeddedCbor>>?,
+
+        @JsonProperty("issuerAuth")
+        val issuerAuth: ByteArray
+    )
+
+    data class IssuerSignedItemDTO(
+        @JsonProperty("digestID")
+        val digestId: Long,
+
+        @JsonProperty("random")
+        val random: ByteArray,
+
+        @JsonProperty("elementIdentifier")
+        val elementIdentifier: String,
+
+        @JsonProperty("elementValue")
+        val elementValue: Any
+    )
+
+    data class DeviceSignedDTO(
+        @JsonProperty("nameSpaces")
+        val nameSpaces: EmbeddedCbor,
+
+        @JsonProperty("deviceAuth")
+        val deviceAuth: DeviceAuthDTO
+    )
+
+    data class DeviceAuthDTO(
+        @JsonProperty("deviceSignature")
+        val deviceSignature: ByteArray
+    )
 }

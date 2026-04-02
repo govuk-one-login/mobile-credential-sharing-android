@@ -15,8 +15,9 @@ class DeviceResponseModelTest {
     private val namespace = "org.iso.18013.5.1"
     private val docType = "org.iso.18013.5.1.mDL"
 
-    private val familyNameRandom = "8798645B20EA200E19FFABAC92624BEE6AEC63ACEEDECFB1B80077D22BFC20E9"
-        .chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+    private val familyNameRandom =
+        "8798645B20EA200E19FFABAC92624BEE6AEC63ACEEDECFB1B80077D22BFC20E9"
+            .chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 
     private val portraitRandom = "D094DAD764A2EB9DEB5210E9D899643EFBD1D069CC311D3295516CA0B024412D"
         .chunked(2).map { it.toInt(16).toByte() }.toByteArray()
@@ -24,7 +25,7 @@ class DeviceResponseModelTest {
     private val portraitBytes = "FFD8FFE000104A464946000101010090009000".chunked(2)
         .map { it.toInt(16).toByte() }.toByteArray()
 
-    private val emptyNameSpacesBytes = byteArrayOf(0xA0.toByte()) // CBOR {}
+    private val emptyNameSpacesBytes = byteArrayOf(0xA0.toByte())
 
     private val model = DeviceResponse(
         version = "1.0",
@@ -81,21 +82,30 @@ class DeviceResponseModelTest {
 
     @Test
     fun `DeviceResponse status supports GENERAL_ERROR`() {
-        val response = DeviceResponse(documents = null, documentErrors = null, status = Status.GENERAL_ERROR)
+        val response =
+            DeviceResponse(documents = null, documentErrors = null, status = Status.GENERAL_ERROR)
         assertEquals(Status.GENERAL_ERROR, response.status)
         assertEquals(10, response.status.code)
     }
 
     @Test
     fun `DeviceResponse status supports CBOR_DECODING_ERROR`() {
-        val response = DeviceResponse(documents = null, documentErrors = null, status = Status.CBOR_DECODING_ERROR)
+        val response = DeviceResponse(
+            documents = null,
+            documentErrors = null,
+            status = Status.CBOR_DECODING_ERROR
+        )
         assertEquals(Status.CBOR_DECODING_ERROR, response.status)
         assertEquals(11, response.status.code)
     }
 
     @Test
     fun `DeviceResponse status supports CBOR_VALIDATION_ERROR`() {
-        val response = DeviceResponse(documents = null, documentErrors = null, status = Status.CBOR_VALIDATION_ERROR)
+        val response = DeviceResponse(
+            documents = null,
+            documentErrors = null,
+            status = Status.CBOR_VALIDATION_ERROR
+        )
         assertEquals(Status.CBOR_VALIDATION_ERROR, response.status)
         assertEquals(12, response.status.code)
     }
