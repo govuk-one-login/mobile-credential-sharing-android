@@ -24,7 +24,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: ./.github/actions/android-setup
+        uses: ./mobile-android-pipelines/actions/setup-runner
+        with:
+          gradle-cache-disabled: "false"
+          jdk-version: "21"
 
       - name: Verify Conventional commit standards against latest git tag
         run: cog check -l

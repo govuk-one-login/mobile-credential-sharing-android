@@ -31,6 +31,8 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/android-setup
+        with:
+          install-vale: 'false'
       - name: Verify Conventional commit standards against latest git tag
         run: cog check -l
         shell: bash
@@ -46,9 +48,6 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/android-setup
-      - name: Install vale
-        run: brew install vale
-        shell: bash
       - name: Run vale prose linting
         run: ./scripts/lint/vale/run
 
@@ -63,6 +62,8 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/android-setup
+        with:
+          install-vale: 'false'
       - name: Run linting associated with Gradle
         run: |
           ./scripts/lint/gradle
@@ -78,6 +79,8 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/android-setup
+        with:
+          install-vale: 'false'
       - name: Run unit tests
         run: |
           ./scripts/test/unit
@@ -100,7 +103,10 @@ jobs:
           submodules: 'true'
           fetch-depth: 0
       - name: Setup
-        uses: ./.github/actions/android-setup
+        uses: ./mobile-android-pipelines/actions/setup-runner
+        with:
+          gradle-cache-disabled: "false"
+          jdk-version: "21"
       - name: Run instrumentation tests
         run: |
           ./scripts/test/instrumentation --no-configuration-cache
@@ -125,6 +131,8 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/android-setup
+        with:
+          install-vale: 'false'
       - name: Download unit test coverage
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
         with:

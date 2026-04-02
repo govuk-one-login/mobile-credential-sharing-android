@@ -1,4 +1,9 @@
 name: Android Environment Setup
+inputs:
+  install-vale:
+    description: 'Install vale prose linter'
+    required: false
+    default: 'true'
 runs:
   using: "composite"
   steps:
@@ -14,11 +19,10 @@ runs:
         git config user.name github-actions
         git config user.email github-actions@github.com
 
-    - name: Setup GitHub Runner workflow
-      uses: ./mobile-android-pipelines/actions/setup-runner
+    - name: Setup common prerequisites
+      uses: ./mobile-android-pipelines/actions/common-prerequisites
       with:
-        gradle-cache-disabled: "false"
-        jdk-version: "21"
+        install-vale: ${{ inputs.install-vale }}
 
     - name: Cache Homebrew downloads
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
