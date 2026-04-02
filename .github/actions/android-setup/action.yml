@@ -23,18 +23,3 @@ runs:
       uses: ./mobile-android-pipelines/actions/common-prerequisites
       with:
         install-vale: ${{ inputs.install-vale }}
-
-    - name: Cache Homebrew downloads
-      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-      with:
-        path: |
-          ~/Library/Caches/Homebrew
-          ~/.cache/Homebrew
-        key: brew-${{ runner.os }}-${{ hashFiles('Brewfile') }}
-        restore-keys: |
-          brew-${{ runner.os }}-
-
-    - name: Install homebrew packages
-      shell: bash
-      run: |
-        brew bundle
