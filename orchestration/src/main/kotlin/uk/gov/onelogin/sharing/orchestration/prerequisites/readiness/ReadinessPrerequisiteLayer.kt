@@ -22,7 +22,10 @@ class ReadinessPrerequisiteLayer(
     override fun checkReadiness(prerequisite: Prerequisite): MissingPrerequisiteReason.NotReady? =
         when (prerequisite) {
             Prerequisite.BLUETOOTH -> handleBluetoothReadiness()
+
             Prerequisite.CAMERA -> handleCameraReadiness()
+
+            Prerequisite.LOCATION,
             Prerequisite.UNKNOWN -> null
         }.also {
             logger.debug(

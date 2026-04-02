@@ -37,7 +37,7 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancel
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
@@ -53,7 +53,7 @@ class HolderOrchestrator(
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
-    private val prerequisiteGate: PrerequisiteGate,
+    private val prerequisiteGate: PrerequisiteGate.V2,
     @Suppress("UnusedPrivateProperty")
     private val credentialProvider: CredentialProvider
 ) : Orchestrator.Holder {
@@ -131,7 +131,7 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleStartPrerequisiteCheck(prerequisiteCheck: List<MissingPrerequisite>) {
+    private fun handleStartPrerequisiteCheck(prerequisiteCheck: List<MissingPrerequisiteV2>) {
         if (prerequisiteCheck.isEmpty()) {
             safeTransitionTo(HolderSessionState.ReadyToPresent)
 
@@ -149,7 +149,7 @@ class HolderOrchestrator(
             val checkResponse = prerequisiteCheck[0]
 
             when {
-                !checkResponse.isRecoverable -> {
+                !checkResponse.isRecoverable() -> {
                     HolderSessionState.Complete.Failed(
                         SessionError(
                             "Device cannot perform journey",

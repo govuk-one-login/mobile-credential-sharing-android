@@ -8,6 +8,7 @@ import android.os.ParcelUuid
 import androidx.annotation.RequiresPermission
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import java.util.UUID
 import java.util.concurrent.CancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerCallback.Companion.toLeScanCallback
-import uk.gov.onelogin.sharing.core.UUIDExtensions.toUUID
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
@@ -31,7 +31,7 @@ class AndroidBluetoothScanner(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     @Suppress("LongMethod")
-    override fun scan(serviceUuid: ByteArray): Flow<ScanEvent> = callbackFlow {
+    override fun scan(serviceUuid: UUID): Flow<ScanEvent> = callbackFlow {
         val scanner = bluetoothAdapterProvider.getLeScanner()
         lateinit var leScanCallback: ScanCallback
         when {
@@ -71,12 +71,12 @@ class AndroidBluetoothScanner(
 
                 logger.debug(
                     logTag,
-                    "Creating ScanFilter for UUID: ${serviceUuid.toUUID()}"
+                    "Creating ScanFilter for UUID: $serviceUuid"
                 )
 
                 val filters: List<ScanFilter> = listOf(
                     ScanFilter.Builder()
-                        .setServiceUuid(ParcelUuid(serviceUuid.toUUID()))
+                        .setServiceUuid(ParcelUuid(serviceUuid))
                         .build()
                 )
 

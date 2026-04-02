@@ -1,19 +1,26 @@
 package uk.gov.onelogin.sharing.orchestration.verificationrequest
 
-data class VerificationRequest(val documentType: String, val requestedElements: List<String>) {
-    companion object {
-        fun typed(
-            documentType: DocumentType,
-            requestElements: List<RequestElement>
-        ): VerificationRequest = VerificationRequest(
-            documentType = documentType.value,
-            requestedElements = requestElements.map { it.value }
-        )
+data class VerificationRequest(val documentType: String, val attributeGroup: AttributeGroup) {
+    val requestedElements: List<String>
+        get() = attributeGroup.attributes.keys.map { it.value }
 
-        fun raw(documentType: String, requestedElements: List<String>): VerificationRequest =
+    companion object {
+        fun typed(documentType: DocumentType, attributeGroup: AttributeGroup): VerificationRequest =
             VerificationRequest(
-                documentType = documentType,
-                requestedElements = requestedElements
+                documentType = documentType.value,
+                attributeGroup = attributeGroup
             )
+
+        fun raw(
+            documentType: String,
+            requestedElements: Map<String, Boolean>
+        ): VerificationRequest = VerificationRequest(
+            documentType = documentType,
+            attributeGroup = AttributeGroup(
+                requestedElements.map { (key, retain) ->
+                    MdlAttribute.Custom(key) to retain
+                }.toMap()
+            )
+        )
     }
 }

@@ -23,7 +23,6 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
-import uk.gov.onelogin.sharing.core.UUIDExtensions.toBytes
 
 @RunWith(AndroidJUnit4::class)
 class AndroidBluetoothScannerTest {
@@ -44,7 +43,7 @@ class AndroidBluetoothScannerTest {
 
     @Test
     fun `scan emits DeviceFound event`() = runTest {
-        val uuid = UUID.randomUUID().toBytes()
+        val uuid = UUID.randomUUID()
 
         val mockDevice = mockk<BluetoothDevice>()
         every { mockDevice.address } returns DEVICE_ADDRESS
@@ -72,7 +71,7 @@ class AndroidBluetoothScannerTest {
     @Test
     fun `scan fails with ScannerFailure Already_Started_Scanning when scan is in progress`() =
         runTest {
-            val uuid = UUID.randomUUID().toBytes()
+            val uuid = UUID.randomUUID()
             val callbackSlot = slot<ScanCallback>()
 
             every {
@@ -106,7 +105,7 @@ class AndroidBluetoothScannerTest {
 
     @Test
     fun `scan emits ScanFailed event`() = runTest {
-        val uuid = UUID.randomUUID().toBytes()
+        val uuid = UUID.randomUUID()
         val callbackSlot = slot<ScanCallback>()
 
         every {
@@ -127,7 +126,7 @@ class AndroidBluetoothScannerTest {
 
     @Test
     fun `scan fails ScannerFailure Internal_Error if scanner is null`() = runTest {
-        val uuid = UUID.randomUUID().toBytes()
+        val uuid = UUID.randomUUID()
         val mockAdapterProvider = mockk<BluetoothAdapterProvider>()
         every { mockAdapterProvider.getLeScanner() } returns null
 
