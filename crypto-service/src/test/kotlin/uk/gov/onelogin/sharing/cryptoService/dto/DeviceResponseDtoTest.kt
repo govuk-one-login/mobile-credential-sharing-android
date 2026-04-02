@@ -51,9 +51,9 @@ class DeviceResponseDtoTest {
         val cborHeader = "42"
 
         val issuerSignedItemHex = issuerSignedItemData.joinToString("")
-        { "%02x".format(it) }
+            { "%02x".format(it) }
         val deviceNameSpacesHex = deviceNameSpacesData.joinToString("")
-        { "%02x".format(it) }
+            { "%02x".format(it) }
 
         val encodedString = encoded.joinToString("") { "%02x".format(it) }
 
