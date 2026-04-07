@@ -9,8 +9,8 @@ import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.bluetoothManager
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.userManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.core.permission.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 
 @ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<BluetoothState>>())

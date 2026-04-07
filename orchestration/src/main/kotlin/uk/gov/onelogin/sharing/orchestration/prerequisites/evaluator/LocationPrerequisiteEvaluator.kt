@@ -9,8 +9,8 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.locationManager
+import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.core.permission.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 @ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<LocationState>>())

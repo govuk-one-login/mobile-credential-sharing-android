@@ -7,8 +7,8 @@ import dev.zacsweers.metro.binding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.toPermissionsList
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.core.permission.toPermissionsList
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
