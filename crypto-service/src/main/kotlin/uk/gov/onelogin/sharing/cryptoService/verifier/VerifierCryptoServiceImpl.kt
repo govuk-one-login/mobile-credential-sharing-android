@@ -5,7 +5,9 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import java.math.BigInteger
 import java.security.AlgorithmParameters
+import java.security.InvalidKeyException
 import java.security.KeyFactory
+import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECPoint
@@ -21,6 +23,7 @@ import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.SharedSecretGenerator
 
 /**
  * Default implementation of [VerifierCryptoService].
@@ -28,7 +31,8 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
 class VerifierCryptoServiceImpl(
     private val logger: Logger,
-    private val keyPairGenerator: KeyPairGenerator
+    private val keyPairGenerator: KeyPairGenerator,
+    private val sharedSecretGenerator: SharedSecretGenerator
 ) : VerifierCryptoService {
 
     override fun processEngagement(
@@ -82,6 +86,34 @@ class VerifierCryptoServiceImpl(
         )
 
         logger.debug(logTag, "SessionTranscriptBytes constructed successfully")
+    }
+
+    override fun computeSharedSecret(context: VerifierCryptoContext): ByteArray {
+        val eReaderPrivateKey = context.eReaderKeyPair?.private as? ECPrivateKey
+            ?: error("EReaderKey.Priv not available")
+        val eDevicePublicKey = context.eDevicePublicKey
+            ?: error("EDeviceKey.Pub not available")
+
+        val deviceCurve = eDevicePublicKey.params.curve
+        val readerCurve = eReaderPrivateKey.params.curve
+        if (deviceCurve != readerCurve) {
+            val message = "Error computing shared secret due to " +
+                "EDeviceKey.Pub with incompatible curve: $deviceCurve"
+            logger.error(logTag, message)
+            throw SharedSecretException.IncompatibleCurve(deviceCurve.toString())
+        }
+
+        return try {
+            sharedSecretGenerator.generateSharedSecret(
+                holderKey = eReaderPrivateKey,
+                eReaderKey = eDevicePublicKey
+            ).also {
+                logger.debug(logTag, "Shared secret computed successfully")
+            }
+        } catch (e: InvalidKeyException) {
+            logger.error(logTag, "Error computing shared secret due to malformed EDeviceKey.Pub")
+            throw SharedSecretException.MalformedKey(e)
+        }
     }
 
     private fun CoseKeyDto.toEcPublicKey(): ECPublicKey {
