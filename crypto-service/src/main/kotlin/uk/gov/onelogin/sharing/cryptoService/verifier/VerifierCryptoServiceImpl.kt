@@ -3,11 +3,18 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
+import java.math.BigInteger
+import java.security.AlgorithmParameters
+import java.security.KeyFactory
 import java.security.interfaces.ECPublicKey
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.ECPublicKeySpec
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveSessionTranscript
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
@@ -60,15 +67,30 @@ class VerifierCryptoServiceImpl(
 
         val sessionTranscriptBytes = EmbeddedCbor(sessionTranscript).encodeCbor()
 
+        val eDevicePublicKey = engagementData.security.ephemeralPublicKey
+            .toEcPublicKey()
+
         updateContext(
             VerifierCryptoContext(
                 engagementString = qrCodeData,
                 serviceUuid = serviceUuid,
                 eReaderKeyTagged = eReaderKeyTagged,
-                sessionTranscriptBytes = sessionTranscriptBytes
+                sessionTranscriptBytes = sessionTranscriptBytes,
+                eReaderKeyPair = keyPair,
+                eDevicePublicKey = eDevicePublicKey
             )
         )
 
         logger.debug(logTag, "SessionTranscriptBytes constructed successfully")
+    }
+
+    private fun CoseKeyDto.toEcPublicKey(): ECPublicKey {
+        val ecPoint = ECPoint(BigInteger(1, x), BigInteger(1, y))
+        val params = AlgorithmParameters.getInstance(ELLIPTIC_CURVE_ALGORITHM).apply {
+            init(ECGenParameterSpec(ELLIPTIC_CURVE_PARAMETER_SPEC))
+        }
+        val ecSpec = params.getParameterSpec(java.security.spec.ECParameterSpec::class.java)
+        return KeyFactory.getInstance(ELLIPTIC_CURVE_ALGORITHM)
+            .generatePublic(ECPublicKeySpec(ecPoint, ecSpec)) as ECPublicKey
     }
 }

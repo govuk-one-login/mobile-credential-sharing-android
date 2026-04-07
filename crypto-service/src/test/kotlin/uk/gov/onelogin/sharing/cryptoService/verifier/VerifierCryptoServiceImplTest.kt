@@ -8,6 +8,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.cryptoService.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.EcKeyPairGenerator
 
 class VerifierCryptoServiceImplTest {
@@ -33,6 +34,13 @@ class VerifierCryptoServiceImplTest {
         assertTrue(eReaderKey[0] == 0xD8.toByte())
         assertTrue(eReaderKey[1] == 0x18.toByte())
         assertNotNull(context.sessionTranscriptBytes)
+        assertNotNull(context.eReaderKeyPair)
+        val eDeviceKey = assertNotNull(context.eDevicePublicKey)
+        val expectedKey = validDeviceEngagementDto.security.ephemeralPublicKey
+        assertEquals(
+            expectedKey.x.toList(),
+            eDeviceKey.w.affineX.toByteArray().takeLast(32).map { it }
+        )
         assert("SessionTranscriptBytes constructed successfully" in logger)
     }
 
