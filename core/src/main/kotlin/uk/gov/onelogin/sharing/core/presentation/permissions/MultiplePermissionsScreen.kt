@@ -1,6 +1,10 @@
 package uk.gov.onelogin.sharing.core.presentation.permissions
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
@@ -44,19 +48,26 @@ fun MultiplePermissionsScreen(
             onGrantedPermissions()
         }
 
-        state.shouldShowRationale -> {
-            onShowRationale(state) {
-                state.launchMultiplePermissionRequest()
-            }
-        }
+        else -> Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                state.shouldShowRationale -> {
+                    onShowRationale(state) {
+                        state.launchMultiplePermissionRequest()
+                    }
+                }
 
-        hasPreviouslyRequestedPermission && state.isPermanentlyDenied() -> {
-            onPermanentlyDenyPermission(state)
-        }
+                hasPreviouslyRequestedPermission && state.isPermanentlyDenied() -> {
+                    onPermanentlyDenyPermission(state)
+                }
 
-        else -> {
-            onRequirePermission(state) {
-                state.launchMultiplePermissionRequest()
+                else -> {
+                    onRequirePermission(state) {
+                        state.launchMultiplePermissionRequest()
+                    }
+                }
             }
         }
     }
