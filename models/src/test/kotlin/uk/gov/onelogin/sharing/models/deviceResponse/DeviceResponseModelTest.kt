@@ -1,3 +1,5 @@
+package uk.gov.onelogin.sharing.models.deviceResponse
+
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
