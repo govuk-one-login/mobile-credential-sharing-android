@@ -25,11 +25,9 @@ import uk.gov.android.ui.componentsv2.camera.ImageProxyConverter
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeScanResult
 import uk.gov.android.ui.componentsv2.camera.qr.BarcodeUseCaseProviders
 import uk.gov.android.ui.componentsv2.camera.qr.CentrallyCroppedImageProxyConverter
-import uk.gov.android.ui.patterns.camera.qr.ModifierExtensions
 import uk.gov.android.ui.patterns.camera.qr.QrScannerScreen
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.android.ui.theme.m3.QrScannerOverlayDefaults
 import uk.gov.android.ui.theme.spacingDouble
 
 @Composable
@@ -68,10 +66,8 @@ fun ScannerContent(
         surfaceRequest = surfaceRequest,
         previewUseCase = previewUseCase,
         analysisUseCase = analysisUseCase,
-        scanningWidthMultiplier = ModifierExtensions.CANVAS_WIDTH_MULTIPLIER,
         coroutineScope = coroutineScope,
-        onUpdateViewModelCamera = viewModel::update,
-        colors = QrScannerOverlayDefaults
+        onUpdateViewModelCamera = viewModel::update
     )
 }
 

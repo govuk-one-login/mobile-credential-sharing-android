@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.CoseKeySerializer
@@ -67,4 +68,15 @@ fun Any.encodeCbor(): ByteArray {
         SessionEstablishmentDto::class.java to SessionEstablishmentSerializer()
     )
     return this.encodeCbor(sessionSerializers)
+}
+
+/**
+ * Extension to encode the [DeviceResponseDto.DeviceResponse] to CBOR bytes.
+ */
+fun DeviceResponseDto.DeviceResponse.encodeCbor(): ByteArray {
+    val serializers: Map<Class<*>, StdSerializer<*>> = mapOf(
+        EmbeddedCbor::class.java to (EmbeddedCborSerializer() as StdSerializer<*>)
+    )
+    val mapper = CborMapper.create(serializers)
+    return mapper.writeValueAsBytes(this)
 }
