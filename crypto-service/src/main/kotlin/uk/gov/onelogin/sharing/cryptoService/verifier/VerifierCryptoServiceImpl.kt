@@ -88,7 +88,16 @@ class VerifierCryptoServiceImpl(
         logger.debug(logTag, "SessionTranscriptBytes constructed successfully")
     }
 
-    override fun computeSharedSecret(context: VerifierCryptoContext): ByteArray {
+    /**
+     * Computes the shared secret (ZAB) using ECKA-DH, combining the Verifier's
+     * EReaderKey.Priv with the Holder's EDeviceKey.Pub.
+     *
+     * @param context The crypto context populated by [processEngagement].
+     * @return The raw shared secret bytes (IKM for HKDF in a subsequent step).
+     * @throws SharedSecretException.IncompatibleCurve if EDeviceKey.Pub is not on P-256.
+     * @throws SharedSecretException.MalformedKey if EDeviceKey.Pub is malformed.
+     */
+    internal fun computeSharedSecret(context: VerifierCryptoContext): ByteArray {
         val eReaderPrivateKey = context.eReaderKeyPair?.private as? ECPrivateKey
             ?: error("EReaderKey.Priv not available")
         val eDevicePublicKey = context.eDevicePublicKey

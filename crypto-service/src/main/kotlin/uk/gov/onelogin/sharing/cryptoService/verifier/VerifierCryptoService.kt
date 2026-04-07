@@ -6,9 +6,8 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
  * The Orchestrator delegates to this service during the verification lifecycle:
  * 1. [processEngagement] — Decodes the QR code, generates ephemeral keys,
  *    calculates the Session Transcript, and decorates the session's crypto context.
- * 2. [computeSharedSecret] — Derives the shared secret (ZAB) via ECKA-DH.
  */
-interface VerifierCryptoService {
+fun interface VerifierCryptoService {
     /**
      * Processes the scanned Device Engagement data: generates the Verifier's
      * ephemeral key pair, constructs the SessionTranscriptBytes, and stores
@@ -24,15 +23,4 @@ interface VerifierCryptoService {
         qrCodeData: String,
         updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
     )
-
-    /**
-     * Computes the shared secret (ZAB) using ECKA-DH, combining the Verifier's
-     * EReaderKey.Priv with the Holder's EDeviceKey.Pub.
-     *
-     * @param context The crypto context populated by [processEngagement].
-     * @return The raw shared secret bytes (IKM for HKDF in a subsequent step).
-     * @throws SharedSecretException.IncompatibleCurve if EDeviceKey.Pub is not on P-256.
-     * @throws SharedSecretException.MalformedKey if EDeviceKey.Pub is malformed.
-     */
-    fun computeSharedSecret(context: VerifierCryptoContext): ByteArray
 }
