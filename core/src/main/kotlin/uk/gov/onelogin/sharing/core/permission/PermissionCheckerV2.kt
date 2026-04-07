@@ -67,6 +67,9 @@ fun Iterable<String>.toDeniedPermission(
     )
 }
 
+fun Iterable<PermissionCheckerV2.Denied>.toPermissionsList(): List<String> =
+    map(PermissionCheckerV2.Denied::permission)
+
 fun Iterable<PermissionCheckerV2.Denied>.hasDeniedPermissions(): Boolean = any {
     it.shouldShowRationale
 }

@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.PrerequisiteEvaluator
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
@@ -13,7 +15,8 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 class PrerequisiteGateV2(
     private val bluetoothEvaluator: PrerequisiteEvaluator<BluetoothState>,
     private val cameraEvaluator: PrerequisiteEvaluator<CameraState>,
-    private val locationEvaluator: PrerequisiteEvaluator<LocationState>
+    private val locationEvaluator: PrerequisiteEvaluator<LocationState>,
+    private val logger: Logger
 ) : PrerequisiteGate.V2 {
 
     override fun evaluatePrerequisites(
@@ -30,6 +33,11 @@ class PrerequisiteGateV2(
                 ?.let(MissingPrerequisiteV2::Location)
 
             else -> null
+        }.also {
+            logger.debug(
+                logTag,
+                "Performed prerequisite checks for: $prerequisites"
+            )
         }
     }
 }
