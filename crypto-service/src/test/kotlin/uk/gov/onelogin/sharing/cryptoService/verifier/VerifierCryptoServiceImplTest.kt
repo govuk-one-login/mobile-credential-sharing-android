@@ -89,7 +89,11 @@ class VerifierCryptoServiceImplTest {
             service.computeSharedSecret(context)
         }
         assert(
-            "Error computing shared secret due to EDeviceKey.Pub with incompatible curve" in logger
+            logger.any {
+                it.message.contains(
+                    "Error computing shared secret due to EDeviceKey.Pub with incompatible curve"
+                )
+            }
         )
     }
 
