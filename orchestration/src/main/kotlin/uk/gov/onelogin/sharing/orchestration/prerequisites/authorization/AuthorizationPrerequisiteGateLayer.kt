@@ -19,12 +19,12 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGateLayer
 )
 class AuthorizationPrerequisiteGateLayer(
     permissionChecker: PermissionCheckerV2,
-    private val logger: Logger,
+    private val logger: Logger
 ) : PrerequisiteGateLayer.Authorization,
     PermissionCheckerV2 by permissionChecker {
 
     override fun checkAuthorization(
-        prerequisite: Prerequisite,
+        prerequisite: Prerequisite
     ): MissingPrerequisiteReason.Unauthorized? = calculatePermissions(prerequisite)
         .let(::checkPermissions)
         .let(::handlePermissionResponse)
@@ -42,12 +42,12 @@ class AuthorizationPrerequisiteGateLayer(
             Prerequisite.CAMERA -> listOf(Manifest.permission.CAMERA)
 
             Prerequisite.LOCATION,
-            Prerequisite.UNKNOWN,
-                -> emptyList()
+            Prerequisite.UNKNOWN
+            -> emptyList()
         }
 
     private fun handlePermissionResponse(
-        result: List<PermissionCheckerV2.Denied>,
+        result: List<PermissionCheckerV2.Denied>
     ): MissingPrerequisiteReason.Unauthorized? = if (result.isEmpty()) {
         null
     } else {

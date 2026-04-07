@@ -33,14 +33,14 @@ class ActivityPermissionCheckerTest {
     @Before
     fun setUp() {
         mockkStatic(
-            ActivityCompat::class,
+            ActivityCompat::class
         )
     }
 
     @After
     fun tearDown() {
         unmockkStatic(
-            ActivityCompat::class,
+            ActivityCompat::class
         )
     }
 
@@ -94,34 +94,33 @@ class ActivityPermissionCheckerTest {
     }
 
     @Test
-    fun `Denied responses contain rationale values`(
-        @TestParameter shouldShowRationale: Boolean,
-    ) = runTest {
-        every {
-            ActivityCompat.checkSelfPermission(activity, permission)
-        } returns PackageManager.PERMISSION_DENIED
-        every {
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                activity,
-                permission
-            )
-        } returns shouldShowRationale
+    fun `Denied responses contain rationale values`(@TestParameter shouldShowRationale: Boolean) =
+        runTest {
+            every {
+                ActivityCompat.checkSelfPermission(activity, permission)
+            } returns PackageManager.PERMISSION_DENIED
+            every {
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    activity,
+                    permission
+                )
+            } returns shouldShowRationale
 
-        val result = checker.checkPermissions(permission)
+            val result = checker.checkPermissions(permission)
 
-        assertThat(
-            result,
-            allOf(
-                hasSize(1),
-                contains(
-                    equalTo(
-                        PermissionCheckerV2.Denied(
-                            permission,
-                            shouldShowRationale
+            assertThat(
+                result,
+                allOf(
+                    hasSize(1),
+                    contains(
+                        equalTo(
+                            PermissionCheckerV2.Denied(
+                                permission,
+                                shouldShowRationale
+                            )
                         )
                     )
                 )
             )
-        )
-    }
+        }
 }

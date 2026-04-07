@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 @Inject
 class LocationPrerequisiteEvaluator(
     private val context: Context,
-    permissionChecker: PermissionCheckerV2,
+    permissionChecker: PermissionCheckerV2
 ) : PermissionCheckerV2 by permissionChecker,
     PrerequisiteEvaluator<LocationState> {
     override fun evaluate(): LocationState? = evaluatePermissions()
@@ -27,9 +27,14 @@ class LocationPrerequisiteEvaluator(
     private fun evaluatePermissions(): LocationState? =
         checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION).let { result ->
             when {
-                result.isEmpty() -> null
-                result.hasPermanentlyDeniedPermissions() -> LocationState.PermissionDeniedPermanently
-                else -> LocationState.PermissionNotGranted
+                result.isEmpty() ->
+                    null
+
+                result.hasPermanentlyDeniedPermissions() ->
+                    LocationState.PermissionDeniedPermanently
+
+                else ->
+                    LocationState.PermissionNotGranted
             }
         }
 

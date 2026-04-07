@@ -30,8 +30,10 @@ class BluetoothPrerequisiteEvaluator(
             .let(::checkPermissions).let { result ->
                 when {
                     result.isEmpty() -> null
+
                     result.hasPermanentlyDeniedPermissions() ->
                         BluetoothState.PermissionDeniedPermanently
+
                     else -> BluetoothState.PermissionNotGranted
                 }
             }

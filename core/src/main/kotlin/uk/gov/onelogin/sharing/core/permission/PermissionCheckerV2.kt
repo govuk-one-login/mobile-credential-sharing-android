@@ -15,8 +15,5 @@ fun interface PermissionCheckerV2 {
         permissions.asList()
     )
 
-    data class Denied(
-        val permission: String,
-        val shouldShowRationale: Boolean,
-    )
+    data class Denied(val permission: String, val shouldShowRationale: Boolean)
 }

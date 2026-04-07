@@ -23,7 +23,7 @@ object CredentialSharingSdkModule {
     ): CredentialSharingSdk = CredentialSharingSdkImpl(
         applicationContext = application,
         logger = logger,
-        permissionChecker = permissionChecker,
+        permissionChecker = permissionChecker
     )
 
     @Provides
