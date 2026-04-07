@@ -6,31 +6,39 @@ import androidx.core.app.ActivityCompat
 
 
 fun interface PermissionCheckerV2 {
-    fun checkPermissions(permissions: List<String>): List<Response>
-    fun checkPermissions(vararg permissions: String): List<Response> = checkPermissions(
+    /**
+     * @return An empty [List] when all requested [permissions] are granted. Otherwise, a list of
+     * [Denied] objects
+     */
+    fun checkPermissions(permissions: List<String>): List<Denied>
+
+    /**
+     * @return An empty [List] when all requested [permissions] are granted. Otherwise, a list of
+     * [Denied] objects
+     */
+    fun checkPermissions(vararg permissions: String): List<Denied> = checkPermissions(
         permissions.asList()
     )
 
-    sealed interface Response {
-        data object Granted : Response
-        data class Denied(
-            val permission: String,
-            val shouldShowRationale: Boolean
-        ) : Response
-    }
+    data class Denied(
+        val permission: String,
+        val shouldShowRationale: Boolean,
+    )
 }
 
 class ActivityPermissionChecker(
-    private val activity: Activity
+    private val activity: Activity,
 ) : PermissionCheckerV2 {
     override fun checkPermissions(
-        permissions: List<String>
-    ): List<PermissionCheckerV2.Response> = permissions.map { permission ->
-        when {
-            PackageManager.PERMISSION_GRANTED ==
-                ActivityCompat.checkSelfPermission(activity, permission) ->
-                    PermissionCheckerV2.Response.Granted
-            else -> PermissionCheckerV2.Response.Denied(
+        permissions: List<String>,
+    ): List<PermissionCheckerV2.Denied> = permissions
+        .filterNot { permission ->
+            PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+                activity,
+                permission
+            )
+        }.map { permission ->
+            PermissionCheckerV2.Denied(
                 permission = permission,
                 shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
                     activity,
@@ -38,17 +46,31 @@ class ActivityPermissionChecker(
                 )
             )
         }
+}
+
+class FakePermissionChecker(
+    private val missingPermissions: () -> List<PermissionCheckerV2.Denied> = { emptyList() },
+) : PermissionCheckerV2 {
+    override fun checkPermissions(
+        permissions: List<String>,
+    ): List<PermissionCheckerV2.Denied> = missingPermissions().filter {
+        it.permission in permissions
     }
 }
 
-fun List<PermissionCheckerV2.Response>.hasGrantedPermissions(): Boolean = all {
-    it == PermissionCheckerV2.Response.Granted
+fun Iterable<String>.toDeniedPermission(
+    shouldShowRationale: Boolean = true
+) : List<PermissionCheckerV2.Denied> = map {
+    PermissionCheckerV2.Denied(
+        permission = it,
+        shouldShowRationale = shouldShowRationale
+    )
 }
 
-fun List<PermissionCheckerV2.Response>.hasDeniedPermissions(): Boolean = any {
-    it is PermissionCheckerV2.Response.Denied && it.shouldShowRationale
+fun Iterable<PermissionCheckerV2.Denied>.hasDeniedPermissions(): Boolean = any {
+    it.shouldShowRationale
 }
 
-fun List<PermissionCheckerV2.Response>.hasPermanentlyDeniedPermissions(): Boolean = any {
-    it is PermissionCheckerV2.Response.Denied && !it.shouldShowRationale
+fun Iterable<PermissionCheckerV2.Denied>.hasPermanentlyDeniedPermissions(): Boolean = any {
+    !it.shouldShowRationale
 }
