@@ -30,6 +30,7 @@ fun MultiplePermissionsScreen(
 fun MultiplePermissionsScreen(
     state: MultiplePermissionsState,
     hasPreviouslyRequestedPermission: Boolean,
+    modifier: Modifier = Modifier,
     onPermanentlyDenyPermission: @Composable (
         permissionState: MultiplePermissionsState
     ) -> Unit = { _ -> },
@@ -49,7 +50,7 @@ fun MultiplePermissionsScreen(
         }
 
         else -> Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             when {
