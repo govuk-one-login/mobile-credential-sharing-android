@@ -21,4 +21,9 @@ class FakeVerifierCryptoService : VerifierCryptoService {
             )
         )
     }
+
+    override fun computeSharedSecret(context: VerifierCryptoContext): ByteArray {
+        exceptionToThrow?.let { throw it }
+        return ByteArray(32)
+    }
 }
