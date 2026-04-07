@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,15 +23,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.permissions.shouldShowRationale
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
-import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
-import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
-import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
+import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPrompt
+import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPromptText
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -99,60 +95,19 @@ fun HolderScreenContent(
         }
 
         else -> {
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = multiplePermissionsState,
                 hasPreviouslyRequestedPermission = hasPreviouslyRequestedPermission,
+                text = PermissionPromptText(
+                    permanentlyDeniedText = stringResource(
+                        R.string.bluetooth_permission_permanently_denied
+                    ),
+                    enablePermissionText = stringResource(R.string.enable_bluetooth_permission),
+                    openSettingsText = stringResource(R.string.open_app_permissions),
+                    deniedText = stringResource(R.string.bluetooth_permission_denied)
+                ),
                 onGrantedPermissions = {
                     grantedAllPerms()
-                }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-fun MultiplePermissionsState.isPermanentlyDenied(): Boolean = permissions.any { perm ->
-    !perm.status.isGranted &&
-        !perm.status.shouldShowRationale
-}
-
-@Suppress("LongMethod", "ComposableLambdaParameterNaming")
-@Composable
-fun BluetoothPermissionPrompt(
-    multiplePermissionsState: MultiplePermissionsState,
-    hasPreviouslyRequestedPermission: Boolean,
-    modifier: Modifier = Modifier,
-    onGrantedPermissions: @Composable () -> Unit
-) {
-    when {
-        multiplePermissionsState.allPermissionsGranted -> {
-            onGrantedPermissions()
-        }
-
-        multiplePermissionsState.shouldShowRationale -> {
-            PermissionRationaleButton(
-                text = stringResource(R.string.enable_bluetooth_permission),
-                titleText = stringResource(R.string.bluetooth_permission_denied),
-                launchPermission = {
-                    multiplePermissionsState.launchMultiplePermissionRequest()
-                }
-            )
-        }
-
-        hasPreviouslyRequestedPermission && multiplePermissionsState.isPermanentlyDenied() -> {
-            PermanentPermissionDenialButton(
-                context = LocalContext.current,
-                modifier = modifier,
-                titleText = stringResource(R.string.bluetooth_permission_permanently_denied),
-                buttonText = stringResource(R.string.open_app_permissions)
-            )
-        }
-
-        else -> {
-            RequirePermissionButton(
-                text = stringResource(R.string.enable_bluetooth_permission),
-                launchPermission = {
-                    multiplePermissionsState.launchMultiplePermissionRequest()
                 }
             )
         }
