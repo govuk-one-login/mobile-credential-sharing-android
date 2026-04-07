@@ -1,85 +1,85 @@
 package uk.gov.onelogin.sharing.orchestration.verificationrequest
 
-sealed interface RequestElement {
+sealed interface MdlAttribute {
     val value: String
     fun validate(data: Any): Boolean
 
-    data object FamilyName : RequestElement {
+    data object FamilyName : MdlAttribute {
         override val value = "family_name"
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object GivenName : RequestElement {
+    data object GivenName : MdlAttribute {
         override val value = "given_name"
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object BirthDate : RequestElement {
+    data object BirthDate : MdlAttribute {
         override val value = "birth_date"
         override fun validate(data: Any) = data is String && FULL_DATE_PATTERN.matches(data)
     }
 
-    data object IssueDate : RequestElement {
+    data object IssueDate : MdlAttribute {
         override val value = "issue_date"
         override fun validate(data: Any) = data is String && FULL_DATE_PATTERN.matches(data)
     }
 
-    data object ExpiryDate : RequestElement {
+    data object ExpiryDate : MdlAttribute {
         override val value = "expiry_date"
         override fun validate(data: Any) = data is String && FULL_DATE_PATTERN.matches(data)
     }
 
-    data object IssuingCountry : RequestElement {
+    data object IssuingCountry : MdlAttribute {
         override val value = "issuing_country"
         override fun validate(data: Any) = data is String && data.length == COUNTRY_CODE_LENGTH
     }
 
-    data object IssuingAuthority : RequestElement {
+    data object IssuingAuthority : MdlAttribute {
         override val value = "issuing_authority"
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object DocumentNumber : RequestElement {
+    data object DocumentNumber : MdlAttribute {
         override val value = "document_number"
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object Portrait : RequestElement {
+    data object Portrait : MdlAttribute {
         override val value = "portrait"
         override fun validate(data: Any) = true
     }
 
-    data object BirthPlace : RequestElement {
+    data object BirthPlace : MdlAttribute {
         override val value = "birth_place"
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object DrivingPrivileges : RequestElement {
+    data object DrivingPrivileges : MdlAttribute {
         override val value = "driving_privileges"
         override fun validate(data: Any) = data is List<*>
     }
 
-    data object UnDistinguishingSign : RequestElement {
+    data object UnDistinguishingSign : MdlAttribute {
         override val value = "un_distinguishing_sign"
         override fun validate(data: Any) = data is String && data.isNotEmpty()
     }
 
-    data object ResidentAddress : RequestElement {
+    data object ResidentAddress : MdlAttribute {
         override val value = "resident_address"
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object ResidentPostalCode : RequestElement {
+    data object ResidentPostalCode : MdlAttribute {
         override val value = "resident_postal_code"
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object ResidentCity : RequestElement {
+    data object ResidentCity : MdlAttribute {
         override val value = "resident_city"
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data class AgeOver(val age: Int) : RequestElement {
+    data class AgeOver(val age: Int) : MdlAttribute {
         init {
             require(age in MIN_AGE..MAX_AGE) {
                 "age must be between $MIN_AGE and $MAX_AGE, was $age"
@@ -90,7 +90,7 @@ sealed interface RequestElement {
         override fun validate(data: Any) = data is Boolean
     }
 
-    data class Custom(override val value: String) : RequestElement {
+    data class Custom(override val value: String) : MdlAttribute {
         override fun validate(data: Any) = true
     }
 

@@ -11,7 +11,7 @@ class PrerequisiteGateImpl(
     private val capability: PrerequisiteGateLayer.Capability,
     private val logger: Logger,
     private val readiness: PrerequisiteGateLayer.Readiness
-) : PrerequisiteGate {
+) : PrerequisiteGate.V1 {
     override fun evaluatePrerequisites(
         prerequisites: Iterable<Prerequisite>
     ): List<MissingPrerequisite> = prerequisites.mapNotNull { prerequisite ->

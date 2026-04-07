@@ -5,11 +5,14 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
  *
  * @see PrerequisiteGateLayer
  */
-fun interface PrerequisiteGate {
-    fun evaluatePrerequisites(prerequisites: Iterable<Prerequisite>): List<MissingPrerequisite>
+fun interface PrerequisiteGate<out Response : Any> {
+    fun evaluatePrerequisites(prerequisites: Iterable<Prerequisite>): List<Response>
 
-    fun evaluatePrerequisites(vararg prerequisites: Prerequisite): List<MissingPrerequisite> =
+    fun evaluatePrerequisites(vararg prerequisites: Prerequisite): List<Response> =
         evaluatePrerequisites(
             prerequisites.toList()
         )
+
+    interface V1 : PrerequisiteGate<MissingPrerequisite>
+    interface V2 : PrerequisiteGate<MissingPrerequisiteV2>
 }
