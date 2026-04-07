@@ -59,15 +59,26 @@ internal fun VerifierPermissionGateContent(
         .find { it.permission == Manifest.permission.CAMERA }
         ?.status?.isGranted == true
 
-    val text = if (!cameraGranted) {
-        PermissionPromptText(
+    val bluetoothGranted = permissionsState.permissions
+        .filter { it.permission != Manifest.permission.CAMERA }
+        .all { it.status.isGranted }
+
+    val text = when {
+        !cameraGranted && !bluetoothGranted -> PermissionPromptText(
+            permanentlyDeniedText = stringResource(R.string.permissions_permanently_denied),
+            enablePermissionText = stringResource(R.string.enable_permissions),
+            openSettingsText = stringResource(R.string.open_app_permissions),
+            deniedText = stringResource(R.string.permissions_denied)
+        )
+
+        !cameraGranted -> PermissionPromptText(
             permanentlyDeniedText = stringResource(R.string.camera_permission_permanently_denied),
             enablePermissionText = stringResource(R.string.enable_camera_permission),
             openSettingsText = stringResource(R.string.open_app_permissions),
             deniedText = stringResource(R.string.camera_permission_denied)
         )
-    } else {
-        PermissionPromptText(
+
+        else -> PermissionPromptText(
             permanentlyDeniedText = stringResource(
                 R.string.bluetooth_permission_permanently_denied
             ),

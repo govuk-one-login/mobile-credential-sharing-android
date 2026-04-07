@@ -8,6 +8,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.allPermissionsDenied
+import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.allPermissionsDeniedWithRationale
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.allPermissionsGranted
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedCameraGranted
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDeniedWithRationaleCameraGranted
@@ -101,6 +103,57 @@ class VerifierPermissionGateContentTest {
             .assertIsDisplayed()
         composeTestRule
             .onNodeWithText("Please enable bluetooth permissions to continue")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `shows generic permanently denied prompt when both permissions are denied`() {
+        composeTestRule.setContent {
+            VerifierPermissionGateContent(
+                permissionsState = allPermissionsDenied,
+                hasPreviouslyRequested = true,
+                onGrantAll = {}
+            )
+        }
+
+        composeTestRule
+            .onNodeWithText("Camera and Bluetooth permissions have been permanently denied.")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Open app permissions")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `shows generic enable prompt when both permissions missing and not previously requested`() {
+        composeTestRule.setContent {
+            VerifierPermissionGateContent(
+                permissionsState = allPermissionsDenied,
+                hasPreviouslyRequested = false,
+                onGrantAll = {}
+            )
+        }
+
+        composeTestRule
+            .onNodeWithText("Please enable camera and Bluetooth permissions to continue.")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `shows generic rationale when both permissions denied with rationale`() {
+        composeTestRule.setContent {
+            VerifierPermissionGateContent(
+                permissionsState = allPermissionsDeniedWithRationale,
+                hasPreviouslyRequested = true,
+                onGrantAll = {}
+            )
+        }
+
+        composeTestRule
+            .onNodeWithText("Camera and Bluetooth permissions were denied")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Please enable camera and Bluetooth permissions to continue.")
             .assertIsDisplayed()
     }
 }
