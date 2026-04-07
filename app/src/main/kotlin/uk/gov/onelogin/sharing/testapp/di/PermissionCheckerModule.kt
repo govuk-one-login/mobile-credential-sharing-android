@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.scopes.ActivityScoped
 import uk.gov.onelogin.sharing.core.permission.ActivityPermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 
@@ -15,6 +16,7 @@ import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 object PermissionCheckerModule {
 
     @Provides
+    @ActivityScoped
     fun providesPermissionChecker(
         @ActivityContext
         context: Context
