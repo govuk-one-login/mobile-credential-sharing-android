@@ -114,6 +114,7 @@ fun HolderScreenContent(
     }
 }
 
+
 @Composable
 fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier) {
     HolderWelcomeText()

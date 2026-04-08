@@ -1,5 +1,7 @@
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+package uk.gov.onelogin.sharing.models.deviceRequest
+
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
