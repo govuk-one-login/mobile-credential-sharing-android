@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SK_READER_KEY
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.EcKeyPairGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.HkdfSessionKeyGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 

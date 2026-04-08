@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
+
 /**
  * Handles cryptographic operations for the Verifier role.
  *
@@ -32,6 +34,7 @@ interface VerifierCryptoService {
      * @param sharedSecret The shared secret (ZAB) derived via ECKA-DH.
      * @param sessionTranscriptBytes The CBOR Tag 24 wrapped SessionTranscript bytes.
      * @return A [Pair] where [Pair.first] is SKReader and [Pair.second] is SKDevice.
+     * @throws SessionKeyDerivationException if either key derivation fails.
      */
     fun deriveSessionKeys(
         sharedSecret: ByteArray,

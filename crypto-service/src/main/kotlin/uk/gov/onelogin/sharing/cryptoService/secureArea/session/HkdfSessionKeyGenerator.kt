@@ -8,7 +8,6 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.generateSalt
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.hkdfKeyGeneration
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
-import uk.gov.onelogin.sharing.cryptoService.verifier.SessionKeyDerivationException
 
 @ContributesBinding(AppScope::class)
 class HkdfSessionKeyGenerator(private val logger: Logger) : SessionKeyGenerator {
