@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.error
+package uk.gov.onelogin.sharing.holder.error
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
@@ -14,20 +14,20 @@ import org.junit.runner.RunWith
 import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 @RunWith(AndroidJUnit4::class)
-class UnrecoverableVerifierErrorScreenTest {
+class UnrecoverableHolderErrorScreenTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
     @get:Rule
-    val composeTestRule = UnrecoverableVerifierErrorScreenRule(createComposeRule())
+    val composeTestRule = UnrecoverableHolderErrorScreenRule(createComposeRule())
 
-    private var initialVerifierState = VerifierSessionState.Complete.Failed(
+    private var sessionState = HolderSessionState.Complete.Failed(
         SessionError(
             "This is a unit test",
             SessionErrorReason.UnrecoverablePrerequisite()
@@ -36,13 +36,13 @@ class UnrecoverableVerifierErrorScreenTest {
 
     private val orchestrator by lazy {
         FakeOrchestrator(
-            initialVerifierState = MutableStateFlow(initialVerifierState),
+            initialHolderState = MutableStateFlow(sessionState),
             startCount = 1
         )
     }
 
     private val viewModel by lazy {
-        UnrecoverableVerifierViewModel(
+        UnrecoverableHolderViewModel(
             orchestrator = orchestrator,
             dispatcher = dispatcherRule.testDispatcher
         )
@@ -54,7 +54,7 @@ class UnrecoverableVerifierErrorScreenTest {
     ) {
         composeTestRule.run {
             setContent {
-                UnrecoverableVerifierErrorScreen(
+                UnrecoverableHolderErrorScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
                     onExitJourney = { composeTestRule.updateHasExitedJourney() }
