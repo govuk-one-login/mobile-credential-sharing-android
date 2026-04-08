@@ -17,10 +17,12 @@ internal fun VerifierPrerequisitesScreen(
     modifier: Modifier = Modifier,
     viewModel: VerifierPrerequisitesViewModel = metroViewModel(),
     onNavigateToPreflight: () -> Unit = {},
-    onNavigateToScanner: () -> Unit = {}
+    onNavigateToScanner: () -> Unit = {},
+    onUnrecoverableError: () -> Unit = {}
 ) {
     val latestOnNavigateToPreflight by rememberUpdatedState(onNavigateToPreflight)
     val latestOnNavigateToScanner by rememberUpdatedState(onNavigateToScanner)
+    val latestOnUnrecoverableError by rememberUpdatedState(onUnrecoverableError)
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -28,6 +30,8 @@ internal fun VerifierPrerequisitesScreen(
                 VerifyCredentialEvents.NavigateToScanner -> latestOnNavigateToScanner()
 
                 VerifyCredentialEvents.NavigateToPreflight -> latestOnNavigateToPreflight()
+
+                VerifyCredentialEvents.NavigateToUnrecoverableError -> latestOnUnrecoverableError()
 
                 else -> {
                     // do nothing with null events
