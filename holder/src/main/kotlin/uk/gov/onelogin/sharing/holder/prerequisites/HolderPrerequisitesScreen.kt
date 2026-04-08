@@ -26,10 +26,12 @@ internal fun HolderPrerequisitesScreen(
     modifier: Modifier = Modifier,
     viewModel: HolderPrerequisitesViewModel = metroViewModel(),
     onHandlePreflight: () -> Unit = {},
-    onPresentEngagement: () -> Unit = {}
+    onPresentEngagement: () -> Unit = {},
+    onUnrecoverableError: () -> Unit = {}
 ) {
     val currentOnHandlePreflight by rememberUpdatedState(onHandlePreflight)
     val currentOnPresentEngagement by rememberUpdatedState(onPresentEngagement)
+    val currentOnUnrecoverableError by rememberUpdatedState(onUnrecoverableError)
     val state: HolderSessionState by viewModel.holderSessionState.collectAsStateWithLifecycle()
     val progressTextResource: String? = calculateProgressTextFrom(state)?.let {
         stringResource(it)
@@ -48,6 +50,10 @@ internal fun HolderPrerequisitesScreen(
 
             is HolderSessionState.PresentingEngagement -> {
                 currentOnPresentEngagement()
+            }
+
+            is HolderSessionState.Complete.Failed -> {
+                currentOnUnrecoverableError()
             }
 
             else -> {
