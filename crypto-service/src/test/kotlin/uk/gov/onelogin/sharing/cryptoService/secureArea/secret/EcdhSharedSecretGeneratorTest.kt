@@ -1,12 +1,15 @@
 package uk.gov.onelogin.sharing.cryptoService.secureArea.secret
 
+import java.security.InvalidKeyException
+import java.security.KeyPairGenerator
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
+import java.security.spec.ECGenParameterSpec
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.fail
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.rsaKeyPair
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
 
 class EcdhSharedSecretGeneratorTest {
@@ -17,9 +20,12 @@ class EcdhSharedSecretGeneratorTest {
     }
 
     @Test
-    fun `Can generate shared secrets`() = runTest {
+    fun `Can generate shared secrets`() {
         val result = try {
-            generator.generateSharedSecret(validKeyPair!!)
+            generator.generateSharedSecret(
+                thisDevicePrivateKey = validKeyPair!!.private as ECPrivateKey,
+                otherDevicePublicKey = validKeyPair!!.public as ECPublicKey
+            )
         } catch (e: Exception) {
             fail("Shouldn't have thrown an exception: ${e.message}")
         }
@@ -28,9 +34,16 @@ class EcdhSharedSecretGeneratorTest {
     }
 
     @Test
-    fun `Invalid KeyPair instances throw exceptions`() = runTest {
-        assertThrows(ClassCastException::class.java) {
-            generator.generateSharedSecret(rsaKeyPair)
+    fun `Mismatched EC curves throw InvalidKeyException`() {
+        val p384KeyPair = KeyPairGenerator.getInstance("EC").apply {
+            initialize(ECGenParameterSpec("secp384r1"))
+        }.generateKeyPair()
+
+        assertThrows(InvalidKeyException::class.java) {
+            generator.generateSharedSecret(
+                thisDevicePrivateKey = validKeyPair!!.private as ECPrivateKey,
+                otherDevicePublicKey = p384KeyPair.public as ECPublicKey
+            )
         }
     }
 }

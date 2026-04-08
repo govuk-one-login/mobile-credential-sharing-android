@@ -114,8 +114,8 @@ class VerifierCryptoServiceImpl(
 
         return try {
             sharedSecretGenerator.generateSharedSecret(
-                holderKey = eReaderPrivateKey,
-                eReaderKey = eDevicePublicKey
+                thisDevicePrivateKey = eReaderPrivateKey,
+                otherDevicePublicKey = eDevicePublicKey
             ).also {
                 logger.debug(logTag, "Shared secret computed successfully")
             }
