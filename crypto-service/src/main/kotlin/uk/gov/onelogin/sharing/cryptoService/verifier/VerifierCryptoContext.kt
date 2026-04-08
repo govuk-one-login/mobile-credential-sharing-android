@@ -17,5 +17,9 @@ data class VerifierCryptoContext(
     /** The Verifier's ephemeral public key in COSE format, wrapped in CBOR Tag 24. */
     val eReaderKeyTagged: ByteArray? = null,
     /** The CBOR Tag 24 wrapped SessionTranscript, used as salt for key derivation. */
-    val sessionTranscriptBytes: ByteArray? = null
+    val sessionTranscriptBytes: ByteArray? = null,
+    /** The 32-byte session key used by the Verifier to encrypt requests. */
+    val skReader: ByteArray? = null,
+    /** The 32-byte session key used by the Verifier to decrypt responses. */
+    val skDevice: ByteArray? = null
 )

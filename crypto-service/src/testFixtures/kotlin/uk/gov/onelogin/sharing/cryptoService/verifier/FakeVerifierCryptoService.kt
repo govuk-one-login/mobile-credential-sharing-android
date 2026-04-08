@@ -5,7 +5,11 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         private set
     var lastQrCodeData: String? = null
         private set
+    var deriveSessionKeysCallCount = 0
+        private set
     var exceptionToThrow: Exception? = null
+    var sessionKeysToReturn: Pair<ByteArray, ByteArray> =
+        Pair(ByteArray(32), ByteArray(32))
 
     override fun processEngagement(
         qrCodeData: String,
@@ -20,5 +24,14 @@ class FakeVerifierCryptoService : VerifierCryptoService {
                 serviceUuid = java.util.UUID.randomUUID()
             )
         )
+    }
+
+    override fun deriveSessionKeys(
+        sharedSecret: ByteArray,
+        sessionTranscriptBytes: ByteArray
+    ): Pair<ByteArray, ByteArray> {
+        deriveSessionKeysCallCount++
+        exceptionToThrow?.let { throw it }
+        return sessionKeysToReturn
     }
 }

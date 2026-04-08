@@ -14,6 +14,9 @@ import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.HOLDER
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
 
 /**
  * Default implementation of [VerifierCryptoService].
@@ -21,7 +24,8 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
 class VerifierCryptoServiceImpl(
     private val logger: Logger,
-    private val keyPairGenerator: KeyPairGenerator
+    private val keyPairGenerator: KeyPairGenerator,
+    private val sessionKeyGenerator: SessionKeyGenerator
 ) : VerifierCryptoService {
 
     override fun processEngagement(
@@ -70,5 +74,26 @@ class VerifierCryptoServiceImpl(
         )
 
         logger.debug(logTag, "SessionTranscriptBytes constructed successfully")
+    }
+
+    override fun deriveSessionKeys(
+        sharedSecret: ByteArray,
+        sessionTranscriptBytes: ByteArray
+    ): Pair<ByteArray, ByteArray> {
+        val skReader = sessionKeyGenerator.deriveSessionKey(
+            sharedKey = sharedSecret,
+            sessionTranscriptBytes = sessionTranscriptBytes,
+            role = VERIFIER
+        )
+        logger.debug(logTag, "SKReader key generated")
+
+        val skDevice = sessionKeyGenerator.deriveSessionKey(
+            sharedKey = sharedSecret,
+            sessionTranscriptBytes = sessionTranscriptBytes,
+            role = HOLDER
+        )
+        logger.debug(logTag, "SKDevice key generated")
+
+        return Pair(skReader, skDevice)
     }
 }
