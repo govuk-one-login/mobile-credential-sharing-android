@@ -19,7 +19,8 @@ class CredentialSharingSdkImplTest {
 
         sdk = CredentialSharingSdkImpl(
             logger = logger,
-            activityContext = mockk()
+            applicationContext = mockk(),
+            permissionChecker = { emptyList() }
         )
     }
 
