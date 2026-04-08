@@ -80,19 +80,27 @@ class VerifierCryptoServiceImpl(
         sharedSecret: ByteArray,
         sessionTranscriptBytes: ByteArray
     ): Pair<ByteArray, ByteArray> {
-        val skReader = sessionKeyGenerator.deriveSessionKey(
-            sharedKey = sharedSecret,
-            sessionTranscriptBytes = sessionTranscriptBytes,
-            role = VERIFIER
-        )
-        logger.debug(logTag, "SKReader key generated")
+        val skReader = try {
+            sessionKeyGenerator.deriveSessionKey(
+                sharedKey = sharedSecret,
+                sessionTranscriptBytes = sessionTranscriptBytes,
+                role = VERIFIER
+            ).also { logger.debug(logTag, "SKReader key generated") }
+        } catch (e: Exception) {
+            logger.error(logTag, "SKReader key derivation failed", e)
+            throw e
+        }
 
-        val skDevice = sessionKeyGenerator.deriveSessionKey(
-            sharedKey = sharedSecret,
-            sessionTranscriptBytes = sessionTranscriptBytes,
-            role = HOLDER
-        )
-        logger.debug(logTag, "SKDevice key generated")
+        val skDevice = try {
+            sessionKeyGenerator.deriveSessionKey(
+                sharedKey = sharedSecret,
+                sessionTranscriptBytes = sessionTranscriptBytes,
+                role = HOLDER
+            ).also { logger.debug(logTag, "SKDevice key generated") }
+        } catch (e: Exception) {
+            logger.error(logTag, "SKDevice key derivation failed", e)
+            throw e
+        }
 
         return Pair(skReader, skDevice)
     }

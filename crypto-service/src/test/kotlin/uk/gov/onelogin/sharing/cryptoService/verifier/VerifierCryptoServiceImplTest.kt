@@ -15,6 +15,8 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SK_READER_KEY
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.EcKeyPairGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.HkdfSessionKeyGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
 class VerifierCryptoServiceImplTest {
     private val logger = SystemLogger()
@@ -113,5 +115,43 @@ class VerifierCryptoServiceImplTest {
 
         assertNotEquals(VALID_SK_READER_KEY, skReader.toHexString())
         assertNotEquals(VALID_SK_DEVICE_KEY, skDevice.toHexString())
+    }
+
+    @Test
+    fun `deriveSessionKeys logs failure when SKReader derivation fails`() {
+        val failingGenerator = SessionKeyGenerator { _, _, role ->
+            if (role == DeviceRole.VERIFIER) throw RuntimeException("SKReader error")
+            byteArrayOf()
+        }
+        val failingService = VerifierCryptoServiceImpl(
+            logger = logger,
+            keyPairGenerator = EcKeyPairGenerator(logger),
+            sessionKeyGenerator = failingGenerator
+        )
+
+        assertThrows(RuntimeException::class.java) {
+            failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript)
+        }
+
+        assert("SKReader key derivation failed" in logger)
+    }
+
+    @Test
+    fun `deriveSessionKeys logs failure when SKDevice derivation fails`() {
+        val failingGenerator = SessionKeyGenerator { _, _, role ->
+            if (role == DeviceRole.HOLDER) throw RuntimeException("SKDevice error")
+            byteArrayOf()
+        }
+        val failingService = VerifierCryptoServiceImpl(
+            logger = logger,
+            keyPairGenerator = EcKeyPairGenerator(logger),
+            sessionKeyGenerator = failingGenerator
+        )
+
+        assertThrows(RuntimeException::class.java) {
+            failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript)
+        }
+
+        assert("SKDevice key derivation failed" in logger)
     }
 }
