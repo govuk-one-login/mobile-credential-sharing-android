@@ -1,8 +1,7 @@
-package uk.gov.onelogin.sharing.bluetooth.permissions
+package uk.gov.onelogin.sharing.core.presentation.permissions
 
 import android.Manifest
 import androidx.compose.material3.Text
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
@@ -16,99 +15,84 @@ import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 
 @RunWith(AndroidJUnit4::class)
-class BluetoothMultiplePermissionPromptTest {
+class PermissionPromptTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val testTag = "bluetoothWelcomeText"
+    private val text = PermissionPromptText(
+        permanentlyDeniedText = "Permission permanently denied",
+        enablePermissionText = "Enable permission",
+        openSettingsText = "Open settings",
+        deniedText = "Permission was denied"
+    )
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
-    fun shouldShowEnableBluetoothButtonWhenShowRationaleTrue() {
+    fun shouldShowEnablePermissionButtonWhenShowRationaleTrue() {
         composeTestRule.setContent {
-            var hasLaunched = remember { false }
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = FakeMultiplePermissionsState(
                     permissions = listOf(
                         FakePermissionState(
-                            permission = Manifest.permission.BLUETOOTH_CONNECT,
-                            status = PermissionStatus.Denied(true)
-                        ),
-                        FakePermissionState(
-                            permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                            permission = Manifest.permission.CAMERA,
                             status = PermissionStatus.Denied(true)
                         )
                     ),
-                    onLaunchPermission = { hasLaunched = true }
+                    onLaunchPermission = {}
                 ),
                 hasPreviouslyRequestedPermission = true,
-                modifier = Modifier
-            ) {
-            }
+                text = text
+            ) {}
         }
 
-        composeTestRule.onNodeWithText("Enable bluetooth permissions").assertIsDisplayed()
+        composeTestRule.onNodeWithText(text.enablePermissionText).assertIsDisplayed()
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
-    fun shouldShowEnableBluetoothButtonWhenRequestingFirstTime() {
+    fun shouldShowEnablePermissionButtonWhenRequestingFirstTime() {
         composeTestRule.setContent {
-            var hasLaunched = remember { false }
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = FakeMultiplePermissionsState(
                     permissions = listOf(
                         FakePermissionState(
-                            permission = Manifest.permission.BLUETOOTH_CONNECT,
-                            status = PermissionStatus.Denied(false)
-                        ),
-                        FakePermissionState(
-                            permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                            permission = Manifest.permission.CAMERA,
                             status = PermissionStatus.Denied(false)
                         )
                     ),
-                    onLaunchPermission = { hasLaunched = false }
+                    onLaunchPermission = {}
                 ),
                 hasPreviouslyRequestedPermission = false,
-                modifier = Modifier
-            ) {
-            }
+                text = text
+            ) {}
         }
 
-        composeTestRule.onNodeWithText("Enable bluetooth permissions").assertIsDisplayed()
+        composeTestRule.onNodeWithText(text.enablePermissionText).assertIsDisplayed()
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
     fun shouldShowOpenSettingsWhenPermissionsPermanentlyDenied() {
         composeTestRule.setContent {
-            var hasLaunched = remember { false }
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = FakeMultiplePermissionsState(
                     permissions = listOf(
                         FakePermissionState(
-                            permission = Manifest.permission.BLUETOOTH_CONNECT,
-                            status = PermissionStatus.Denied(false)
-                        ),
-                        FakePermissionState(
-                            permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                            permission = Manifest.permission.CAMERA,
                             status = PermissionStatus.Denied(false)
                         )
                     ),
-                    onLaunchPermission = { hasLaunched = true }
+                    onLaunchPermission = {}
                 ),
                 hasPreviouslyRequestedPermission = true,
-                modifier = Modifier
-            ) {
-            }
+                text = text
+            ) {}
         }
 
-        composeTestRule.onNodeWithText("Open settings").assertIsDisplayed()
+        composeTestRule.onNodeWithText(text.openSettingsText).assertIsDisplayed()
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
@@ -118,22 +102,18 @@ class BluetoothMultiplePermissionPromptTest {
         val grantedContentTestTag = "granted-content"
 
         composeTestRule.setContent {
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = FakeMultiplePermissionsState(
                     permissions = listOf(
                         FakePermissionState(
-                            permission = Manifest.permission.BLUETOOTH_CONNECT,
-                            status = PermissionStatus.Granted
-                        ),
-                        FakePermissionState(
-                            permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                            permission = Manifest.permission.CAMERA,
                             status = PermissionStatus.Granted
                         )
                     ),
                     onLaunchPermission = {}
                 ),
                 hasPreviouslyRequestedPermission = true,
-                modifier = Modifier
+                text = text
             ) {
                 onGrantedLambdaCalled = true
                 Text(

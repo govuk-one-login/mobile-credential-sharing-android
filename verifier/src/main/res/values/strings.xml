@@ -9,6 +9,10 @@
     <string name="bluetooth_connection_failed">Bluetooth connection failed</string>
     <string name="open_app_permissions">Open app permissions</string>
     <string name="try_again">Try again</string>
+    <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
+    <string name="enable_bluetooth_permission">Please enable bluetooth permissions to continue</string>
+    <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>
+    <string name="camera_permission_denied">Camera permission was denied</string>
 
     <string name="bluetooth_turned_off_verifier">Bluetooth was turned off on verifier device during session</string>
 </resources>

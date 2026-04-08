@@ -132,6 +132,7 @@ fun BluetoothPermissionPrompt(
         multiplePermissionsState.shouldShowRationale -> {
             PermissionRationaleButton(
                 text = stringResource(R.string.enable_bluetooth_permission),
+                titleText = stringResource(R.string.bluetooth_permission_denied),
                 launchPermission = {
                     multiplePermissionsState.launchMultiplePermissionRequest()
                 }

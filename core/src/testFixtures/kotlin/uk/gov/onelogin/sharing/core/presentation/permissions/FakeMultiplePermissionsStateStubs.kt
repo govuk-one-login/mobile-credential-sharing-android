@@ -59,4 +59,92 @@ object FakeMultiplePermissionsStateStubs {
         ),
         onLaunchPermission = {}
     )
+
+    val allPermissionsGranted = FakeMultiplePermissionsState(
+        permissions = listOf(
+            FakePermissionState(
+                permission = Manifest.permission.CAMERA,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_CONNECT,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                status = PermissionStatus.Granted
+            )
+        ),
+        onLaunchPermission = {}
+    )
+
+    val cameraPermissionDenied = FakeMultiplePermissionsState(
+        permissions = listOf(
+            FakePermissionState(
+                permission = Manifest.permission.CAMERA,
+                status = PermissionStatus.Denied(false)
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_CONNECT,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                status = PermissionStatus.Granted
+            )
+        ),
+        onLaunchPermission = {}
+    )
+
+    val bluetoothPermissionsDeniedCameraGranted = FakeMultiplePermissionsState(
+        permissions = listOf(
+            FakePermissionState(
+                permission = Manifest.permission.CAMERA,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_CONNECT,
+                status = PermissionStatus.Denied(false)
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                status = PermissionStatus.Denied(false)
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                status = PermissionStatus.Denied(false)
+            )
+        ),
+        onLaunchPermission = {}
+    )
+
+    val bluetoothPermissionsDeniedWithRationaleCameraGranted = FakeMultiplePermissionsState(
+        permissions = listOf(
+            FakePermissionState(
+                permission = Manifest.permission.CAMERA,
+                status = PermissionStatus.Granted
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_CONNECT,
+                status = PermissionStatus.Denied(true)
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.BLUETOOTH_ADVERTISE,
+                status = PermissionStatus.Denied(true)
+            ),
+            FakePermissionState(
+                permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                status = PermissionStatus.Denied(true)
+            )
+        ),
+        onLaunchPermission = {}
+    )
 }
