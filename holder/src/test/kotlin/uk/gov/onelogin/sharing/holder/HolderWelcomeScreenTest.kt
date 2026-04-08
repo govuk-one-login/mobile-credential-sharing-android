@@ -24,7 +24,9 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsDenied
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsStateStubs.bluetoothPermissionsGranted
-import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
+import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPrompt
+import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPromptText
+import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.presentation.HolderScreenContent
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenPreview
@@ -85,9 +87,19 @@ class HolderWelcomeScreenTest {
     fun initiallyDisplaysEnablePermissionButtonBeforeRequestingPermissions() {
         composeTestRule.setContent {
             val permissionsState = bluetoothPermissionsDenied
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = permissionsState,
-                hasPreviouslyRequestedPermission = false
+                hasPreviouslyRequestedPermission = false,
+                text = PermissionPromptText(
+                    permanentlyDeniedText = resources.getString(
+                        R.string.bluetooth_permission_permanently_denied
+                    ),
+                    enablePermissionText = resources.getString(
+                        R.string.enable_bluetooth_permission
+                    ),
+                    openSettingsText = resources.getString(R.string.open_app_permissions),
+                    deniedText = resources.getString(R.string.bluetooth_permission_denied)
+                )
             ) {}
         }
 

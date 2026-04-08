@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalPermissionsApi::class)
 
-package uk.gov.onelogin.sharing.bluetooth.permissions
+package uk.gov.onelogin.sharing.core.presentation.permissions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -10,13 +10,13 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermanentPermissionDenialButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.PermissionRationaleButton
 import uk.gov.onelogin.sharing.core.presentation.buttons.RequirePermissionButton
-import uk.gov.onelogin.sharing.core.presentation.permissions.MultiplePermissionsScreen
 
 @Suppress("LongMethod", "ComposableLambdaParameterNaming")
 @Composable
-fun BluetoothPermissionPrompt(
+fun PermissionPrompt(
     multiplePermissionsState: MultiplePermissionsState,
     hasPreviouslyRequestedPermission: Boolean,
+    text: PermissionPromptText,
     modifier: Modifier = Modifier,
     onGrantedPermissions: @Composable () -> Unit
 ) {
@@ -24,23 +24,24 @@ fun BluetoothPermissionPrompt(
         state = multiplePermissionsState,
         hasPreviouslyRequestedPermission = hasPreviouslyRequestedPermission,
         onGrantedPermissions = onGrantedPermissions,
-        onPermanentlyDenyPermission = { _ ->
+        onPermanentlyDenyPermission = {
             PermanentPermissionDenialButton(
                 context = LocalContext.current,
                 modifier = modifier,
-                titleText = "Permanently denied open in your settings",
-                buttonText = "Open settings"
+                titleText = text.permanentlyDeniedText,
+                buttonText = text.openSettingsText
             )
         },
         onRequirePermission = { _, launchPermissions ->
             RequirePermissionButton(
-                text = "Enable bluetooth permissions",
+                text = text.enablePermissionText,
                 launchPermission = launchPermissions
             )
         },
         onShowRationale = { _, launchPermissions ->
             PermissionRationaleButton(
-                text = "Enable bluetooth permissions",
+                text = text.enablePermissionText,
+                titleText = text.deniedText,
                 launchPermission = launchPermissions
             )
         }

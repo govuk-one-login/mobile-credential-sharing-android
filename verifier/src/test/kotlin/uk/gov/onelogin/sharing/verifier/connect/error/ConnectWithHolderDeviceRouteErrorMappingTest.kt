@@ -7,6 +7,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitleRes
 import uk.gov.onelogin.sharing.verifier.R
 
 @RunWith(Parameterized::class)

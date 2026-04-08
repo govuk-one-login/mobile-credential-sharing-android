@@ -3,4 +3,16 @@
     <string name="test_screen_title">Credential Sharing Test App</string>
     <string name="holder">Holder</string>
     <string name="verifier">Verifier</string>
+
+    <!-- TODO: Remove once SDK prerequisites screen handles permissions -->
+    <string name="camera_permission_permanently_denied">The camera permission is permanently denied.</string>
+    <string name="enable_camera_permission">Please enable the camera permission to continue.</string>
+    <string name="camera_permission_denied">Camera permission was denied</string>
+    <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
+    <string name="enable_bluetooth_permission">Please enable bluetooth permissions to continue</string>
+    <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>
+    <string name="permissions_permanently_denied">Camera and Bluetooth permissions have been permanently denied.</string>
+    <string name="enable_permissions">Please enable camera and Bluetooth permissions to continue.</string>
+    <string name="permissions_denied">Camera and Bluetooth permissions were denied</string>
+    <string name="open_app_permissions">Open app permissions</string>
 </resources>

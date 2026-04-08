@@ -18,12 +18,13 @@ import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_RATIO
 @Composable
 fun PermissionRationaleButton(
     text: String,
+    titleText: String,
     modifier: Modifier = Modifier,
     launchPermission: () -> Unit = {}
 ) {
     Column(modifier = modifier) {
         Text(
-            "Bluetooth permission were denied",
+            titleText,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
@@ -49,7 +50,8 @@ internal fun PermissionRationaleButtonPreview() {
         ) {
             PermissionRationaleButton(
                 launchPermission = {},
-                text = "asd",
+                text = "Please enable permissions",
+                titleText = "Permission was denied",
                 modifier = Modifier.testTag("preview")
             )
         }

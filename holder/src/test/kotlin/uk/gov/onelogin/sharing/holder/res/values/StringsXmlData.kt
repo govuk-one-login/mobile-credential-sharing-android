@@ -40,5 +40,9 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     OPEN_APP_PERMISSIONS(
         expected = "Open app permissions",
         resourceId = R.string.open_app_permissions
+    ),
+    BLUETOOTH_PERMISSION_DENIED(
+        expected = "Bluetooth permissions were denied",
+        resourceId = R.string.bluetooth_permission_denied
     )
 }
