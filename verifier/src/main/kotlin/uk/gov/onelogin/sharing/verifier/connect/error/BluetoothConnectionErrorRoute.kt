@@ -33,9 +33,5 @@ data class BluetoothConnectionErrorRoute(val title: String) {
                 )
             }
         }
-
-        fun NavController.navigateToBluetoothConnectionErrorRoute(title: String) {
-            navigate(BluetoothConnectionErrorRoute(title))
-        }
     }
 }

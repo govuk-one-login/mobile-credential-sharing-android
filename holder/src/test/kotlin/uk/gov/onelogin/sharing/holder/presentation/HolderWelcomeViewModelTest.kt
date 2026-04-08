@@ -55,7 +55,6 @@ class HolderWelcomeViewModelTest {
             assertFalse(state.showErrorScreen)
         }
 
-
     @Test
     fun `error should not be shown if permissions initially not granted on start up`() = runTest {
         val viewModel = createViewModel()
