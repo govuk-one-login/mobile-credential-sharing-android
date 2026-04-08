@@ -1,10 +1,8 @@
-package uk.gov.onelogin.sharing.verifier.connect.error
+package uk.gov.onelogin.sharing.core.presentation.bluetooth
 
 import android.content.Context
 import androidx.annotation.StringRes
 import uk.gov.onelogin.sharing.core.R as coreR
-import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
-import uk.gov.onelogin.sharing.verifier.R
 
 /**
  * Returns the string resource ID for the error text for each [BluetoothSessionError].
@@ -14,18 +12,18 @@ import uk.gov.onelogin.sharing.verifier.R
  * @return The string resource ID for the error title.
  */
 @StringRes
-internal fun errorTitleRes(error: BluetoothSessionError): Int = when (error) {
+fun errorTitleRes(error: BluetoothSessionError): Int = when (error) {
     BluetoothSessionError.BluetoothConfigurationError ->
-        R.string.bluetooth_connection_error_failed
+        coreR.string.bluetooth_connection_error_failed
 
     BluetoothSessionError.GenericError ->
-        R.string.bluetooth_connection_error_generic
+        coreR.string.bluetooth_connection_error_generic
 
     BluetoothSessionError.BluetoothConnectionError ->
         coreR.string.bluetooth_disconnected_unexpectedly
 
     BluetoothSessionError.BluetoothDisabledError ->
-        R.string.bluetooth_turned_off_verifier
+        coreR.string.bluetooth_turned_off_verifier
 
     BluetoothSessionError.BluetoothPermissionsError ->
         coreR.string.bluetooth_permissions_revoked
@@ -38,5 +36,5 @@ internal fun errorTitleRes(error: BluetoothSessionError): Int = when (error) {
  * @param error The error to get the title for.
  * @return The title string for the error.
  */
-internal fun errorTitle(context: Context, error: BluetoothSessionError): String =
+fun errorTitle(context: Context, error: BluetoothSessionError): String =
     context.getString(errorTitleRes(error))

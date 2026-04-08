@@ -6,7 +6,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import uk.gov.onelogin.sharing.verifier.connect.error.errorTitle
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
+import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 
 object ConnectWithHolderDeviceNavigationExt {
@@ -18,6 +20,13 @@ object ConnectWithHolderDeviceNavigationExt {
         }
     }
 
+    fun NavController.navigateToBluetoothConnectionErrorRoute(title: String) =
+        navigate(BluetoothConnectionErrorRoute(title)) {
+            popUpTo<ConnectWithHolderDeviceRoute> {
+                inclusive = false
+            }
+        }
+
     @OptIn(ExperimentalPermissionsApi::class)
     internal fun NavGraphBuilder.configureConnectWithHolderDeviceRoute(
         onFindError: (String) -> Unit = {}
@@ -25,7 +34,7 @@ object ConnectWithHolderDeviceNavigationExt {
         composable<ConnectWithHolderDeviceRoute> {
             val context = LocalContext.current
             ConnectWithHolderDeviceScreen(
-                onConnectionError = { error: ConnectWithHolderDeviceError ->
+                onConnectionError = { error: BluetoothSessionError ->
                     errorTitle(context, error)
                         .let(onFindError::invoke)
                         .also {

@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.res.values
 
 import androidx.annotation.StringRes
+import uk.gov.onelogin.sharing.core.R as CoreR
 import uk.gov.onelogin.sharing.verifier.R
 
 /**
@@ -21,7 +22,7 @@ enum class DeferredStringsXmlData(
         R.string.scanned_invalid_qr_title
     ),
     SCANNED_INVALID_QR_TRY_AGAIN(
-        R.string.try_again,
+        CoreR.string.try_again,
         R.string.scanned_invalid_qr_try_again
     ),
     VERIFIER_SCANNER_CAMERA_PERMISSION_PERMANENTLY_DENIED(
@@ -29,11 +30,11 @@ enum class DeferredStringsXmlData(
         R.string.verifier_scanner_camera_permission_permanently_denied
     ),
     VERIFIER_SCANNER_REQUIRE_CAMERA_PERMISSION(
-        R.string.enable_camera_permission_to_continue,
+        CoreR.string.enable_camera_permission_to_continue,
         R.string.verifier_scanner_require_camera_permission
     ),
     VERIFIER_SCANNER_REQUIRE_CAMERA_RATIONALE(
-        R.string.enable_camera_permission_to_continue,
+        CoreR.string.enable_camera_permission_to_continue,
         R.string.verifier_scanner_require_camera_rationale
     ),
     VERIFIER_SCANNER_REQUIRE_OPEN_PERMISSIONS(

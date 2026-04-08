@@ -23,6 +23,7 @@ import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.R as coreR
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.verifier.R
 
 @Composable
@@ -36,7 +37,7 @@ fun ConnectWithHolderDeviceScreen(
     ) {
         viewModel.receive(ConnectWithHolderDeviceEvent.RequestedPermission(true))
     },
-    onConnectionError: (ConnectWithHolderDeviceError) -> Unit = {}
+    onConnectionError: (BluetoothSessionError) -> Unit = {}
 ) {
     val latestOnConnectionError by rememberUpdatedState(onConnectionError)
 
