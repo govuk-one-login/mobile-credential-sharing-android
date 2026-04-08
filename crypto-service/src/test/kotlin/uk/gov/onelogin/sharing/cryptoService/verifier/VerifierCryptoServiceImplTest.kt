@@ -120,7 +120,9 @@ class VerifierCryptoServiceImplTest {
     @Test
     fun `deriveSessionKeys logs failure when SKReader derivation fails`() {
         val failingGenerator = SessionKeyGenerator { _, _, role ->
-            if (role == DeviceRole.VERIFIER) throw RuntimeException("SKReader error")
+            if (role == DeviceRole.VERIFIER) {
+                throw SessionKeyDerivationException("SKReader error", RuntimeException())
+            }
             byteArrayOf()
         }
         val failingService = VerifierCryptoServiceImpl(
@@ -129,7 +131,7 @@ class VerifierCryptoServiceImplTest {
             sessionKeyGenerator = failingGenerator
         )
 
-        assertThrows(RuntimeException::class.java) {
+        assertThrows(SessionKeyDerivationException::class.java) {
             failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript)
         }
 
@@ -139,7 +141,9 @@ class VerifierCryptoServiceImplTest {
     @Test
     fun `deriveSessionKeys logs failure when SKDevice derivation fails`() {
         val failingGenerator = SessionKeyGenerator { _, _, role ->
-            if (role == DeviceRole.HOLDER) throw RuntimeException("SKDevice error")
+            if (role == DeviceRole.HOLDER) {
+                throw SessionKeyDerivationException("SKDevice error", RuntimeException())
+            }
             byteArrayOf()
         }
         val failingService = VerifierCryptoServiceImpl(
@@ -148,7 +152,7 @@ class VerifierCryptoServiceImplTest {
             sessionKeyGenerator = failingGenerator
         )
 
-        assertThrows(RuntimeException::class.java) {
+        assertThrows(SessionKeyDerivationException::class.java) {
             failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript)
         }
 

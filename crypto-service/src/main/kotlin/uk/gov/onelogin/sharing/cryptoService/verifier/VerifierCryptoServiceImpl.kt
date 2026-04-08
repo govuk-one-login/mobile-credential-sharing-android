@@ -86,7 +86,7 @@ class VerifierCryptoServiceImpl(
                 sessionTranscriptBytes = sessionTranscriptBytes,
                 role = VERIFIER
             ).also { logger.debug(logTag, "SKReader key generated") }
-        } catch (e: Exception) {
+        } catch (e: SessionKeyDerivationException) {
             logger.error(logTag, "SKReader key derivation failed", e)
             throw e
         }
@@ -97,7 +97,7 @@ class VerifierCryptoServiceImpl(
                 sessionTranscriptBytes = sessionTranscriptBytes,
                 role = HOLDER
             ).also { logger.debug(logTag, "SKDevice key generated") }
-        } catch (e: Exception) {
+        } catch (e: SessionKeyDerivationException) {
             logger.error(logTag, "SKDevice key derivation failed", e)
             throw e
         }
