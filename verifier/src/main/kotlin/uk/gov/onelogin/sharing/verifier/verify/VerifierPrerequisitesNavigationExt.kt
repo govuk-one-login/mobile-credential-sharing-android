@@ -13,6 +13,7 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.navigateToUnrecoverableVerifierError
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanFromRoot
 
 /**
@@ -45,7 +46,8 @@ data object VerifierPrerequisitesNavigationExt {
                             "Called 'onNavigateToPreflight' behaviour"
                         )
                     },
-                    onNavigateToScanner = { navController.navigateToVerifierScanFromRoot() }
+                    onNavigateToScanner = { navController.navigateToVerifierScanFromRoot() },
+                    onUnrecoverableError = { navController.navigateToUnrecoverableVerifierError() }
                 )
             }
         }
