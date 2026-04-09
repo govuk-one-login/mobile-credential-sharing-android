@@ -1,0 +1,44 @@
+package uk.gov.onelogin.sharing.testapp
+
+import java.security.KeyPairGenerator
+import java.util.Base64
+
+object SampleCredentialProviderStub {
+
+    const val DEVICE_AUTHENTICATION_HEX =
+        "d818590271847444657669636541757468656e7469636174696f6e83d8185858" +
+            "a20063312e30018201d818584b" +
+            "a4010220012158205a88d182bce5f42efa59943f33359d2e8a968ff289d93e5fa444b624343167f" +
+            "e225820b16e8cf858ddc7690407ba61d4c338237a8cfcf3de6aa672fc60a557aa32fc67" +
+            "d818584ba40102200121582060e3392385041f51403051f2415531" +
+            "cb56dd3f999c71687013aac6768bc8187e" +
+            "225820e58deb8fdbe907f7dd5368245551a34796f7d2215c440c339bb0f7b67beccdfa" +
+            "8258c391020f487315d10209616301013001046d646f631a200c01" +
+            "6170706c69636174696f6e2f766e642e626c7565746f6f74682e6c652e6f6f62" +
+            "30081b28128b37282801021c015c1e580469736f2e6f72673a31383031333a6465766" +
+            "96365656e676167656d656e74" +
+            "6d646f63a20063312e30018201d818584b" +
+            "a4010220012158205a88d182bce5f42efa59943f33359d2e8a968ff289d93e5fa444b624343167f" +
+            "e225820b16e8cf858ddc7690407ba61d4c338237a8cfcf3de6aa672fc60a557aa32fc67" +
+            "58cd910225487215910202637201021102046163010130001102066163010" +
+            "36e6663005102046163010157001a201e016170706c69636174696f6e2f766e642e" +
+            "626c7565746f6f74682e6c652e6f6f62" +
+            "30081b28078080bf2801021c021107c832fff6d26fa0beb34dfcd555d4823a1c1" +
+            "1010369736f2e6f72673a31383031333a6e6663" +
+            "6e6663015a172b016170706c69636174696f6e2f766e642e7766612e6e616e" +
+            "57030101032302001324fec9a70b97ac9684a4e326176ef5b981c5e853" +
+            "3e5f00298cfccbc35e700a6b" +
+            "020414756f72672e69736f2e31383031332e352e312e6d444cd81841a0"
+
+    val base64EncodedCredential = "AQID"
+    val rawCredentialBytes = byteArrayOf(1, 2, 3)
+    val keyPair = KeyPairGenerator.getInstance("EC").apply {
+        initialize(256)
+    }.generateKeyPair()
+
+    val pkcs8PrivateKeyPem = buildString {
+        appendLine("-----BEGIN PRIVATE KEY-----")
+        appendLine(Base64.getEncoder().encodeToString(keyPair.private.encoded))
+        append("-----END PRIVATE KEY-----")
+    }
+}
