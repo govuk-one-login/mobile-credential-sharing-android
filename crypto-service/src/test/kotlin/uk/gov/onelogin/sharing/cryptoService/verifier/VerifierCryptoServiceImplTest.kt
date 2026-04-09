@@ -1,8 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
-import java.security.KeyPairGenerator as JKeyPairGenerator
-import java.security.interfaces.ECPublicKey
-import java.security.spec.ECGenParameterSpec
+import java.security.InvalidKeyException
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
@@ -13,13 +11,9 @@ import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.validDeviceEngagementDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
-import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.SHARED_SECRET_BYTES
-import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SK_DEVICE_KEY
-import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SK_READER_KEY
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.EcKeyPairGenerator
-import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
 import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.EcdhSharedSecretGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.SharedSecretGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.HkdfSessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
@@ -27,32 +21,31 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 
 class VerifierCryptoServiceImplTest {
     private val logger = SystemLogger()
-    private val sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
     private val service = VerifierCryptoServiceImpl(
         logger = logger,
         keyPairGenerator = EcKeyPairGenerator(logger),
         sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-        sessionKeyGenerator = sessionKeyGenerator
+        sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
     )
 
     @Test
-    fun `processEngagement decorates context successfully`() = runTest {
-        var decoratedContext: VerifierCryptoContext? = null
+    fun `establishSession decorates context successfully`() = runTest {
+        var context: VerifierCryptoContext? = null
 
-        service.processEngagement(VALID_ENCODED_DEVICE_ENGAGEMENT) {
-            decoratedContext = it
+        service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) {
+            context = it
             it
         }
 
-        val context = assertNotNull(decoratedContext)
-        assertEquals(VALID_ENCODED_DEVICE_ENGAGEMENT, context.engagementString)
-        assertNotNull(context.serviceUuid)
-        val eReaderKey = assertNotNull(context.eReaderKeyTagged)
+        val ctx = assertNotNull(context)
+        assertEquals(VALID_ENCODED_DEVICE_ENGAGEMENT, ctx.engagementString)
+        assertNotNull(ctx.serviceUuid)
+        val eReaderKey = assertNotNull(ctx.eReaderKeyTagged)
         assertTrue(eReaderKey[0] == 0xD8.toByte())
         assertTrue(eReaderKey[1] == 0x18.toByte())
-        assertNotNull(context.sessionTranscriptBytes)
-        assertNotNull(context.eReaderKeyPair)
-        val eDeviceKey = assertNotNull(context.eDevicePublicKey)
+        assertNotNull(ctx.sessionTranscriptBytes)
+        assertNotNull(ctx.eReaderKeyPair)
+        val eDeviceKey = assertNotNull(ctx.eDevicePublicKey)
         val expectedKey = validDeviceEngagementDto.security.ephemeralPublicKey
         assertEquals(
             expectedKey.x.toList(),
@@ -62,9 +55,9 @@ class VerifierCryptoServiceImplTest {
     }
 
     @Test
-    fun `processEngagement throws when DeviceEngagementBytes is blank`() = runTest {
+    fun `establishSession throws when DeviceEngagementBytes is blank`() = runTest {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            service.processEngagement("") { it }
+            service.establishSession("") { it }
         }
 
         assertEquals("DeviceEngagementBytes must not be blank", exception.message)
@@ -75,168 +68,143 @@ class VerifierCryptoServiceImplTest {
     }
 
     @Test
-    fun `deriveSessionKeys generates correct SKReader key`() {
-        var context: VerifierCryptoContext? = null
+    fun `shared secret computed successfully`() = runTest {
+        service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
 
-        service.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) {
-            context = it
-            it
-        }
-
-        assertEquals(VALID_SK_READER_KEY, context!!.skReader!!.toHexString())
-        assert("SKReader key generated" in logger)
-    }
-
-    @Test
-    fun `deriveSessionKeys generates correct SKDevice key`() {
-        var context: VerifierCryptoContext? = null
-
-        service.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) {
-            context = it
-            it
-        }
-
-        assertEquals(VALID_SK_DEVICE_KEY, context!!.skDevice!!.toHexString())
-        assert("SKDevice key generated" in logger)
-    }
-
-    @Test
-    fun `deriveSessionKeys produces distinct SKReader and SKDevice keys`() {
-        var context: VerifierCryptoContext? = null
-
-        service.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) {
-            context = it
-            it
-        }
-
-        assertNotEquals(context!!.skReader!!.toHexString(), context!!.skDevice!!.toHexString())
-    }
-
-    @Test
-    fun `deriveSessionKeys produces wrong keys when sessionTranscriptBytes differ`() {
-        val alteredTranscript = validSessionTranscript.copyOf().apply { set(0, 0x00) }
-        var context: VerifierCryptoContext? = null
-
-        service.deriveSessionKeys(SHARED_SECRET_BYTES, alteredTranscript) {
-            context = it
-            it
-        }
-
-        assertNotEquals(VALID_SK_READER_KEY, context!!.skReader!!.toHexString())
-        assertNotEquals(VALID_SK_DEVICE_KEY, context!!.skDevice!!.toHexString())
-    }
-
-    @Test
-    fun `deriveSessionKeys produces wrong keys when shared secret differs`() {
-        val wrongSecret = ByteArray(32) { 0xFF.toByte() }
-        var context: VerifierCryptoContext? = null
-
-        service.deriveSessionKeys(wrongSecret, validSessionTranscript) {
-            context = it
-            it
-        }
-
-        assertNotEquals(VALID_SK_READER_KEY, context!!.skReader!!.toHexString())
-        assertNotEquals(VALID_SK_DEVICE_KEY, context!!.skDevice!!.toHexString())
-    }
-
-    @Test
-    fun `deriveSessionKeys logs failure when SKReader derivation fails`() {
-        val failingGenerator = SessionKeyGenerator { _, _, role ->
-            if (role == DeviceRole.VERIFIER) {
-                throw SessionKeyDerivationException("SKReader error", RuntimeException())
-            }
-            byteArrayOf()
-        }
-        val failingService = VerifierCryptoServiceImpl(
-            logger = logger,
-            keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-            sessionKeyGenerator = failingGenerator
-        )
-
-        assertThrows(SessionKeyDerivationException::class.java) {
-            failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) { it }
-        }
-
-        assert("SKReader key derivation failed" in logger)
-    }
-
-    @Test
-    fun `deriveSessionKeys logs failure when SKDevice derivation fails`() {
-        val failingGenerator = SessionKeyGenerator { _, _, role ->
-            if (role == DeviceRole.HOLDER) {
-                throw SessionKeyDerivationException("SKDevice error", RuntimeException())
-            }
-            byteArrayOf()
-        }
-        val failingService = VerifierCryptoServiceImpl(
-            logger = logger,
-            keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-            sessionKeyGenerator = failingGenerator
-        )
-
-        assertThrows(SessionKeyDerivationException::class.java) {
-            failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) { it }
-        }
-
-        assert("SKDevice key derivation failed" in logger)
-    }
-
-    @Test
-    fun `AC1 - computeSharedSecret succeeds with valid P-256 keys`() {
-        val context = buildContextFromEngagement()
-
-        val sharedSecret = service.computeSharedSecret(context)
-
-        assertNotNull(sharedSecret)
-        assertTrue(sharedSecret.isNotEmpty())
         assert("Shared secret computed successfully" in logger)
     }
 
     @Test
-    fun `AC2 - computeSharedSecret throws IncompatibleCurve when EDeviceKey uses wrong curve`() {
-        val p384KeyPair = JKeyPairGenerator.getInstance("EC").apply {
-            initialize(ECGenParameterSpec("secp384r1"))
-        }.generateKeyPair()
-
-        val context = VerifierCryptoContext(
-            eReaderKeyPair = validKeyPair,
-            eDevicePublicKey = p384KeyPair.public as ECPublicKey
+    fun `incompatible curve logs error and throws`() {
+        val service = VerifierCryptoServiceImpl(
+            logger = logger,
+            keyPairGenerator = EcKeyPairGenerator(logger),
+            sharedSecretGenerator = SharedSecretGenerator { _, _ ->
+                throw InvalidKeyException("incompatible curve")
+            },
+            sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
         )
 
-        assertThrows(SharedSecretException.IncompatibleCurve::class.java) {
-            service.computeSharedSecret(context)
+        assertThrows(SharedSecretException.MalformedKey::class.java) {
+            service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
         }
+
         assert(
             logger.any {
                 it.message.contains(
-                    "Error computing shared secret due to EDeviceKey.Pub with incompatible curve"
+                    "Error computing shared secret due to malformed EDeviceKey.Pub"
                 )
             }
         )
     }
 
     @Test
-    fun `AC3 - computeSharedSecret throws when EDeviceKey is not available`() {
-        val context = VerifierCryptoContext(
-            eReaderKeyPair = validKeyPair,
-            eDevicePublicKey = null
+    fun `malformed EDeviceKey logs error and throws`() {
+        val service = VerifierCryptoServiceImpl(
+            logger = logger,
+            keyPairGenerator = EcKeyPairGenerator(logger),
+            sharedSecretGenerator = SharedSecretGenerator { _, _ ->
+                throw InvalidKeyException("malformed key")
+            },
+            sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
         )
 
-        val exception = assertThrows(IllegalStateException::class.java) {
-            service.computeSharedSecret(context)
+        assertThrows(SharedSecretException.MalformedKey::class.java) {
+            service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
         }
-        assertEquals("EDeviceKey.Pub not available", exception.message)
+
+        assert(
+            logger.any {
+                it.message.contains(
+                    "Error computing shared secret due to malformed EDeviceKey.Pub"
+                )
+            }
+        )
     }
 
-    private fun buildContextFromEngagement(): VerifierCryptoContext {
+    @Test
+    fun `salt calculated from SessionTranscriptBytes`() = runTest {
         var context: VerifierCryptoContext? = null
-        service.processEngagement(VALID_ENCODED_DEVICE_ENGAGEMENT) {
+
+        service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) {
             context = it
             it
         }
-        return context!!
+
+        assertNotNull(context!!.sessionTranscriptBytes)
+    }
+
+    @Test
+    fun `SKReader key derived successfully`() = runTest {
+        var context: VerifierCryptoContext? = null
+
+        service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) {
+            context = it
+            it
+        }
+
+        val skReader = assertNotNull(context!!.skReader)
+        assertEquals(32, skReader.size)
+        assert("SKReader key generated" in logger)
+    }
+
+    @Test
+    fun `SKDevice key derived and distinct from SKReader`() = runTest {
+        var context: VerifierCryptoContext? = null
+
+        service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) {
+            context = it
+            it
+        }
+
+        val skReader = assertNotNull(context!!.skReader)
+        val skDevice = assertNotNull(context!!.skDevice)
+        assertEquals(32, skDevice.size)
+        assertNotEquals(skReader.toList(), skDevice.toList())
+        assert("SKDevice key generated" in logger)
+    }
+
+    @Test
+    fun `SKReader derivation failure logs and throws`() {
+        val failingGenerator = SessionKeyGenerator { _, _, role ->
+            if (role == DeviceRole.VERIFIER) {
+                throw SessionKeyDerivationException("SKReader error", RuntimeException())
+            }
+            byteArrayOf()
+        }
+        val service = VerifierCryptoServiceImpl(
+            logger = logger,
+            keyPairGenerator = EcKeyPairGenerator(logger),
+            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
+            sessionKeyGenerator = failingGenerator
+        )
+
+        assertThrows(SessionKeyDerivationException::class.java) {
+            service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
+        }
+
+        assert("SKReader key derivation failed" in logger)
+    }
+
+    @Test
+    fun `SKDevice derivation failure logs and throws`() {
+        val failingGenerator = SessionKeyGenerator { _, _, role ->
+            if (role == DeviceRole.HOLDER) {
+                throw SessionKeyDerivationException("SKDevice error", RuntimeException())
+            }
+            byteArrayOf()
+        }
+        val service = VerifierCryptoServiceImpl(
+            logger = logger,
+            keyPairGenerator = EcKeyPairGenerator(logger),
+            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
+            sessionKeyGenerator = failingGenerator
+        )
+
+        assertThrows(SessionKeyDerivationException::class.java) {
+            service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
+        }
+
+        assert("SKDevice key derivation failed" in logger)
     }
 }

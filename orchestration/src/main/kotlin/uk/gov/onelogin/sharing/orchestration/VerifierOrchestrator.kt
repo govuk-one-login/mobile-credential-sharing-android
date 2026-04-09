@@ -165,7 +165,7 @@ class VerifierOrchestrator(
         when (result) {
             is QrScanResult.Success -> {
                 runCatching {
-                    verifierCryptoService.processEngagement(result.value) { context ->
+                    verifierCryptoService.establishSession(result.value) { context ->
                         sessionFlow.value.updateCryptoContext { context }
                         context
                     }

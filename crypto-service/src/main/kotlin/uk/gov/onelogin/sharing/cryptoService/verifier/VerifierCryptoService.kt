@@ -6,40 +6,27 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDeriva
  * Handles cryptographic operations for the Verifier role.
  *
  * The Orchestrator delegates to this service during the verification lifecycle:
- * 1. [processEngagement] — Decodes the QR code, generates ephemeral keys,
- *    calculates the Session Transcript, and decorates the session's crypto context.
- * 2. [deriveSessionKeys] — Derives the SKReader and SKDevice session keys from
- *    the shared secret and SessionTranscriptBytes.
+ * 1. [establishSession] — Decodes the QR code, generates ephemeral keys,
+ *    calculates the Session Transcript, computes the shared secret, and derives
+ *    the SKReader and SKDevice session keys.
  */
-interface VerifierCryptoService {
+fun interface VerifierCryptoService {
     /**
      * Processes the scanned Device Engagement data: generates the Verifier's
-     * ephemeral key pair, constructs the SessionTranscriptBytes, and stores
-     * the results in the session's crypto context.
+     * ephemeral key pair, constructs the SessionTranscriptBytes, computes the
+     * shared secret (ZAB), and derives the session keys.
      *
      * @param qrCodeData The base64url-encoded Device Engagement string
      *   (with the `mdoc:` prefix already stripped).
      * @param updateContext Callback to decorate the session's crypto context.
      * @throws IllegalArgumentException if [qrCodeData] is blank.
      * @throws IllegalStateException if key pair generation fails.
+     * @throws SharedSecretException.IncompatibleCurve if EDeviceKey.Pub is not on P-256.
+     * @throws SharedSecretException.MalformedKey if EDeviceKey.Pub is malformed.
+     * @throws SessionKeyDerivationException if either session key derivation fails.
      */
-    fun processEngagement(
+    fun establishSession(
         qrCodeData: String,
-        updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
-    )
-
-    /**
-     * Derives the SKReader and SKDevice 32-byte session keys using HKDF-SHA256
-     * and stores them in the session's crypto context.
-     *
-     * @param sharedSecret The shared secret (ZAB) derived via ECKA-DH.
-     * @param sessionTranscriptBytes The CBOR Tag 24 wrapped SessionTranscript bytes.
-     * @param updateContext Callback to decorate the session's crypto context with the derived keys.
-     * @throws SessionKeyDerivationException if either key derivation fails.
-     */
-    fun deriveSessionKeys(
-        sharedSecret: ByteArray,
-        sessionTranscriptBytes: ByteArray,
         updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
     )
 }
