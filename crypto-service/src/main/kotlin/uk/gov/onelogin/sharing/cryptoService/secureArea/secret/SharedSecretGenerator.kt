@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.cryptoService.secureArea.secret
 
-import java.security.KeyPair
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 

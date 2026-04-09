@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
 import java.security.InvalidKeyException
+import java.security.KeyPairGenerator
+import java.security.spec.ECGenParameterSpec
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
@@ -75,23 +77,25 @@ class VerifierCryptoServiceImplTest {
 
     @Test
     fun `incompatible curve logs error and throws`() {
+        val p384KeyPair = KeyPairGenerator.getInstance("EC").apply {
+            initialize(ECGenParameterSpec("secp384r1"))
+        }.generateKeyPair()
+
         val service = VerifierCryptoServiceImpl(
             logger = logger,
-            keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = { _, _ ->
-                throw InvalidKeyException("incompatible curve")
-            },
+            keyPairGenerator = { _, _ -> p384KeyPair },
+            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
             sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
         )
 
-        assertThrows(SharedSecretException.MalformedKey::class.java) {
+        assertThrows(SharedSecretException.IncompatibleCurve::class.java) {
             service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
         }
 
         assert(
             logger.any {
                 it.message.contains(
-                    "Error computing shared secret due to malformed EDeviceKey.Pub"
+                    "Error computing shared secret due to EDeviceKey.Pub with incompatible curve"
                 )
             }
         )
