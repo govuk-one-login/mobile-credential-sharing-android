@@ -2,6 +2,8 @@ package uk.gov.onelogin.sharing.holder
 
 import android.Manifest
 import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -14,7 +16,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
 import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
-import uk.gov.onelogin.sharing.holder.presentation.BluetoothPermissionPrompt
+import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPrompt
+import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPromptText
+import uk.gov.onelogin.sharing.holder.R
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -27,6 +31,16 @@ class HolderWelcomeScreenPermissionsTest {
         composeTestRule = createComposeRule(),
         resources = resources
     )
+
+    private val text
+        @Composable get() = PermissionPromptText(
+            permanentlyDeniedText = stringResource(
+                R.string.bluetooth_permission_permanently_denied
+            ),
+            enablePermissionText = stringResource(R.string.enable_bluetooth_permission),
+            openSettingsText = stringResource(R.string.open_app_permissions),
+            deniedText = stringResource(R.string.bluetooth_permission_denied)
+        )
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Test
@@ -47,9 +61,10 @@ class HolderWelcomeScreenPermissionsTest {
         )
 
         composeTestRule.setContent {
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = fakeState,
-                hasPreviouslyRequestedPermission = false
+                hasPreviouslyRequestedPermission = false,
+                text = text
             ) {}
         }
 
@@ -77,9 +92,10 @@ class HolderWelcomeScreenPermissionsTest {
         )
 
         composeTestRule.setContent {
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = fakeState,
-                hasPreviouslyRequestedPermission = true
+                hasPreviouslyRequestedPermission = true,
+                text = text
             ) { }
         }
 
@@ -107,9 +123,10 @@ class HolderWelcomeScreenPermissionsTest {
         )
 
         composeTestRule.setContent {
-            BluetoothPermissionPrompt(
+            PermissionPrompt(
                 multiplePermissionsState = fakeState,
-                hasPreviouslyRequestedPermission = true
+                hasPreviouslyRequestedPermission = true,
+                text = text
             ) { }
         }
 

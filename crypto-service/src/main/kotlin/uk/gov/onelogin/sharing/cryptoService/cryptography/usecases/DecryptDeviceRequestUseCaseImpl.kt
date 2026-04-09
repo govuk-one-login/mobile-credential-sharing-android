@@ -40,8 +40,8 @@ class DecryptDeviceRequestUseCaseImpl(
         )
 
         val sharedSecret = sessionSecurity.generateSharedSecret(
-            holderKey = holderPrivateKey as ECPrivateKey,
-            eReaderKey = eReaderPublicKey
+            thisDevicePrivateKey = holderPrivateKey as ECPrivateKey,
+            otherDevicePublicKey = eReaderPublicKey
         )
 
         val transcript = deriveSessionTranscript(

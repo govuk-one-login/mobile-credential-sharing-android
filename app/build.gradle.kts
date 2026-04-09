@@ -87,6 +87,7 @@ dependencies {
     ).forEach(::kspAndroidTest)
 
     listOf(
+        projects.core, // Remove once SDK prerequisites screen handles permissions
         projects.sdk,
         projects.ui.uiApi,
         projects.ui.uiImpl
@@ -131,6 +132,7 @@ dependencies {
         libs.bundles.testing.unit,
         libs.metro.runtime,
         libs.uk.gov.logging.testdouble,
+        testFixtures(projects.core), // Remove once SDK prerequisites screen handles permissions
         testFixtures(projects.holder),
         testFixtures(projects.orchestration),
         testFixtures(projects.sdk)

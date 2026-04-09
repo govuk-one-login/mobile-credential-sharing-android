@@ -47,14 +47,18 @@ fun TestAppScreen(
         mutableStateOf<CredentialSharingDestination?>(null)
     }
 
+    // Remove verifierPermissionGate once SDK prerequisites screen handles permissions
+    var verifierPermissionGate by rememberSaveable { mutableStateOf(false) }
+    var holderPermissionGate by rememberSaveable { mutableStateOf(false) }
+
     val sharingDialogVisible by remember {
-        derivedStateOf { destination != null }
+        derivedStateOf { destination != null || verifierPermissionGate || holderPermissionGate }
     }
 
     TestAppScreenContent(
         modifier = modifier,
-        onOpenHolder = { destination = CredentialSharingDestination.Holder },
-        onOpenVerifier = { destination = CredentialSharingDestination.Verifier },
+        onOpenHolder = { holderPermissionGate = true },
+        onOpenVerifier = { verifierPermissionGate = true },
         onCloseFlow = {
             when (destination) {
                 is CredentialSharingDestination.Holder ->
@@ -67,21 +71,32 @@ fun TestAppScreen(
             }?.cancel()
 
             destination = null
+            verifierPermissionGate = false
+            holderPermissionGate = false
         },
         sharingDialogVisible = sharingDialogVisible,
         content = {
-            when (destination) {
-                CredentialSharingDestination.Holder -> ShareCredential(
+            when {
+                // Remove verifierPermissionGate branch once SDK prerequisites handles permissions
+                verifierPermissionGate && destination == null -> VerifierPermissionGate {
+                    verifierPermissionGate = false
+                    destination = CredentialSharingDestination.Verifier
+                }
+
+                holderPermissionGate && destination == null -> HolderPermissionGate {
+                    holderPermissionGate = false
+                    destination = CredentialSharingDestination.Holder
+                }
+
+                destination == CredentialSharingDestination.Holder -> ShareCredential(
                     component = credentialPresenter,
                     modifier = Modifier.fillMaxSize()
                 )
 
-                CredentialSharingDestination.Verifier -> VerifyCredential(
+                destination == CredentialSharingDestination.Verifier -> VerifyCredential(
                     component = credentialVerifier,
                     modifier = Modifier.fillMaxSize()
                 )
-
-                null -> {}
             }
         }
     )

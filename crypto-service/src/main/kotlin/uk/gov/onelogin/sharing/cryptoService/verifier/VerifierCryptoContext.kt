@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
+import java.security.KeyPair
+import java.security.interfaces.ECPublicKey
 import java.util.UUID
 
 /**
@@ -18,6 +20,10 @@ data class VerifierCryptoContext(
     val eReaderKeyTagged: ByteArray? = null,
     /** The CBOR Tag 24 wrapped SessionTranscript, used as salt for key derivation. */
     val sessionTranscriptBytes: ByteArray? = null,
+    /** The Verifier's ephemeral key pair (EReaderKey), retained for shared secret computation. */
+    val eReaderKeyPair: KeyPair? = null,
+    /** The Holder's ephemeral public key (EDeviceKey.Pub), parsed from the DeviceEngagement. */
+    val eDevicePublicKey: ECPublicKey? = null,
     /** The 32-byte session key used by the Verifier to encrypt requests. */
     val skReader: ByteArray? = null,
     /** The 32-byte session key used by the Verifier to decrypt responses. */
