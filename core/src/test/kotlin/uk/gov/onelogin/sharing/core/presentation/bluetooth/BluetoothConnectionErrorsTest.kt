@@ -18,7 +18,7 @@ class BluetoothConnectionErrorsTest {
 
     enum class ErrorTitleResData(
         val error: BluetoothSessionError,
-        @StringRes val expectedRes: Int,
+        @param:StringRes val expectedRes: Int,
         val expectedString: String
     ) {
         CONFIGURATION_ERROR(
