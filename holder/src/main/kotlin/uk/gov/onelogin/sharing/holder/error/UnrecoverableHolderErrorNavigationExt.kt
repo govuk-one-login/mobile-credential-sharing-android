@@ -5,7 +5,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import uk.gov.onelogin.sharing.holder.HolderRoutes
-import uk.gov.onelogin.sharing.holder.HolderRoutes.navigateToHolderJourney
 
 object UnrecoverableHolderErrorNavigationExt {
     fun NavController.navigateToUnrecoverableHolderError(
@@ -16,11 +15,7 @@ object UnrecoverableHolderErrorNavigationExt {
         composable<UnrecoverableHolderErrorRoute> {
             UnrecoverableHolderErrorScreen(
                 onExitJourney = {
-                    navController.navigateToHolderJourney {
-                        popUpTo<HolderRoutes> {
-                            inclusive = true
-                        }
-                    }
+                    navController.popBackStack(HolderRoutes, inclusive = true)
                 }
             )
         }

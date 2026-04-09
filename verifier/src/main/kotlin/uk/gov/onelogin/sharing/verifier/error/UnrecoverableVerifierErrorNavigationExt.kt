@@ -5,7 +5,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
-import uk.gov.onelogin.sharing.verifier.VerifierRoutes.navigateToVerifierJourney
 
 object UnrecoverableVerifierErrorNavigationExt {
     fun NavController.navigateToUnrecoverableVerifierError(
@@ -16,11 +15,7 @@ object UnrecoverableVerifierErrorNavigationExt {
         composable<UnrecoverableVerifierErrorRoute> {
             UnrecoverableVerifierErrorScreen(
                 onExitJourney = {
-                    navController.navigateToVerifierJourney {
-                        popUpTo<VerifierRoutes> {
-                            inclusive = true
-                        }
-                    }
+                    navController.popBackStack(VerifierRoutes, inclusive = true)
                 }
             )
         }
