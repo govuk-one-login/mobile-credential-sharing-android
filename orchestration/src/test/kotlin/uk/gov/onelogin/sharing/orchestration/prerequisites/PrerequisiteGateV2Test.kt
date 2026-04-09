@@ -9,6 +9,7 @@ import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.hasSize
 import org.junit.runner.RunWith
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.PrerequisiteEvaluator
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisitesV2Matchers.hasBluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisitesV2Matchers.hasCameraState
@@ -38,7 +39,8 @@ class PrerequisiteGateV2Test {
         PrerequisiteGateV2(
             bluetoothEvaluator = bluetoothEvaluator,
             cameraEvaluator = cameraEvaluator,
-            locationEvaluator = locationEvaluator
+            locationEvaluator = locationEvaluator,
+            logger = SystemLogger()
         )
     }
 

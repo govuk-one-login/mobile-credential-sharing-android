@@ -21,6 +21,9 @@ class HolderPrerequisitesScreenRule(
     var hasPresentedEngagement: Boolean = false
         private set
 
+    var hasUnrecoverableError: Boolean = false
+        private set
+
     fun assertNotStartedTextIsDisplayed() = onNodeWithText(
         resources.getString(R.string.holder_prerequisites_not_started)
     ).assertIsDisplayed()
@@ -40,5 +43,9 @@ class HolderPrerequisitesScreenRule(
 
     fun updateHasPresentedEngagement(hasPresentedEngagement: Boolean = true) {
         this.hasPresentedEngagement = hasPresentedEngagement
+    }
+
+    fun updateHasUnrecoverableError(hasUnrecoverableError: Boolean = true) {
+        this.hasUnrecoverableError = hasUnrecoverableError
     }
 }

@@ -25,7 +25,8 @@ class MainActivityTest {
     val appGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
         .create(
             applicationContext = ApplicationProvider.getApplicationContext(),
-            logger = SystemLogger()
+            logger = SystemLogger(),
+            permissionCheckerV2 = { emptyList() }
         )
 
     val holderGraph = createGraphFactory<PresentCredentialGraph.Factory>()

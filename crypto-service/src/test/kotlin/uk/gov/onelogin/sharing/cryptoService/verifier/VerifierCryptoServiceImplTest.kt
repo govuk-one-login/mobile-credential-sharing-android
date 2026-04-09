@@ -13,7 +13,6 @@ import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_EN
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.EcKeyPairGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.EcdhSharedSecretGenerator
-import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.SharedSecretGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.HkdfSessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
@@ -37,15 +36,15 @@ class VerifierCryptoServiceImplTest {
             it
         }
 
-        val ctx = assertNotNull(context)
-        assertEquals(VALID_ENCODED_DEVICE_ENGAGEMENT, ctx.engagementString)
-        assertNotNull(ctx.serviceUuid)
-        val eReaderKey = assertNotNull(ctx.eReaderKeyTagged)
+        assertNotNull(context)
+        assertEquals(VALID_ENCODED_DEVICE_ENGAGEMENT, context.engagementString)
+        assertNotNull(context.serviceUuid)
+        val eReaderKey = assertNotNull(context.eReaderKeyTagged)
         assertTrue(eReaderKey[0] == 0xD8.toByte())
         assertTrue(eReaderKey[1] == 0x18.toByte())
-        assertNotNull(ctx.sessionTranscriptBytes)
-        assertNotNull(ctx.eReaderKeyPair)
-        val eDeviceKey = assertNotNull(ctx.eDevicePublicKey)
+        assertNotNull(context.sessionTranscriptBytes)
+        assertNotNull(context.eReaderKeyPair)
+        val eDeviceKey = assertNotNull(context.eDevicePublicKey)
         val expectedKey = validDeviceEngagementDto.security.ephemeralPublicKey
         assertEquals(
             expectedKey.x.toList(),

@@ -8,13 +8,15 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import java.util.Collections.singleton
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.junit.After
 import org.junit.Before
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
-import uk.gov.onelogin.sharing.core.permission.StubPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.toDeniedPermission
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 class LocationPrerequisiteEvaluatorTest {
@@ -23,12 +25,12 @@ class LocationPrerequisiteEvaluatorTest {
     private val packageManager: PackageManager = mockk()
     private val locationManager: LocationManager = mockk()
 
-    private var permissionResult: PermissionChecker.Response = PermissionChecker.Response.Passed
+    private var permissionResult: MutableList<PermissionCheckerV2.Denied> = mutableListOf()
 
     private val evaluator by lazy {
         LocationPrerequisiteEvaluator(
             context = context,
-            permissionChecker = StubPermissionChecker(permissionResult)
+            permissionChecker = FakePermissionChecker { permissionResult }
         )
     }
 
@@ -53,9 +55,18 @@ class LocationPrerequisiteEvaluatorTest {
 
     @Test
     fun `Returns PermissionNotGranted when permission is missing`() {
-        permissionResult =
-            PermissionChecker.Response.Missing("android.permission.ACCESS_FINE_LOCATION")
+        singleton("android.permission.ACCESS_FINE_LOCATION")
+            .toDeniedPermission()
+            .let(permissionResult::addAll)
         assertEquals(LocationState.PermissionNotGranted, evaluator.evaluate())
+    }
+
+    @Test
+    fun `Returns PermissionDeniedPermanently when permission is missing`() {
+        singleton("android.permission.ACCESS_FINE_LOCATION")
+            .toDeniedPermission(false)
+            .let(permissionResult::addAll)
+        assertEquals(LocationState.PermissionDeniedPermanently, evaluator.evaluate())
     }
 
     @Test
@@ -72,8 +83,9 @@ class LocationPrerequisiteEvaluatorTest {
 
     @Test
     fun `Permission check takes priority over support check`() {
-        permissionResult =
-            PermissionChecker.Response.Missing("android.permission.ACCESS_FINE_LOCATION")
+        singleton("android.permission.ACCESS_FINE_LOCATION")
+            .toDeniedPermission()
+            .let(permissionResult::addAll)
         every { packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION) } returns false
         assertEquals(LocationState.PermissionNotGranted, evaluator.evaluate())
     }
