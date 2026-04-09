@@ -62,60 +62,68 @@ class VerifierCryptoServiceImplTest {
 
     @Test
     fun `deriveSessionKeys generates correct SKReader key`() {
-        val (skReader, _) = service.deriveSessionKeys(
-            SHARED_SECRET_BYTES,
-            validSessionTranscript
-        )
+        var context: VerifierCryptoContext? = null
 
-        assertEquals(VALID_SK_READER_KEY, skReader.toHexString())
+        service.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) {
+            context = it
+            it
+        }
+
+        assertEquals(VALID_SK_READER_KEY, context!!.skReader!!.toHexString())
         assert("SKReader key generated" in logger)
     }
 
     @Test
     fun `deriveSessionKeys generates correct SKDevice key`() {
-        val (_, skDevice) = service.deriveSessionKeys(
-            SHARED_SECRET_BYTES,
-            validSessionTranscript
-        )
+        var context: VerifierCryptoContext? = null
 
-        assertEquals(VALID_SK_DEVICE_KEY, skDevice.toHexString())
+        service.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) {
+            context = it
+            it
+        }
+
+        assertEquals(VALID_SK_DEVICE_KEY, context!!.skDevice!!.toHexString())
         assert("SKDevice key generated" in logger)
     }
 
     @Test
     fun `deriveSessionKeys produces distinct SKReader and SKDevice keys`() {
-        val (skReader, skDevice) = service.deriveSessionKeys(
-            SHARED_SECRET_BYTES,
-            validSessionTranscript
-        )
+        var context: VerifierCryptoContext? = null
 
-        assertNotEquals(skReader.toHexString(), skDevice.toHexString())
+        service.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) {
+            context = it
+            it
+        }
+
+        assertNotEquals(context!!.skReader!!.toHexString(), context!!.skDevice!!.toHexString())
     }
 
     @Test
     fun `deriveSessionKeys produces wrong keys when sessionTranscriptBytes differ`() {
         val alteredTranscript = validSessionTranscript.copyOf().apply { set(0, 0x00) }
+        var context: VerifierCryptoContext? = null
 
-        val (skReader, skDevice) = service.deriveSessionKeys(
-            SHARED_SECRET_BYTES,
-            alteredTranscript
-        )
+        service.deriveSessionKeys(SHARED_SECRET_BYTES, alteredTranscript) {
+            context = it
+            it
+        }
 
-        assertNotEquals(VALID_SK_READER_KEY, skReader.toHexString())
-        assertNotEquals(VALID_SK_DEVICE_KEY, skDevice.toHexString())
+        assertNotEquals(VALID_SK_READER_KEY, context!!.skReader!!.toHexString())
+        assertNotEquals(VALID_SK_DEVICE_KEY, context!!.skDevice!!.toHexString())
     }
 
     @Test
     fun `deriveSessionKeys produces wrong keys when shared secret differs`() {
         val wrongSecret = ByteArray(32) { 0xFF.toByte() }
+        var context: VerifierCryptoContext? = null
 
-        val (skReader, skDevice) = service.deriveSessionKeys(
-            wrongSecret,
-            validSessionTranscript
-        )
+        service.deriveSessionKeys(wrongSecret, validSessionTranscript) {
+            context = it
+            it
+        }
 
-        assertNotEquals(VALID_SK_READER_KEY, skReader.toHexString())
-        assertNotEquals(VALID_SK_DEVICE_KEY, skDevice.toHexString())
+        assertNotEquals(VALID_SK_READER_KEY, context!!.skReader!!.toHexString())
+        assertNotEquals(VALID_SK_DEVICE_KEY, context!!.skDevice!!.toHexString())
     }
 
     @Test
@@ -133,7 +141,7 @@ class VerifierCryptoServiceImplTest {
         )
 
         assertThrows(SessionKeyDerivationException::class.java) {
-            failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript)
+            failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) { it }
         }
 
         assert("SKReader key derivation failed" in logger)
@@ -154,7 +162,7 @@ class VerifierCryptoServiceImplTest {
         )
 
         assertThrows(SessionKeyDerivationException::class.java) {
-            failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript)
+            failingService.deriveSessionKeys(SHARED_SECRET_BYTES, validSessionTranscript) { it }
         }
 
         assert("SKDevice key derivation failed" in logger)

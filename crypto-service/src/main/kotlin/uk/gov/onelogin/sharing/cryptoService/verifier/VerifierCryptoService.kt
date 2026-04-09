@@ -29,15 +29,17 @@ interface VerifierCryptoService {
     )
 
     /**
-     * Derives the SKReader and SKDevice 32-byte session keys using HKDF-SHA256.
+     * Derives the SKReader and SKDevice 32-byte session keys using HKDF-SHA256
+     * and stores them in the session's crypto context.
      *
      * @param sharedSecret The shared secret (ZAB) derived via ECKA-DH.
      * @param sessionTranscriptBytes The CBOR Tag 24 wrapped SessionTranscript bytes.
-     * @return A [Pair] where [Pair.first] is SKReader and [Pair.second] is SKDevice.
+     * @param updateContext Callback to decorate the session's crypto context with the derived keys.
      * @throws SessionKeyDerivationException if either key derivation fails.
      */
     fun deriveSessionKeys(
         sharedSecret: ByteArray,
-        sessionTranscriptBytes: ByteArray
-    ): Pair<ByteArray, ByteArray>
+        sessionTranscriptBytes: ByteArray,
+        updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
+    )
 }

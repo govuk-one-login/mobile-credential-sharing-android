@@ -28,10 +28,16 @@ class FakeVerifierCryptoService : VerifierCryptoService {
 
     override fun deriveSessionKeys(
         sharedSecret: ByteArray,
-        sessionTranscriptBytes: ByteArray
-    ): Pair<ByteArray, ByteArray> {
+        sessionTranscriptBytes: ByteArray,
+        updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
+    ) {
         deriveSessionKeysCallCount++
         exceptionToThrow?.let { throw it }
-        return sessionKeysToReturn
+        updateContext(
+            VerifierCryptoContext(
+                skReader = sessionKeysToReturn.first,
+                skDevice = sessionKeysToReturn.second
+            )
+        )
     }
 }

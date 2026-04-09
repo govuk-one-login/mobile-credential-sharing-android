@@ -79,8 +79,9 @@ class VerifierCryptoServiceImpl(
 
     override fun deriveSessionKeys(
         sharedSecret: ByteArray,
-        sessionTranscriptBytes: ByteArray
-    ): Pair<ByteArray, ByteArray> {
+        sessionTranscriptBytes: ByteArray,
+        updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
+    ) {
         val skReader = try {
             sessionKeyGenerator.deriveSessionKey(
                 sharedKey = sharedSecret,
@@ -103,6 +104,11 @@ class VerifierCryptoServiceImpl(
             throw e
         }
 
-        return Pair(skReader, skDevice)
+        updateContext(
+            VerifierCryptoContext(
+                skReader = skReader,
+                skDevice = skDevice
+            )
+        )
     }
 }
