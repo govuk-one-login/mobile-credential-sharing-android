@@ -15,13 +15,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import uk.gov.onelogin.sharing.core.VerifierUiScope
+import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
 @ViewModelKey
-@ContributesIntoMap(VerifierUiScope::class)
+@ContributesIntoMap(HolderUiScope::class)
 class UnrecoverableHolderViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
