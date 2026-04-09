@@ -4,10 +4,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
@@ -15,26 +19,33 @@ import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 @Composable
 internal fun VerifierPrerequisitesScreen(
     modifier: Modifier = Modifier,
+    dispatcher: CoroutineDispatcher = Dispatchers.Main,
     viewModel: VerifierPrerequisitesViewModel = metroViewModel(),
     onNavigateToPreflight: () -> Unit = {},
     onNavigateToScanner: () -> Unit = {},
     onUnrecoverableError: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope { dispatcher }
     val latestOnNavigateToPreflight by rememberUpdatedState(onNavigateToPreflight)
     val latestOnNavigateToScanner by rememberUpdatedState(onNavigateToScanner)
     val latestOnUnrecoverableError by rememberUpdatedState(onUnrecoverableError)
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
-            when (event) {
-                VerifyCredentialEvents.NavigateToScanner -> latestOnNavigateToScanner()
+            scope.launch {
+                when (event) {
+                    VerifyCredentialEvents.NavigateToScanner ->
+                        latestOnNavigateToScanner()
 
-                VerifyCredentialEvents.NavigateToPreflight -> latestOnNavigateToPreflight()
+                    VerifyCredentialEvents.NavigateToPreflight ->
+                        latestOnNavigateToPreflight()
 
-                VerifyCredentialEvents.NavigateToUnrecoverableError -> latestOnUnrecoverableError()
+                    VerifyCredentialEvents.NavigateToUnrecoverableError ->
+                        latestOnUnrecoverableError()
 
-                else -> {
-                    // do nothing with null events
+                    else -> {
+                        // do nothing with null events
+                    }
                 }
             }
         }
