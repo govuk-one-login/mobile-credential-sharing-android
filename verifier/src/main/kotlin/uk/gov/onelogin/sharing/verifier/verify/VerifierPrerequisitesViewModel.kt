@@ -32,7 +32,12 @@ class VerifierPrerequisitesViewModel(
         .map { session ->
             when (session) {
                 is VerifierSessionState.Preflight -> VerifyCredentialEvents.NavigateToPreflight
+
                 is VerifierSessionState.ReadyToScan -> VerifyCredentialEvents.NavigateToScanner
+
+                is VerifierSessionState.Complete.Failed ->
+                    VerifyCredentialEvents.NavigateToUnrecoverableError
+
                 else -> null
             }.also {
                 logger.debug(
@@ -53,4 +58,5 @@ class VerifierPrerequisitesViewModel(
 sealed interface VerifyCredentialEvents {
     data object NavigateToScanner : VerifyCredentialEvents
     data object NavigateToPreflight : VerifyCredentialEvents
+    data object NavigateToUnrecoverableError : VerifyCredentialEvents
 }

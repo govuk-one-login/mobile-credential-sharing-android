@@ -9,15 +9,16 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.locationManager
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
+import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 @ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<LocationState>>())
 @Inject
 class LocationPrerequisiteEvaluator(
     private val context: Context,
-    permissionChecker: PermissionChecker
-) : PermissionChecker by permissionChecker,
+    permissionChecker: PermissionCheckerV2
+) : PermissionCheckerV2 by permissionChecker,
     PrerequisiteEvaluator<LocationState> {
     override fun evaluate(): LocationState? = evaluatePermissions()
         ?: evaluateSupport()
@@ -25,9 +26,15 @@ class LocationPrerequisiteEvaluator(
 
     private fun evaluatePermissions(): LocationState? =
         checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION).let { result ->
-            when (result) {
-                PermissionChecker.Response.Passed -> null
-                is PermissionChecker.Response.Missing -> LocationState.PermissionNotGranted
+            when {
+                result.isEmpty() ->
+                    null
+
+                result.hasPermanentlyDeniedPermissions() ->
+                    LocationState.PermissionDeniedPermanently
+
+                else ->
+                    LocationState.PermissionNotGranted
             }
         }
 

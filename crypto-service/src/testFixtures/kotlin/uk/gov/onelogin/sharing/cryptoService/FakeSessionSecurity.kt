@@ -21,8 +21,10 @@ class FakeSessionSecurity : SessionSecurity {
         return sessionKeyPair
     }
 
-    override fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray =
-        byteArrayOf(1)
+    override fun generateSharedSecret(
+        thisDevicePrivateKey: ECPrivateKey,
+        otherDevicePublicKey: ECPublicKey
+    ): ByteArray = byteArrayOf(1)
 
     override fun deriveSessionKey(
         sharedKey: ByteArray,

@@ -17,6 +17,7 @@ import org.hamcrest.Matchers.greaterThan
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenIcon
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothConnectionErrorScreen
+import uk.gov.onelogin.sharing.verifier.R
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScreen
 
 /**
@@ -37,7 +38,7 @@ class BluetoothConnectionErrorScreenRule(
         resources: Resources =
             ApplicationProvider.getApplicationContext<Context>().resources
     ) : this(
-        button = "Try again",
+        button = resources.getString(R.string.bluetooth_connection_error_try_again),
         composeContentTestRule = composeContentTestRule,
         iconDescription = resources.getString(ErrorScreenIcon.ErrorIcon.description)
     )

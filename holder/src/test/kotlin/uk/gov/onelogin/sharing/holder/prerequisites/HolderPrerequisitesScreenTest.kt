@@ -24,7 +24,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -138,6 +137,9 @@ class HolderPrerequisitesScreenTest {
             },
             onPresentEngagement = {
                 composeTestRule.updateHasPresentedEngagement()
+            },
+            onUnrecoverableError = {
+                composeTestRule.updateHasUnrecoverableError()
             }
         )
     }

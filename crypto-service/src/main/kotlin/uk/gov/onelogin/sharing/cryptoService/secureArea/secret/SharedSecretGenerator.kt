@@ -6,17 +6,16 @@ import java.security.interfaces.ECPublicKey
 
 fun interface SharedSecretGenerator {
     /**
-     * Takes the holder's private key and the eReader's public key to compute a
-     * common secret that can be used to derive symmetric keys for encrypting communication.
+     * Takes the private key from this device and the public key from the device we're communicating
+     * with to compute a common secret that can be used to derive symmetric keys for encrypting
+     * communications.
      *
-     * @param holderKey The private key of the key holder.
-     * @param eReaderKey The public key of the reader.
+     * @param thisDevicePrivateKey The private key of this device
+     * @param otherDevicePublicKey The public key of the other device
      * @return A [ByteArray] containing the computed shared secret.
      */
-    fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray
-
-    fun generateSharedSecret(keyPair: KeyPair) = generateSharedSecret(
-        holderKey = keyPair.private as ECPrivateKey,
-        eReaderKey = keyPair.public as ECPublicKey
-    )
+    fun generateSharedSecret(
+        thisDevicePrivateKey: ECPrivateKey,
+        otherDevicePublicKey: ECPublicKey
+    ): ByteArray
 }

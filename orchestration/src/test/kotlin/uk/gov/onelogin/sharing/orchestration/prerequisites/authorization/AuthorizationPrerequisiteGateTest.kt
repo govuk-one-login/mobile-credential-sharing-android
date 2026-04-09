@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.authorization
 
 import android.Manifest
+import java.util.Collections.singleton
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.nullValue
@@ -8,22 +9,21 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.After
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
-import uk.gov.onelogin.sharing.core.permission.StubPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.toDeniedPermission
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasUnauthorizedPermissions
 
 class AuthorizationPrerequisiteGateTest {
 
     private val logger = SystemLogger()
-    private val permission = Manifest.permission.CAMERA
+    private val permission = Manifest.permission.BLUETOOTH
     private val request: Prerequisite = Prerequisite.BLUETOOTH
 
-    private var permissionResult: PermissionChecker.Response = PermissionChecker.Response.Passed
+    private var permissionResult: MutableList<PermissionCheckerV2.Denied> = mutableListOf()
     private val permissionChecker by lazy {
-        StubPermissionChecker(
-            permissionResult
-        )
+        FakePermissionChecker { permissionResult }
     }
 
     private val gate by lazy {
@@ -54,7 +54,10 @@ class AuthorizationPrerequisiteGateTest {
 
     @Test
     fun `Converts a denied permissions check into an Unauthorized response`() = runTest {
-        permissionResult = PermissionChecker.Response.Missing(permission)
+        singleton(permission)
+            .toDeniedPermission()
+            .let(permissionResult::addAll)
+
         val result = gate.checkAuthorization(request)
 
         assertThat(

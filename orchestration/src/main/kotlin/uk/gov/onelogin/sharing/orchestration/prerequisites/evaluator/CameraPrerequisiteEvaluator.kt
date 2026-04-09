@@ -8,7 +8,8 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.devicePolicyManager
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
+import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 
@@ -17,8 +18,8 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 class CameraPrerequisiteEvaluator(
     private val context: Context,
     private val factory: ProcessCameraProviderFactory,
-    permissionChecker: PermissionChecker
-) : PermissionChecker by permissionChecker,
+    permissionChecker: PermissionCheckerV2
+) : PermissionCheckerV2 by permissionChecker,
     PrerequisiteEvaluator<CameraState> {
     override fun evaluate(): CameraState? = evaluatePermissions()
         ?: evaluateSupport()
@@ -26,9 +27,10 @@ class CameraPrerequisiteEvaluator(
 
     private fun evaluatePermissions(): CameraState? =
         checkPermissions(Manifest.permission.CAMERA).let { result ->
-            when (result) {
-                PermissionChecker.Response.Passed -> null
-                is PermissionChecker.Response.Missing -> CameraState.PermissionNotGranted
+            when {
+                result.isEmpty() -> null
+                result.hasPermanentlyDeniedPermissions() -> CameraState.PermissionDeniedPermanently
+                else -> CameraState.PermissionNotGranted
             }
         }
 
