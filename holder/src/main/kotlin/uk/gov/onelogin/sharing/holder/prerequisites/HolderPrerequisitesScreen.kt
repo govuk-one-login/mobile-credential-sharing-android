@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.holder.R
@@ -24,11 +28,13 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @Composable
 internal fun HolderPrerequisitesScreen(
     modifier: Modifier = Modifier,
+    dispatcher: CoroutineDispatcher = Dispatchers.Main,
     viewModel: HolderPrerequisitesViewModel = metroViewModel(),
     onHandlePreflight: () -> Unit = {},
     onPresentEngagement: () -> Unit = {},
     onUnrecoverableError: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope { dispatcher }
     val currentOnHandlePreflight by rememberUpdatedState(onHandlePreflight)
     val currentOnPresentEngagement by rememberUpdatedState(onPresentEngagement)
     val currentOnUnrecoverableError by rememberUpdatedState(onUnrecoverableError)
@@ -43,21 +49,23 @@ internal fun HolderPrerequisitesScreen(
     )
 
     LaunchedEffect(state) {
-        when (state) {
-            is HolderSessionState.Preflight -> {
-                currentOnHandlePreflight()
-            }
+        scope.launch {
+            when (state) {
+                is HolderSessionState.Preflight -> {
+                    currentOnHandlePreflight()
+                }
 
-            is HolderSessionState.PresentingEngagement -> {
-                currentOnPresentEngagement()
-            }
+                is HolderSessionState.PresentingEngagement -> {
+                    currentOnPresentEngagement()
+                }
 
-            is HolderSessionState.Complete.Failed -> {
-                currentOnUnrecoverableError()
-            }
+                is HolderSessionState.Complete.Failed -> {
+                    currentOnUnrecoverableError()
+                }
 
-            else -> {
-                // other session states don't affect this screen's behaviour
+                else -> {
+                    // other session states don't affect this screen's behaviour
+                }
             }
         }
     }
