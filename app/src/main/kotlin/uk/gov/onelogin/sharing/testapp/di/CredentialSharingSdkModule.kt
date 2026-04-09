@@ -4,32 +4,35 @@ import android.app.Application
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.internal.shared.CredentialSharingSdkImpl
 
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(ActivityComponent::class)
 object CredentialSharingSdkModule {
     @Provides
-    @Singleton
+    @ActivityScoped
     fun provideCredentialSharingSdk(
         application: Application,
-        logger: Logger
+        logger: Logger,
+        permissionChecker: PermissionCheckerV2
     ): CredentialSharingSdk = CredentialSharingSdkImpl(
         applicationContext = application,
-        logger = logger
+        logger = logger,
+        permissionChecker = permissionChecker
     )
 
     @Provides
-    @Singleton
+    @ActivityScoped
     fun providePresentCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
         credentialSharingSdk.presentCredentialSdk
 
     @Provides
-    @Singleton
+    @ActivityScoped
     fun provideVerifyCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
         credentialSharingSdk.verifyCredentialSdk
 }

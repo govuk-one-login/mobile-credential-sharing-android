@@ -27,7 +27,8 @@ fun createTestAppGraph(
 ): CredentialSharingAppGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
     .create(
         applicationContext = applicationContext,
-        logger = logger
+        logger = logger,
+        permissionCheckerV2 = { emptyList() }
     )
 
 fun createTestHolderGraph(appGraph: CredentialSharingAppGraph): PresentCredentialGraph =

@@ -5,6 +5,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import uk.gov.onelogin.sharing.holder.HolderRoutes
+import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
 
 object HolderPrerequisitesNavigationExt {
@@ -24,6 +26,13 @@ object HolderPrerequisitesNavigationExt {
                 },
                 onPresentEngagement = {
                     controller.navigateToHolderPresentQrScreen()
+                },
+                onUnrecoverableError = {
+                    controller.navigateToUnrecoverableHolderError {
+                        popUpTo<HolderRoutes> {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }

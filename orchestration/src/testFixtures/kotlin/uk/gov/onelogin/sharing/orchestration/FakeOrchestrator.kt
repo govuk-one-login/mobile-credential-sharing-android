@@ -16,8 +16,9 @@ class FakeOrchestrator(
     val initialVerifierState: MutableStateFlow<VerifierSessionState> = MutableStateFlow(
         VerifierSessionState.NotStarted
     ),
-    val parser: FakeQrParser = FakeQrParser()
-
+    val parser: FakeQrParser = FakeQrParser(),
+    var startCount: Int = 0,
+    var cancelCount: Int = 0
 ) : Orchestrator.Holder,
     Orchestrator.Verifier,
     Resettable {
@@ -45,9 +46,6 @@ class FakeOrchestrator(
             QrScanResult.NotFound -> Unit
         }
     }
-
-    var startCount = 0
-    var cancelCount = 0
 
     override fun start() {
         startCount++

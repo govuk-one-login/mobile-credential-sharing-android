@@ -21,7 +21,11 @@ class HolderPrerequisitesScreenHandlers : TestParametersValuesProvider() {
                 HolderSessionState.PresentingEngagement(
                     EngagementGeneratorStub.BASE64_ENCODED_DEVICE_ENGAGEMENT
                 )
-            ) { hasPresentedEngagement }
+            ) { hasPresentedEngagement },
+            Triple(
+                "Called `onUnrecoverableError` lambda",
+                HolderSessionStateStubs.userJourneyFailure
+            ) { hasUnrecoverableError }
         ).map { (name, state, handlerAssertion) ->
             TestParameters.TestParametersValues.builder()
                 .name(name)

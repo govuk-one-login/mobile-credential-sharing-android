@@ -15,21 +15,23 @@ class EcdhSharedSecretGenerator(private val logger: Logger) : SharedSecretGenera
      * Generates a shared secret using the Elliptic Curve Diffie-Hellman (ECDH) key agreement
      * protocol.
      *
-     * This method takes the holder's private key and the eReader's public key to compute a
+     * This method takes this device's private key and the other device's public key to compute a
      * common secret that can be used to derive symmetric keys for encrypting communication.
      *
-     * @param holderKey The private key of the key holder.
-     * @param eReaderKey The public key of the reader.
-     * @param logger A [Logger] instance for logging debug information in case of an error.
+     * @param thisDevicePrivateKey The private key of this device.
+     * @param otherDevicePublicKey The public key of the other device.
      * @return A [ByteArray] containing the computed shared secret.
      * @throws java.security.InvalidKeyException if the provided keys are invalid or incompatible for ECDH,
      *         wrapping the original exception.
      */
-    override fun generateSharedSecret(holderKey: ECPrivateKey, eReaderKey: ECPublicKey): ByteArray {
+    override fun generateSharedSecret(
+        thisDevicePrivateKey: ECPrivateKey,
+        otherDevicePublicKey: ECPublicKey
+    ): ByteArray {
         try {
             val keyAgreement = KeyAgreement.getInstance("ECDH")
-            keyAgreement.init(holderKey)
-            keyAgreement.doPhase(eReaderKey, true)
+            keyAgreement.init(thisDevicePrivateKey)
+            keyAgreement.doPhase(otherDevicePublicKey, true)
             return keyAgreement.generateSecret()
         } catch (e: InvalidKeyException) {
             logger.debug(logTag, "Unable to create shared secret (status 10): $e")

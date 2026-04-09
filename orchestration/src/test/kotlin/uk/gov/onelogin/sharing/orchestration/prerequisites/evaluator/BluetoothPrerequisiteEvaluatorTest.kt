@@ -10,8 +10,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.junit.Before
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
-import uk.gov.onelogin.sharing.core.permission.StubPermissionChecker
+import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.toDeniedPermission
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 
 class BluetoothPrerequisiteEvaluatorTest {
@@ -20,13 +21,17 @@ class BluetoothPrerequisiteEvaluatorTest {
     private val bluetoothManager: BluetoothManager = mockk()
     private val bluetoothAdapter: BluetoothAdapter = mockk()
     private val userManager: UserManager = mockk()
+    private val permissions = listOf(
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_SCAN"
+    )
 
-    private var permissionResult: PermissionChecker.Response = PermissionChecker.Response.Passed
+    private var permissionResult: MutableList<PermissionCheckerV2.Denied> = mutableListOf()
 
     private val evaluator by lazy {
         BluetoothPrerequisiteEvaluator(
             context = context,
-            permissionChecker = StubPermissionChecker(permissionResult)
+            permissionChecker = FakePermissionChecker { permissionResult }
         )
     }
 
@@ -46,8 +51,16 @@ class BluetoothPrerequisiteEvaluatorTest {
 
     @Test
     fun `Returns PermissionNotGranted when permission is missing`() {
-        permissionResult = PermissionChecker.Response.Missing("android.permission.BLUETOOTH_SCAN")
+        permissions.toDeniedPermission()
+            .let(permissionResult::addAll)
         assertEquals(BluetoothState.PermissionNotGranted, evaluator.evaluate())
+    }
+
+    @Test
+    fun `Returns PermissionDeniedPermanently from permission checker`() {
+        permissions.toDeniedPermission(false)
+            .let(permissionResult::addAll)
+        assertEquals(BluetoothState.PermissionDeniedPermanently, evaluator.evaluate())
     }
 
     @Test
@@ -70,7 +83,8 @@ class BluetoothPrerequisiteEvaluatorTest {
 
     @Test
     fun `Permission check takes priority over support check`() {
-        permissionResult = PermissionChecker.Response.Missing("android.permission.BLUETOOTH_SCAN")
+        permissions.toDeniedPermission()
+            .let(permissionResult::addAll)
         every { bluetoothManager.adapter } returns null
         assertEquals(BluetoothState.PermissionNotGranted, evaluator.evaluate())
     }
