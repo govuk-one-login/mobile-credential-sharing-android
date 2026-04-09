@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 interface VerifierSession :
     Completable,
     StateContainer.Complete<VerifierSessionState> {
-    val cryptoContext: VerifierCryptoContext
+    val cryptoContext: VerifierCryptoContext?
 
-    fun updateCryptoContext(update: (VerifierCryptoContext) -> VerifierCryptoContext)
+    fun updateCryptoContext(update: (VerifierCryptoContext?) -> VerifierCryptoContext)
 }

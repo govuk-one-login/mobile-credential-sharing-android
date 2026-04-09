@@ -79,7 +79,7 @@ class VerifierCryptoServiceImplTest {
         val service = VerifierCryptoServiceImpl(
             logger = logger,
             keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = SharedSecretGenerator { _, _ ->
+            sharedSecretGenerator = { _, _ ->
                 throw InvalidKeyException("incompatible curve")
             },
             sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
@@ -103,7 +103,7 @@ class VerifierCryptoServiceImplTest {
         val service = VerifierCryptoServiceImpl(
             logger = logger,
             keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = SharedSecretGenerator { _, _ ->
+            sharedSecretGenerator = { _, _ ->
                 throw InvalidKeyException("malformed key")
             },
             sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
@@ -158,7 +158,7 @@ class VerifierCryptoServiceImplTest {
         }
 
         val skReader = assertNotNull(context!!.skReader)
-        val skDevice = assertNotNull(context!!.skDevice)
+        val skDevice = assertNotNull(context.skDevice)
         assertEquals(32, skDevice.size)
         assertNotEquals(skReader.toList(), skDevice.toList())
         assert("SKDevice key generated" in logger)
