@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
-import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
@@ -232,25 +231,18 @@ class VerifierOrchestrator(
             is CentralBluetoothState.Disconnected -> {
                 if (state.isSessionEnd) return
 
-                stopCentralTransport()
-
-                safeTransitionTo(
-                    VerifierSessionState.Complete.Failed(
-                        SessionError(
-                            "Device ${state.address} disconnected unexpectedly",
-                            BluetoothDisconnectedException(
-                                "Bluetooth disconnected unexpectedly",
-                                IllegalStateException(
-                                    "Device ${state.address} disconnected unexpectedly"
-                                )
-                            )
+                failWith(
+                    "Device ${state.address} disconnected unexpectedly",
+                    BluetoothDisconnectedException(
+                        "Bluetooth disconnected unexpectedly",
+                        IllegalStateException(
+                            "Device ${state.address} disconnected unexpectedly"
                         )
                     )
                 )
             }
 
             is CentralBluetoothState.Error -> {
-                stopCentralTransport()
                 failWith(
                     "Bluetooth error: ${state.reason}",
                     IllegalStateException("Bluetooth error: ${state.reason}")
@@ -267,6 +259,7 @@ class VerifierOrchestrator(
 
     private fun failWith(message: String, exception: Exception) {
         logger.error(logTag, message, exception)
+        stopCentralTransport()
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(
                 SessionError(message = message, exception = exception)

@@ -11,6 +11,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPromptRule
 import uk.gov.onelogin.sharing.core.R as coreR
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.verifier.R
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -84,7 +85,7 @@ class ConnectWithHolderDeviceRule(
         modifier: Modifier = Modifier,
         viewModel: SessionEstablishmentViewModel,
         permissionsState: MultiplePermissionsState,
-        onFindError: (ConnectWithHolderDeviceError) -> Unit = {}
+        onFindError: (BluetoothSessionError) -> Unit = {}
     ) {
         update(state)
         setContent {

@@ -136,24 +136,6 @@ class HolderWelcomeScreenTest {
     }
 
     @Test
-    fun showsErrorScreenWhenContentStateShowErrorScreenIsTrue() = runTest {
-        composeTestRule.apply {
-            render(
-                HolderWelcomeUiState(
-                    showErrorScreen = true,
-                    errorMessage = "Bluetooth permissions were revoked during the session",
-                    hasBluetoothPermissions = true
-                )
-            )
-        }
-
-        advanceUntilIdle()
-
-        composeTestRule.onNodeWithText("Bluetooth permissions were revoked during the session")
-            .assertIsDisplayed()
-    }
-
-    @Test
     fun shouldNotShowEnableBluetoothPromptIfHasBluetoothPermissionsIsFalse() = runTest {
         composeTestRule.apply {
             render(

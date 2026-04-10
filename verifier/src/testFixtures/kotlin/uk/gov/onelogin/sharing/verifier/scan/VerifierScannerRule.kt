@@ -20,6 +20,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasFlags
 import org.hamcrest.CoreMatchers.allOf
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
+import uk.gov.onelogin.sharing.core.R as CoreR
 import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_PERMANENT_DENIAL_BUTTON
 import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_RATIONALE_BUTTON
 import uk.gov.onelogin.sharing.core.presentation.ButtonTestTags.PERMISSION_REQUIRED_BUTTON
@@ -45,7 +46,9 @@ class VerifierScannerRule(
     ) : this(
         composeTestRule = composeTestRule,
         openAppSettingsText = resources.getString(R.string.open_app_permissions),
-        permissionDeniedText = resources.getString(R.string.enable_camera_permission_to_continue)
+        permissionDeniedText = resources.getString(
+            CoreR.string.enable_camera_permission_to_continue
+        )
     )
 
     fun assertCameraViewfinderIsDisplayed() = onCameraViewfinder().assertIsDisplayed()

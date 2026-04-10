@@ -10,4 +10,12 @@
     <!-- Bluetooth connection errors -->
     <string name="bluetooth_disconnected_unexpectedly">Bluetooth disconnected unexpectedly</string>
     <string name="bluetooth_permissions_revoked">Bluetooth permissions were revoked during the session</string>
+    <string name="bluetooth_connection_error_try_again">Try again</string>
+    <string name="bluetooth_turned_off_verifier">Bluetooth was turned off on verifier device during session</string>
+    <string name="bluetooth_turned_off_holder">Bluetooth was turned off on holder device during session</string>
+
+    <string name="generic_error">Generic error</string>
+    <string name="enable_camera_permission_to_continue">Please enable the camera permission to continue.</string>
+    <string name="bluetooth_connection_failed">Bluetooth connection failed</string>
+    <string name="try_again">Try again</string>
 </resources>

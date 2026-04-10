@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.res.values
 
 import androidx.annotation.StringRes
+import uk.gov.onelogin.sharing.core.R as CoreR
 import uk.gov.onelogin.sharing.verifier.R
 
 /**
@@ -19,7 +20,7 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     ),
     GENERIC_ERROR(
         expected = "Generic error",
-        resourceId = R.string.generic_error
+        resourceId = CoreR.string.generic_error
     ),
     DID_NOT_SCAN_DIGITAL_CREDENTIAL_QR(
         expected = "The scanned QR code didn’t contain a digital credential. " +
@@ -28,11 +29,11 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     ),
     ENABLE_CAMERA_PERMISSION_TO_CONTINUE(
         expected = "Please enable the camera permission to continue.",
-        resourceId = R.string.enable_camera_permission_to_continue
+        resourceId = CoreR.string.enable_camera_permission_to_continue
     ),
     BLUETOOTH_CONNECTION_FAILED(
         expected = "Bluetooth connection failed",
-        resourceId = R.string.bluetooth_connection_failed
+        resourceId = CoreR.string.bluetooth_connection_failed
     ),
     OPEN_APP_PERMISSIONS(
         expected = "Open app permissions",
@@ -40,22 +41,6 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     ),
     TRY_AGAIN(
         expected = "Try again",
-        resourceId = R.string.try_again
-    ),
-    BLUETOOTH_PERMISSION_PERMANENTLY_DENIED(
-        expected = "Bluetooth permissions have been permanently denied",
-        resourceId = R.string.bluetooth_permission_permanently_denied
-    ),
-    ENABLE_BLUETOOTH_PERMISSION(
-        expected = "Please enable bluetooth permissions to continue",
-        resourceId = R.string.enable_bluetooth_permission
-    ),
-    BLUETOOTH_PERMISSION_DENIED(
-        expected = "Bluetooth permissions were denied",
-        resourceId = R.string.bluetooth_permission_denied
-    ),
-    CAMERA_PERMISSION_DENIED(
-        expected = "Camera permission was denied",
-        resourceId = R.string.camera_permission_denied
+        resourceId = CoreR.string.try_again
     )
 }

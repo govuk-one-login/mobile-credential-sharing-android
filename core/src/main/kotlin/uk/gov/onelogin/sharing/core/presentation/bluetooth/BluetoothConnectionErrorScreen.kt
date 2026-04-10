@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier.connect.error
+package uk.gov.onelogin.sharing.core.presentation.bluetooth
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,7 +15,7 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.images.GdsIcon
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreen
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenIcon
-import uk.gov.onelogin.sharing.verifier.R
+import uk.gov.onelogin.sharing.core.R
 
 @Composable
 fun BluetoothConnectionErrorScreen(

@@ -27,6 +27,7 @@ import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.permissions.isPermanentlyDenied
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState as OrchestratorVerifierSessionState
@@ -81,6 +82,17 @@ class SessionEstablishmentViewModel(
                     it.copy(
                         isLoading = sessionState is OrchestratorVerifierSessionState.Connecting
                     )
+                }
+                when (sessionState) {
+                    is OrchestratorVerifierSessionState.Complete.Failed -> {
+                        _navEvents.tryEmit(
+                            ConnectWithHolderDeviceNavEvent.NavigateToError(
+                                BluetoothSessionError.BluetoothConnectionError
+                            )
+                        )
+                    }
+
+                    else -> Unit
                 }
             }
         }
@@ -137,7 +149,7 @@ class SessionEstablishmentViewModel(
             logger.debug(logTag, "Bluetooth app permissions revoked during session")
             _navEvents.tryEmit(
                 ConnectWithHolderDeviceNavEvent.NavigateToError(
-                    ConnectWithHolderDeviceError.BluetoothPermissionsError
+                    BluetoothSessionError.BluetoothPermissionsError
                 )
             )
         }

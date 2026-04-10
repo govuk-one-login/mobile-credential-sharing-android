@@ -6,8 +6,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import uk.gov.onelogin.sharing.core.R as coreR
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitleRes
 import uk.gov.onelogin.sharing.verifier.R
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceError
 
 @RunWith(Parameterized::class)
 class ConnectWithHolderDeviceRouteErrorMappingTest(
@@ -34,26 +35,26 @@ class ConnectWithHolderDeviceRouteErrorMappingTest(
 
 enum class ConnectWithHolderDeviceRouteErrorData(
     @param:StringRes val errorRes: Int,
-    val errorType: ConnectWithHolderDeviceError
+    val errorType: BluetoothSessionError
 ) {
     BLUETOOTH_CONFIGURATION(
         errorRes = R.string.bluetooth_connection_error_failed,
-        errorType = ConnectWithHolderDeviceError.BluetoothConfigurationError
+        errorType = BluetoothSessionError.BluetoothConfigurationError
     ),
     BLUETOOTH_GENERIC_ERROR(
         errorRes = R.string.bluetooth_connection_error_generic,
-        errorType = ConnectWithHolderDeviceError.GenericError
+        errorType = BluetoothSessionError.GenericError
     ),
     BLUETOOTH_CONNECTION_ERROR(
         errorRes = coreR.string.bluetooth_disconnected_unexpectedly,
-        errorType = ConnectWithHolderDeviceError.BluetoothConnectionError
+        errorType = BluetoothSessionError.BluetoothConnectionError
     ),
     BLUETOOTH_OFF_ERROR(
         errorRes = R.string.bluetooth_turned_off_verifier,
-        errorType = ConnectWithHolderDeviceError.BluetoothDisabledError
+        errorType = BluetoothSessionError.BluetoothDisabledError
     ),
     BLUETOOTH_PERMISSIONS_ERROR(
         errorRes = coreR.string.bluetooth_permissions_revoked,
-        errorType = ConnectWithHolderDeviceError.BluetoothPermissionsError
+        errorType = BluetoothSessionError.BluetoothPermissionsError
     )
 }

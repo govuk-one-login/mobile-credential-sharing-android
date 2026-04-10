@@ -56,26 +56,6 @@ class HolderWelcomeViewModelTest {
         }
 
     @Test
-    fun `bluetooth permissions revoked and error screen shown`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.updateBluetoothPermissions(granted = true)
-        assertTrue(viewModel.uiState.value.previouslyHadPermissions)
-
-        viewModel.updateBluetoothPermissions(granted = false)
-
-        val state = viewModel.uiState.value
-
-        assertFalse(state.hasBluetoothPermissions!!)
-        assertTrue(state.previouslyHadPermissions)
-        assertTrue(state.showErrorScreen)
-        assertEquals(
-            "Bluetooth permissions were revoked during the session",
-            state.errorMessage
-        )
-    }
-
-    @Test
     fun `error should not be shown if permissions initially not granted on start up`() = runTest {
         val viewModel = createViewModel()
 

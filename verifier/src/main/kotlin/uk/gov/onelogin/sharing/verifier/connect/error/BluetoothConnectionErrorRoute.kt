@@ -8,7 +8,7 @@ import androidx.navigation.toRoute
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothConnectionErrorScreen
 
 @Keep
 @Serializable
@@ -33,12 +33,5 @@ data class BluetoothConnectionErrorRoute(val title: String) {
                 )
             }
         }
-
-        fun NavController.navigateToBluetoothConnectionErrorRoute(title: String) =
-            navigate(BluetoothConnectionErrorRoute(title)) {
-                popUpTo<ConnectWithHolderDeviceRoute> {
-                    inclusive = false
-                }
-            }
     }
 }

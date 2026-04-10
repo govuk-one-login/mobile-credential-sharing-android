@@ -26,7 +26,7 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
-import uk.gov.onelogin.sharing.core.presentation.ErrorScreen
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPrompt
 import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPromptText
 import uk.gov.onelogin.sharing.holder.QrCodeImage
@@ -39,7 +39,8 @@ private const val QR_SIZE = 800
 @Composable
 fun HolderWelcomeScreen(
     viewModel: HolderWelcomeViewModel = assistedMetroViewModel(),
-    onAwaitingUserConsent: () -> Unit = {}
+    onAwaitingUserConsent: () -> Unit = {},
+    onConnectionError: (BluetoothSessionError) -> Unit = {}
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
     val sessionState by viewModel.holderSessionState.collectAsStateWithLifecycle()
@@ -50,6 +51,16 @@ fun HolderWelcomeScreen(
         permissions = bluetoothPermissions()
     ) {
         hasPreviouslyRequestedPermission = true
+    }
+    val latestOnConnectionError by rememberUpdatedState(onConnectionError)
+
+    LaunchedEffect(Unit) {
+        viewModel.navEvents.collect {
+            when (it) {
+                is HolderScreenEvents.NavigateToError ->
+                    latestOnConnectionError(it.error)
+            }
+        }
     }
 
     LaunchedEffect(sessionState) {
@@ -86,10 +97,6 @@ fun HolderScreenContent(
     grantedAllPerms: () -> Unit
 ) {
     when {
-        contentState.showErrorScreen -> {
-            ErrorScreen(errorText = contentState.errorMessage)
-        }
-
         contentState.hasBluetoothPermissions == true -> {
             QrContent(contentState)
         }

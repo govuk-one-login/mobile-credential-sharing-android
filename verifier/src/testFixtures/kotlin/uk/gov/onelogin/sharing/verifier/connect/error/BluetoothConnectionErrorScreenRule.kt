@@ -16,6 +16,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.greaterThan
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenIcon
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothConnectionErrorScreen
 import uk.gov.onelogin.sharing.verifier.R
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrScreen
 
