@@ -14,9 +14,7 @@ object RetryHolderPrerequisitesNavigationExt {
         options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(RetryHolderPrerequisitesRoute, options)
 
-    internal fun NavGraphBuilder.configureRetryHolderPrerequisites(
-        controller: NavController
-    ) {
+    internal fun NavGraphBuilder.configureRetryHolderPrerequisites(controller: NavController) {
         composable<RetryHolderPrerequisitesRoute> {
             RetryHolderPrerequisitesScreen(
                 modifier = Modifier.fillMaxSize(),

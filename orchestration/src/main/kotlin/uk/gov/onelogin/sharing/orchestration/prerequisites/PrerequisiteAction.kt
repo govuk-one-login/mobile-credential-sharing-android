@@ -4,12 +4,11 @@ import android.bluetooth.BluetoothAdapter
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions.Companion.ACTION_REQUEST_PERMISSIONS
 
-sealed class PrerequisiteAction(
-    val intentAction: String
-) {
-    data class RequestPermissions(val permissions: List<String>) : PrerequisiteAction(
-        ACTION_REQUEST_PERMISSIONS
-    ) {
+sealed class PrerequisiteAction(val intentAction: String) {
+    data class RequestPermissions(val permissions: List<String>) :
+        PrerequisiteAction(
+            ACTION_REQUEST_PERMISSIONS
+        ) {
         constructor(
             vararg permissions: String
         ) : this(permissions.toList())

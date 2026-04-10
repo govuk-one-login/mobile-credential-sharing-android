@@ -41,7 +41,7 @@ import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
 fun TestAppScreen(
     credentialPresenter: CredentialPresenter,
     credentialVerifier: CredentialVerifier,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var destination by rememberSaveable {
         mutableStateOf<CredentialSharingDestination?>(null)
@@ -102,7 +102,7 @@ fun TestAppScreenContent(
     onCloseFlow: () -> Unit,
     sharingDialogVisible: Boolean,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     Scaffold(modifier = modifier) { contentPadding ->
         Box(
