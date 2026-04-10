@@ -34,6 +34,11 @@ dependencies {
     listOf(
         libs.metro.viewmodel.compose
     ).forEach(::implementation)
+
+    listOf(
+        libs.androidx.compose.runtime,
+        platform(libs.androidx.compose.bom)
+    ).forEach(::testFixturesImplementation)
 }
 
 mavenPublishingConfig {

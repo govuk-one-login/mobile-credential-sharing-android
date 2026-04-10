@@ -9,4 +9,8 @@ interface RetryPrerequisitesNavigator<State : Any> {
         data object PassedPrerequisites : NavigationEvent
         data object UnrecoverableError : NavigationEvent
     }
+
+    companion object {
+        // empty to allow for extension functions
+    }
 }

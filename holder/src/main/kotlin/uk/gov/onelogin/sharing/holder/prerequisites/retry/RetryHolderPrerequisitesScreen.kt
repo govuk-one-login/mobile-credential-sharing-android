@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequ
 internal fun RetryHolderPrerequisitesScreen(
     modifier: Modifier = Modifier,
     viewModel: RetryHolderPrerequisitesViewModel = metroViewModel(),
-    contract: ActivityResultLauncher<PrerequisiteAction> = rememberLauncherForActivityResult(
+    launcher: ActivityResultLauncher<PrerequisiteAction> = rememberLauncherForActivityResult(
         PrerequisiteActionContract
     ) {
         viewModel.recheckPrerequisites()
@@ -69,6 +69,6 @@ internal fun RetryHolderPrerequisitesScreen(
     RetryPrerequisitesContent(
         modifier = modifier,
         missingPrerequisites = missingPrerequisites,
-        onButtonClick = { viewModel.resolve(contract) }
+        onButtonClick = { viewModel.resolve(launcher) }
     )
 }
