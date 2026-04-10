@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val holder = presentCredentialSdk
-            .presenter(SampleCredentialProvider(this))
+            .presenter(SampleCredentialProvider(MockCredentials.mockCredential(this)))
 
         val verificationRequest = VerificationRequest.typed(
             documentType = DocumentType.Mdl,

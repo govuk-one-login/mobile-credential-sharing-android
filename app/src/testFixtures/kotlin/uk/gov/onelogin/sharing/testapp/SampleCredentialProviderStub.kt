@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.testapp
 
 import java.security.KeyPairGenerator
-import java.util.Base64
 
 object SampleCredentialProviderStub {
 
@@ -30,15 +29,7 @@ object SampleCredentialProviderStub {
             "3e5f00298cfccbc35e700a6b" +
             "020414756f72672e69736f2e31383031332e352e312e6d444cd81841a0"
 
-    val base64EncodedCredential = "AQID"
-    val rawCredentialBytes = byteArrayOf(1, 2, 3)
-    val keyPair = KeyPairGenerator.getInstance("EC").apply {
+    val keyPair = KeyPairGenerator.getInstance(ALGORITHM_EC).apply {
         initialize(256)
     }.generateKeyPair()
-
-    val pkcs8PrivateKeyPem = buildString {
-        appendLine("-----BEGIN PRIVATE KEY-----")
-        appendLine(Base64.getEncoder().encodeToString(keyPair.private.encoded))
-        append("-----END PRIVATE KEY-----")
-    }
 }

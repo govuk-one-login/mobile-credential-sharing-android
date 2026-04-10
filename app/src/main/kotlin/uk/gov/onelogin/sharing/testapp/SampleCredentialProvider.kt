@@ -1,13 +1,14 @@
 package uk.gov.onelogin.sharing.testapp
 
-import android.content.Context
-import java.security.KeyFactory
-import java.security.Signature
-import java.security.spec.PKCS8EncodedKeySpec
-import java.util.Base64
 import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialRequest
+import java.security.KeyFactory
+import java.security.Signature
+import java.security.spec.PKCS8EncodedKeySpec
+
+const val ALGORITHM_EC = "EC"
+const val SIGNING_ALGORITHM = "SHA256withECDSA"
 
 /**
  * Sample implementation of [CredentialProvider] for demonstration purposes.
@@ -15,9 +16,7 @@ import uk.gov.onelogin.sharing.orchestration.CredentialRequest
  * In a production app, this would retrieve actual credentials from secure storage
  * and use the Android Keystore for signing operations.
  */
-class SampleCredentialProvider(context: Context) : CredentialProvider {
-
-    private val activeCredential: MockCredential = MockCredentials.mockCredential(context)
+class SampleCredentialProvider(private val activeCredential: MockCredential) : CredentialProvider {
 
     override suspend fun getCredentials(request: CredentialRequest): List<Credential> = listOf(
         Credential(
@@ -35,17 +34,10 @@ class SampleCredentialProvider(context: Context) : CredentialProvider {
      * secure hardware.
      */
     override suspend fun sign(payload: ByteArray, documentId: String): ByteArray {
-        val pemText = String(activeCredential.privateKey)
-        val derBytes = pemText
-            .lines()
-            .filter { !it.startsWith("-----") && it.isNotBlank() }
-            .joinToString("")
-            .let { Base64.getDecoder().decode(it) }
+        val privateKey = KeyFactory.getInstance(ALGORITHM_EC)
+            .generatePrivate(PKCS8EncodedKeySpec(activeCredential.privateKey))
 
-        val privateKey = KeyFactory.getInstance("EC")
-            .generatePrivate(PKCS8EncodedKeySpec(derBytes))
-
-        return Signature.getInstance("SHA256withECDSA").run {
+        return Signature.getInstance(SIGNING_ALGORITHM).run {
             initSign(privateKey)
             update(payload)
             sign()
