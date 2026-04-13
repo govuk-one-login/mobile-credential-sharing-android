@@ -36,6 +36,10 @@ object HolderSessionStateMatchers {
         HolderSessionState.Complete.Cancelled
     )
 
+    fun isFailed(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.Complete.Failed::class.java
+    )
+
     fun isFailed(message: String, exception: Exception): Matcher<in HolderSessionState> = equalTo(
         HolderSessionState.Complete.Failed(
             SessionError(message, exception)
