@@ -23,13 +23,16 @@ class ResolveHolderPrerequisiteAction(
             ?.missingPrerequisites
             ?.mapNotNull(MissingPrerequisiteV2::getAction)
             ?.let { actions ->
-                val action = if (actions.all { it is PrerequisiteAction.RequestPermissions }) {
+                if (!actions.isEmpty() && actions.all {
+                        it is PrerequisiteAction.RequestPermissions
+                    }
+                ) {
                     actions.mapNotNull { it as? PrerequisiteAction.RequestPermissions }
                         .reduce(PrerequisiteAction.RequestPermissions::plus)
                 } else {
-                    actions.first()
+                    actions.firstOrNull()
                 }
-
+            }?.let { action ->
                 launcher.launch(action)
                 logger.debug(
                     logTag,
