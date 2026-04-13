@@ -15,6 +15,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.navigateToUnrecoverableVerifierError
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanFromRoot
+import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesNavigationExt.navigateToRetryVerifierPrerequisites
 
 /**
  * Serialization object used as a navigation route. Maps to the [VerifierPrerequisitesScreen] composable UI.
@@ -41,10 +42,7 @@ data object VerifierPrerequisitesNavigationExt {
             ) {
                 VerifierPrerequisitesScreen(
                     onNavigateToPreflight = {
-                        Log.d(
-                            "VerifyCredentialRoute",
-                            "Called 'onNavigateToPreflight' behaviour"
-                        )
+                        navController.navigateToRetryVerifierPrerequisites()
                     },
                     onNavigateToScanner = { navController.navigateToVerifierScanFromRoot() },
                     onUnrecoverableError = { navController.navigateToUnrecoverableVerifierError() }

@@ -1,25 +1,25 @@
-package uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases
+package uk.gov.onelogin.sharing.orchestration.verifier.prerequisites.usecases
 
 import androidx.activity.result.ActivityResultLauncher
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.ResolvePrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.ResolvePrerequisiteAction.LogMessages.launchActionMessage
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
-@ContributesBinding(HolderUiScope::class)
-class ResolveHolderPrerequisiteAction(
-    private val orchestrator: Orchestrator.Holder,
+@ContributesBinding(VerifierUiScope::class)
+class ResolveVerifierPrerequisiteAction(
+    private val orchestrator: Orchestrator.Verifier,
     private val logger: Logger
-) : ResolvePrerequisiteAction<HolderSessionState> {
+) : ResolvePrerequisiteAction<VerifierSessionState> {
 
     override fun resolve(launcher: ActivityResultLauncher<PrerequisiteAction>) {
-        (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
+        (orchestrator.verifierSessionState.value as? VerifierSessionState.Preflight)
             ?.missingPrerequisites
             ?.mapNotNull(MissingPrerequisiteV2::getAction)
             ?.let { actions ->
