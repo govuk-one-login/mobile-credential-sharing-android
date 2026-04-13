@@ -26,4 +26,8 @@ object MockCredentials {
             privateKey = loadPrivateKey(context)
         )
     }
+
+    fun getMockCredentials(context: Context): List<MockCredential> = listOf(
+        mockCredential(context)
+    )
 }

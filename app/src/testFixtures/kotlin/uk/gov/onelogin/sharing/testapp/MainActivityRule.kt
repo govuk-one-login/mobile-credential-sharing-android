@@ -7,6 +7,8 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -25,6 +27,15 @@ class MainActivityRule(
     private val holderText: String,
     private val verifierText: String
 ) : ComposeContentTestRule by composeTestRule {
+
+    private val mockCredentials = listOf(
+        MockCredential(
+            id = "test-id",
+            displayName = "Jane Doe",
+            rawCredential = byteArrayOf(),
+            privateKey = byteArrayOf()
+        )
+    )
 
     constructor(
         composeTestRule: ComposeContentTestRule,
@@ -58,10 +69,13 @@ class MainActivityRule(
         credentialVerifier: VerifyCredentialGraph
     ) {
         TestAppScreen(
-            credentialPresenter = FakeCredentialPresenter(
-                appGraph = appGraph,
-                orchestrator = credentialPresenter.holderOrchestrator()
-            ),
+            presentCredentialSdk = { provider ->
+                FakeCredentialPresenter(
+                    appGraph = appGraph,
+                    orchestrator = credentialPresenter.holderOrchestrator()
+                )
+            },
+            mockCredentials = mockCredentials,
             credentialVerifier = FakeCredentialVerifier(
                 appGraph = appGraph,
                 orchestrator = credentialVerifier.verifierOrchestrator()
@@ -79,6 +93,12 @@ class MainActivityRule(
 
     fun openHolder() {
         onNodeWithText(holderText)
+            .assertExists()
+            .assertHasClickAction()
+            .performClick()
+
+        onAllNodesWithTag(CREDENTIAL_ITEM_TAG)
+            .onFirst()
             .assertExists()
             .assertHasClickAction()
             .performClick()

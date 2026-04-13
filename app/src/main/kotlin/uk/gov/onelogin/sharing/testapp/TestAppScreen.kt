@@ -1,10 +1,14 @@
 package uk.gov.onelogin.sharing.testapp
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 import uk.gov.onelogin.sharing.ui.impl.ShareCredential
 import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
@@ -39,12 +45,17 @@ import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
 @Suppress("ktlint:compose:vm-forwarding-check")
 @Composable
 fun TestAppScreen(
-    credentialPresenter: CredentialPresenter,
+    presentCredentialSdk: PresentCredentialSdk,
+    mockCredentials: List<MockCredential>,
     credentialVerifier: CredentialVerifier,
     modifier: Modifier = Modifier
 ) {
     var destination by rememberSaveable {
         mutableStateOf<CredentialSharingDestination?>(null)
+    }
+
+    var credentialPresenter by remember {
+        mutableStateOf<CredentialPresenter?>(null)
     }
 
     // Remove verifierPermissionGate once SDK prerequisites screen handles permissions
@@ -57,12 +68,17 @@ fun TestAppScreen(
 
     TestAppScreenContent(
         modifier = modifier,
-        onOpenHolder = { holderPermissionGate = true },
+        mockCredentials = mockCredentials,
+        onOpenHolder = { credential ->
+            credentialPresenter = presentCredentialSdk
+                .presenter(SampleCredentialProvider(credential))
+            holderPermissionGate = true
+        },
         onOpenVerifier = { verifierPermissionGate = true },
         onCloseFlow = {
             when (destination) {
                 is CredentialSharingDestination.Holder ->
-                    credentialPresenter.orchestrator
+                    credentialPresenter?.orchestrator
 
                 is CredentialSharingDestination.Verifier ->
                     credentialVerifier.orchestrator
@@ -71,6 +87,7 @@ fun TestAppScreen(
             }?.cancel()
 
             destination = null
+            credentialPresenter = null
             verifierPermissionGate = false
             holderPermissionGate = false
         },
@@ -88,10 +105,12 @@ fun TestAppScreen(
                     destination = CredentialSharingDestination.Holder
                 }
 
-                destination == CredentialSharingDestination.Holder -> ShareCredential(
-                    component = credentialPresenter,
-                    modifier = Modifier.fillMaxSize()
-                )
+                destination == CredentialSharingDestination.Holder -> credentialPresenter?.let {
+                    ShareCredential(
+                        component = it,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
 
                 destination == CredentialSharingDestination.Verifier -> VerifyCredential(
                     component = credentialVerifier,
@@ -104,13 +123,16 @@ fun TestAppScreen(
 
 @Composable
 fun TestAppScreenContent(
-    onOpenHolder: () -> Unit,
+    mockCredentials: List<MockCredential>,
+    onOpenHolder: (MockCredential) -> Unit,
     onOpenVerifier: () -> Unit,
     onCloseFlow: () -> Unit,
     sharingDialogVisible: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    var showCredentialPicker by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(modifier = modifier) { contentPadding ->
         Box(
             modifier = Modifier
@@ -129,7 +151,10 @@ fun TestAppScreenContent(
                     fontWeight = FontWeight.Bold
                 )
 
-                OutlinedButton(onClick = onOpenHolder, modifier = Modifier.padding(16.dp)) {
+                OutlinedButton(
+                    onClick = { showCredentialPicker = true },
+                    modifier = Modifier.padding(16.dp)
+                ) {
                     Text(stringResource(R.string.holder))
                 }
 
@@ -138,11 +163,58 @@ fun TestAppScreenContent(
                 }
             }
 
+            if (showCredentialPicker) {
+                CredentialPickerDialog(
+                    mockCredentials = mockCredentials,
+                    onSelect = { credential ->
+                        showCredentialPicker = false
+                        onOpenHolder(credential)
+                    },
+                    onDismiss = { showCredentialPicker = false }
+                )
+            }
+
             if (sharingDialogVisible) {
                 SharingDialog(
                     content = content,
                     onCloseFlow = onCloseFlow
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CredentialPickerDialog(
+    mockCredentials: List<MockCredential>,
+    onSelect: (MockCredential) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            border = BorderStroke(1.dp, Color.Gray)
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = "Select credential",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                LazyColumn {
+                    items(mockCredentials, key = { it.id }) { credential ->
+                        OutlinedButton(
+                            onClick = { onSelect(credential) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .testTag(CREDENTIAL_ITEM_TAG)
+                        ) {
+                            Text(credential.displayName)
+                        }
+                    }
+                }
             }
         }
     }
@@ -190,6 +262,14 @@ private fun SharingDialog(onCloseFlow: () -> Unit, content: @Composable () -> Un
 @Composable
 private fun TestAppScreenContentPreview() {
     TestAppScreenContent(
+        mockCredentials = listOf(
+            MockCredential(
+                id = "1",
+                displayName = "Jane Doe",
+                rawCredential = byteArrayOf(),
+                privateKey = byteArrayOf()
+            )
+        ),
         onOpenHolder = {},
         onOpenVerifier = {},
         onCloseFlow = {},

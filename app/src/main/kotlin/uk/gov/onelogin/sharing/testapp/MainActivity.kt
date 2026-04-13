@@ -35,8 +35,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val holder = presentCredentialSdk
-            .presenter(SampleCredentialProvider(MockCredentials.mockCredential(this)))
+        val mockCredentials = MockCredentials.getMockCredentials(this)
 
         val verificationRequest = VerificationRequest.typed(
             documentType = DocumentType.Mdl,
@@ -61,14 +60,15 @@ class MainActivity : ComponentActivity() {
         if (BuildConfig.DEBUG) {
             Log.d(
                 "Mock Credential",
-                MockCredentials.mockCredential(this).toString()
+                mockCredentials.toString()
             )
         }
 
         setContent {
             GdsTheme {
                 TestAppScreen(
-                    credentialPresenter = holder,
+                    presentCredentialSdk = presentCredentialSdk,
+                    mockCredentials = mockCredentials,
                     credentialVerifier = verifier
                 )
             }
