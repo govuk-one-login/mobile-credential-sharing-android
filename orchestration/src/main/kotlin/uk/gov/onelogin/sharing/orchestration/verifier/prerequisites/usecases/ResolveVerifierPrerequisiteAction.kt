@@ -23,7 +23,7 @@ class ResolveVerifierPrerequisiteAction(
             ?.missingPrerequisites
             ?.mapNotNull(MissingPrerequisiteV2::getAction)
             ?.let { actions ->
-                if (!actions.isEmpty() && actions.all {
+                if (actions.isNotEmpty() && actions.all {
                         it is PrerequisiteAction.RequestPermissions
                     }
                 ) {
