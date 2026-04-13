@@ -49,4 +49,19 @@ class BleOptionsTest {
             actualNode
         )
     }
+
+    // Expected CBOR structure derived from ISO 18013-5 Appendix D.3.1
+    @Test
+    fun `BleOptions encodes to definite-length map matching D_3_1`() {
+        val specBleOptions = BleOptions(
+            serverMode = false,
+            clientMode = true,
+            peripheralServerModeUuid = "45efef742b2c4837a9a3b0e1d05a6917".hexToByteArray()
+        )
+
+        val encoded = testMapper().writeValueAsBytes(specBleOptions)
+        val expectedHex = "a300f401f50a5045efef742b2c4837a9a3b0e1d05a6917"
+
+        assertEquals(expectedHex, encoded.toHexString())
+    }
 }

@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.serializers
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborPropertyIds.PROPERTY_ID_0
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborPropertyIds.PROPERTY_ID_1
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborPropertyIds.PROPERTY_ID_10
@@ -10,7 +11,7 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 
 class BleOptionsSerializer : StdSerializer<BleOptions>(BleOptions::class.java) {
     override fun serialize(value: BleOptions, gen: JsonGenerator, provider: SerializerProvider) {
-        gen.writeStartObject()
+        (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
         gen.writeFieldId(PROPERTY_ID_0)
         gen.writeBoolean(value.serverMode)
         gen.writeFieldId(PROPERTY_ID_1)
@@ -18,5 +19,9 @@ class BleOptionsSerializer : StdSerializer<BleOptions>(BleOptions::class.java) {
         gen.writeFieldId(PROPERTY_ID_10)
         provider.defaultSerializeValue(value.peripheralServerModeUuid, gen)
         gen.writeEndObject()
+    }
+
+    private companion object {
+        const val FIELD_COUNT = 3
     }
 }

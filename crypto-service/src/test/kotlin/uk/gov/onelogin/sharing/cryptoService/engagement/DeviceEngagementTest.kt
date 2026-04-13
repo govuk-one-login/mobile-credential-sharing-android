@@ -42,4 +42,13 @@ class DeviceEngagementTest {
             INVALID_DEVICE_ENGAGEMENT.encodeCbor()
         }
     }
+
+    // Expected prefix taken from ISO 18013-5 Appendix D.3.1
+    @Test
+    fun `DeviceEngagement encodes to definite-length map`() {
+        val encoded = DEVICE_ENGAGEMENT.encodeCbor()
+
+        // D.3.1: DeviceEngagement starts with a3 (definite-length map, 3 entries)
+        assertEquals("a3", encoded.toHexString().substring(0, 2))
+    }
 }

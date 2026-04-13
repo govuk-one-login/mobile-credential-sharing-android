@@ -9,6 +9,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeSessionEstablishmentModel
+import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
 
 class CoseKeyTest {
@@ -89,5 +90,24 @@ class CoseKeyTest {
         )
 
         assertNotNull(resultPublicKey)
+    }
+
+    // Expected CBOR value taken from ISO 18013-5 Appendix D.3.1 (EDeviceKey)
+    @Test
+    fun `CoseKey encodes to definite-length map matching D_3_1 EDeviceKey`() {
+        val coseKey = CoseKey(
+            keyType = Cose.KEY_TYPE_EC2,
+            curve = Cose.CURVE_P256,
+            x = "5a88d182bce5f42efa59943f33359d2e8a968ff289d93e5fa444b624343167fe"
+                .hexToByteArray(),
+            y = "b16e8cf858ddc7690407ba61d4c338237a8cfcf3de6aa672fc60a557aa32fc67"
+                .hexToByteArray()
+        )
+
+        val expectedHex = "a4010220012158205a88d182bce5f42efa59943f33359d2e" +
+            "8a968ff289d93e5fa444b624343167fe225820b16e8cf858ddc7690407ba61d4" +
+            "c338237a8cfcf3de6aa672fc60a557aa32fc67"
+
+        assertEquals(expectedHex, coseKey.encodeCbor().toHexString())
     }
 }
