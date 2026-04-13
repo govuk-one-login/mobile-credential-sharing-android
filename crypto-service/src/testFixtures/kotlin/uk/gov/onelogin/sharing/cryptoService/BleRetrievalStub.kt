@@ -30,6 +30,15 @@ object BleRetrievalStub {
             options = BLE_OPTIONS
         )
 
+    // ISO 18013-5 Appendix D.3.1
+    val D_3_1_BLE_OPTIONS = BleOptions(
+        serverMode = false,
+        clientMode = true,
+        peripheralServerModeUuid = "45efef742b2c4837a9a3b0e1d05a6917".hexToByteArray()
+    )
+
+    const val D_3_1_BLE_OPTIONS_HEX = "a300f401f50a5045efef742b2c4837a9a3b0e1d05a6917"
+
     fun bleOptionNodes(
         serverMode: Boolean = true,
         clientMode: Boolean = false,

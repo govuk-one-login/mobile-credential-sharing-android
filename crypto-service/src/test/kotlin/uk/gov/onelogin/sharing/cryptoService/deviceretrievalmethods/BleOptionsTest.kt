@@ -11,6 +11,8 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_OPTIONS
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_OPTIONS_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.bleOptionNodes
+import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.D_3_1_BLE_OPTIONS
+import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.D_3_1_BLE_OPTIONS_HEX
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
@@ -53,15 +55,8 @@ class BleOptionsTest {
     // Expected CBOR structure derived from ISO 18013-5 Appendix D.3.1
     @Test
     fun `BleOptions encodes to definite-length map matching D_3_1`() {
-        val specBleOptions = BleOptions(
-            serverMode = false,
-            clientMode = true,
-            peripheralServerModeUuid = "45efef742b2c4837a9a3b0e1d05a6917".hexToByteArray()
-        )
+        val encoded = testMapper().writeValueAsBytes(D_3_1_BLE_OPTIONS)
 
-        val encoded = testMapper().writeValueAsBytes(specBleOptions)
-        val expectedHex = "a300f401f50a5045efef742b2c4837a9a3b0e1d05a6917"
-
-        assertEquals(expectedHex, encoded.toHexString())
+        assertEquals(D_3_1_BLE_OPTIONS_HEX, encoded.toHexString())
     }
 }
