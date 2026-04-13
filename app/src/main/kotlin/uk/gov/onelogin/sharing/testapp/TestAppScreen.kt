@@ -190,7 +190,7 @@ private fun CredentialPickerDialog(
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(
-                    text = "Select credential",
+                    text = stringResource(R.string.select_credential),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)

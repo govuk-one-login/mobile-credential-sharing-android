@@ -69,7 +69,7 @@ class MainActivityTest {
         val restorationTester = StateRestorationTester(composeTestRule)
         restorationTester.setContent {
             TestAppScreen(
-                presentCredentialSdk = { provider ->
+                presentCredentialSdk = { _ ->
                     FakeCredentialPresenter(
                         appGraph = appGraph,
                         orchestrator = holderGraph.holderOrchestrator()

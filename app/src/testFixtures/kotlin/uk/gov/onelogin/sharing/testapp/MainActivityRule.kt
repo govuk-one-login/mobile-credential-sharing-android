@@ -69,7 +69,7 @@ class MainActivityRule(
         credentialVerifier: VerifyCredentialGraph
     ) {
         TestAppScreen(
-            presentCredentialSdk = { provider ->
+            presentCredentialSdk = { _ ->
                 FakeCredentialPresenter(
                     appGraph = appGraph,
                     orchestrator = credentialPresenter.holderOrchestrator()
