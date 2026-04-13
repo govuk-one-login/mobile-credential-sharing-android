@@ -34,7 +34,7 @@ object DeviceEngagementStub {
     )
 
     const val ENGAGEMENT_EXPECTED_BASE_64 =
-        "owBjMS4wAZ8B2BhQRkFLRV9FREVWSUNFX0tFWf8Cn58CAaMA9QH0ClARERERIiIzM0REVVVVVVVV//8="
+        "owBjMS4wAYIB2BhQRkFLRV9FREVWSUNFX0tFWQKBgwIBowD1AfQKUBEREREiIjMzRERVVVVVVVU="
 
     private val jsonNodeFactory: JsonNodeFactory = JsonNodeFactory.instance
     private fun deviceEngagementBuilder(): DeviceEngagement.Builder =

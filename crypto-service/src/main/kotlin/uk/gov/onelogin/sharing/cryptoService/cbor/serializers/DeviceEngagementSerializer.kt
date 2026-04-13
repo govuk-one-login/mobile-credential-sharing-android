@@ -24,7 +24,7 @@ class DeviceEngagementSerializer :
         gen.writeFieldId(PROPERTY_ID_1)
         provider.defaultSerializeValue(value.security, gen)
         gen.writeFieldId(PROPERTY_ID_2)
-        gen.writeStartArray()
+        gen.writeStartArray(value.deviceRetrievalMethods, value.deviceRetrievalMethods.size)
         value.deviceRetrievalMethods.forEach {
             provider.defaultSerializeValue(it, gen)
         }

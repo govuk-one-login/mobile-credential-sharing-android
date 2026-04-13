@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 
 object BleRetrievalStub {
-    const val BLE_EXPECTED_BASE_64 = "nwIBowD1AfQKUBEREREiIjMzRERVVVVVVVX/"
+    const val BLE_EXPECTED_BASE_64 = "gwIBowD1AfQKUBEREREiIjMzRERVVVVVVVU="
     const val BLE_OPTIONS_EXPECTED_BASE_64 = "owD1AfQKUBEREREiIjMzRERVVVVVVVU="
     const val UUID_STRING = "11111111-2222-3333-4444-555555555555"
     val UUID_16_BIT: UUID = UUID.fromString(UUID_STRING)
