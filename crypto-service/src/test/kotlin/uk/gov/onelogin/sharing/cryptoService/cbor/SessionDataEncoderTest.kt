@@ -13,8 +13,8 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 class SessionDataEncoderTest {
     private val cborMapper = ObjectMapper(CBORFactory())
 
-    private fun decodeCborMap(bytes: ByteArray): Map<String, Any> =
-        cborMapper.readValue(bytes, Map::class.java) as Map<String, Any>
+    private fun decodeCborMap(bytes: ByteArray): Map<*, *> =
+        cborMapper.readValue(bytes, Map::class.java)
 
     @Test
     fun `encodes SessionData with data only`() {
@@ -37,6 +37,17 @@ class SessionDataEncoderTest {
         assertFalse(result.containsKey("data"))
         assertTrue(result.containsKey("status"))
         assertEquals(20, result["status"])
+    }
+
+    // Expected CBOR value taken from ISO 18013-5 Appendix D.5.1
+    @Test
+    fun `session termination encodes to expected CBOR bytes`() {
+        val sessionData = SessionData(status = SessionDataStatus.SESSION_TERMINATION)
+
+        val expected = "a16673746174757314"
+        val actual = sessionData.encodeCbor().toHexString()
+
+        assertEquals(expected, actual)
     }
 
     @Test

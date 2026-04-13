@@ -94,8 +94,9 @@ fun DeviceResponseDto.DeviceResponse.encodeCbor(): ByteArray {
  */
 fun SessionData.encodeCbor(): ByteArray {
     val output = ByteArrayOutputStream()
+    val fieldCount = listOfNotNull(data, status).size
     CBORFactory().createGenerator(output).use { gen ->
-        gen.writeStartObject()
+        gen.writeStartObject(fieldCount)
         data?.let { gen.writeBinaryField("data", it) }
         status?.let { gen.writeNumberField("status", it.code.toLong()) }
         gen.writeEndObject()
