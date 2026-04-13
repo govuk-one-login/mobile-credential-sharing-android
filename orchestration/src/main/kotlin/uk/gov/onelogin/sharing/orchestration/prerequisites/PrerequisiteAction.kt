@@ -2,20 +2,28 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
 
 import android.bluetooth.BluetoothAdapter
 import android.provider.Settings
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions.Companion.ACTION_REQUEST_PERMISSIONS
 
-sealed class PrerequisiteAction {
-    data class RequestPermissions(val permissions: List<String>) : PrerequisiteAction() {
+sealed class PrerequisiteAction(val intentAction: String) {
+    data class RequestPermissions(val permissions: List<String>) :
+        PrerequisiteAction(
+            ACTION_REQUEST_PERMISSIONS
+        ) {
         constructor(
             vararg permissions: String
         ) : this(permissions.toList())
     }
 
-    abstract class IntentHandoff(val intentData: String) : PrerequisiteAction()
-    data object OpenAppPermissions : IntentHandoff(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-    data object EnableBluetooth : IntentHandoff(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+    data object OpenAppPermissions : PrerequisiteAction(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+    )
+
+    data object EnableBluetooth : PrerequisiteAction(
+        BluetoothAdapter.ACTION_REQUEST_ENABLE
+    )
 
     // Requires Google Play Services SettingsClient
-    data object EnableLocationServices : IntentHandoff(
+    data object EnableLocationServices : PrerequisiteAction(
         Settings.ACTION_LOCATION_SOURCE_SETTINGS
     )
 }

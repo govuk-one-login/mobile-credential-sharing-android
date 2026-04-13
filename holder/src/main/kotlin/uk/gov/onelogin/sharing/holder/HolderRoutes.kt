@@ -12,6 +12,7 @@ import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configu
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.configureUnrecoverableHolderError
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.configureRetryHolderPrerequisites
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
 
 @Keep
@@ -23,6 +24,8 @@ data object HolderRoutes {
     fun NavGraphBuilder.configureHolderRoutes(controller: NavController) {
         navigation<HolderRoutes>(startDestination = HolderPrerequisitesRoute) {
             configureHolderPrerequisitesScreen(controller)
+            configureUnrecoverableHolderError(controller)
+            configureRetryHolderPrerequisites(controller)
             configureHolderPresentQrScreen(
                 controller = controller,
                 onError = {
