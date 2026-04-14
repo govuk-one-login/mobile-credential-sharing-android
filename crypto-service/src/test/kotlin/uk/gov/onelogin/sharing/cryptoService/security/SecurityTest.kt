@@ -46,4 +46,13 @@ class SecurityTest {
             actualNode
         )
     }
+
+    // ISO 18013-5: Security array must use definite-length encoding
+    @Test
+    fun `Security encodes to definite-length array`() {
+        val encoded = testMapper().writeValueAsBytes(SECURITY)
+
+        // 82 = definite-length array with 2 elements
+        assertEquals(0x82.toByte(), encoded[0])
+    }
 }

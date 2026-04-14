@@ -10,6 +10,8 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_OPTIONS
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_OPTIONS_EXPECTED_BASE_64
+import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.D_3_1_BLE_OPTIONS
+import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.D_3_1_BLE_OPTIONS_HEX
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.bleOptionNodes
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
@@ -48,5 +50,13 @@ class BleOptionsTest {
             expectedNodes,
             actualNode
         )
+    }
+
+    // Expected CBOR structure derived from ISO 18013-5 Appendix D.3.1
+    @Test
+    fun `BleOptions encodes to definite-length map matching D_3_1`() {
+        val encoded = testMapper().writeValueAsBytes(D_3_1_BLE_OPTIONS)
+
+        assertEquals(D_3_1_BLE_OPTIONS_HEX, encoded.toHexString())
     }
 }

@@ -58,4 +58,13 @@ class BleDeviceRetrievalMethodTest {
             actualNode
         )
     }
+
+    // ISO 18013-5: DeviceRetrievalMethod array must use definite-length encoding
+    @Test
+    fun `DeviceRetrievalMethod encodes to definite-length array`() {
+        val encoded = testMapper().writeValueAsBytes(BLE_RETRIEVAL_METHOD_SERVER_MODE)
+
+        // 83 = definite-length array with 3 elements
+        assertEquals(0x83.toByte(), encoded[0])
+    }
 }

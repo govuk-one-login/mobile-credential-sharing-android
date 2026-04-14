@@ -58,11 +58,8 @@ fun TestAppScreen(
         mutableStateOf<CredentialPresenter?>(null)
     }
 
-    // Remove verifierPermissionGate once SDK prerequisites screen handles permissions
-    var verifierPermissionGate by rememberSaveable { mutableStateOf(false) }
-
     val sharingDialogVisible by remember {
-        derivedStateOf { destination != null || verifierPermissionGate }
+        derivedStateOf { destination != null }
     }
 
     TestAppScreenContent(
@@ -73,7 +70,7 @@ fun TestAppScreen(
                 .presenter(SampleCredentialProvider(credential))
             destination = CredentialSharingDestination.Holder
         },
-        onOpenVerifier = { verifierPermissionGate = true },
+        onOpenVerifier = { destination = CredentialSharingDestination.Verifier },
         onCloseFlow = {
             when (destination) {
                 is CredentialSharingDestination.Holder ->
@@ -87,17 +84,10 @@ fun TestAppScreen(
 
             destination = null
             credentialPresenter = null
-            verifierPermissionGate = false
         },
         sharingDialogVisible = sharingDialogVisible,
         content = {
             when {
-                // Remove verifierPermissionGate branch once SDK prerequisites handles permissions
-                verifierPermissionGate && destination == null -> VerifierPermissionGate {
-                    verifierPermissionGate = false
-                    destination = CredentialSharingDestination.Verifier
-                }
-
                 destination == CredentialSharingDestination.Holder -> credentialPresenter?.let {
                     ShareCredential(
                         component = it,
@@ -109,6 +99,10 @@ fun TestAppScreen(
                     component = credentialVerifier,
                     modifier = Modifier.fillMaxSize()
                 )
+
+                else -> {
+                    // do nothing with null destination
+                }
             }
         }
     )

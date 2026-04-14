@@ -1,11 +1,11 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.retry
+package uk.gov.onelogin.sharing.orchestration.prerequisites.ui
 
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.performClick
 import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
 
-class RetryHolderPrerequisitesScreenRule(composeTestRule: ComposeContentTestRule) :
+class RetryPrerequisitesContentRule(composeTestRule: ComposeContentTestRule) :
     ComposeContentTestRule by composeTestRule {
 
     var hasPassedPrerequisites: Boolean = false

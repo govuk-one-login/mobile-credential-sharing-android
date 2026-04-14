@@ -6,9 +6,12 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.cryptoService.CoseKeyStub.D_3_1_EDEVICE_KEY
+import uk.gov.onelogin.sharing.cryptoService.CoseKeyStub.D_3_1_EDEVICE_KEY_HEX
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeSessionEstablishmentModel
+import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
 
 class CoseKeyTest {
@@ -89,5 +92,14 @@ class CoseKeyTest {
         )
 
         assertNotNull(resultPublicKey)
+    }
+
+    // Expected CBOR value taken from ISO 18013-5 Appendix D.3.1 (EDeviceKey)
+    @Test
+    fun `CoseKey encodes to definite-length map matching D_3_1 EDeviceKey`() {
+        assertEquals(
+            D_3_1_EDEVICE_KEY_HEX,
+            D_3_1_EDEVICE_KEY.encodeCbor().toHexString()
+        )
     }
 }

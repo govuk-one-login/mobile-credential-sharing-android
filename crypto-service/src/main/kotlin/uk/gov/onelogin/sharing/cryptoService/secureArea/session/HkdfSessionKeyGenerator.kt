@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService.secureArea.session
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import java.security.GeneralSecurityException
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.generateSalt
@@ -25,22 +26,29 @@ class HkdfSessionKeyGenerator(private val logger: Logger) : SessionKeyGenerator 
         sessionTranscriptBytes: ByteArray,
         role: DeviceRole
     ): ByteArray {
-        val salt = generateSalt(sessionTranscriptBytes)
-        val roleAsBytes = role.hdkfRoleAsString.toByteArray(Charsets.UTF_8).also {
-            logger.debug(
-                logTag,
-                "Encoded session role as bytes: ${it.decodeToString()}"
-            )
-        }
+        try {
+            val salt = generateSalt(sessionTranscriptBytes)
+            val roleAsBytes = role.hdkfRoleAsString.toByteArray(Charsets.UTF_8).also {
+                logger.debug(
+                    logTag,
+                    "Encoded session role as bytes: ${it.decodeToString()}"
+                )
+            }
 
-        return hkdfKeyGeneration(
-            sharedKey,
-            salt,
-            roleAsBytes
-        ).also {
-            logger.debug(
-                logTag,
-                "Generated HKDF session key"
+            return hkdfKeyGeneration(
+                sharedKey,
+                salt,
+                roleAsBytes
+            ).also {
+                logger.debug(
+                    logTag,
+                    "Generated HKDF session key"
+                )
+            }
+        } catch (e: GeneralSecurityException) {
+            throw SessionKeyDerivationException(
+                "${role.hdkfRoleAsString} key derivation failed",
+                e
             )
         }
     }

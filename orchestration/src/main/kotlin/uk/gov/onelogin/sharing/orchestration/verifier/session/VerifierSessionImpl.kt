@@ -27,11 +27,11 @@ class VerifierSessionImpl(
     private val transitionMap: VerifierSessionStateTransitions = validVerifierTransitions
 ) : VerifierSession {
 
-    private var _cryptoContext = VerifierCryptoContext()
-    override val cryptoContext: VerifierCryptoContext
+    private var _cryptoContext: VerifierCryptoContext? = null
+    override val cryptoContext: VerifierCryptoContext?
         get() = _cryptoContext
 
-    override fun updateCryptoContext(update: (VerifierCryptoContext) -> VerifierCryptoContext) {
+    override fun updateCryptoContext(update: (VerifierCryptoContext?) -> VerifierCryptoContext) {
         _cryptoContext = update(_cryptoContext)
     }
 

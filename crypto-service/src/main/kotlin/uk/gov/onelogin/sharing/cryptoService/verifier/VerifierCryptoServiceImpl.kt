@@ -24,18 +24,20 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CUR
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.SharedSecretGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.HOLDER
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
 
-/**
- * Default implementation of [VerifierCryptoService].
- */
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
 class VerifierCryptoServiceImpl(
     private val logger: Logger,
     private val keyPairGenerator: KeyPairGenerator,
-    private val sharedSecretGenerator: SharedSecretGenerator
+    private val sharedSecretGenerator: SharedSecretGenerator,
+    private val sessionKeyGenerator: SessionKeyGenerator
 ) : VerifierCryptoService {
 
-    override fun processEngagement(
+    override fun establishSession(
         qrCodeData: String,
         updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
     ) {
@@ -74,6 +76,26 @@ class VerifierCryptoServiceImpl(
         val eDevicePublicKey = engagementData.security.ephemeralPublicKey
             .toEcPublicKey()
 
+        logger.debug(logTag, "SessionTranscriptBytes constructed successfully")
+
+        val sharedSecret = computeSharedSecret(
+            eReaderPrivateKey = keyPair.private as ECPrivateKey,
+            eDevicePublicKey = eDevicePublicKey
+        )
+
+        val skReader = deriveSessionKey(
+            sharedSecret = sharedSecret,
+            sessionTranscriptBytes = sessionTranscriptBytes,
+            role = VERIFIER,
+            label = "SKReader"
+        )
+        val skDevice = deriveSessionKey(
+            sharedSecret = sharedSecret,
+            sessionTranscriptBytes = sessionTranscriptBytes,
+            role = HOLDER,
+            label = "SKDevice"
+        )
+
         updateContext(
             VerifierCryptoContext(
                 engagementString = qrCodeData,
@@ -81,28 +103,17 @@ class VerifierCryptoServiceImpl(
                 eReaderKeyTagged = eReaderKeyTagged,
                 sessionTranscriptBytes = sessionTranscriptBytes,
                 eReaderKeyPair = keyPair,
-                eDevicePublicKey = eDevicePublicKey
+                eDevicePublicKey = eDevicePublicKey,
+                skReader = skReader,
+                skDevice = skDevice
             )
         )
-
-        logger.debug(logTag, "SessionTranscriptBytes constructed successfully")
     }
 
-    /**
-     * Computes the shared secret (ZAB) using ECKA-DH, combining the Verifier's
-     * EReaderKey.Priv with the Holder's EDeviceKey.Pub.
-     *
-     * @param context The crypto context populated by [processEngagement].
-     * @return The raw shared secret bytes (IKM for HKDF in a subsequent step).
-     * @throws SharedSecretException.IncompatibleCurve if EDeviceKey.Pub is not on P-256.
-     * @throws SharedSecretException.MalformedKey if EDeviceKey.Pub is malformed.
-     */
-    internal fun computeSharedSecret(context: VerifierCryptoContext): ByteArray {
-        val eReaderPrivateKey = context.eReaderKeyPair?.private as? ECPrivateKey
-            ?: error("EReaderKey.Priv not available")
-        val eDevicePublicKey = context.eDevicePublicKey
-            ?: error("EDeviceKey.Pub not available")
-
+    private fun computeSharedSecret(
+        eReaderPrivateKey: ECPrivateKey,
+        eDevicePublicKey: ECPublicKey
+    ): ByteArray {
         val deviceCurve = eDevicePublicKey.params.curve
         val readerCurve = eReaderPrivateKey.params.curve
         if (deviceCurve != readerCurve) {
@@ -123,6 +134,22 @@ class VerifierCryptoServiceImpl(
             logger.error(logTag, "Error computing shared secret due to malformed EDeviceKey.Pub")
             throw SharedSecretException.MalformedKey(e)
         }
+    }
+
+    private fun deriveSessionKey(
+        sharedSecret: ByteArray,
+        sessionTranscriptBytes: ByteArray,
+        role: SessionKeyGenerator.Companion.DeviceRole,
+        label: String
+    ): ByteArray = try {
+        sessionKeyGenerator.deriveSessionKey(
+            sharedKey = sharedSecret,
+            sessionTranscriptBytes = sessionTranscriptBytes,
+            role = role
+        ).also { logger.debug(logTag, "$label key generated") }
+    } catch (e: SessionKeyDerivationException) {
+        logger.error(logTag, "$label key derivation failed", e)
+        throw e
     }
 
     private fun CoseKeyDto.toEcPublicKey(): ECPublicKey {

@@ -10,8 +10,8 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 
 object BleRetrievalStub {
-    const val BLE_EXPECTED_BASE_64 = "nwIBvwD1AfQKUBEREREiIjMzRERVVVVVVVX//w=="
-    const val BLE_OPTIONS_EXPECTED_BASE_64 = "vwD1AfQKUBEREREiIjMzRERVVVVVVVX/"
+    const val BLE_EXPECTED_BASE_64 = "gwIBowD1AfQKUBEREREiIjMzRERVVVVVVVU="
+    const val BLE_OPTIONS_EXPECTED_BASE_64 = "owD1AfQKUBEREREiIjMzRERVVVVVVVU="
     const val UUID_STRING = "11111111-2222-3333-4444-555555555555"
     val UUID_16_BIT: UUID = UUID.fromString(UUID_STRING)
 
@@ -29,6 +29,15 @@ object BleRetrievalStub {
             version = BLE_VERSION,
             options = BLE_OPTIONS
         )
+
+    // ISO 18013-5 Appendix D.3.1
+    val D_3_1_BLE_OPTIONS = BleOptions(
+        serverMode = false,
+        clientMode = true,
+        peripheralServerModeUuid = "45efef742b2c4837a9a3b0e1d05a6917".hexToByteArray()
+    )
+
+    const val D_3_1_BLE_OPTIONS_HEX = "a300f401f50a5045efef742b2c4837a9a3b0e1d05a6917"
 
     fun bleOptionNodes(
         serverMode: Boolean = true,

@@ -5,4 +5,8 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 
 fun interface ResolvePrerequisiteAction<State : Any> {
     fun resolve(launcher: ActivityResultLauncher<PrerequisiteAction>)
+
+    object LogMessages {
+        fun launchActionMessage(action: PrerequisiteAction): String = "Launched action: $action"
+    }
 }

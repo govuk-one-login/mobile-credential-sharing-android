@@ -12,6 +12,9 @@ sealed class PrerequisiteAction(val intentAction: String) {
         constructor(
             vararg permissions: String
         ) : this(permissions.toList())
+
+        operator fun plus(action: RequestPermissions): RequestPermissions =
+            RequestPermissions(this.permissions + action.permissions)
     }
 
     data object OpenAppPermissions : PrerequisiteAction(

@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import java.io.ByteArrayOutputStream
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
@@ -16,6 +18,7 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 
 /**
  * A private generic function that takes ('Any') map of custom serializers to encode using
@@ -79,4 +82,24 @@ fun DeviceResponseDto.DeviceResponse.encodeCbor(): ByteArray {
     )
     val mapper = CborMapper.create(serializers)
     return mapper.writeValueAsBytes(this)
+}
+
+/**
+ * Encodes a [SessionData] into a CBOR map as defined by ISO 18013-5.
+ *
+ * Null fields are omitted entirely from the resulting map.
+ *
+ * @receiver The [SessionData] to encode.
+ * @return A [ByteArray] containing the CBOR representation.
+ */
+fun SessionData.encodeCbor(): ByteArray {
+    val output = ByteArrayOutputStream()
+    val fieldCount = listOfNotNull(data, status).size
+    CBORFactory().createGenerator(output).use { gen ->
+        gen.writeStartObject(fieldCount)
+        data?.let { gen.writeBinaryField("data", it) }
+        status?.let { gen.writeNumberField("status", it.code.toLong()) }
+        gen.writeEndObject()
+    }
+    return output.toByteArray()
 }

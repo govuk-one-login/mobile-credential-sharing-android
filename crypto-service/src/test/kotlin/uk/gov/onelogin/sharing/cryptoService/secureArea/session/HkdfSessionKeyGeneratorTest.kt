@@ -1,9 +1,13 @@
 package uk.gov.onelogin.sharing.cryptoService.secureArea.session
 
+import io.mockk.every
+import io.mockk.mockkStatic
+import java.security.GeneralSecurityException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import kotlin.test.assertNotEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
@@ -14,6 +18,7 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CUR
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.SHARED_SECRET_BYTES
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SK_DEVICE_KEY
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SK_READER_KEY
+import uk.gov.onelogin.sharing.cryptoService.cryptography.java.generateSalt
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.HOLDER
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionStubs.VALID_SKDEVICE_BYTES
@@ -97,5 +102,23 @@ class HkdfSessionKeyGeneratorTest {
         )
 
         assert(!skReaderKey.contentEquals(VALID_SKREADER_BYTES))
+    }
+
+    @Test
+    fun `deriveSessionKey wraps GeneralSecurityException in SessionKeyDerivationException`() {
+        val exception = assertThrows(SessionKeyDerivationException::class.java) {
+            mockkStatic(::generateSalt) {
+                every { generateSalt(any()) } throws
+                    GeneralSecurityException("test error")
+
+                sessionKeyGenerator.deriveSessionKey(
+                    SHARED_SECRET_BYTES,
+                    validSessionTranscript,
+                    VERIFIER
+                )
+            }
+        }
+
+        assertEquals("SKReader key derivation failed", exception.message)
     }
 }

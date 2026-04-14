@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases
+package uk.gov.onelogin.sharing.orchestration.verifier.prerequisites.usecases
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -12,29 +12,29 @@ import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 @RunWith(AndroidJUnit4::class)
-class ResolveHolderPrerequisiteActionTest {
+class ResolveVerifierPrerequisiteActionTest {
 
-    private lateinit var initialHolderState: HolderSessionState
+    private lateinit var initialState: VerifierSessionState
 
     private val launcher: ActivityResultLauncher<PrerequisiteAction> = mockk(relaxed = true)
 
     private val orchestrator by lazy {
         FakeOrchestrator(
-            initialHolderState = MutableStateFlow(initialHolderState)
+            initialVerifierState = MutableStateFlow(initialState)
         )
     }
 
     private val logger = SystemLogger()
 
     private val resolver by lazy {
-        ResolveHolderPrerequisiteAction(
+        ResolveVerifierPrerequisiteAction(
             logger = logger,
             orchestrator = orchestrator
         )
@@ -45,7 +45,7 @@ class ResolveHolderPrerequisiteActionTest {
         val missingPrerequisite = MissingPrerequisiteV2.Bluetooth(
             BluetoothState.PermissionNotGranted
         )
-        initialHolderState = HolderSessionState.Preflight(
+        initialState = VerifierSessionState.Preflight(
             listOf(missingPrerequisite)
         )
         resolver.resolve(launcher)
@@ -60,7 +60,7 @@ class ResolveHolderPrerequisiteActionTest {
             MissingPrerequisiteV2.Bluetooth(BluetoothState.PermissionNotGranted),
             MissingPrerequisiteV2.Camera(CameraState.Restricted)
         )
-        initialHolderState = HolderSessionState.Preflight(missingPrerequisites)
+        initialState = VerifierSessionState.Preflight(missingPrerequisites)
         resolver.resolve(launcher)
 
         verify(exactly = missingPrerequisites.size - 1) {
@@ -71,7 +71,7 @@ class ResolveHolderPrerequisiteActionTest {
 
     @Test
     fun `Unrecoverable prerequisites cannot launch actions`() = runTest {
-        initialHolderState = HolderSessionState.Preflight(
+        initialState = VerifierSessionState.Preflight(
             listOf(
                 MissingPrerequisiteV2.Bluetooth(BluetoothState.Unsupported)
             )
@@ -85,7 +85,7 @@ class ResolveHolderPrerequisiteActionTest {
 
     @Test
     fun `Non-preflight states cannot launch actions`() = runTest {
-        initialHolderState = HolderSessionState.NotStarted
+        initialState = VerifierSessionState.NotStarted
 
         resolver.resolve(launcher)
 

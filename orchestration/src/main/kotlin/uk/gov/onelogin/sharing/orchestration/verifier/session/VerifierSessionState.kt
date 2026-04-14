@@ -31,7 +31,8 @@ sealed class VerifierSessionState : Completable {
     data class Preflight(
         val missingPrerequisites: List<MissingPrerequisiteV2>,
         val onComplete: () -> Unit = {}
-    ) : VerifierSessionState()
+    ) : VerifierSessionState(),
+        Iterable<MissingPrerequisiteV2> by missingPrerequisites
 
     /**
      * The User's completed the [Preflight] validations, so the device is ready to

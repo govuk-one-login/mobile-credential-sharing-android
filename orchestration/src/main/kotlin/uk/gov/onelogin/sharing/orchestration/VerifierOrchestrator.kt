@@ -164,16 +164,16 @@ class VerifierOrchestrator(
         when (result) {
             is QrScanResult.Success -> {
                 runCatching {
-                    verifierCryptoService.processEngagement(result.value) { context ->
+                    verifierCryptoService.establishSession(result.value) { context ->
                         sessionFlow.value.updateCryptoContext { context }
                         context
                     }
                 }.onFailure { e ->
                     failWith("Error processing engagement: ${e.message}", e as Exception)
                 }.onSuccess {
-                    sessionFlow.value.cryptoContext.serviceUuid?.let { uuid ->
+                    sessionFlow.value.cryptoContext?.let {
                         safeTransitionTo(VerifierSessionState.Connecting)
-                        centralBluetoothTransport.scanAndConnect(uuid)
+                        centralBluetoothTransport.scanAndConnect(it.serviceUuid)
                     } ?: failWith(
                         "Service UUID not found in device engagement",
                         IllegalStateException("Service UUID not found in device engagement")

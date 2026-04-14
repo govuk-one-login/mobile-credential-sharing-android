@@ -10,6 +10,11 @@ interface RetryPrerequisitesNavigator<State : Any> {
         data object UnrecoverableError : NavigationEvent
     }
 
+    object LogMessages {
+        fun updateNavigationEvent(event: NavigationEvent?): String =
+            "Updated navigation event to: $event"
+    }
+
     companion object {
         // empty to allow for extension functions
     }

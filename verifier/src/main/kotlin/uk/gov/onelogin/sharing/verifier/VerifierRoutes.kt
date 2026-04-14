@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRout
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesNavigationExt.configureVerifierPrerequisitesRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
+import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesNavigationExt.configureRetryVerifierPrerequisites
 
 /**
  * Serializable data object that acts as a navigation route for the Wallet sharing verifier module.
@@ -45,6 +46,7 @@ data object VerifierRoutes {
         navigation<VerifierRoutes>(startDestination = VerifierPrerequisitesRoute) {
             configureVerifierPrerequisitesRoute(navController)
             configureUnrecoverableVerifierError(navController)
+            configureRetryVerifierPrerequisites(navController)
             configureVerifierScannerRoute(
                 onInvalidBarcode = {
                     navController.navigateToScannedInvalidQrRoute(uri = it)

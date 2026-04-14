@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.retry
+package uk.gov.onelogin.sharing.verifier.verify.retry
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
@@ -16,8 +16,6 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisitesContentRule
@@ -25,10 +23,11 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisites
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
+import uk.gov.onelogin.sharing.orchestration.verifier.prerequisites.usecases.ResolveVerifierPrerequisiteAction
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 @RunWith(RobolectricTestParameterInjector::class)
-class RetryHolderPrerequisitesScreenTest {
-
+class RetryVerifierPrerequisitesScreenTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
@@ -44,29 +43,29 @@ class RetryHolderPrerequisitesScreenTest {
 
     private val orchestrator by lazy {
         FakeOrchestrator(
-            initialHolderState = MutableStateFlow(initialHolderState)
+            initialVerifierState = MutableStateFlow(initialState)
         )
     }
     private val resolver by lazy {
-        ResolveHolderPrerequisiteAction(
+        ResolveVerifierPrerequisiteAction(
             logger = logger,
             orchestrator = orchestrator
         )
     }
-    private val initialHolderState: HolderSessionState by lazy {
-        HolderSessionState.Preflight(
+    private val initialState: VerifierSessionState by lazy {
+        VerifierSessionState.Preflight(
             missingPrerequisites = missingPrerequisites
         ) { }
     }
 
     private val navigator by lazy {
-        RetryPrerequisitesNavigator.from<HolderSessionState>(
+        RetryPrerequisitesNavigator.from<VerifierSessionState>(
             navigatorEvents.asFlow()
         )
     }
 
     private val viewModel by lazy {
-        RetryHolderPrerequisitesViewModel(
+        RetryVerifierPrerequisitesViewModel(
             navigator = navigator,
             orchestrator = orchestrator,
             resolver = resolver,
@@ -83,7 +82,7 @@ class RetryHolderPrerequisitesScreenTest {
         navigatorEvents.add(event)
         composeTestRule.run {
             setContent {
-                RetryHolderPrerequisitesScreen(
+                RetryVerifierPrerequisitesScreen(
                     viewModel = viewModel,
                     onPassPrerequisites = { composeTestRule.updateHasPassedPrerequisites() },
                     onUnrecoverableError = { composeTestRule.updateHasUnrecoverableError() }
@@ -112,7 +111,7 @@ class RetryHolderPrerequisitesScreenTest {
 
             setContent {
                 ProvideActivityResultRegistry(testRegistry) {
-                    RetryHolderPrerequisitesScreen(
+                    RetryVerifierPrerequisitesScreen(
                         viewModel = viewModel,
                         onPassPrerequisites = { composeTestRule.updateHasPassedPrerequisites() },
                         onUnrecoverableError = { composeTestRule.updateHasUnrecoverableError() }
