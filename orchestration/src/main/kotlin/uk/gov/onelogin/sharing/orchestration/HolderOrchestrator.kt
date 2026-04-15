@@ -25,6 +25,8 @@ import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
+import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -44,7 +46,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @SingleIn(AppScope::class)
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
@@ -53,6 +55,7 @@ class HolderOrchestrator(
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
+    private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate.V2,
     @Suppress("UnusedPrivateProperty")
     private val credentialProvider: CredentialProvider
@@ -289,30 +292,47 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.MessageReceived -> {
-                val keypair = sessionFlow.value.sessionContext.keyPair?.private
-                if (keypair !is ECPrivateKey) {
-                    logger.error(
-                        logTag,
-                        "Invalid or missing keypair"
-                    )
-                    return
-                }
-
-                val deviceRequest = decryptDeviceRequestUseCase.execute(
-                    sessionEstablishmentBytes = state.message,
-                    engagement = sessionFlow.value.sessionContext.engagement,
-                    holderPrivateKey = keypair,
-                    decryptCounter = sessionFlow.value.sessionContext.decryptCounter
-                )
-
-                // only increment decrypt counter if decryption was successful
-                sessionFlow.value.updateSessionContext {
-                    it.copy(decryptCounter = it.decryptCounter + 1u)
-                }
-
-                safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+                handleMessageReceived(state.message)
             }
         }
+    }
+
+    private fun handleMessageReceived(message: ByteArray) {
+        val keypair = sessionFlow.value.sessionContext.keyPair?.private
+        if (keypair !is ECPrivateKey) {
+            sendTerminationAndFail(IllegalStateException("Invalid or missing keypair"))
+            return
+        }
+
+        try {
+            val deviceRequest = decryptDeviceRequestUseCase.execute(
+                sessionEstablishmentBytes = message,
+                engagement = sessionFlow.value.sessionContext.engagement,
+                holderPrivateKey = keypair,
+                decryptCounter = sessionFlow.value.sessionContext.decryptCounter
+            )
+
+            sessionFlow.value.updateSessionContext {
+                it.copy(decryptCounter = it.decryptCounter + 1u)
+            }
+
+            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            sendTerminationAndFail(e)
+        }
+    }
+
+    private fun sendTerminationAndFail(exception: Exception) {
+        logger.error(logTag, exception.message ?: "Unknown error", exception)
+        holderCryptoService.buildTerminationSessionData(SessionDataStatus.SESSION_TERMINATION)
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = exception.message ?: "Unknown error",
+                    exception = exception
+                )
+            )
+        )
     }
 
     private fun handleError(reason: PeripheralBluetoothTransportError) {

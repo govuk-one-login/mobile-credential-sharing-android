@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -102,7 +103,8 @@ class HolderOrchestratorTest {
         peripheralBluetoothTransport = peripheralBluetoothTransport,
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
-        credentialProvider = FakeCredentialProvider()
+        credentialProvider = FakeCredentialProvider(),
+        holderCryptoService = HolderCryptoServiceImpl()
     )
 
     @Test
@@ -577,5 +579,70 @@ class HolderOrchestratorTest {
         )
 
         assertEquals(2u, currentSession.sessionContext.decryptCounter)
+    }
+
+    @Test
+    fun `CBOR decoding failure builds termination SessionData and transitions to failed`() =
+        runTest {
+            fakeDecryptDeviceRequestUseCase.exception =
+                IllegalArgumentException("CBOR decoding error")
+            val peripheralTransport = FakePeripheralBluetoothTransport(
+                initialState = PeripheralBluetoothState.AdvertisingStarted
+            )
+            val sessionFactory = createSessionFactory()
+            val orchestrator = createOrchestrator(
+                sessionFactory = sessionFactory,
+                peripheralBluetoothTransport = peripheralTransport
+            )
+            backgroundScope.launch {
+                orchestrator.holderSessionState.collect {}
+            }
+            orchestrator.start()
+            advanceUntilIdle()
+
+            peripheralTransport.emitState(
+                PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
+            )
+            peripheralTransport.emitState(
+                PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+            )
+            advanceUntilIdle()
+
+            assertThat(
+                orchestrator.holderSessionState.value,
+                isFailed()
+            )
+        }
+
+    @Test
+    fun `decryption failure builds termination SessionData and transitions to failed`() = runTest {
+        fakeDecryptDeviceRequestUseCase.exception =
+            RuntimeException("Decryption failed")
+        val peripheralTransport = FakePeripheralBluetoothTransport(
+            initialState = PeripheralBluetoothState.AdvertisingStarted
+        )
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            peripheralBluetoothTransport = peripheralTransport
+        )
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
+        )
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(
+            orchestrator.holderSessionState.value,
+            isFailed()
+        )
     }
 }

@@ -16,6 +16,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -100,6 +101,7 @@ class HolderPrerequisitesScreenTest {
             appCoroutineScope = backgroundScope,
             credentialProvider = FakeCredentialProvider(),
             decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase(),
+            holderCryptoService = HolderCryptoServiceImpl(),
             logger = logger,
             sessionFactory = {
                 HolderSessionImpl(
