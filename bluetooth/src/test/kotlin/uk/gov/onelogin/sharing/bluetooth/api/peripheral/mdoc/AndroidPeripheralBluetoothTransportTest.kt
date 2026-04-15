@@ -45,20 +45,39 @@ class AndroidPeripheralBluetoothTransportTest {
     private val uuid = UUID.randomUUID()
 
     @Test
-    fun `initial state is Idle`() = runTest {
-        assertEquals(PeripheralBluetoothState.Idle, sessionManager.state.value)
+    fun `advertiser started logs without emitting state`() = runTest {
+        sessionManager.state.test {
+            assertEquals(PeripheralBluetoothState.Idle, awaitItem())
+            advertiser.emitState(AdvertiserState.Started)
+            expectNoEvents()
+        }
+        assert(logger.contains("Advertising Started"))
     }
 
     @Test
-    fun `advertiser state maps to session state`() = runTest {
+    fun `advertiser stopped logs without emitting state`() = runTest {
         sessionManager.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
-
-            advertiser.emitState(AdvertiserState.Started)
-            assertEquals(PeripheralBluetoothState.AdvertisingStarted, awaitItem())
-
             advertiser.emitState(AdvertiserState.Stopped)
-            assertEquals(PeripheralBluetoothState.AdvertisingStopped, awaitItem())
+            expectNoEvents()
+        }
+        assert(logger.contains("Advertising Stopped"))
+    }
+
+    @Test
+    fun `advertiser idle logs without emitting state`() = runTest {
+        sessionManager.state.test {
+            assertEquals(PeripheralBluetoothState.Idle, awaitItem())
+            advertiser.emitState(AdvertiserState.Idle)
+            expectNoEvents()
+        }
+        assert(logger.contains("Idle"))
+    }
+
+    @Test
+    fun `advertiser failure emits error state`() = runTest {
+        sessionManager.state.test {
+            assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             advertiser.emitState(AdvertiserState.Failed("error"))
             assertEquals(
@@ -109,33 +128,15 @@ class AndroidPeripheralBluetoothTransportTest {
     }
 
     @Test
-    fun `stop calls advertiser stop and sets session state to stopped`() = runTest {
-        val advertiser = FakeBleAdvertiser(initialState = AdvertiserState.Started)
-        val sessionManager = AndroidPeripheralBluetoothTransport(
-            bleAdvertiser = advertiser,
-            gattServerManager = gattServerManager,
-            bluetoothStateMonitor = bluetoothStateMonitor,
-            coroutineScope = testScope,
-            logger = logger
+    fun `stop calls advertiser stop and gatt server close`() = runTest {
+        sessionManager.stop(
+            serviceUuid = uuid,
+            sendEndCommand = true
         )
 
-        sessionManager.state.test {
-            assertEquals(PeripheralBluetoothState.AdvertisingStarted, awaitItem())
-
-            sessionManager.stop(
-                serviceUuid = uuid,
-                sendEndCommand = true
-            )
-
-            assertEquals(1, advertiser.stopCalls)
-            assertEquals(PeripheralBluetoothState.AdvertisingStopped, awaitItem())
-
-            gattServerManager.emitEvent(GattServerEvent.ServiceStopped)
-            assertEquals(1, gattServerManager.closeCalls)
-            assertEquals(PeripheralBluetoothState.GattServiceStopped, awaitItem())
-
-            assertEquals(1, bluetoothStateMonitor.stopCalls)
-        }
+        assertEquals(1, advertiser.stopCalls)
+        assertEquals(1, gattServerManager.closeCalls)
+        assertEquals(1, bluetoothStateMonitor.stopCalls)
     }
 
     @Test
@@ -152,7 +153,7 @@ class AndroidPeripheralBluetoothTransportTest {
     }
 
     @Test
-    fun `gatt service added event triggers mdoc session service added`() = runTest {
+    fun `gatt service added event logs without emitting state`() = runTest {
         val service = mockk<BluetoothGattService>()
         every { service.uuid } returns uuid
 
@@ -165,11 +166,9 @@ class AndroidPeripheralBluetoothTransportTest {
                     service
                 )
             )
-            assertEquals(
-                PeripheralBluetoothState.ServiceAdded(service.uuid),
-                awaitItem()
-            )
+            expectNoEvents()
         }
+        assert(logger.contains("Service Added: $uuid"))
     }
 
     @Test
@@ -257,15 +256,22 @@ class AndroidPeripheralBluetoothTransportTest {
     }
 
     @Test
-    fun `bluetooth switched off triggers event stops BLE session`() = runTest {
+    fun `gatt ServiceStopped logs without emitting state`() = runTest {
+        sessionManager.state.test {
+            assertEquals(PeripheralBluetoothState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(GattServerEvent.ServiceStopped)
+            expectNoEvents()
+        }
+        assert(logger.contains("GattService Stopped"))
+    }
+
+    @Test
+    fun `bluetooth switched off stops BLE session`() = runTest {
         bluetoothStateMonitor.emit(BluetoothStatus.OFF)
 
         sessionManager.bluetoothStatus.test {
             assertEquals(BluetoothStatus.OFF, awaitItem())
-        }
-
-        sessionManager.state.test {
-            assertEquals(PeripheralBluetoothState.AdvertisingStopped, awaitItem())
         }
 
         assertEquals(1, gattServerManager.closeCalls)
@@ -279,21 +285,5 @@ class AndroidPeripheralBluetoothTransportTest {
         sessionManager.bluetoothStatus.test {
             assertEquals(BluetoothStatus.ON, awaitItem())
         }
-    }
-
-    @Test
-    fun `bluetooth switched off triggers event and stops session`() = runTest {
-        bluetoothStateMonitor.emit(BluetoothStatus.OFF)
-
-        sessionManager.bluetoothStatus.test {
-            assertEquals(BluetoothStatus.OFF, awaitItem())
-        }
-
-        sessionManager.state.test {
-            assertEquals(PeripheralBluetoothState.AdvertisingStopped, awaitItem())
-        }
-
-        assertEquals(1, gattServerManager.closeCalls)
-        assertEquals(1, advertiser.stopCalls)
     }
 }
