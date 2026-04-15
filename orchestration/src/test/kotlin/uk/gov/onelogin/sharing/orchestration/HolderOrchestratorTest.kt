@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.orchestration
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -280,36 +279,6 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `handles advertiser started state change`() = runTest {
-        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-        backgroundScope.launch {
-            orchestrator.holderSessionState.collect {}
-        }
-        orchestrator.start()
-
-        assertEquals(1, peripheralBluetoothTransport.startCalls)
-
-        assert(logger.any { it.message.startsWith("Mdoc - Advertising Started") })
-    }
-
-    @Test
-    fun `handles advertiser stopped state change`() = runTest {
-        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-        backgroundScope.launch {
-            orchestrator.holderSessionState.collect {}
-        }
-        orchestrator.start()
-
-        orchestrator.cancel()
-
-        assertEquals(1, peripheralBluetoothTransport.stopCalls)
-
-        assert("Mdoc - Advertising Stopped" in logger)
-    }
-
-    @Test
     fun `handles device connected state change`() = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val sessionFactory = createSessionFactory()
@@ -426,53 +395,6 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `handles gatt service stopped`() = runTest {
-        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-        backgroundScope.launch {
-            orchestrator.holderSessionState.collect {}
-        }
-        orchestrator.start()
-
-        peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.GattServiceStopped
-        )
-
-        assert("Mdoc - GattService Stopped" in logger)
-    }
-
-    @Test
-    fun `handles idle state`() = runTest {
-        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-
-        orchestrator.start()
-
-        peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.Idle
-        )
-
-        assert("Mdoc - Idle" in logger)
-    }
-
-    @Test
-    fun `handles service added state`() = runTest {
-        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport)
-        backgroundScope.launch {
-            orchestrator.holderSessionState.collect {}
-        }
-        orchestrator.start()
-
-        val uuid = UUID.randomUUID()
-        peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.ServiceAdded(uuid)
-        )
-
-        assert("Mdoc - Service Added: $uuid" in logger)
-    }
-
-    @Test
     fun `logs end session event when session ends`() = runTest {
         val sessionFactory = createSessionFactory()
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
@@ -530,10 +452,7 @@ class HolderOrchestratorTest {
     @Test
     fun `decrypts device request when connected`() = runTest {
         val sessionFactory = createSessionFactory()
-        val peripheralTransport =
-            FakePeripheralBluetoothTransport(
-                initialState = PeripheralBluetoothState.AdvertisingStarted
-            )
+        val peripheralTransport = FakePeripheralBluetoothTransport()
 
         val orchestrator = createOrchestrator(
             sessionFactory = sessionFactory,
@@ -590,9 +509,7 @@ class HolderOrchestratorTest {
         runTest {
             fakeDecryptDeviceRequestUseCase.exception =
                 IllegalArgumentException("CBOR decoding error")
-            val peripheralTransport = FakePeripheralBluetoothTransport(
-                initialState = PeripheralBluetoothState.AdvertisingStarted
-            )
+            val peripheralTransport = FakePeripheralBluetoothTransport()
             val sessionFactory = createSessionFactory()
             val orchestrator = createOrchestrator(
                 sessionFactory = sessionFactory,
@@ -622,9 +539,7 @@ class HolderOrchestratorTest {
     fun `decryption failure builds termination SessionData and transitions to failed`() = runTest {
         fakeDecryptDeviceRequestUseCase.exception =
             RuntimeException("Decryption failed")
-        val peripheralTransport = FakePeripheralBluetoothTransport(
-            initialState = PeripheralBluetoothState.AdvertisingStarted
-        )
+        val peripheralTransport = FakePeripheralBluetoothTransport()
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(
             sessionFactory = sessionFactory,

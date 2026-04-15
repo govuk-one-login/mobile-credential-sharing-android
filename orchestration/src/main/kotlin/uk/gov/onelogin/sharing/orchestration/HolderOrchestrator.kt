@@ -199,23 +199,11 @@ class HolderOrchestrator(
         }
     }
 
-    @Suppress("ComplexMethod", "LongMethod")
+    @Suppress("LongMethod")
     private fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
 
         when (state) {
-            PeripheralBluetoothState.AdvertisingStarted -> {
-                logger.debug(
-                    logTag,
-                    "Mdoc - Advertising Started UUID: " +
-                        "${sessionFlow.value.sessionContext.sessionUuid}"
-                )
-            }
-
-            PeripheralBluetoothState.AdvertisingStopped -> {
-                logger.debug(logTag, "Mdoc - Advertising Stopped")
-            }
-
             is PeripheralBluetoothState.Connected -> {
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
 
@@ -267,16 +255,7 @@ class HolderOrchestrator(
                 handleError(state.reason)
             }
 
-            PeripheralBluetoothState.GattServiceStopped -> {
-                logger.debug(logTag, "Mdoc - GattService Stopped")
-            }
-
-            PeripheralBluetoothState.Idle -> {
-                logger.debug(logTag, "Mdoc - Idle")
-            }
-
-            is PeripheralBluetoothState.ServiceAdded ->
-                logger.debug(logTag, "Mdoc - Service Added: ${state.uuid}")
+            PeripheralBluetoothState.Idle -> Unit
 
             is PeripheralBluetoothState.Ended -> {
                 safeTransitionTo(HolderSessionState.Complete.Cancelled)

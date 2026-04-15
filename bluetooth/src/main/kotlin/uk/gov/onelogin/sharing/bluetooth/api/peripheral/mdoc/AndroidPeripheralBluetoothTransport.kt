@@ -103,10 +103,10 @@ class AndroidPeripheralBluetoothTransport(
     private fun handleAdvertiserState(state: AdvertiserState) {
         when (state) {
             AdvertiserState.Started ->
-                _state.value = PeripheralBluetoothState.AdvertisingStarted
+                logger.debug(logTag, "Advertising Started")
 
             AdvertiserState.Stopped ->
-                _state.value = PeripheralBluetoothState.AdvertisingStopped
+                logger.debug(logTag, "Advertising Stopped")
 
             is AdvertiserState.Failed ->
                 _state.value =
@@ -115,7 +115,7 @@ class AndroidPeripheralBluetoothTransport(
                     )
 
             AdvertiserState.Idle ->
-                _state.value = PeripheralBluetoothState.Idle
+                logger.debug(logTag, "Idle")
 
             else -> Unit
         }
@@ -136,35 +136,33 @@ class AndroidPeripheralBluetoothTransport(
                 )
 
             is GattServerEvent.ServiceAdded ->
-                _state.value = PeripheralBluetoothState.ServiceAdded(event.service?.uuid)
+                logger.debug(logTag, "Service Added: ${event.service?.uuid}")
 
             GattServerEvent.ServiceStopped ->
-                _state.value = PeripheralBluetoothState.GattServiceStopped
+                logger.debug(logTag, "GattService Stopped")
 
             is GattServerEvent.UnsupportedEvent ->
                 logger.error(
                     logTag,
-                    "Mdoc - Unsupported event - status: ${event.status} new state: ${event.newState}"
+                    "Unsupported event - status: ${event.status} new state: ${event.newState}"
                 )
 
-            GattServerEvent.SessionStarted -> {
+            GattServerEvent.SessionStarted ->
                 logger.debug(
                     logTag,
-                    "Mdoc - Connection has been setup successfully - session state started"
+                    "Connection has been setup successfully - session state started"
                 )
-            }
 
             is GattServerEvent.SessionEnd -> {
                 _state.value = PeripheralBluetoothState.Ended(event.status)
                 logger.debug(
                     logTag,
-                    "Mdoc - Session end command was received. Closing connection"
+                    "Session end command was received. Closing connection"
                 )
             }
 
-            is GattServerEvent.MessageReceived -> {
+            is GattServerEvent.MessageReceived ->
                 _state.value = PeripheralBluetoothState.MessageReceived(event.byteArray)
-            }
         }
     }
 }
