@@ -75,12 +75,20 @@ class RetryVerifierPrerequisitesViewModelTest {
         dispatcherRule.testDispatcher
     ) {
         navigationEvents.add(NavigationEvent.PassedPrerequisites)
+        viewModel.recheckPrerequisites()
+
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
 
         viewModel.navigationEvent.test {
             assertEquals(
                 NavigationEvent.PassedPrerequisites,
                 awaitItem()
             )
+        }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertFalse { awaitItem() }
         }
     }
 
@@ -117,6 +125,9 @@ class RetryVerifierPrerequisitesViewModelTest {
         viewModel.recheckPrerequisites()
 
         assertTrue { hasCalledOnComplete }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
     }
 
     @Test
@@ -128,5 +139,8 @@ class RetryVerifierPrerequisitesViewModelTest {
         viewModel.recheckPrerequisites()
 
         assertFalse { hasCalledOnComplete }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
     }
 }

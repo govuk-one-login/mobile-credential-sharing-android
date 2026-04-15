@@ -9,12 +9,14 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
@@ -38,10 +40,19 @@ class RetryHolderPrerequisitesViewModel(
 
     val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent?> = navigator
         .events
+        .map { event ->
+            if (event != null) {
+                _hasRecheckedPrerequisites.update { false }
+            }
+            event
+        }
         .shareIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Companion.Lazily
         )
+
+    private val _hasRecheckedPrerequisites = MutableStateFlow(false)
+    val hasRecheckedPrerequisites: StateFlow<Boolean> = _hasRecheckedPrerequisites
 
     val prerequisites: StateFlow<List<Prerequisite>?> = orchestrator
         .holderSessionState
@@ -55,6 +66,7 @@ class RetryHolderPrerequisitesViewModel(
         )
 
     fun recheckPrerequisites(): Job = viewModelScope.launch(dispatcher) {
+        _hasRecheckedPrerequisites.update { true }
         (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
             ?.onComplete()
     }
