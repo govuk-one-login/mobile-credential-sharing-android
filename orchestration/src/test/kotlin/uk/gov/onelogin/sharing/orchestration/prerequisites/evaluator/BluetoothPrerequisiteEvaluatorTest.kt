@@ -13,6 +13,8 @@ import org.junit.Before
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toUndeterminedPermissions
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 
 class BluetoothPrerequisiteEvaluatorTest {
@@ -51,7 +53,14 @@ class BluetoothPrerequisiteEvaluatorTest {
     }
 
     @Test
-    fun `Returns PermissionNotGranted when permission is missing`() {
+    fun `Returns PermissionUndetermined from permission checker`() {
+        permissions.toUndeterminedPermissions()
+            .let(permissionResult::addAll)
+        assertEquals(BluetoothState.PermissionUndetermined, evaluator.evaluate())
+    }
+
+    @Test
+    fun `Returns PermissionNotGranted from permission checker`() {
         permissions.toDeniedPermission()
             .let(permissionResult::addAll)
         assertEquals(BluetoothState.PermissionNotGranted, evaluator.evaluate())
@@ -59,7 +68,7 @@ class BluetoothPrerequisiteEvaluatorTest {
 
     @Test
     fun `Returns PermissionDeniedPermanently from permission checker`() {
-        permissions.toDeniedPermission(false)
+        permissions.toPermanentlyDeniedPermissions()
             .let(permissionResult::addAll)
         assertEquals(BluetoothState.PermissionDeniedPermanently, evaluator.evaluate())
     }

@@ -10,6 +10,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.locationManager
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasUndeterminedPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
@@ -32,6 +33,8 @@ class LocationPrerequisiteEvaluator(
 
                 result.hasPermanentlyDeniedPermissions() ->
                     LocationState.PermissionDeniedPermanently
+
+                result.hasUndeterminedPermissions() -> LocationState.PermissionUndetermined
 
                 else ->
                     LocationState.PermissionNotGranted

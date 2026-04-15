@@ -47,7 +47,7 @@ class AuthorizationPrerequisiteGateLayer(
         }
 
     private fun handlePermissionResponse(
-        result: List<PermissionCheckerV2.Denied>
+        result: List<PermissionCheckerV2.PermissionCheckResult>
     ): MissingPrerequisiteReason.Unauthorized? = if (result.isEmpty()) {
         null
     } else {

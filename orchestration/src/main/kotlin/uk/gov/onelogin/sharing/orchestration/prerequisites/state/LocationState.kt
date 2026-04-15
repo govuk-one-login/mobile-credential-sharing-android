@@ -10,20 +10,24 @@ enum class LocationState :
     Actionable<PrerequisiteAction> {
     Unsupported,
     ServicesDisabled,
+    PermissionDeniedPermanently,
     PermissionNotGranted,
-    PermissionDeniedPermanently;
+    PermissionUndetermined;
 
     override fun isRecoverable(): Boolean = this in recoverabilityMap.keys
 
     override fun getAction(): PrerequisiteAction? = recoverabilityMap[this]
 
     companion object {
+        private val requestPermissionsAction = PrerequisiteAction.RequestPermissions(
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+
         @JvmStatic
         private val recoverabilityMap = mapOf(
-            PermissionNotGranted to PrerequisiteAction.RequestPermissions(
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ),
             PermissionDeniedPermanently to PrerequisiteAction.OpenAppPermissions,
+            PermissionNotGranted to requestPermissionsAction,
+            PermissionUndetermined to requestPermissionsAction,
             ServicesDisabled to PrerequisiteAction.EnableLocationServices
         )
     }

@@ -9,6 +9,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.devicePolicyManager
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasUndeterminedPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
@@ -30,6 +31,7 @@ class CameraPrerequisiteEvaluator(
             when {
                 result.isEmpty() -> null
                 result.hasPermanentlyDeniedPermissions() -> CameraState.PermissionDeniedPermanently
+                result.hasUndeterminedPermissions() -> CameraState.PermissionUndetermined
                 else -> CameraState.PermissionNotGranted
             }
         }

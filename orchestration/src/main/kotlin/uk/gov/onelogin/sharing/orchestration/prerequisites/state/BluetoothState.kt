@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.state
 
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
 import uk.gov.onelogin.sharing.core.Actionable
 import uk.gov.onelogin.sharing.core.Recoverable
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
@@ -11,21 +11,25 @@ enum class BluetoothState :
     Unsupported,
     Restricted,
     PoweredOff,
+    PermissionDeniedPermanently,
     PermissionNotGranted,
-    PermissionDeniedPermanently;
+    PermissionUndetermined;
 
     override fun isRecoverable(): Boolean = this in recoverabilityMap.keys
 
     override fun getAction(): PrerequisiteAction? = recoverabilityMap[this]
 
     companion object {
+        private val requestPermissionsAction = PrerequisiteAction.RequestPermissions(
+            bluetoothPermissions()
+        )
+
         @JvmStatic
         private val recoverabilityMap: Map<BluetoothState, PrerequisiteAction> = mapOf(
-            PermissionNotGranted to PrerequisiteAction.RequestPermissions(
-                BluetoothPermissionChecker.Companion.bluetoothPermissions()
-            ),
-            PoweredOff to PrerequisiteAction.EnableBluetooth,
-            PermissionDeniedPermanently to PrerequisiteAction.OpenAppPermissions
+            PermissionDeniedPermanently to PrerequisiteAction.OpenAppPermissions,
+            PermissionNotGranted to requestPermissionsAction,
+            PermissionUndetermined to requestPermissionsAction,
+            PoweredOff to PrerequisiteAction.EnableBluetooth
         )
     }
 }

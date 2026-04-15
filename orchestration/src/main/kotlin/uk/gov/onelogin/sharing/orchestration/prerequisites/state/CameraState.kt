@@ -10,20 +10,24 @@ enum class CameraState :
     Actionable<PrerequisiteAction> {
     Unsupported,
     Restricted,
+    PermissionDeniedPermanently,
     PermissionNotGranted,
-    PermissionDeniedPermanently;
+    PermissionUndetermined;
 
     override fun isRecoverable(): Boolean = this in recoverabilityMap.keys
 
     override fun getAction(): PrerequisiteAction? = recoverabilityMap[this]
 
     companion object {
+        private val requestPermissionsAction = PrerequisiteAction.RequestPermissions(
+            Manifest.permission.CAMERA
+        )
+
         @JvmStatic
         private val recoverabilityMap = mapOf(
-            PermissionNotGranted to PrerequisiteAction.RequestPermissions(
-                Manifest.permission.CAMERA
-            ),
-            PermissionDeniedPermanently to PrerequisiteAction.OpenAppPermissions
+            PermissionDeniedPermanently to PrerequisiteAction.OpenAppPermissions,
+            PermissionNotGranted to requestPermissionsAction,
+            PermissionUndetermined to requestPermissionsAction
         )
     }
 }
