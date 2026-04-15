@@ -63,6 +63,15 @@ class MainActivityTest {
         composeTestRule.assertSharingDialogIsDisplayed()
     }
 
+    @Test
+    fun `opening verifier shows sharing dialog`() {
+        composeTestRule.render()
+
+        composeTestRule.openVerifier()
+
+        composeTestRule.assertSharingDialogIsDisplayed()
+    }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun `Rotation is possible during the holder journey`() = runTest {
@@ -83,10 +92,12 @@ class MainActivityTest {
                         privateKey = byteArrayOf()
                     )
                 ),
-                credentialVerifier = FakeCredentialVerifier(
-                    appGraph = appGraph,
-                    orchestrator = verifierGraph.verifierOrchestrator()
-                )
+                verifyCredentialSdk = { _ ->
+                    FakeCredentialVerifier(
+                        appGraph = appGraph,
+                        orchestrator = verifierGraph.verifierOrchestrator()
+                    )
+                }
             )
         }
 

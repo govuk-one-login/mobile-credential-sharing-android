@@ -25,7 +25,8 @@ class MainActivityRule(
     private val holderGraph: PresentCredentialGraph,
     private val verifierGraph: VerifyCredentialGraph,
     private val holderText: String,
-    private val verifierText: String
+    private val verifierText: String,
+    private val verifyCredentialText: String
 ) : ComposeContentTestRule by composeTestRule {
 
     private val mockCredentials = listOf(
@@ -49,7 +50,8 @@ class MainActivityRule(
         holderGraph = holderGraph,
         verifierGraph = verifierGraph,
         holderText = resources.getString(R.string.holder),
-        verifierText = resources.getString(R.string.verifier)
+        verifierText = resources.getString(R.string.verifier),
+        verifyCredentialText = resources.getString(R.string.verify_credential)
     )
 
     fun render() {
@@ -76,10 +78,12 @@ class MainActivityRule(
                 )
             },
             mockCredentials = mockCredentials,
-            credentialVerifier = FakeCredentialVerifier(
-                appGraph = appGraph,
-                orchestrator = credentialVerifier.verifierOrchestrator()
-            )
+            verifyCredentialSdk = { _ ->
+                FakeCredentialVerifier(
+                    appGraph = appGraph,
+                    orchestrator = credentialVerifier.verifierOrchestrator()
+                )
+            }
         )
     }
 
@@ -99,6 +103,18 @@ class MainActivityRule(
 
         onAllNodesWithTag(CREDENTIAL_ITEM_TAG)
             .onFirst()
+            .assertExists()
+            .assertHasClickAction()
+            .performClick()
+    }
+
+    fun openVerifier() {
+        onNodeWithText(verifierText)
+            .assertExists()
+            .assertHasClickAction()
+            .performClick()
+
+        onNodeWithTag(VERIFY_CREDENTIAL_BUTTON_TAG)
             .assertExists()
             .assertHasClickAction()
             .performClick()
