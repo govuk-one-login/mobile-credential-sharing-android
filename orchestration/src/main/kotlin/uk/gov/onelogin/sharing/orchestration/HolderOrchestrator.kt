@@ -300,8 +300,7 @@ class HolderOrchestrator(
     private fun handleMessageReceived(message: ByteArray) {
         val keypair = sessionFlow.value.sessionContext.keyPair?.private
         if (keypair !is ECPrivateKey) {
-            logger.error(logTag, "Invalid or missing keypair")
-            sendTerminationAndFail("Invalid or missing keypair")
+            sendTerminationAndFail(IllegalStateException("Invalid or missing keypair"))
             return
         }
 
@@ -319,16 +318,19 @@ class HolderOrchestrator(
 
             safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            logger.error(logTag, "Failed to process SessionEstablishment", e)
-            sendTerminationAndFail(e.message ?: "Failed to process SessionEstablishment")
+            sendTerminationAndFail(e)
         }
     }
 
-    private fun sendTerminationAndFail(message: String) {
+    private fun sendTerminationAndFail(exception: Exception) {
+        logger.error(logTag, exception.message ?: "Unknown error", exception)
         holderCryptoService.buildTerminationSessionData(SessionDataStatus.SESSION_TERMINATION)
         safeTransitionTo(
             HolderSessionState.Complete.Failed(
-                SessionError(message, SessionErrorReason.UnrecoverableThrowable(Exception(message)))
+                SessionError(
+                    message = exception.message ?: "Unknown error",
+                    exception = exception
+                )
             )
         )
     }
