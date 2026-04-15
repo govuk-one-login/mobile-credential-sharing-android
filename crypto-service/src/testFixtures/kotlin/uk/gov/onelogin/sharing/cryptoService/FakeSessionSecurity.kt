@@ -43,4 +43,21 @@ class FakeSessionSecurity : SessionSecurity {
         lastDecryptCounter = decryptCounter
         return plaintextToReturn
     }
+
+    var encryptedToReturn: ByteArray = byteArrayOf()
+    var lastEncryptData: ByteArray? = null
+    var lastEncryptRole: DeviceRole? = null
+    var lastEncryptCounter: UInt? = null
+
+    override fun encryptPayload(
+        key: ByteArray,
+        data: ByteArray,
+        role: DeviceRole,
+        encryptCounter: UInt
+    ): ByteArray {
+        lastEncryptData = data
+        lastEncryptRole = role
+        lastEncryptCounter = encryptCounter
+        return encryptedToReturn
+    }
 }

@@ -68,4 +68,29 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
             throw e
         }
     }
+
+    override fun encryptPayload(
+        key: ByteArray,
+        data: ByteArray,
+        role: DeviceRole,
+        encryptCounter: UInt
+    ): ByteArray {
+        val nistInitialisationVector = createNistInitialisationVector(
+            role.nistInitialisationVectorIdentifier,
+            encryptCounter
+        )
+
+        val encryptedData = Cipher.getInstance(AES_256_TRANSFORMATION).run {
+            logger.debug(logTag, "Encrypt Counter = $encryptCounter")
+
+            init(
+                Cipher.ENCRYPT_MODE,
+                SecretKeySpec(key, AES_256_ALGORITHM),
+                GCMParameterSpec(AES_256_NONCE_LENGTH, nistInitialisationVector)
+            )
+            doFinal(data)
+        }
+        logger.debug(logTag, "successful encryption")
+        return encryptedData
+    }
 }

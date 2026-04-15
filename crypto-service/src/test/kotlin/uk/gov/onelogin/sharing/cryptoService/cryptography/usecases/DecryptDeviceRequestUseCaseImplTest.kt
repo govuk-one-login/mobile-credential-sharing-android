@@ -56,7 +56,7 @@ class DecryptDeviceRequestUseCaseImplTest {
             logger = logger
         ).toSessionEstablishment().data
 
-        assertSame(fakeDecoder.deviceRequestToReturn, result)
+        assertSame(fakeDecoder.deviceRequestToReturn, result.deviceRequest)
 
         assertArrayEquals(
             fakeSessionSecurity.plaintextToReturn,

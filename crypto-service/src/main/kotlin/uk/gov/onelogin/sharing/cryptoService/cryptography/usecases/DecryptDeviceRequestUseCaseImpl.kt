@@ -16,7 +16,6 @@ import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
 @ContributesBinding(scope = AppScope::class, binding = binding<DecryptDeviceRequestUseCase>())
 class DecryptDeviceRequestUseCaseImpl(
@@ -29,7 +28,7 @@ class DecryptDeviceRequestUseCaseImpl(
         engagement: String,
         holderPrivateKey: PrivateKey,
         decryptCounter: UInt
-    ): DeviceRequest {
+    ): DecryptResult {
         val sessionEstablishment = decodeSessionEstablishmentModel(
             rawBytes = sessionEstablishmentBytes,
             logger = logger
@@ -56,6 +55,12 @@ class DecryptDeviceRequestUseCaseImpl(
             role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
         )
 
+        val skDevice = sessionSecurity.deriveSessionKey(
+            sharedKey = sharedSecret,
+            sessionTranscriptBytes = transcript,
+            role = SessionKeyGenerator.Companion.DeviceRole.HOLDER
+        )
+
         val plaintext = sessionSecurity.decryptPayload(
             key = skReader,
             data = sessionEstablishment.data,
@@ -73,6 +78,9 @@ class DecryptDeviceRequestUseCaseImpl(
                 logger.debug(logTag, "Requests: key = $key, value = $value")
             }
 
-        return deviceRequest
+        return DecryptResult(
+            deviceRequest = deviceRequest,
+            skDevice = skDevice
+        )
     }
 }

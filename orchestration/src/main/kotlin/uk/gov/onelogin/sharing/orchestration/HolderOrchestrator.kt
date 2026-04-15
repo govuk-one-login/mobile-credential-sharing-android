@@ -298,7 +298,7 @@ class HolderOrchestrator(
                     return
                 }
 
-                val deviceRequest = decryptDeviceRequestUseCase.execute(
+                val result = decryptDeviceRequestUseCase.execute(
                     sessionEstablishmentBytes = state.message,
                     engagement = sessionFlow.value.sessionContext.engagement,
                     holderPrivateKey = keypair,
@@ -307,10 +307,13 @@ class HolderOrchestrator(
 
                 // only increment decrypt counter if decryption was successful
                 sessionFlow.value.updateSessionContext {
-                    it.copy(decryptCounter = it.decryptCounter + 1u)
+                    it.copy(
+                        decryptCounter = it.decryptCounter + 1u,
+                        skDevice = result.skDevice
+                    )
                 }
 
-                safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+                safeTransitionTo(HolderSessionState.AwaitingUserConsent(result.deviceRequest))
             }
         }
     }
