@@ -4,15 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
+import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 
 class HolderCryptoServiceImplTest {
 
-    private val service = HolderCryptoServiceImpl()
+    private val service = HolderCryptoServiceImpl(
+        sessionSecurity = FakeSessionSecurity(),
+        logger = SystemLogger()
+    )
     private val cborMapper = ObjectMapper(CBORFactory())
 
     @Test
