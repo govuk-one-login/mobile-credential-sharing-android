@@ -13,5 +13,4 @@ set -o errexit
   :models:jacocoTestReport \
   testDebugUnitTest \
   createDebugUnitTestCoverageReport \
-  -x testReleaseUnitTest \
   "${@}"

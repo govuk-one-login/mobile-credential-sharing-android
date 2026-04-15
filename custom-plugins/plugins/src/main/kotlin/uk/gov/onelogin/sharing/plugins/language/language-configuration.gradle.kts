@@ -55,8 +55,8 @@ fun KotlinJvmCompilerOptions.configureKotlinCompiler() {
     )
 }
 
-fun CommonExtension<*, *, *, *, *, *>.configureCompileOptions() {
-    compileOptions {
+fun CommonExtension.configureCompileOptions() {
+    compileOptions.apply {
         sourceCompatibility =
             languageVersions.javaVersion.get()
         targetCompatibility =
