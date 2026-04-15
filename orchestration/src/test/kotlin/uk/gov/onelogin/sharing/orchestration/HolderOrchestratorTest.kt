@@ -505,9 +505,7 @@ class HolderOrchestratorTest {
         runTest {
             fakeDecryptDeviceRequestUseCase.exception =
                 IllegalArgumentException("CBOR decoding error")
-            val peripheralTransport = FakePeripheralBluetoothTransport(
-                initialState = PeripheralBluetoothState.AdvertisingStarted
-            )
+            val peripheralTransport = FakePeripheralBluetoothTransport()
             val sessionFactory = createSessionFactory()
             val orchestrator = createOrchestrator(
                 sessionFactory = sessionFactory,
@@ -537,9 +535,7 @@ class HolderOrchestratorTest {
     fun `decryption failure builds termination SessionData and transitions to failed`() = runTest {
         fakeDecryptDeviceRequestUseCase.exception =
             RuntimeException("Decryption failed")
-        val peripheralTransport = FakePeripheralBluetoothTransport(
-            initialState = PeripheralBluetoothState.AdvertisingStarted
-        )
+        val peripheralTransport = FakePeripheralBluetoothTransport()
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(
             sessionFactory = sessionFactory,
