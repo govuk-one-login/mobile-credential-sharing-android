@@ -305,21 +305,23 @@ class HolderOrchestrator(
         }
 
         try {
-            val result = decryptDeviceRequestUseCase.execute(
+            val deviceRequest = decryptDeviceRequestUseCase.execute(
                 sessionEstablishmentBytes = message,
                 engagement = sessionFlow.value.sessionContext.engagement,
                 holderPrivateKey = keypair,
-                decryptCounter = sessionFlow.value.sessionContext.decryptCounter
+                decryptCounter = sessionFlow.value.sessionContext.decryptCounter,
+                onDeriveSkDevice = { skDevice ->
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(skDevice = skDevice)
+                    }
+                }
             )
 
             sessionFlow.value.updateSessionContext {
-                it.copy(
-                    decryptCounter = it.decryptCounter + 1u,
-                    skDevice = result.skDevice
-                )
+                it.copy(decryptCounter = it.decryptCounter + 1u)
             }
 
-            safeTransitionTo(HolderSessionState.AwaitingUserConsent(result.deviceRequest))
+            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             sendTerminationAndFail(e)
         }
