@@ -12,7 +12,7 @@ import kotlin.test.assertNull
 import org.junit.Before
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.core.permission.toDeniedPermission
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 
@@ -22,7 +22,8 @@ class CameraPrerequisiteEvaluatorTest {
     private val devicePolicyManager: DevicePolicyManager = mockk()
     private val processCameraProvider: ProcessCameraProvider = mockk()
 
-    private var permissionResult: MutableList<PermissionCheckerV2.Denied> = mutableListOf()
+    private var permissionResult: MutableList<PermissionCheckerV2.PermissionCheckResult> =
+        mutableListOf()
     private var factory = ProcessCameraProviderFactory { processCameraProvider }
 
     private val evaluator by lazy {

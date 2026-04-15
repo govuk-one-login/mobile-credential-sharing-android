@@ -16,7 +16,7 @@ import org.junit.After
 import org.junit.Before
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.core.permission.toDeniedPermission
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 class LocationPrerequisiteEvaluatorTest {
@@ -25,7 +25,8 @@ class LocationPrerequisiteEvaluatorTest {
     private val packageManager: PackageManager = mockk()
     private val locationManager: LocationManager = mockk()
 
-    private var permissionResult: MutableList<PermissionCheckerV2.Denied> = mutableListOf()
+    private var permissionResult: MutableList<PermissionCheckerV2.PermissionCheckResult> =
+        mutableListOf()
 
     private val evaluator by lazy {
         LocationPrerequisiteEvaluator(

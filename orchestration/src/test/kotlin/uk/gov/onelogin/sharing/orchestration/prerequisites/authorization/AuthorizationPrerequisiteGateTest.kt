@@ -11,7 +11,7 @@ import org.junit.After
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.core.permission.toDeniedPermission
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasUnauthorizedPermissions
 
@@ -21,7 +21,8 @@ class AuthorizationPrerequisiteGateTest {
     private val permission = Manifest.permission.BLUETOOTH
     private val request: Prerequisite = Prerequisite.BLUETOOTH
 
-    private var permissionResult: MutableList<PermissionCheckerV2.Denied> = mutableListOf()
+    private var permissionResult: MutableList<PermissionCheckerV2.PermissionCheckResult> =
+        mutableListOf()
     private val permissionChecker by lazy {
         FakePermissionChecker { permissionResult }
     }

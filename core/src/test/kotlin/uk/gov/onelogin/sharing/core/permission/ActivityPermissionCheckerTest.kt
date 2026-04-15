@@ -2,20 +2,15 @@ package uk.gov.onelogin.sharing.core.permission
 
 import android.Manifest
 import android.app.Activity
-import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
-import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameters
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.allOf
-import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.contains
-import org.hamcrest.Matchers.hasSize
 import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -26,8 +21,15 @@ class ActivityPermissionCheckerTest {
     private val activity: Activity = mockk()
     private val permission = Manifest.permission.CAMERA
 
+    private val markerStore by lazy {
+        ListPermissionStore()
+    }
+
     private val checker by lazy {
-        ActivityPermissionChecker(activity)
+        ActivityPermissionChecker(
+            activity,
+            markerStore = markerStore
+        )
     }
 
     @Before
@@ -44,83 +46,23 @@ class ActivityPermissionCheckerTest {
         )
     }
 
+    @TestParameters(valuesProvider = PermissionCheckerParameters::class)
     @Test
-    fun `Empty lists represent granting all permissions`() = runTest {
+    fun `Permission checker logic`(input: PermissionCheckerParameters.Input) = runTest {
         every {
             ActivityCompat.checkSelfPermission(activity, permission)
-        } returns PackageManager.PERMISSION_GRANTED
-
-        val result = checker.checkPermissions(permission)
-        assertThat(
-            result,
-            hasSize(0)
-        )
-    }
-
-    @Test
-    fun `Granted permissions aren't included with denied permissions`() = runTest {
+        } returns input.grantStatus
         every {
-            ActivityCompat.checkSelfPermission(activity, permission)
-        } returns PackageManager.PERMISSION_GRANTED
-        every {
-            ActivityCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH)
-        } returns PackageManager.PERMISSION_DENIED
-        every {
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                activity,
-                Manifest.permission.BLUETOOTH
-            )
-        } returns true
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
+        } returns input.shouldShowRationale
 
-        val result = checker.checkPermissions(
-            permission,
-            Manifest.permission.BLUETOOTH
-        )
-
-        assertThat(
-            result,
-            allOf(
-                hasSize(1),
-                contains(
-                    equalTo(
-                        PermissionCheckerV2.Denied(
-                            Manifest.permission.BLUETOOTH,
-                            shouldShowRationale = true
-                        )
-                    )
-                )
-            )
-        )
-    }
-
-    @Test
-    fun `Denied responses contain rationale values`(@TestParameter shouldShowRationale: Boolean) =
-        runTest {
-            every {
-                ActivityCompat.checkSelfPermission(activity, permission)
-            } returns PackageManager.PERMISSION_DENIED
-            every {
-                ActivityCompat.shouldShowRequestPermissionRationale(
-                    activity,
-                    permission
-                )
-            } returns shouldShowRationale
-
-            val result = checker.checkPermissions(permission)
-
-            assertThat(
-                result,
-                allOf(
-                    hasSize(1),
-                    contains(
-                        equalTo(
-                            PermissionCheckerV2.Denied(
-                                permission,
-                                shouldShowRationale
-                            )
-                        )
-                    )
-                )
-            )
+        if (input.wasMarked) {
+            markerStore.mark(permission)
         }
+
+        assertThat(
+            checker.checkPermissions(permission),
+            input.assertion
+        )
+    }
 }
