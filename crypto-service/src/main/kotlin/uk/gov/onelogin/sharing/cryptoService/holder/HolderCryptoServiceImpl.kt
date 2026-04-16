@@ -12,6 +12,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 @ContributesBinding(scope = AppScope::class, binding = binding<HolderCryptoService>())
 class HolderCryptoServiceImpl(
@@ -20,6 +21,24 @@ class HolderCryptoServiceImpl(
 ) : HolderCryptoService {
     override fun buildTerminationSessionData(status: SessionDataStatus): ByteArray =
         SessionData(status = status).encodeCbor()
+
+    override fun buildErrorSessionData(
+        deviceResponseStatus: Status,
+        sessionDataStatus: SessionDataStatus,
+        skDevice: ByteArray,
+        encryptCounter: UInt
+    ): ByteArray {
+        val encryptedPayload = encryptDeviceResponse(
+            deviceResponse = DeviceResponse(
+                documents = null,
+                documentErrors = null,
+                status = deviceResponseStatus
+            ),
+            skDevice = skDevice,
+            encryptCounter = encryptCounter
+        )
+        return SessionData(data = encryptedPayload, status = sessionDataStatus).encodeCbor()
+    }
 
     override fun encryptDeviceResponse(
         deviceResponse: DeviceResponse,

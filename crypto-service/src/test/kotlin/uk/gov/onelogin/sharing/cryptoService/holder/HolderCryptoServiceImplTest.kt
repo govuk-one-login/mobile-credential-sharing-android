@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
@@ -14,6 +15,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class HolderCryptoServiceImplTest {
 
@@ -61,5 +63,24 @@ class HolderCryptoServiceImplTest {
         assertArrayEquals(expectedCborBytes, fakeSessionSecurity.lastEncryptData)
         assertEquals(DeviceRole.HOLDER, fakeSessionSecurity.lastEncryptRole)
         assertEquals(encryptCounter, fakeSessionSecurity.lastEncryptCounter)
+    }
+
+    @Test
+    fun `buildErrorSessionData contains encrypted payload and status 20`() {
+        fakeSessionSecurity.encryptedToReturn = byteArrayOf(0x0A, 0x0B)
+        val skDevice = byteArrayOf(0x01, 0x02)
+
+        val result = service.buildErrorSessionData(
+            deviceResponseStatus = Status.CBOR_DECODING_ERROR,
+            sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+            skDevice = skDevice,
+            encryptCounter = 1u
+        )
+
+        val map: Map<*, *> = cborMapper.readValue(result, Map::class.java)
+        assertEquals(SessionDataStatus.SESSION_TERMINATION.code.toInt(), map["status"])
+        assertTrue(map.containsKey("data"))
+        assertEquals(DeviceRole.HOLDER, fakeSessionSecurity.lastEncryptRole)
+        assertEquals(1u, fakeSessionSecurity.lastEncryptCounter)
     }
 }

@@ -63,6 +63,8 @@ class DecryptDeviceRequestUseCaseImpl(
             role = SessionKeyGenerator.Companion.DeviceRole.HOLDER
         )
 
+        onDeriveSkDevice(skDevice)
+
         val plaintext = sessionSecurity.decryptPayload(
             key = skReader,
             data = sessionEstablishment.data,
@@ -79,8 +81,6 @@ class DecryptDeviceRequestUseCaseImpl(
             ?.forEach { (key, value) ->
                 logger.debug(logTag, "Requests: key = $key, value = $value")
             }
-
-        onDeriveSkDevice(skDevice)
 
         return deviceRequest
     }
