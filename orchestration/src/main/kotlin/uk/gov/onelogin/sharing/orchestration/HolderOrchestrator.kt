@@ -340,7 +340,7 @@ class HolderOrchestrator(
     }
 
     private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
-        logger.error(logTag, exception.message ?: "Unknown error", exception)
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         val context = sessionFlow.value.sessionContext
         val skDevice = checkNotNull(context.skDevice) {
             "skDevice must be derived before handling DeviceRequest failure"
@@ -356,7 +356,7 @@ class HolderOrchestrator(
         safeTransitionTo(
             HolderSessionState.Complete.Failed(
                 SessionError(
-                    message = exception.message ?: "Unknown error",
+                    message = exception.message ?: UNKNOWN_ERROR,
                     exception = exception
                 )
             )
@@ -364,12 +364,12 @@ class HolderOrchestrator(
     }
 
     private fun sendTerminationAndFail(exception: Exception) {
-        logger.error(logTag, exception.message ?: "Unknown error", exception)
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         holderCryptoService.buildTerminationSessionData(SessionDataStatus.SESSION_TERMINATION)
         safeTransitionTo(
             HolderSessionState.Complete.Failed(
                 SessionError(
-                    message = exception.message ?: "Unknown error",
+                    message = exception.message ?: UNKNOWN_ERROR,
                     exception = exception
                 )
             )
@@ -407,5 +407,9 @@ class HolderOrchestrator(
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
             logger.error(logTag, logMessage, loggedException)
         }
+    }
+
+    private companion object {
+        const val UNKNOWN_ERROR = "Unknown error"
     }
 }
