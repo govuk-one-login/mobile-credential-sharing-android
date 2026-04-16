@@ -46,6 +46,7 @@ class FakeSessionSecurity : SessionSecurity {
 
     var encryptedToReturn: ByteArray = byteArrayOf()
     var lastEncryptData: ByteArray? = null
+    var lastEncryptKey: ByteArray? = null
     var lastEncryptRole: DeviceRole? = null
     var lastEncryptCounter: UInt? = null
 
@@ -55,6 +56,7 @@ class FakeSessionSecurity : SessionSecurity {
         role: DeviceRole,
         encryptCounter: UInt
     ): ByteArray {
+        lastEncryptKey = key
         lastEncryptData = data
         lastEncryptRole = role
         lastEncryptCounter = encryptCounter

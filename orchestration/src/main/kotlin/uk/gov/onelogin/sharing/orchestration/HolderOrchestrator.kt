@@ -27,6 +27,10 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -304,6 +308,28 @@ class HolderOrchestrator(
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             sendTerminationAndFail(e)
         }
+    }
+
+    fun assembleAndEncryptResponse(documents: List<Document>): ByteArray {
+        val deviceResponse = DeviceResponse(
+            documents = documents,
+            documentErrors = null
+        )
+        val context = sessionFlow.value.sessionContext
+        val skDevice = context.skDevice
+            ?: error("Missing skDevice")
+
+        val encryptedResponse = holderCryptoService.encryptDeviceResponse(
+            deviceResponse = deviceResponse,
+            skDevice = skDevice,
+            encryptCounter = context.encryptCounter
+        )
+
+        sessionFlow.value.updateSessionContext {
+            it.copy(encryptCounter = it.encryptCounter + 1u)
+        }
+
+        return encryptedResponse
     }
 
     private fun sendTerminationAndFail(exception: Exception) {
