@@ -10,7 +10,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
 
@@ -36,7 +36,7 @@ class RetryHolderPrerequisitesTest {
     fun `Emits unrecoverable event due to unrecoverable bluetooth state`() = runTest {
         initialHolderState = HolderSessionState.Preflight(
             listOf(
-                MissingPrerequisiteV2.Bluetooth(BluetoothState.Unsupported)
+                MissingPrerequisite.Bluetooth(BluetoothState.Unsupported)
             )
         )
         navigator.events.test {
@@ -63,7 +63,7 @@ class RetryHolderPrerequisitesTest {
     fun `Emits null due to recoverable bluetooth state`() = runTest {
         initialHolderState = HolderSessionState.Preflight(
             listOf(
-                MissingPrerequisiteV2.Bluetooth(BluetoothState.PermissionNotGranted)
+                MissingPrerequisite.Bluetooth(BluetoothState.PermissionNotGranted)
             )
         )
         navigator.events.test {

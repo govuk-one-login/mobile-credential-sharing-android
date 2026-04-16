@@ -22,7 +22,7 @@ import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.ResolvePrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
@@ -57,12 +57,12 @@ class RetryHolderPrerequisitesViewModel(
     val prerequisites: StateFlow<List<Prerequisite>?> = orchestrator
         .holderSessionState
         .map { it as? HolderSessionState.Preflight }
-        .map { it?.map(MissingPrerequisiteV2::prerequisite) }
+        .map { it?.map(MissingPrerequisite::prerequisite) }
         .stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Companion.Eagerly,
             (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
-                ?.map(MissingPrerequisiteV2::prerequisite)
+                ?.map(MissingPrerequisite::prerequisite)
         )
 
     fun recheckPrerequisites(): Job = viewModelScope.launch(dispatcher) {

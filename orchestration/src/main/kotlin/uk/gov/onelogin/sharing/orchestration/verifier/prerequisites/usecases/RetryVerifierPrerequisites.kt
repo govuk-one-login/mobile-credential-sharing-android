@@ -7,7 +7,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.LogMessages.updateNavigationEvent
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
@@ -25,7 +25,7 @@ class RetryVerifierPrerequisites(orchestrator: Orchestrator.Verifier, private va
 
                     is VerifierSessionState.Preflight -> {
                         if (state.missingPrerequisites.none(
-                                MissingPrerequisiteV2::isRecoverable
+                                MissingPrerequisite::isRecoverable
                             )
                         ) {
                             NavigationEvent.UnrecoverableError

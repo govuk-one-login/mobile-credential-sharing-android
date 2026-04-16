@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 @ContributesBinding(AppScope::class)
 @Inject
-class PrerequisiteGateV2(
+class PrerequisiteGateImpl(
     private val bluetoothEvaluator: PrerequisiteEvaluator<BluetoothState>,
     private val cameraEvaluator: PrerequisiteEvaluator<CameraState>,
     private val locationEvaluator: PrerequisiteEvaluator<LocationState>,
@@ -21,16 +21,16 @@ class PrerequisiteGateV2(
 
     override fun evaluatePrerequisites(
         prerequisites: Iterable<Prerequisite>
-    ): List<MissingPrerequisiteV2> = prerequisites.mapNotNull { prerequisite ->
+    ): List<MissingPrerequisite> = prerequisites.mapNotNull { prerequisite ->
         when (prerequisite) {
             Prerequisite.BLUETOOTH -> bluetoothEvaluator.evaluate()
-                ?.let(MissingPrerequisiteV2::Bluetooth)
+                ?.let(MissingPrerequisite::Bluetooth)
 
             Prerequisite.CAMERA -> cameraEvaluator.evaluate()
-                ?.let(MissingPrerequisiteV2::Camera)
+                ?.let(MissingPrerequisite::Camera)
 
             Prerequisite.LOCATION -> locationEvaluator.evaluate()
-                ?.let(MissingPrerequisiteV2::Location)
+                ?.let(MissingPrerequisite::Location)
 
             else -> null
         }.also {

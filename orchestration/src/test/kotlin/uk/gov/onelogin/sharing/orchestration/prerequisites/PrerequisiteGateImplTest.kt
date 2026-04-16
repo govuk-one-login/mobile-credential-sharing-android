@@ -11,15 +11,15 @@ import org.hamcrest.Matchers.hasSize
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.PrerequisiteEvaluator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisitesV2Matchers.hasBluetoothState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisitesV2Matchers.hasCameraState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisitesV2Matchers.hasLocationState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisiteMatchers.hasBluetoothState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisiteMatchers.hasCameraState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisiteMatchers.hasLocationState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 @RunWith(TestParameterInjector::class)
-class PrerequisiteGateV2Test {
+class PrerequisiteGateImplTest {
 
     private var bluetoothResponse: BluetoothState? = null
     private var cameraResponse: CameraState? = null
@@ -36,7 +36,7 @@ class PrerequisiteGateV2Test {
     }
 
     private val gate by lazy {
-        PrerequisiteGateV2(
+        PrerequisiteGateImpl(
             bluetoothEvaluator = bluetoothEvaluator,
             cameraEvaluator = cameraEvaluator,
             locationEvaluator = locationEvaluator,

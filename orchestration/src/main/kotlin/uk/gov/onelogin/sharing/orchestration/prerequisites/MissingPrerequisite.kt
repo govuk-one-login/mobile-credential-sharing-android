@@ -6,7 +6,7 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
-sealed class MissingPrerequisiteV2(
+sealed class MissingPrerequisite(
     val prerequisite: Prerequisite,
     recoverable: Recoverable,
     actionable: Actionable<PrerequisiteAction>
@@ -14,21 +14,21 @@ sealed class MissingPrerequisiteV2(
     Actionable<PrerequisiteAction> by actionable {
 
     data class Bluetooth(val state: BluetoothState) :
-        MissingPrerequisiteV2(
+        MissingPrerequisite(
             prerequisite = Prerequisite.BLUETOOTH,
             recoverable = state,
             actionable = state
         )
 
     data class Camera(val state: CameraState) :
-        MissingPrerequisiteV2(
+        MissingPrerequisite(
             prerequisite = Prerequisite.CAMERA,
             recoverable = state,
             actionable = state
         )
 
     data class Location(val state: LocationState) :
-        MissingPrerequisiteV2(
+        MissingPrerequisite(
             prerequisite = Prerequisite.LOCATION,
             recoverable = state,
             actionable = state
