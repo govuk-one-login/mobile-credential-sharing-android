@@ -11,6 +11,12 @@ buildscript {
                 "ch.qos.logback" -> useVersion(libs.versions.logback.get())
                 "org.jdom" -> useVersion(libs.versions.jdom2.get())
                 "org.bitbucket.b_c" -> useVersion(libs.versions.jose4j.get())
+                "com.google.guava" -> if (requested.name == "guava") {
+                    useVersion(libs.versions.guava.get())
+                }
+                "com.google.android.gms" -> if (requested.name == "play-services-basement") {
+                    useVersion(libs.versions.play.services.basement.get())
+                }
                 "org.apache.commons" -> if (requested.name == "commons-lang3") {
                     useVersion(libs.versions.commons.lang3.get())
                 }
@@ -30,11 +36,45 @@ allprojects {
                 "ch.qos.logback" -> useVersion(libs.versions.logback.get())
                 "org.jdom" -> useVersion(libs.versions.jdom2.get())
                 "org.bitbucket.b_c" -> useVersion(libs.versions.jose4j.get())
+                "com.google.guava" -> if (requested.name == "guava") {
+                    useVersion(libs.versions.guava.get())
+                }
+                "com.google.android.gms" -> if (requested.name == "play-services-basement") {
+                    useVersion(libs.versions.play.services.basement.get())
+                }
                 "org.apache.commons" -> if (requested.name == "commons-lang3") {
                     useVersion(libs.versions.commons.lang3.get())
                 }
                 "org.apache.httpcomponents" -> if (requested.name == "httpclient") {
                     useVersion(libs.versions.httpclient.get())
+                }
+            }
+        }
+    }
+}
+
+// Also cover submodule plugin classpaths
+subprojects {
+    buildscript {
+        configurations.configureEach {
+            resolutionStrategy.eachDependency {
+                when (requested.group) {
+                    "io.netty" -> useVersion(libs.versions.netty.get())
+                    "ch.qos.logback" -> useVersion(libs.versions.logback.get())
+                    "org.jdom" -> useVersion(libs.versions.jdom2.get())
+                    "org.bitbucket.b_c" -> useVersion(libs.versions.jose4j.get())
+                    "com.google.guava" -> if (requested.name == "guava") {
+                        useVersion(libs.versions.guava.get())
+                    }
+                    "com.google.android.gms" -> if (requested.name == "play-services-basement") {
+                        useVersion(libs.versions.play.services.basement.get())
+                    }
+                    "org.apache.commons" -> if (requested.name == "commons-lang3") {
+                        useVersion(libs.versions.commons.lang3.get())
+                    }
+                    "org.apache.httpcomponents" -> if (requested.name == "httpclient") {
+                        useVersion(libs.versions.httpclient.get())
+                    }
                 }
             }
         }
