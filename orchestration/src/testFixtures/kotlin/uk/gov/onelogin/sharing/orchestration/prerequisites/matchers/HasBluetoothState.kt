@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2
+package uk.gov.onelogin.sharing.orchestration.prerequisites.matchers
 
 import org.hamcrest.Matcher
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite

@@ -11,9 +11,9 @@ import org.hamcrest.Matchers.hasSize
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.PrerequisiteEvaluator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisiteMatchers.hasBluetoothState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisiteMatchers.hasCameraState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisiteMatchers.hasLocationState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasBluetoothState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasCameraState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasLocationState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState

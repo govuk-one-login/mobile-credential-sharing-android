@@ -7,7 +7,7 @@ import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisiteMatchers.hasPrerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasPrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
