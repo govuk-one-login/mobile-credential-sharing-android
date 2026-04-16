@@ -56,7 +56,7 @@ class HolderOrchestrator(
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val holderCryptoService: HolderCryptoService,
-    private val prerequisiteGate: PrerequisiteGate.V2,
+    private val prerequisiteGate: PrerequisiteGate,
     @Suppress("UnusedPrivateProperty")
     private val credentialProvider: CredentialProvider
 ) : Orchestrator.Holder {

@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites
 
-class StubPrerequisiteGate(private val results: List<MissingPrerequisiteV2>) : PrerequisiteGate.V2 {
+class StubPrerequisiteGate(private val results: List<MissingPrerequisiteV2>) : PrerequisiteGate {
 
     constructor(
         vararg result: MissingPrerequisiteV2

@@ -17,7 +17,7 @@ class PrerequisiteGateV2(
     private val cameraEvaluator: PrerequisiteEvaluator<CameraState>,
     private val locationEvaluator: PrerequisiteEvaluator<LocationState>,
     private val logger: Logger
-) : PrerequisiteGate.V2 {
+) : PrerequisiteGate {
 
     override fun evaluatePrerequisites(
         prerequisites: Iterable<Prerequisite>
