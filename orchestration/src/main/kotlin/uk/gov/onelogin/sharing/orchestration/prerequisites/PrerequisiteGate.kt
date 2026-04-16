@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
 /**
  * Abstraction for performing various forms of checks based on [Prerequisite] input.
  *
- * @see PrerequisiteGateLayer
+ * @sample PrerequisiteGateV2
  */
 fun interface PrerequisiteGate {
     fun evaluatePrerequisites(prerequisites: Iterable<Prerequisite>): List<MissingPrerequisiteV2>
