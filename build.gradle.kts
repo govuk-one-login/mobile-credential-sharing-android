@@ -1,8 +1,27 @@
 /**
- * Force minimum safe versions for vulnerable transitive dependencies in the build classpath.
- * These are pulled in by AGP/Gradle plugins and don't ship in the app, but are used at build time.
+ * Force minimum safe versions for vulnerable transitive dependencies.
+ * Covers both the plugin classpath (buildscript) and project configurations (allprojects).
  * Versions are defined in libs.versions.toml.
  */
+buildscript {
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            when (requested.group) {
+                "io.netty" -> useVersion(libs.versions.netty.get())
+                "ch.qos.logback" -> useVersion(libs.versions.logback.get())
+                "org.jdom" -> useVersion(libs.versions.jdom2.get())
+                "org.bitbucket.b_c" -> useVersion(libs.versions.jose4j.get())
+                "org.apache.commons" -> if (requested.name == "commons-lang3") {
+                    useVersion(libs.versions.commons.lang3.get())
+                }
+                "org.apache.httpcomponents" -> if (requested.name == "httpclient") {
+                    useVersion(libs.versions.httpclient.get())
+                }
+            }
+        }
+    }
+}
+
 allprojects {
     configurations.configureEach {
         resolutionStrategy.eachDependency {
