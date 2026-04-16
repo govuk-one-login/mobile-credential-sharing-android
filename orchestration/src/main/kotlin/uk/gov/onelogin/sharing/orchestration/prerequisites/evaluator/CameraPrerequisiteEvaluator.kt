@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.bluetooth.ContextExt.devicePolicyManager
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasUndeterminedPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
+import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 
 @ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<CameraState>>())

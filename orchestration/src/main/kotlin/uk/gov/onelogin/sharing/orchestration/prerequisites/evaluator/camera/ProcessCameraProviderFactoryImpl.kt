@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.prerequisites.camera
+package uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.camera
 
 import android.content.Context
 import androidx.camera.lifecycle.ProcessCameraProvider
