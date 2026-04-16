@@ -3,6 +3,14 @@ activityCompose = "1.13.0" # https://developer.android.com/jetpack/androidx/rele
 agp = "9.0.1" # https://developer.android.com/build/releases/gradle-plugin
 androidx-browser = "1.10.0" # https://developer.android.com/jetpack/androidx/releases/browser
 androidx-camera = "1.6.0" # https://developer.android.com/jetpack/androidx/releases/camera
+
+# Minimum safe versions for vulnerable build classpath transitive dependencies
+netty = "4.1.132.Final"
+logback = "1.5.25"
+jdom2 = "2.0.6.1"
+jose4j = "0.9.6"
+commons-lang3 = "3.18.0"
+httpclient = "4.5.13"
 androidx-navigation = "2.9.7" # https://developer.android.com/jetpack/androidx/releases/navigation
 androidx-test-espresso = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#espresso-3.7.0
 androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/test#orchestrator-1.6.1
