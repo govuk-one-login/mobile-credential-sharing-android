@@ -78,5 +78,10 @@ class DecryptDeviceRequestUseCaseImplTest {
             1u,
             fakeSessionSecurity.lastDecryptCounter
         )
+
+        assertArrayEquals(
+            byteArrayOf(2),
+            capturedSkDevice
+        )
     }
 }

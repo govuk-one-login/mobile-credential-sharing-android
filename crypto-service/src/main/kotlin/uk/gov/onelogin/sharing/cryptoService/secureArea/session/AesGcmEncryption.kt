@@ -69,6 +69,18 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
         }
     }
 
+    /**
+     * Encrypt a plaintext payload for a SessionData message.
+     *
+     * Generates a 12 byte nonce from a nist initialisation vector, using the device
+     * role and a counter of the number of times that the encryption service has been
+     * used.
+     *
+     * Encrypts the data using AES-256-GCM with the nist initialisation vector and the
+     * generated HKDF session key with the role of the sender.
+     *
+     * @return [ByteArray] containing the ciphertext concatenated with the 16-byte authentication tag
+     */
     override fun encryptPayload(
         key: ByteArray,
         data: ByteArray,
