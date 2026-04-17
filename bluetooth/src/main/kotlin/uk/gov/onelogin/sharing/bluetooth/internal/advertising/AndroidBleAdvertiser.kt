@@ -40,7 +40,7 @@ class AndroidBleAdvertiser(
     override fun isBluetoothEnabled() = bleProvider.isBluetoothEnabled()
     override fun hasAdvertisePermission() = permissionChecker
         .checkPermissions(getBluetoothPermissions())
-        .isNotEmpty()
+        .isEmpty()
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
         when {

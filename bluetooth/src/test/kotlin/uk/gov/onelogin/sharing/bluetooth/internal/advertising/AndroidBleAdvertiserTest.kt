@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import java.util.UUID
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
@@ -63,7 +64,7 @@ internal class AndroidBleAdvertiserTest {
 
     @Test
     fun `has advertise permission returns true when provider has permissions`() {
-        assert(bleAdvertiser.hasAdvertisePermission())
+        assertTrue { bleAdvertiser.hasAdvertisePermission() }
     }
 
     @Test
