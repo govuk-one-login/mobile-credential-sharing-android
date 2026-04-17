@@ -142,24 +142,23 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `emits NavigateToGenericError when failure is not a specific exception`() =
-        runTest {
-            val orchestrator = FakeOrchestrator(
-                initialHolderState = MutableStateFlow(HolderSessionState.NotStarted)
+    fun `emits NavigateToGenericError when failure is not a specific exception`() = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(HolderSessionState.NotStarted)
+        )
+        val viewModel = createViewModel(orchestrator = orchestrator)
+        advanceUntilIdle()
+
+        viewModel.navEvents.test {
+            orchestrator.initialHolderState.value = HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = "encryption failed",
+                    exception = RuntimeException("encryption failed")
+                )
             )
-            val viewModel = createViewModel(orchestrator = orchestrator)
             advanceUntilIdle()
 
-            viewModel.navEvents.test {
-                orchestrator.initialHolderState.value = HolderSessionState.Complete.Failed(
-                    SessionError(
-                        message = "encryption failed",
-                        exception = RuntimeException("encryption failed")
-                    )
-                )
-                advanceUntilIdle()
-
-                assertEquals(HolderScreenEvents.NavigateToGenericError, awaitItem())
-            }
+            assertEquals(HolderScreenEvents.NavigateToGenericError, awaitItem())
         }
+    }
 }

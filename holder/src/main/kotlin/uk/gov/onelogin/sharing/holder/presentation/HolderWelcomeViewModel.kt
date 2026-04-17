@@ -93,16 +93,23 @@ class HolderWelcomeViewModel(
                     val exception =
                         (currentSate.error.reason as? SessionErrorReason.UnrecoverableThrowable)
                             ?.exception
-                    if (exception is BluetoothDisconnectedException) {
-                        _navEvents.tryEmit(
-                            HolderScreenEvents.NavigateToBluetoothError(
-                                BluetoothSessionError.BluetoothConnectionError
+
+                    when (exception) {
+                        is BluetoothDisconnectedException -> {
+                            _navEvents.tryEmit(
+                                HolderScreenEvents.NavigateToBluetoothError(
+                                    BluetoothSessionError.BluetoothConnectionError
+                                )
                             )
-                        )
-                    } else if (exception is DeviceRequestDecodingException) {
-                        _navEvents.tryEmit(HolderScreenEvents.NavigateToGenericError)
-                    } else {
-                        _navEvents.tryEmit(HolderScreenEvents.NavigateToGenericError)
+                        }
+
+                        is DeviceRequestDecodingException -> {
+                            _navEvents.tryEmit(HolderScreenEvents.NavigateToGenericError)
+                        }
+
+                        else -> {
+                            _navEvents.tryEmit(HolderScreenEvents.NavigateToGenericError)
+                        }
                     }
                     errorMessage.update { currentSate.error.message }
                 }

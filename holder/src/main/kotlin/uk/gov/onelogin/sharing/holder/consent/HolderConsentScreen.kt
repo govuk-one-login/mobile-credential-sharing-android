@@ -15,7 +15,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,10 +31,24 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Composable
-internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
+internal fun HolderConsentScreen(
+    viewModel: HolderConsentViewModel = metroViewModel(),
+    onGenericError: () -> Unit = {}
+) {
     BackHandler(enabled = true) { }
 
     val state by viewModel.holderSessionState.collectAsStateWithLifecycle()
+    val latestOnGenericError by rememberUpdatedState(onGenericError)
+
+    LaunchedEffect(Unit) {
+        viewModel.navEvents.collect { event ->
+            when (event) {
+                is HolderConsentNavEvents.NavigateToGenericError ->
+                    latestOnGenericError()
+            }
+        }
+    }
+
     val consentState = state as? HolderSessionState.AwaitingUserConsent ?: return
 
     HolderConsentContent(consentState.request)

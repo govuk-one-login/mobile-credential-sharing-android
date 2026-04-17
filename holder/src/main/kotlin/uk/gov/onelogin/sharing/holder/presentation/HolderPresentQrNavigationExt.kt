@@ -7,16 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
-import androidx.compose.ui.res.stringResource
 
 object HolderPresentQrNavigationExt {
     fun NavController.navigateToHolderPresentQrScreen(options: NavOptionsBuilder.() -> Unit = {}) =
@@ -24,11 +21,11 @@ object HolderPresentQrNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderPresentQrScreen(
         controller: NavController,
-        onError: (String) -> Unit
+        onError: (String) -> Unit,
+        onGenericError: () -> Unit
     ) {
         composable<HolderPresentQrRoute> {
             val context = LocalContext.current
-            val genericErrorTitle = stringResource(coreR.string.generic_error)
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -48,9 +45,7 @@ object HolderPresentQrNavigationExt {
                                 )
                             }
                     },
-                    onGenericError = {
-                        onError(genericErrorTitle)
-                    }
+                    onGenericError = onGenericError
                 )
             }
         }
