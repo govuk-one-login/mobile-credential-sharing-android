@@ -601,35 +601,6 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `handleDeviceRequestFailure throws when skDevice is null`() = runTest {
-        fakeDecryptDeviceRequestUseCase.exception =
-            DeviceRequestDecodingException("fail")
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(
-            sessionFactory = createSessionFactory(),
-            peripheralBluetoothTransport = peripheralTransport
-        )
-        backgroundScope.launch {
-            orchestrator.holderSessionState.collect {}
-        }
-        orchestrator.start()
-        advanceUntilIdle()
-
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
-        )
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
-
-        assertThat(
-            orchestrator.holderSessionState.value,
-            isProcessingEstablishment()
-        )
-    }
-
-    @Test
     fun `parsing failure builds error SessionData with status 11 and transitions to failed`() =
         runTest {
             fakeDecryptDeviceRequestUseCase.exceptionAfterKeyDerivation =

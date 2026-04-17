@@ -87,11 +87,11 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            orchestrator.holderSessionState.collect { currentSate ->
+            orchestrator.holderSessionState.collect { currentState ->
 
-                if (currentSate is HolderSessionState.Complete.Failed) {
+                if (currentState is HolderSessionState.Complete.Failed) {
                     val exception =
-                        (currentSate.error.reason as? SessionErrorReason.UnrecoverableThrowable)
+                        (currentState.error.reason as? SessionErrorReason.UnrecoverableThrowable)
                             ?.exception
 
                     when (exception) {
@@ -111,7 +111,7 @@ class HolderWelcomeViewModel(
                             _navEvents.tryEmit(HolderScreenEvents.NavigateToGenericError)
                         }
                     }
-                    errorMessage.update { currentSate.error.message }
+                    errorMessage.update { currentState.error.message }
                 }
             }
         }
