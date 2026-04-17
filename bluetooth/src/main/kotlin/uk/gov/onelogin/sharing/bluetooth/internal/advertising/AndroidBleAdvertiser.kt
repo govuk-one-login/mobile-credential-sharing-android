@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.bluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
@@ -39,7 +39,7 @@ class AndroidBleAdvertiser(
 
     override fun isBluetoothEnabled() = bleProvider.isBluetoothEnabled()
     override fun hasAdvertisePermission() = permissionChecker
-        .checkPermissions(bluetoothPermissions())
+        .checkPermissions(getBluetoothPermissions())
         .isNotEmpty()
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
@@ -49,7 +49,7 @@ class AndroidBleAdvertiser(
                     AdvertisingError.BLUETOOTH_DISABLED
                 )
 
-            permissionChecker.checkPermissions(bluetoothPermissions()).isNotEmpty() ->
+            permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty() ->
                 throw StartAdvertisingException(
                     AdvertisingError.MISSING_PERMISSION
                 )

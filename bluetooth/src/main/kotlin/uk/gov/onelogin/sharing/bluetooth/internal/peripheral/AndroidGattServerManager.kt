@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.bluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -66,7 +66,7 @@ class AndroidGattServerManager(
     override fun open(serviceUuid: UUID) {
         val gattService = gattServiceFactory(serviceUuid)
 
-        if (permissionsChecker.checkPermissions(bluetoothPermissions()).isNotEmpty()) {
+        if (permissionsChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
                 GattServerEvent.Error(
                     GattServerError.BLUETOOTH_PERMISSION_MISSING

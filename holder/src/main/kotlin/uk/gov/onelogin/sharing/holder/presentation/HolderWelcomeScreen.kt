@@ -25,7 +25,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.bluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPrompt
 import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPromptText
@@ -48,7 +48,7 @@ fun HolderWelcomeScreen(
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     val multiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = bluetoothPermissions()
+        permissions = getBluetoothPermissions()
     ) {
         hasPreviouslyRequestedPermission = true
     }

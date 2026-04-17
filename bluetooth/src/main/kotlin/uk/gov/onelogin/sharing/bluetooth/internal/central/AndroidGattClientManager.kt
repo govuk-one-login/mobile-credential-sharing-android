@@ -16,7 +16,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.bluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -53,7 +53,7 @@ class AndroidGattClientManager(
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
-        if (permissionChecker.checkPermissions(bluetoothPermissions()).isNotEmpty()) {
+        if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
                 GattClientEvent.Error(
                     ClientError.BLUETOOTH_PERMISSION_MISSING

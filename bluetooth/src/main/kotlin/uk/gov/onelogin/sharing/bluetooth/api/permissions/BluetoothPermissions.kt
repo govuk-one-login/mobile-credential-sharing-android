@@ -8,7 +8,7 @@ import android.os.Build
  */
 object BluetoothPermissions {
     @JvmStatic
-    fun bluetoothPermissions(): List<String> = buildList {
+    fun getBluetoothPermissions(): List<String> = buildList {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             add(Manifest.permission.BLUETOOTH_CONNECT)
             add(Manifest.permission.BLUETOOTH_ADVERTISE)
