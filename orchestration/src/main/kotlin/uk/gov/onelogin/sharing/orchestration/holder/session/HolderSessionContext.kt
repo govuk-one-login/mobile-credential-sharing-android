@@ -8,5 +8,7 @@ data class HolderSessionContext(
     val keyPair: KeyPair?,
     val engagement: String,
     val qrCode: String,
-    val decryptCounter: UInt = 1u
+    val decryptCounter: UInt = 1u,
+    val encryptCounter: UInt = 1u,
+    val skDevice: ByteArray? = null
 )
