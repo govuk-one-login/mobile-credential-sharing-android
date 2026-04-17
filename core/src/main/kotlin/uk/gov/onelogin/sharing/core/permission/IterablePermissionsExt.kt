@@ -1,14 +1,20 @@
 package uk.gov.onelogin.sharing.core.permission
 
-object IterablePermissionsExt {
-    fun Iterable<PermissionCheckerV2.Denied>.toPermissionsList(): List<String> =
-        map(PermissionCheckerV2.Denied::permission)
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2.PermissionCheckResult
 
-    fun Iterable<PermissionCheckerV2.Denied>.hasDeniedPermissions(): Boolean = any {
-        it.shouldShowRationale
+object IterablePermissionsExt {
+    fun Iterable<PermissionCheckResult>.toPermissionsList(): List<String> =
+        map(PermissionCheckResult::permission)
+
+    fun Iterable<PermissionCheckResult>.hasDeniedPermissions(): Boolean = any {
+        it is PermissionCheckResult.Denied
     }
 
-    fun Iterable<PermissionCheckerV2.Denied>.hasPermanentlyDeniedPermissions(): Boolean = any {
-        !it.shouldShowRationale
+    fun Iterable<PermissionCheckResult>.hasPermanentlyDeniedPermissions(): Boolean = any {
+        it is PermissionCheckResult.PermanentlyDenied
+    }
+
+    fun Iterable<PermissionCheckResult>.hasUndeterminedPermissions(): Boolean = any {
+        it is PermissionCheckResult.Undetermined
     }
 }

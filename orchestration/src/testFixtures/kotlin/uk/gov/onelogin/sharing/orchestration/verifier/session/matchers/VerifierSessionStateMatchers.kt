@@ -5,9 +5,9 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.v2.MissingPrerequisitesV2Matchers.hasPrerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasPrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
@@ -29,7 +29,7 @@ object VerifierSessionStateMatchers {
     )
 
     fun hasMissingPreflightPrerequisites(
-        matcher: Matcher<in List<MissingPrerequisiteV2>>
+        matcher: Matcher<in List<MissingPrerequisite>>
     ): Matcher<VerifierSessionState> = HasVerifierPreflightPrerequisites(matcher)
 
     fun isCancelled(): Matcher<VerifierSessionState> = equalTo(

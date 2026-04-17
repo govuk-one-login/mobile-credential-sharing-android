@@ -17,7 +17,7 @@ import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Rule
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
@@ -36,7 +36,7 @@ class RetryVerifierPrerequisitesViewModelTest {
 
     private var initialState: VerifierSessionState = VerifierSessionState.Preflight(
         listOf(
-            MissingPrerequisiteV2.Bluetooth(
+            MissingPrerequisite.Bluetooth(
                 BluetoothState.PermissionNotGranted
             )
         )
@@ -75,12 +75,20 @@ class RetryVerifierPrerequisitesViewModelTest {
         dispatcherRule.testDispatcher
     ) {
         navigationEvents.add(NavigationEvent.PassedPrerequisites)
+        viewModel.recheckPrerequisites()
+
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
 
         viewModel.navigationEvent.test {
             assertEquals(
                 NavigationEvent.PassedPrerequisites,
                 awaitItem()
             )
+        }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertFalse { awaitItem() }
         }
     }
 
@@ -117,6 +125,9 @@ class RetryVerifierPrerequisitesViewModelTest {
         viewModel.recheckPrerequisites()
 
         assertTrue { hasCalledOnComplete }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
     }
 
     @Test
@@ -128,5 +139,8 @@ class RetryVerifierPrerequisitesViewModelTest {
         viewModel.recheckPrerequisites()
 
         assertFalse { hasCalledOnComplete }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
     }
 }

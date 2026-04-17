@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -33,6 +33,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 
 @ContributesBinding(AppScope::class)
 class AndroidGattServerManager(
@@ -43,7 +44,7 @@ class AndroidGattServerManager(
             GattServiceSpec.mdocService(it)
         )
     },
-    private val permissionsChecker: BluetoothPermissionChecker,
+    private val permissionsChecker: PermissionCheckerV2,
     private val logger: Logger,
     private val gattWriter: GattWriter
 ) : GattServerManager {
@@ -65,7 +66,7 @@ class AndroidGattServerManager(
     override fun open(serviceUuid: UUID) {
         val gattService = gattServiceFactory(serviceUuid)
 
-        if (!permissionsChecker.hasBluetoothPermissions()) {
+        if (permissionsChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
                 GattServerEvent.Error(
                     GattServerError.BLUETOOTH_PERMISSION_MISSING

@@ -30,14 +30,14 @@ if (pluginManager.isAndroidApp()) {
  * Enables test coverage when running the various test suites
  * Also defines the version of jacoco to utilise, as per the version catalog.
  */
-fun CommonExtension<*, *, *, *, *, *>.configureTestCoverage() {
-    testOptions {
+fun CommonExtension.configureTestCoverage() {
+    testOptions.apply {
         unitTests.all {
             testCoverage.jacocoVersion = libs.findVersion("jacoco").get().requiredVersion
         }
     }
 
-    buildTypes {
+    buildTypes.apply {
         this.maybeCreate("debug").apply {
             enableAndroidTestCoverage = true
             enableUnitTestCoverage = true

@@ -21,7 +21,8 @@ object HolderPresentQrNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderPresentQrScreen(
         controller: NavController,
-        onError: (String) -> Unit
+        onError: (String) -> Unit,
+        onGenericError: () -> Unit
     ) {
         composable<HolderPresentQrRoute> {
             val context = LocalContext.current
@@ -43,7 +44,8 @@ object HolderPresentQrNavigationExt {
                                     "Navigated to error screen: $it"
                                 )
                             }
-                    }
+                    },
+                    onGenericError = onGenericError
                 )
             }
         }

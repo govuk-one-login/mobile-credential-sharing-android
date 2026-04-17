@@ -31,7 +31,7 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSe
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
@@ -46,7 +46,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 @SingleIn(AppScope::class)
 class VerifierOrchestrator(
     private val logger: Logger,
-    private val prerequisiteGate: PrerequisiteGate.V2,
+    private val prerequisiteGate: PrerequisiteGate,
     private val sessionFactory: SessionFactory<VerifierSession>,
     @Suppress("UnusedPrivateProperty")
     private val verifierConfig: VerifierConfig,
@@ -135,7 +135,7 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun handleStartPrerequisiteFailure(missingPrerequisites: List<MissingPrerequisiteV2>) {
+    private fun handleStartPrerequisiteFailure(missingPrerequisites: List<MissingPrerequisite>) {
         if (missingPrerequisites.any { !it.isRecoverable() }) {
             VerifierSessionState.Complete.Failed(
                 SessionError(

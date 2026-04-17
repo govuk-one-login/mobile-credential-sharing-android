@@ -1,96 +1,53 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites
 
-import android.Manifest
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
-import org.hamcrest.collection.IsCollectionWithSize.hasSize
-import org.junit.After
+import org.hamcrest.Matchers.hasSize
+import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.FakePrerequisiteAuthorizationGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.authorization.UnauthorizedReason
-import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.FakePrerequisiteCapabilityGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReason
-import uk.gov.onelogin.sharing.orchestration.prerequisites.capability.IncapableReasonMatchers.isMissingHardware
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasReason
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasIncapableReason
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasNotReadyReason
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.PrerequisiteResponseMatchers.hasUnauthorizedPermissions
-import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.FakePrerequisiteReadinessGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReason
-import uk.gov.onelogin.sharing.orchestration.prerequisites.readiness.NotReadyReasonMatchers.hasBluetoothTurnedOff
+import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.PrerequisiteEvaluator
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasBluetoothState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasCameraState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasLocationState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
+@RunWith(TestParameterInjector::class)
 class PrerequisiteGateImplTest {
 
-    private var authorizationResult:
-        MutableMap<Prerequisite, MissingPrerequisiteReason.Unauthorized?> =
-        mutableMapOf()
-    private var capabilityResult: MutableMap<Prerequisite, MissingPrerequisiteReason.Incapable?> =
-        mutableMapOf()
-    private var readinessResult: MutableMap<Prerequisite, MissingPrerequisiteReason.NotReady?> =
-        mutableMapOf()
+    private var bluetoothResponse: BluetoothState? = null
+    private var cameraResponse: CameraState? = null
+    private var locationResponse: LocationState? = null
 
-    private val prerequisite = Prerequisite.BLUETOOTH
-    private val logger = SystemLogger()
-    private val authorization by lazy {
-        FakePrerequisiteAuthorizationGate(
-            result = authorizationResult
-        )
+    private val bluetoothEvaluator = PrerequisiteEvaluator {
+        bluetoothResponse
     }
-    private val capability by lazy {
-        FakePrerequisiteCapabilityGate(
-            result = capabilityResult
-        )
+    private val cameraEvaluator = PrerequisiteEvaluator {
+        cameraResponse
     }
-    private val readiness by lazy {
-        FakePrerequisiteReadinessGate(
-            result = readinessResult
-        )
+    private val locationEvaluator = PrerequisiteEvaluator {
+        locationResponse
     }
+
     private val gate by lazy {
         PrerequisiteGateImpl(
-            authorization = authorization,
-            capability = capability,
-            logger = logger,
-            readiness = readiness
-        )
-    }
-
-    @After
-    fun verifyLogs() {
-        assert(
-            logger.any {
-                it.message.startsWith("Performed prerequisite checks for: ")
-            }
+            bluetoothEvaluator = bluetoothEvaluator,
+            cameraEvaluator = cameraEvaluator,
+            locationEvaluator = locationEvaluator,
+            logger = SystemLogger()
         )
     }
 
     @Test
-    fun `Missing prerequisites are within a list`() = runTest {
-        setupCapabilityFailure(
-            prerequisite = Prerequisite.CAMERA
-        )
-        val result = gate.evaluatePrerequisites(Prerequisite.entries)
-
-        assertThat(
-            result,
-            allOf(
-                hasSize(1),
-                contains(
-                    allOf(
-                        hasPrerequisite(Prerequisite.CAMERA),
-                        hasReason(hasIncapableReason(isMissingHardware()))
-                    )
-                )
-            )
-        )
-    }
-
-    @Test
-    fun `Meeting all prerequisites returns an empty list`() = runTest {
+    fun `Passing prerequisite checks provide an empty list`(
+        @TestParameter prerequisite: Prerequisite
+    ) = runTest {
         val result = gate.evaluatePrerequisites(prerequisite)
         assertThat(
             result,
@@ -99,116 +56,64 @@ class PrerequisiteGateImplTest {
     }
 
     @Test
-    fun `Failing authorization provides an unauthorized value`() = runTest {
-        setupAuthorizationFailure()
-
+    fun `Wraps found bluetooth issues as a missing prerequisite`(
+        @TestParameter state: BluetoothState
+    ) = runTest {
+        bluetoothResponse = state
+        val result = gate.evaluatePrerequisites(Prerequisite.BLUETOOTH)
         assertThat(
-            gate.evaluatePrerequisites(prerequisite),
+            result,
             contains(
-                allOf(
-                    hasPrerequisite(prerequisite),
-                    hasReason(
-                        hasUnauthorizedPermissions(
-                            contains(Manifest.permission.BLUETOOTH)
-                        )
-                    )
-                )
+                hasBluetoothState(state)
             )
         )
     }
 
     @Test
-    fun `Authorization failures are a higher priority than capability failures`() = runTest {
-        setupAuthorizationFailure()
-        setupCapabilityFailure()
-
-        assertThat(
-            gate.evaluatePrerequisites(prerequisite),
-            contains(
-                allOf(
-                    hasPrerequisite(prerequisite),
-                    hasReason(
-                        hasUnauthorizedPermissions(
-                            contains(Manifest.permission.BLUETOOTH)
-                        )
-                    )
+    fun `Wraps found camera issues as a missing prerequisite`(@TestParameter state: CameraState) =
+        runTest {
+            cameraResponse = state
+            val result = gate.evaluatePrerequisites(Prerequisite.CAMERA)
+            assertThat(
+                result,
+                contains(
+                    hasCameraState(state)
                 )
+            )
+        }
+
+    @Test
+    fun `Wraps found location issues as a missing prerequisite`(
+        @TestParameter state: LocationState
+    ) = runTest {
+        locationResponse = state
+        val result = gate.evaluatePrerequisites(Prerequisite.LOCATION)
+        assertThat(
+            result,
+            contains(
+                hasLocationState(state)
             )
         )
     }
 
     @Test
-    fun `Failing capability provides an incapable reason`() = runTest {
-        setupCapabilityFailure()
+    fun `Entries within the list map to failed prerequisites`() = runTest {
+        bluetoothResponse = BluetoothState.PermissionNotGranted
+        cameraResponse = CameraState.PermissionNotGranted
+        locationResponse = LocationState.PermissionNotGranted
+
+        val result = gate.evaluatePrerequisites(Prerequisite.entries)
 
         assertThat(
-            gate.evaluatePrerequisites(prerequisite),
-            contains(
-                allOf(
-                    hasPrerequisite(prerequisite),
-                    hasReason(
-                        hasIncapableReason(isMissingHardware())
-                    )
+            result,
+            allOf(
+                hasSize(3),
+                contains(
+                    hasBluetoothState(bluetoothResponse!!),
+                    hasCameraState(cameraResponse!!),
+                    hasLocationState(locationResponse!!)
                 )
             )
         )
-    }
-
-    @Test
-    fun `Capability failures are a higher priority than readiness failures`() = runTest {
-        setupCapabilityFailure()
-        setupReadinessFailure()
-
-        assertThat(
-            gate.evaluatePrerequisites(prerequisite),
-            contains(
-                allOf(
-                    hasPrerequisite(prerequisite),
-                    hasReason(
-                        hasIncapableReason(isMissingHardware())
-                    )
-                )
-            )
-        )
-    }
-
-    @Test
-    fun `Failing readiness provides a not ready reason`() = runTest {
-        setupReadinessFailure()
-
-        assertThat(
-            gate.evaluatePrerequisites(prerequisite),
-            contains(
-                allOf(
-                    hasPrerequisite(prerequisite),
-                    hasReason(
-                        hasNotReadyReason(hasBluetoothTurnedOff())
-                    )
-                )
-            )
-        )
-    }
-
-    private fun setupAuthorizationFailure(
-        prerequisite: Prerequisite = this.prerequisite,
-        reason: UnauthorizedReason = UnauthorizedReason.MissingPermissions(
-            Manifest.permission.BLUETOOTH
-        )
-    ) {
-        authorizationResult[prerequisite] = MissingPrerequisiteReason.Unauthorized(reason)
-    }
-
-    private fun setupCapabilityFailure(
-        prerequisite: Prerequisite = this.prerequisite,
-        reason: IncapableReason = IncapableReason.MissingHardware
-    ) {
-        capabilityResult[prerequisite] = MissingPrerequisiteReason.Incapable(reason)
-    }
-
-    private fun setupReadinessFailure(
-        prerequisite: Prerequisite = this.prerequisite,
-        reason: NotReadyReason = NotReadyReason.BluetoothTurnedOff
-    ) {
-        readinessResult[prerequisite] = MissingPrerequisiteReason.NotReady(reason)
     }
 }

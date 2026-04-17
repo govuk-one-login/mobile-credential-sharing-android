@@ -27,8 +27,11 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 @AssistedInject
 @Suppress("LongParameterList")
@@ -84,15 +87,31 @@ class HolderWelcomeViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            orchestrator.holderSessionState.collect { currentSate ->
+            orchestrator.holderSessionState.collect { currentState ->
 
-                if (currentSate is HolderSessionState.Complete.Failed) {
-                    _navEvents.tryEmit(
-                        HolderScreenEvents.NavigateToError(
-                            BluetoothSessionError.BluetoothConnectionError
-                        )
-                    )
-                    errorMessage.update { currentSate.error.message }
+                if (currentState is HolderSessionState.Complete.Failed) {
+                    val exception =
+                        (currentState.error.reason as? SessionErrorReason.UnrecoverableThrowable)
+                            ?.exception
+
+                    when (exception) {
+                        is BluetoothDisconnectedException -> {
+                            _navEvents.tryEmit(
+                                HolderScreenEvents.NavigateToBluetoothError(
+                                    BluetoothSessionError.BluetoothConnectionError
+                                )
+                            )
+                        }
+
+                        is DeviceRequestDecodingException -> {
+                            _navEvents.tryEmit(HolderScreenEvents.NavigateToGenericError)
+                        }
+
+                        else -> {
+                            _navEvents.tryEmit(HolderScreenEvents.NavigateToGenericError)
+                        }
+                    }
+                    errorMessage.update { currentState.error.message }
                 }
             }
         }

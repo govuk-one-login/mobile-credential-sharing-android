@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisitesContentRule
 import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisitesNavigatorAssertions
@@ -37,7 +37,7 @@ class RetryHolderPrerequisitesScreenTest {
 
     private var navigatorEvents = mutableListOf<NavigationEvent?>()
     private var missingPrerequisites = mutableListOf(
-        MissingPrerequisiteV2.Bluetooth(state = BluetoothState.PermissionNotGranted)
+        MissingPrerequisite.Bluetooth(state = BluetoothState.PermissionNotGranted)
     )
 
     private val logger = SystemLogger()

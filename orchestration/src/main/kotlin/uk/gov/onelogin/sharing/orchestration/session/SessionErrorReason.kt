@@ -1,16 +1,16 @@
 package uk.gov.onelogin.sharing.orchestration.session
 
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 
 sealed class SessionErrorReason {
     data class UnrecoverableThrowable(val exception: Throwable) : SessionErrorReason()
 
     data class UnrecoverablePrerequisite(
-        val unrecoverablePrerequisites: List<MissingPrerequisiteV2>
+        val unrecoverablePrerequisites: List<MissingPrerequisite>
     ) : SessionErrorReason(),
-        Iterable<MissingPrerequisiteV2> by unrecoverablePrerequisites {
+        Iterable<MissingPrerequisite> by unrecoverablePrerequisites {
         constructor(
-            vararg unrecoverablePrerequisites: MissingPrerequisiteV2
+            vararg unrecoverablePrerequisites: MissingPrerequisite
         ) : this(
             unrecoverablePrerequisites.toList()
         )

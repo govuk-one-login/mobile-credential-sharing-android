@@ -28,7 +28,8 @@ class DecryptDeviceRequestUseCaseImpl(
         sessionEstablishmentBytes: ByteArray,
         engagement: String,
         holderPrivateKey: PrivateKey,
-        decryptCounter: UInt
+        decryptCounter: UInt,
+        onDeriveSkDevice: (ByteArray) -> Unit
     ): DeviceRequest {
         val sessionEstablishment = decodeSessionEstablishmentModel(
             rawBytes = sessionEstablishmentBytes,
@@ -55,6 +56,14 @@ class DecryptDeviceRequestUseCaseImpl(
             sessionTranscriptBytes = transcript,
             role = SessionKeyGenerator.Companion.DeviceRole.VERIFIER
         )
+
+        val skDevice = sessionSecurity.deriveSessionKey(
+            sharedKey = sharedSecret,
+            sessionTranscriptBytes = transcript,
+            role = SessionKeyGenerator.Companion.DeviceRole.HOLDER
+        )
+
+        onDeriveSkDevice(skDevice)
 
         val plaintext = sessionSecurity.decryptPayload(
             key = skReader,

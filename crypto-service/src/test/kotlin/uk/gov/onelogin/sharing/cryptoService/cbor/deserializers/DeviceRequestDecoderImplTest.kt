@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -8,6 +7,7 @@ import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoderImpl
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromHexStringFile
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
@@ -47,7 +47,7 @@ class DeviceRequestDecoderImplTest {
 
     @Test
     fun `when invalid cbor given, decoding fails and status code 11 thrown ac3`() {
-        assertFailsWith<MismatchedInputException> {
+        assertFailsWith<DeviceRequestDecodingException> {
             deviceRequestDecoderImpl.deviceRequestDecoder(INVALID_CBOR.toByteArray())
         }
 
@@ -56,7 +56,7 @@ class DeviceRequestDecoderImplTest {
 
     @Test
     fun `when docrequests array is empty, decoding fails and status code 20 thrown ac4`() {
-        assertFailsWith<TypeNotPresentException> {
+        assertFailsWith<DeviceRequestDecodingException> {
             deviceRequestDecoderImpl.deviceRequestDecoder(emptyDocRequest)
         }
 

@@ -19,14 +19,13 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.data.UriTestData.mdocExampleUriOne
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
@@ -72,7 +71,7 @@ class VerifierOrchestratorTest {
         )
     }
 
-    private var gateResponses: MutableList<MissingPrerequisiteV2> = mutableListOf()
+    private var gateResponses: MutableList<MissingPrerequisite> = mutableListOf()
 
     private val gate by lazy {
         StubPrerequisiteGate(gateResponses)
@@ -123,7 +122,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
         gateResponses.add(
-            MissingPrerequisiteV2.Bluetooth(BluetoothState.PoweredOff)
+            MissingPrerequisite.Bluetooth(BluetoothState.PoweredOff)
         )
 
         backgroundScope.launch {
@@ -143,7 +142,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Incapable prerequisite check responses transition to failed`() = runTest {
         gateResponses.add(
-            MissingPrerequisiteV2.Bluetooth(BluetoothState.Unsupported)
+            MissingPrerequisite.Bluetooth(BluetoothState.Unsupported)
         )
 
         backgroundScope.launch {

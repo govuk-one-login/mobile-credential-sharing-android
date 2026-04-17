@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRout
 import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configureHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.configureUnrecoverableHolderError
+import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.configureRetryHolderPrerequisites
@@ -30,9 +31,16 @@ data object HolderRoutes {
                 controller = controller,
                 onError = {
                     controller.navigateToBluetoothConnectionErrorRoute(it)
+                },
+                onGenericError = {
+                    controller.navigateToUnrecoverableHolderError()
                 }
             )
-            configureHolderConsentScreen()
+            configureHolderConsentScreen(
+                onError = {
+                    controller.navigateToUnrecoverableHolderError()
+                }
+            )
             configureBluetoothConnectionErrorRoute(controller)
         }
     }

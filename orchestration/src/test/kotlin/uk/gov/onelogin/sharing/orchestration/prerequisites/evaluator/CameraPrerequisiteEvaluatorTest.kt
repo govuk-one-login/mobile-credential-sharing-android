@@ -12,8 +12,10 @@ import kotlin.test.assertNull
 import org.junit.Before
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.core.permission.toDeniedPermission
-import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toUndeterminedPermissions
+import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 
 class CameraPrerequisiteEvaluatorTest {
@@ -22,7 +24,8 @@ class CameraPrerequisiteEvaluatorTest {
     private val devicePolicyManager: DevicePolicyManager = mockk()
     private val processCameraProvider: ProcessCameraProvider = mockk()
 
-    private var permissionResult: MutableList<PermissionCheckerV2.Denied> = mutableListOf()
+    private var permissionResult: MutableList<PermissionCheckerV2.PermissionCheckResult> =
+        mutableListOf()
     private var factory = ProcessCameraProviderFactory { processCameraProvider }
 
     private val evaluator by lazy {
@@ -47,6 +50,14 @@ class CameraPrerequisiteEvaluatorTest {
     }
 
     @Test
+    fun `Returns PermissionUndetermined when permission is missing`() {
+        singleton("android.permission.CAMERA")
+            .toUndeterminedPermissions()
+            .let(permissionResult::addAll)
+        assertEquals(CameraState.PermissionUndetermined, evaluator.evaluate())
+    }
+
+    @Test
     fun `Returns PermissionNotGranted when permission is missing`() {
         singleton("android.permission.CAMERA")
             .toDeniedPermission()
@@ -57,7 +68,7 @@ class CameraPrerequisiteEvaluatorTest {
     @Test
     fun `Returns PermissionDeniedPermanently when permission is missing`() {
         singleton("android.permission.CAMERA")
-            .toDeniedPermission(false)
+            .toPermanentlyDeniedPermissions()
             .let(permissionResult::addAll)
         assertEquals(CameraState.PermissionDeniedPermanently, evaluator.evaluate())
     }

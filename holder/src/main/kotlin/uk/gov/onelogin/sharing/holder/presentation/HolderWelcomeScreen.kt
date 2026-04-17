@@ -25,7 +25,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPrompt
 import uk.gov.onelogin.sharing.core.presentation.permissions.PermissionPromptText
@@ -40,7 +40,8 @@ private const val QR_SIZE = 800
 fun HolderWelcomeScreen(
     viewModel: HolderWelcomeViewModel = assistedMetroViewModel(),
     onAwaitingUserConsent: () -> Unit = {},
-    onConnectionError: (BluetoothSessionError) -> Unit = {}
+    onConnectionError: (BluetoothSessionError) -> Unit = {},
+    onGenericError: () -> Unit = {}
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
     val sessionState by viewModel.holderSessionState.collectAsStateWithLifecycle()
@@ -48,17 +49,21 @@ fun HolderWelcomeScreen(
     var hasPreviouslyRequestedPermission by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     val multiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = bluetoothPermissions()
+        permissions = getBluetoothPermissions()
     ) {
         hasPreviouslyRequestedPermission = true
     }
     val latestOnConnectionError by rememberUpdatedState(onConnectionError)
+    val latestOnGenericError by rememberUpdatedState(onGenericError)
 
     LaunchedEffect(Unit) {
         viewModel.navEvents.collect {
             when (it) {
-                is HolderScreenEvents.NavigateToError ->
+                is HolderScreenEvents.NavigateToBluetoothError ->
                     latestOnConnectionError(it.error)
+
+                is HolderScreenEvents.NavigateToGenericError ->
+                    latestOnGenericError()
             }
         }
     }

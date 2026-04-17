@@ -16,7 +16,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 
 const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 
@@ -32,7 +33,7 @@ const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 @Suppress("TooManyFunctions")
 class AndroidGattClientManager(
     private val context: Context,
-    private val permissionChecker: BluetoothPermissionChecker,
+    private val permissionChecker: PermissionCheckerV2,
     private val serviceValidator: ServiceValidator,
     private val gattWriter: GattWriter,
     private val logger: Logger
@@ -52,7 +53,7 @@ class AndroidGattClientManager(
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
-        if (!permissionChecker.hasBluetoothPermissions()) {
+        if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
                 GattClientEvent.Error(
                     ClientError.BLUETOOTH_PERMISSION_MISSING

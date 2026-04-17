@@ -8,8 +8,9 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.bluetoothManager
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.userManager
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasUndeterminedPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 
@@ -26,17 +27,18 @@ class BluetoothPrerequisiteEvaluator(
         ?: evaluateReadiness()
 
     private fun evaluatePermissions(): BluetoothState? =
-        BluetoothPermissionChecker.Companion.bluetoothPermissions()
-            .let(::checkPermissions).let { result ->
-                when {
-                    result.isEmpty() -> null
+        getBluetoothPermissions().let(::checkPermissions).let { result ->
+            when {
+                result.isEmpty() -> null
 
-                    result.hasPermanentlyDeniedPermissions() ->
-                        BluetoothState.PermissionDeniedPermanently
+                result.hasPermanentlyDeniedPermissions() ->
+                    BluetoothState.PermissionDeniedPermanently
 
-                    else -> BluetoothState.PermissionNotGranted
-                }
+                result.hasUndeterminedPermissions() -> BluetoothState.PermissionUndetermined
+
+                else -> BluetoothState.PermissionNotGranted
             }
+        }
 
     private fun evaluateSupport(): BluetoothState? =
         if (context.bluetoothManager?.adapter == null) {

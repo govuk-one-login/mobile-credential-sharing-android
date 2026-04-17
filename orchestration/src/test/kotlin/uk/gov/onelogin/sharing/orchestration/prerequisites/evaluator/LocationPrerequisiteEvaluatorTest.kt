@@ -16,7 +16,9 @@ import org.junit.After
 import org.junit.Before
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
-import uk.gov.onelogin.sharing.core.permission.toDeniedPermission
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toUndeterminedPermissions
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 class LocationPrerequisiteEvaluatorTest {
@@ -25,7 +27,8 @@ class LocationPrerequisiteEvaluatorTest {
     private val packageManager: PackageManager = mockk()
     private val locationManager: LocationManager = mockk()
 
-    private var permissionResult: MutableList<PermissionCheckerV2.Denied> = mutableListOf()
+    private var permissionResult: MutableList<PermissionCheckerV2.PermissionCheckResult> =
+        mutableListOf()
 
     private val evaluator by lazy {
         LocationPrerequisiteEvaluator(
@@ -54,6 +57,14 @@ class LocationPrerequisiteEvaluatorTest {
     }
 
     @Test
+    fun `Returns PermissionUndetermined when permission is missing`() {
+        singleton("android.permission.ACCESS_FINE_LOCATION")
+            .toUndeterminedPermissions()
+            .let(permissionResult::addAll)
+        assertEquals(LocationState.PermissionUndetermined, evaluator.evaluate())
+    }
+
+    @Test
     fun `Returns PermissionNotGranted when permission is missing`() {
         singleton("android.permission.ACCESS_FINE_LOCATION")
             .toDeniedPermission()
@@ -64,7 +75,7 @@ class LocationPrerequisiteEvaluatorTest {
     @Test
     fun `Returns PermissionDeniedPermanently when permission is missing`() {
         singleton("android.permission.ACCESS_FINE_LOCATION")
-            .toDeniedPermission(false)
+            .toPermanentlyDeniedPermissions()
             .let(permissionResult::addAll)
         assertEquals(LocationState.PermissionDeniedPermanently, evaluator.evaluate())
     }

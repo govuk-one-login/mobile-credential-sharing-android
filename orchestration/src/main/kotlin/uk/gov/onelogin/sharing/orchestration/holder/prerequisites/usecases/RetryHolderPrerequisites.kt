@@ -8,7 +8,7 @@ import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.LogMessages.updateNavigationEvent
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
@@ -25,7 +25,7 @@ class RetryHolderPrerequisites(orchestrator: Orchestrator.Holder, private val lo
 
                     is HolderSessionState.Preflight -> {
                         if (state.missingPrerequisites.none(
-                                MissingPrerequisiteV2::isRecoverable
+                                MissingPrerequisite::isRecoverable
                             )
                         ) {
                             NavigationEvent.UnrecoverableError

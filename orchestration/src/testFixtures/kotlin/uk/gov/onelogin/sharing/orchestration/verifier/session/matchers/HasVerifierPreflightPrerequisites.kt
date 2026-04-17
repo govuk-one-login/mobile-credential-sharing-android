@@ -3,11 +3,11 @@ package uk.gov.onelogin.sharing.orchestration.verifier.session.matchers
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
 internal class HasVerifierPreflightPrerequisites(
-    private val matcher: Matcher<in List<MissingPrerequisiteV2>>
+    private val matcher: Matcher<in List<MissingPrerequisite>>
 ) : TypeSafeMatcher<VerifierSessionState>() {
     override fun describeTo(description: Description?) = matcher.describeTo(description)
 

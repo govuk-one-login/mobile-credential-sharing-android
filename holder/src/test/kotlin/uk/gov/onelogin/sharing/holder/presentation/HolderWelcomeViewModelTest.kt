@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -12,9 +13,13 @@ import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HolderWelcomeViewModelTest {
@@ -86,4 +91,74 @@ class HolderWelcomeViewModelTest {
 
             assertEquals("fakeQrData", viewModel.uiState.value.qrData)
         }
+
+    @Test
+    fun `emits BluetoothConnectionError when failure is BluetoothDisconnectedException`() =
+        runTest {
+            val orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(HolderSessionState.NotStarted)
+            )
+            val viewModel = createViewModel(orchestrator = orchestrator)
+            advanceUntilIdle()
+
+            viewModel.navEvents.test {
+                orchestrator.initialHolderState.value = HolderSessionState.Complete.Failed(
+                    SessionError(
+                        message = "disconnected",
+                        exception = BluetoothDisconnectedException(
+                            "disconnected",
+                            IllegalStateException("cause")
+                        )
+                    )
+                )
+                advanceUntilIdle()
+
+                assertEquals(
+                    BluetoothSessionError.BluetoothConnectionError,
+                    (awaitItem() as HolderScreenEvents.NavigateToBluetoothError).error
+                )
+            }
+        }
+
+    @Test
+    fun `emits NavigateToGenericError when failure is DeviceRequestDecodingException`() = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(HolderSessionState.NotStarted)
+        )
+        val viewModel = createViewModel(orchestrator = orchestrator)
+        advanceUntilIdle()
+
+        viewModel.navEvents.test {
+            orchestrator.initialHolderState.value = HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = "CBOR decoding error",
+                    exception = DeviceRequestDecodingException("CBOR decoding error")
+                )
+            )
+            advanceUntilIdle()
+
+            assertEquals(HolderScreenEvents.NavigateToGenericError, awaitItem())
+        }
+    }
+
+    @Test
+    fun `emits NavigateToGenericError when failure is not a specific exception`() = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(HolderSessionState.NotStarted)
+        )
+        val viewModel = createViewModel(orchestrator = orchestrator)
+        advanceUntilIdle()
+
+        viewModel.navEvents.test {
+            orchestrator.initialHolderState.value = HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = "encryption failed",
+                    exception = RuntimeException("encryption failed")
+                )
+            )
+            advanceUntilIdle()
+
+            assertEquals(HolderScreenEvents.NavigateToGenericError, awaitItem())
+        }
+    }
 }

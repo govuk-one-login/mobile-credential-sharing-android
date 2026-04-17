@@ -36,6 +36,10 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
+        libs.com.google.test.parameter.injector
+    ).forEach(::testFixturesApi)
+
+    listOf(
         libs.androidx.compose.runtime,
         platform(libs.androidx.compose.bom)
     ).forEach(::testFixturesImplementation)

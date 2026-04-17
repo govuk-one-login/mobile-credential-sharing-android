@@ -6,7 +6,7 @@ import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 
-internal data class HasPrerequisite(private val matcher: Matcher<in Prerequisite>) :
+internal class HasPrerequisite(private val matcher: Matcher<in Prerequisite>) :
     TypeSafeMatcher<MissingPrerequisite>() {
     override fun describeTo(description: Description?) = matcher.describeTo(description)
     override fun describeMismatchSafely(

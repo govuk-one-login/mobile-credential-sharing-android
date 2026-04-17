@@ -21,7 +21,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.bluetooth.EnableBluetoothPrompt
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.verifier.R
@@ -32,7 +32,7 @@ fun ConnectWithHolderDeviceScreen(
     modifier: Modifier = Modifier,
     viewModel: SessionEstablishmentViewModel = metroViewModel(),
     multiplePermissionsState: MultiplePermissionsState = rememberMultiplePermissionsState(
-        permissions = bluetoothPermissions()
+        permissions = getBluetoothPermissions()
 
     ) {
         viewModel.receive(ConnectWithHolderDeviceEvent.RequestedPermission(true))

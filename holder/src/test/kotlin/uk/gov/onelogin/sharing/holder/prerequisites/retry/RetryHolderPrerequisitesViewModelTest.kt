@@ -18,7 +18,7 @@ import org.junit.Rule
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
@@ -36,7 +36,7 @@ class RetryHolderPrerequisitesViewModelTest {
 
     private var initialHolderState: HolderSessionState = HolderSessionState.Preflight(
         listOf(
-            MissingPrerequisiteV2.Bluetooth(
+            MissingPrerequisite.Bluetooth(
                 BluetoothState.PermissionNotGranted
             )
         )
@@ -75,12 +75,20 @@ class RetryHolderPrerequisitesViewModelTest {
         dispatcherRule.testDispatcher
     ) {
         navigationEvents.add(NavigationEvent.PassedPrerequisites)
+        viewModel.recheckPrerequisites()
+
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
 
         viewModel.navigationEvent.test {
             assertEquals(
                 NavigationEvent.PassedPrerequisites,
                 awaitItem()
             )
+        }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertFalse { awaitItem() }
         }
     }
 
@@ -117,6 +125,9 @@ class RetryHolderPrerequisitesViewModelTest {
         viewModel.recheckPrerequisites()
 
         assertTrue { hasCalledOnComplete }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
     }
 
     @Test
@@ -128,5 +139,8 @@ class RetryHolderPrerequisitesViewModelTest {
         viewModel.recheckPrerequisites()
 
         assertFalse { hasCalledOnComplete }
+        viewModel.hasRecheckedPrerequisites.test {
+            assertTrue { awaitItem() }
+        }
     }
 }

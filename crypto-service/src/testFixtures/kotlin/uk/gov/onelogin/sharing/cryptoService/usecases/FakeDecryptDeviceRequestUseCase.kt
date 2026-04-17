@@ -6,15 +6,20 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDevice
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
 class FakeDecryptDeviceRequestUseCase : DecryptDeviceRequestUseCase {
+    var skDeviceToReturn: ByteArray = byteArrayOf(0x01, 0x02)
     var exception: Exception? = null
+    var exceptionAfterKeyDerivation: Exception? = null
 
     override fun execute(
         sessionEstablishmentBytes: ByteArray,
         engagement: String,
         holderPrivateKey: PrivateKey,
-        decryptCounter: UInt
+        decryptCounter: UInt,
+        onDeriveSkDevice: (ByteArray) -> Unit
     ): DeviceRequest {
         exception?.let { throw it }
+        onDeriveSkDevice(skDeviceToReturn)
+        exceptionAfterKeyDerivation?.let { throw it }
         return deviceRequestStub
     }
 }

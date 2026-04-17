@@ -9,9 +9,9 @@ object HolderConsentNavigationExt {
     fun NavController.navigateToHolderConsentScreen(options: NavOptionsBuilder.() -> Unit = {}) =
         navigate(HolderConsentRoute, options)
 
-    internal fun NavGraphBuilder.configureHolderConsentScreen() {
+    internal fun NavGraphBuilder.configureHolderConsentScreen(onError: () -> Unit) {
         composable<HolderConsentRoute> {
-            HolderConsentScreen()
+            HolderConsentScreen(onGenericError = onError)
         }
     }
 }

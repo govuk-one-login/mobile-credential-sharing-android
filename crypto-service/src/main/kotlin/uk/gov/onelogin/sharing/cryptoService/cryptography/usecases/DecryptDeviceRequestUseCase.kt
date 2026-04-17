@@ -8,6 +8,7 @@ fun interface DecryptDeviceRequestUseCase {
         sessionEstablishmentBytes: ByteArray,
         engagement: String,
         holderPrivateKey: PrivateKey,
-        decryptCounter: UInt
+        decryptCounter: UInt,
+        onDeriveSkDevice: (ByteArray) -> Unit
     ): DeviceRequest
 }
