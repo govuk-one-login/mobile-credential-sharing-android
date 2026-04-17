@@ -88,9 +88,9 @@ class PermissionCheckerParameters : TestParametersValuesProvider() {
             ),
             Input(
                 name = "Invalid flow: " +
-                    "An unmarked, denied permission with rationale is 'Undetermined'",
+                    "An unmarked, denied permission with rationale is 'Denied'",
                 assertion = contains(
-                    instanceOf(PermissionCheckResult.Undetermined::class.java)
+                    instanceOf(PermissionCheckResult.Denied::class.java)
                 ),
                 grantStatus = PackageManager.PERMISSION_DENIED,
                 shouldShowRationale = true
