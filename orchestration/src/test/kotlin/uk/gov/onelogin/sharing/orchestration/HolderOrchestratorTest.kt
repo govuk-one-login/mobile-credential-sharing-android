@@ -508,7 +508,7 @@ class HolderOrchestratorTest {
     fun `CBOR decoding failure builds termination SessionData and transitions to failed`() =
         runTest {
             fakeDecryptDeviceRequestUseCase.exception =
-                IllegalArgumentException("Session establishment error")
+                IllegalArgumentException("CBOR decoding error")
             val peripheralTransport = FakePeripheralBluetoothTransport()
             val sessionFactory = createSessionFactory()
             val orchestrator = createOrchestrator(
@@ -582,14 +582,8 @@ class HolderOrchestratorTest {
             )
         )
 
-        val orchestrator = HolderOrchestrator(
-            logger = logger,
+        val orchestrator = createOrchestrator(
             sessionFactory = sessionFactory,
-            prerequisiteGate = gate,
-            peripheralBluetoothTransport = FakePeripheralBluetoothTransport(),
-            appCoroutineScope = scope,
-            decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
-            credentialProvider = FakeCredentialProvider(),
             holderCryptoService = HolderCryptoServiceImpl(
                 sessionSecurity = fakeSessionSecurity,
                 logger = logger
@@ -604,6 +598,35 @@ class HolderOrchestratorTest {
         assertEquals(DeviceRole.HOLDER, fakeSessionSecurity.lastEncryptRole)
         assertEquals(1u, fakeSessionSecurity.lastEncryptCounter)
         assertEquals(2u, currentSession.sessionContext.encryptCounter)
+    }
+
+    @Test
+    fun `handleDeviceRequestFailure throws when skDevice is null`() = runTest {
+        fakeDecryptDeviceRequestUseCase.exception =
+            DeviceRequestDecodingException("fail")
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            sessionFactory = createSessionFactory(),
+            peripheralBluetoothTransport = peripheralTransport
+        )
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
+        )
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(
+            orchestrator.holderSessionState.value,
+            isProcessingEstablishment()
+        )
     }
 
     @Test
@@ -654,11 +677,6 @@ class HolderOrchestratorTest {
         val contextWithSkDevice = holderSessionContextStub.copy(skDevice = skDevice)
         val sessionFactory = FakeSessionFactory(
             listOf(
-                HolderSessionImpl(
-                    logger = logger,
-                    internalState = MutableStateFlow(HolderSessionState.NotStarted),
-                    initialContext = contextWithSkDevice
-                ),
                 HolderSessionImpl(
                     logger = logger,
                     internalState = MutableStateFlow(HolderSessionState.NotStarted),
