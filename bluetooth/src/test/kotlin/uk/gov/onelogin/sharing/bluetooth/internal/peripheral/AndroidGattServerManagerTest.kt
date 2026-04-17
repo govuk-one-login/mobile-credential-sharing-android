@@ -35,8 +35,9 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.Chara
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
-import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker.Response
+import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
@@ -51,7 +52,8 @@ class AndroidGattServerManagerTest {
             listOf()
         )
     )
-    private val fakePermissionChecker = StubBluetoothPermissionChecker()
+    private val permissionResponse = mutableListOf<PermissionCheckerV2.PermissionCheckResult>()
+    private val fakePermissionChecker = FakePermissionChecker { permissionResponse }
     private val fakeGattWriter = FakeGattWriter()
     private val logger = SystemLogger()
 
@@ -306,7 +308,9 @@ class AndroidGattServerManagerTest {
 
     @Test
     fun `gatt server returns error if permissions are not granted`() = runTest {
-        fakePermissionChecker.result = Response.Missing()
+        listOf(
+            Manifest.permission.BLUETOOTH
+        ).toDeniedPermission().let(permissionResponse::addAll)
 
         manager.events.test {
             manager.open(uuid)
