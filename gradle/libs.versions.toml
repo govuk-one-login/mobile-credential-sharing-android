@@ -32,9 +32,19 @@ roborazzi = "1.59.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.1.0.6387" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.1.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
-uk-gov-logging = "0.39.9" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
+uk-gov-logging = "0.39.15" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
 uk-gov-ui = "16.4.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
+
+# Minimum safe versions for vulnerable build classpath transitive dependencies
+netty = "4.1.132.Final"
+logback = "1.5.25"
+jdom2 = "2.0.6.1"
+jose4j = "0.9.6"
+commons-lang3 = "3.18.0"
+httpclient = "4.5.13"
+guava = "33.3.1-jre"
+play-services-basement = "18.10.0"
 
 [libraries]
 app-cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }

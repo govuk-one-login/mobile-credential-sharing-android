@@ -27,6 +27,8 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -215,7 +217,7 @@ class HolderOrchestrator(
                     details = [
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
-                            description = "We may need to handle explicit bluetooth" +
+                            description = "We may need to handle explicit bluetooth " +
                                 "disconnection states to handle common error codes " +
                                 "8, 19, 22 and 133. The function below will handle " +
                                 "treat all disconnect states the same when connected " +
@@ -288,7 +290,12 @@ class HolderOrchestrator(
                 sessionEstablishmentBytes = message,
                 engagement = sessionFlow.value.sessionContext.engagement,
                 holderPrivateKey = keypair,
-                decryptCounter = sessionFlow.value.sessionContext.decryptCounter
+                decryptCounter = sessionFlow.value.sessionContext.decryptCounter,
+                onDeriveSkDevice = { skDevice ->
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(skDevice = skDevice)
+                    }
+                }
             )
 
             sessionFlow.value.updateSessionContext {
@@ -299,6 +306,28 @@ class HolderOrchestrator(
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             sendTerminationAndFail(e)
         }
+    }
+
+    fun assembleAndEncryptResponse(documents: List<Document>): ByteArray {
+        val deviceResponse = DeviceResponse(
+            documents = documents,
+            documentErrors = null
+        )
+        val context = sessionFlow.value.sessionContext
+        val skDevice = context.skDevice
+            ?: error("Missing skDevice")
+
+        val encryptedResponse = holderCryptoService.encryptDeviceResponse(
+            deviceResponse = deviceResponse,
+            skDevice = skDevice,
+            encryptCounter = context.encryptCounter
+        )
+
+        sessionFlow.value.updateSessionContext {
+            it.copy(encryptCounter = it.encryptCounter + 1u)
+        }
+
+        return encryptedResponse
     }
 
     private fun sendTerminationAndFail(exception: Exception) {

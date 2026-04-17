@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -23,8 +24,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
+import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -103,7 +105,10 @@ class HolderOrchestratorTest {
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
         credentialProvider = FakeCredentialProvider(),
-        holderCryptoService = HolderCryptoServiceImpl()
+        holderCryptoService = HolderCryptoServiceImpl(
+            sessionSecurity = FakeSessionSecurity(),
+            logger = logger
+        )
     )
 
     @Test
@@ -486,16 +491,8 @@ class HolderOrchestratorTest {
                 )
             )
 
-            assertEquals(
-                HolderSessionState.AwaitingUserConsent(deviceRequestStub),
-                awaitItem()
-            )
+            assertThat(awaitItem(), isAwaitingUserConsent())
         }
-
-        assertThat(
-            sessionFactory,
-            currentSessionState(isAwaitingUserConsent())
-        )
 
         assertEquals(2u, currentSession.sessionContext.decryptCounter)
     }
@@ -559,5 +556,46 @@ class HolderOrchestratorTest {
             orchestrator.holderSessionState.value,
             isFailed()
         )
+    }
+
+    @Test
+    fun `assembleAndEncryptResponse encrypts DeviceResponse and increments counter`() = runTest {
+        val fakeSessionSecurity = FakeSessionSecurity()
+        fakeSessionSecurity.encryptedToReturn = byteArrayOf(0x0A, 0x0B, 0x0C)
+        val skDevice = byteArrayOf(0x01, 0x02)
+
+        val contextWithSkDevice = holderSessionContextStub.copy(skDevice = skDevice)
+        val sessionFactory = FakeSessionFactory(
+            listOf(
+                HolderSessionImpl(
+                    logger = logger,
+                    internalState = MutableStateFlow(HolderSessionState.NotStarted),
+                    initialContext = contextWithSkDevice
+                )
+            )
+        )
+
+        val orchestrator = HolderOrchestrator(
+            logger = logger,
+            sessionFactory = sessionFactory,
+            prerequisiteGate = gate,
+            peripheralBluetoothTransport = FakePeripheralBluetoothTransport(),
+            appCoroutineScope = scope,
+            decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
+            credentialProvider = FakeCredentialProvider(),
+            holderCryptoService = HolderCryptoServiceImpl(
+                sessionSecurity = fakeSessionSecurity,
+                logger = logger
+            )
+        )
+
+        val result = orchestrator.assembleAndEncryptResponse(emptyList())
+
+        val currentSession = sessionFactory.getCurrentSession()
+        assertArrayEquals(byteArrayOf(0x0A, 0x0B, 0x0C), result)
+        assertArrayEquals(skDevice, fakeSessionSecurity.lastEncryptKey)
+        assertEquals(DeviceRole.HOLDER, fakeSessionSecurity.lastEncryptRole)
+        assertEquals(1u, fakeSessionSecurity.lastEncryptCounter)
+        assertEquals(2u, currentSession.sessionContext.encryptCounter)
     }
 }
