@@ -48,7 +48,8 @@ listOf(
     ":crypto-service",
     ":verifier",
     ":ui:ui-api",
-    ":ui:ui-impl"
+    ":ui:ui-impl",
+    ":iso18013-6-tests"
 ).forEach(::include)
 
 /**
