@@ -51,6 +51,7 @@ listOf(
     ":ui:ui-api",
     ":ui:ui-impl",
     ":verifier",
+    ":iso18013-6-tests"
 ).forEach(::include)
 
 /**
