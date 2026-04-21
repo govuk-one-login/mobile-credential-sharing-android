@@ -40,6 +40,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 
 @ContributesBinding(AppScope::class)
+@Suppress("TooManyFunctions")
 class AndroidGattServerManager(
     private val context: Context,
     private val bluetoothManager: BluetoothManager,
@@ -274,7 +275,10 @@ class AndroidGattServerManager(
                 return false
             }
 
-            logger.debug(logTag, "Sent chunk: header=0x${"%02X".format(header)}, offset=$offset, size=${chunk.size}")
+            logger.debug(
+                logTag,
+                "Sent chunk: header=0x${"%02X".format(header)}, offset=$offset, size=${chunk.size}"
+            )
             offset = end
         }
 
