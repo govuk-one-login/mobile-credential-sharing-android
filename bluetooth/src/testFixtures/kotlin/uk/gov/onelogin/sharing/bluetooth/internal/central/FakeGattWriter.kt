@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattServer
 
 class FakeGattWriter(val success: Boolean = true) : GattWriter {
     var writes = 0
+    val sentChunks = mutableListOf<ByteArray>()
 
     override fun writeCharacteristic(
         gatt: BluetoothGatt,
@@ -22,5 +23,8 @@ class FakeGattWriter(val success: Boolean = true) : GattWriter {
         device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
-    ): Boolean = success
+    ): Boolean {
+        sentChunks.add(value)
+        return success
+    }
 }

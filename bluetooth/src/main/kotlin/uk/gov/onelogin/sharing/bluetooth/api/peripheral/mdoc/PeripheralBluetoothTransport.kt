@@ -46,4 +46,13 @@ interface PeripheralBluetoothTransport {
      * Notifies the client to end the session with end code 0x02
      */
     suspend fun notifySessionEnd(serviceUuid: UUID)
+
+    /**
+     * Sends [data] to the connected Verifier over BLE, chunked according to the negotiated MTU.
+     *
+     * @param serviceUuid The UUID of the active GATT service.
+     * @param data The CBOR-encoded SessionData bytes to transmit.
+     * @return `true` if all chunks were sent successfully, `false` otherwise.
+     */
+    fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean
 }

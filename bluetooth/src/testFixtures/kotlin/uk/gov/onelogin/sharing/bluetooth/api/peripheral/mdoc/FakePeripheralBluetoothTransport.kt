@@ -39,4 +39,6 @@ class FakePeripheralBluetoothTransport(
     override suspend fun notifySessionEnd(serviceUuid: UUID) {
         lastUuid = serviceUuid
     }
+
+    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean = true
 }

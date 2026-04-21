@@ -100,6 +100,9 @@ class AndroidPeripheralBluetoothTransport(
         }
     }
 
+    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean =
+        gattServerManager.sendMessage(serviceUuid, data)
+
     private fun handleAdvertiserState(state: AdvertiserState) {
         when (state) {
             AdvertiserState.Started ->
