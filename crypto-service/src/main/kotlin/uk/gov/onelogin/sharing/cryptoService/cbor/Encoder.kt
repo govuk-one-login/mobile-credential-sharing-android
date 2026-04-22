@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrieva
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 /**
  * A private generic function that takes ('Any') map of custom serializers to encode using
@@ -82,6 +83,38 @@ fun DeviceResponseDto.DeviceResponse.encodeCbor(): ByteArray {
     )
     val mapper = CborMapper.create(serializers)
     return mapper.writeValueAsBytes(this)
+}
+
+/**
+ * Encodes an [ItemsRequest] into a CBOR byte array wrapped in CBOR Tag 24 (#6.24).
+ *
+ * The [ItemsRequest] is first serialised to a CBOR byte string, then that byte string
+ * is embedded as [EmbeddedCbor] so the result carries Tag 24 as required by the
+ * ISO 18013-5 `ItemsRequestBytes` definition.
+ *
+ * @receiver The [ItemsRequest] to encode.
+ * @return A [ByteArray] containing the Tag-24-wrapped CBOR representation.
+ */
+fun ItemsRequest.encodeCbor(): ByteArray {
+    val itemsRequestBytes = ByteArrayOutputStream().also { output ->
+        CBORFactory().createGenerator(output).use { gen ->
+            gen.writeStartObject(2)
+            gen.writeStringField("docType", docType)
+            gen.writeFieldName("nameSpaces")
+            gen.writeStartObject(nameSpaces.size)
+            nameSpaces.forEach { (namespace, elements) ->
+                gen.writeFieldName(namespace)
+                gen.writeStartObject(elements.size)
+                elements.forEach { (identifier, intentToRetain) ->
+                    gen.writeBooleanField(identifier, intentToRetain)
+                }
+                gen.writeEndObject()
+            }
+            gen.writeEndObject()
+            gen.writeEndObject()
+        }
+    }.toByteArray()
+    return EmbeddedCbor(itemsRequestBytes).encodeCbor()
 }
 
 /**

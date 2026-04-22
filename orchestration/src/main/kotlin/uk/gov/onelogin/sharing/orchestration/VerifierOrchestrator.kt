@@ -38,6 +38,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
@@ -98,6 +99,9 @@ class VerifierOrchestrator(
         }
 
         logger.debug(logTag, "AttributeGroup: ${verifierConfig.verificationRequest.attributeGroup}")
+        val itemsRequest = verifierConfig.verificationRequest.attributeGroup
+            .toItemsRequest(verifierConfig.verificationRequest.documentType)
+        logger.debug(logTag, "ItemsRequest: $itemsRequest")
         performPreflightChecks()
     }
 

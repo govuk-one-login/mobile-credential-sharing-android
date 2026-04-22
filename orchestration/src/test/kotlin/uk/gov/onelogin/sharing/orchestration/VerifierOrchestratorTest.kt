@@ -20,6 +20,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransp
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
+import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
+import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
@@ -32,6 +34,8 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
@@ -393,5 +397,54 @@ class VerifierOrchestratorTest {
             isCancelled()
         )
         assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `start logs ItemsRequest for Photo and Age Over 21 attribute group`() = runTest {
+        val orchestrator = VerifierOrchestrator(
+            logger = logger,
+            prerequisiteGate = gate,
+            sessionFactory = sessionFactory,
+            verifierConfig = photoAndAgeOver21Config,
+            centralBluetoothTransport = centralBluetoothTransport,
+            appCoroutineScope = scope,
+            barcodeParser = FakeQrParser(),
+            verifierCryptoService = verifierCryptoService
+        )
+
+        orchestrator.start()
+
+        assert(
+            logger.contains(
+                "ItemsRequest: ItemsRequest(" +
+                    "docType=$MDL_DOC_TYPE, " +
+                    "nameSpaces={$MDL_NAMESPACE={portrait=false, age_over_21=false}})"
+            )
+        )
+    }
+
+    @Test
+    fun `start logs ItemsRequest for Name Retain and Age Over 18 attribute group`() = runTest {
+        val orchestrator = VerifierOrchestrator(
+            logger = logger,
+            prerequisiteGate = gate,
+            sessionFactory = sessionFactory,
+            verifierConfig = nameRetainAndAgeOver18Config,
+            centralBluetoothTransport = centralBluetoothTransport,
+            appCoroutineScope = scope,
+            barcodeParser = FakeQrParser(),
+            verifierCryptoService = verifierCryptoService
+        )
+
+        orchestrator.start()
+
+        assert(
+            logger.contains(
+                "ItemsRequest: ItemsRequest(" +
+                    "docType=$MDL_DOC_TYPE, " +
+                    "nameSpaces={$MDL_NAMESPACE={given_name=true, family_name=true, " +
+                    "age_over_18=false}})"
+            )
+        )
     }
 }
