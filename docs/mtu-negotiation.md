@@ -25,7 +25,7 @@ The peripheral receives the negotiated MTU through the `onMtuChanged` callback
 
 ## `MtuValues` Reference
 
-The `MtuValues` object (`bluetooth/.../internal/core/MtuValues.kt`) centralises all MTU-related
+The [MtuValues object] centralises all MTU-related
 constants and calculations.
 
 ### Constants
@@ -73,3 +73,6 @@ Each chunk is prefixed with a 1-byte ISO header:
 
 - `0x01` — more chunks follow
 - `0x00` — this is the last (or only) chunk
+
+
+[MtuValues object]: ../bluetooth/src/main/kotlin/uk/gov/onelogin/sharing/bluetooth/internal/core/MtuValues.kt

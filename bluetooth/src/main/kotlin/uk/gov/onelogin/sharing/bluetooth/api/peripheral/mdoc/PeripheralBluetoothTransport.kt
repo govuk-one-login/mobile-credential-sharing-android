@@ -3,13 +3,14 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.MessageSender
 
 /**
  * Responsible for orchestrating the BLE advertising and GATT service
  *
  * [PeripheralBluetoothState] via a [StateFlow].
  */
-interface PeripheralBluetoothTransport {
+interface PeripheralBluetoothTransport : MessageSender {
     /**
      * The current state of the BLE session, exposed as a [StateFlow].
      * This can be used to observe the session's status, such as whether it's advertising,
@@ -46,13 +47,4 @@ interface PeripheralBluetoothTransport {
      * Notifies the client to end the session with end code 0x02
      */
     suspend fun notifySessionEnd(serviceUuid: UUID)
-
-    /**
-     * Sends [data] to the connected Verifier over BLE, chunked according to the negotiated MTU.
-     *
-     * @param serviceUuid The UUID of the active GATT service.
-     * @param data The CBOR-encoded SessionData bytes to transmit.
-     * @return `true` if all chunks were sent successfully, `false` otherwise.
-     */
-    fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean
 }

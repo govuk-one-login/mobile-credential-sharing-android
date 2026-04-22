@@ -253,6 +253,21 @@ class AndroidGattServerManager(
         val characteristic = server.getService(serviceUuid)
             ?.getCharacteristic(SERVER_2_CLIENT_UUID) ?: return false
 
+        if (data.isEmpty()) {
+            logger.error(logTag, "sendMessage called with empty data")
+            return false
+        }
+
+        return sendChunked(server, device, characteristic, data)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun sendChunked(
+        server: BluetoothGattServer,
+        device: BluetoothDevice,
+        characteristic: BluetoothGattCharacteristic,
+        data: ByteArray
+    ): Boolean {
         val chunkSize = MtuValues.dataChunkSize(mtu)
         logger.debug(logTag, "Sending ${data.size} bytes in chunks of $chunkSize (MTU=$mtu)")
 
