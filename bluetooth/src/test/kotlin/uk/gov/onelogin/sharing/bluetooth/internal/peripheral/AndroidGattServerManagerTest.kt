@@ -567,6 +567,28 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
+    fun `sendMessage returns false when data is empty`() {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+        val server2ClientChar = mockk<BluetoothGattCharacteristic>()
+        val service = mockk<BluetoothGattService> {
+            every { getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns server2ClientChar
+        }
+        every { gattServer.getService(uuid) } returns service
+
+        manager.open(uuid)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        val result = manager.sendMessage(uuid, byteArrayOf())
+
+        assert(!result)
+        assert(fakeGattWriter.sentChunks.isEmpty())
+    }
+
+    @Test
     fun `sendMessage returns false when no device connected`() {
         val (_, gattServer) = setupOpenGattServer(bluetoothManager, context)
         every { gattServer.getService(uuid) } returns mockk()
