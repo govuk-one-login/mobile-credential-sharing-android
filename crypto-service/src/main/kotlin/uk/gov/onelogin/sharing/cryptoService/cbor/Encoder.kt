@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService.cbor
 
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import java.io.ByteArrayOutputStream
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
@@ -19,6 +20,7 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrieva
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 /**
@@ -86,36 +88,32 @@ fun DeviceResponseDto.DeviceResponse.encodeCbor(): ByteArray {
 }
 
 /**
- * Encodes an [ItemsRequest] into a CBOR byte array wrapped in CBOR Tag 24 (#6.24).
+ * Encodes the [ItemsRequest] fields into a raw CBOR byte array without Tag 24 wrapping.
  *
- * The [ItemsRequest] is first serialised to a CBOR byte string, then that byte string
- * is embedded as [EmbeddedCbor] so the result carries Tag 24 as required by the
- * ISO 18013-5 `ItemsRequestBytes` definition.
+ * Used by [DeviceRequest.encodeCbor], which writes Tag 24 directly via
+ * [CBORGenerator.writeTag] to avoid double-wrapping.
  *
  * @receiver The [ItemsRequest] to encode.
- * @return A [ByteArray] containing the Tag-24-wrapped CBOR representation.
+ * @return A [ByteArray] containing the raw CBOR representation of the [ItemsRequest].
  */
-fun ItemsRequest.encodeCbor(): ByteArray {
-    val itemsRequestBytes = ByteArrayOutputStream().also { output ->
-        CBORFactory().createGenerator(output).use { gen ->
-            gen.writeStartObject(2)
-            gen.writeStringField("docType", docType)
-            gen.writeFieldName("nameSpaces")
-            gen.writeStartObject(nameSpaces.size)
-            nameSpaces.forEach { (namespace, elements) ->
-                gen.writeFieldName(namespace)
-                gen.writeStartObject(elements.size)
-                elements.forEach { (identifier, intentToRetain) ->
-                    gen.writeBooleanField(identifier, intentToRetain)
-                }
-                gen.writeEndObject()
+fun ItemsRequest.encodeCbor(): ByteArray = ByteArrayOutputStream().also { output ->
+    CBORFactory().createGenerator(output).use { gen ->
+        gen.writeStartObject(2)
+        gen.writeStringField("docType", docType)
+        gen.writeFieldName("nameSpaces")
+        gen.writeStartObject(nameSpaces.size)
+        nameSpaces.forEach { (namespace, elements) ->
+            gen.writeFieldName(namespace)
+            gen.writeStartObject(elements.size)
+            elements.forEach { (identifier, intentToRetain) ->
+                gen.writeBooleanField(identifier, intentToRetain)
             }
             gen.writeEndObject()
-            gen.writeEndObject()
         }
-    }.toByteArray()
-    return EmbeddedCbor(itemsRequestBytes).encodeCbor()
-}
+        gen.writeEndObject()
+        gen.writeEndObject()
+    }
+}.toByteArray()
 
 /**
  * Encodes a [SessionData] into a CBOR map as defined by ISO 18013-5.
@@ -132,6 +130,36 @@ fun SessionData.encodeCbor(): ByteArray {
         gen.writeStartObject(fieldCount)
         data?.let { gen.writeBinaryField("data", it) }
         status?.let { gen.writeNumberField("status", it.code.toLong()) }
+        gen.writeEndObject()
+    }
+    return output.toByteArray()
+}
+
+/**
+ * Encodes a [DeviceRequest] into a raw CBOR byte array as defined by ISO 18013-5.
+ *
+ * The top-level structure is a CBOR map with `version` and `docRequests`.
+ * Each [DocRequest] contains an `itemsRequest` field encoded as Tag 24-wrapped bytes.
+ * The [DeviceRequest] itself is not wrapped in Tag 24.
+ *
+ * @receiver The [DeviceRequest] to encode.
+ * @return A [ByteArray] containing the raw CBOR representation.
+ */
+fun DeviceRequest.encodeCbor(): ByteArray {
+    val output = ByteArrayOutputStream()
+    CBORFactory().createGenerator(output).use { gen ->
+        gen.writeStartObject(2)
+        gen.writeStringField("version", version)
+        gen.writeFieldName("docRequests")
+        gen.writeStartArray(docRequests, docRequests.size)
+        docRequests.forEach { docRequest ->
+            gen.writeStartObject(1)
+            gen.writeFieldName("itemsRequest")
+            (gen as CBORGenerator).writeTag(EmbeddedCborSerializer.EMBEDDED_CBOR_TAG)
+            gen.writeBinary(docRequest.itemsRequest.encodeCbor())
+            gen.writeEndObject()
+        }
+        gen.writeEndArray()
         gen.writeEndObject()
     }
     return output.toByteArray()
