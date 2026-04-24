@@ -151,7 +151,7 @@ fun DeviceRequest.encodeCbor(): ByteArray {
         gen.writeStartObject(2)
         gen.writeStringField("version", version)
         gen.writeFieldName("docRequests")
-        gen.writeStartArray()
+        gen.writeStartArray(docRequests, docRequests.size)
         docRequests.forEach { docRequest ->
             gen.writeStartObject(1)
             gen.writeFieldName("itemsRequest")
