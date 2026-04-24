@@ -66,7 +66,7 @@ class HolderCryptoServiceImpl(
 
         logger.debug(
             logTag,
-            "DeviceNameSpacesBytes generated (${deviceNameSpacesBytes.size} bytes)"
+            "DeviceNameSpacesBytes encoded: ${deviceNameSpacesBytes.toHexString()}"
         )
 
         val deviceAuthenticationBytes = DeviceAuthentication(
@@ -77,7 +77,7 @@ class HolderCryptoServiceImpl(
 
         logger.debug(
             logTag,
-            "DeviceAuthenticationBytes encoded (${deviceAuthenticationBytes.size} bytes)"
+            "DeviceAuthenticationBytes encoded: ${deviceAuthenticationBytes.toHexString()}"
         )
 
         return DeviceAuthenticationResult(

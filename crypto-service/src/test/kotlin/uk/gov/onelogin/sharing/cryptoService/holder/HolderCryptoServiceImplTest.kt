@@ -94,15 +94,16 @@ class HolderCryptoServiceImplTest {
             docType = MDL_DOC_TYPE
         )
 
-        assertTrue(result.deviceAuthenticationBytes.isNotEmpty())
-        assert(
-            "DeviceAuthenticationBytes encoded (${result.deviceAuthenticationBytes.size} bytes)"
-                in logger
+        assertTrue(result.deviceNameSpacesBytes.isNotEmpty())
+        assertTrue(
+            "DeviceNameSpacesBytes encoded: ${result.deviceNameSpacesBytes.toHexString()}" in
+                logger
         )
 
-        assertTrue(result.deviceNameSpacesBytes.isNotEmpty())
-        assert(
-            "DeviceNameSpacesBytes generated (${result.deviceNameSpacesBytes.size} bytes)" in logger
+        assertTrue(result.deviceAuthenticationBytes.isNotEmpty())
+        assertTrue(
+            "DeviceAuthenticationBytes encoded: ${result.deviceAuthenticationBytes.toHexString()}"
+                in logger
         )
     }
 }

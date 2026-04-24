@@ -8,11 +8,12 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
  * @property deviceNameSpacesBytes The Tag-24-wrapped DeviceNameSpaces CBOR bytes.
  */
 data class DeviceAuthentication(
-    val label: String = DEVICE_AUTHENTICATION,
     val sessionTranscript: ByteArray,
     val docType: String,
     val deviceNameSpacesBytes: ByteArray
 ) {
+    val label: String = DEVICE_AUTHENTICATION
+
     companion object {
         const val DEVICE_AUTHENTICATION = "DeviceAuthentication"
         const val ELEMENT_COUNT = 4

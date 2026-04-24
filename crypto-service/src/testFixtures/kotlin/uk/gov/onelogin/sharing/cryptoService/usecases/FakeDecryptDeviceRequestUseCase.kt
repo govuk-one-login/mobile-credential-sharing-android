@@ -7,7 +7,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 
 class FakeDecryptDeviceRequestUseCase : DecryptDeviceRequestUseCase {
     var skDeviceToReturn: ByteArray = byteArrayOf(0x01, 0x02)
-    var sessionTranscriptToReturn: ByteArray = byteArrayOf(0x83.toByte(), 0x01, 0x02)
+    var sessionTranscriptToReturn: ByteArray = byteArrayOf(0x83.toByte(), 0x01, 0x02, 0x03)
     var exception: Exception? = null
     var exceptionAfterKeyDerivation: Exception? = null
 
