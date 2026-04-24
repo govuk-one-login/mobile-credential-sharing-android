@@ -9,9 +9,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
+import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
