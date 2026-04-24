@@ -3,13 +3,14 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.MessageSender
 
 /**
  * Responsible for orchestrating the BLE advertising and GATT service
  *
  * [PeripheralBluetoothState] via a [StateFlow].
  */
-interface PeripheralBluetoothTransport {
+interface PeripheralBluetoothTransport : MessageSender {
     /**
      * The current state of the BLE session, exposed as a [StateFlow].
      * This can be used to observe the session's status, such as whether it's advertising,

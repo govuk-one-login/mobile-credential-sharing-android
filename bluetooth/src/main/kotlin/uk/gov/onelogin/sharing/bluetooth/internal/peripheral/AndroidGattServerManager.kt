@@ -22,11 +22,15 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.NOTIFY_CLIENT_FAILED
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
@@ -36,6 +40,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 
 @ContributesBinding(AppScope::class)
+@Suppress("TooManyFunctions")
 class AndroidGattServerManager(
     private val context: Context,
     private val bluetoothManager: BluetoothManager,
@@ -239,5 +244,60 @@ class AndroidGattServerManager(
             logger.error(logTag, "failed to notify client with END command: notification failed")
             SessionEndStateQueued.Failed
         }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+        val server = gattServer ?: return false
+        val device = connectedDevice ?: return false
+        val characteristic = server.getService(serviceUuid)
+            ?.getCharacteristic(SERVER_2_CLIENT_UUID) ?: return false
+
+        if (data.isEmpty()) {
+            logger.error(logTag, "sendMessage called with empty data")
+            return false
+        }
+
+        return sendChunked(server, device, characteristic, data)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun sendChunked(
+        server: BluetoothGattServer,
+        device: BluetoothDevice,
+        characteristic: BluetoothGattCharacteristic,
+        data: ByteArray
+    ): Boolean {
+        val chunkSize = MtuValues.dataChunkSize(mtu)
+        logger.debug(logTag, "Sending ${data.size} bytes in chunks of $chunkSize (MTU=$mtu)")
+
+        var offset = 0
+        while (offset < data.size) {
+            val end = minOf(offset + chunkSize, data.size)
+            val isLast = end == data.size
+            val header = if (isLast) LAST_PART else NON_LAST_PART
+            val chunk = byteArrayOf(header) + data.copyOfRange(offset, end)
+
+            val success = gattWriter.notifyAndWriteToClientCharacteristic(
+                server,
+                device,
+                characteristic,
+                chunk
+            )
+
+            if (!success) {
+                logger.error(logTag, "Failed to send chunk at offset $offset")
+                return false
+            }
+
+            logger.debug(
+                logTag,
+                "Sent chunk: header=0x${"%02X".format(header)}, offset=$offset, size=${chunk.size}"
+            )
+            offset = end
+        }
+
+        logger.debug(logTag, "SessionData transmission complete")
+        return true
     }
 }
