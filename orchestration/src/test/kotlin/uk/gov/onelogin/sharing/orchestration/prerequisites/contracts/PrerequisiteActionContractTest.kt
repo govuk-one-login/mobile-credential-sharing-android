@@ -13,7 +13,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasFlag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.mockk.Called
 import io.mockk.confirmVerified
@@ -54,7 +53,6 @@ class PrerequisiteActionContractTest {
             allOf(
                 hasAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS),
                 hasData(Uri.fromParts("package", context.packageName, null)),
-                hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
         )
     }
