@@ -50,7 +50,8 @@ class DecryptDeviceRequestUseCaseImplTest {
             engagement = engagement,
             holderPrivateKey = holderPrivateKey,
             decryptCounter = 1u,
-            onDeriveSkDevice = { capturedSkDevice = it }
+            onDeriveSkDevice = { capturedSkDevice = it },
+            onDeriveSessionTranscript = {}
         )
 
         val expectedCipherText = decodeSessionEstablishmentModel(

@@ -46,4 +46,17 @@ interface HolderCryptoService {
         skDevice: ByteArray,
         encryptCounter: UInt
     ): ByteArray
+
+    /**
+     * Constructs the `DeviceAuthenticationBytes` payload as defined in ISO 18013-5.
+     *
+     * @param sessionTranscript The raw SessionTranscript bytes.
+     * @param docType The document type string.
+     * @return A [DeviceAuthenticationResult] containing both the encoded
+     *         `DeviceAuthenticationBytes` and the reusable `DeviceNameSpacesBytes`.
+     */
+    fun buildDeviceAuthenticationBytes(
+        sessionTranscript: ByteArray,
+        docType: String
+    ): DeviceAuthenticationResult
 }

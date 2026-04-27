@@ -297,6 +297,11 @@ class HolderOrchestrator(
                     sessionFlow.value.updateSessionContext {
                         it.copy(skDevice = skDevice)
                     }
+                },
+                onDeriveSessionTranscript = { transcript ->
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(sessionTranscriptBytes = transcript)
+                    }
                 }
             )
 

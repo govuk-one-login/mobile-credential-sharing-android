@@ -29,7 +29,8 @@ class DecryptDeviceRequestUseCaseImpl(
         engagement: String,
         holderPrivateKey: PrivateKey,
         decryptCounter: UInt,
-        onDeriveSkDevice: (ByteArray) -> Unit
+        onDeriveSkDevice: (ByteArray) -> Unit,
+        onDeriveSessionTranscript: (ByteArray) -> Unit
     ): DeviceRequest {
         val sessionEstablishment = decodeSessionEstablishmentModel(
             rawBytes = sessionEstablishmentBytes,
@@ -50,6 +51,8 @@ class DecryptDeviceRequestUseCaseImpl(
             eReaderKeyTagged = sessionEstablishment.eReaderKey,
             logger = logger
         )
+
+        onDeriveSessionTranscript(transcript)
 
         val skReader = sessionSecurity.deriveSessionKey(
             sharedKey = sharedSecret,

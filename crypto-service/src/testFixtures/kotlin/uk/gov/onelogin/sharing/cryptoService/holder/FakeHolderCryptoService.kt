@@ -16,6 +16,15 @@ class FakeHolderCryptoService : HolderCryptoService {
     var lastEncryptSkDevice: ByteArray? = null
     var lastEncryptCounter: UInt? = null
 
+    var deviceAuthResultToReturn: DeviceAuthenticationResult =
+        DeviceAuthenticationResult(
+            deviceAuthenticationBytes = byteArrayOf(),
+            deviceNameSpacesBytes = byteArrayOf()
+        )
+    var deviceAuthException: Exception? = null
+    var lastDeviceAuthDocType: String? = null
+    var lastDeviceAuthSessionTranscript: ByteArray? = null
+
     override fun buildTerminationSessionData(status: SessionDataStatus): ByteArray {
         lastBuildTerminationStatus = status
         return byteArrayOf()
@@ -42,5 +51,15 @@ class FakeHolderCryptoService : HolderCryptoService {
         lastEncryptSkDevice = skDevice
         lastEncryptCounter = encryptCounter
         return encryptedToReturn
+    }
+
+    override fun buildDeviceAuthenticationBytes(
+        sessionTranscript: ByteArray,
+        docType: String
+    ): DeviceAuthenticationResult {
+        deviceAuthException?.let { throw it }
+        lastDeviceAuthSessionTranscript = sessionTranscript
+        lastDeviceAuthDocType = docType
+        return deviceAuthResultToReturn
     }
 }

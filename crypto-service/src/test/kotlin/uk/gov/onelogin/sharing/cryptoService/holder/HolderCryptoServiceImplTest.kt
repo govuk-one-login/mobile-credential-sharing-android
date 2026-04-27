@@ -9,6 +9,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
+import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
@@ -20,9 +22,10 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.S
 class HolderCryptoServiceImplTest {
 
     private val fakeSessionSecurity = FakeSessionSecurity()
+    private val logger = SystemLogger()
     private val service = HolderCryptoServiceImpl(
         sessionSecurity = fakeSessionSecurity,
-        logger = SystemLogger()
+        logger = logger
     )
     private val cborMapper = ObjectMapper(CBORFactory())
 
@@ -82,5 +85,25 @@ class HolderCryptoServiceImplTest {
         assertTrue(map.containsKey("data"))
         assertEquals(DeviceRole.HOLDER, fakeSessionSecurity.lastEncryptRole)
         assertEquals(1u, fakeSessionSecurity.lastEncryptCounter)
+    }
+
+    @Test
+    fun `buildDeviceAuthenticationBytes returns a DeviceAuthenticationResult`() {
+        val result = service.buildDeviceAuthenticationBytes(
+            sessionTranscript = validSessionTranscript,
+            docType = MDL_DOC_TYPE
+        )
+
+        assertTrue(result.deviceNameSpacesBytes.isNotEmpty())
+        assertTrue(
+            "DeviceNameSpacesBytes encoded: ${result.deviceNameSpacesBytes.toHexString()}" in
+                logger
+        )
+
+        assertTrue(result.deviceAuthenticationBytes.isNotEmpty())
+        assertTrue(
+            "DeviceAuthenticationBytes encoded: ${result.deviceAuthenticationBytes.toHexString()}"
+                in logger
+        )
     }
 }

@@ -6,11 +6,13 @@ import dev.zacsweers.metro.binding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceAuthentication
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
@@ -53,6 +55,34 @@ class HolderCryptoServiceImpl(
             data = cborBytes,
             role = DeviceRole.HOLDER,
             encryptCounter = encryptCounter
+        )
+    }
+
+    override fun buildDeviceAuthenticationBytes(
+        sessionTranscript: ByteArray,
+        docType: String
+    ): DeviceAuthenticationResult {
+        val deviceNameSpacesBytes = encodeDeviceNameSpacesBytes()
+
+        logger.debug(
+            logTag,
+            "DeviceNameSpacesBytes encoded: ${deviceNameSpacesBytes.toHexString()}"
+        )
+
+        val deviceAuthenticationBytes = DeviceAuthentication(
+            sessionTranscript = sessionTranscript,
+            docType = docType,
+            deviceNameSpacesBytes = deviceNameSpacesBytes
+        ).encodeCbor()
+
+        logger.debug(
+            logTag,
+            "DeviceAuthenticationBytes encoded: ${deviceAuthenticationBytes.toHexString()}"
+        )
+
+        return DeviceAuthenticationResult(
+            deviceAuthenticationBytes = deviceAuthenticationBytes,
+            deviceNameSpacesBytes = deviceNameSpacesBytes
         )
     }
 }
