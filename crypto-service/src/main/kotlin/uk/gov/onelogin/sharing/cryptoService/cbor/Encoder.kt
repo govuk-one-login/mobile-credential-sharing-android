@@ -24,6 +24,8 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceAuthentication
 
+private const val CBOR_ARRAY_4 = 0x84
+
 /**
  * A private generic function that takes ('Any') map of custom serializers to encode using
  * [CborMapper.create] and returns a [ByteArray] object
@@ -147,14 +149,11 @@ fun SessionData.encodeCbor(): ByteArray {
  */
 fun DeviceAuthentication.encodeCbor(): ByteArray {
     val deviceAuthenticationArray = ByteArrayOutputStream().also { out ->
-        val gen = CBORFactory().createGenerator(out)
-        gen.writeStartArray(null, DeviceAuthentication.ELEMENT_COUNT)
-        gen.writeString(label)
-        gen.flush()
+        // CBOR definite-length array header for 4 elements
+        out.write(CBOR_ARRAY_4)
+        CBORFactory().createGenerator(out).use { gen -> gen.writeString(label) }
         out.write(sessionTranscript)
-        CBORFactory().createGenerator(out).use { innerGen ->
-            innerGen.writeString(docType)
-        }
+        CBORFactory().createGenerator(out).use { gen -> gen.writeString(docType) }
         out.write(deviceNameSpacesBytes)
     }.toByteArray()
     return EmbeddedCbor(deviceAuthenticationArray).encodeCbor()
