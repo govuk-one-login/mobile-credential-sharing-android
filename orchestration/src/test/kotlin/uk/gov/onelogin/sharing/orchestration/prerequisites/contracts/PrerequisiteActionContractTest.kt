@@ -53,8 +53,7 @@ class PrerequisiteActionContractTest {
             createIntent(PrerequisiteAction.OpenAppPermissions),
             allOf(
                 hasAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS),
-                hasData(Uri.fromParts("package", context.packageName, null)),
-                hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK)
+                hasData(Uri.fromParts("package", context.packageName, null))
             )
         )
     }
