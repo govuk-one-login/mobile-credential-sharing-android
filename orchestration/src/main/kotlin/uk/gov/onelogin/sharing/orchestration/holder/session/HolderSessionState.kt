@@ -5,6 +5,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 /**
  * Represents a digital credential verification journey's state for devices that contain digital
@@ -82,7 +83,9 @@ sealed class HolderSessionState : Completable {
          * The User cannot complete a digital credential verification journey due to encountering
          * an unresolvable error.
          */
-        data class Failed(val error: SessionError) : Complete(error.message)
+        data class Failed(val error: SessionError) : Complete(error.message) {
+            val sessionReason: SessionErrorReason get() = error.reason
+        }
 
         /**
          * The User has chosen to stop a partially completed digital credential verification
