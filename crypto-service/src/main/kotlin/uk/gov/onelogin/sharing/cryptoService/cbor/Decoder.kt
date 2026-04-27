@@ -50,7 +50,7 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
         details = [
             ImplementationDetail(
                 ticket = "N/A not captured",
-                description = "Create DTO -> Domain mapping functions for verifier to extract" +
+                description = "Create DTO -> Domain mapping functions for verifier to extract " +
                     "deserialized device engagement message"
             )
         ]
