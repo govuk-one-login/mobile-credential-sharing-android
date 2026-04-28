@@ -73,4 +73,3 @@ class CredentialRequestHandler(
             "provided credential matches DeviceRequest docType"
     }
 }
-

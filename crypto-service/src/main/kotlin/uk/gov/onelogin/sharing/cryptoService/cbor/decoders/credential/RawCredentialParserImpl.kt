@@ -32,11 +32,9 @@ class RawCredentialParserImpl : RawCredentialParser {
         throw RawCredentialParsingException(FAILED_TO_PARSE_RAW_CREDENTIAL_CBOR, e)
     }
 
-    private fun extractMsoDocType(
-        cborMapper: ObjectMapper,
-        issuerAuthArray: ArrayNode
-    ): String {
-        // COSE_Sign1: [protectedHeader, unprotectedHeader, payload, signature]
+    @Suppress("ThrowsCount")
+    private fun extractMsoDocType(cborMapper: ObjectMapper, issuerAuthArray: ArrayNode): String {
+        // COSE_Sign1: [protected, unprotected, payload, signature] - RFC 9052 standard
         val payloadNode = issuerAuthArray.get(COSE_SIGN1_PAYLOAD_INDEX) as? BinaryNode
             ?: throw RawCredentialParsingException(ERROR_MISSING_COSE_PAYLOAD)
 

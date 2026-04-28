@@ -34,8 +34,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
-import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
-import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -45,6 +43,8 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSe
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
@@ -228,10 +228,10 @@ class HolderOrchestrator(
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
                             description = "We may need to handle explicit bluetooth " +
-                                    "disconnection states to handle common error codes " +
-                                    "8, 19, 22 and 133. The function below will handle " +
-                                    "treat all disconnect states the same when connected " +
-                                    "to a device"
+                                "disconnection states to handle common error codes " +
+                                "8, 19, 22 and 133. The function below will handle " +
+                                "treat all disconnect states the same when connected " +
+                                "to a device"
                         )
                     ]
                 )

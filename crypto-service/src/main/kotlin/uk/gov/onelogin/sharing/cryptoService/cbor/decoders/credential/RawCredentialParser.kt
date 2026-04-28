@@ -12,4 +12,3 @@ fun interface RawCredentialParser {
      */
     fun parse(rawCredential: ByteArray): ParsedRawCredential
 }
-
