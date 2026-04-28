@@ -27,6 +27,9 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeRawCredentialParser
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParsingException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
@@ -89,6 +92,23 @@ class HolderOrchestratorTest {
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
+    private val fakeRawCredentialParser = FakeRawCredentialParser().apply {
+        resultToReturn = ParsedRawCredential(
+            nameSpaces = byteArrayOf(0xA0.toByte()),
+            issuerAuth = byteArrayOf(0x01),
+            msoDocType = "org.iso.18013.5.1.mDL"
+        )
+    }
+
+    private val fakeCredentialProvider = FakeCredentialProvider().apply {
+        credentialsToReturn = listOf(
+            Credential(
+                id = "test-credential-id",
+                rawCredential = byteArrayOf(0x01)
+            )
+        )
+    }
+
     private fun createSessionFactory() = FakeSessionFactory(
         initialStates.map { initialState ->
             HolderSessionImpl(
@@ -106,7 +126,9 @@ class HolderOrchestratorTest {
         holderCryptoService: HolderCryptoService = HolderCryptoServiceImpl(
             sessionSecurity = FakeSessionSecurity(),
             logger = logger
-        )
+        ),
+        credentialProvider: FakeCredentialProvider = fakeCredentialProvider,
+        rawCredentialParser: FakeRawCredentialParser = fakeRawCredentialParser
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -114,8 +136,9 @@ class HolderOrchestratorTest {
         peripheralBluetoothTransport = peripheralBluetoothTransport,
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
-        credentialProvider = FakeCredentialProvider(),
-        holderCryptoService = holderCryptoService
+        credentialProvider = credentialProvider,
+        holderCryptoService = holderCryptoService,
+        rawCredentialParser = rawCredentialParser
     )
 
     @Test
@@ -670,6 +693,180 @@ class HolderOrchestratorTest {
             SessionDataStatus.SESSION_TERMINATION,
             fakeCryptoService.lastBuildTerminationStatus
         )
+        assertEquals(0, peripheralTransport.stopCalls)
+    }
+
+    @Test
+    fun `AC1 successful credential fetch and docType match stores credential`() = runTest {
+        val sessionFactory = createSessionFactory()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            peripheralBluetoothTransport = peripheralTransport
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+        assert("provided credential matches DeviceRequest docType" in logger)
+
+        val session = (sessionFactory as FakeSessionFactory).getCurrentSession()
+        val validated = session.sessionContext.validatedCredential
+        assertEquals("test-credential-id", validated?.credentialId)
+    }
+
+    @Test
+    fun `AC2 MSO decode failure triggers no match termination`() = runTest {
+        val parser = FakeRawCredentialParser().apply {
+            exceptionToThrow = RawCredentialParsingException("bad CBOR")
+        }
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            rawCredentialParser = parser
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assert(
+            "SessionData termination initiated due to MSO decoding error" in logger
+        )
+    }
+
+    @Test
+    fun `AC3 host app throws error triggers no match termination`() = runTest {
+        val provider = FakeCredentialProvider().apply {
+            getCredentialsException = RuntimeException("host error")
+        }
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            credentialProvider = provider
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assert(
+            "SessionData termination initiated due to getCredentials error thrown" in logger
+        )
+    }
+
+    @Test
+    fun `AC4 zero credentials returned triggers no match termination`() = runTest {
+        val provider = FakeCredentialProvider()
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            credentialProvider = provider
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assert(
+            "SessionData termination initiated due to getCredentials no credentials returned"
+                in logger
+        )
+    }
+
+    @Test
+    fun `AC5 docType mismatch triggers no match termination`() = runTest {
+        val parser = FakeRawCredentialParser().apply {
+            resultToReturn = ParsedRawCredential(
+                nameSpaces = byteArrayOf(0xA0.toByte()),
+                issuerAuth = byteArrayOf(0x01),
+                msoDocType = "org.iso.18013.5.1.WRONG"
+            )
+        }
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            rawCredentialParser = parser
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assert(
+            "SessionData termination initiated due to " +
+                "getCredentials no credentials of correct docType returned" in logger
+        )
+    }
+
+    @Test
+    fun `AC6 no match termination builds error SessionData with status 20`() = runTest {
+        val provider = FakeCredentialProvider()
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            credentialProvider = provider
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            Status.OK,
+            fakeCryptoService.lastErrorDeviceResponseStatus
+        )
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastErrorSessionDataStatus
+        )
+        assertThat(orchestrator.holderSessionState.value, isFailed())
         assertEquals(0, peripheralTransport.stopCalls)
     }
 }

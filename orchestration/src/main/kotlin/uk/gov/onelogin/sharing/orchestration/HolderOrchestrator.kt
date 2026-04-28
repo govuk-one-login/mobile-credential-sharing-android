@@ -25,13 +25,17 @@ import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParser
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -61,9 +65,13 @@ class HolderOrchestrator(
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
-    @Suppress("UnusedPrivateProperty")
-    private val credentialProvider: CredentialProvider
+    private val credentialProvider: CredentialProvider,
+    private val rawCredentialParser: RawCredentialParser
 ) : Orchestrator.Holder {
+    private val credentialRequestHandler = CredentialRequestHandler(
+        credentialProvider,
+        rawCredentialParser
+    )
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
 
@@ -220,10 +228,10 @@ class HolderOrchestrator(
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
                             description = "We may need to handle explicit bluetooth " +
-                                "disconnection states to handle common error codes " +
-                                "8, 19, 22 and 133. The function below will handle " +
-                                "treat all disconnect states the same when connected " +
-                                "to a device"
+                                    "disconnection states to handle common error codes " +
+                                    "8, 19, 22 and 133. The function below will handle " +
+                                    "treat all disconnect states the same when connected " +
+                                    "to a device"
                         )
                     ]
                 )
@@ -309,12 +317,57 @@ class HolderOrchestrator(
                 it.copy(decryptCounter = it.decryptCounter + 1u)
             }
 
-            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+            val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
+            appCoroutineScope.launch {
+                requestAndValidateCredential(requestedDocType, deviceRequest)
+            }
         } catch (e: DeviceRequestDecodingException) {
             handleDeviceRequestFailure(e)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             sendTerminationAndFail(e)
         }
+    }
+
+    private suspend fun requestAndValidateCredential(
+        requestedDocType: String,
+        deviceRequest: DeviceRequest
+    ) {
+        try {
+            val validated = credentialRequestHandler.requestAndValidate(requestedDocType)
+
+            sessionFlow.value.updateSessionContext {
+                it.copy(validatedCredential = validated)
+            }
+
+            logger.debug(logTag, CredentialRequestHandler.LOG_DOCTYPE_MATCH)
+            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+        } catch (e: CredentialRequestException) {
+            handleNoMatchTermination(e)
+        }
+    }
+
+    private fun handleNoMatchTermination(exception: CredentialRequestException) {
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
+        val context = sessionFlow.value.sessionContext
+        val skDevice = context.skDevice
+
+        skDevice?.let {
+            holderCryptoService.buildErrorSessionData(
+                deviceResponseStatus = Status.OK,
+                sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+                skDevice = it,
+                encryptCounter = context.encryptCounter
+            )
+        }
+
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = exception.message ?: UNKNOWN_ERROR,
+                    exception = exception
+                )
+            )
+        )
     }
 
     fun assembleAndEncryptResponse(documents: List<Document>): ByteArray {
