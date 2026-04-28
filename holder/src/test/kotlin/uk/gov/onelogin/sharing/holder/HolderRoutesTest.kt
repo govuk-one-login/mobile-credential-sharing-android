@@ -15,6 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenRule
 
 @RunWith(AndroidJUnit4::class)
 class HolderRoutesTest {
