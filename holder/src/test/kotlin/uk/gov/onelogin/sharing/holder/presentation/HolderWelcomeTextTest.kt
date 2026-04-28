@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder
+package uk.gov.onelogin.sharing.holder.presentation
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -11,8 +11,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeText
 
 @RunWith(AndroidJUnit4::class)
 class HolderWelcomeTextTest {
@@ -26,12 +24,12 @@ class HolderWelcomeTextTest {
     fun showsWelcomeText() = runTest {
         composeTestRule.setContent {
             HolderWelcomeText(
-                modifier = Modifier.testTag(testTag)
+                modifier = Modifier.Companion.testTag(testTag)
             )
         }
 
         composeTestRule.onNodeWithTag(testTag)
             .assertIsDisplayed()
-            .assertTextEquals(HOLDER_WELCOME_TEXT)
+            .assertTextEquals(HolderWelcomeTexts.HOLDER_WELCOME_TEXT)
     }
 }
