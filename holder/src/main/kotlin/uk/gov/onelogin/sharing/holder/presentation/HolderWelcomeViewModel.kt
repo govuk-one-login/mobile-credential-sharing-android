@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -39,6 +40,7 @@ class HolderWelcomeViewModel(
         .holderSessionState
         .map(::convertToNavigationEvent)
         .distinctUntilChanged()
+        .flowOn(dispatcher)
         .shareIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Lazily
@@ -50,7 +52,9 @@ class HolderWelcomeViewModel(
             HolderWelcomeUiState(
                 qrData = (sessionState as? HolderSessionState.PresentingEngagement)?.qrData
             )
-        }.stateIn(
+        }.distinctUntilChanged()
+        .flowOn(dispatcher)
+        .stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
             HolderWelcomeUiState()

@@ -45,9 +45,6 @@ internal fun HolderConsentScreen(
             when (event) {
                 is HolderConsentNavEvents.NavigateToGenericError ->
                     latestOnGenericError()
-                else -> {
-                    // do nothing with unrelated / null events
-                }
             }
         }
     }

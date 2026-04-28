@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,17 +26,21 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ContributesIntoMap(HolderUiScope::class)
 class UnrecoverableHolderViewModel(
     private val orchestrator: Orchestrator.Holder,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
 
-    val failureState: StateFlow<HolderSessionState.Complete.Failed?> =
-        orchestrator.holderSessionState.map {
+    val failureState: StateFlow<HolderSessionState.Complete.Failed?> = orchestrator
+        .holderSessionState
+        .map {
             it as? HolderSessionState.Complete.Failed
-        }.stateIn(
+        }
+        .distinctUntilChanged()
+        .flowOn(dispatcher)
+        .stateIn(
             viewModelScope.plus(dispatcher),
-            SharingStarted.Companion.Eagerly,
+            SharingStarted.Eagerly,
             orchestrator.holderSessionState.value as?
-                HolderSessionState.Complete.Failed
+                    HolderSessionState.Complete.Failed
         )
 
     private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()
