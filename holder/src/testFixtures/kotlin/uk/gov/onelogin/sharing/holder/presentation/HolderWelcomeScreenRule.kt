@@ -12,9 +12,8 @@ import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.holder.QrCodeGenerator.QR_CODE_CONTENT_DESC
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeTexts.HOLDER_WELCOME_TEXT
 
-class HolderWelcomeScreenRule(
-    composeTestRule: ComposeContentTestRule,
-) : ComposeContentTestRule by composeTestRule {
+class HolderWelcomeScreenRule(composeTestRule: ComposeContentTestRule) :
+    ComposeContentTestRule by composeTestRule {
 
     private var onAwaitingUserConsent = false
     private var connectionError: BluetoothSessionError? = null
@@ -31,9 +30,8 @@ class HolderWelcomeScreenRule(
     }
 
     fun assertOnAwaitingUserConsentIsCalled() = waitUntil { onAwaitingUserConsent }
-    fun assertOnConnectionError(
-        matcher: Matcher<in BluetoothSessionError>
-    ) = waitUntil { matcher.matches(connectionError) }
+    fun assertOnConnectionError(matcher: Matcher<in BluetoothSessionError>) =
+        waitUntil { matcher.matches(connectionError) }
 
     fun assertOnGenericErrorIsCalled() = waitUntil { onGenericError }
 

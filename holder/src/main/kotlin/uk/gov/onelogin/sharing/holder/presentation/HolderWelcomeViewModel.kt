@@ -32,7 +32,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 class HolderWelcomeViewModel(
     private val logger: Logger,
     orchestrator: Orchestrator.Holder,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     val navEvents: SharedFlow<HolderScreenEvents?> = orchestrator
@@ -56,40 +56,40 @@ class HolderWelcomeViewModel(
             HolderWelcomeUiState()
         )
 
-    private fun convertToNavigationEvent(
-        sessionState: HolderSessionState
-    ): HolderScreenEvents? = when (sessionState) {
-        is HolderSessionState.Complete.Failed -> {
-            val exception =
-                (sessionState.sessionReason as? SessionErrorReason.UnrecoverableThrowable)
-                    ?.exception
+    private fun convertToNavigationEvent(sessionState: HolderSessionState): HolderScreenEvents? =
+        when (sessionState) {
+            is HolderSessionState.Complete.Failed -> {
+                val exception =
+                    (sessionState.sessionReason as? SessionErrorReason.UnrecoverableThrowable)
+                        ?.exception
 
-            when (exception) {
-                is BluetoothDisconnectedException -> {
-                    HolderScreenEvents.NavigateToBluetoothError(
-                        BluetoothSessionError.BluetoothConnectionError
-                    )
-                }
+                when (exception) {
+                    is BluetoothDisconnectedException -> {
+                        HolderScreenEvents.NavigateToBluetoothError(
+                            BluetoothSessionError.BluetoothConnectionError
+                        )
+                    }
 
-                is DeviceRequestDecodingException -> {
-                    HolderScreenEvents.NavigateToGenericError
-                }
+                    is DeviceRequestDecodingException -> {
+                        HolderScreenEvents.NavigateToGenericError
+                    }
 
-                else -> {
-                    HolderScreenEvents.NavigateToGenericError
+                    else -> {
+                        HolderScreenEvents.NavigateToGenericError
+                    }
                 }
             }
-        }
-        is HolderSessionState.AwaitingUserConsent ->
-            HolderScreenEvents.AwaitingUserContent
 
-        else -> null
-    }.also {
-        logger.debug(
-            logTag,
-            "Updated navigation event: $it"
-        )
-    }
+            is HolderSessionState.AwaitingUserConsent ->
+                HolderScreenEvents.AwaitingUserContent
+
+            else -> null
+        }.also {
+            logger.debug(
+                logTag,
+                "Updated navigation event: $it"
+            )
+        }
 }
 
 data class HolderWelcomeUiState(val qrData: String? = null)

@@ -58,13 +58,12 @@ class HolderScreenEventsFromState : TestParametersValuesProvider() {
         )
     )
 
-    override fun provideValues(
-        context: Context?
-    ): List<TestParameters.TestParametersValues?>? = inputs.map { (name, state, event) ->
-        TestParameters.TestParametersValues.builder()
-            .name(name)
-            .addParameter("state", state)
-            .addParameter("expected", event)
-            .build()
-    }
+    override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?>? =
+        inputs.map { (name, state, event) ->
+            TestParameters.TestParametersValues.builder()
+                .name(name)
+                .addParameter("state", state)
+                .addParameter("expected", event)
+                .build()
+        }
 }

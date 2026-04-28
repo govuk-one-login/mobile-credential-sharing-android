@@ -116,7 +116,6 @@ class HolderWelcomeScreenTest {
             assertWelcomeTextIsDisplayed()
             assertQrCodeIsDisplayed()
         }
-
     }
 
     @Composable
@@ -125,7 +124,7 @@ class HolderWelcomeScreenTest {
             viewModel = viewModel,
             onAwaitingUserConsent = composeTestRule::callOnAwaitingUserConsent,
             onConnectionError = composeTestRule::callOnConnectionError,
-            onGenericError = composeTestRule::callOnGenericError,
+            onGenericError = composeTestRule::callOnGenericError
         )
     }
 }

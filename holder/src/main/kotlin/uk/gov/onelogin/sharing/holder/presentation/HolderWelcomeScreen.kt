@@ -56,7 +56,7 @@ fun HolderWelcomeScreen(
 
     QrContent(
         contentState = contentState,
-        modifier = modifier,
+        modifier = modifier
     )
 }
 

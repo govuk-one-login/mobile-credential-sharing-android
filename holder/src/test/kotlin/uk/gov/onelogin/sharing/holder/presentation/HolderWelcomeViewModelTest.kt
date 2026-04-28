@@ -50,13 +50,13 @@ class HolderWelcomeViewModelTest {
     fun `Provides QR data during the 'PresentingEngagement' session state`() = runTest(
         mainDispatcherRule.testDispatcher
     ) {
-            viewModel.uiState.test {
-                assertThat(
-                    awaitItem().qrData,
-                    equalTo(qrData)
-                )
-            }
+        viewModel.uiState.test {
+            assertThat(
+                awaitItem().qrData,
+                equalTo(qrData)
+            )
         }
+    }
 
     @Test
     fun `Has no QR data for inapplicable session states`() = runTest(
