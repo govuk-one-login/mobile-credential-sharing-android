@@ -31,7 +31,8 @@ class HolderConsentViewModelTest {
 
     private val viewModel by lazy {
         HolderConsentViewModel(
-            orchestrator = orchestrator
+            orchestrator = orchestrator,
+            dispatcher = dispatcherRule.testDispatcher
         )
     }
 
