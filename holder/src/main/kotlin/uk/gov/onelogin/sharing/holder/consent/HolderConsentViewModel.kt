@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 @ViewModelKey
-class HolderConsentViewModel(orchestrator: Orchestrator.Holder) : ViewModel() {
+class HolderConsentViewModel(private val orchestrator: Orchestrator.Holder) : ViewModel() {
     val holderSessionState: StateFlow<HolderSessionState> = orchestrator.holderSessionState
 
     private val _navEvents = MutableSharedFlow<HolderConsentNavEvents>(extraBufferCapacity = 1)
@@ -31,5 +31,13 @@ class HolderConsentViewModel(orchestrator: Orchestrator.Holder) : ViewModel() {
                 }
             }
         }
+    }
+
+    fun onAccept() {
+        orchestrator.confirmConsent()
+    }
+
+    fun onDeny() {
+        orchestrator.cancel()
     }
 }

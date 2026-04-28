@@ -39,6 +39,10 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderResponseUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderResponseUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
@@ -106,7 +110,9 @@ class HolderOrchestratorTest {
         holderCryptoService: HolderCryptoService = HolderCryptoServiceImpl(
             sessionSecurity = FakeSessionSecurity(),
             logger = logger
-        )
+        ),
+        holderResponseUseCase: HolderResponseUseCase = FakeHolderResponseUseCase(),
+        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase()
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -115,7 +121,9 @@ class HolderOrchestratorTest {
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
         credentialProvider = FakeCredentialProvider(),
-        holderCryptoService = holderCryptoService
+        holderCryptoService = holderCryptoService,
+        holderResponseUseCase = holderResponseUseCase,
+        confirmConsentUseCase = confirmConsentUseCase
     )
 
     @Test
@@ -671,5 +679,43 @@ class HolderOrchestratorTest {
             fakeCryptoService.lastBuildTerminationStatus
         )
         assertEquals(0, peripheralTransport.stopCalls)
+    }
+
+    @Test
+    fun `sign failure sends status 20 termination and transitions to failed`() = runTest {
+        val fakeConfirmConsentUseCase = FakeConfirmConsentUseCase().apply {
+            exception = RuntimeException("Signing failed")
+        }
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = fakeConfirmConsentUseCase
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(
+                byteArrayOf(
+                    1,
+                    2,
+                    3
+                )
+            )
+        )
+        advanceUntilIdle()
+
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastBuildTerminationStatus
+        )
+        assertThat(orchestrator.holderSessionState.value, isFailed())
     }
 }

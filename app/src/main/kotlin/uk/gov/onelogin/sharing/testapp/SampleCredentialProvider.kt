@@ -34,13 +34,43 @@ class SampleCredentialProvider(private val activeCredential: MockCredential) : C
      * secure hardware.
      */
     override suspend fun sign(payload: ByteArray, documentId: String): ByteArray {
-        val privateKey = KeyFactory.getInstance(ALGORITHM_EC)
-            .generatePrivate(PKCS8EncodedKeySpec(activeCredential.privateKey))
+        val pemContent = activeCredential.privateKey.toString(Charsets.UTF_8)
+            .lines()
+            .filter { !it.startsWith("-----") && it.isNotBlank() }
+            .joinToString("")
+        val derBytes = java.util.Base64.getDecoder().decode(pemContent)
 
-        return Signature.getInstance(SIGNING_ALGORITHM).run {
+        val privateKey = KeyFactory.getInstance(ALGORITHM_EC)
+            .generatePrivate(PKCS8EncodedKeySpec(derBytes))
+
+        val derSignature = Signature.getInstance(SIGNING_ALGORITHM).run {
             initSign(privateKey)
             update(payload)
             sign()
         }
+
+        return derToRawRS(derSignature)
+    }
+
+    /**
+     * Converts a DER-encoded ECDSA signature to raw R||S format (64 bytes for P-256).
+     *
+     * DER structure: 0x30 <len> 0x02 <rLen> <r> 0x02 <sLen> <s>
+     */
+    private fun derToRawRS(der: ByteArray): ByteArray {
+        var offset = 2
+        val rLen = der[offset + 1].toInt() and 0xFF
+        val rStart = offset + 2
+        val r = der.copyOfRange(rStart, rStart + rLen)
+
+        offset = rStart + rLen
+        val sLen = der[offset + 1].toInt() and 0xFF
+        val sStart = offset + 2
+        val s = der.copyOfRange(sStart, sStart + sLen)
+
+        val result = ByteArray(64)
+        r.takeLast(32).toByteArray().copyInto(result, 32 - minOf(r.size, 32))
+        s.takeLast(32).toByteArray().copyInto(result, 64 - minOf(s.size, 32))
+        return result
     }
 }

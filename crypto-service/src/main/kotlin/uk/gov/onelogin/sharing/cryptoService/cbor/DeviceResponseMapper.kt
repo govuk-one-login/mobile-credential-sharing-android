@@ -58,6 +58,6 @@ fun IssuerSignedItem.toEmbeddedCbor(): EmbeddedCbor {
 fun DeviceSigned.toDto(): DeviceResponseDto.DeviceSignedDTO = DeviceResponseDto.DeviceSignedDTO(
     nameSpaces = EmbeddedCbor(nameSpaces),
     deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-        deviceSignature = deviceSignature
+        deviceSignature = deviceAuth
     )
 )

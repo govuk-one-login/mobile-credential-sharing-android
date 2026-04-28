@@ -41,6 +41,8 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSe
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderResponseUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
@@ -62,7 +64,9 @@ class HolderOrchestrator(
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
     @Suppress("UnusedPrivateProperty")
-    private val credentialProvider: CredentialProvider
+    private val credentialProvider: CredentialProvider,
+    private val holderResponseUseCase: HolderResponseUseCase,
+    private val confirmConsentUseCase: ConfirmConsentUseCase
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -171,6 +175,31 @@ class HolderOrchestrator(
                         onComplete = ::performPreflightChecks
                     )
             }.let(::safeTransitionTo)
+        }
+    }
+
+    override fun confirmConsent() {
+        val state = sessionFlow.value.currentState.value
+        if (state !is HolderSessionState.AwaitingUserConsent) {
+            logger.error(logTag, "confirmConsent called in invalid state: $state")
+            return
+        }
+
+        safeTransitionTo(HolderSessionState.ProcessingResponse)
+
+        val sessionTranscript = sessionFlow.value.sessionContext.sessionTranscriptBytes
+            ?: return sendTerminationAndFail(IllegalStateException("Missing session transcript"))
+
+        appCoroutineScope.launch {
+            try {
+                confirmConsentUseCase.execute(
+                    sessionTranscript = sessionTranscript,
+                    deviceRequest = state.request,
+                    credentialProvider = credentialProvider
+                )
+            } catch (e: Exception) {
+                sendTerminationAndFail(e)
+            }
         }
     }
 
