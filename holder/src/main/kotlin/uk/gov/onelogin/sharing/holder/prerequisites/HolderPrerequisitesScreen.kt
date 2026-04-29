@@ -31,6 +31,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @Composable
 internal fun HolderPrerequisitesScreen(
     modifier: Modifier = Modifier,
+    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
     viewModel: HolderPrerequisitesViewModel = metroViewModel(),
     onHandlePreflight: () -> Unit = {},
     onPresentEngagement: () -> Unit = {},
@@ -57,10 +58,12 @@ internal fun HolderPrerequisitesScreen(
 
     LaunchedEffect(state) {
         viewModel.events.collect { event ->
-            when (event) {
-                is NavigationEvent.ToPreflight -> currentOnHandlePreflight()
-                is NavigationEvent.PresentEngagement -> currentOnPresentEngagement()
-                is NavigationEvent.ToUnrecoverableError -> currentOnUnrecoverableError()
+            withContext(mainDispatcher) {
+                when (event) {
+                    is NavigationEvent.ToPreflight -> currentOnHandlePreflight()
+                    is NavigationEvent.PresentEngagement -> currentOnPresentEngagement()
+                    is NavigationEvent.ToUnrecoverableError -> currentOnUnrecoverableError()
+                }
             }
         }
     }
