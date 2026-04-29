@@ -45,8 +45,8 @@ class RawCredentialParserImpl : RawCredentialParser {
         val innerBytes = (innerTree as? BinaryNode)?.binaryValue()
             ?: throw RawCredentialParsingException(ERROR_INVALID_TAG24)
 
-        val mso = cborMapper.readTree(innerBytes)
-        return mso.get(KEY_DOC_TYPE)?.asText()
+        val mobileSecurityObject = cborMapper.readTree(innerBytes)
+        return mobileSecurityObject.get(KEY_DOC_TYPE)?.asText()
             ?: throw RawCredentialParsingException(ERROR_MISSING_DOCTYPE)
     }
 
