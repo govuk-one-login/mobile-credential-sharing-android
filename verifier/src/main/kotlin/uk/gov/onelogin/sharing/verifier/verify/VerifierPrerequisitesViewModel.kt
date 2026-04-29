@@ -10,7 +10,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.v2.Logger
@@ -28,8 +30,8 @@ class VerifierPrerequisitesViewModel(
     orchestrator: Orchestrator.Verifier,
     dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
-    val events: SharedFlow<VerifyCredentialEvents?> = orchestrator.verifierSessionState
-        .map { session ->
+    val events: SharedFlow<VerifyCredentialEvents> = orchestrator.verifierSessionState
+        .mapNotNull { session ->
             when (session) {
                 is VerifierSessionState.Preflight -> VerifyCredentialEvents.NavigateToPreflight
 
@@ -45,7 +47,9 @@ class VerifierPrerequisitesViewModel(
                     "Converted session state to navigation event: $it"
                 )
             }
-        }.shareIn(
+        }.distinctUntilChanged()
+        .flowOn(dispatcher)
+        .shareIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Lazily
         )

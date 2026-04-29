@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verifier
+package uk.gov.onelogin.sharing.verifier.scan
 
 sealed class VerifierNavigationEvents {
     data object NavigateToDiagnostic : VerifierNavigationEvents()

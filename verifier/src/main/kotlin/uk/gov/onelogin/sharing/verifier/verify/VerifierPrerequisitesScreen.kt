@@ -42,10 +42,6 @@ internal fun VerifierPrerequisitesScreen(
 
                     VerifyCredentialEvents.NavigateToUnrecoverableError ->
                         latestOnUnrecoverableError()
-
-                    else -> {
-                        // do nothing with null events
-                    }
                 }
             }
         }
