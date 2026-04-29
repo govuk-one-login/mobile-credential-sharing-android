@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 @ContributesIntoMap(VerifierUiScope::class)
 class UnrecoverableVerifierViewModel(
     private val orchestrator: Orchestrator.Verifier,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     val failureState: StateFlow<VerifierSessionState.Complete.Failed?> =
@@ -38,7 +38,7 @@ class UnrecoverableVerifierViewModel(
                 viewModelScope.plus(dispatcher),
                 SharingStarted.Eagerly,
                 orchestrator.verifierSessionState.value as?
-                        VerifierSessionState.Complete.Failed
+                    VerifierSessionState.Complete.Failed
             )
 
     private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()

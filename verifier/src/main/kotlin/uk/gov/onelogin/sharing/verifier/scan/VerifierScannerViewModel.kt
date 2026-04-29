@@ -28,7 +28,7 @@ import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 @ViewModelKey
 class VerifierScannerViewModel(
     val orchestrator: Orchestrator.Verifier,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
     val navigationEvents: SharedFlow<VerifierNavigationEvents> = orchestrator
         .verifierSessionState

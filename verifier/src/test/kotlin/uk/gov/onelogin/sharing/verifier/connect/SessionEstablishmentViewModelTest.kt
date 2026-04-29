@@ -26,12 +26,11 @@ class SessionEstablishmentViewModelTest {
 
     private lateinit var viewModel: SessionEstablishmentViewModel
 
-    private fun createViewModel(
-        orchestrator: FakeOrchestrator = FakeOrchestrator()
-    ) = SessionEstablishmentViewModel(
-        logger = logger,
-        orchestrator = orchestrator,
-    )
+    private fun createViewModel(orchestrator: FakeOrchestrator = FakeOrchestrator()) =
+        SessionEstablishmentViewModel(
+            logger = logger,
+            orchestrator = orchestrator
+        )
 
     @Test
     fun `navigates to error when session state is Complete Failed`() = runTest(

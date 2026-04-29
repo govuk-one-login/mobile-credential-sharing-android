@@ -33,7 +33,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 class SessionEstablishmentViewModel(
     orchestrator: Orchestrator.Verifier,
     private val logger: Logger,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     val uiState: StateFlow<ConnectWithHolderDeviceState> = orchestrator

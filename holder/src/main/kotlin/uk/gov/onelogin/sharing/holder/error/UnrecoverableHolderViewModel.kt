@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ContributesIntoMap(HolderUiScope::class)
 class UnrecoverableHolderViewModel(
     private val orchestrator: Orchestrator.Holder,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     val failureState: StateFlow<HolderSessionState.Complete.Failed?> = orchestrator
@@ -40,7 +40,7 @@ class UnrecoverableHolderViewModel(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
             orchestrator.holderSessionState.value as?
-                    HolderSessionState.Complete.Failed
+                HolderSessionState.Complete.Failed
         )
 
     private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()

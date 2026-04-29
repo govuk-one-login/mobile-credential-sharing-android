@@ -8,9 +8,8 @@ import org.hamcrest.Matcher
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 
 @OptIn(ExperimentalPermissionsApi::class)
-class ConnectWithHolderDeviceRule(
-    composeContentTestRule: ComposeContentTestRule,
-) : ComposeContentTestRule by composeContentTestRule {
+class ConnectWithHolderDeviceRule(composeContentTestRule: ComposeContentTestRule) :
+    ComposeContentTestRule by composeContentTestRule {
 
     private lateinit var renderState: ConnectWithHolderDeviceState
 
@@ -38,9 +37,8 @@ class ConnectWithHolderDeviceRule(
         renderState = state
     }
 
-    fun assertBluetoothSessionError(
-        matcher: Matcher<in BluetoothSessionError>
-    ) = waitUntil { matcher.matches(this.bluetoothSessionError) }
+    fun assertBluetoothSessionError(matcher: Matcher<in BluetoothSessionError>) =
+        waitUntil { matcher.matches(this.bluetoothSessionError) }
 
     fun assertPlaceholderTextDoesNotExist() = onNodeWithText("Connect with holder device screen")
         .assertDoesNotExist()
