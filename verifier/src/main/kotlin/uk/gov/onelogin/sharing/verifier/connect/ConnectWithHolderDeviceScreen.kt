@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 
 @Composable
@@ -23,6 +25,11 @@ fun ConnectWithHolderDeviceScreen(
     val latestOnConnectionError by rememberUpdatedState(onConnectionError)
 
     val contentState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("ConnectWithHolderDeviceScreen")
+    }
 
     LaunchedEffect(Unit) {
         viewModel.navEvents.collect {

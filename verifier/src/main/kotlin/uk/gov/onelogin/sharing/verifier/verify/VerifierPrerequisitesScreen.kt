@@ -13,6 +13,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
 @Suppress("ComposableLambdaParameterNaming")
@@ -29,6 +31,11 @@ internal fun VerifierPrerequisitesScreen(
     val latestOnNavigateToPreflight by rememberUpdatedState(onNavigateToPreflight)
     val latestOnNavigateToScanner by rememberUpdatedState(onNavigateToScanner)
     val latestOnUnrecoverableError by rememberUpdatedState(onUnrecoverableError)
+
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("VerifierPrerequisitesScreen")
+    }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
