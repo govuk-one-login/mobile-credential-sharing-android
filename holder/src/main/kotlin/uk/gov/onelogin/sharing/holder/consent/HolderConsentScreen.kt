@@ -38,7 +38,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @Composable
 internal fun HolderConsentScreen(
     viewModel: HolderConsentViewModel = metroViewModel(),
-    onGenericError: () -> Unit = {},
+    onGenericError: () -> Unit = {}
 ) {
     BackHandler(enabled = true) { }
 

@@ -31,7 +31,7 @@ fun TestAppScreen(
     modifier: Modifier = Modifier,
     viewModel: TestAppViewModel = viewModel(),
     onStartHolderJourney: () -> Unit = {},
-    onStartVerifierJourney: () -> Unit = {},
+    onStartVerifierJourney: () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentOnStartHolderJourney by rememberUpdatedState(onStartHolderJourney)

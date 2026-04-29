@@ -79,9 +79,11 @@ internal fun SelectCredentialAttributesScreen(
                 }
             }
             Button(
-                onClick = { coroutineScope.launch {
-                    onSelectAttributeGroup(selected.attributeGroup)
-                } },
+                onClick = {
+                    coroutineScope.launch {
+                        onSelectAttributeGroup(selected.attributeGroup)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
