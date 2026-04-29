@@ -99,7 +99,6 @@ dependencies {
 
     listOf(
         platform(libs.androidx.compose.bom),
-        libs.androidx.metrics.performance,
         libs.bundles.android.baseline,
         libs.bundles.uk.gov.ui,
         libs.hilt.android,

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.VerifierUiScope
@@ -55,7 +56,9 @@ class VerifierPrerequisitesViewModel(
         )
 
     init {
-        orchestrator.start()
+        viewModelScope.launch(dispatcher) {
+            orchestrator.start()
+        }
     }
 }
 

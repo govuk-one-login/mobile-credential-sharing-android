@@ -32,6 +32,10 @@ android {
 
 dependencies {
     listOf(
+        libs.androidx.metrics.performance
+    ).forEach(::api)
+
+    listOf(
         libs.metro.viewmodel.compose
     ).forEach(::implementation)
 
