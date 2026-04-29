@@ -29,7 +29,5 @@ data class DeviceSignatureResult(
 /**
  * Exception thrown when device signature creation fails.
  */
-class DeviceSignatureException(
-    message: String,
-    cause: Throwable? = null
-) : Exception(message, cause)
+class DeviceSignatureException(message: String, cause: Throwable? = null) :
+    Exception(message, cause)

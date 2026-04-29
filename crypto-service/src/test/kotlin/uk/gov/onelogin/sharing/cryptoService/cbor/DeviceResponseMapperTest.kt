@@ -44,7 +44,7 @@ class DeviceResponseMapperTest {
                     ),
                     deviceSigned = DeviceSigned(
                         nameSpaces = nameSpacesBytes,
-                        deviceSignature = byteArrayOf(0x07, 0x08)
+                        deviceAuth = byteArrayOf(0x07, 0x08)
                     )
                 )
             ),

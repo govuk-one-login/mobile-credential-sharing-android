@@ -4,6 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
+import java.security.GeneralSecurityException
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
@@ -38,7 +39,9 @@ class HolderResponseUseCaseImpl(
                 nameSpaces = signatureResult.deviceSigned,
                 deviceAuth = signatureResult.deviceAuth
             )
-        } catch (e: Exception) {
+        } catch (e: DeviceSignatureException) {
+            throw DeviceSignatureException("Failed to generate device response", e)
+        } catch (e: GeneralSecurityException) {
             throw DeviceSignatureException("Failed to generate device response", e)
         }
     }

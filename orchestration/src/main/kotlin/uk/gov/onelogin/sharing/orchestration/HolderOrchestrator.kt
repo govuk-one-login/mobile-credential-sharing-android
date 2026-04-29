@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
+import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
@@ -65,6 +66,7 @@ class HolderOrchestrator(
     private val prerequisiteGate: PrerequisiteGate,
     @Suppress("UnusedPrivateProperty")
     private val credentialProvider: CredentialProvider,
+    @Suppress("UnusedPrivateProperty")
     private val holderResponseUseCase: HolderResponseUseCase,
     private val confirmConsentUseCase: ConfirmConsentUseCase
 ) : Orchestrator.Holder {
@@ -197,7 +199,7 @@ class HolderOrchestrator(
                     deviceRequest = state.request,
                     credentialProvider = credentialProvider
                 )
-            } catch (e: Exception) {
+            } catch (e: DeviceSignatureException) {
                 sendTerminationAndFail(e)
             }
         }

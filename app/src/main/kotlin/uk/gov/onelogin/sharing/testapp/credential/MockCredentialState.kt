@@ -36,7 +36,10 @@ data class MockCredentialState(
         val privateKey = context.assets.open(privateKeyAssetName)
             .bufferedReader()
             .readText()
-            .toByteArray()
+            .lines()
+            .filter { !it.startsWith("-----") }
+            .joinToString("")
+            .let { Base64.getDecoder().decode(it) }
 
         val base64EncodedRawCredential = context.resources
             .openRawResource(rawCredentialRes)
