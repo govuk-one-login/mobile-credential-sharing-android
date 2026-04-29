@@ -19,7 +19,7 @@ object PrerequisiteActionContract : ActivityResultContract<PrerequisiteAction, U
                                 context.packageName,
                                 null
                             )
-                        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
 
                 is PrerequisiteAction.RequestPermissions ->
                     intent
