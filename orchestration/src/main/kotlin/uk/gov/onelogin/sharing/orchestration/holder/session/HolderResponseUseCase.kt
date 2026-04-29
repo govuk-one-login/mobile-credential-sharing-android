@@ -5,7 +5,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 
-interface HolderResponseUseCase {
+fun interface HolderResponseUseCase {
     @Throws(DeviceSignatureException::class)
     suspend fun generateDeviceResponse(
         selectedCredential: Credential,

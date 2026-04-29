@@ -5,7 +5,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 
-interface ConfirmConsentUseCase {
+fun interface ConfirmConsentUseCase {
     @Throws(DeviceSignatureException::class)
     suspend fun execute(
         sessionTranscript: ByteArray,

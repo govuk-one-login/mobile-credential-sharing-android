@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.holder
 /**
  * Service for handling COSE_Sign1 construction from a raw signature.
  */
-interface DeviceSignatureUseCase {
+fun interface DeviceSignatureUseCase {
     /**
      * Constructs the COSE_Sign1, DeviceAuth, and DeviceSigned structures from a raw signature.
      *
