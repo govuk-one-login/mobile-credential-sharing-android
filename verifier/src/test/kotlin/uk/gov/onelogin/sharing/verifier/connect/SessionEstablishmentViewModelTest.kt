@@ -33,7 +33,7 @@ class SessionEstablishmentViewModelTest {
         orchestrator: FakeOrchestrator = FakeOrchestrator()
     ) = SessionEstablishmentViewModel(
         logger = logger,
-        verifierOrchestrator = orchestrator,
+        orchestrator = orchestrator,
         advertiser = advertiser,
     )
 

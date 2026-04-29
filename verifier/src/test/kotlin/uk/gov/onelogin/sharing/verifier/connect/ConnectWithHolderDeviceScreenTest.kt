@@ -29,7 +29,7 @@ class ConnectWithHolderDeviceScreenTest {
 
     fun createViewModel(): SessionEstablishmentViewModel = SessionEstablishmentViewModel(
         logger = logger,
-        verifierOrchestrator = FakeOrchestrator(),
+        orchestrator = FakeOrchestrator(),
         advertiser = FakeBleAdvertiser(),
     )
 

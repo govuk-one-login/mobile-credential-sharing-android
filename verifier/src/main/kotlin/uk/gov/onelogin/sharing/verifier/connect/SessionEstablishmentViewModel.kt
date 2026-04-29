@@ -32,13 +32,13 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 @ViewModelKey
 @ContributesIntoMap(VerifierUiScope::class)
 class SessionEstablishmentViewModel(
-    private val logger: Logger,
-    private val verifierOrchestrator: Orchestrator.Verifier,
+    orchestrator: Orchestrator.Verifier,
     private val advertiser: BleAdvertiser,
+    private val logger: Logger,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
 
-    val uiState: StateFlow<ConnectWithHolderDeviceState> = verifierOrchestrator
+    val uiState: StateFlow<ConnectWithHolderDeviceState> = orchestrator
         .verifierSessionState
         .map { state ->
             ConnectWithHolderDeviceState(
@@ -56,7 +56,7 @@ class SessionEstablishmentViewModel(
             )
         )
 
-    val navEvents: SharedFlow<ConnectWithHolderDeviceNavEvent> = verifierOrchestrator
+    val navEvents: SharedFlow<ConnectWithHolderDeviceNavEvent> = orchestrator
         .verifierSessionState
         .mapNotNull { state ->
             when (state) {
