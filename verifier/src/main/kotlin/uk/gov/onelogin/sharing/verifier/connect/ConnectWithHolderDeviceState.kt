@@ -8,9 +8,5 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 @OptIn(ExperimentalPermissionsApi::class)
 data class ConnectWithHolderDeviceState(
     val isBluetoothEnabled: Boolean = false,
-    val hasAllPermissions: Boolean = false,
-    val hasRequestedPermissions: Boolean = false,
-    val connectionStateStarted: Boolean = false,
-    val previouslyHadPermissions: Boolean = false,
     val isLoading: Boolean = false
 )

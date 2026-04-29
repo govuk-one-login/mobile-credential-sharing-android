@@ -49,10 +49,6 @@ internal fun RetryVerifierPrerequisitesScreen(
 
                 is NavigationEvent.UnrecoverableError ->
                     currentOnUnrecoverableError()
-
-                else -> {
-                    // do nothing with null events
-                }
             }
         }
     }

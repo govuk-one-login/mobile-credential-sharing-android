@@ -10,26 +10,5 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 data object ConnectWithHolderDeviceStateStubs {
     val undecodableState = ConnectWithHolderDeviceState(
         isBluetoothEnabled = true,
-        hasAllPermissions = false
-    )
-
-    val decodableDeniedState = ConnectWithHolderDeviceState(
-        isBluetoothEnabled = true,
-        hasAllPermissions = false
-    )
-
-    val decodableGrantedState = ConnectWithHolderDeviceState(
-        isBluetoothEnabled = true,
-        hasAllPermissions = true
-    )
-
-    val validWithCorrectBluetoothSetup = ConnectWithHolderDeviceState(
-        isBluetoothEnabled = true,
-        hasAllPermissions = true
-    )
-
-    val genericErrorState = ConnectWithHolderDeviceState(
-        hasAllPermissions = true,
-        isBluetoothEnabled = true
     )
 }
