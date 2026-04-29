@@ -25,7 +25,6 @@ import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParser
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
@@ -45,6 +44,7 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancel
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
@@ -65,13 +65,8 @@ class HolderOrchestrator(
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
-    private val credentialProvider: CredentialProvider,
-    private val rawCredentialParser: RawCredentialParser
+    private val credentialRequestHandler: CredentialRequestHandler
 ) : Orchestrator.Holder {
-    private val credentialRequestHandler = CredentialRequestHandler(
-        credentialProvider,
-        rawCredentialParser
-    )
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
 
@@ -333,13 +328,13 @@ class HolderOrchestrator(
         deviceRequest: DeviceRequest
     ) {
         try {
-            val validated = credentialRequestHandler.requestAndValidate(requestedDocType)
+            val validatedCredential = credentialRequestHandler.requestAndValidate(requestedDocType)
 
             sessionFlow.value.updateSessionContext {
-                it.copy(validatedCredential = validated)
+                it.copy(validatedCredential = validatedCredential)
             }
 
-            logger.debug(logTag, CredentialRequestHandler.LOG_DOCTYPE_MATCH)
+            logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)
             safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
         } catch (e: CredentialRequestException) {
             handleNoMatchTermination(e)

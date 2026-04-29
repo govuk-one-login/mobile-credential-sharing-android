@@ -12,20 +12,4 @@ data class ValidatedCredential(
     val credentialId: String,
     val nameSpaces: ByteArray,
     val issuerAuth: ByteArray
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as ValidatedCredential
-        return credentialId == other.credentialId &&
-            nameSpaces.contentEquals(other.nameSpaces) &&
-            issuerAuth.contentEquals(other.issuerAuth)
-    }
-
-    override fun hashCode(): Int {
-        var result = credentialId.hashCode()
-        result = 31 * result + nameSpaces.contentHashCode()
-        result = 31 * result + issuerAuth.contentHashCode()
-        return result
-    }
-}
+)

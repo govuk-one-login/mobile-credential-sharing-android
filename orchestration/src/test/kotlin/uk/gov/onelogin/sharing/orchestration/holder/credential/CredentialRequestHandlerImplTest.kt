@@ -9,12 +9,12 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawC
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParsingException
 import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
-import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler.Companion.LOG_DOCTYPE_MISMATCH
-import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler.Companion.LOG_GET_CREDENTIALS_ERROR
-import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler.Companion.LOG_MSO_DECODE_ERROR
-import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler.Companion.LOG_NO_CREDENTIALS
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_DOCTYPE_MISMATCH
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_GET_CREDENTIALS_ERROR
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_MSO_DECODE_ERROR
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_NO_CREDENTIALS
 
-class CredentialRequestHandlerTest {
+class CredentialRequestHandlerImplTest {
     private val docType = "org.iso.18013.5.1.mDL"
     private val nameSpaces = byteArrayOf(0xA0.toByte())
     private val issuerAuth = byteArrayOf(0x01)
@@ -33,7 +33,7 @@ class CredentialRequestHandlerTest {
         )
     }
 
-    private val handler = CredentialRequestHandler(
+    private val handler = CredentialRequestHandlerImpl(
         credentialProvider = fakeCredentialProvider,
         rawCredentialParser = fakeParser
     )
