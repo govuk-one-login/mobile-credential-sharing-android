@@ -24,6 +24,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
@@ -33,12 +38,17 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @Composable
 internal fun HolderConsentScreen(
     viewModel: HolderConsentViewModel = metroViewModel(),
-    onGenericError: () -> Unit = {}
+    onGenericError: () -> Unit = {},
 ) {
     BackHandler(enabled = true) { }
 
     val state by viewModel.holderSessionState.collectAsStateWithLifecycle()
     val latestOnGenericError by rememberUpdatedState(onGenericError)
+
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("HolderConsentScreen")
+    }
 
     LaunchedEffect(Unit) {
         viewModel.navEvents.collect { event ->

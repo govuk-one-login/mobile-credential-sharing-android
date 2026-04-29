@@ -122,8 +122,8 @@ class HolderPrerequisitesScreenTest {
             Render()
         }
 
+        composeTestRule.waitUntil { composeTestRule.hasPresentedEngagement }
         composeTestRule.assertPresentingEngagementTextIsDisplayed()
-        assertTrue { composeTestRule.hasPresentedEngagement }
 
         tester.emulateSavedInstanceStateRestore()
 

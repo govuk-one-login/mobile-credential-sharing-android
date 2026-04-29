@@ -26,4 +26,9 @@ object JankStatsHelper {
         val view = LocalView.current
         return remember(view) { PerformanceMetricsState.getHolderForHierarchy(view) }
     }
+
+    fun PerformanceMetricsState.Holder.putScreenState(screenName: String) = state?.putState(
+        "screenName",
+        screenName
+    )
 }

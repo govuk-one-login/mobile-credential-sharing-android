@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.Dispatchers
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 
@@ -29,11 +32,18 @@ fun HolderWelcomeScreen(
     onConnectionError: (BluetoothSessionError) -> Unit = {},
     onGenericError: () -> Unit = {}
 ) {
-    val contentState by viewModel.uiState.collectAsStateWithLifecycle()
+    val contentState by viewModel.uiState.collectAsStateWithLifecycle(
+        context = Dispatchers.Default
+    )
 
     val currentOnAwaitingUserConsent by rememberUpdatedState(onAwaitingUserConsent)
     val latestOnConnectionError by rememberUpdatedState(onConnectionError)
     val latestOnGenericError by rememberUpdatedState(onGenericError)
+
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("HolderWelcomeScreen")
+    }
 
     LaunchedEffect(Unit) {
         viewModel.navEvents.collect {

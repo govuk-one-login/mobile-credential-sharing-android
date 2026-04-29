@@ -8,7 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,53 +19,48 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesViewModel.NavigationEvent
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Composable
 internal fun HolderPrerequisitesScreen(
     modifier: Modifier = Modifier,
-    dispatcher: CoroutineDispatcher = Dispatchers.Main,
     viewModel: HolderPrerequisitesViewModel = metroViewModel(),
     onHandlePreflight: () -> Unit = {},
     onPresentEngagement: () -> Unit = {},
     onUnrecoverableError: () -> Unit = {}
 ) {
-    val scope = rememberCoroutineScope { dispatcher }
     val currentOnHandlePreflight by rememberUpdatedState(onHandlePreflight)
     val currentOnPresentEngagement by rememberUpdatedState(onPresentEngagement)
     val currentOnUnrecoverableError by rememberUpdatedState(onUnrecoverableError)
     val state: HolderSessionState by viewModel.holderSessionState.collectAsStateWithLifecycle()
-    val progressTextResource: String? = calculateProgressTextFrom(state)?.let {
+    val progressTextResource: Int? by loadProgressText(state)
+    val progressText: String? = progressTextResource?.let {
         stringResource(it)
+    }
+
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("HolderPrerequisitesScreen")
     }
 
     HolderPrerequisitesContent(
         modifier = modifier,
-        progressText = progressTextResource
+        progressText = { progressText }
     )
 
     LaunchedEffect(state) {
-        scope.launch {
-            when (state) {
-                is HolderSessionState.Preflight -> {
-                    currentOnHandlePreflight()
-                }
-
-                is HolderSessionState.PresentingEngagement -> {
-                    currentOnPresentEngagement()
-                }
-
-                is HolderSessionState.Complete.Failed -> {
-                    currentOnUnrecoverableError()
-                }
-
-                else -> {
-                    // other session states don't affect this screen's behaviour
-                }
+        viewModel.events.collect { event ->
+            when (event) {
+                is NavigationEvent.ToPreflight -> currentOnHandlePreflight()
+                is NavigationEvent.PresentEngagement -> currentOnPresentEngagement()
+                is NavigationEvent.ToUnrecoverableError -> currentOnUnrecoverableError()
             }
         }
     }
@@ -74,7 +69,7 @@ internal fun HolderPrerequisitesScreen(
 @Composable
 internal fun HolderPrerequisitesContent(
     modifier: Modifier = Modifier,
-    progressText: String? = null
+    progressText: @Composable () -> String? = { null }
 ) {
     Column(
         modifier = modifier,
@@ -86,9 +81,17 @@ internal fun HolderPrerequisitesContent(
             verticalArrangement = Arrangement.spacedBy(spacingSingle)
         ) {
             CircularProgressIndicator()
-            progressText?.let { Text(it) }
+            progressText()?.let { Text(it) }
         }
     }
+}
+
+@Composable
+fun loadProgressText(
+    state: HolderSessionState,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
+) = produceState<Int?>(null, state) {
+    value = withContext(dispatcher) { calculateProgressTextFrom(state) }
 }
 
 private fun calculateProgressTextFrom(state: HolderSessionState): Int? = when (state) {
@@ -116,7 +119,7 @@ internal fun HolderPrerequisitesScreenPreview(
     GdsTheme {
         HolderPrerequisitesContent(
             modifier = Modifier.fillMaxSize(),
-            progressText = calculateProgressTextFrom(state)?.let { stringResource(it) }
+            progressText = { calculateProgressTextFrom(state)?.let { stringResource(it) } }
         )
     }
 }
