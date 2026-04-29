@@ -11,12 +11,16 @@ class FakeHolderResponseUseCase : HolderResponseUseCase {
         nameSpaces = byteArrayOf(),
         deviceAuth = byteArrayOf()
     )
+    var lastSelectedCredential: Credential? = null
+    var lastDeviceAuthenticationBytes: ByteArray? = null
 
     override suspend fun generateDeviceResponse(
         selectedCredential: Credential,
         deviceAuthenticationBytes: ByteArray,
         credentialProvider: CredentialProvider
     ): DeviceSigned {
+        lastSelectedCredential = selectedCredential
+        lastDeviceAuthenticationBytes = deviceAuthenticationBytes
         exception?.let { throw DeviceSignatureException("Sign failed", it) }
         return deviceSignedToReturn
     }

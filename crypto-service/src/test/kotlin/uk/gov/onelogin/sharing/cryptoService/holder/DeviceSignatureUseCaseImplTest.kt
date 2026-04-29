@@ -13,7 +13,9 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
+import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_ARRAY_4
+import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_BSTR_1
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_EMPTY_MAP
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.COSE_SIGN1_TAG
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.ES256_ALG_LABEL
@@ -36,7 +38,9 @@ class DeviceSignatureUseCaseImplTest {
         docType = MDL_DOC_TYPE
     ).deviceAuthenticationBytes
 
-    private val result by lazy { deviceSignatureUseCase.buildDeviceSignedStructures(signatureBytes) }
+    private val result by lazy {
+        deviceSignatureUseCase.buildDeviceSignedStructures(signatureBytes)
+    }
 
     @Test
     fun `coseSign1Array starts with COSE_Sign1 tag 18`() {
@@ -53,8 +57,8 @@ class DeviceSignatureUseCaseImplTest {
         val tree: JsonNode = cborMapper.readTree(result.coseSign1Array)
         val protectedHeaderBytes = tree[0].binaryValue()
         assertNotNull(protectedHeaderBytes)
-        val headerMap: Map<*, *> = cborMapper.readValue(protectedHeaderBytes, Map::class.java)
-        assertEquals(ES256_ALG_VALUE, headerMap[ES256_ALG_LABEL])
+        val headerTree: JsonNode = cborMapper.readTree(protectedHeaderBytes)
+        assertEquals(ES256_ALG_VALUE, headerTree[ES256_ALG_LABEL.toString()].intValue())
     }
 
     @Test
@@ -87,8 +91,9 @@ class DeviceSignatureUseCaseImplTest {
 
     @Test
     fun `deviceAuth deviceSignature value is the coseSign1Array`() {
-        val map: Map<*, *> = cborMapper.readValue(result.deviceAuth, Map::class.java)
-        val embeddedSignature = map["deviceSignature"] as ByteArray
+        val keyLength = "deviceSignature".toByteArray().size
+        val valueOffset = 1 + 1 + keyLength
+        val embeddedSignature = result.deviceAuth.copyOfRange(valueOffset, result.deviceAuth.size)
         assertTrue(embeddedSignature.contentEquals(result.coseSign1Array))
     }
 
@@ -102,19 +107,23 @@ class DeviceSignatureUseCaseImplTest {
 
     @Test
     fun `deviceSigned nameSpaces is Tag-24-wrapped empty CBOR map`() {
-        val map: Map<*, *> = cborMapper.readValue(result.deviceSigned, Map::class.java)
-        val nameSpacesBytes = map["nameSpaces"] as ByteArray
+        val keyLength = "nameSpaces".toByteArray().size
+        val valueOffset = 1 + 1 + keyLength
+        val nameSpacesBytes = result.deviceSigned.copyOfRange(valueOffset, valueOffset + 4)
         assertEquals(TAG_24_MAJOR, nameSpacesBytes[0])
         assertEquals(TAG_24_VALUE, nameSpacesBytes[1])
-        val wrappedLength = nameSpacesBytes[2].toInt() and 0xff
-        assertEquals(1, wrappedLength)
+        assertEquals(CBOR_BSTR_1, nameSpacesBytes[2])
         assertEquals(CBOR_EMPTY_MAP, nameSpacesBytes[3])
     }
 
     @Test
     fun `deviceSigned deviceAuth value is the deviceAuth bytes`() {
-        val map: Map<*, *> = cborMapper.readValue(result.deviceSigned, Map::class.java)
-        val embeddedAuth = map["deviceAuth"] as ByteArray
+        val nameSpacesKeyLength = "nameSpaces".toByteArray().size
+        val nameSpacesBytesLength = encodeDeviceNameSpacesBytes().size
+        val deviceAuthKeyLength = "deviceAuth".toByteArray().size
+        val valueOffset =
+            1 + 1 + nameSpacesKeyLength + nameSpacesBytesLength + 1 + deviceAuthKeyLength
+        val embeddedAuth = result.deviceSigned.copyOfRange(valueOffset, result.deviceSigned.size)
         assertTrue(embeddedAuth.contentEquals(result.deviceAuth))
     }
 
