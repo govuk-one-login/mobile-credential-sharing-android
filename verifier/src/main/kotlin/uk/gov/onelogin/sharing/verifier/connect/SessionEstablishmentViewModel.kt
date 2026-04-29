@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
@@ -33,7 +32,6 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 @ContributesIntoMap(VerifierUiScope::class)
 class SessionEstablishmentViewModel(
     orchestrator: Orchestrator.Verifier,
-    private val advertiser: BleAdvertiser,
     private val logger: Logger,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
@@ -42,7 +40,6 @@ class SessionEstablishmentViewModel(
         .verifierSessionState
         .map { state ->
             ConnectWithHolderDeviceState(
-                isBluetoothEnabled = advertiser.isBluetoothEnabled(),
                 isLoading = state is VerifierSessionState.Connecting
             )
         }.distinctUntilChanged()
@@ -51,7 +48,6 @@ class SessionEstablishmentViewModel(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
             ConnectWithHolderDeviceState(
-                isBluetoothEnabled = advertiser.isBluetoothEnabled(),
                 isLoading = true
             )
         )

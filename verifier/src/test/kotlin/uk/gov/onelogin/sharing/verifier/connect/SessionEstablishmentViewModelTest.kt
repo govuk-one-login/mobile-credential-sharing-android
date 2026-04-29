@@ -10,8 +10,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
-import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -29,12 +27,10 @@ class SessionEstablishmentViewModelTest {
     private lateinit var viewModel: SessionEstablishmentViewModel
 
     private fun createViewModel(
-        advertiser: BleAdvertiser = FakeBleAdvertiser(),
         orchestrator: FakeOrchestrator = FakeOrchestrator()
     ) = SessionEstablishmentViewModel(
         logger = logger,
         orchestrator = orchestrator,
-        advertiser = advertiser,
     )
 
     @Test
