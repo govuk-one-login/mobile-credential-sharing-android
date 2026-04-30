@@ -13,9 +13,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -25,8 +25,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 @ViewModelKey
 class HolderConsentViewModel(
-    orchestrator: Orchestrator.Holder,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
+    private val orchestrator: Orchestrator.Holder,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
     val holderSessionState: StateFlow<HolderSessionState> = orchestrator.holderSessionState
 
@@ -45,4 +45,16 @@ class HolderConsentViewModel(
             viewModelScope.plus(dispatcher),
             SharingStarted.Lazily
         )
+
+    fun onAccept() {
+        viewModelScope.launch(dispatcher) {
+            orchestrator.confirmConsent()
+        }
+    }
+
+    fun onDeny() {
+        viewModelScope.launch(dispatcher) {
+            orchestrator.cancel()
+        }
+    }
 }

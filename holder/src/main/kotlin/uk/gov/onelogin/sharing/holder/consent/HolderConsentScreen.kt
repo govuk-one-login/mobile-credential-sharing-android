@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -61,11 +63,20 @@ internal fun HolderConsentScreen(
 
     val consentState = state as? HolderSessionState.AwaitingUserConsent ?: return
 
-    HolderConsentContent(consentState.request)
+    HolderConsentContent(
+        request = consentState.request,
+        onAccept = viewModel::onAccept,
+        onDeny = viewModel::onDeny
+    )
 }
 
 @Composable
-internal fun HolderConsentContent(request: DeviceRequest) {
+internal fun HolderConsentContent(
+    request: DeviceRequest,
+    onAccept: () -> Unit = {},
+    onDeny: () -> Unit = {}
+) {
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -113,11 +124,11 @@ internal fun HolderConsentContent(request: DeviceRequest) {
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = {}) {
+            Button(onClick = { scope.launch { onDeny() } }) {
                 Text(stringResource(R.string.holder_consent_deny))
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {}) {
+            Button(onClick = { scope.launch { onAccept() } }) {
                 Text(stringResource(R.string.holder_consent_accept))
             }
         }
