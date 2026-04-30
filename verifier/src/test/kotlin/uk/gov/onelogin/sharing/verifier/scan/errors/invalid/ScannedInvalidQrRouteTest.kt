@@ -39,9 +39,7 @@ class ScannedInvalidQrRouteTest {
                 navController = controller,
                 startDestination = ScannedInvalidQrRoute(invalidBarcodeDataResultOne)
             ) {
-                configureScannedInvalidQrRoute(
-                    onTryAgainClick = { hasClickedOnTryAgain = true }
-                )
+                configureScannedInvalidQrRoute(controller)
             }
         }
 

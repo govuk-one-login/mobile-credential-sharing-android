@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.verifier.prerequisites.usecases
 
 import dev.zacsweers.metro.ContributesBinding
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -16,9 +16,9 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 @ContributesBinding(VerifierUiScope::class)
 class RetryVerifierPrerequisites(orchestrator: Orchestrator.Verifier, private val logger: Logger) :
     RetryPrerequisitesNavigator<VerifierSessionState> {
-    override val events: Flow<NavigationEvent?> =
+    override val events: Flow<NavigationEvent> =
         orchestrator.verifierSessionState
-            .map { state ->
+            .mapNotNull { state ->
                 when (state) {
                     is VerifierSessionState.ReadyToScan ->
                         NavigationEvent.PassedPrerequisites
