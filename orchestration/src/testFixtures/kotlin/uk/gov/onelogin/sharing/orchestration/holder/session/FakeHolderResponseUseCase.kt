@@ -4,12 +4,13 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
-class FakeHolderResponseUseCase : HolderResponseUseCase {
-    var exception: Exception? = null
-    var deviceSignedToReturn: DeviceSigned = DeviceSigned(
+class FakeHolderResponseUseCase(
+    private val exception: Exception? = null,
+    private val deviceSignedToReturn: DeviceSigned = DeviceSigned(
         nameSpaces = byteArrayOf(),
         deviceAuth = byteArrayOf()
     )
+) : HolderResponseUseCase {
     var lastValidatedCredential: ValidatedCredential? = null
     var lastDeviceAuthenticationBytes: ByteArray? = null
 

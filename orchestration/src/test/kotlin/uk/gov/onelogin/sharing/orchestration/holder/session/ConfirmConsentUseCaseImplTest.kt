@@ -14,14 +14,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredenti
 
 class ConfirmConsentUseCaseImplTest {
 
-    private val fakeHolderCryptoService = FakeHolderCryptoService()
-    private val fakeHolderResponseUseCase = FakeHolderResponseUseCase()
-
-    private val useCase = ConfirmConsentUseCaseImpl(
-        holderCryptoService = fakeHolderCryptoService,
-        holderResponseUseCase = fakeHolderResponseUseCase
-    )
-
     private val sessionTranscript = byteArrayOf(0x01, 0x02)
     private val deviceAuthBytes = byteArrayOf(0x03, 0x04)
     private val deviceRequest = DeviceRequestStub.deviceRequestStub
@@ -33,6 +25,16 @@ class ConfirmConsentUseCaseImplTest {
         issuerAuth = byteArrayOf()
     )
 
+    private val fakeHolderCryptoService = FakeHolderCryptoService()
+    private val fakeHolderResponseUseCase = FakeHolderResponseUseCase()
+
+    private val useCase by lazy {
+        ConfirmConsentUseCaseImpl(
+            holderCryptoService = fakeHolderCryptoService,
+            holderResponseUseCase = fakeHolderResponseUseCase
+        )
+    }
+
     @Test
     fun `execute returns DeviceSigned from holderResponseUseCase`() = runTest {
         val expected = DeviceSigned(nameSpaces = byteArrayOf(0x01), deviceAuth = byteArrayOf(0x02))
@@ -40,7 +42,10 @@ class ConfirmConsentUseCaseImplTest {
             deviceAuthenticationBytes = deviceAuthBytes,
             deviceNameSpacesBytes = byteArrayOf()
         )
-        fakeHolderResponseUseCase.deviceSignedToReturn = expected
+        val useCase = ConfirmConsentUseCaseImpl(
+            holderCryptoService = fakeHolderCryptoService,
+            holderResponseUseCase = FakeHolderResponseUseCase(deviceSignedToReturn = expected)
+        )
 
         val result = useCase.execute(sessionTranscript, deviceRequest, validatedCredential)
 
@@ -61,20 +66,21 @@ class ConfirmConsentUseCaseImplTest {
         }
 
     @Test
-    fun `execute passes devAuthBytes and validatedCredential to holderResponseUseCase`() = runTest {
-        fakeHolderCryptoService.deviceAuthResultToReturn = DeviceAuthenticationResult(
-            deviceAuthenticationBytes = deviceAuthBytes,
-            deviceNameSpacesBytes = byteArrayOf()
-        )
+    fun `execute passes deviceAuthBytes and validatedCredential to holderResponseUseCase`() =
+        runTest {
+            fakeHolderCryptoService.deviceAuthResultToReturn = DeviceAuthenticationResult(
+                deviceAuthenticationBytes = deviceAuthBytes,
+                deviceNameSpacesBytes = byteArrayOf()
+            )
 
-        useCase.execute(sessionTranscript, deviceRequest, validatedCredential)
+            useCase.execute(sessionTranscript, deviceRequest, validatedCredential)
 
-        assertArrayEquals(
-            deviceAuthBytes,
-            fakeHolderResponseUseCase.lastDeviceAuthenticationBytes
-        )
-        assertEquals(validatedCredential, fakeHolderResponseUseCase.lastValidatedCredential)
-    }
+            assertArrayEquals(
+                deviceAuthBytes,
+                fakeHolderResponseUseCase.lastDeviceAuthenticationBytes
+            )
+            assertEquals(validatedCredential, fakeHolderResponseUseCase.lastValidatedCredential)
+        }
 
     @Test
     fun `execute throws DeviceSignatureException when docRequests is empty`() = runTest {
@@ -89,7 +95,12 @@ class ConfirmConsentUseCaseImplTest {
 
     @Test
     fun `execute propagates DeviceSignatureException from holderResponseUseCase`() = runTest {
-        fakeHolderResponseUseCase.exception = DeviceSignatureException("sign failed")
+        val useCase = ConfirmConsentUseCaseImpl(
+            holderCryptoService = fakeHolderCryptoService,
+            holderResponseUseCase = FakeHolderResponseUseCase(
+                exception = DeviceSignatureException("sign failed")
+            )
+        )
 
         assertFailsWith<DeviceSignatureException> {
             useCase.execute(sessionTranscript, deviceRequest, validatedCredential)

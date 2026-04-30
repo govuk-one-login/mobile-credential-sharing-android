@@ -48,6 +48,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequest
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
@@ -73,6 +74,7 @@ class HolderOrchestrator(
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
+    private val currentContext: HolderSessionContext get() = sessionFlow.value.sessionContext
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val holderSessionState: StateFlow<HolderSessionState> = sessionFlow.flatMapLatest {
@@ -151,11 +153,11 @@ class HolderOrchestrator(
 
             appCoroutineScope.launch {
                 peripheralBluetoothTransport.start(
-                    serviceUuid = sessionFlow.value.sessionContext.sessionUuid
+                    serviceUuid = currentContext.sessionUuid
                 )
             }
 
-            val qrCode = sessionFlow.value.sessionContext.qrCode
+            val qrCode = currentContext.qrCode
             if (qrCode.isNotEmpty()) {
                 safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
             }
@@ -182,37 +184,34 @@ class HolderOrchestrator(
     }
 
     override fun confirmConsent() {
-        val state = sessionFlow.value.currentState.value
-        if (state !is HolderSessionState.AwaitingUserConsent) {
-            logger.error(logTag, "confirmConsent called in invalid state: $state")
-            return
-        }
-
-        safeTransitionTo(HolderSessionState.ProcessingResponse)
-        resolveConsentParameters(state)
-    }
-
-    private fun resolveConsentParameters(state: HolderSessionState.AwaitingUserConsent) {
-        val sessionTranscript = sessionFlow.value.sessionContext.sessionTranscriptBytes
-        val validatedCredential = sessionFlow.value.sessionContext.validatedCredential
-
-        if (sessionTranscript == null || validatedCredential == null) {
-            sendTerminationAndFail(
-                IllegalStateException("Missing session transcript or validated credential")
-            )
-            return
-        }
-
-        appCoroutineScope.launch {
-            try {
-                confirmConsentUseCase.execute(
-                    sessionTranscript = sessionTranscript,
-                    deviceRequest = state.request,
-                    validatedCredential = validatedCredential
-                )
-            } catch (e: DeviceSignatureException) {
-                sendTerminationAndFail(e)
+        val state = holderSessionState.value
+        try {
+            assert(state is HolderSessionState.AwaitingUserConsent) {
+                "confirmConsent called in an invalid state: $state"
             }
+            check(state is HolderSessionState.AwaitingUserConsent)
+            safeTransitionTo(HolderSessionState.ProcessingResponse)
+
+            val sessionTranscript = checkNotNull(currentContext.sessionTranscriptBytes) {
+                "Missing session transcript"
+            }
+            val validatedCredential = checkNotNull(currentContext.validatedCredential) {
+                "Missing validated credential"
+            }
+
+            appCoroutineScope.launch {
+                try {
+                    confirmConsentUseCase.execute(
+                        sessionTranscript = sessionTranscript,
+                        deviceRequest = state.request,
+                        validatedCredential = validatedCredential
+                    )
+                } catch (e: DeviceSignatureException) {
+                    sendTerminationAndFail(e)
+                }
+            }
+        } catch (e: IllegalStateException) {
+            sendTerminationAndFail(e)
         }
     }
 
@@ -239,7 +238,7 @@ class HolderOrchestrator(
     private fun stopAdvertising(sendEndCommand: Boolean) {
         appCoroutineScope.launch {
             peripheralBluetoothTransport.stop(
-                serviceUuid = sessionFlow.value.sessionContext.sessionUuid,
+                serviceUuid = currentContext.sessionUuid,
                 sendEndCommand = sendEndCommand
             )
         }
@@ -323,7 +322,7 @@ class HolderOrchestrator(
     }
 
     private fun handleMessageReceived(message: ByteArray) {
-        val keypair = sessionFlow.value.sessionContext.keyPair?.private
+        val keypair = currentContext.keyPair?.private
         if (keypair !is ECPrivateKey) {
             sendTerminationAndFail(IllegalStateException("Invalid or missing keypair"))
             return
@@ -332,9 +331,9 @@ class HolderOrchestrator(
         try {
             val deviceRequest = decryptDeviceRequestUseCase.execute(
                 sessionEstablishmentBytes = message,
-                engagement = sessionFlow.value.sessionContext.engagement,
+                engagement = currentContext.engagement,
                 holderPrivateKey = keypair,
-                decryptCounter = sessionFlow.value.sessionContext.decryptCounter,
+                decryptCounter = currentContext.decryptCounter,
                 onDeriveSkDevice = { skDevice ->
                     sessionFlow.value.updateSessionContext {
                         it.copy(skDevice = skDevice)
@@ -382,7 +381,7 @@ class HolderOrchestrator(
 
     private fun handleNoMatchTermination(exception: CredentialRequestException) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
-        val context = sessionFlow.value.sessionContext
+        val context = currentContext
         val skDevice = context.skDevice
 
         skDevice?.let {
@@ -409,7 +408,7 @@ class HolderOrchestrator(
             documents = documents,
             documentErrors = null
         )
-        val context = sessionFlow.value.sessionContext
+        val context = currentContext
         val skDevice = context.skDevice
             ?: error("Missing skDevice")
 
@@ -433,7 +432,7 @@ class HolderOrchestrator(
 
     private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
-        val context = sessionFlow.value.sessionContext
+        val context = currentContext
         val skDevice = checkNotNull(context.skDevice) {
             "skDevice must be derived before handling DeviceRequest failure"
         }

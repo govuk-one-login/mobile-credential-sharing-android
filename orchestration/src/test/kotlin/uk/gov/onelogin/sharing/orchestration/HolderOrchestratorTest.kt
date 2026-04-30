@@ -694,9 +694,9 @@ class HolderOrchestratorTest {
 
     @Test
     fun `sign failure sends status 20 termination and transitions to failed`() = runTest {
-        val fakeConfirmConsentUseCase = FakeConfirmConsentUseCase().apply {
+        val fakeConfirmConsentUseCase = FakeConfirmConsentUseCase(
             exception = RuntimeException("Signing failed")
-        }
+        )
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(

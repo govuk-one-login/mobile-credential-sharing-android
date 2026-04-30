@@ -5,12 +5,13 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
-class FakeConfirmConsentUseCase : ConfirmConsentUseCase {
-    var exception: Exception? = null
-    var deviceSignedToReturn: DeviceSigned = DeviceSigned(
+class FakeConfirmConsentUseCase(
+    private val exception: Exception? = null,
+    private val deviceSignedToReturn: DeviceSigned = DeviceSigned(
         nameSpaces = byteArrayOf(),
         deviceAuth = byteArrayOf()
     )
+) : ConfirmConsentUseCase {
 
     override suspend fun execute(
         sessionTranscript: ByteArray,

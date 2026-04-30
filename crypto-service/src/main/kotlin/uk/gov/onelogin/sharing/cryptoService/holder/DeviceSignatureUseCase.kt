@@ -24,7 +24,9 @@ data class DeviceSignatureResult(
     val coseSign1Array: ByteArray,
     val deviceAuth: ByteArray,
     val deviceSigned: ByteArray
-)
+) {
+    override fun toString(): String = "DeviceSignatureResult(redacted)"
+}
 
 /**
  * Exception thrown when device signature creation fails.
