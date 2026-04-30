@@ -36,7 +36,7 @@ class RetryHolderPrerequisitesViewModel(
     navigator: RetryPrerequisitesNavigator<HolderSessionState>,
     private val orchestrator: Orchestrator.Holder,
     private val resolver: ResolvePrerequisiteAction<HolderSessionState>,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel(),
     ResolvePrerequisiteAction<HolderSessionState> by resolver {
 
