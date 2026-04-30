@@ -8,13 +8,10 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.configureConnectWithHolderDeviceRoute
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToBluetoothConnectionErrorRoute
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.configureUnrecoverableVerifierError
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.configureVerifierScannerRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.configureScannedInvalidQrRoute
-import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesNavigationExt.configureVerifierPrerequisitesRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
 import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesNavigationExt.configureRetryVerifierPrerequisites
@@ -47,27 +44,9 @@ data object VerifierRoutes {
             configureVerifierPrerequisitesRoute(navController)
             configureUnrecoverableVerifierError(navController)
             configureRetryVerifierPrerequisites(navController)
-            configureVerifierScannerRoute(
-                onInvalidBarcode = {
-                    navController.navigateToScannedInvalidQrRoute(uri = it)
-                },
-                onValidBarcode = {
-                    navController.navigateToConnectWithHolderDeviceRoute()
-                }
-            )
-            configureScannedInvalidQrRoute(
-                onTryAgainClick = {
-                    navController.navigate(VerifierPrerequisitesRoute) {
-                        popUpTo<VerifierRoutes> {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                }
-            )
-            configureConnectWithHolderDeviceRoute {
-                navController.navigateToBluetoothConnectionErrorRoute(title = it)
-            }
+            configureVerifierScannerRoute(navController)
+            configureScannedInvalidQrRoute(navController)
+            configureConnectWithHolderDeviceRoute(navController)
             configureBluetoothConnectionErrorRoute(controller = navController)
         }
     }

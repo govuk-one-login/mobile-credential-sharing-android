@@ -4,13 +4,18 @@ import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToConnectWithHolderDeviceRoute
+import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
 
 /**
@@ -26,18 +31,27 @@ object VerifierScanRoute {
      */
     @OptIn(ExperimentalPermissionsApi::class)
     fun NavGraphBuilder.configureVerifierScannerRoute(
-        onInvalidBarcode: (String) -> Unit = {},
-        onValidBarcode: () -> Unit = {}
+        controller: NavController,
     ) {
         composable<VerifierScanRoute> {
+            val scope = rememberCoroutineScope { Dispatchers.Main }
+
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 VerifierScanner(
-                    onInvalidBarcode = onInvalidBarcode,
-                    onValidBarcode = onValidBarcode
+                    onInvalidBarcode = {
+                        scope.launch {
+                            controller.navigateToScannedInvalidQrRoute(uri = it)
+                        }
+                    },
+                    onValidBarcode = {
+                        scope.launch {
+                            controller.navigateToConnectWithHolderDeviceRoute()
+                        }
+                    }
                 )
             }
         }

@@ -1,11 +1,14 @@
 package uk.gov.onelogin.sharing.verifier.connect.error
 
 import androidx.annotation.Keep
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothConnectionErrorScreen
@@ -26,10 +29,15 @@ data class BluetoothConnectionErrorRoute(val title: String) {
         fun NavGraphBuilder.configureBluetoothConnectionErrorRoute(controller: NavController) {
             composable<BluetoothConnectionErrorRoute> { navBackstackEntry ->
                 val arguments: BluetoothConnectionErrorRoute = navBackstackEntry.toRoute()
+                val scope = rememberCoroutineScope { Dispatchers.Main }
 
                 BluetoothConnectionErrorScreen(
                     title = arguments.title,
-                    onTryAgainClick = controller::popBackStack
+                    onTryAgainClick = {
+                        scope.launch {
+                            controller.popBackStack()
+                        }
+                    }
                 )
             }
         }
