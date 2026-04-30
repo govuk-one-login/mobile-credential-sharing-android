@@ -13,8 +13,8 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureResult
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCase
-import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
+import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
 class HolderResponseUseCaseImplTest {
 
@@ -24,10 +24,15 @@ class HolderResponseUseCaseImplTest {
 
     private val useCase = HolderResponseUseCaseImpl(
         logger = logger,
-        deviceSignatureService = deviceSignatureService
+        deviceSignatureService = deviceSignatureService,
+        credentialProvider = credentialProvider
     )
 
-    private val credential = Credential(id = "doc-1", rawCredential = byteArrayOf())
+    private val validatedCredential = ValidatedCredential(
+        credentialId = "doc-1",
+        nameSpaces = byteArrayOf(),
+        issuerAuth = byteArrayOf()
+    )
     private val deviceAuthBytes = byteArrayOf(0x01, 0x02, 0x03)
     private val signatureBytes = byteArrayOf(0x04, 0x05, 0x06)
     private val deviceSignedBytes = byteArrayOf(0x07, 0x08)
@@ -45,19 +50,17 @@ class HolderResponseUseCaseImplTest {
             coEvery {
                 credentialProvider.sign(
                     deviceAuthBytes,
-                    credential.id
+                    validatedCredential.credentialId
                 )
             } returns signatureBytes
             coEvery {
                 deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
             } returns signatureResult
 
-            val result =
-                useCase.generateDeviceResponse(
-                    credential,
-                    deviceAuthBytes,
-                    credentialProvider
-                )
+            val result = useCase.generateDeviceResponse(
+                validatedCredential,
+                deviceAuthBytes
+            )
 
             assertArrayEquals(deviceSignedBytes, result.nameSpaces)
         }
@@ -68,38 +71,45 @@ class HolderResponseUseCaseImplTest {
             coEvery {
                 credentialProvider.sign(
                     deviceAuthBytes,
-                    credential.id
+                    validatedCredential.credentialId
                 )
             } returns signatureBytes
             coEvery {
                 deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
             } returns signatureResult
 
-            val result =
-                useCase.generateDeviceResponse(
-                    credential,
-                    deviceAuthBytes,
-                    credentialProvider
-                )
+            val result = useCase.generateDeviceResponse(
+                validatedCredential,
+                deviceAuthBytes
+            )
 
             assertArrayEquals(deviceAuthResultBytes, result.deviceAuth)
         }
 
     @Test
-    fun `generateDeviceResponse passes deviceAuthBytes and documentId to credentialProvider`() =
+    fun `generateDeviceResponse passes deviceAuthBytes and credentialId to credentialProvider`() =
         runTest {
             coEvery {
                 credentialProvider.sign(
                     deviceAuthBytes,
-                    credential.id
+                    validatedCredential.credentialId
                 )
             } returns signatureBytes
-            coEvery { deviceSignatureService.buildDeviceSignedStructures(signatureBytes) } returns
-                signatureResult
+            coEvery {
+                deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
+            } returns signatureResult
 
-            useCase.generateDeviceResponse(credential, deviceAuthBytes, credentialProvider)
+            useCase.generateDeviceResponse(
+                validatedCredential,
+                deviceAuthBytes
+            )
 
-            coVerify { credentialProvider.sign(deviceAuthBytes, credential.id) }
+            coVerify {
+                credentialProvider.sign(
+                    deviceAuthBytes,
+                    validatedCredential.credentialId
+                )
+            }
         }
 
     @Test
@@ -108,18 +118,13 @@ class HolderResponseUseCaseImplTest {
             coEvery {
                 credentialProvider.sign(
                     deviceAuthBytes,
-                    credential.id
+                    validatedCredential.credentialId
                 )
             } returns signatureBytes
-            coEvery {
-                deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
-            } returns signatureResult
+            coEvery { deviceSignatureService.buildDeviceSignedStructures(signatureBytes) } returns
+                signatureResult
 
-            useCase.generateDeviceResponse(
-                credential,
-                deviceAuthBytes,
-                credentialProvider
-            )
+            useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
 
             coVerify { deviceSignatureService.buildDeviceSignedStructures(signatureBytes) }
         }
@@ -132,7 +137,7 @@ class HolderResponseUseCaseImplTest {
             coEvery { deviceSignatureService.buildDeviceSignedStructures(any()) } throws cause
 
             val thrown = assertFailsWith<DeviceSignatureException> {
-                useCase.generateDeviceResponse(credential, deviceAuthBytes, credentialProvider)
+                useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
             }
 
             assertEquals("Failed to generate device response", thrown.message)
@@ -146,7 +151,7 @@ class HolderResponseUseCaseImplTest {
             coEvery { credentialProvider.sign(any(), any()) } throws cause
 
             val thrown = assertFailsWith<DeviceSignatureException> {
-                useCase.generateDeviceResponse(credential, deviceAuthBytes, credentialProvider)
+                useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
             }
 
             assertEquals("Failed to generate device response", thrown.message)

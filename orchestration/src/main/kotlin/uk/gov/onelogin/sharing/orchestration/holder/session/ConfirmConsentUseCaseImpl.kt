@@ -8,8 +8,7 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
-import uk.gov.onelogin.sharing.orchestration.CredentialProvider
-import uk.gov.onelogin.sharing.orchestration.CredentialRequest
+import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<ConfirmConsentUseCase>())
@@ -21,7 +20,7 @@ class ConfirmConsentUseCaseImpl(
     override suspend fun execute(
         sessionTranscript: ByteArray,
         deviceRequest: DeviceRequest,
-        credentialProvider: CredentialProvider
+        validatedCredential: ValidatedCredential
     ): DeviceSigned {
         val docType = deviceRequest.docRequests.firstOrNull()?.itemsRequest?.docType
             ?: throw DeviceSignatureException("Missing docType")
@@ -31,14 +30,9 @@ class ConfirmConsentUseCaseImpl(
             docType = docType
         )
 
-        val credential = credentialProvider.getCredentials(
-            CredentialRequest(documentTypes = listOf(docType))
-        ).firstOrNull() ?: throw DeviceSignatureException("No credential available")
-
         return holderResponseUseCase.generateDeviceResponse(
-            selectedCredential = credential,
-            deviceAuthenticationBytes = authResult.deviceAuthenticationBytes,
-            credentialProvider = credentialProvider
+            validatedCredential = validatedCredential,
+            deviceAuthenticationBytes = authResult.deviceAuthenticationBytes
         )
     }
 }

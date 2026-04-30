@@ -10,25 +10,25 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCase
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
-import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
+import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<HolderResponseUseCase>())
 class HolderResponseUseCaseImpl(
     private val logger: Logger,
-    private val deviceSignatureService: DeviceSignatureUseCase
+    private val deviceSignatureService: DeviceSignatureUseCase,
+    private val credentialProvider: CredentialProvider
 ) : HolderResponseUseCase {
 
     override suspend fun generateDeviceResponse(
-        selectedCredential: Credential,
-        deviceAuthenticationBytes: ByteArray,
-        credentialProvider: CredentialProvider
+        validatedCredential: ValidatedCredential,
+        deviceAuthenticationBytes: ByteArray
     ): DeviceSigned {
         try {
             val signatureBytes = credentialProvider.sign(
                 payload = deviceAuthenticationBytes,
-                documentId = selectedCredential.id
+                documentId = validatedCredential.credentialId
             )
             logger.debug(logTag, "Successfully retrieved signature from credential provider")
 

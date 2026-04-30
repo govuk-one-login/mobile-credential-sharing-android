@@ -19,10 +19,10 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
-import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.HolderOrchestrator
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.credential.FakeCredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderResponseUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
@@ -102,7 +102,7 @@ class HolderPrerequisitesScreenTest {
         val logger = SystemLogger()
         orchestrator = HolderOrchestrator(
             appCoroutineScope = backgroundScope,
-            credentialProvider = FakeCredentialProvider(),
+            credentialRequestHandler = FakeCredentialRequestHandler(),
             decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase(),
             holderCryptoService = HolderCryptoServiceImpl(
                 sessionSecurity = FakeSessionSecurity(),
@@ -118,7 +118,6 @@ class HolderPrerequisitesScreenTest {
             },
             peripheralBluetoothTransport = FakePeripheralBluetoothTransport(),
             prerequisiteGate = StubPrerequisiteGate(),
-            holderResponseUseCase = FakeHolderResponseUseCase(),
             confirmConsentUseCase = FakeConfirmConsentUseCase()
         )
 
