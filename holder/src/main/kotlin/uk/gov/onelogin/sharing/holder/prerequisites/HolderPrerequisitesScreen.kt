@@ -31,11 +31,10 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @Composable
 internal fun HolderPrerequisitesScreen(
     modifier: Modifier = Modifier,
-    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
     viewModel: HolderPrerequisitesViewModel = metroViewModel(),
     onHandlePreflight: () -> Unit = {},
     onPresentEngagement: () -> Unit = {},
-    onUnrecoverableError: () -> Unit = {}
+    onUnrecoverableError: () -> Unit = {},
 ) {
     val currentOnHandlePreflight by rememberUpdatedState(onHandlePreflight)
     val currentOnPresentEngagement by rememberUpdatedState(onPresentEngagement)
@@ -58,12 +57,10 @@ internal fun HolderPrerequisitesScreen(
 
     LaunchedEffect(state) {
         viewModel.events.collect { event ->
-            withContext(mainDispatcher) {
-                when (event) {
-                    is NavigationEvent.ToPreflight -> currentOnHandlePreflight()
-                    is NavigationEvent.PresentEngagement -> currentOnPresentEngagement()
-                    is NavigationEvent.ToUnrecoverableError -> currentOnUnrecoverableError()
-                }
+            when (event) {
+                is NavigationEvent.ToPreflight -> currentOnHandlePreflight()
+                is NavigationEvent.PresentEngagement -> currentOnPresentEngagement()
+                is NavigationEvent.ToUnrecoverableError -> currentOnUnrecoverableError()
             }
         }
     }
@@ -72,7 +69,7 @@ internal fun HolderPrerequisitesScreen(
 @Composable
 internal fun HolderPrerequisitesContent(
     modifier: Modifier = Modifier,
-    progressText: @Composable () -> String? = { null }
+    progressText: @Composable () -> String? = { null },
 ) {
     Column(
         modifier = modifier,
@@ -92,7 +89,7 @@ internal fun HolderPrerequisitesContent(
 @Composable
 fun loadProgressText(
     state: HolderSessionState,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) = produceState<Int?>(null, state) {
     value = withContext(dispatcher) { calculateProgressTextFrom(state) }
 }
@@ -117,7 +114,7 @@ private fun calculateProgressTextFrom(state: HolderSessionState): Int? = when (s
 @Preview(showBackground = true)
 internal fun HolderPrerequisitesScreenPreview(
     @PreviewParameter(HolderPrerequisitesStates::class)
-    state: HolderSessionState
+    state: HolderSessionState,
 ) {
     GdsTheme {
         HolderPrerequisitesContent(
