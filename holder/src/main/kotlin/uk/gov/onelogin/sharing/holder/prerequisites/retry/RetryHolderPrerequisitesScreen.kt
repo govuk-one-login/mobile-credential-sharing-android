@@ -56,10 +56,6 @@ internal fun RetryHolderPrerequisitesScreen(
 
                 is NavigationEvent.UnrecoverableError ->
                     currentOnUnrecoverableError()
-
-                else -> {
-                    // do nothing with null events
-                }
             }
         }
     }

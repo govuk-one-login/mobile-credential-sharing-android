@@ -44,9 +44,7 @@ class RetryVerifierPrerequisitesViewModel(
     val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent> = navigator
         .events
         .mapNotNull { event ->
-            if (event != null) {
-                _hasRecheckedPrerequisites.update { false }
-            }
+            _hasRecheckedPrerequisites.update { false }
             event
         }
         .distinctUntilChanged()
