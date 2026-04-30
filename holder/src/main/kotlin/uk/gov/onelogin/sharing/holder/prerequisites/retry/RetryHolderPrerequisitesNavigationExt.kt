@@ -9,6 +9,7 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
 
@@ -25,7 +26,11 @@ object RetryHolderPrerequisitesNavigationExt {
                 modifier = Modifier.fillMaxSize(),
                 onPassPrerequisites = {
                     scope.launch {
-                        controller.navigateToHolderPresentQrScreen()
+                        controller.navigateToHolderPresentQrScreen {
+                            popUpTo<HolderRoutes> {
+                                inclusive = true
+                            }
+                        }
                     }
                 },
                 onUnrecoverableError = {

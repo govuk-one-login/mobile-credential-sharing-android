@@ -29,7 +29,11 @@ object HolderPrerequisitesNavigationExt {
                 },
                 onPresentEngagement = {
                     scope.launch {
-                        controller.navigateToHolderPresentQrScreen()
+                        controller.navigateToHolderPresentQrScreen {
+                            popUpTo<HolderRoutes> {
+                                inclusive = true
+                            }
+                        }
                     }
                 },
                 onUnrecoverableError = {
