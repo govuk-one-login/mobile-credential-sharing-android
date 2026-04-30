@@ -39,6 +39,11 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
+import uk.gov.onelogin.sharing.orchestration.holder.credential.FakeCredentialRequestHandler
+import uk.gov.onelogin.sharing.orchestration.holder.credential.NoMatchTerminationCase
+import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
@@ -89,6 +94,14 @@ class HolderOrchestratorTest {
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
+    private val fakeCredentialRequestHandler = FakeCredentialRequestHandler().apply {
+        resultToReturn = ValidatedCredential(
+            credentialId = "test-credential-id",
+            nameSpaces = byteArrayOf(0xA0.toByte()),
+            issuerAuth = byteArrayOf(0x01)
+        )
+    }
+
     private fun createSessionFactory() = FakeSessionFactory(
         initialStates.map { initialState ->
             HolderSessionImpl(
@@ -106,7 +119,8 @@ class HolderOrchestratorTest {
         holderCryptoService: HolderCryptoService = HolderCryptoServiceImpl(
             sessionSecurity = FakeSessionSecurity(),
             logger = logger
-        )
+        ),
+        credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -114,8 +128,8 @@ class HolderOrchestratorTest {
         peripheralBluetoothTransport = peripheralBluetoothTransport,
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
-        credentialProvider = FakeCredentialProvider(),
-        holderCryptoService = holderCryptoService
+        holderCryptoService = holderCryptoService,
+        credentialRequestHandler = credentialRequestHandler
     )
 
     @Test
@@ -669,6 +683,66 @@ class HolderOrchestratorTest {
         assertEquals(
             SessionDataStatus.SESSION_TERMINATION,
             fakeCryptoService.lastBuildTerminationStatus
+        )
+        assertEquals(0, peripheralTransport.stopCalls)
+    }
+
+    @Test
+    fun `successful request credential and docType match stores credential`() = runTest {
+        val sessionFactory = createSessionFactory()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            peripheralBluetoothTransport = peripheralTransport
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+        assert("provided credential matches DeviceRequest docType" in logger)
+
+        val session = sessionFactory.getCurrentSession()
+        val validatedCredential = session.sessionContext.validatedCredential
+        assertEquals("test-credential-id", validatedCredential?.credentialId)
+    }
+
+    @Test
+    fun `credential request failure triggers no match termination`(
+        @TestParameter case: NoMatchTerminationCase
+    ) = runTest {
+        val handler = FakeCredentialRequestHandler().apply {
+            exceptionToThrow = CredentialRequestException(case.errorMessage)
+        }
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            credentialRequestHandler = handler
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assert(case.errorMessage in logger)
+        assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastErrorSessionDataStatus
         )
         assertEquals(0, peripheralTransport.stopCalls)
     }

@@ -28,6 +28,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoding
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
@@ -41,6 +42,9 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSe
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
@@ -61,8 +65,7 @@ class HolderOrchestrator(
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
-    @Suppress("UnusedPrivateProperty")
-    private val credentialProvider: CredentialProvider
+    private val credentialRequestHandler: CredentialRequestHandler
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -309,12 +312,57 @@ class HolderOrchestrator(
                 it.copy(decryptCounter = it.decryptCounter + 1u)
             }
 
-            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+            val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
+            appCoroutineScope.launch {
+                requestAndValidateCredential(requestedDocType, deviceRequest)
+            }
         } catch (e: DeviceRequestDecodingException) {
             handleDeviceRequestFailure(e)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             sendTerminationAndFail(e)
         }
+    }
+
+    private suspend fun requestAndValidateCredential(
+        requestedDocType: String,
+        deviceRequest: DeviceRequest
+    ) {
+        try {
+            val validatedCredential = credentialRequestHandler.requestAndValidate(requestedDocType)
+
+            sessionFlow.value.updateSessionContext {
+                it.copy(validatedCredential = validatedCredential)
+            }
+
+            logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)
+            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+        } catch (e: CredentialRequestException) {
+            handleNoMatchTermination(e)
+        }
+    }
+
+    private fun handleNoMatchTermination(exception: CredentialRequestException) {
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
+        val context = sessionFlow.value.sessionContext
+        val skDevice = context.skDevice
+
+        skDevice?.let {
+            holderCryptoService.buildErrorSessionData(
+                deviceResponseStatus = Status.OK,
+                sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+                skDevice = it,
+                encryptCounter = context.encryptCounter
+            )
+        }
+
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = exception.message ?: UNKNOWN_ERROR,
+                    exception = exception
+                )
+            )
+        )
     }
 
     fun assembleAndEncryptResponse(documents: List<Document>): ByteArray {
