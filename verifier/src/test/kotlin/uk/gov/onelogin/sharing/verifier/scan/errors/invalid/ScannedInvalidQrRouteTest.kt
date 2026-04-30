@@ -35,8 +35,6 @@ class ScannedInvalidQrRouteTest {
 
     lateinit var controller: TestNavHostController
 
-    private var hasClickedOnTryAgain = false
-
     @Test
     fun verifyNavGraphEntry() = runTest(dispatcherRule.testDispatcher) {
         composeTestRule.setContent {
