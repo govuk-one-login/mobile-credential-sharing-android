@@ -51,9 +51,8 @@ internal fun HolderPrerequisitesScreen(
     }
 
     HolderPrerequisitesContent(
-        modifier = modifier,
-        progressText = { progressText }
-    )
+        modifier = modifier
+    ) { progressText }
 
     LaunchedEffect(state) {
         viewModel.events.collect { event ->
@@ -69,7 +68,7 @@ internal fun HolderPrerequisitesScreen(
 @Composable
 internal fun HolderPrerequisitesContent(
     modifier: Modifier = Modifier,
-    progressText: @Composable () -> String? = { null }
+    content: @Composable () -> String? = { null }
 ) {
     Column(
         modifier = modifier,
@@ -81,7 +80,7 @@ internal fun HolderPrerequisitesContent(
             verticalArrangement = Arrangement.spacedBy(spacingSingle)
         ) {
             CircularProgressIndicator()
-            progressText()?.let { Text(it) }
+            content()?.let { Text(it) }
         }
     }
 }
@@ -119,7 +118,7 @@ internal fun HolderPrerequisitesScreenPreview(
     GdsTheme {
         HolderPrerequisitesContent(
             modifier = Modifier.fillMaxSize(),
-            progressText = { calculateProgressTextFrom(state)?.let { stringResource(it) } }
+            content = { calculateProgressTextFrom(state)?.let { stringResource(it) } }
         )
     }
 }
