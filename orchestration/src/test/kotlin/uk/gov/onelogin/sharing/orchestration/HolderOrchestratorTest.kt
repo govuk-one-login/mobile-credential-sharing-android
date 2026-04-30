@@ -44,6 +44,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequest
 import uk.gov.onelogin.sharing.orchestration.holder.credential.FakeCredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.credential.NoMatchTerminationCase
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
@@ -71,6 +73,7 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReason
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
+@Suppress("LargeClass")
 class HolderOrchestratorTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -120,7 +123,8 @@ class HolderOrchestratorTest {
             sessionSecurity = FakeSessionSecurity(),
             logger = logger
         ),
-        credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler
+        credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler,
+        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase()
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -129,7 +133,8 @@ class HolderOrchestratorTest {
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
         holderCryptoService = holderCryptoService,
-        credentialRequestHandler = credentialRequestHandler
+        credentialRequestHandler = credentialRequestHandler,
+        confirmConsentUseCase = confirmConsentUseCase
     )
 
     @Test
@@ -685,6 +690,44 @@ class HolderOrchestratorTest {
             fakeCryptoService.lastBuildTerminationStatus
         )
         assertEquals(0, peripheralTransport.stopCalls)
+    }
+
+    @Test
+    fun `sign failure sends status 20 termination and transitions to failed`() = runTest {
+        val fakeConfirmConsentUseCase = FakeConfirmConsentUseCase(
+            exception = RuntimeException("Signing failed")
+        )
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = fakeConfirmConsentUseCase
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(
+                byteArrayOf(
+                    1,
+                    2,
+                    3
+                )
+            )
+        )
+        advanceUntilIdle()
+
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastBuildTerminationStatus
+        )
+        assertThat(orchestrator.holderSessionState.value, isFailed())
     }
 
     @Test

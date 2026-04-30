@@ -55,7 +55,7 @@ class DeviceResponseModelTest {
                 ),
                 deviceSigned = DeviceSigned(
                     nameSpaces = emptyNameSpacesBytes,
-                    deviceSignature = byteArrayOf()
+                    deviceAuth = byteArrayOf()
                 )
             )
         ),

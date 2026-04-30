@@ -51,11 +51,19 @@ internal fun HolderConsentScreen(
 
     val consentState = state as? HolderSessionState.AwaitingUserConsent ?: return
 
-    HolderConsentContent(consentState.request)
+    HolderConsentContent(
+        request = consentState.request,
+        onAccept = viewModel::onAccept,
+        onDeny = viewModel::onDeny
+    )
 }
 
 @Composable
-internal fun HolderConsentContent(request: DeviceRequest) {
+internal fun HolderConsentContent(
+    request: DeviceRequest,
+    onAccept: () -> Unit = {},
+    onDeny: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -103,11 +111,11 @@ internal fun HolderConsentContent(request: DeviceRequest) {
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = {}) {
+            Button(onClick = onDeny) {
                 Text(stringResource(R.string.holder_consent_deny))
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {}) {
+            Button(onClick = onAccept) {
                 Text(stringResource(R.string.holder_consent_accept))
             }
         }

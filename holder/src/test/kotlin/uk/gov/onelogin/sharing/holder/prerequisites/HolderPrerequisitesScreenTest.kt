@@ -23,6 +23,8 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.HolderOrchestrator
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.credential.FakeCredentialRequestHandler
+import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderResponseUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
@@ -115,7 +117,8 @@ class HolderPrerequisitesScreenTest {
                 )
             },
             peripheralBluetoothTransport = FakePeripheralBluetoothTransport(),
-            prerequisiteGate = StubPrerequisiteGate()
+            prerequisiteGate = StubPrerequisiteGate(),
+            confirmConsentUseCase = FakeConfirmConsentUseCase()
         )
 
         tester.setContent {

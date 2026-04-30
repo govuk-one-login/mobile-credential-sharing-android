@@ -27,6 +27,8 @@ interface Orchestrator : Resettable {
     interface Holder : Orchestrator {
         val holderSessionState: StateFlow<HolderSessionState>
 
+        fun confirmConsent()
+
         companion object {
             const val JOURNEY_NAME: String = "holder"
         }

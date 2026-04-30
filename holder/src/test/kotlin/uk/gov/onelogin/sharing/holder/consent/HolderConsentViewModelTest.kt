@@ -28,11 +28,26 @@ class HolderConsentViewModelTest {
     )
 
     private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
+    private var confirmConsentCount = 0
+
+    private val orchestratorWithConsentTracking = FakeOrchestrator(
+        initialHolderState = holderState,
+        onConfirmConsent = { confirmConsentCount++ }
+    )
 
     private val viewModel by lazy {
         HolderConsentViewModel(
             orchestrator = orchestrator
         )
+    }
+
+    @Test
+    fun `onAccept calls confirmConsent on orchestrator`() = runTest(dispatcherRule.testDispatcher) {
+        val viewModel = HolderConsentViewModel(orchestrator = orchestratorWithConsentTracking)
+
+        viewModel.onAccept()
+
+        assertEquals(1, confirmConsentCount)
     }
 
     @Test
