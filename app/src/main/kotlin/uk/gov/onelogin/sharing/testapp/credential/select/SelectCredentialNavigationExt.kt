@@ -21,7 +21,7 @@ object SelectCredentialNavigationExt {
 
     internal fun NavGraphBuilder.configureSelectMockCredentialDialog(
         controller: NavController,
-        mockCredentials: List<MockCredentialState>,
+        mockCredentials: List<MockCredentialState>
     ) {
         dialog<SelectCredentialRoute> {
             val scope = rememberCoroutineScope { Dispatchers.Main }

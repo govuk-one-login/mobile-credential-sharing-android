@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifie
 
 object RetryVerifierPrerequisitesNavigationExt {
     fun NavController.navigateToRetryVerifierPrerequisites(
-        options: NavOptionsBuilder.() -> Unit = {},
+        options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(RetryVerifierPrerequisitesRoute, options)
 
     internal fun NavGraphBuilder.configureRetryVerifierPrerequisites(controller: NavController) {

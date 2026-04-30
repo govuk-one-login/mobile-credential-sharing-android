@@ -27,7 +27,7 @@ import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesN
 data object VerifierPrerequisitesNavigationExt {
 
     fun NavController.navigateToVerifierPrerequisitesScreen(
-        options: NavOptionsBuilder.() -> Unit = {},
+        options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(VerifierPrerequisitesRoute, options)
 
     /**

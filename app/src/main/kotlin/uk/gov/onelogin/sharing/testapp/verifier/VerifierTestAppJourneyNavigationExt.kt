@@ -27,7 +27,7 @@ import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 object VerifierTestAppJourneyNavigationExt {
     fun NavController.navigateToTestAppVerifierJourney(
         request: VerificationRequest,
-        options: NavOptionsBuilder.() -> Unit = {},
+        options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(
         VerifierTestAppJourney(request = request),
         options
@@ -35,7 +35,7 @@ object VerifierTestAppJourneyNavigationExt {
 
     internal fun NavGraphBuilder.configureVerifierJourneyWrapper(
         navController: NavController,
-        requestToVerifier: (VerificationRequest) -> CredentialVerifier,
+        requestToVerifier: (VerificationRequest) -> CredentialVerifier
     ) {
         composable<VerifierTestAppJourney>(
             typeMap = mapOf(
@@ -70,7 +70,7 @@ object VerifierTestAppJourneyNavigationExt {
     private fun produceCredentialVerifier(
         request: VerificationRequest,
         requestToVerifier: (VerificationRequest) -> CredentialVerifier,
-        dispatcher: CoroutineDispatcher = Dispatchers.Default,
+        dispatcher: CoroutineDispatcher = Dispatchers.Default
     ) = produceState<CredentialVerifier?>(null, request, requestToVerifier) {
         value = withContext(dispatcher) { requestToVerifier(request) }
     }

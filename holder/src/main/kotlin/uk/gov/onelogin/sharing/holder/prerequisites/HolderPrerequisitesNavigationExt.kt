@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.
 
 object HolderPrerequisitesNavigationExt {
     fun NavController.navigateToHolderPrerequisitesScreen(
-        options: NavOptionsBuilder.() -> Unit = {},
+        options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(HolderPrerequisitesRoute, options)
 
     internal fun NavGraphBuilder.configureHolderPrerequisitesScreen(controller: NavController) {

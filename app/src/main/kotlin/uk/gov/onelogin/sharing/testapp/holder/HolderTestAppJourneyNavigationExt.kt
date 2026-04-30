@@ -29,7 +29,7 @@ import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState.Companion.
 object HolderTestAppJourneyNavigationExt {
     fun NavController.navigateToTestAppHolderJourney(
         state: MockCredentialState,
-        options: NavOptionsBuilder.() -> Unit = {},
+        options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(
         HolderTestAppJourney(state = state),
         options
@@ -37,7 +37,7 @@ object HolderTestAppJourneyNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderJourneyWrapper(
         navController: NavController,
-        component: (MockCredential) -> CredentialPresenter,
+        component: (MockCredential) -> CredentialPresenter
     ) {
         composable<HolderTestAppJourney>(
             typeMap = mapOf(
@@ -77,7 +77,7 @@ object HolderTestAppJourneyNavigationExt {
     fun produceCredentialPresenter(
         credential: MockCredential,
         credentialToPresenter: (MockCredential) -> CredentialPresenter,
-        dispatcher: CoroutineDispatcher = Dispatchers.Default,
+        dispatcher: CoroutineDispatcher = Dispatchers.Default
     ) = produceState<CredentialPresenter?>(null, credential, credentialToPresenter) {
         value = withContext(dispatcher) { credentialToPresenter(credential) }
     }

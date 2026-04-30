@@ -30,9 +30,7 @@ object VerifierScanRoute {
      * target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    fun NavGraphBuilder.configureVerifierScannerRoute(
-        controller: NavController,
-    ) {
+    fun NavGraphBuilder.configureVerifierScannerRoute(controller: NavController) {
         composable<VerifierScanRoute> {
             val scope = rememberCoroutineScope { Dispatchers.Main }
 
