@@ -1,7 +1,14 @@
 package uk.gov.onelogin.sharing.testapp.holder
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.remember
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -10,6 +17,10 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.testapp.credential.MockCredential
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState
@@ -35,18 +46,39 @@ object HolderTestAppJourneyNavigationExt {
         ) { navBackStackEntry ->
             val arguments: HolderTestAppJourney = navBackStackEntry.toRoute()
             val context = LocalContext.current
+            val scope = rememberCoroutineScope { Dispatchers.Main }
 
-            val presenter = remember {
-                component(arguments.state.toCredential(context))
-            }
+            val presenter by produceCredentialPresenter(
+                arguments.state.toCredential(context),
+                component
+            )
 
-            HolderTestAppJourneyScreen(
-                component = presenter,
-                modifier = Modifier.fillMaxSize()
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                presenter.orchestrator.cancel()
-                navController.popBackStack()
+                presenter?.let { presenter ->
+                    HolderTestAppJourneyScreen(
+                        component = presenter,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        scope.launch {
+                            presenter.orchestrator.cancel()
+                            navController.popBackStack()
+                        }
+                    }
+                } ?: CircularProgressIndicator()
             }
         }
+    }
+
+    @Composable
+    fun produceCredentialPresenter(
+        credential: MockCredential,
+        credentialToPresenter: (MockCredential) -> CredentialPresenter,
+        dispatcher: CoroutineDispatcher = Dispatchers.Default
+    ) = produceState<CredentialPresenter?>(null, credential, credentialToPresenter) {
+        value = withContext(dispatcher) { credentialToPresenter(credential) }
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -16,6 +17,8 @@ import uk.gov.android.ui.componentsv2.images.GdsIcon
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreen
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenIcon
 import uk.gov.onelogin.sharing.core.R
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 
 @Composable
 fun BluetoothConnectionErrorScreen(
@@ -23,6 +26,11 @@ fun BluetoothConnectionErrorScreen(
     modifier: Modifier = Modifier,
     onTryAgainClick: () -> Unit = {}
 ) {
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("BluetoothConnectionErrorScreen")
+    }
+
     ErrorScreen(
         modifier = modifier.fillMaxWidth(),
         icon = { horizontalPadding ->

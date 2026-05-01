@@ -36,7 +36,10 @@ class HolderConsentScreenTest {
     private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
 
     private val viewModel by lazy {
-        HolderConsentViewModel(orchestrator = orchestrator)
+        HolderConsentViewModel(
+            orchestrator = orchestrator,
+            dispatcher = dispatcherRule.testDispatcher
+        )
     }
 
     // DCMAW-16715 AC1: all IntentToRetain flags are false

@@ -11,6 +11,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -18,6 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.testapp.CREDENTIAL_ITEM_TAG
 import uk.gov.onelogin.sharing.testapp.R
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState
@@ -28,6 +33,12 @@ internal fun SelectCredentialsScreen(
     modifier: Modifier = Modifier,
     onSelectCredential: (MockCredentialState) -> Unit = {}
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("SelectCredentialsScreen")
+    }
+
     Surface(
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(1.dp, Color.Gray),
@@ -43,7 +54,7 @@ internal fun SelectCredentialsScreen(
             LazyColumn {
                 items(credentials, key = { it.id }) { credential ->
                     OutlinedButton(
-                        onClick = { onSelectCredential(credential) },
+                        onClick = { coroutineScope.launch { onSelectCredential(credential) } },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)

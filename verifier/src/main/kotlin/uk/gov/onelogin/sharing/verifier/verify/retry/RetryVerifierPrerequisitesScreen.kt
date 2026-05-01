@@ -13,6 +13,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.contracts.PrerequisiteActionContract
@@ -41,6 +43,11 @@ internal fun RetryVerifierPrerequisitesScreen(
         .hasRecheckedPrerequisites
         .collectAsStateWithLifecycle()
 
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("RetryVerifierPrerequisitesScreen")
+    }
+
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
@@ -49,10 +56,6 @@ internal fun RetryVerifierPrerequisitesScreen(
 
                 is NavigationEvent.UnrecoverableError ->
                     currentOnUnrecoverableError()
-
-                else -> {
-                    // do nothing with null events
-                }
             }
         }
     }

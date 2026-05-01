@@ -30,7 +30,7 @@ class RetryVerifierPrerequisitesViewModelTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
-    private var navigationEvents = mutableListOf<NavigationEvent?>()
+    private var navigationEvents = mutableListOf<NavigationEvent>()
     private var hasCalledOnComplete = false
     private var hasCalledResolver = false
 

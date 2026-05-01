@@ -3,6 +3,7 @@ activityCompose = "1.13.0" # https://developer.android.com/jetpack/androidx/rele
 agp = "9.0.1" # https://developer.android.com/build/releases/gradle-plugin
 androidx-browser = "1.10.0" # https://developer.android.com/jetpack/androidx/releases/browser
 androidx-camera = "1.6.0" # https://developer.android.com/jetpack/androidx/releases/camera
+androidx-metrics = "1.0.0" # https://developer.android.com/jetpack/androidx/releases/metrics
 androidx-navigation = "2.9.8" # https://developer.android.com/jetpack/androidx/releases/navigation
 androidx-test-espresso = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#espresso-3.7.0
 androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/test#orchestrator-1.6.1
@@ -67,6 +68,7 @@ androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", vers
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
+androidx-metrics-performance = { module = "androidx.metrics:metrics-performance", version.ref = "androidx-metrics" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
 androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "androidx-navigation" }
 androidx-test-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "androidx-test-espresso" }
