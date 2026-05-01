@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,17 +26,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Composable
 internal fun HolderConsentScreen(
@@ -44,7 +41,7 @@ internal fun HolderConsentScreen(
 ) {
     BackHandler(enabled = true) { }
 
-    val state by viewModel.holderSessionState.collectAsStateWithLifecycle()
+    val request by viewModel.deviceRequest.collectAsStateWithLifecycle()
     val latestOnGenericError by rememberUpdatedState(onGenericError)
 
     val metrics = rememberMetricsStateHolder()
@@ -61,13 +58,13 @@ internal fun HolderConsentScreen(
         }
     }
 
-    val consentState = state as? HolderSessionState.AwaitingUserConsent ?: return
-
-    HolderConsentContent(
-        request = consentState.request,
-        onAccept = viewModel::onAccept,
-        onDeny = viewModel::onDeny
-    )
+    request?.let {
+        HolderConsentContent(
+            request = it,
+            onAccept = viewModel::onAccept,
+            onDeny = viewModel::onDeny
+        )
+    } ?: CircularProgressIndicator()
 }
 
 @Composable

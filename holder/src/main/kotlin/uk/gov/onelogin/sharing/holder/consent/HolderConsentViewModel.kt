@@ -13,11 +13,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -28,7 +31,17 @@ class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
-    val holderSessionState: StateFlow<HolderSessionState> = orchestrator.holderSessionState
+    val deviceRequest: StateFlow<DeviceRequest?> = orchestrator
+        .holderSessionState
+        .map { state ->
+            state as? HolderSessionState.AwaitingUserConsent
+        }.map { consentState ->
+            consentState?.request
+        }.stateIn(
+            viewModelScope.plus(dispatcher),
+            SharingStarted.Eagerly,
+            null
+        )
 
     val navEvents: SharedFlow<HolderConsentNavEvents> = orchestrator
         .holderSessionState
@@ -46,15 +59,11 @@ class HolderConsentViewModel(
             SharingStarted.Lazily
         )
 
-    fun onAccept() {
-        viewModelScope.launch(dispatcher) {
-            orchestrator.confirmConsent()
-        }
+    fun onAccept() = viewModelScope.launch(dispatcher) {
+        orchestrator.confirmConsent()
     }
 
-    fun onDeny() {
-        viewModelScope.launch(dispatcher) {
-            orchestrator.cancel()
-        }
+    fun onDeny() = viewModelScope.launch(dispatcher) {
+        orchestrator.cancel()
     }
 }
