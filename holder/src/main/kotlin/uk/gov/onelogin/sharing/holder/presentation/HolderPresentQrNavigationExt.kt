@@ -36,7 +36,9 @@ object HolderPresentQrNavigationExt {
 
                 HolderWelcomeScreen(
                     onAwaitingUserConsent = {
-                        controller.navigateToHolderConsentScreen()
+                        scope.launch {
+                            controller.navigateToHolderConsentScreen()
+                        }
                     },
                     onConnectionError = {
                         errorTitle(context, it)
@@ -46,10 +48,10 @@ object HolderPresentQrNavigationExt {
                                 }
                                 title
                             }
-                            .also {
+                            .also { title ->
                                 Log.w(
                                     HolderRoutes::class.java.simpleName,
-                                    "Navigated to error screen: $it"
+                                    "Navigated to error screen: $title"
                                 )
                             }
                     },

@@ -50,11 +50,7 @@ internal fun HolderPrerequisitesScreen(
         metrics.putScreenState("HolderPrerequisitesScreen")
     }
 
-    HolderPrerequisitesContent(
-        modifier = modifier
-    ) { progressText }
-
-    LaunchedEffect(state) {
+    LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is NavigationEvent.ToPreflight -> currentOnHandlePreflight()
@@ -63,6 +59,10 @@ internal fun HolderPrerequisitesScreen(
             }
         }
     }
+
+    HolderPrerequisitesContent(
+        modifier = modifier
+    ) { progressText }
 }
 
 @Composable
