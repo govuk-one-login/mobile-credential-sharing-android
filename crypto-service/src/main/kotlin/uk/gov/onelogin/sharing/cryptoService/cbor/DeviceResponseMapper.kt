@@ -6,7 +6,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSignedItem
 
 /**
  * Maps the [DeviceResponse] domain model to its corresponding [DeviceResponseDto.DeviceResponse].
@@ -30,27 +29,14 @@ fun Document.toDto(): DeviceResponseDto.DocumentDTO = DeviceResponseDto.Document
 
 /**
  * Maps [IssuerSigned] domain model to its corresponding [DeviceResponseDto.IssuerSignedDTO].
+ * Each ByteArray in nameSpaces is the original Tag 24 encoded IssuerSignedItemBytes.
  */
 fun IssuerSigned.toDto(): DeviceResponseDto.IssuerSignedDTO = DeviceResponseDto.IssuerSignedDTO(
     nameSpaces = nameSpaces?.mapValues { entry ->
-        entry.value.map { it.toEmbeddedCbor() }
+        entry.value.map { EmbeddedCbor(it) }
     },
     issuerAuth = issuerAuth
 )
-
-/**
- * Encodes [IssuerSignedItem] into [EmbeddedCbor] (wrapped in Tag 24).
- */
-fun IssuerSignedItem.toEmbeddedCbor(): EmbeddedCbor {
-    val mapper = CborMapper.create(emptyMap())
-    val dto = DeviceResponseDto.IssuerSignedItemDTO(
-        digestId = digestId,
-        random = random,
-        elementIdentifier = elementIdentifier,
-        elementValue = elementValue
-    )
-    return EmbeddedCbor(mapper.writeValueAsBytes(dto))
-}
 
 /**
  * Maps [DeviceSigned] domain model to its corresponding [DeviceResponseDto.DeviceSignedDTO].

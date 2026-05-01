@@ -24,6 +24,7 @@ import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
@@ -206,6 +207,8 @@ class HolderOrchestrator(
                         deviceRequest = state.request,
                         validatedCredential = validatedCredential
                     )
+                } catch (e: NoMatchingAttributesException) {
+                    handleNoMatchTermination(e)
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
                 }
@@ -379,7 +382,7 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleNoMatchTermination(exception: CredentialRequestException) {
+    private fun handleNoMatchTermination(exception: Exception) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         val context = currentContext
         val skDevice = context.skDevice

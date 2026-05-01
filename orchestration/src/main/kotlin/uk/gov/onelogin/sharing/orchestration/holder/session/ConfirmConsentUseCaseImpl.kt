@@ -4,6 +4,8 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssuerSignedUseCase
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
@@ -14,7 +16,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredenti
 @ContributesBinding(scope = AppScope::class, binding = binding<ConfirmConsentUseCase>())
 class ConfirmConsentUseCaseImpl(
     private val holderCryptoService: HolderCryptoService,
-    private val holderResponseUseCase: HolderResponseUseCase
+    private val holderResponseUseCase: HolderResponseUseCase,
+    private val filterIssuerSignedUseCase: FilterIssuerSignedUseCase
 ) : ConfirmConsentUseCase {
 
     override suspend fun execute(
@@ -24,6 +27,15 @@ class ConfirmConsentUseCaseImpl(
     ): DeviceSigned {
         val docType = deviceRequest.docRequests.firstOrNull()?.itemsRequest?.docType
             ?: throw DeviceSignatureException("Missing docType")
+
+        filterIssuerSignedUseCase.filter(
+            ParsedRawCredential(
+                nameSpaces = validatedCredential.nameSpaces,
+                issuerAuth = validatedCredential.issuerAuth,
+                msoDocType = docType
+            ),
+            deviceRequest
+        )
 
         val authResult = holderCryptoService.buildDeviceAuthenticationBytes(
             sessionTranscript = sessionTranscript,
