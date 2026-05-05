@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.holder.presentation
 
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.google.testing.junit.testparameterinjector.TestParameters
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -68,22 +67,6 @@ class HolderWelcomeViewModelTest {
             assertThat(
                 awaitItem().qrData,
                 nullValue(String::class.java)
-            )
-        }
-    }
-
-    @TestParameters(valuesProvider = HolderScreenEventsFromState::class)
-    @Test
-    fun `Navigation events occur due to session state`(
-        state: HolderSessionState,
-        expected: HolderScreenEvents
-    ) = runTest(mainDispatcherRule.testDispatcher) {
-        initialHolderState = state
-
-        viewModel.navEvents.test {
-            assertThat(
-                awaitItem(),
-                equalTo(expected)
             )
         }
     }

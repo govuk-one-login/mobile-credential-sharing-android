@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import com.google.testing.junit.testparameterinjector.TestParameters
-import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
@@ -24,7 +23,6 @@ import uk.gov.onelogin.sharing.orchestration.HolderOrchestrator
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.credential.FakeCredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
-import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderResponseUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
@@ -80,23 +78,6 @@ class HolderPrerequisitesScreenTest {
     }
 
     @Test
-    @TestParameters(valuesProvider = HolderPrerequisitesScreenHandlers::class)
-    fun `Certain session states call composable lambdas`(
-        state: HolderSessionState,
-        handlerAssertion: HolderPrerequisitesScreenRule.() -> Boolean
-    ) = runTest(dispatcherRule.testDispatcher) {
-        holderState.update { state }
-
-        composeTestRule.setContent {
-            Render()
-        }
-
-        assertTrue {
-            handlerAssertion(composeTestRule)
-        }
-    }
-
-    @Test
     fun `State restoration occurs without issues`() = runTest(dispatcherRule.testDispatcher) {
         val tester = StateRestorationTester(composeTestRule)
         val logger = SystemLogger()
@@ -125,7 +106,6 @@ class HolderPrerequisitesScreenTest {
             Render()
         }
 
-        composeTestRule.waitUntil { composeTestRule.hasPresentedEngagement }
         composeTestRule.assertPresentingEngagementTextIsDisplayed()
 
         tester.emulateSavedInstanceStateRestore()
@@ -141,15 +121,6 @@ class HolderPrerequisitesScreenTest {
         HolderPrerequisitesScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = viewModel,
-            onHandlePreflight = {
-                composeTestRule.updateHasHandledPreflight()
-            },
-            onPresentEngagement = {
-                composeTestRule.updateHasPresentedEngagement()
-            },
-            onUnrecoverableError = {
-                composeTestRule.updateHasUnrecoverableError()
-            }
         )
     }
 

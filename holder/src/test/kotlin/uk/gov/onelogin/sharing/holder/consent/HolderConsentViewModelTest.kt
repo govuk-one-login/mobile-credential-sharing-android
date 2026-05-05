@@ -5,7 +5,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -15,7 +14,6 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HolderConsentViewModelTest {
@@ -69,27 +67,6 @@ class HolderConsentViewModelTest {
                 holderState.value = HolderSessionState.AwaitingUserConsent(deviceRequestStub)
 
                 assertThat(awaitItem(), equalTo(deviceRequestStub))
-            }
-        }
-
-    @Test
-    fun `emits NavigateToGenericError when orchestrator transitions to Failed`() =
-        runTest(dispatcherRule.testDispatcher) {
-            advanceUntilIdle()
-
-            viewModel.navEvents.test {
-                holderState.value = HolderSessionState.Complete.Failed(
-                    SessionError(
-                        message = "encryption failed",
-                        exception = RuntimeException("encryption failed")
-                    )
-                )
-                advanceUntilIdle()
-
-                assertEquals(
-                    HolderConsentNavEvents.NavigateToGenericError,
-                    awaitItem()
-                )
             }
         }
 }

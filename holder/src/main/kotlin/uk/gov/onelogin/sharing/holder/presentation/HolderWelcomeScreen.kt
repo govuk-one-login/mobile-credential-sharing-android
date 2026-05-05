@@ -28,40 +28,14 @@ private const val QR_SIZE = 800
 fun HolderWelcomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HolderWelcomeViewModel = metroViewModel(),
-    onAwaitingUserConsent: () -> Unit = {},
-    onConnectionError: (BluetoothSessionError) -> Unit = {},
-    onGenericError: () -> Unit = {}
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle(
         context = Dispatchers.Default
     )
 
-    val currentOnAwaitingUserConsent by rememberUpdatedState(onAwaitingUserConsent)
-    val latestOnConnectionError by rememberUpdatedState(onConnectionError)
-    val latestOnGenericError by rememberUpdatedState(onGenericError)
-
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderWelcomeScreen")
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.navEvents.collect {
-            when (it) {
-                is HolderScreenEvents.NavigateToBluetoothError ->
-                    latestOnConnectionError(it.error)
-
-                is HolderScreenEvents.NavigateToGenericError ->
-                    latestOnGenericError()
-
-                is HolderScreenEvents.AwaitingUserContent ->
-                    currentOnAwaitingUserConsent()
-
-                else -> {
-                    // do nothing with null events
-                }
-            }
-        }
     }
 
     QrContent(

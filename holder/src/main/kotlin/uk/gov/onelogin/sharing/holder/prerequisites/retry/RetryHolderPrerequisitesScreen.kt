@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -19,7 +18,6 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.contracts.PrerequisiteActionContract
 import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisitesContent
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
 
 @Composable
 internal fun RetryHolderPrerequisitesScreen(
@@ -30,12 +28,8 @@ internal fun RetryHolderPrerequisitesScreen(
     ) {
         viewModel.recheckPrerequisites()
     },
-    onPassPrerequisites: () -> Unit = {},
-    onUnrecoverableError: () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val currentOnPassPrerequisites by rememberUpdatedState(onPassPrerequisites)
-    val currentOnUnrecoverableError by rememberUpdatedState(onUnrecoverableError)
     val missingPrerequisites: List<Prerequisite>? by viewModel
         .prerequisites
         .collectAsStateWithLifecycle()
@@ -46,18 +40,6 @@ internal fun RetryHolderPrerequisitesScreen(
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("RetryHolderPrerequisitesScreen")
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is NavigationEvent.PassedPrerequisites ->
-                    currentOnPassPrerequisites()
-
-                is NavigationEvent.UnrecoverableError ->
-                    currentOnUnrecoverableError()
-            }
-        }
     }
 
     DisposableEffect(lifecycleOwner) {

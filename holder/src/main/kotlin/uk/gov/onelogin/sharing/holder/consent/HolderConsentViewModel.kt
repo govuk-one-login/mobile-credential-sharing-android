@@ -43,22 +43,6 @@ class HolderConsentViewModel(
             null
         )
 
-    val navEvents: SharedFlow<HolderConsentNavEvents> = orchestrator
-        .holderSessionState
-        .mapNotNull { state ->
-            when (state) {
-                is HolderSessionState.Complete.Failed ->
-                    HolderConsentNavEvents.NavigateToGenericError
-
-                else -> null
-            }
-        }.distinctUntilChanged()
-        .flowOn(dispatcher)
-        .shareIn(
-            viewModelScope.plus(dispatcher),
-            SharingStarted.Lazily
-        )
-
     fun onAccept() = viewModelScope.launch(dispatcher) {
         orchestrator.confirmConsent()
     }
