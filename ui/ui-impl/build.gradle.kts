@@ -45,7 +45,9 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        testFixtures(projects.core),
         testFixtures(projects.orchestration),
+        testFixtures(projects.holder),
         testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 }

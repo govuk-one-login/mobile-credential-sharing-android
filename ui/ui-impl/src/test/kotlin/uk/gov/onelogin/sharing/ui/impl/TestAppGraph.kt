@@ -5,7 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
@@ -23,21 +26,27 @@ import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
  */
 fun createTestAppGraph(
     applicationContext: Context = ApplicationProvider.getApplicationContext(),
-    logger: Logger = SystemLogger()
+    logger: Logger = SystemLogger(),
+    checker: PermissionCheckerV2 = PermissionCheckerV2 { emptyList() }
 ): CredentialSharingAppGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
     .create(
         applicationContext = applicationContext,
         logger = logger,
-        permissionCheckerV2 = { emptyList() }
+        permissionCheckerV2 = checker
     )
 
-fun createTestHolderGraph(appGraph: CredentialSharingAppGraph): PresentCredentialGraph =
-    createGraphFactory<PresentCredentialGraph.Factory>()
-        .create(appGraph = appGraph, credentialProvider = FakeCredentialProvider())
+fun createTestHolderGraph(
+    appGraph: CredentialSharingAppGraph,
+    credentialProvider: CredentialProvider = FakeCredentialProvider()
+): PresentCredentialGraph = createGraphFactory<PresentCredentialGraph.Factory>().create(
+    appGraph = appGraph,
+    credentialProvider = credentialProvider
+)
 
-fun createTestVerifierGraph(appGraph: CredentialSharingAppGraph): VerifyCredentialGraph =
-    createGraphFactory<VerifyCredentialGraph.Factory>()
-        .create(
-            appGraph = appGraph,
-            verifierConfig = verifierConfigStub
-        )
+fun createTestVerifierGraph(
+    appGraph: CredentialSharingAppGraph,
+    config: VerifierConfig = verifierConfigStub
+): VerifyCredentialGraph = createGraphFactory<VerifyCredentialGraph.Factory>().create(
+    appGraph = appGraph,
+    verifierConfig = config
+)

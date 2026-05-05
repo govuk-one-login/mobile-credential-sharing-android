@@ -2,23 +2,19 @@ package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
-import uk.gov.onelogin.sharing.holder.HolderRoutes.convertSessionStateToNavigation
+import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 
@@ -32,39 +28,36 @@ import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
  * @param modifier Optional [Modifier] to apply to the root composable.
  */
 @Composable
-fun ShareCredential(
-    component: CredentialPresenter,
-    modifier: Modifier = Modifier,
-    mainDispatcher: CoroutineDispatcher = Dispatchers.Main
-) {
+fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifier) {
     val uiGraph = remember(component.appGraph, component.orchestrator) {
         createGraphFactory<HolderUiGraph.Factory>()
             .create(component.appGraph, component.orchestrator)
     }
-
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     val navController = rememberNavController()
+    val holderSessionState = component.orchestrator.holderSessionState
 
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            component.orchestrator.holderSessionState
-                .map { state ->
-                    convertSessionStateToNavigation(
-                        context,
-                        navController,
-                        state
-                    )
-                }.collect { navigationFunction ->
-                    withContext(mainDispatcher) {
-                        navigationFunction()
-                    }
-                }
-        }
-    }
+    ShareCredential(
+        holderSessionState = holderSessionState,
+        modifier = modifier,
+        navController = navController,
+        viewModelFactory = uiGraph.metroViewModelFactory
+    )
+}
+
+@Composable
+internal fun ShareCredential(
+    holderSessionState: StateFlow<HolderSessionState>,
+    viewModelFactory: MetroViewModelFactory,
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
+    MonitorHolderSessionState(
+        holderSessionState = holderSessionState,
+        navController = navController
+    )
 
     CompositionLocalProvider(
-        LocalMetroViewModelFactory provides uiGraph.metroViewModelFactory
+        LocalMetroViewModelFactory provides viewModelFactory
     ) {
         NavHost(
             navController = navController,

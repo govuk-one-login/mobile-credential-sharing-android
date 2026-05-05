@@ -47,7 +47,6 @@ data object HolderRoutes {
         }
     }
 
-    // DCMAW-19768: Unit test this function
     suspend fun convertSessionStateToNavigation(
         context: Context,
         navController: NavHostController,

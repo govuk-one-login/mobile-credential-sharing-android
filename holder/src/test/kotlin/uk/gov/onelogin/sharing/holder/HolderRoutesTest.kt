@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
+import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
@@ -28,6 +29,7 @@ class HolderRoutesTest {
     )
 
     @Test
+    @UiThreadTest
     fun holderRoutesAreConfigured() = runTest {
         composeTestRule.setContent {
             val context = LocalContext.current
