@@ -9,7 +9,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -36,7 +35,6 @@ class HolderWelcomeScreenTest {
     private val viewModel by lazy {
         HolderWelcomeViewModel(
             dispatcher = dispatcherRule.testDispatcher,
-            logger = SystemLogger(),
             orchestrator = orchestrator
         )
     }

@@ -11,7 +11,6 @@ import org.hamcrest.Matchers.nullValue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -22,8 +21,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 class HolderWelcomeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
-
-    private val logger = SystemLogger()
 
     val qrData = "QR code"
     private var initialHolderState: HolderSessionState = HolderSessionState.PresentingEngagement(
@@ -39,7 +36,6 @@ class HolderWelcomeViewModelTest {
 
     private val viewModel by lazy {
         HolderWelcomeViewModel(
-            logger = logger,
             orchestrator = orchestrator,
             dispatcher = mainDispatcherRule.testDispatcher
         )
