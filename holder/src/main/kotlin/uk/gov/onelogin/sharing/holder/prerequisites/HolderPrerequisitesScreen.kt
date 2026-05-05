@@ -29,7 +29,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @Composable
 internal fun HolderPrerequisitesScreen(
     modifier: Modifier = Modifier,
-    viewModel: HolderPrerequisitesViewModel = metroViewModel(),
+    viewModel: HolderPrerequisitesViewModel = metroViewModel()
 ) {
     val state: HolderSessionState by viewModel.holderSessionState.collectAsStateWithLifecycle()
     val progressTextResource: Int? by loadProgressText(state)

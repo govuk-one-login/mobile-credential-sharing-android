@@ -27,7 +27,7 @@ private const val QR_SIZE = 800
 @Composable
 fun HolderWelcomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HolderWelcomeViewModel = metroViewModel(),
+    viewModel: HolderWelcomeViewModel = metroViewModel()
 ) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle(
         context = Dispatchers.Default

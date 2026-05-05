@@ -27,7 +27,7 @@ internal fun RetryHolderPrerequisitesScreen(
         PrerequisiteActionContract
     ) {
         viewModel.recheckPrerequisites()
-    },
+    }
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val missingPrerequisites: List<Prerequisite>? by viewModel

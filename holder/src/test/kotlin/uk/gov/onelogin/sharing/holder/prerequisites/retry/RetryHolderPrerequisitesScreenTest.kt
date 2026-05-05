@@ -91,7 +91,7 @@ class RetryHolderPrerequisitesScreenTest {
             setContent {
                 ProvideActivityResultRegistry(testRegistry) {
                     RetryHolderPrerequisitesScreen(
-                        viewModel = viewModel,
+                        viewModel = viewModel
                     )
                 }
             }

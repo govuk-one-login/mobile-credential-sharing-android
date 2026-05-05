@@ -53,7 +53,7 @@ fun ShareCredential(
                     convertSessionStateToNavigation(
                         context,
                         navController,
-                        state,
+                        state
                     )
                 }.collect { navigationFunction ->
                     withContext(mainDispatcher) {

@@ -120,7 +120,7 @@ class HolderPrerequisitesScreenTest {
     private fun Render() {
         HolderPrerequisitesScreen(
             modifier = Modifier.fillMaxSize(),
-            viewModel = viewModel,
+            viewModel = viewModel
         )
     }
 
