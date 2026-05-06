@@ -10,8 +10,7 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceAuthenticationResult
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeFilterIssuerSignedUseCase
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
 class ConfirmConsentUseCaseImplTest {
@@ -27,15 +26,18 @@ class ConfirmConsentUseCaseImplTest {
         issuerAuth = byteArrayOf()
     )
 
+    private val filteredIssuerSigned = IssuerSigned(
+        nameSpaces = emptyMap(),
+        issuerAuth = byteArrayOf()
+    )
+
     private val fakeHolderCryptoService = FakeHolderCryptoService()
     private val fakeHolderResponseUseCase = FakeHolderResponseUseCase()
-    private val fakeFilterIssuerSignedUseCase = FakeFilterIssuerSignedUseCase()
 
     private val useCase by lazy {
         ConfirmConsentUseCaseImpl(
             holderCryptoService = fakeHolderCryptoService,
-            holderResponseUseCase = fakeHolderResponseUseCase,
-            filterIssuerSignedUseCase = fakeFilterIssuerSignedUseCase
+            holderResponseUseCase = fakeHolderResponseUseCase
         )
     }
 
@@ -48,11 +50,15 @@ class ConfirmConsentUseCaseImplTest {
         )
         val useCase = ConfirmConsentUseCaseImpl(
             holderCryptoService = fakeHolderCryptoService,
-            holderResponseUseCase = FakeHolderResponseUseCase(deviceSignedToReturn = expected),
-            filterIssuerSignedUseCase = fakeFilterIssuerSignedUseCase
+            holderResponseUseCase = FakeHolderResponseUseCase(deviceSignedToReturn = expected)
         )
 
-        val result = useCase.execute(sessionTranscript, deviceRequest, validatedCredential)
+        val result = useCase.execute(
+            sessionTranscript,
+            deviceRequest,
+            validatedCredential,
+            filteredIssuerSigned
+        )
 
         assertArrayEquals(expected.nameSpaces, result.nameSpaces)
         assertArrayEquals(expected.deviceAuth, result.deviceAuth)
@@ -61,7 +67,12 @@ class ConfirmConsentUseCaseImplTest {
     @Test
     fun `execute passes sessionTranscript and docType to buildDeviceAuthenticationBytes`() =
         runTest {
-            useCase.execute(sessionTranscript, deviceRequest, validatedCredential)
+            useCase.execute(
+                sessionTranscript,
+                deviceRequest,
+                validatedCredential,
+                filteredIssuerSigned
+            )
 
             assertArrayEquals(
                 sessionTranscript,
@@ -78,7 +89,12 @@ class ConfirmConsentUseCaseImplTest {
                 deviceNameSpacesBytes = byteArrayOf()
             )
 
-            useCase.execute(sessionTranscript, deviceRequest, validatedCredential)
+            useCase.execute(
+                sessionTranscript,
+                deviceRequest,
+                validatedCredential,
+                filteredIssuerSigned
+            )
 
             assertArrayEquals(
                 deviceAuthBytes,
@@ -94,7 +110,12 @@ class ConfirmConsentUseCaseImplTest {
         ).copy(docRequests = emptyList())
 
         assertFailsWith<DeviceSignatureException> {
-            useCase.execute(sessionTranscript, emptyRequest, validatedCredential)
+            useCase.execute(
+                sessionTranscript,
+                emptyRequest,
+                validatedCredential,
+                filteredIssuerSigned
+            )
         }
     }
 
@@ -104,28 +125,16 @@ class ConfirmConsentUseCaseImplTest {
             holderCryptoService = fakeHolderCryptoService,
             holderResponseUseCase = FakeHolderResponseUseCase(
                 exception = DeviceSignatureException("sign failed")
-            ),
-            filterIssuerSignedUseCase = fakeFilterIssuerSignedUseCase
+            )
         )
 
         assertFailsWith<DeviceSignatureException> {
-            useCase.execute(sessionTranscript, deviceRequest, validatedCredential)
+            useCase.execute(
+                sessionTranscript,
+                deviceRequest,
+                validatedCredential,
+                filteredIssuerSigned
+            )
         }
     }
-
-    @Test
-    fun `execute propagates NoMatchingAttributesException from filterIssuerSignedUseCase`() =
-        runTest {
-            val useCase = ConfirmConsentUseCaseImpl(
-                holderCryptoService = fakeHolderCryptoService,
-                holderResponseUseCase = fakeHolderResponseUseCase,
-                filterIssuerSignedUseCase = FakeFilterIssuerSignedUseCase(
-                    exceptionToThrow = NoMatchingAttributesException("no match")
-                )
-            )
-
-            assertFailsWith<NoMatchingAttributesException> {
-                useCase.execute(sessionTranscript, deviceRequest, validatedCredential)
-            }
-        }
 }

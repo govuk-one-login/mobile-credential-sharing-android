@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.decoders
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import java.io.ByteArrayOutputStream
 import kotlin.test.assertFailsWith
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -14,16 +15,22 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawC
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
-import java.io.ByteArrayOutputStream
-import kotlin.collections.iterator
 
 class FilterIssuerSignedUseCaseImplTest {
 
     private val logger = object : Logger {
         override fun debug(tag: String, message: String) = Unit
-        override fun error(tag: String, message: String, throwable: Throwable?) = Unit
         override fun info(tag: String, message: String) = Unit
-        override fun warn(tag: String, message: String) = Unit
+        override fun error(
+            tag: String,
+            message: String,
+            throwable: Throwable,
+            errorKeys: uk.gov.logging.api.v2.errorKeys.ErrorKeys
+        ) = Unit
+
+        override fun error(tag: String, message: String, throwable: Throwable) = Unit
+        override fun error(tag: String, message: String) = Unit
+        override fun warning(tag: String, message: String) = Unit
     }
 
     private val useCase = FilterIssuerSignedUseCaseImpl(logger)
@@ -114,9 +121,10 @@ class FilterIssuerSignedUseCaseImplTest {
 
         val result = useCase.filter(parsedCredential(credentialBytes), request)
 
-        assertEquals(2, result.nameSpaces!!.size)
-        assertArrayEquals(familyNameBytes, result.nameSpaces[namespace]!![0])
-        assertArrayEquals(drivingPrivilegesBytes, result.nameSpaces[gbNamespace]!![0])
+        val nameSpaces = result.nameSpaces!!
+        assertEquals(2, nameSpaces.size)
+        assertArrayEquals(familyNameBytes, nameSpaces[namespace]!![0])
+        assertArrayEquals(drivingPrivilegesBytes, nameSpaces[gbNamespace]!![0])
     }
 
     @Test
@@ -134,7 +142,8 @@ class FilterIssuerSignedUseCaseImplTest {
     fun `filter throws when no requested namespace exists in credential`() {
         val itemBytes = buildItemBytes(0, "family_name", "Smith")
         val credentialBytes = buildNameSpacesBytes(mapOf(namespace to listOf(itemBytes)))
-        val request = deviceRequest(mapOf("org.iso.18013.5.1.OTHER" to mapOf("family_name" to true)))
+        val request =
+            deviceRequest(mapOf("org.iso.18013.5.1.OTHER" to mapOf("family_name" to true)))
 
         val ex = assertFailsWith<NoMatchingAttributesException> {
             useCase.filter(parsedCredential(credentialBytes), request)

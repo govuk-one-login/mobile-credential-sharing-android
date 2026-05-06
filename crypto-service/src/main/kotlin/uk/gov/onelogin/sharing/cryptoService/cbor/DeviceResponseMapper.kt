@@ -1,7 +1,11 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCborSerializer
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
@@ -35,8 +39,19 @@ fun IssuerSigned.toDto(): DeviceResponseDto.IssuerSignedDTO = DeviceResponseDto.
     nameSpaces = nameSpaces?.mapValues { entry ->
         entry.value.map { EmbeddedCbor(it) }
     },
-    issuerAuth = issuerAuth
+    issuerAuth = RawCbor(issuerAuth)
 )
+
+/**
+ * Encodes [IssuerSigned] to CBOR bytes. For diagnostic use only.
+ */
+fun IssuerSigned.encodeCbor(): ByteArray {
+    val serializers: Map<Class<*>, StdSerializer<*>> = mapOf(
+        EmbeddedCbor::class.java to (EmbeddedCborSerializer() as StdSerializer<*>),
+        RawCbor::class.java to (RawCborSerializer() as StdSerializer<*>)
+    )
+    return CborMapper.create(serializers).writeValueAsBytes(this.toDto())
+}
 
 /**
  * Maps [DeviceSigned] domain model to its corresponding [DeviceResponseDto.DeviceSignedDTO].

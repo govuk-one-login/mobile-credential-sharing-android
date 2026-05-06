@@ -16,9 +16,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.I
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<FilterIssuerSignedUseCase>())
-class FilterIssuerSignedUseCaseImpl(
-    private val logger: Logger
-) : FilterIssuerSignedUseCase {
+class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSignedUseCase {
 
     private val cborMapper = ObjectMapper(CBORFactory())
 
@@ -120,12 +118,14 @@ class FilterIssuerSignedUseCaseImpl(
     private fun readElementIdentifier(itemBytes: ByteArray): String? = try {
         (cborMapper.readTree(itemBytes) as? ObjectNode)?.get(KEY_ELEMENT_IDENTIFIER)?.asText()
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        logger.debug(logTag, "Failed to read elementIdentifier: ${e.message}")
         null
     }
 
     private fun readBooleanValue(itemBytes: ByteArray): Boolean? = try {
         (cborMapper.readTree(itemBytes) as? ObjectNode)?.get(KEY_ELEMENT_VALUE)?.asBoolean()
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        logger.debug(logTag, "Failed to read elementValue: ${e.message}")
         null
     }
 
@@ -147,13 +147,8 @@ class FilterIssuerSignedUseCaseImpl(
             AgeItem(age, value, bytes)
         }
 
-        parsed.filter { it.value && it.age >= requestedAge }.minByOrNull { it.age }
-            ?.let { return it.bytes }
-
-        parsed.filter { !it.value && it.age <= requestedAge }.maxByOrNull { it.age }
-            ?.let { return it.bytes }
-
-        return null
+        return parsed.filter { it.value && it.age >= requestedAge }.minByOrNull { it.age }?.bytes
+            ?: parsed.filter { !it.value && it.age <= requestedAge }.maxByOrNull { it.age }?.bytes
     }
 
     private fun isAgeOverNN(identifier: String) = AGE_OVER_PATTERN.matches(identifier)

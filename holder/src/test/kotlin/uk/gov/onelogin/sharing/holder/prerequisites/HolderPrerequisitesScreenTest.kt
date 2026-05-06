@@ -17,6 +17,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeFilterIssuerSignedUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -118,7 +119,8 @@ class HolderPrerequisitesScreenTest {
             },
             peripheralBluetoothTransport = FakePeripheralBluetoothTransport(),
             prerequisiteGate = StubPrerequisiteGate(),
-            confirmConsentUseCase = FakeConfirmConsentUseCase()
+            confirmConsentUseCase = FakeConfirmConsentUseCase(),
+            filterIssuerSignedUseCase = FakeFilterIssuerSignedUseCase()
         )
 
         tester.setContent {
