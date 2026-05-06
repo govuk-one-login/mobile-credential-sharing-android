@@ -24,6 +24,14 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedExc
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
+/**
+ * Creates a [LaunchedEffect] that monitors the [holderSessionState].
+ *
+ * These states map to [NavHostController] extension functions, controlling the screen displayed
+ * to the User.
+ *
+ * @see convertSessionStateToNavigation
+ */
 @Composable
 fun MonitorHolderSessionState(
     holderSessionState: StateFlow<HolderSessionState>,
@@ -47,6 +55,19 @@ fun MonitorHolderSessionState(
     }
 }
 
+/**
+ * Converts the provided [state] into a navigation action by wrapping a [NavHostController]
+ * extension function.
+ *
+ * Using this function tightly binds app navigation to the [HolderSessionState]. As in,
+ * changes to the [state] update the current location of the User withing the holder app journey.
+ *
+ * The reason for doing this is due to the [HolderSessionState] acting as the User's current
+ * position within the journey as a form of state machine.
+ *
+ * @return An anonymous function that calls [NavHostController] extension functions. Invoke the
+ * returned value to perform navigation.
+ */
 internal suspend fun convertSessionStateToNavigation(
     context: Context,
     navController: NavHostController,
@@ -76,6 +97,12 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        is HolderSessionState.AwaitingUserConsent -> {
+            {
+                navController.navigateToHolderConsentScreen()
+            }
+        }
+
         is HolderSessionState.Complete.Failed -> {
             {
                 if ((state.sessionReason as? SessionErrorReason.UnrecoverableThrowable)
@@ -97,15 +124,15 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
-        is HolderSessionState.AwaitingUserConsent -> {
+        HolderSessionState.ReadyToPresent,
+        HolderSessionState.ProcessingEstablishment,
+        HolderSessionState.ProcessingResponse,
+        HolderSessionState.Complete.Cancelled,
+        is HolderSessionState.Complete.Success
+        -> {
             {
-                navController.navigateToHolderConsentScreen()
+                // do nothing with unrelated / unimplemented states
             }
-        }
-
-        else -> {
-            // do nothing with unrelated sessions
-            {}
         }
     }
 }
