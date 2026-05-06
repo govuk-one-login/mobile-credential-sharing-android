@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,27 +34,14 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.Do
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 @Composable
-internal fun HolderConsentScreen(
-    viewModel: HolderConsentViewModel = metroViewModel(),
-    onGenericError: () -> Unit = {}
-) {
+internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
     BackHandler(enabled = true) { }
 
     val request by viewModel.deviceRequest.collectAsStateWithLifecycle()
-    val latestOnGenericError by rememberUpdatedState(onGenericError)
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderConsentScreen")
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.navEvents.collect { event ->
-            when (event) {
-                is HolderConsentNavEvents.NavigateToGenericError ->
-                    latestOnGenericError()
-            }
-        }
     }
 
     request?.let {

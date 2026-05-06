@@ -22,11 +22,11 @@ data object HolderRoutes {
 
     fun NavGraphBuilder.configureHolderRoutes(controller: NavController) {
         navigation<HolderRoutes>(startDestination = HolderPrerequisitesRoute) {
-            configureHolderPrerequisitesScreen(controller)
+            configureHolderPrerequisitesScreen()
             configureUnrecoverableHolderError(controller)
-            configureRetryHolderPrerequisites(controller)
-            configureHolderPresentQrScreen(controller)
-            configureHolderConsentScreen(controller)
+            configureRetryHolderPrerequisites()
+            configureHolderPresentQrScreen()
+            configureHolderConsentScreen()
             configureBluetoothConnectionErrorRoute(controller)
         }
     }

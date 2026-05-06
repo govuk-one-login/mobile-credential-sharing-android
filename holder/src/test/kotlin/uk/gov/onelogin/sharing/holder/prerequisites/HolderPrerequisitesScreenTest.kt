@@ -3,32 +3,12 @@ package uk.gov.onelogin.sharing.holder.prerequisites
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.StateRestorationTester
-import com.google.testing.junit.testparameterinjector.TestParameters
-import kotlin.test.assertTrue
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
-import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
-import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
-import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.HolderOrchestrator
-import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.credential.FakeCredentialRequestHandler
-import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
-import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderResponseUseCase
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
-import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 
 @RunWith(RobolectricTestParameterInjector::class)
 class HolderPrerequisitesScreenTest {
@@ -39,98 +19,22 @@ class HolderPrerequisitesScreenTest {
     @get:Rule
     val composeTestRule = HolderPrerequisitesScreenRule()
 
-    private val holderState = MutableStateFlow<HolderSessionState>(
-        HolderSessionState.NotStarted
-    )
-
-    private var orchestrator: Orchestrator.Holder = FakeOrchestrator(
-        initialHolderState = holderState
-    )
-
-    private val viewModel by lazy {
-        HolderPrerequisitesViewModel(orchestrator = orchestrator)
-    }
-
     @Test
-    @TestParameters(valuesProvider = HolderPrerequisitesScreenStates::class)
-    fun `Progress indicator text changes based on session state`(
-        state: HolderSessionState,
-        composeTestRuleAssertion: HolderPrerequisitesScreenRule.() -> Unit
-    ) = runTest(dispatcherRule.testDispatcher) {
-        holderState.update { state }
-
+    fun `Progress indicator is displayed`() = runTest {
         composeTestRule.setContent {
             Render()
         }
 
-        composeTestRuleAssertion(composeTestRule)
+        composeTestRule.assertProgressIndicatorIsDisplayed()
     }
 
     @Test
-    @TestParameters(valuesProvider = HolderPrerequisitesScreenStates::class)
-    fun `Preview follows the same display as the main composable screen`(
-        state: HolderSessionState,
-        composeTestRuleAssertion: HolderPrerequisitesScreenRule.() -> Unit
-    ) = runTest(dispatcherRule.testDispatcher) {
+    fun `Preview follows the same display as the main composable screen`() = runTest {
         composeTestRule.setContent {
-            RenderPreview(state)
+            RenderPreview()
         }
 
-        composeTestRuleAssertion(composeTestRule)
-    }
-
-    @Test
-    @TestParameters(valuesProvider = HolderPrerequisitesScreenHandlers::class)
-    fun `Certain session states call composable lambdas`(
-        state: HolderSessionState,
-        handlerAssertion: HolderPrerequisitesScreenRule.() -> Boolean
-    ) = runTest(dispatcherRule.testDispatcher) {
-        holderState.update { state }
-
-        composeTestRule.setContent {
-            Render()
-        }
-
-        assertTrue {
-            handlerAssertion(composeTestRule)
-        }
-    }
-
-    @Test
-    fun `State restoration occurs without issues`() = runTest(dispatcherRule.testDispatcher) {
-        val tester = StateRestorationTester(composeTestRule)
-        val logger = SystemLogger()
-        orchestrator = HolderOrchestrator(
-            appCoroutineScope = backgroundScope,
-            credentialRequestHandler = FakeCredentialRequestHandler(),
-            decryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase(),
-            holderCryptoService = HolderCryptoServiceImpl(
-                sessionSecurity = FakeSessionSecurity(),
-                logger = logger
-            ),
-            logger = logger,
-            sessionFactory = {
-                HolderSessionImpl(
-                    logger = logger,
-                    internalState = holderState,
-                    initialContext = holderSessionContextStub
-                )
-            },
-            peripheralBluetoothTransport = FakePeripheralBluetoothTransport(),
-            prerequisiteGate = StubPrerequisiteGate(),
-            confirmConsentUseCase = FakeConfirmConsentUseCase()
-        )
-
-        tester.setContent {
-            Render()
-        }
-
-        composeTestRule.waitUntil { composeTestRule.hasPresentedEngagement }
-        composeTestRule.assertPresentingEngagementTextIsDisplayed()
-
-        tester.emulateSavedInstanceStateRestore()
-
-        composeTestRule.assertPresentingEngagementTextIsDisplayed()
+        composeTestRule.assertProgressIndicatorIsDisplayed()
     }
 
     /**
@@ -138,23 +42,11 @@ class HolderPrerequisitesScreenTest {
      */
     @Composable
     private fun Render() {
-        HolderPrerequisitesScreen(
-            modifier = Modifier.fillMaxSize(),
-            viewModel = viewModel,
-            onHandlePreflight = {
-                composeTestRule.updateHasHandledPreflight()
-            },
-            onPresentEngagement = {
-                composeTestRule.updateHasPresentedEngagement()
-            },
-            onUnrecoverableError = {
-                composeTestRule.updateHasUnrecoverableError()
-            }
-        )
+        HolderPrerequisitesScreen(modifier = Modifier.fillMaxSize())
     }
 
     @Composable
-    private fun RenderPreview(state: HolderSessionState) {
-        HolderPrerequisitesScreenPreview(state = state)
+    private fun RenderPreview() {
+        HolderPrerequisitesScreenPreview()
     }
 }

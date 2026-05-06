@@ -69,6 +69,10 @@ dependencies {
     ).forEach(::testImplementation)
 
     listOf(
+        libs.androidx.navigation.testing
+    ).forEach(::testFixturesApi)
+
+    listOf(
         projects.bluetooth,
         projects.cryptoService,
         testFixtures(projects.bluetooth),

@@ -8,14 +8,9 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
@@ -41,22 +36,6 @@ class HolderConsentViewModel(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
             null
-        )
-
-    val navEvents: SharedFlow<HolderConsentNavEvents> = orchestrator
-        .holderSessionState
-        .mapNotNull { state ->
-            when (state) {
-                is HolderSessionState.Complete.Failed ->
-                    HolderConsentNavEvents.NavigateToGenericError
-
-                else -> null
-            }
-        }.distinctUntilChanged()
-        .flowOn(dispatcher)
-        .shareIn(
-            viewModelScope.plus(dispatcher),
-            SharingStarted.Lazily
         )
 
     fun onAccept() = viewModelScope.launch(dispatcher) {
