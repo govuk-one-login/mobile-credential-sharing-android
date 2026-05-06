@@ -4,6 +4,7 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
+import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
@@ -12,51 +13,75 @@ import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisit
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 
 class HolderRouteParameters : TestParametersValuesProvider() {
-    private val inputs = listOf<Triple<String, Any, TestNavHostController.() -> Any?>>(
+    private val inputs = listOf<Triple<String, Any, TestNavHostController.() -> Boolean>>(
         Triple(
             "Holder prerequisites route",
             HolderPrerequisitesRoute
         ) {
-            currentBackStackEntry?.toRoute<HolderPrerequisitesRoute>()
+            instanceOf<HolderPrerequisitesRoute>(
+                HolderPrerequisitesRoute::class.java
+            ).matches(
+                currentBackStackEntry?.toRoute<HolderPrerequisitesRoute>()
+            )
         },
         Triple(
             "Holder unrecoverable error",
             UnrecoverableHolderErrorRoute
         ) {
-            currentBackStackEntry?.toRoute<UnrecoverableHolderErrorRoute>()
+            instanceOf<UnrecoverableHolderErrorRoute>(
+                UnrecoverableHolderErrorRoute::class.java
+            ).matches(
+                currentBackStackEntry?.toRoute<UnrecoverableHolderErrorRoute>()
+            )
         },
         Triple(
             "Retry holder prerequisites",
             RetryHolderPrerequisitesRoute
         ) {
-            currentBackStackEntry?.toRoute<RetryHolderPrerequisitesRoute>()
+            instanceOf<RetryHolderPrerequisitesRoute>(
+                RetryHolderPrerequisitesRoute::class.java
+            ).matches(
+                currentBackStackEntry?.toRoute<RetryHolderPrerequisitesRoute>()
+            )
         },
         Triple(
             "Holder present QR route",
             HolderPresentQrRoute
         ) {
-            currentBackStackEntry?.toRoute<HolderPresentQrRoute>()
+            instanceOf<HolderPresentQrRoute>(
+                HolderPresentQrRoute::class.java
+            ).matches(
+                currentBackStackEntry?.toRoute<HolderPresentQrRoute>()
+            )
         },
         Triple(
             "Holder consent confirmation",
             HolderConsentRoute
         ) {
-            currentBackStackEntry?.toRoute<HolderConsentRoute>()
+            instanceOf<HolderConsentRoute>(
+                HolderConsentRoute::class.java
+            ).matches(
+                currentBackStackEntry?.toRoute<HolderConsentRoute>()
+            )
         },
         Triple(
             "Holder bluetooth connection error",
             BtConnectionErrorRoute("This is a unit test")
         ) {
-            currentBackStackEntry?.toRoute<BtConnectionErrorRoute>()
+            instanceOf<BtConnectionErrorRoute>(
+                BtConnectionErrorRoute::class.java
+            ).matches(
+                currentBackStackEntry?.toRoute<BtConnectionErrorRoute>()
+            )
         }
     )
 
     override fun provideValues(context: Context?): List<TestParameters.TestParametersValues?> =
-        inputs.map { (name, route, conversion) ->
+        inputs.map { (name, route, assertion) ->
             TestParameters.TestParametersValues.builder()
                 .name(name)
                 .addParameter("route", route)
-                .addParameter("conversion", conversion)
+                .addParameter("assertion", assertion)
                 .build()
         }
 }

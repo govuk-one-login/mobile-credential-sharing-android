@@ -14,6 +14,7 @@ import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -23,14 +24,18 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(RobolectricTestParameterInjector::class)
-class HolderRoutesTest {
+class MonitorHolderSessionStateTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
     private val viewModelFactory: MetroViewModelFactory = mockk(relaxed = true)
+    private val holderSessionState: MutableStateFlow<HolderSessionState> = MutableStateFlow(
+        HolderSessionState.NotStarted
+    )
 
     private lateinit var controller: TestNavHostController
     private lateinit var context: Context
@@ -49,8 +54,11 @@ class HolderRoutesTest {
 
     @Test
     @UiThreadTest
-    @TestParameters(valuesProvider = HolderRouteParameters::class)
-    fun `Navigates to route`(route: Any, assertion: TestNavHostController.() -> Boolean) = runTest {
+    @TestParameters(valuesProvider = HolderStateToNavigationRoute::class)
+    fun `Session state converts to navigation route`(
+        state: HolderSessionState,
+        assertion: TestNavHostController.() -> Boolean
+    ) = runTest {
         composeTestRule.run {
             setContent {
                 context = LocalContext.current
@@ -61,9 +69,11 @@ class HolderRoutesTest {
                 Render(viewModelFactory)
             }
 
-            waitForIdle()
-
-            controller.navigate(route)
+            convertSessionStateToNavigation(
+                context = context,
+                navController = controller,
+                state = state
+            ).invoke()
 
             waitUntil {
                 assertion(controller)

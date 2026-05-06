@@ -14,7 +14,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import uk.gov.onelogin.sharing.holder.HolderStateToNavigationStringRoute
+import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
@@ -50,12 +50,12 @@ class ShareCredentialTest {
         composeTestRule.waitForIdle()
     }
 
-    @TestParameters(valuesProvider = HolderStateToNavigationStringRoute::class)
+    @TestParameters(valuesProvider = HolderStateToNavigationRoute::class)
     @Test
     @UiThreadTest
     fun `Session state maps to navigation routes`(
         state: HolderSessionState,
-        expectedRoute: String
+        assertion: TestNavHostController.() -> Boolean
     ) = runTest {
         val orchestrator = FakeOrchestrator(
             initialHolderState = MutableStateFlow(state)
@@ -84,7 +84,7 @@ class ShareCredentialTest {
         composeTestRule.waitForIdle()
 
         composeTestRule.waitUntil {
-            controller.currentBackStackEntry?.destination?.route?.endsWith(expectedRoute) ?: false
+            assertion(controller)
         }
     }
 }
