@@ -10,8 +10,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.orchestration.scan.CredentialScanner
-import uk.gov.onelogin.sharing.verifier.VerifierNavigationEvents
 import uk.gov.onelogin.sharing.verifier.scan.state.VerifierUiState
 
 @Composable
@@ -26,7 +27,12 @@ fun VerifierScanner(
     val currentOnInvalidBarcode by rememberUpdatedState(onInvalidBarcode)
     val currentOnValidBarcode by rememberUpdatedState(onValidBarcode)
 
-    LaunchedEffect(viewModel.navigationEvents) {
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("VerifierScanner")
+    }
+
+    LaunchedEffect(Unit) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.navigationEvents.collect { event ->
                 when (event) {

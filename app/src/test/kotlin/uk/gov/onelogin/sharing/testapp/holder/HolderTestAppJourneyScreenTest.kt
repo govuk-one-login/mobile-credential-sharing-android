@@ -31,7 +31,7 @@ class HolderTestAppJourneyScreenTest {
                 Render()
             }
 
-            assertPrerequisitesNotStartedTextIsDisplayed()
+            assertPrerequisitesProgressIndicatorIsDisplayed()
             performCloseJourneyClick()
             assertHasClosedJourney()
         }

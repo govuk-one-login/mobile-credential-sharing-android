@@ -13,7 +13,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -38,17 +41,17 @@ class RetryVerifierPrerequisitesViewModel(
 ) : ViewModel(),
     ResolvePrerequisiteAction<VerifierSessionState> by resolver {
 
-    val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent?> = navigator
+    val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent> = navigator
         .events
-        .map { event ->
-            if (event != null) {
-                _hasRecheckedPrerequisites.update { false }
-            }
+        .mapNotNull { event ->
+            _hasRecheckedPrerequisites.update { false }
             event
         }
+        .distinctUntilChanged()
+        .flowOn(dispatcher)
         .shareIn(
             viewModelScope.plus(dispatcher),
-            SharingStarted.Companion.Lazily
+            SharingStarted.Lazily
         )
 
     private val _hasRecheckedPrerequisites = MutableStateFlow(false)
@@ -58,9 +61,10 @@ class RetryVerifierPrerequisitesViewModel(
         .verifierSessionState
         .map { it as? VerifierSessionState.Preflight }
         .map { it?.map(MissingPrerequisite::prerequisite) }
+        .flowOn(dispatcher)
         .stateIn(
             viewModelScope.plus(dispatcher),
-            SharingStarted.Companion.Eagerly,
+            SharingStarted.Eagerly,
             (orchestrator.verifierSessionState.value as? VerifierSessionState.Preflight)
                 ?.map(MissingPrerequisite::prerequisite)
         )

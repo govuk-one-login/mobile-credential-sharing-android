@@ -1,12 +1,17 @@
 package uk.gov.onelogin.sharing.verifier.scan.errors.invalid
 
 import androidx.annotation.Keep
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
+import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
 
 /**
  * Serialization data class used as a navigation route. Maps to the [ScannedInvalidQrScreen]
@@ -22,12 +27,22 @@ data class ScannedInvalidQrRoute(val data: String) {
          * [NavGraphBuilder] extension function for configuring the [ScannedInvalidQrRoute]
          * navigation target.
          */
-        fun NavGraphBuilder.configureScannedInvalidQrRoute(onTryAgainClick: () -> Unit = {}) {
+        fun NavGraphBuilder.configureScannedInvalidQrRoute(controller: NavController) {
             composable<ScannedInvalidQrRoute> { navBackStackEntry ->
                 val arguments: ScannedInvalidQrRoute = navBackStackEntry.toRoute()
+                val scope = rememberCoroutineScope { Dispatchers.Main }
                 ScannedInvalidQrScreen(
                     inputUri = arguments.data,
-                    onTryAgainClick = onTryAgainClick
+                    onTryAgainClick = {
+                        scope.launch {
+                            controller.navigate(VerifierPrerequisitesRoute) {
+                                popUpTo<VerifierRoutes> {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+                    }
                 )
             }
         }

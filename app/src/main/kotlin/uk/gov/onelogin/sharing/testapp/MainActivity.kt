@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.metrics.performance.JankStats
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.api.BuildConfig
+import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 import uk.gov.onelogin.sharing.testapp.MainActivityRoutes.configureTestAppRoutes
@@ -31,6 +34,11 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var verifyCredentialSdk: VerifyCredentialSdk
+
+    @Inject
+    lateinit var logger: Logger
+
+    private lateinit var jankStats: JankStats
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,5 +77,29 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        jankStats = JankStats.createAndTrack(window) { frameData ->
+            if (frameData.isJank) {
+                logger.debug(
+                    "JankStats",
+                    "Received possible jank: ${frameData.states}"
+                )
+            }
+        }.also {
+            logger.debug(
+                logTag,
+                "Initialised JankStats"
+            )
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        jankStats.isTrackingEnabled = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        jankStats.isTrackingEnabled = true
     }
 }
