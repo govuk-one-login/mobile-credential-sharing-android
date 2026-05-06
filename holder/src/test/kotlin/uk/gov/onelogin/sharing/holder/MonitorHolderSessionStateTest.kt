@@ -19,9 +19,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(RobolectricTestParameterInjector::class)
-class HolderRoutesTest {
+class MonitorHolderSessionStateTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -33,8 +34,11 @@ class HolderRoutesTest {
 
     @Test
     @UiThreadTest
-    @TestParameters(valuesProvider = HolderRouteParameters::class)
-    fun `Navigates to route`(route: Any, assertion: TestNavHostController.() -> Boolean) = runTest {
+    @TestParameters(valuesProvider = HolderStateToNavigationRoute::class)
+    fun `Session state converts to navigation route`(
+        state: HolderSessionState,
+        assertion: TestNavHostController.() -> Boolean
+    ) = runTest {
         composeTestRule.run {
             setContent {
                 context = LocalContext.current
@@ -45,9 +49,11 @@ class HolderRoutesTest {
                 Render(viewModelFactory)
             }
 
-            waitForIdle()
-
-            controller.navigate(route)
+            convertSessionStateToNavigation(
+                context = context,
+                navController = controller,
+                state = state
+            ).invoke()
 
             waitUntil {
                 assertion(controller)

@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderViewModel.NavigationEvent as ViewModelEvent
 import uk.gov.onelogin.sharing.orchestration.error.UnrecoverableErrorContent
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -26,6 +28,11 @@ internal fun UnrecoverableHolderErrorScreen(
     val failureState: HolderSessionState.Complete.Failed? by viewModel
         .failureState
         .collectAsStateWithLifecycle()
+
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("UnrecoverableHolderErrorScreen")
+    }
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->

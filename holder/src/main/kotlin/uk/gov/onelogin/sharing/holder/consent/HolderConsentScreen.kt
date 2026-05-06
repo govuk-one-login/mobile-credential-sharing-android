@@ -12,50 +12,45 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.launch
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Composable
-internal fun HolderConsentScreen(
-    viewModel: HolderConsentViewModel = metroViewModel(),
-    onGenericError: () -> Unit = {}
-) {
+internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
     BackHandler(enabled = true) { }
 
-    val state by viewModel.holderSessionState.collectAsStateWithLifecycle()
-    val latestOnGenericError by rememberUpdatedState(onGenericError)
+    val request by viewModel.deviceRequest.collectAsStateWithLifecycle()
 
+    val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
-        viewModel.navEvents.collect { event ->
-            when (event) {
-                is HolderConsentNavEvents.NavigateToGenericError ->
-                    latestOnGenericError()
-            }
-        }
+        metrics.putScreenState("HolderConsentScreen")
     }
 
-    val consentState = state as? HolderSessionState.AwaitingUserConsent ?: return
-
-    HolderConsentContent(
-        request = consentState.request,
-        onAccept = viewModel::onAccept,
-        onDeny = viewModel::onDeny
-    )
+    request?.let {
+        HolderConsentContent(
+            request = it,
+            onAccept = viewModel::onAccept,
+            onDeny = viewModel::onDeny
+        )
+    } ?: CircularProgressIndicator()
 }
 
 @Composable
@@ -64,6 +59,7 @@ internal fun HolderConsentContent(
     onAccept: () -> Unit = {},
     onDeny: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -111,11 +107,11 @@ internal fun HolderConsentContent(
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = onDeny) {
+            Button(onClick = { scope.launch { onDeny() } }) {
                 Text(stringResource(R.string.holder_consent_deny))
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = onAccept) {
+            Button(onClick = { scope.launch { onAccept() } }) {
                 Text(stringResource(R.string.holder_consent_accept))
             }
         }

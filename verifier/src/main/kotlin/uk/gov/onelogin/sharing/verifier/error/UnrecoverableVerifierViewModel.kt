@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -30,12 +32,14 @@ class UnrecoverableVerifierViewModel(
     val failureState: StateFlow<VerifierSessionState.Complete.Failed?> =
         orchestrator.verifierSessionState.map {
             it as? VerifierSessionState.Complete.Failed
-        }.stateIn(
-            viewModelScope.plus(dispatcher),
-            SharingStarted.Companion.Eagerly,
-            orchestrator.verifierSessionState.value as?
-                VerifierSessionState.Complete.Failed
-        )
+        }.distinctUntilChanged()
+            .flowOn(dispatcher)
+            .stateIn(
+                viewModelScope.plus(dispatcher),
+                SharingStarted.Eagerly,
+                orchestrator.verifierSessionState.value as?
+                    VerifierSessionState.Complete.Failed
+            )
 
     private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()
     val navigationEvent: SharedFlow<NavigationEvent?> = _navigationEvent

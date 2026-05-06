@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -38,14 +40,14 @@ class RetryHolderPrerequisitesViewModel(
 ) : ViewModel(),
     ResolvePrerequisiteAction<HolderSessionState> by resolver {
 
-    val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent?> = navigator
+    val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent> = navigator
         .events
         .map { event ->
-            if (event != null) {
-                _hasRecheckedPrerequisites.update { false }
-            }
+            _hasRecheckedPrerequisites.update { false }
             event
         }
+        .distinctUntilChanged()
+        .flowOn(dispatcher)
         .shareIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Companion.Lazily
@@ -58,6 +60,7 @@ class RetryHolderPrerequisitesViewModel(
         .holderSessionState
         .map { it as? HolderSessionState.Preflight }
         .map { it?.map(MissingPrerequisite::prerequisite) }
+        .flowOn(dispatcher)
         .stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Companion.Eagerly,

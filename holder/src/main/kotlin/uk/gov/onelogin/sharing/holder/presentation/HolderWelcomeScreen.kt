@@ -8,14 +8,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
+import kotlinx.coroutines.Dispatchers
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.QrCodeImage
 
 private const val QR_SIZE = 800
@@ -24,34 +25,15 @@ private const val QR_SIZE = 800
 @Composable
 fun HolderWelcomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HolderWelcomeViewModel = metroViewModel(),
-    onAwaitingUserConsent: () -> Unit = {},
-    onConnectionError: (BluetoothSessionError) -> Unit = {},
-    onGenericError: () -> Unit = {}
+    viewModel: HolderWelcomeViewModel = metroViewModel()
 ) {
-    val contentState by viewModel.uiState.collectAsStateWithLifecycle()
+    val contentState by viewModel.uiState.collectAsStateWithLifecycle(
+        context = Dispatchers.Default
+    )
 
-    val currentOnAwaitingUserConsent by rememberUpdatedState(onAwaitingUserConsent)
-    val latestOnConnectionError by rememberUpdatedState(onConnectionError)
-    val latestOnGenericError by rememberUpdatedState(onGenericError)
-
+    val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
-        viewModel.navEvents.collect {
-            when (it) {
-                is HolderScreenEvents.NavigateToBluetoothError ->
-                    latestOnConnectionError(it.error)
-
-                is HolderScreenEvents.NavigateToGenericError ->
-                    latestOnGenericError()
-
-                is HolderScreenEvents.AwaitingUserContent ->
-                    currentOnAwaitingUserConsent()
-
-                else -> {
-                    // do nothing with null events
-                }
-            }
-        }
+        metrics.putScreenState("HolderWelcomeScreen")
     }
 
     QrContent(

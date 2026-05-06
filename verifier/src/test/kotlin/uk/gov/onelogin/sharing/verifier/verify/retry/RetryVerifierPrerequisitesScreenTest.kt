@@ -34,7 +34,7 @@ class RetryVerifierPrerequisitesScreenTest {
     @get:Rule
     val composeTestRule = RetryPrerequisitesContentRule(createComposeRule())
 
-    private var navigatorEvents = mutableListOf<NavigationEvent?>()
+    private var navigatorEvents = mutableListOf<NavigationEvent>()
     private var missingPrerequisites = mutableListOf(
         MissingPrerequisite.Bluetooth(state = BluetoothState.PermissionNotGranted)
     )

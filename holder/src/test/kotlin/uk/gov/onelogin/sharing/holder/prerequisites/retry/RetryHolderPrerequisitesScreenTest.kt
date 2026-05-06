@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
-import com.google.testing.junit.testparameterinjector.TestParameters
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
@@ -21,7 +20,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisitesContentRule
-import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisitesNavigatorAssertions
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
@@ -35,7 +33,7 @@ class RetryHolderPrerequisitesScreenTest {
     @get:Rule
     val composeTestRule = RetryPrerequisitesContentRule(createComposeRule())
 
-    private var navigatorEvents = mutableListOf<NavigationEvent?>()
+    private var navigatorEvents = mutableListOf<NavigationEvent>()
     private var missingPrerequisites = mutableListOf(
         MissingPrerequisite.Bluetooth(state = BluetoothState.PermissionNotGranted)
     )
@@ -75,26 +73,6 @@ class RetryHolderPrerequisitesScreenTest {
     }
 
     @Test
-    @TestParameters(valuesProvider = RetryPrerequisitesNavigatorAssertions::class)
-    fun `Calls lambda based on navigation event`(
-        event: NavigationEvent,
-        assertion: RetryPrerequisitesContentRule.() -> Unit
-    ) = runTest(dispatcherRule.testDispatcher) {
-        navigatorEvents.add(event)
-        composeTestRule.run {
-            setContent {
-                RetryHolderPrerequisitesScreen(
-                    viewModel = viewModel,
-                    onPassPrerequisites = { composeTestRule.updateHasPassedPrerequisites() },
-                    onUnrecoverableError = { composeTestRule.updateHasUnrecoverableError() }
-                )
-            }
-
-            assertion(composeTestRule)
-        }
-    }
-
-    @Test
     fun `Tapping resolve action defers to an activity result contract`() = runTest {
         composeTestRule.run {
             var hasCalledActivityResult = false
@@ -113,9 +91,7 @@ class RetryHolderPrerequisitesScreenTest {
             setContent {
                 ProvideActivityResultRegistry(testRegistry) {
                     RetryHolderPrerequisitesScreen(
-                        viewModel = viewModel,
-                        onPassPrerequisites = { composeTestRule.updateHasPassedPrerequisites() },
-                        onUnrecoverableError = { composeTestRule.updateHasUnrecoverableError() }
+                        viewModel = viewModel
                     )
                 }
             }

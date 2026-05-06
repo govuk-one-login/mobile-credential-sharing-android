@@ -5,7 +5,6 @@ import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -60,18 +59,13 @@ class RetryHolderPrerequisitesTest {
     }
 
     @Test
-    fun `Emits null due to recoverable bluetooth state`() = runTest {
+    fun `Recoverable bluetooth states don't emit navigation events`() = runTest {
         initialHolderState = HolderSessionState.Preflight(
             listOf(
                 MissingPrerequisite.Bluetooth(BluetoothState.PermissionNotGranted)
             )
         )
-        navigator.events.test {
-            assertThat(
-                awaitItem(),
-                nullValue(NavigationEvent::class.java)
-            )
-        }
+        navigator.events.test { expectNoEvents() }
     }
 
     @Test
@@ -87,14 +81,9 @@ class RetryHolderPrerequisitesTest {
     }
 
     @Test
-    fun `Emits null due to irrelevant holder session state`() = runTest {
+    fun `Irrelevant holder session states don't emit navigation events`() = runTest {
         initialHolderState = HolderSessionState.NotStarted
 
-        navigator.events.test {
-            assertThat(
-                awaitItem(),
-                nullValue(NavigationEvent::class.java)
-            )
-        }
+        navigator.events.test { expectNoEvents() }
     }
 }
