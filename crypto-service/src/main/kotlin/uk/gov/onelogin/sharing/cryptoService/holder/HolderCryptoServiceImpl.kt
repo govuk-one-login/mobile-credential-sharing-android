@@ -48,6 +48,7 @@ class HolderCryptoServiceImpl(
         encryptCounter: UInt
     ): ByteArray {
         val cborBytes = deviceResponse.toDto().encodeCbor()
+        val cborHex = cborBytes.toHexString()
         logger.debug(logTag, "DeviceResponse encoded to ${cborBytes.size} CBOR bytes")
 
         return sessionSecurity.encryptPayload(

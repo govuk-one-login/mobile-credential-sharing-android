@@ -797,11 +797,11 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `filter failure triggers no match termination before consent`() = runTest {
+    fun `filter failure due to no matching namespaces triggers no match termination`() = runTest {
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()
         val failingFilter = FakeFilterIssuerSignedUseCase(
-            exceptionToThrow = NoMatchingAttributesException("no matching attributes")
+            exceptionToThrow = NoMatchingAttributesException("SessionData termination initiated due to no matching NameSpaces")
         )
         val orchestrator = createOrchestrator(
             peripheralBluetoothTransport = peripheralTransport,
@@ -819,11 +819,44 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertThat(orchestrator.holderSessionState.value, isFailed())
-        assert("no matching attributes" in logger)
+        assert("SessionData termination initiated due to no matching NameSpaces" in logger)
         assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
         assertEquals(
             SessionDataStatus.SESSION_TERMINATION,
             fakeCryptoService.lastErrorSessionDataStatus
         )
+        assertEquals(0, peripheralTransport.stopCalls)
+    }
+
+    @Test
+    fun `filter failure due to no matching attributes triggers no match termination`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val failingFilter = FakeFilterIssuerSignedUseCase(
+            exceptionToThrow = NoMatchingAttributesException("SessionData termination initiated due to no matching attributes")
+        )
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            filterIssuerSignedUseCase = failingFilter
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assert("SessionData termination initiated due to no matching attributes" in logger)
+        assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastErrorSessionDataStatus
+        )
+        assertEquals(0, peripheralTransport.stopCalls)
     }
 }

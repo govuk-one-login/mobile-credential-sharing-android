@@ -207,12 +207,13 @@ class HolderOrchestrator(
 
             appCoroutineScope.launch {
                 try {
-                    confirmConsentUseCase.execute(
+                    val document = confirmConsentUseCase.execute(
                         sessionTranscript = sessionTranscript,
                         deviceRequest = state.request,
                         validatedCredential = validatedCredential,
                         filteredIssuerSigned = filteredIssuerSigned
                     )
+                    assembleAndEncryptResponse(listOf(document))
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
                 }
