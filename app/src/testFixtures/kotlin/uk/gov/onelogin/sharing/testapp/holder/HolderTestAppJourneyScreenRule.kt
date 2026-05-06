@@ -13,8 +13,8 @@ class HolderTestAppJourneyScreenRule(composeTestRule: ComposeContentTestRule) :
 
     fun assertHasClosedJourney() = waitUntil { hasClosedJourney }
 
-    fun assertPrerequisitesNotStartedTextIsDisplayed() =
-        prerequisitesScreenRule.assertNotStartedTextIsDisplayed()
+    fun assertPrerequisitesProgressIndicatorIsDisplayed() =
+        prerequisitesScreenRule.assertProgressIndicatorIsDisplayed()
 
     fun performCloseJourneyClick() = onNodeWithContentDescription(
         "Close",

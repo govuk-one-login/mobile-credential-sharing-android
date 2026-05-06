@@ -12,17 +12,13 @@ import androidx.test.annotation.UiThreadTest
 import com.google.testing.junit.testparameterinjector.TestParameters
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
-import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesViewModel
-import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
 @RunWith(RobolectricTestParameterInjector::class)
 class HolderRoutesTest {
@@ -34,18 +30,6 @@ class HolderRoutesTest {
 
     private lateinit var controller: TestNavHostController
     private lateinit var context: Context
-
-    @Before
-    fun setUp() {
-        every {
-            viewModelFactory.create(
-                HolderPrerequisitesViewModel::class,
-                any()
-            )
-        } returns HolderPrerequisitesViewModel(
-            orchestrator = FakeOrchestrator()
-        )
-    }
 
     @Test
     @UiThreadTest

@@ -75,6 +75,7 @@ class ShareCredentialTest {
             }
 
             ShareCredential(
+                orchestrator = orchestrator,
                 holderSessionState = orchestrator.holderSessionState,
                 viewModelFactory = uiGraph.metroViewModelFactory,
                 navController = controller
