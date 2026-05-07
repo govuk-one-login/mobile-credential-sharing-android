@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.orchestration.holder.credential
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParser
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParsingException
 import uk.gov.onelogin.sharing.orchestration.Credential
