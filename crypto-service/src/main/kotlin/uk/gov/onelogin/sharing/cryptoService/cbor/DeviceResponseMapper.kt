@@ -1,12 +1,15 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCborSerializer
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSignedItem
 
 /**
  * Maps the [DeviceResponse] domain model to its corresponding [DeviceResponseDto.DeviceResponse].
@@ -30,26 +33,24 @@ fun Document.toDto(): DeviceResponseDto.DocumentDTO = DeviceResponseDto.Document
 
 /**
  * Maps [IssuerSigned] domain model to its corresponding [DeviceResponseDto.IssuerSignedDTO].
+ * Each ByteArray in nameSpaces is the original Tag 24 encoded IssuerSignedItemBytes.
  */
 fun IssuerSigned.toDto(): DeviceResponseDto.IssuerSignedDTO = DeviceResponseDto.IssuerSignedDTO(
     nameSpaces = nameSpaces?.mapValues { entry ->
-        entry.value.map { it.toEmbeddedCbor() }
+        entry.value.map { EmbeddedCbor(it) }
     },
-    issuerAuth = issuerAuth
+    issuerAuth = RawCbor(issuerAuth)
 )
 
 /**
- * Encodes [IssuerSignedItem] into [EmbeddedCbor] (wrapped in Tag 24).
+ * Encodes [IssuerSigned] to CBOR bytes. For diagnostic use only.
  */
-fun IssuerSignedItem.toEmbeddedCbor(): EmbeddedCbor {
-    val mapper = CborMapper.create(emptyMap())
-    val dto = DeviceResponseDto.IssuerSignedItemDTO(
-        digestId = digestId,
-        random = random,
-        elementIdentifier = elementIdentifier,
-        elementValue = elementValue
+fun IssuerSigned.encodeCbor(): ByteArray {
+    val serializers: Map<Class<*>, StdSerializer<*>> = mapOf(
+        EmbeddedCbor::class.java to (EmbeddedCborSerializer() as StdSerializer<*>),
+        RawCbor::class.java to (RawCborSerializer() as StdSerializer<*>)
     )
-    return EmbeddedCbor(mapper.writeValueAsBytes(dto))
+    return CborMapper.create(serializers).writeValueAsBytes(this.toDto())
 }
 
 /**
