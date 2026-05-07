@@ -9,7 +9,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSignedItem
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseModelTest {
@@ -17,16 +16,8 @@ class DeviceResponseModelTest {
     private val namespace = "org.iso.18013.5.1"
     private val docType = "org.iso.18013.5.1.mDL"
 
-    private val familyNameRandom =
-        "8798645B20EA200E19FFABAC92624BEE6AEC63ACEEDECFB1B80077D22BFC20E9"
-            .chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-
-    private val portraitRandom = "D094DAD764A2EB9DEB5210E9D899643EFBD1D069CC311D3295516CA0B024412D"
-        .chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-
-    private val portraitBytes = "FFD8FFE000104A464946000101010090009000".chunked(2)
-        .map { it.toInt(16).toByte() }.toByteArray()
-
+    private val familyNameItemBytes = byteArrayOf(0x01, 0x02, 0x03)
+    private val portraitItemBytes = byteArrayOf(0x04, 0x05, 0x06)
     private val emptyNameSpacesBytes = byteArrayOf(0xA0.toByte())
 
     private val model = DeviceResponse(
@@ -36,20 +27,7 @@ class DeviceResponseModelTest {
                 docType = docType,
                 issuerSigned = IssuerSigned(
                     nameSpaces = mapOf(
-                        namespace to listOf(
-                            IssuerSignedItem(
-                                digestId = 0,
-                                random = familyNameRandom,
-                                elementIdentifier = "family_name",
-                                elementValue = "Smith"
-                            ),
-                            IssuerSignedItem(
-                                digestId = 8,
-                                random = portraitRandom,
-                                elementIdentifier = "portrait",
-                                elementValue = portraitBytes
-                            )
-                        )
+                        namespace to listOf(familyNameItemBytes, portraitItemBytes)
                     ),
                     issuerAuth = byteArrayOf()
                 ),
@@ -131,21 +109,10 @@ class DeviceResponseModelTest {
     }
 
     @Test
-    fun `IssuerSignedItem family_name has correct fields`() {
-        val item = model.documents!!.first().issuerSigned.nameSpaces!![namespace]!![0]
-        assertEquals(0L, item.digestId)
-        assertEquals("family_name", item.elementIdentifier)
-        assertEquals("Smith", item.elementValue)
-        assertArrayEquals(familyNameRandom, item.random)
-    }
-
-    @Test
-    fun `IssuerSignedItem portrait has correct fields`() {
-        val item = model.documents!!.first().issuerSigned.nameSpaces!![namespace]!![1]
-        assertEquals(8L, item.digestId)
-        assertEquals("portrait", item.elementIdentifier)
-        assertArrayEquals(portraitBytes, item.elementValue as ByteArray)
-        assertArrayEquals(portraitRandom, item.random)
+    fun `IssuerSigned nameSpaces items are raw bytes`() {
+        val items = model.documents!!.first().issuerSigned.nameSpaces!![namespace]!!
+        assertArrayEquals(familyNameItemBytes, items[0])
+        assertArrayEquals(portraitItemBytes, items[1])
     }
 
     @Test

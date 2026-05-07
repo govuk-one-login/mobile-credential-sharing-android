@@ -8,11 +8,16 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCborSerializer
 
 class DeviceResponseDtoTest {
 
     private val mapper = CborMapper.create(
-        mapOf(EmbeddedCbor::class.java to EmbeddedCborSerializer())
+        mapOf(
+            EmbeddedCbor::class.java to EmbeddedCborSerializer(),
+            RawCbor::class.java to RawCborSerializer()
+        )
     )
 
     private val docType = "org.iso.18013.5.1.mDL"
@@ -28,7 +33,7 @@ class DeviceResponseDtoTest {
                 nameSpaces = mapOf(
                     "org.iso.18013.5.1" to listOf(EmbeddedCbor(issuerSignedItemData))
                 ),
-                issuerAuth = byteArrayOf()
+                issuerAuth = RawCbor(byteArrayOf())
             ),
             deviceSigned = DeviceResponseDto.DeviceSignedDTO(
                 nameSpaces = EmbeddedCbor(deviceNameSpacesData),

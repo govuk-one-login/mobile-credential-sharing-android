@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.dto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
 
 class DeviceResponseDto {
 
@@ -41,7 +42,7 @@ class DeviceResponseDto {
         val nameSpaces: Map<String, List<EmbeddedCbor>>?,
 
         @JsonProperty("issuerAuth")
-        val issuerAuth: ByteArray
+        val issuerAuth: RawCbor
     )
 
     data class IssuerSignedItemDTO(
