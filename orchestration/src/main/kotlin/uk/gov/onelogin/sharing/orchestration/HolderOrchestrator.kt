@@ -269,10 +269,10 @@ class HolderOrchestrator(
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
                             description = "We may need to handle explicit bluetooth " +
-                                "disconnection states to handle common error codes " +
-                                "8, 19, 22 and 133. The function below will handle " +
-                                "treat all disconnect states the same when connected " +
-                                "to a device"
+                                    "disconnection states to handle common error codes " +
+                                    "8, 19, 22 and 133. The function below will handle " +
+                                    "treat all disconnect states the same when connected " +
+                                    "to a device"
                         )
                     ]
                 )
