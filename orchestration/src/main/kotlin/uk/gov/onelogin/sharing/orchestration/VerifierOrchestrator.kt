@@ -45,7 +45,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 @SingleIn(AppScope::class)
 class VerifierOrchestrator(

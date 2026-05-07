@@ -33,7 +33,7 @@ class VerifierScannerGrantedTest {
     )
 
     @Test
-    fun permissionGrantedTextIsShown() = runTest {
+    fun displaysCameraPreview() = runTest {
         composeTestRule.run {
             setContent {
                 ScannerContent(
@@ -42,19 +42,6 @@ class VerifierScannerGrantedTest {
                 )
             }
 
-            assertCameraViewfinderIsDisplayed()
-        }
-    }
-
-    @Test
-    fun permissionGrantedTextRenderedWithPermissionState() = runTest {
-        composeTestRule.run {
-            setContent {
-                ScannerContent(
-                    lifecycleOwner = LocalLifecycleOwner.current,
-                    barcodeScanResultCallback = { _, _ -> }
-                )
-            }
             assertCameraViewfinderIsDisplayed()
         }
     }
