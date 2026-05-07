@@ -2,38 +2,42 @@ package uk.gov.onelogin.sharing.orchestration.prerequisites
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.PrerequisiteEvaluator
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 @ContributesBinding(AppScope::class)
+@Inject
 class PrerequisiteGateImpl(
-    private val authorization: PrerequisiteGateLayer.Authorization,
-    private val capability: PrerequisiteGateLayer.Capability,
-    private val logger: Logger,
-    private val readiness: PrerequisiteGateLayer.Readiness
-) : PrerequisiteGate.V1 {
+    private val bluetoothEvaluator: PrerequisiteEvaluator<BluetoothState>,
+    private val cameraEvaluator: PrerequisiteEvaluator<CameraState>,
+    private val locationEvaluator: PrerequisiteEvaluator<LocationState>,
+    private val logger: Logger
+) : PrerequisiteGate {
+
     override fun evaluatePrerequisites(
         prerequisites: Iterable<Prerequisite>
     ): List<MissingPrerequisite> = prerequisites.mapNotNull { prerequisite ->
-        evaluatePrerequisite(prerequisite)?.let { response ->
-            MissingPrerequisite(
-                prerequisite = prerequisite,
-                reason = response
+        when (prerequisite) {
+            Prerequisite.BLUETOOTH -> bluetoothEvaluator.evaluate()
+                ?.let(MissingPrerequisite::Bluetooth)
+
+            Prerequisite.CAMERA -> cameraEvaluator.evaluate()
+                ?.let(MissingPrerequisite::Camera)
+
+            Prerequisite.LOCATION -> locationEvaluator.evaluate()
+                ?.let(MissingPrerequisite::Location)
+
+            else -> null
+        }.also {
+            logger.debug(
+                logTag,
+                "Performed prerequisite checks for: $prerequisites"
             )
         }
-    }.also {
-        logger.debug(
-            logTag,
-            "Performed prerequisite checks for: $prerequisites"
-        )
     }
-
-    private fun evaluatePrerequisite(prerequisite: Prerequisite): MissingPrerequisiteReason? =
-        authorization.checkAuthorization(
-            prerequisite
-        ) ?: capability.checkCapability(
-            prerequisite
-        ) ?: readiness.checkReadiness(
-            prerequisite
-        )
 }

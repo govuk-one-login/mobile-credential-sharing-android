@@ -1,96 +1,123 @@
 package uk.gov.onelogin.sharing.orchestration.verificationrequest
 
-sealed interface MdlAttribute {
-    val value: String
-    fun validate(data: Any): Boolean
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
+import kotlinx.serialization.Serializable
 
-    data object FamilyName : MdlAttribute {
-        override val value = "family_name"
+@Parcelize
+@Serializable
+@TypeParceler<MdlAttribute, MdlAttributeParceler>()
+sealed class MdlAttribute(open val value: String) : Parcelable {
+    abstract fun validate(data: Any): Boolean
+
+    override fun describeContents(): Int = 0
+
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object FamilyName : MdlAttribute("family_name") {
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object GivenName : MdlAttribute {
-        override val value = "given_name"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object GivenName : MdlAttribute("given_name") {
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object BirthDate : MdlAttribute {
-        override val value = "birth_date"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object BirthDate : MdlAttribute("birth_date") {
         override fun validate(data: Any) = data is String && FULL_DATE_PATTERN.matches(data)
     }
 
-    data object IssueDate : MdlAttribute {
-        override val value = "issue_date"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object IssueDate : MdlAttribute("issue_date") {
         override fun validate(data: Any) = data is String && FULL_DATE_PATTERN.matches(data)
     }
 
-    data object ExpiryDate : MdlAttribute {
-        override val value = "expiry_date"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object ExpiryDate : MdlAttribute("expiry_date") {
         override fun validate(data: Any) = data is String && FULL_DATE_PATTERN.matches(data)
     }
 
-    data object IssuingCountry : MdlAttribute {
-        override val value = "issuing_country"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object IssuingCountry : MdlAttribute("issuing_country") {
         override fun validate(data: Any) = data is String && data.length == COUNTRY_CODE_LENGTH
     }
 
-    data object IssuingAuthority : MdlAttribute {
-        override val value = "issuing_authority"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object IssuingAuthority : MdlAttribute("issuing_authority") {
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object DocumentNumber : MdlAttribute {
-        override val value = "document_number"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object DocumentNumber : MdlAttribute("document_number") {
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object Portrait : MdlAttribute {
-        override val value = "portrait"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object Portrait : MdlAttribute("portrait") {
         override fun validate(data: Any) = true
     }
 
-    data object BirthPlace : MdlAttribute {
-        override val value = "birth_place"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object BirthPlace : MdlAttribute("birth_place") {
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object DrivingPrivileges : MdlAttribute {
-        override val value = "driving_privileges"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object DrivingPrivileges : MdlAttribute("driving_privileges") {
         override fun validate(data: Any) = data is List<*>
     }
 
-    data object UnDistinguishingSign : MdlAttribute {
-        override val value = "un_distinguishing_sign"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object UnDistinguishingSign : MdlAttribute("un_distinguishing_sign") {
         override fun validate(data: Any) = data is String && data.isNotEmpty()
     }
 
-    data object ResidentAddress : MdlAttribute {
-        override val value = "resident_address"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object ResidentAddress : MdlAttribute("resident_address") {
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object ResidentPostalCode : MdlAttribute {
-        override val value = "resident_postal_code"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object ResidentPostalCode : MdlAttribute("resident_postal_code") {
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data object ResidentCity : MdlAttribute {
-        override val value = "resident_city"
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object ResidentCity : MdlAttribute("resident_city") {
         override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
     }
 
-    data class AgeOver(val age: Int) : MdlAttribute {
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data class AgeOver(private val age: Int) : MdlAttribute("age_over_%02d".format(age)) {
         init {
             require(age in MIN_AGE..MAX_AGE) {
                 "age must be between $MIN_AGE and $MAX_AGE, was $age"
             }
         }
 
-        override val value = "age_over_%02d".format(age)
         override fun validate(data: Any) = data is Boolean
     }
 
-    data class Custom(override val value: String) : MdlAttribute {
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data class Custom(val attributeName: String) : MdlAttribute(attributeName) {
         override fun validate(data: Any) = true
     }
 

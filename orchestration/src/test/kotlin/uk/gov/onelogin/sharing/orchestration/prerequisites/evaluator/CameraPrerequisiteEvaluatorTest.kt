@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toUndeterminedPermissions
-import uk.gov.onelogin.sharing.orchestration.prerequisites.camera.ProcessCameraProviderFactory
+import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 
 class CameraPrerequisiteEvaluatorTest {

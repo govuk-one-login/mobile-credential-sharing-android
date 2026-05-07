@@ -1,8 +1,11 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
+import android.Manifest
 import app.cash.turbine.test
 import java.util.UUID
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
@@ -20,14 +23,18 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingExcepti
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
-import uk.gov.onelogin.sharing.bluetooth.permissions.StubBluetoothPermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
+import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class AndroidBleAdvertiserTest {
     private lateinit var bleProvider: FakeBleProvider
     private lateinit var bleAdvertiser: AndroidBleAdvertiser
-    private val permissionChecker = StubBluetoothPermissionChecker()
+
+    private val permissionResponse = mutableListOf<PermissionCheckerV2.PermissionCheckResult>()
+
+    private val permissionChecker = FakePermissionChecker { permissionResponse }
     private val logger = SystemLogger()
 
     @get:Rule
@@ -57,13 +64,15 @@ internal class AndroidBleAdvertiserTest {
 
     @Test
     fun `has advertise permission returns true when provider has permissions`() {
-        assert(bleAdvertiser.hasAdvertisePermission())
+        assertTrue { bleAdvertiser.hasAdvertisePermission() }
     }
 
     @Test
     fun `has advertise permission returns false when provider does not have permissions`() {
-        permissionChecker.result = PermissionChecker.Response.Missing()
-        assert(!bleAdvertiser.hasAdvertisePermission())
+        listOf(
+            Manifest.permission.BLUETOOTH
+        ).toDeniedPermission().let(permissionResponse::addAll)
+        assertFalse { bleAdvertiser.hasAdvertisePermission() }
     }
 
     @Test
@@ -100,7 +109,9 @@ internal class AndroidBleAdvertiserTest {
 
     @Test
     fun `start fails when permission not granted`() = runTest {
-        permissionChecker.result = PermissionChecker.Response.Missing()
+        listOf(
+            Manifest.permission.BLUETOOTH
+        ).toDeniedPermission().let(permissionResponse::addAll)
 
         val exception = assertFailsWith<StartAdvertisingException> {
             bleAdvertiser.startAdvertise(

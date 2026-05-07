@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DatabindException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.IOException
 import java.util.Base64
 import uk.gov.logging.api.v2.Logger
@@ -42,13 +41,16 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
         registerModule(KotlinModule.Builder().build())
     }
 
-    val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(cborData)
+    val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(
+        cborData,
+        DeviceEngagementDto::class.java
+    )
     logger.debug(TAG, "Successfully deserialized DeviceEngagementDto:")
     @RequiresImplementation(
         details = [
             ImplementationDetail(
                 ticket = "N/A not captured",
-                description = "Create DTO -> Domain mapping functions for verifier to extract" +
+                description = "Create DTO -> Domain mapping functions for verifier to extract " +
                     "deserialized device engagement message"
             )
         ]

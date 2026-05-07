@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.orchestration.error.UnrecoverableErrorContent
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierViewModel.NavigationEvent as ViewModelEvent
@@ -26,6 +28,11 @@ internal fun UnrecoverableVerifierErrorScreen(
     val failureState: VerifierSessionState.Complete.Failed? by viewModel
         .failureState
         .collectAsStateWithLifecycle()
+
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("UnrecoverableVerifierErrorScreen")
+    }
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->

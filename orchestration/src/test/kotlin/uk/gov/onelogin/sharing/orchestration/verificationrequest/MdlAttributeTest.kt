@@ -171,7 +171,7 @@ class MdlAttributeTest {
     class CustomTests {
         @Test
         fun `value matches provided string`() =
-            assertEquals("custom_attr", MdlAttribute.Custom("custom_attr").value)
+            assertEquals("custom_attr", MdlAttribute.Custom("custom_attr").attributeName)
 
         @Test
         fun `validates any type`() = assertTrue(MdlAttribute.Custom("x").validate("string"))

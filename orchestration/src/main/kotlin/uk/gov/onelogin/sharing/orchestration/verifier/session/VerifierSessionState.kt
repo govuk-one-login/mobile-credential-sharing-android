@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import uk.gov.onelogin.sharing.core.Completable
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
@@ -29,10 +29,10 @@ sealed class VerifierSessionState : Completable {
      * preflight checks again. Defaults to `{}`, meaning no additional behaviour occurs.
      */
     data class Preflight(
-        val missingPrerequisites: List<MissingPrerequisiteV2>,
+        val missingPrerequisites: List<MissingPrerequisite>,
         val onComplete: () -> Unit = {}
     ) : VerifierSessionState(),
-        Iterable<MissingPrerequisiteV2> by missingPrerequisites
+        Iterable<MissingPrerequisite> by missingPrerequisites
 
     /**
      * The User's completed the [Preflight] validations, so the device is ready to

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -26,6 +27,8 @@ import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.verifier.R
 
 /**
@@ -54,6 +57,11 @@ fun ScannedInvalidQrScreen(
     modifier: Modifier = Modifier,
     onTryAgainClick: () -> Unit = {}
 ) {
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("ScannedInvalidQrScreen")
+    }
+
     ErrorScreen(
         modifier = modifier.fillMaxWidth(),
         icon = { horizontalPadding ->

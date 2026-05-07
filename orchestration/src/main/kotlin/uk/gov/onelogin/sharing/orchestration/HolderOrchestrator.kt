@@ -24,9 +24,15 @@ import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
+import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -37,9 +43,14 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSe
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
@@ -56,12 +67,14 @@ class HolderOrchestrator(
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val holderCryptoService: HolderCryptoService,
-    private val prerequisiteGate: PrerequisiteGate.V2,
+    private val prerequisiteGate: PrerequisiteGate,
     @Suppress("UnusedPrivateProperty")
-    private val credentialProvider: CredentialProvider
+    private val confirmConsentUseCase: ConfirmConsentUseCase,
+    private val credentialRequestHandler: CredentialRequestHandler
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
+    private val currentContext: HolderSessionContext get() = sessionFlow.value.sessionContext
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val holderSessionState: StateFlow<HolderSessionState> = sessionFlow.flatMapLatest {
@@ -134,17 +147,17 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleStartPrerequisiteCheck(prerequisiteCheck: List<MissingPrerequisiteV2>) {
+    private fun handleStartPrerequisiteCheck(prerequisiteCheck: List<MissingPrerequisite>) {
         if (prerequisiteCheck.isEmpty()) {
             safeTransitionTo(HolderSessionState.ReadyToPresent)
 
             appCoroutineScope.launch {
                 peripheralBluetoothTransport.start(
-                    serviceUuid = sessionFlow.value.sessionContext.sessionUuid
+                    serviceUuid = currentContext.sessionUuid
                 )
             }
 
-            val qrCode = sessionFlow.value.sessionContext.qrCode
+            val qrCode = currentContext.qrCode
             if (qrCode.isNotEmpty()) {
                 safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
             }
@@ -167,6 +180,38 @@ class HolderOrchestrator(
                         onComplete = ::performPreflightChecks
                     )
             }.let(::safeTransitionTo)
+        }
+    }
+
+    override fun confirmConsent() {
+        val state = holderSessionState.value
+        try {
+            assert(state is HolderSessionState.AwaitingUserConsent) {
+                "confirmConsent called in an invalid state: $state"
+            }
+            check(state is HolderSessionState.AwaitingUserConsent)
+            safeTransitionTo(HolderSessionState.ProcessingResponse)
+
+            val sessionTranscript = checkNotNull(currentContext.sessionTranscriptBytes) {
+                "Missing session transcript"
+            }
+            val validatedCredential = checkNotNull(currentContext.validatedCredential) {
+                "Missing validated credential"
+            }
+
+            appCoroutineScope.launch {
+                try {
+                    confirmConsentUseCase.execute(
+                        sessionTranscript = sessionTranscript,
+                        deviceRequest = state.request,
+                        validatedCredential = validatedCredential
+                    )
+                } catch (e: DeviceSignatureException) {
+                    sendTerminationAndFail(e)
+                }
+            }
+        } catch (e: IllegalStateException) {
+            sendTerminationAndFail(e)
         }
     }
 
@@ -193,7 +238,7 @@ class HolderOrchestrator(
     private fun stopAdvertising(sendEndCommand: Boolean) {
         appCoroutineScope.launch {
             peripheralBluetoothTransport.stop(
-                serviceUuid = sessionFlow.value.sessionContext.sessionUuid,
+                serviceUuid = currentContext.sessionUuid,
                 sendEndCommand = sendEndCommand
             )
         }
@@ -215,7 +260,7 @@ class HolderOrchestrator(
                     details = [
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
-                            description = "We may need to handle explicit bluetooth" +
+                            description = "We may need to handle explicit bluetooth " +
                                 "disconnection states to handle common error codes " +
                                 "8, 19, 22 and 133. The function below will handle " +
                                 "treat all disconnect states the same when connected " +
@@ -277,7 +322,7 @@ class HolderOrchestrator(
     }
 
     private fun handleMessageReceived(message: ByteArray) {
-        val keypair = sessionFlow.value.sessionContext.keyPair?.private
+        val keypair = currentContext.keyPair?.private
         if (keypair !is ECPrivateKey) {
             sendTerminationAndFail(IllegalStateException("Invalid or missing keypair"))
             return
@@ -286,28 +331,136 @@ class HolderOrchestrator(
         try {
             val deviceRequest = decryptDeviceRequestUseCase.execute(
                 sessionEstablishmentBytes = message,
-                engagement = sessionFlow.value.sessionContext.engagement,
+                engagement = currentContext.engagement,
                 holderPrivateKey = keypair,
-                decryptCounter = sessionFlow.value.sessionContext.decryptCounter
+                decryptCounter = currentContext.decryptCounter,
+                onDeriveSkDevice = { skDevice ->
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(skDevice = skDevice)
+                    }
+                },
+                onDeriveSessionTranscript = { transcript ->
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(sessionTranscriptBytes = transcript)
+                    }
+                }
             )
 
             sessionFlow.value.updateSessionContext {
                 it.copy(decryptCounter = it.decryptCounter + 1u)
             }
 
-            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+            val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
+            appCoroutineScope.launch {
+                requestAndValidateCredential(requestedDocType, deviceRequest)
+            }
+        } catch (e: DeviceRequestDecodingException) {
+            handleDeviceRequestFailure(e)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             sendTerminationAndFail(e)
         }
     }
 
+    private suspend fun requestAndValidateCredential(
+        requestedDocType: String,
+        deviceRequest: DeviceRequest
+    ) {
+        try {
+            val validatedCredential = credentialRequestHandler.requestAndValidate(requestedDocType)
+
+            sessionFlow.value.updateSessionContext {
+                it.copy(validatedCredential = validatedCredential)
+            }
+
+            logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)
+            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+        } catch (e: CredentialRequestException) {
+            handleNoMatchTermination(e)
+        }
+    }
+
+    private fun handleNoMatchTermination(exception: CredentialRequestException) {
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
+        val context = currentContext
+        val skDevice = context.skDevice
+
+        skDevice?.let {
+            holderCryptoService.buildErrorSessionData(
+                deviceResponseStatus = Status.OK,
+                sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+                skDevice = it,
+                encryptCounter = context.encryptCounter
+            )
+        }
+
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = exception.message ?: UNKNOWN_ERROR,
+                    exception = exception
+                )
+            )
+        )
+    }
+
+    fun assembleAndEncryptResponse(documents: List<Document>): ByteArray {
+        val deviceResponse = DeviceResponse(
+            documents = documents,
+            documentErrors = null
+        )
+        val context = currentContext
+        val skDevice = context.skDevice
+            ?: error("Missing skDevice")
+
+        return try {
+            val encryptedResponse = holderCryptoService.encryptDeviceResponse(
+                deviceResponse = deviceResponse,
+                skDevice = skDevice,
+                encryptCounter = context.encryptCounter
+            )
+
+            sessionFlow.value.updateSessionContext {
+                it.copy(encryptCounter = it.encryptCounter + 1u)
+            }
+
+            encryptedResponse
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            sendTerminationAndFail(e)
+            throw e
+        }
+    }
+
+    private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
+        val context = currentContext
+        val skDevice = checkNotNull(context.skDevice) {
+            "skDevice must be derived before handling DeviceRequest failure"
+        }
+
+        holderCryptoService.buildErrorSessionData(
+            deviceResponseStatus = Status.CBOR_DECODING_ERROR,
+            sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+            skDevice = skDevice,
+            encryptCounter = context.encryptCounter
+        )
+
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = exception.message ?: UNKNOWN_ERROR,
+                    exception = exception
+                )
+            )
+        )
+    }
+
     private fun sendTerminationAndFail(exception: Exception) {
-        logger.error(logTag, exception.message ?: "Unknown error", exception)
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         holderCryptoService.buildTerminationSessionData(SessionDataStatus.SESSION_TERMINATION)
         safeTransitionTo(
             HolderSessionState.Complete.Failed(
                 SessionError(
-                    message = exception.message ?: "Unknown error",
+                    message = exception.message ?: UNKNOWN_ERROR,
                     exception = exception
                 )
             )
@@ -345,5 +498,9 @@ class HolderOrchestrator(
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
             logger.error(logTag, logMessage, loggedException)
         }
+    }
+
+    private companion object {
+        const val UNKNOWN_ERROR = "Unknown error"
     }
 }

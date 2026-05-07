@@ -44,11 +44,14 @@ class DecryptDeviceRequestUseCaseImplTest {
         )
         val holderPrivateKey = keyPair.private as ECPrivateKey
 
+        var capturedSkDevice: ByteArray? = null
         val result = useCase.execute(
             sessionEstablishmentBytes = sessionEstablishmentBytes,
             engagement = engagement,
             holderPrivateKey = holderPrivateKey,
-            decryptCounter = 1u
+            decryptCounter = 1u,
+            onDeriveSkDevice = { capturedSkDevice = it },
+            onDeriveSessionTranscript = {}
         )
 
         val expectedCipherText = decodeSessionEstablishmentModel(
@@ -75,6 +78,11 @@ class DecryptDeviceRequestUseCaseImplTest {
         assertEquals(
             1u,
             fakeSessionSecurity.lastDecryptCounter
+        )
+
+        assertArrayEquals(
+            byteArrayOf(2),
+            capturedSkDevice
         )
     }
 }

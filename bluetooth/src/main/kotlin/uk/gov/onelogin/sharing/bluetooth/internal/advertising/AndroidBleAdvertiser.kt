@@ -19,14 +19,15 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 
 @ContributesBinding(AppScope::class)
 class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
-    private val permissionChecker: BluetoothPermissionChecker,
+    private val permissionChecker: PermissionCheckerV2,
     private val logger: Logger,
     private val startTimeoutMs: Long = 5_000
 ) : BleAdvertiser {
@@ -37,7 +38,9 @@ class AndroidBleAdvertiser(
     private var currentCallback: AdvertisingCallback? = null
 
     override fun isBluetoothEnabled() = bleProvider.isBluetoothEnabled()
-    override fun hasAdvertisePermission() = permissionChecker.hasBluetoothPermissions()
+    override fun hasAdvertisePermission() = permissionChecker
+        .checkPermissions(getBluetoothPermissions())
+        .isEmpty()
 
     override suspend fun startAdvertise(bleAdvertiseData: BleAdvertiseData) {
         when {
@@ -46,7 +49,7 @@ class AndroidBleAdvertiser(
                     AdvertisingError.BLUETOOTH_DISABLED
                 )
 
-            !permissionChecker.hasBluetoothPermissions() ->
+            permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty() ->
                 throw StartAdvertisingException(
                     AdvertisingError.MISSING_PERMISSION
                 )

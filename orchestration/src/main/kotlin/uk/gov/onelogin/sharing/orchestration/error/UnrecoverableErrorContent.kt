@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
@@ -17,16 +19,18 @@ fun UnrecoverableErrorContent(
     modifier: Modifier = Modifier,
     onExitJourney: () -> Unit = {}
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.Companion.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacingSingle)
     ) {
         Text(failureState.reason::class.java.simpleName)
         Text(failureState.message)
         Button(
-            modifier = Modifier.Companion.fillMaxWidth(),
-            onClick = onExitJourney
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { coroutineScope.launch { onExitJourney() } }
         ) {
             Text("Exit journey")
         }

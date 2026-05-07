@@ -6,7 +6,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.ResolvePrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.ResolvePrerequisiteAction.LogMessages.launchActionMessage
@@ -21,7 +21,7 @@ class ResolveVerifierPrerequisiteAction(
     override fun resolve(launcher: ActivityResultLauncher<PrerequisiteAction>) {
         (orchestrator.verifierSessionState.value as? VerifierSessionState.Preflight)
             ?.missingPrerequisites
-            ?.mapNotNull(MissingPrerequisiteV2::getAction)
+            ?.mapNotNull(MissingPrerequisite::getAction)
             ?.let { actions ->
                 if (actions.isNotEmpty() && actions.all {
                         it is PrerequisiteAction.RequestPermissions

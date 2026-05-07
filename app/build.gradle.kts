@@ -59,7 +59,8 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -104,6 +105,7 @@ dependencies {
         libs.hilt.android,
         libs.uk.gov.logging.impl,
         libs.uk.gov.logging.api,
+        libs.kotlinx.serialization.json,
         testFixtures(projects.verifier)
     ).forEach(::implementation)
     ksp(libs.hilt.compiler)
@@ -122,6 +124,7 @@ dependencies {
         platform(libs.androidx.compose.bom),
         libs.androidx.navigation.testing,
         libs.bundles.android.baseline,
+        testFixtures(libs.uk.gov.ui.android.componentsv2),
         testFixtures(projects.sdk),
         testFixtures(projects.ui.uiApi),
         testFixtures(projects.ui.uiImpl)

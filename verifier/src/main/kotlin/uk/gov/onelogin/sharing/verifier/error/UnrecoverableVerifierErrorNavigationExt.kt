@@ -1,9 +1,12 @@
 package uk.gov.onelogin.sharing.verifier.error
 
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 
 object UnrecoverableVerifierErrorNavigationExt {
@@ -13,9 +16,12 @@ object UnrecoverableVerifierErrorNavigationExt {
 
     internal fun NavGraphBuilder.configureUnrecoverableVerifierError(navController: NavController) {
         composable<UnrecoverableVerifierErrorRoute> {
+            val scope = rememberCoroutineScope { Dispatchers.Main }
             UnrecoverableVerifierErrorScreen(
                 onExitJourney = {
-                    navController.popBackStack(VerifierRoutes, inclusive = true)
+                    scope.launch {
+                        navController.popBackStack(VerifierRoutes, inclusive = true)
+                    }
                 }
             )
         }

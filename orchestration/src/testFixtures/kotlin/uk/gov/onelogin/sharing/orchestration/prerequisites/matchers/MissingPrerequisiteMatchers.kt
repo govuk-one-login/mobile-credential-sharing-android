@@ -1,21 +1,23 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.matchers
 
-import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matcher
+import org.hamcrest.Matchers
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteReason
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
+import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 object MissingPrerequisiteMatchers {
     fun hasPrerequisite(expected: Prerequisite): Matcher<in MissingPrerequisite> =
-        hasPrerequisite(equalTo(expected))
+        HasPrerequisite(Matchers.equalTo(expected))
 
-    fun hasPrerequisite(matcher: Matcher<in Prerequisite>): Matcher<in MissingPrerequisite> =
-        HasPrerequisite(matcher)
+    fun hasBluetoothState(expected: BluetoothState): Matcher<in MissingPrerequisite> =
+        HasBluetoothState(Matchers.equalTo(expected))
 
-    fun hasReason(expected: MissingPrerequisiteReason): Matcher<in MissingPrerequisite> =
-        hasReason(equalTo(expected))
+    fun hasCameraState(expected: CameraState): Matcher<in MissingPrerequisite> =
+        HasCameraState(Matchers.equalTo(expected))
 
-    fun hasReason(matcher: Matcher<in MissingPrerequisiteReason>): Matcher<in MissingPrerequisite> =
-        HasMissingPrerequisiteReason(matcher)
+    fun hasLocationState(expected: LocationState): Matcher<in MissingPrerequisite> =
+        HasLocationState(Matchers.equalTo(expected))
 }

@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
@@ -42,7 +42,7 @@ class ResolveHolderPrerequisiteActionTest {
 
     @Test
     fun `Launches actions from Missing prerequisites`() = runTest {
-        val missingPrerequisite = MissingPrerequisiteV2.Bluetooth(
+        val missingPrerequisite = MissingPrerequisite.Bluetooth(
             BluetoothState.PermissionNotGranted
         )
         initialHolderState = HolderSessionState.Preflight(
@@ -57,8 +57,8 @@ class ResolveHolderPrerequisiteActionTest {
     @Test
     fun `Launches occur based on the number of recoverable actions`() = runTest {
         val missingPrerequisites = listOf(
-            MissingPrerequisiteV2.Bluetooth(BluetoothState.PermissionNotGranted),
-            MissingPrerequisiteV2.Camera(CameraState.Restricted)
+            MissingPrerequisite.Bluetooth(BluetoothState.PermissionNotGranted),
+            MissingPrerequisite.Camera(CameraState.Restricted)
         )
         initialHolderState = HolderSessionState.Preflight(missingPrerequisites)
         resolver.resolve(launcher)
@@ -73,7 +73,7 @@ class ResolveHolderPrerequisiteActionTest {
     fun `Unrecoverable prerequisites cannot launch actions`() = runTest {
         initialHolderState = HolderSessionState.Preflight(
             listOf(
-                MissingPrerequisiteV2.Bluetooth(BluetoothState.Unsupported)
+                MissingPrerequisite.Bluetooth(BluetoothState.Unsupported)
             )
         )
 

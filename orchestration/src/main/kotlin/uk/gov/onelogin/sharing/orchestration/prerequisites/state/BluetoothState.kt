@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.prerequisites.state
 
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker.Companion.bluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.core.Actionable
 import uk.gov.onelogin.sharing.core.Recoverable
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
@@ -21,7 +21,7 @@ enum class BluetoothState :
 
     companion object {
         private val requestPermissionsAction = PrerequisiteAction.RequestPermissions(
-            bluetoothPermissions()
+            getBluetoothPermissions()
         )
 
         @JvmStatic

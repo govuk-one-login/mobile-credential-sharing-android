@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -18,18 +19,20 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(scope = AppScope::class)
+@ContributesBinding(scope = AppScope::class, binding = binding<PeripheralBluetoothTransport>())
 class AndroidPeripheralBluetoothTransport(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @ApplicationScope coroutineScope: CoroutineScope,
     private val logger: Logger
-) : PeripheralBluetoothTransport {
+) : PeripheralBluetoothTransport,
+    MessageSender by gattServerManager {
 
     private val _state = MutableStateFlow<PeripheralBluetoothState>(PeripheralBluetoothState.Idle)
     override val state: StateFlow<PeripheralBluetoothState> = _state

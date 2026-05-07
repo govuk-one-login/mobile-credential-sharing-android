@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -22,7 +24,7 @@ import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisiteV2
+import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.ResolvePrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
@@ -38,14 +40,14 @@ class RetryHolderPrerequisitesViewModel(
 ) : ViewModel(),
     ResolvePrerequisiteAction<HolderSessionState> by resolver {
 
-    val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent?> = navigator
+    val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent> = navigator
         .events
         .map { event ->
-            if (event != null) {
-                _hasRecheckedPrerequisites.update { false }
-            }
+            _hasRecheckedPrerequisites.update { false }
             event
         }
+        .distinctUntilChanged()
+        .flowOn(dispatcher)
         .shareIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Companion.Lazily
@@ -57,12 +59,13 @@ class RetryHolderPrerequisitesViewModel(
     val prerequisites: StateFlow<List<Prerequisite>?> = orchestrator
         .holderSessionState
         .map { it as? HolderSessionState.Preflight }
-        .map { it?.map(MissingPrerequisiteV2::prerequisite) }
+        .map { it?.map(MissingPrerequisite::prerequisite) }
+        .flowOn(dispatcher)
         .stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Companion.Eagerly,
             (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
-                ?.map(MissingPrerequisiteV2::prerequisite)
+                ?.map(MissingPrerequisite::prerequisite)
         )
 
     fun recheckPrerequisites(): Job = viewModelScope.launch(dispatcher) {

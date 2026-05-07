@@ -16,6 +16,9 @@ object MtuValues {
     /** 3 bytes for headers according to ISO spec */
     const val HEADERS = 3
 
+    /** 1 byte ISO header prepended to each chunk (0x00 = last, 0x01 = more to follow) */
+    const val ISO_HEADER = 1
+
     /** 512 is the max value according to the Bluetooth Core Specification*/
     const val MAX_LENGTH = 512
 
@@ -39,4 +42,13 @@ object MtuValues {
 
         return (mtu - HEADERS).coerceAtMost(MAX_LENGTH)
     }
+
+    /**
+     * Calculates the maximum number of data bytes per chunk after accounting for both
+     * the BLE ATT overhead ([HEADERS]) and the 1-byte ISO header ([ISO_HEADER]).
+     *
+     * @param mtu The negotiated MTU size. Must be between [MIN_MTU] and [MAX_MTU].
+     * @return The maximum data payload size per chunk.
+     */
+    fun dataChunkSize(mtu: Int): Int = maxChunkBytes(mtu) - ISO_HEADER
 }

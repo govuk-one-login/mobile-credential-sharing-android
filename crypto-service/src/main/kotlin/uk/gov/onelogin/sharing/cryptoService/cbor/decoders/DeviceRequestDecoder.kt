@@ -9,6 +9,7 @@ fun interface DeviceRequestDecoder {
      * @param bytes The encoded device request
      *
      * @return [DeviceRequest] object
+     * @throws DeviceRequestDecodingException if the bytes cannot be decoded as a valid DeviceRequest
      */
     fun deviceRequestDecoder(bytes: ByteArray): DeviceRequest
 }

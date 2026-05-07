@@ -6,25 +6,15 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
 
 object RetryHolderPrerequisitesNavigationExt {
     fun NavController.navigateToRetryHolderPrerequisites(
         options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(RetryHolderPrerequisitesRoute, options)
 
-    internal fun NavGraphBuilder.configureRetryHolderPrerequisites(controller: NavController) {
+    internal fun NavGraphBuilder.configureRetryHolderPrerequisites() {
         composable<RetryHolderPrerequisitesRoute> {
-            RetryHolderPrerequisitesScreen(
-                modifier = Modifier.fillMaxSize(),
-                onPassPrerequisites = {
-                    controller.navigateToHolderPresentQrScreen()
-                },
-                onUnrecoverableError = {
-                    controller.navigateToUnrecoverableHolderError()
-                }
-            )
+            RetryHolderPrerequisitesScreen(modifier = Modifier.fillMaxSize())
         }
     }
 }

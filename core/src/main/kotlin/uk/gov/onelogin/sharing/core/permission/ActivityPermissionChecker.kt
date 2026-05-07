@@ -30,9 +30,14 @@ class ActivityPermissionChecker internal constructor(
                 val shouldShowRationale = ActivityCompat
                     .shouldShowRequestPermissionRationale(activity, permission)
                 when {
-                    permission !in markerStore -> PermissionCheckResult.Undetermined(permission)
-                    shouldShowRationale -> PermissionCheckResult.Denied(permission)
-                    else -> PermissionCheckResult.PermanentlyDenied(permission)
+                    permission !in markerStore && !shouldShowRationale ->
+                        PermissionCheckResult::Undetermined
+
+                    shouldShowRationale -> PermissionCheckResult::Denied
+
+                    else -> PermissionCheckResult::PermanentlyDenied
+                }.let { constructor ->
+                    constructor(permission)
                 }.also {
                     markerStore.mark(permission)
                 }

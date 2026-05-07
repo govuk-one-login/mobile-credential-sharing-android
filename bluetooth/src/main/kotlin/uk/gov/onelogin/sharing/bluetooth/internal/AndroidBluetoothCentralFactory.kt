@@ -6,12 +6,12 @@ import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.bluetooth.BluetoothPermissionChecker
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.core.VerifierUiScope
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 
 /**
  * An Android-specific implementation of the [BluetoothCentralFactory] interface.
@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.core.VerifierUiScope
 @ContributesBinding(AppScope::class)
 @ContributesBinding(VerifierUiScope::class)
 class AndroidBluetoothCentralFactory(
-    private val bluetoothPermissionChecker: BluetoothPermissionChecker,
+    private val permissionChecker: PermissionCheckerV2,
     private val context: Context,
     private val serviceValidator: ServiceValidator,
     private val logger: Logger
@@ -34,7 +34,7 @@ class AndroidBluetoothCentralFactory(
 
         val gattClientManager = AndroidGattClientManager(
             context = context,
-            permissionChecker = bluetoothPermissionChecker,
+            permissionChecker = permissionChecker,
             serviceValidator = serviceValidator,
             gattWriter = gattWriter,
             logger = logger

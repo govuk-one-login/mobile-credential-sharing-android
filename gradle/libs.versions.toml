@@ -3,26 +3,28 @@ activityCompose = "1.13.0" # https://developer.android.com/jetpack/androidx/rele
 agp = "9.0.1" # https://developer.android.com/build/releases/gradle-plugin
 androidx-browser = "1.10.0" # https://developer.android.com/jetpack/androidx/releases/browser
 androidx-camera = "1.6.0" # https://developer.android.com/jetpack/androidx/releases/camera
-androidx-navigation = "2.9.7" # https://developer.android.com/jetpack/androidx/releases/navigation
+androidx-metrics = "1.0.0" # https://developer.android.com/jetpack/androidx/releases/metrics
+androidx-navigation = "2.9.8" # https://developer.android.com/jetpack/androidx/releases/navigation
 androidx-test-espresso = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#espresso-3.7.0
 androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/test#orchestrator-1.6.1
 androidx-test-rules = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#rules-1.7.0
 androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#runner-1.7.0
 com-google-test-parameter-injector = "1.22" # https://github.com/google/TestParameterInjector
 com-google-guava-android = "33.6.0-android" # https://github.com/google/guava/releases
-compose-lint-rules = "0.5.7" # https://github.com/mrmans0n/compose-rules/releases/
+compose-lint-rules = "0.5.8" # https://github.com/mrmans0n/compose-rules/releases/
 composeBom = "2026.03.01" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.18.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
 detekt = "1.23.8" # https://github.com/detekt/detekt/releases
 espressoCore = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#3.7.0
 hilt = "2.59.2" # https://github.com/google/dagger/releases
-jackson = "2.21.2" # https://github.com/FasterXML/jackson/wiki/Jackson-Releases
+jackson = "2.21.3" # https://github.com/FasterXML/jackson/wiki/Jackson-Releases
 jacoco = "0.8.14" # https://github.com/jacoco/jacoco/releases
 junit = "4.13.2" # https://github.com/junit-team/junit4/releases
 kotlin = "2.3.20" # https://github.com/JetBrains/kotlin/releases
-kotlin-symbol-processing = "2.3.6" # https://github.com/google/ksp/releases ; update with 'kotlin'
+kotlin-symbol-processing = "2.3.7" # https://github.com/google/ksp/releases ; update with 'kotlin'
 kotlinx-collections-immutable = "0.4.0" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 kotlinx-bytestring = "0.9.0"
+kotlinx-serialization = "1.11.0" # https://github.com/Kotlin/kotlinx.serialization/releases
 ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
 metro = "0.13.2"  # https://github.com/ZacSweers/Metro/releases
@@ -32,9 +34,19 @@ roborazzi = "1.59.0" # https://github.com/takahirom/roborazzi/releases
 sonarqube = "7.2.3.7755" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.4.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
-uk-gov-logging = "0.39.9" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
-uk-gov-ui = "16.4.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
+uk-gov-logging = "0.39.15" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
+uk-gov-ui = "16.7.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
+
+# Minimum safe versions for vulnerable build classpath transitive dependencies
+netty = "4.1.132.Final"
+logback = "1.5.25"
+jdom2 = "2.0.6.1"
+jose4j = "0.9.6"
+commons-lang3 = "3.18.0"
+httpclient = "4.5.13"
+guava = "33.3.1-jre"
+play-services-basement = "18.10.0"
 
 [libraries]
 app-cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
@@ -56,6 +68,7 @@ androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", vers
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
+androidx-metrics-performance = { module = "androidx.metrics:metrics-performance", version.ref = "androidx-metrics" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
 androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "androidx-navigation" }
 androidx-test-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "androidx-test-espresso" }
@@ -82,7 +95,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-io-bytestring = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-bytestring", version.ref = "kotlinx-bytestring" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }

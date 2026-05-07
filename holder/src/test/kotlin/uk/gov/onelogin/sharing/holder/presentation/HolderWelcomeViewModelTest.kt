@@ -1,89 +1,69 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
-import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.nullValue
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(TestParameterInjector::class)
 class HolderWelcomeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val logger = SystemLogger()
-
-    private fun createViewModel(
-        orchestrator: FakeOrchestrator = FakeOrchestrator(parser = FakeQrParser())
-    ): HolderWelcomeViewModel = HolderWelcomeViewModel(
-        logger = logger,
-        savedStateHandle = SavedStateHandle(),
-        orchestrator = orchestrator,
-        dispatcher = mainDispatcherRule.testDispatcher
+    val qrData = "QR code"
+    private var initialHolderState: HolderSessionState = HolderSessionState.PresentingEngagement(
+        qrData
     )
 
-    @Test
-    fun `updateBluetoothPermissions should update hasBluetoothPermissions`() {
-        val viewModel = createViewModel()
+    private val orchestrator by lazy {
+        FakeOrchestrator(
+            parser = FakeQrParser(),
+            initialHolderState = MutableStateFlow(initialHolderState)
+        )
+    }
 
-        viewModel.updateBluetoothPermissions(true)
-
-        assertEquals(true, viewModel.uiState.value.hasBluetoothPermissions)
+    private val viewModel by lazy {
+        HolderWelcomeViewModel(
+            orchestrator = orchestrator,
+            dispatcher = mainDispatcherRule.testDispatcher
+        )
     }
 
     @Test
-    fun `bluetooth permissions granted initially and sets previouslyHadPermissions true`() =
-        runTest {
-            val viewModel = createViewModel()
-
-            viewModel.updateBluetoothPermissions(granted = true)
-
-            val state = viewModel.uiState.value
-
-            assertTrue(state.hasBluetoothPermissions!!)
-            assertTrue(state.previouslyHadPermissions)
-            assertFalse(state.showErrorScreen)
-        }
-
-    @Test
-    fun `error should not be shown if permissions initially not granted on start up`() = runTest {
-        val viewModel = createViewModel()
-
-        assertFalse(viewModel.uiState.value.previouslyHadPermissions)
-
-        viewModel.updateBluetoothPermissions(granted = false)
-
-        val state = viewModel.uiState.value
-
-        assertFalse(state.hasBluetoothPermissions!!)
-        assertFalse(state.previouslyHadPermissions)
-        assertFalse(state.showErrorScreen)
-    }
-
-    @Test
-    fun `when orchestrator state is PresentingEngagement, should set QR data to ui state`() =
-        runTest {
-            val orchestrator = FakeOrchestrator(
-                initialHolderState = MutableStateFlow(
-                    HolderSessionState.PresentingEngagement(qrData = "fakeQrData")
-                )
+    fun `Provides QR data during the 'PresentingEngagement' session state`() = runTest(
+        mainDispatcherRule.testDispatcher
+    ) {
+        viewModel.uiState.test {
+            assertThat(
+                awaitItem().qrData,
+                equalTo(qrData)
             )
-
-            val viewModel = createViewModel(orchestrator = orchestrator)
-
-            orchestrator.start()
-            advanceUntilIdle()
-
-            assertEquals("fakeQrData", viewModel.uiState.value.qrData)
         }
+    }
+
+    @Test
+    fun `Has no QR data for inapplicable session states`() = runTest(
+        mainDispatcherRule.testDispatcher
+    ) {
+        initialHolderState = HolderSessionState.NotStarted
+
+        viewModel.uiState.test {
+            assertThat(
+                awaitItem().qrData,
+                nullValue(String::class.java)
+            )
+        }
+    }
 }
