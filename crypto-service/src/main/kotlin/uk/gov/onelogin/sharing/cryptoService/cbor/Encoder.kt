@@ -12,6 +12,8 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceEngagementSe
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceRetrievalMethodSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCborSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SecuritySerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SessionEstablishmentSerializer
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
@@ -84,7 +86,8 @@ fun Any.encodeCbor(): ByteArray {
  */
 fun DeviceResponseDto.DeviceResponse.encodeCbor(): ByteArray {
     val serializers: Map<Class<*>, StdSerializer<*>> = mapOf(
-        EmbeddedCbor::class.java to (EmbeddedCborSerializer() as StdSerializer<*>)
+        EmbeddedCbor::class.java to (EmbeddedCborSerializer() as StdSerializer<*>),
+        RawCbor::class.java to (RawCborSerializer() as StdSerializer<*>)
     )
     val mapper = CborMapper.create(serializers)
     return mapper.writeValueAsBytes(this)
