@@ -89,7 +89,11 @@ internal suspend fun convertSessionStateToNavigation(
 
         VerifierSessionState.ReadyToScan -> {
             {
-                navController.navigateToVerifierScanRoute()
+                navController.navigateToVerifierScanRoute {
+                    popUpTo<VerifierRoutes> {
+                        inclusive = true
+                    }
+                }
             }
         }
 
@@ -97,14 +101,6 @@ internal suspend fun convertSessionStateToNavigation(
             {
                 navController.navigateToConnectWithHolderDeviceRoute()
             }
-        }
-
-        VerifierSessionState.ProcessingEngagement,
-        VerifierSessionState.Verifying,
-        is VerifierSessionState.Complete.Success,
-        VerifierSessionState.Complete.Cancelled
-        -> {
-            {}
         }
 
         is VerifierSessionState.Complete.Failed -> {
@@ -123,9 +119,21 @@ internal suspend fun convertSessionStateToNavigation(
                     is SessionErrorReason.UnrecoverableThrowable,
                     is SessionErrorReason.UnrecoverablePrerequisite
                     ->
-                        navController.navigateToUnrecoverableVerifierError()
+                        navController.navigateToUnrecoverableVerifierError {
+                            popUpTo<VerifierRoutes> {
+                                inclusive = true
+                            }
+                        }
                 }
             }
+        }
+
+        VerifierSessionState.ProcessingEngagement,
+        VerifierSessionState.Verifying,
+        is VerifierSessionState.Complete.Success,
+        VerifierSessionState.Complete.Cancelled
+        -> {
+            {}
         }
     }
 }
