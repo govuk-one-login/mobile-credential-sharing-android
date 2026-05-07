@@ -30,8 +30,6 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
@@ -68,7 +66,6 @@ class HolderOrchestrator(
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
-    @Suppress("UnusedPrivateProperty")
     private val confirmConsentUseCase: ConfirmConsentUseCase,
     private val credentialRequestHandler: CredentialRequestHandler
 ) : Orchestrator.Holder {
@@ -210,7 +207,20 @@ class HolderOrchestrator(
                         validatedCredential = validatedCredential,
                         filteredIssuerSigned = filteredIssuerSigned
                     )
-                    assembleAndEncryptResponse(listOf(document))
+
+                    val context = currentContext
+                    val skDevice = context.skDevice
+                        ?: error("Missing skDevice")
+
+                    holderCryptoService.buildDeviceResponse(
+                        documents = listOf(document),
+                        skDevice = skDevice,
+                        encryptCounter = context.encryptCounter
+                    )
+
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(encryptCounter = it.encryptCounter + 1u)
+                    }
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
                 }
@@ -221,7 +231,8 @@ class HolderOrchestrator(
     }
 
     override fun denyConsent() {
-        val skDevice = currentContext.skDevice ?: run {
+        val context = currentContext
+        val skDevice = context.skDevice ?: run {
             sendTerminationAndFail(IllegalStateException("Missing skDevice"))
             return
         }
@@ -230,11 +241,11 @@ class HolderOrchestrator(
             deviceResponseStatus = Status.OK,
             sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
             skDevice = skDevice,
-            encryptCounter = currentContext.encryptCounter
+            encryptCounter = context.encryptCounter
         )
 
         peripheralBluetoothTransport.sendMessage(
-            serviceUuid = currentContext.sessionUuid,
+            serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
 
@@ -439,33 +450,6 @@ class HolderOrchestrator(
                 )
             )
         )
-    }
-
-    fun assembleAndEncryptResponse(documents: List<Document>): ByteArray {
-        val deviceResponse = DeviceResponse(
-            documents = documents,
-            documentErrors = null
-        )
-        val context = currentContext
-        val skDevice = context.skDevice
-            ?: error("Missing skDevice")
-
-        return try {
-            val encryptedResponse = holderCryptoService.encryptDeviceResponse(
-                deviceResponse = deviceResponse,
-                skDevice = skDevice,
-                encryptCounter = context.encryptCounter
-            )
-
-            sessionFlow.value.updateSessionContext {
-                it.copy(encryptCounter = it.encryptCounter + 1u)
-            }
-
-            encryptedResponse
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            sendTerminationAndFail(e)
-            throw e
-        }
     }
 
     private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {

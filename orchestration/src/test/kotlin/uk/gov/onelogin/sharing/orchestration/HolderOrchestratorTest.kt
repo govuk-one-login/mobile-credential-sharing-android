@@ -11,9 +11,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +29,6 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoding
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
-import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
@@ -587,41 +584,6 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `assembleAndEncryptResponse encrypts DeviceResponse and increments counter`() = runTest {
-        val fakeSessionSecurity = FakeSessionSecurity()
-        fakeSessionSecurity.encryptedToReturn = byteArrayOf(0x0A, 0x0B, 0x0C)
-        val skDevice = byteArrayOf(0x01, 0x02)
-
-        val contextWithSkDevice = holderSessionContextStub.copy(skDevice = skDevice)
-        val sessionFactory = FakeSessionFactory(
-            listOf(
-                HolderSessionImpl(
-                    logger = logger,
-                    internalState = MutableStateFlow(HolderSessionState.NotStarted),
-                    initialContext = contextWithSkDevice
-                )
-            )
-        )
-
-        val orchestrator = createOrchestrator(
-            sessionFactory = sessionFactory,
-            holderCryptoService = HolderCryptoServiceImpl(
-                sessionSecurity = fakeSessionSecurity,
-                logger = logger
-            )
-        )
-
-        val result = orchestrator.assembleAndEncryptResponse(emptyList())
-
-        val currentSession = sessionFactory.getCurrentSession()
-        assertArrayEquals(byteArrayOf(0x0A, 0x0B, 0x0C), result)
-        assertArrayEquals(skDevice, fakeSessionSecurity.lastEncryptKey)
-        assertEquals(DeviceRole.HOLDER, fakeSessionSecurity.lastEncryptRole)
-        assertEquals(1u, fakeSessionSecurity.lastEncryptCounter)
-        assertEquals(2u, currentSession.sessionContext.encryptCounter)
-    }
-
-    @Test
     fun `parsing failure builds error SessionData with status 11 and transitions to failed`() =
         runTest {
             fakeDecryptDeviceRequestUseCase.exceptionAfterKeyDerivation =
@@ -659,40 +621,6 @@ class HolderOrchestratorTest {
             assertThat(orchestrator.holderSessionState.value, isFailed())
             assertEquals(0, peripheralTransport.stopCalls)
         }
-
-    @Test
-    fun `encryption failure builds termination SessionData and transitions to failed`() = runTest {
-        val fakeCryptoService = FakeHolderCryptoService().apply {
-            encryptException = RuntimeException("Encryption failed")
-        }
-        val skDevice = byteArrayOf(0x01, 0x02)
-        val contextWithSkDevice = holderSessionContextStub.copy(skDevice = skDevice)
-        val sessionFactory = FakeSessionFactory(
-            listOf(
-                HolderSessionImpl(
-                    logger = logger,
-                    internalState = MutableStateFlow(HolderSessionState.NotStarted),
-                    initialContext = contextWithSkDevice
-                )
-            )
-        )
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(
-            sessionFactory = sessionFactory,
-            peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService
-        )
-
-        assertThrows(RuntimeException::class.java) {
-            orchestrator.assembleAndEncryptResponse(emptyList())
-        }
-
-        assertEquals(
-            SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastBuildTerminationStatus
-        )
-        assertEquals(0, peripheralTransport.stopCalls)
-    }
 
     @Test
     fun `sign failure sends status 20 termination and transitions to failed`() = runTest {

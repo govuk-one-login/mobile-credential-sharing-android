@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService.holder
 
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 /**
@@ -34,15 +35,15 @@ interface HolderCryptoService {
     ): ByteArray
 
     /**
-     * Encrypts a [DeviceResponse] for transmission to the Verifier.
+     * Constructs and encrypts a [DeviceResponse] for transmission to the Verifier.
      *
-     * @param deviceResponse The response to encrypt.
+     * @param documents The list of documents to include in the response.
      * @param skDevice The session key for the device.
      * @param encryptCounter The current encryption message counter.
      * @return The encrypted ciphertext + authentication tag bytes.
      */
-    fun encryptDeviceResponse(
-        deviceResponse: DeviceResponse,
+    fun buildDeviceResponse(
+        documents: List<Document>,
         skDevice: ByteArray,
         encryptCounter: UInt
     ): ByteArray

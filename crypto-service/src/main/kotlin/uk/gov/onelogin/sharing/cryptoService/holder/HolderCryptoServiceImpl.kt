@@ -14,6 +14,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceAuthentication
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 @ContributesBinding(scope = AppScope::class, binding = binding<HolderCryptoService>())
@@ -42,7 +43,20 @@ class HolderCryptoServiceImpl(
         return SessionData(data = encryptedPayload, status = sessionDataStatus).encodeCbor()
     }
 
-    override fun encryptDeviceResponse(
+    override fun buildDeviceResponse(
+        documents: List<Document>,
+        skDevice: ByteArray,
+        encryptCounter: UInt
+    ): ByteArray = encryptDeviceResponse(
+        deviceResponse = DeviceResponse(
+            documents = documents,
+            documentErrors = null
+        ),
+        skDevice = skDevice,
+        encryptCounter = encryptCounter
+    )
+
+    private fun encryptDeviceResponse(
         deviceResponse: DeviceResponse,
         skDevice: ByteArray,
         encryptCounter: UInt
