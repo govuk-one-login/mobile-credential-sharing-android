@@ -23,7 +23,9 @@ import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
+import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
+import uk.gov.onelogin.sharing.orchestration.verifier.session.FakeBuildDeviceRequestUseCase
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -86,6 +88,8 @@ class VerifierOrchestratorTest {
 
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
 
+    private val fakeBuildDeviceRequestUseCase = FakeBuildDeviceRequestUseCase()
+
     private val orchestrator by lazy {
         VerifierOrchestrator(
             logger = logger,
@@ -95,7 +99,8 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService
+            verifierCryptoService = verifierCryptoService,
+            buildDeviceRequestUseCase = fakeBuildDeviceRequestUseCase
         )
     }
 
@@ -409,10 +414,12 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService
+            verifierCryptoService = verifierCryptoService,
+            buildDeviceRequestUseCase = fakeBuildDeviceRequestUseCase
         )
-
-        orchestrator.start()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
         assert(
             logger.contains(
@@ -433,10 +440,12 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService
+            verifierCryptoService = verifierCryptoService,
+            buildDeviceRequestUseCase = fakeBuildDeviceRequestUseCase
         )
-
-        orchestrator.start()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
         assert(
             logger.contains(
@@ -446,5 +455,71 @@ class VerifierOrchestratorTest {
                     "age_over_18=false}})"
             )
         )
+    }
+
+    @Test
+    fun `AC3 - ConnectionStateStarted encrypts DeviceRequest with counter 1 and increments to 2`() =
+        runTest {
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.processQrCode(VALID_MDOC_URI)
+            centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+
+            assertEquals(1u, fakeBuildDeviceRequestUseCase.lastEncryptCounter)
+            val context = sessionFactory.getCurrentSession().cryptoContext
+            assertEquals(2u, context?.encryptCounter)
+        }
+
+    @Test
+    fun `AC4 - encryption failure transitions to Failed and stops BLE`() = runTest {
+        val failingBuild = FakeBuildDeviceRequestUseCase(
+            exceptionToThrow = EncryptDeviceRequestException(
+                "Error encrypting DeviceRequest",
+                RuntimeException("AES failure")
+            )
+        )
+        val orchestrator = VerifierOrchestrator(
+            logger = logger,
+            prerequisiteGate = gate,
+            sessionFactory = sessionFactory,
+            verifierConfig = verifierConfigStub,
+            centralBluetoothTransport = centralBluetoothTransport,
+            appCoroutineScope = scope,
+            barcodeParser = FakeQrParser(),
+            verifierCryptoService = verifierCryptoService,
+            buildDeviceRequestUseCase = failingBuild
+        )
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+
+        assertThat(orchestrator.verifierSessionState.value, isFailed())
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `AC4 - counter is not incremented when encryption fails`() = runTest {
+        val failingBuild = FakeBuildDeviceRequestUseCase(
+            exceptionToThrow = EncryptDeviceRequestException(
+                "Error encrypting DeviceRequest",
+                RuntimeException("AES failure")
+            )
+        )
+        val orchestrator = VerifierOrchestrator(
+            logger = logger,
+            prerequisiteGate = gate,
+            sessionFactory = sessionFactory,
+            verifierConfig = verifierConfigStub,
+            centralBluetoothTransport = centralBluetoothTransport,
+            appCoroutineScope = scope,
+            barcodeParser = FakeQrParser(),
+            verifierCryptoService = verifierCryptoService,
+            buildDeviceRequestUseCase = failingBuild
+        )
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+
+        val context = sessionFactory.getCurrentSession().cryptoContext
+        assertEquals(1u, context?.encryptCounter)
     }
 }
