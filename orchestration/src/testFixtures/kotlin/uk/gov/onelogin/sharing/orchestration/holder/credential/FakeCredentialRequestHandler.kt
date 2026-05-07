@@ -1,12 +1,26 @@
 package uk.gov.onelogin.sharing.orchestration.holder.credential
 
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+
 class FakeCredentialRequestHandler : CredentialRequestHandler {
     var resultToReturn: ValidatedCredential? = null
     var exceptionToThrow: CredentialRequestException? = null
+    var filteredIssuerSignedToReturn: IssuerSigned = IssuerSigned(
+        nameSpaces = emptyMap(),
+        issuerAuth = byteArrayOf()
+    )
 
-    override suspend fun requestAndValidate(requestedDocType: String): ValidatedCredential {
+    override suspend fun requestAndValidate(
+        requestedDocType: String,
+        deviceRequest: DeviceRequest
+    ): CredentialRequestResult {
         exceptionToThrow?.let { throw it }
-        return resultToReturn
+        val validated = resultToReturn
             ?: throw CredentialRequestException("No result configured")
+        return CredentialRequestResult(
+            validatedCredential = validated,
+            filteredIssuerSigned = filteredIssuerSignedToReturn
+        )
     }
 }
