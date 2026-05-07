@@ -24,7 +24,7 @@ class EcdhSharedSecretGeneratorTest {
         val result = try {
             generator.generateSharedSecret(
                 thisDevicePrivateKey = validKeyPair!!.private as ECPrivateKey,
-                otherDevicePublicKey = validKeyPair!!.public as ECPublicKey
+                otherDevicePublicKey = validKeyPair.public as ECPublicKey
             )
         } catch (e: Exception) {
             fail("Shouldn't have thrown an exception: ${e.message}")
