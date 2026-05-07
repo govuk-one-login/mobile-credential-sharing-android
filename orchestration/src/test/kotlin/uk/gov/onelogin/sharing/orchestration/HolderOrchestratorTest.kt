@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeFilterIssuerSignedUseCase
@@ -825,5 +826,60 @@ class HolderOrchestratorTest {
             SessionDataStatus.SESSION_TERMINATION,
             fakeCryptoService.lastErrorSessionDataStatus
         )
+    }
+
+    @Test
+    fun `deny consent sends termination and transitions to Cancelled`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        orchestrator.denyConsent()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isCancelled())
+        assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastErrorSessionDataStatus
+        )
+    }
+
+    @Test
+    fun `deny consent without skDevice transitions to failed`() = runTest {
+        val initialState = HolderSessionState.AwaitingUserConsent(deviceRequestStub)
+        initialStates = mutableListOf(initialState, HolderSessionState.NotStarted)
+        val sessionFactory = FakeSessionFactory(
+            listOf(
+                HolderSessionImpl(
+                    logger = logger,
+                    internalState = MutableStateFlow(initialState),
+                    initialContext = holderSessionContextStub.copy(skDevice = null)
+                )
+            )
+        )
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        orchestrator.denyConsent()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
     }
 }
