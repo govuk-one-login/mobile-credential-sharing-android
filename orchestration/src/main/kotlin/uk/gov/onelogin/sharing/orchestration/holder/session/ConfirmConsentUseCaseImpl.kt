@@ -7,7 +7,7 @@ import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
@@ -23,7 +23,7 @@ class ConfirmConsentUseCaseImpl(
         deviceRequest: DeviceRequest,
         validatedCredential: ValidatedCredential,
         filteredIssuerSigned: IssuerSigned
-    ): DeviceSigned {
+    ): Document {
         val docType = deviceRequest.docRequests.firstOrNull()?.itemsRequest?.docType
             ?: throw DeviceSignatureException("Missing docType")
 
@@ -32,9 +32,15 @@ class ConfirmConsentUseCaseImpl(
             docType = docType
         )
 
-        return holderResponseUseCase.generateDeviceResponse(
+        val deviceSigned = holderResponseUseCase.generateDeviceResponse(
             validatedCredential = validatedCredential,
             deviceAuthenticationBytes = authResult.deviceAuthenticationBytes
+        )
+
+        return Document(
+            docType = docType,
+            issuerSigned = filteredIssuerSigned,
+            deviceSigned = deviceSigned
         )
     }
 }

@@ -28,9 +28,6 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeFilterIssuerSignedUseCase
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssuerSignedUseCase
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
@@ -129,8 +126,7 @@ class HolderOrchestratorTest {
             logger = logger
         ),
         credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler,
-        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
-        filterIssuerSignedUseCase: FilterIssuerSignedUseCase = FakeFilterIssuerSignedUseCase()
+        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase()
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -140,8 +136,7 @@ class HolderOrchestratorTest {
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
         holderCryptoService = holderCryptoService,
         credentialRequestHandler = credentialRequestHandler,
-        confirmConsentUseCase = confirmConsentUseCase,
-        filterIssuerSignedUseCase = filterIssuerSignedUseCase
+        confirmConsentUseCase = confirmConsentUseCase
     )
 
     @Test
@@ -801,13 +796,13 @@ class HolderOrchestratorTest {
     fun `filter failure triggers no match termination before consent`() = runTest {
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()
-        val failingFilter = FakeFilterIssuerSignedUseCase(
-            exceptionToThrow = NoMatchingAttributesException("no matching attributes")
-        )
+        val failingHandler = FakeCredentialRequestHandler().apply {
+            exceptionToThrow = CredentialRequestException("no matching attributes")
+        }
         val orchestrator = createOrchestrator(
             peripheralBluetoothTransport = peripheralTransport,
             holderCryptoService = fakeCryptoService,
-            filterIssuerSignedUseCase = failingFilter
+            credentialRequestHandler = failingHandler
         )
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
         orchestrator.start()
@@ -826,6 +821,7 @@ class HolderOrchestratorTest {
             SessionDataStatus.SESSION_TERMINATION,
             fakeCryptoService.lastErrorSessionDataStatus
         )
+        assertEquals(0, peripheralTransport.stopCalls)
     }
 
     @Test
