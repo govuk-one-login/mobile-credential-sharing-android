@@ -28,8 +28,6 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
             .firstOrNull()?.itemsRequest?.nameSpaces
             ?: throw NoMatchingAttributesException(LOG_NO_MATCHING_NAMESPACES)
 
-//        val requestedNameSpaces = mapOf("org.iso.18013.5.1.FAKE" to mapOf("family_name" to true))
-
         val credentialNameSpaces = parseNameSpaces(validatedCredential.nameSpaces)
 
         val filteredNameSpaces = mutableMapOf<String, List<ByteArray>>()

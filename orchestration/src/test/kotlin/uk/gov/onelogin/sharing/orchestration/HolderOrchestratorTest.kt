@@ -27,9 +27,6 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeFilterIssuerSignedUseCase
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssuerSignedUseCase
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
@@ -128,8 +125,7 @@ class HolderOrchestratorTest {
             logger = logger
         ),
         credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler,
-        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
-        filterIssuerSignedUseCase: FilterIssuerSignedUseCase = FakeFilterIssuerSignedUseCase()
+        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase()
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -139,8 +135,7 @@ class HolderOrchestratorTest {
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
         holderCryptoService = holderCryptoService,
         credentialRequestHandler = credentialRequestHandler,
-        confirmConsentUseCase = confirmConsentUseCase,
-        filterIssuerSignedUseCase = filterIssuerSignedUseCase
+        confirmConsentUseCase = confirmConsentUseCase
     )
 
     @Test
@@ -797,16 +792,16 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `filter failure due to no matching namespaces triggers no match termination`() = runTest {
+    fun `filter failure triggers no match termination before consent`() = runTest {
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()
-        val failingFilter = FakeFilterIssuerSignedUseCase(
-            exceptionToThrow = NoMatchingAttributesException("SessionData termination initiated due to no matching NameSpaces")
-        )
+        val failingHandler = FakeCredentialRequestHandler().apply {
+            exceptionToThrow = CredentialRequestException("no matching attributes")
+        }
         val orchestrator = createOrchestrator(
             peripheralBluetoothTransport = peripheralTransport,
             holderCryptoService = fakeCryptoService,
-            filterIssuerSignedUseCase = failingFilter
+            credentialRequestHandler = failingHandler
         )
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
         orchestrator.start()
@@ -819,39 +814,7 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertThat(orchestrator.holderSessionState.value, isFailed())
-        assert("SessionData termination initiated due to no matching NameSpaces" in logger)
-        assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
-        assertEquals(
-            SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastErrorSessionDataStatus
-        )
-        assertEquals(0, peripheralTransport.stopCalls)
-    }
-
-    @Test
-    fun `filter failure due to no matching attributes triggers no match termination`() = runTest {
-        val fakeCryptoService = FakeHolderCryptoService()
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val failingFilter = FakeFilterIssuerSignedUseCase(
-            exceptionToThrow = NoMatchingAttributesException("SessionData termination initiated due to no matching attributes")
-        )
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService,
-            filterIssuerSignedUseCase = failingFilter
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
-
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
-
-        assertThat(orchestrator.holderSessionState.value, isFailed())
-        assert("SessionData termination initiated due to no matching attributes" in logger)
+        assert("no matching attributes" in logger)
         assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
         assertEquals(
             SessionDataStatus.SESSION_TERMINATION,
