@@ -4,7 +4,6 @@ import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
@@ -12,12 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.navigateToUnrecoverableVerifierError
-import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanFromRoot
-import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesNavigationExt.navigateToRetryVerifierPrerequisites
 
 /**
  * Serialization object used as a navigation route. Maps to the [VerifierPrerequisitesScreen] composable UI.
@@ -35,31 +29,14 @@ data object VerifierPrerequisitesNavigationExt {
      * navigation target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    internal fun NavGraphBuilder.configureVerifierPrerequisitesRoute(navController: NavController) {
+    internal fun NavGraphBuilder.configureVerifierPrerequisitesRoute() {
         composable<VerifierPrerequisitesRoute> {
-            val scope = rememberCoroutineScope { Dispatchers.Main }
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                VerifierPrerequisitesScreen(
-                    onNavigateToPreflight = {
-                        scope.launch {
-                            navController.navigateToRetryVerifierPrerequisites()
-                        }
-                    },
-                    onNavigateToScanner = {
-                        scope.launch {
-                            navController.navigateToVerifierScanFromRoot()
-                        }
-                    },
-                    onUnrecoverableError = {
-                        scope.launch {
-                            navController.navigateToUnrecoverableVerifierError()
-                        }
-                    }
-                )
+                VerifierPrerequisitesScreen()
             }
         }
     }

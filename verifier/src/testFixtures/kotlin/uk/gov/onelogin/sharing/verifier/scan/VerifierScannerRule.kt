@@ -111,17 +111,4 @@ class VerifierScannerRule(
     }
 
     fun performPermissionDeniedClick() = onPermissionPermanentlyDeniedButton().performClick()
-
-    /**
-     * Due to issues with the metro dependency injection framework's compiler, don't use this
-     * in android instrumentation tests.
-     */
-    fun render(onInvalidBarcode: (String) -> Unit = {}, onValidBarcode: () -> Unit = {}) {
-        setContent {
-            VerifierScanner(
-                onInvalidBarcode = onInvalidBarcode,
-                onValidBarcode = onValidBarcode
-            )
-        }
-    }
 }
