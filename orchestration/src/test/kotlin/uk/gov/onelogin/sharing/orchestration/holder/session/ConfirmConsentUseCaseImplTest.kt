@@ -42,15 +42,20 @@ class ConfirmConsentUseCaseImplTest {
     }
 
     @Test
-    fun `execute returns DeviceSigned from holderResponseUseCase`() = runTest {
-        val expected = DeviceSigned(nameSpaces = byteArrayOf(0x01), deviceAuth = byteArrayOf(0x02))
+    fun `execute returns Document with DeviceSigned from holderResponseUseCase`() = runTest {
+        val expectedDeviceSigned = DeviceSigned(
+            nameSpaces = byteArrayOf(0x01),
+            deviceAuth = byteArrayOf(0x02)
+        )
         fakeHolderCryptoService.deviceAuthResultToReturn = DeviceAuthenticationResult(
             deviceAuthenticationBytes = deviceAuthBytes,
             deviceNameSpacesBytes = byteArrayOf()
         )
         val useCase = ConfirmConsentUseCaseImpl(
             holderCryptoService = fakeHolderCryptoService,
-            holderResponseUseCase = FakeHolderResponseUseCase(deviceSignedToReturn = expected)
+            holderResponseUseCase = FakeHolderResponseUseCase(
+                deviceSignedToReturn = expectedDeviceSigned
+            )
         )
 
         val result = useCase.execute(
@@ -60,8 +65,10 @@ class ConfirmConsentUseCaseImplTest {
             filteredIssuerSigned
         )
 
-        assertArrayEquals(expected.nameSpaces, result.nameSpaces)
-        assertArrayEquals(expected.deviceAuth, result.deviceAuth)
+        assertEquals(docType, result.docType)
+        assertEquals(filteredIssuerSigned, result.issuerSigned)
+        assertArrayEquals(expectedDeviceSigned.nameSpaces, result.deviceSigned.nameSpaces)
+        assertArrayEquals(expectedDeviceSigned.deviceAuth, result.deviceSigned.deviceAuth)
     }
 
     @Test

@@ -25,9 +25,6 @@ import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssuerSignedUseCase
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -71,9 +68,9 @@ class HolderOrchestrator(
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
+    @Suppress("UnusedPrivateProperty")
     private val confirmConsentUseCase: ConfirmConsentUseCase,
-    private val credentialRequestHandler: CredentialRequestHandler,
-    private val filterIssuerSignedUseCase: FilterIssuerSignedUseCase
+    private val credentialRequestHandler: CredentialRequestHandler
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -207,12 +204,13 @@ class HolderOrchestrator(
 
             appCoroutineScope.launch {
                 try {
-                    confirmConsentUseCase.execute(
+                    val document = confirmConsentUseCase.execute(
                         sessionTranscript = sessionTranscript,
                         deviceRequest = state.request,
                         validatedCredential = validatedCredential,
                         filteredIssuerSigned = filteredIssuerSigned
                     )
+                    assembleAndEncryptResponse(listOf(document))
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
                 }
@@ -373,33 +371,21 @@ class HolderOrchestrator(
         deviceRequest: DeviceRequest
     ) {
         try {
-            val validatedCredential = credentialRequestHandler.requestAndValidate(requestedDocType)
-
-            // The filtered issuer auth and issuer signed components will need to be
-            // used to form the final deviceResponse payload. Logging here just for now -
-            // remove logs later
-            val filteredIssuerSigned = filterIssuerSignedUseCase.filter(
-                ParsedRawCredential(
-                    nameSpaces = validatedCredential.nameSpaces,
-                    issuerAuth = validatedCredential.issuerAuth,
-                    msoDocType = requestedDocType
-                ),
+            val result = credentialRequestHandler.requestAndValidate(
+                requestedDocType,
                 deviceRequest
             )
 
             sessionFlow.value.updateSessionContext {
                 it.copy(
-                    validatedCredential = validatedCredential,
-                    filteredIssuerSigned = filteredIssuerSigned
+                    validatedCredential = result.validatedCredential,
+                    filteredIssuerSigned = result.filteredIssuerSigned
                 )
             }
 
             logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)
-
             safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
         } catch (e: CredentialRequestException) {
-            handleNoMatchTermination(e)
-        } catch (e: NoMatchingAttributesException) {
             handleNoMatchTermination(e)
         }
     }
