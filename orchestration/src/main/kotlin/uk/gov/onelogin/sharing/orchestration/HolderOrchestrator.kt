@@ -215,6 +215,28 @@ class HolderOrchestrator(
         }
     }
 
+    override fun denyConsent() {
+        val skDevice = currentContext.skDevice ?: run {
+            sendTerminationAndFail(IllegalStateException("Missing skDevice"))
+            return
+        }
+
+        val sessionDataBytes = holderCryptoService.buildErrorSessionData(
+            deviceResponseStatus = Status.OK,
+            sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+            skDevice = skDevice,
+            encryptCounter = currentContext.encryptCounter
+        )
+
+        peripheralBluetoothTransport.sendMessage(
+            serviceUuid = currentContext.sessionUuid,
+            data = sessionDataBytes
+        )
+
+        safeTransitionTo(HolderSessionState.Complete.Cancelled)
+        stopAdvertising(sendEndCommand = false)
+    }
+
     override fun cancel() {
         safeTransitionTo(
             state = HolderSessionState.Complete.Cancelled,
@@ -248,6 +270,11 @@ class HolderOrchestrator(
     private fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
 
+        if (sessionFlow.value.isComplete()) {
+            logger.debug(logTag, "Session already complete, ignoring BLE state: $state")
+            return
+        }
+
         when (state) {
             is PeripheralBluetoothState.Connected -> {
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
@@ -261,10 +288,10 @@ class HolderOrchestrator(
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
                             description = "We may need to handle explicit bluetooth " +
-                                "disconnection states to handle common error codes " +
-                                "8, 19, 22 and 133. The function below will handle " +
-                                "treat all disconnect states the same when connected " +
-                                "to a device"
+                                    "disconnection states to handle common error codes " +
+                                    "8, 19, 22 and 133. The function below will handle " +
+                                    "treat all disconnect states the same when connected " +
+                                    "to a device"
                         )
                     ]
                 )
