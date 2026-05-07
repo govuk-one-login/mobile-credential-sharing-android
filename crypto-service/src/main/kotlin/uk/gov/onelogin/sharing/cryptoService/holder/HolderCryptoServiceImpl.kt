@@ -47,14 +47,17 @@ class HolderCryptoServiceImpl(
         documents: List<Document>,
         skDevice: ByteArray,
         encryptCounter: UInt
-    ): ByteArray = encryptDeviceResponse(
-        deviceResponse = DeviceResponse(
-            documents = documents,
-            documentErrors = null
-        ),
-        skDevice = skDevice,
-        encryptCounter = encryptCounter
-    )
+    ): ByteArray {
+        val encryptedPayload = encryptDeviceResponse(
+            deviceResponse = DeviceResponse(
+                documents = documents,
+                documentErrors = null
+            ),
+            skDevice = skDevice,
+            encryptCounter = encryptCounter
+        )
+        return SessionData(data = encryptedPayload).encodeCbor()
+    }
 
     private fun encryptDeviceResponse(
         deviceResponse: DeviceResponse,

@@ -182,6 +182,7 @@ class HolderOrchestrator(
 
     override fun confirmConsent() {
         val state = holderSessionState.value
+        val context = currentContext
         try {
             assert(state is HolderSessionState.AwaitingUserConsent) {
                 "confirmConsent called in an invalid state: $state"
@@ -189,14 +190,18 @@ class HolderOrchestrator(
             check(state is HolderSessionState.AwaitingUserConsent)
             safeTransitionTo(HolderSessionState.ProcessingResponse)
 
-            val sessionTranscript = checkNotNull(currentContext.sessionTranscriptBytes) {
+            val sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
                 "Missing session transcript"
             }
-            val validatedCredential = checkNotNull(currentContext.validatedCredential) {
+            val validatedCredential = checkNotNull(context.validatedCredential) {
                 "Missing validated credential"
             }
-            val filteredIssuerSigned = checkNotNull(currentContext.filteredIssuerSigned) {
+            val filteredIssuerSigned = checkNotNull(context.filteredIssuerSigned) {
                 "Missing filtered issuer signed"
+            }
+
+            val skDevice = checkNotNull(context.skDevice) {
+                "Missing skDevice"
             }
 
             appCoroutineScope.launch {
@@ -208,14 +213,15 @@ class HolderOrchestrator(
                         filteredIssuerSigned = filteredIssuerSigned
                     )
 
-                    val context = currentContext
-                    val skDevice = context.skDevice
-                        ?: error("Missing skDevice")
-
-                    holderCryptoService.buildDeviceResponse(
+                    val sessionDataBytes = holderCryptoService.buildDeviceResponse(
                         documents = listOf(document),
                         skDevice = skDevice,
                         encryptCounter = context.encryptCounter
+                    )
+
+                    peripheralBluetoothTransport.sendMessage(
+                        serviceUuid = context.sessionUuid,
+                        data = sessionDataBytes
                     )
 
                     sessionFlow.value.updateSessionContext {
@@ -231,26 +237,29 @@ class HolderOrchestrator(
     }
 
     override fun denyConsent() {
-        val context = currentContext
-        val skDevice = context.skDevice ?: run {
-            sendTerminationAndFail(IllegalStateException("Missing skDevice"))
-            return
+        try {
+            val context = currentContext
+            val skDevice = checkNotNull(context.skDevice) {
+                "Missing skDevice"
+            }
+
+            val sessionDataBytes = holderCryptoService.buildErrorSessionData(
+                deviceResponseStatus = Status.OK,
+                sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+                skDevice = skDevice,
+                encryptCounter = context.encryptCounter
+            )
+
+            peripheralBluetoothTransport.sendMessage(
+                serviceUuid = context.sessionUuid,
+                data = sessionDataBytes
+            )
+
+            safeTransitionTo(HolderSessionState.Complete.Cancelled)
+            stopAdvertising(sendEndCommand = false)
+        } catch (e: IllegalStateException) {
+            sendTerminationAndFail(e)
         }
-
-        val sessionDataBytes = holderCryptoService.buildErrorSessionData(
-            deviceResponseStatus = Status.OK,
-            sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
-            skDevice = skDevice,
-            encryptCounter = context.encryptCounter
-        )
-
-        peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
-            data = sessionDataBytes
-        )
-
-        safeTransitionTo(HolderSessionState.Complete.Cancelled)
-        stopAdvertising(sendEndCommand = false)
     }
 
     override fun cancel() {

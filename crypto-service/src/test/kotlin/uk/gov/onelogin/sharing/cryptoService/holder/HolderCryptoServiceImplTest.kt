@@ -62,7 +62,8 @@ class HolderCryptoServiceImplTest {
             documents = documents,
             documentErrors = null
         ).toDto().encodeCbor()
-        assertArrayEquals(expectedEncrypted, result)
+        val expectedSessionData = SessionData(data = expectedEncrypted).encodeCbor()
+        assertArrayEquals(expectedSessionData, result)
         assertArrayEquals(skDevice, fakeSessionSecurity.lastEncryptKey)
         assertArrayEquals(expectedCborBytes, fakeSessionSecurity.lastEncryptData)
         assertEquals(DeviceRole.HOLDER, fakeSessionSecurity.lastEncryptRole)
