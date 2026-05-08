@@ -491,10 +491,10 @@ class HolderOrchestratorTest {
         orchestrator.start()
         advanceUntilIdle()
 
-        val currentSession = (sessionFactory as FakeSessionFactory).getCurrentSession()
+        val currentSession = sessionFactory.getCurrentSession()
         assertEquals(1u, currentSession.sessionContext.decryptCounter)
 
-        (orchestrator as HolderOrchestrator).holderSessionState.test {
+        orchestrator.holderSessionState.test {
             assertEquals(
                 HolderSessionState.PresentingEngagement(
                     holderSessionContextStub.qrCode
