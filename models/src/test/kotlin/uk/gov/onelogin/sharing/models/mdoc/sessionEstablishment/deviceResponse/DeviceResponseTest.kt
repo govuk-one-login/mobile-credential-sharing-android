@@ -57,12 +57,15 @@ class DeviceResponseTest {
      * DCMAW-19837: AC3: Enforce DeviceResponse status constraints
      */
     @Test
-    fun `Invalid status codes throw IllegalArgumentExceptions`(
-        @TestParameter code: Int? = testValues(
-            13,
-            null
-        )
-    ) {
+    fun `Invalid status codes throw IllegalArgumentExceptions`() = performInvalidStatusCodeFlow(13u)
+
+    /**
+     * DCMAW-19837: AC3: Enforce DeviceResponse status constraints
+     */
+    @Test
+    fun `Null status codes throw IllegalArgumentExceptions`() = performInvalidStatusCodeFlow(null)
+
+    private fun performInvalidStatusCodeFlow(code: UInt?) {
         val exception = assertThrows(IllegalArgumentException::class.java) {
             DeviceResponse(statusCode = code)
         }
