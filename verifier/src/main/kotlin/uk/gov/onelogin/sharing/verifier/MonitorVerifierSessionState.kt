@@ -9,6 +9,8 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,23 +37,27 @@ import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesN
 @Composable
 fun MonitorVerifierSessionState(
     sessionState: StateFlow<VerifierSessionState>,
-    controller: NavHostController
+    controller: NavHostController,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope { Dispatchers.Main }
+    val conversion: suspend (VerifierSessionState) -> (() -> Unit) = { state ->
+        convertSessionStateToNavigation(
+            context,
+            controller,
+            state
+        )
+    }
 
     LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            sessionState.map { state ->
-                convertSessionStateToNavigation(
-                    context,
-                    controller,
-                    state
-                )
-            }.collect { navigationFunction ->
-                navigationFunction()
+        sessionState
+            .map(conversion)
+            .distinctUntilChanged()
+            .flowOn(dispatcher)
+            .collect { navigationFunction ->
+                coroutineScope.launch { navigationFunction() }
             }
-        }
     }
 }
 
