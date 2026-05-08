@@ -14,7 +14,7 @@ enum class SessionDataStatus(val code: UInt) {
         private val applicableCodes = SessionDataStatus.entries.map(SessionDataStatus::code)
         fun from(code: UInt? = null): SessionDataStatus? = code?.let { code ->
             require(code in applicableCodes) {
-                "Provided invalid session data status: $code"
+                "Received invalid session data status: $code"
             }
 
             SessionDataStatus.entries.first { code == it.code }

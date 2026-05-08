@@ -32,7 +32,7 @@ class SessionDataTest {
 
         assertThat(
             exception.message,
-            equalTo("Provided invalid session data status: 12")
+            equalTo("Received invalid session data status: 12")
         )
     }
 
