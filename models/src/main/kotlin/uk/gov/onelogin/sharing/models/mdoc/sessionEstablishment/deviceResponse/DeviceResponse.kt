@@ -2,8 +2,8 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
 data class DeviceResponse(
     val version: String = "1.0",
-    val documents: List<Document>?,
-    val documentErrors: Map<String, Status>?,
+    val documents: List<Document>? = null,
+    val documentErrors: Map<String, Status>? = null,
     val status: Status = Status.OK
 ) {
     init {
@@ -11,4 +11,16 @@ data class DeviceResponse(
             "Received invalid device response version: $version"
         }
     }
+
+    constructor(
+        statusCode: Int?,
+        documents: List<Document>? = null,
+        documentErrors: Map<String, Status>? = null,
+        version: String = "1.0"
+    ) : this(
+        documents = documents,
+        documentErrors = documentErrors,
+        status = Status.from(statusCode),
+        version = version
+    )
 }

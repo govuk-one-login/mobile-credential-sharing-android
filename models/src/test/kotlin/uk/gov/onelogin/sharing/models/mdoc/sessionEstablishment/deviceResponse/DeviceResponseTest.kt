@@ -22,11 +22,7 @@ class DeviceResponseTest {
             "1.x"
         )
     ) {
-        DeviceResponse(
-            version = version,
-            documents = listOf(),
-            documentErrors = mapOf()
-        )
+        DeviceResponse(version = version)
     }
 
     /**
@@ -40,16 +36,40 @@ class DeviceResponseTest {
         )
     ) {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            DeviceResponse(
-                version = version,
-                documents = listOf(),
-                documentErrors = mapOf()
-            )
+            DeviceResponse(version = version)
         }
 
         assertThat(
             exception.message,
             equalTo("Received invalid device response version: $version")
+        )
+    }
+
+    /**
+     * DCMAW-19837: AC3: Enforce DeviceResponse status constraints
+     */
+    @Test
+    fun `Valid status codes come from the 'Status' enum`(@TestParameter status: Status) {
+        DeviceResponse(statusCode = status.code)
+    }
+
+    /**
+     * DCMAW-19837: AC3: Enforce DeviceResponse status constraints
+     */
+    @Test
+    fun `Invalid status codes throw IllegalArgumentExceptions`(
+        @TestParameter code: Int? = testValues(
+            13,
+            null
+        )
+    ) {
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            DeviceResponse(statusCode = code)
+        }
+
+        assertThat(
+            exception.message,
+            equalTo("Received invalid device response status code: $code")
         )
     }
 }
