@@ -10,7 +10,6 @@ import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.core.VerifierUiScope
-import uk.gov.onelogin.sharing.orchestration.Orchestrator
 
 /**
  * Dependency graph for the scanner components.

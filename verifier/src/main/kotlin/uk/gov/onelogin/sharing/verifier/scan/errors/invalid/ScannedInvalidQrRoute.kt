@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
-import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
+import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesNavigationExt.navigateToVerifierPrerequisitesScreen
 
 /**
  * Serialization data class used as a navigation route. Maps to the [ScannedInvalidQrScreen]
@@ -35,7 +35,7 @@ data class ScannedInvalidQrRoute(val data: String) {
                     inputUri = arguments.data,
                     onTryAgainClick = {
                         scope.launch {
-                            controller.navigate(VerifierPrerequisitesRoute) {
+                            controller.navigateToVerifierPrerequisitesScreen {
                                 popUpTo<VerifierRoutes> {
                                     inclusive = true
                                 }

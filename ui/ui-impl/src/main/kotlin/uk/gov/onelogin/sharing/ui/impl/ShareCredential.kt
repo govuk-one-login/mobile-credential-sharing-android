@@ -40,11 +40,11 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
             .create(component.appGraph, component.orchestrator)
     }
     val navController = rememberNavController()
-    val holderSessionState = component.orchestrator.holderSessionState
+    val orchestrator = uiGraph.holderOrchestrator()
 
     ShareCredential(
-        orchestrator = uiGraph.holderOrchestrator(),
-        holderSessionState = holderSessionState,
+        orchestrator = orchestrator,
+        holderSessionState = orchestrator.holderSessionState,
         modifier = modifier,
         navController = navController,
         viewModelFactory = uiGraph.metroViewModelFactory

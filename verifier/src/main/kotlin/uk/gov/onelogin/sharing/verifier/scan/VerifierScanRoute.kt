@@ -4,19 +4,14 @@ import androidx.annotation.Keep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToConnectWithHolderDeviceRoute
-import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
-import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
 
 /**
  * Serialization object used as a navigation route. Maps to the [VerifierScanner] composable UI.
@@ -30,40 +25,18 @@ object VerifierScanRoute {
      * target.
      */
     @OptIn(ExperimentalPermissionsApi::class)
-    fun NavGraphBuilder.configureVerifierScannerRoute(controller: NavController) {
+    fun NavGraphBuilder.configureVerifierScannerRoute() {
         composable<VerifierScanRoute> {
-            val scope = rememberCoroutineScope { Dispatchers.Main }
-
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                VerifierScanner(
-                    onInvalidBarcode = {
-                        scope.launch {
-                            controller.navigateToScannedInvalidQrRoute(uri = it)
-                        }
-                    },
-                    onValidBarcode = {
-                        scope.launch {
-                            controller.navigateToConnectWithHolderDeviceRoute()
-                        }
-                    }
-                )
+                VerifierScanner()
             }
         }
     }
 
-    fun NavController.navigateToVerifierScanRoute() = navigate(VerifierScanRoute) {
-        popUpTo<VerifierScanRoute> {
-            inclusive = true
-        }
-    }
-
-    fun NavController.navigateToVerifierScanFromRoot() = navigate(VerifierScanRoute) {
-        popUpTo<VerifierPrerequisitesRoute> {
-            inclusive = true
-        }
-    }
+    fun NavController.navigateToVerifierScanRoute(options: NavOptionsBuilder.() -> Unit = {}) =
+        navigate(VerifierScanRoute, options)
 }

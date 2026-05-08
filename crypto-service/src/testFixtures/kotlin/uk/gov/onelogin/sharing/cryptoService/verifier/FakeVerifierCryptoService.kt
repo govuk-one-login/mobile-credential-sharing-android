@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
 import java.security.interfaces.ECPublicKey
+import java.util.UUID
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
 
 class FakeVerifierCryptoService : VerifierCryptoService {
@@ -19,10 +20,10 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         establishSessionCallCount++
         lastQrCodeData = qrCodeData
         exceptionToThrow?.let { throw it }
-        updateContext(
+        DeferredVerifierCryptoService { qrCodeData ->
             VerifierCryptoContext(
                 engagementString = qrCodeData,
-                serviceUuid = java.util.UUID.randomUUID(),
+                serviceUuid = UUID.randomUUID(),
                 eReaderKeyTagged = byteArrayOf(),
                 sessionTranscriptBytes = byteArrayOf(),
                 eReaderKeyPair = validKeyPair!!,
@@ -30,6 +31,6 @@ class FakeVerifierCryptoService : VerifierCryptoService {
                 skReader = sessionKeysToReturn.first,
                 skDevice = sessionKeysToReturn.second
             )
-        )
+        }.establishSession(qrCodeData, updateContext)
     }
 }

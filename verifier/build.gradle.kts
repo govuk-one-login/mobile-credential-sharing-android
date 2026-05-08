@@ -52,6 +52,11 @@ dependencies {
     ).forEach(::implementation)
 
     implementation(libs.androidx.browser)
+
+    listOf(
+        libs.androidx.navigation.testing
+    ).forEach(::testFixturesApi)
+
     listOf(
         libs.androidx.browser,
         libs.com.google.test.parameter.injector,

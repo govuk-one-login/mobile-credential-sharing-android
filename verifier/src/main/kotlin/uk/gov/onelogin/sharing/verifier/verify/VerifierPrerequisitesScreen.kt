@@ -3,56 +3,23 @@ package uk.gov.onelogin.sharing.verifier.verify
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import dev.zacsweers.metrox.viewmodel.metroViewModel
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.util.UnstableDesignSystemAPI
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 
 @OptIn(ExperimentalPermissionsApi::class, UnstableDesignSystemAPI::class)
-@Suppress("ComposableLambdaParameterNaming")
 @Composable
-internal fun VerifierPrerequisitesScreen(
-    modifier: Modifier = Modifier,
-    dispatcher: CoroutineDispatcher = Dispatchers.Main,
-    viewModel: VerifierPrerequisitesViewModel = metroViewModel(),
-    onNavigateToPreflight: () -> Unit = {},
-    onNavigateToScanner: () -> Unit = {},
-    onUnrecoverableError: () -> Unit = {}
-) {
-    val scope = rememberCoroutineScope { dispatcher }
-    val latestOnNavigateToPreflight by rememberUpdatedState(onNavigateToPreflight)
-    val latestOnNavigateToScanner by rememberUpdatedState(onNavigateToScanner)
-    val latestOnUnrecoverableError by rememberUpdatedState(onUnrecoverableError)
-
+internal fun VerifierPrerequisitesScreen(modifier: Modifier = Modifier) {
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("VerifierPrerequisitesScreen")
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            scope.launch {
-                when (event) {
-                    VerifyCredentialEvents.NavigateToScanner ->
-                        latestOnNavigateToScanner()
-
-                    VerifyCredentialEvents.NavigateToPreflight ->
-                        latestOnNavigateToPreflight()
-
-                    VerifyCredentialEvents.NavigateToUnrecoverableError ->
-                        latestOnUnrecoverableError()
-                }
-            }
-        }
-    }
-
-    CircularProgressIndicator(modifier = modifier)
+    CircularProgressIndicator(
+        modifier = modifier
+            .then(Modifier.testTag("progressIndicator"))
+    )
 }

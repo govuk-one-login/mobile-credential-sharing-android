@@ -45,7 +45,7 @@ class ScannedInvalidQrRouteTest {
                 navController = controller,
                 startDestination = ScannedInvalidQrRoute(invalidBarcodeDataResultOne)
             ) {
-                configureVerifierPrerequisitesRoute(controller)
+                configureVerifierPrerequisitesRoute()
                 configureScannedInvalidQrRoute(controller)
             }
         }

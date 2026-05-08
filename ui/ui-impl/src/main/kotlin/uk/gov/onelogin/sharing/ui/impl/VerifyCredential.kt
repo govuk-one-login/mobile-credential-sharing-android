@@ -2,21 +2,26 @@ package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 import uk.gov.onelogin.sharing.ui.impl.di.VerifierUiGraph
+import uk.gov.onelogin.sharing.verifier.MonitorVerifierSessionState
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 
@@ -36,33 +41,48 @@ fun VerifyCredential(component: CredentialVerifier, modifier: Modifier = Modifie
         createGraphFactory<VerifierUiGraph.Factory>()
             .create(component.appGraph, component.orchestrator)
     }
-
-    val coroutineScope = rememberCoroutineScope()
-    val lifecycleOwner = LocalLifecycleOwner.current
     val navController = rememberNavController()
+    val orchestrator = uiGraph.verifierOrchestrator()
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            coroutineScope.launch {
-                if (event == Lifecycle.Event.ON_PAUSE) {
-                    navController.popBackStack(VerifierRoutes, inclusive = true)
-                }
-            }
+    VerifyCredential(
+        controller = navController,
+        modifier = modifier,
+        orchestrator = orchestrator,
+        verifierSessionState = orchestrator.verifierSessionState,
+        viewModelFactory = uiGraph.metroViewModelFactory
+    )
+}
+
+@Composable
+internal fun VerifyCredential(
+    orchestrator: Orchestrator.Verifier,
+    verifierSessionState: StateFlow<VerifierSessionState>,
+    viewModelFactory: MetroViewModelFactory,
+    modifier: Modifier = Modifier,
+    controller: NavHostController = rememberNavController(),
+    defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+) {
+    MonitorVerifierSessionState(
+        sessionState = verifierSessionState,
+        controller = controller
+    )
+
+    val scope = rememberCoroutineScope { defaultDispatcher }
+    LaunchedEffect(Unit) {
+        scope.launch {
+            orchestrator.start()
         }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     CompositionLocalProvider(
-        LocalMetroViewModelFactory provides uiGraph.metroViewModelFactory
+        LocalMetroViewModelFactory provides viewModelFactory
     ) {
         NavHost(
-            navController = navController,
+            navController = controller,
             startDestination = VerifierRoutes,
             modifier = modifier
         ) {
-            configureVerifierRoutes(navController)
+            configureVerifierRoutes(controller)
         }
     }
 }
