@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +39,7 @@ import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesN
 fun MonitorVerifierSessionState(
     sessionState: StateFlow<VerifierSessionState>,
     controller: NavHostController,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
+    dispatcher: CoroutineContext = Dispatchers.Default
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope { Dispatchers.Main }
