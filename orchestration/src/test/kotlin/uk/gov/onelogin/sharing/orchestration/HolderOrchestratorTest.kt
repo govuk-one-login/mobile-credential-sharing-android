@@ -58,6 +58,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isSuccessful
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
@@ -327,6 +328,28 @@ class HolderOrchestratorTest {
             orchestrator.holderSessionState.value,
             isProcessingEstablishment()
         )
+    }
+
+    @Test
+    fun `ignores BLE state changes when session is already complete`() = runTest {
+        initialStates = mutableListOf(
+            HolderSessionState.Complete.Success
+        )
+
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            peripheralBluetoothTransport = peripheralBluetoothTransport
+        )
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false)
+        )
+
+        assert("Session already complete, ignoring BLE state" in logger)
     }
 
     @Test
@@ -656,6 +679,7 @@ class HolderOrchestratorTest {
             2u,
             sessionFactory.getCurrentSession().sessionContext.encryptCounter
         )
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
     }
 
     @Test

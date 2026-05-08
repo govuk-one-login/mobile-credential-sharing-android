@@ -227,6 +227,8 @@ class HolderOrchestrator(
                     sessionFlow.value.updateSessionContext {
                         it.copy(encryptCounter = it.encryptCounter + 1u)
                     }
+
+                    safeTransitionTo(HolderSessionState.Complete.Success)
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
                 }
@@ -237,8 +239,15 @@ class HolderOrchestrator(
     }
 
     override fun denyConsent() {
+        val state = holderSessionState.value
+        val context = currentContext
         try {
-            val context = currentContext
+            assert(state is HolderSessionState.AwaitingUserConsent) {
+                "confirmConsent called in an invalid state: $state"
+            }
+            check(state is HolderSessionState.AwaitingUserConsent)
+            safeTransitionTo(HolderSessionState.ProcessingResponse)
+
             val skDevice = checkNotNull(context.skDevice) {
                 "Missing skDevice"
             }
@@ -256,7 +265,6 @@ class HolderOrchestrator(
             )
 
             safeTransitionTo(HolderSessionState.Complete.Cancelled)
-            stopAdvertising(sendEndCommand = false)
         } catch (e: IllegalStateException) {
             sendTerminationAndFail(e)
         }
@@ -296,7 +304,7 @@ class HolderOrchestrator(
         logger.debug(logTag, "state = $state")
 
         if (sessionFlow.value.isComplete()) {
-            logger.debug(logTag, "Session already complete, ignoring BLE state: $state")
+            logger.debug(logTag, "Session already complete, ignoring BLE state")
             return
         }
 

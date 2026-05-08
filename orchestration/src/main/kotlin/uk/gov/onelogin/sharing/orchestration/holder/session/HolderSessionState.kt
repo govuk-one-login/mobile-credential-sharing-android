@@ -77,7 +77,7 @@ sealed class HolderSessionState : Completable {
          * The User has completed a digital credential verification journey without un-resolvable
          * errors occurring.
          */
-        data class Success(val data: DeviceResponse) : Complete("Successful journey")
+        data object Success : Complete("Successful journey")
 
         /**
          * The User cannot complete a digital credential verification journey due to encountering
