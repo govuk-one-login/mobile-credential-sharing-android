@@ -3,14 +3,13 @@ package uk.gov.onelogin.sharing.verifier
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
@@ -38,19 +37,19 @@ fun MonitorVerifierSessionState(
     controller: NavHostController
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope { Dispatchers.Main }
+    val conversion: suspend (VerifierSessionState) -> (() -> Unit) = { state ->
+        convertSessionStateToNavigation(
+            context,
+            controller,
+            state
+        )
+    }
 
     LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            sessionState.map { state ->
-                convertSessionStateToNavigation(
-                    context,
-                    controller,
-                    state
-                )
-            }.collect { navigationFunction ->
-                navigationFunction()
-            }
+        sessionState.map(
+            conversion
+        ).distinctUntilChanged().collect { navigationFunction ->
+            navigationFunction()
         }
     }
 }
