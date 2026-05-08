@@ -16,10 +16,10 @@ class DeviceResponseDto {
         val documents: List<DocumentDTO>?,
 
         @JsonProperty("documentErrors")
-        val documentErrors: Map<String, Int>?,
+        val documentErrors: Map<String, UInt>?,
 
         @JsonProperty("status")
-        val status: Int
+        val status: UInt
     )
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

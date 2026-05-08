@@ -1,15 +1,15 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
-enum class Status(val code: Int) {
-    OK(0),
-    GENERAL_ERROR(10),
-    CBOR_DECODING_ERROR(11),
-    CBOR_VALIDATION_ERROR(12);
+enum class Status(val code: UInt) {
+    OK(0u),
+    GENERAL_ERROR(10u),
+    CBOR_DECODING_ERROR(11u),
+    CBOR_VALIDATION_ERROR(12u);
 
     companion object {
         private val applicableCodes = Status.entries.map(Status::code)
 
-        fun from(code: Int?): Status {
+        fun from(code: UInt?): Status {
             require(code in applicableCodes) {
                 "Received invalid device response status code: $code"
             }
