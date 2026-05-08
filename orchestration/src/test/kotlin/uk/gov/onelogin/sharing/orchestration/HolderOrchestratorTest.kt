@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -490,10 +491,10 @@ class HolderOrchestratorTest {
         orchestrator.start()
         advanceUntilIdle()
 
-        val currentSession = (sessionFactory as FakeSessionFactory).getCurrentSession()
+        val currentSession = sessionFactory.getCurrentSession()
         assertEquals(1u, currentSession.sessionContext.decryptCounter)
 
-        (orchestrator as HolderOrchestrator).holderSessionState.test {
+        orchestrator.holderSessionState.test {
             assertEquals(
                 HolderSessionState.PresentingEngagement(
                     holderSessionContextStub.qrCode
@@ -621,6 +622,41 @@ class HolderOrchestratorTest {
             assertThat(orchestrator.holderSessionState.value, isFailed())
             assertEquals(0, peripheralTransport.stopCalls)
         }
+
+    @Test
+    fun `confirm consent builds device response and sends over BLE`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            sessionFactory = sessionFactory
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        assertArrayEquals(
+            fakeDecryptDeviceRequestUseCase.skDeviceToReturn,
+            fakeCryptoService.lastEncryptSkDevice
+        )
+        assertEquals(1u, fakeCryptoService.lastEncryptCounter)
+        assertEquals(
+            2u,
+            sessionFactory.getCurrentSession().sessionContext.encryptCounter
+        )
+    }
 
     @Test
     fun `sign failure sends status 20 termination and transitions to failed`() = runTest {
