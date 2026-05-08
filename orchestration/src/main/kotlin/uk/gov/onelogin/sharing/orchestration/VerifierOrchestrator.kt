@@ -39,7 +39,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
-import uk.gov.onelogin.sharing.orchestration.verifier.session.BuildDeviceRequestUseCase
+import uk.gov.onelogin.sharing.orchestration.verifier.credential.DeviceRequestHandler
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
@@ -55,7 +55,7 @@ class VerifierOrchestrator(
     private val barcodeParser: QrParser,
     private val centralBluetoothTransport: CentralBluetoothTransport,
     private val verifierCryptoService: VerifierCryptoService,
-    private val buildDeviceRequestUseCase: BuildDeviceRequestUseCase
+    private val deviceRequestHandler: DeviceRequestHandler
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -267,8 +267,7 @@ class VerifierOrchestrator(
         )
 
         val encryptedDeviceRequest = try {
-            buildDeviceRequestUseCase.execute(
-                verificationRequest = verifierConfig.verificationRequest,
+            deviceRequestHandler.buildAndEncrypt(
                 skReader = context.skReader,
                 encryptCounter = context.encryptCounter
             )

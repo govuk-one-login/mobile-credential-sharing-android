@@ -20,12 +20,10 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransp
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
-import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
-import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
-import uk.gov.onelogin.sharing.orchestration.verifier.session.FakeBuildDeviceRequestUseCase
+import uk.gov.onelogin.sharing.orchestration.verifier.credential.FakeDeviceRequestHandler
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -36,9 +34,6 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
@@ -88,19 +83,18 @@ class VerifierOrchestratorTest {
 
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
 
-    private val fakeBuildDeviceRequestUseCase = FakeBuildDeviceRequestUseCase()
+    private val fakeDeviceRequestHandler = FakeDeviceRequestHandler()
 
     private val orchestrator by lazy {
         VerifierOrchestrator(
             logger = logger,
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
-            verifierConfig = verifierConfigStub,
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
             verifierCryptoService = verifierCryptoService,
-            buildDeviceRequestUseCase = fakeBuildDeviceRequestUseCase
+            deviceRequestHandler = fakeDeviceRequestHandler
         )
     }
 
@@ -405,73 +399,20 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `start logs ItemsRequest for Photo and Age Over 21 attribute group`() = runTest {
-        val orchestrator = VerifierOrchestrator(
-            logger = logger,
-            prerequisiteGate = gate,
-            sessionFactory = sessionFactory,
-            verifierConfig = photoAndAgeOver21Config,
-            centralBluetoothTransport = centralBluetoothTransport,
-            appCoroutineScope = scope,
-            barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService,
-            buildDeviceRequestUseCase = fakeBuildDeviceRequestUseCase
-        )
-        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
-        orchestrator.processQrCode(VALID_MDOC_URI)
-        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
-
-        assert(
-            logger.contains(
-                "ItemsRequest: ItemsRequest(" +
-                    "docType=$MDL_DOC_TYPE, " +
-                    "nameSpaces={$MDL_NAMESPACE={portrait=false, age_over_21=false}})"
-            )
-        )
-    }
-
-    @Test
-    fun `start logs ItemsRequest for Name Retain and Age Over 18 attribute group`() = runTest {
-        val orchestrator = VerifierOrchestrator(
-            logger = logger,
-            prerequisiteGate = gate,
-            sessionFactory = sessionFactory,
-            verifierConfig = nameRetainAndAgeOver18Config,
-            centralBluetoothTransport = centralBluetoothTransport,
-            appCoroutineScope = scope,
-            barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService,
-            buildDeviceRequestUseCase = fakeBuildDeviceRequestUseCase
-        )
-        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
-        orchestrator.processQrCode(VALID_MDOC_URI)
-        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
-
-        assert(
-            logger.contains(
-                "ItemsRequest: ItemsRequest(" +
-                    "docType=$MDL_DOC_TYPE, " +
-                    "nameSpaces={$MDL_NAMESPACE={given_name=true, family_name=true, " +
-                    "age_over_18=false}})"
-            )
-        )
-    }
-
-    @Test
     fun `AC3 - ConnectionStateStarted encrypts DeviceRequest with counter 1 and increments to 2`() =
         runTest {
             backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
             orchestrator.processQrCode(VALID_MDOC_URI)
             centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
-            assertEquals(1u, fakeBuildDeviceRequestUseCase.lastEncryptCounter)
+            assertEquals(1u, fakeDeviceRequestHandler.lastEncryptCounter)
             val context = sessionFactory.getCurrentSession().cryptoContext
             assertEquals(2u, context?.encryptCounter)
         }
 
     @Test
     fun `AC4 - encryption failure transitions to Failed and stops BLE`() = runTest {
-        val failingBuild = FakeBuildDeviceRequestUseCase(
+        val failingHandler = FakeDeviceRequestHandler(
             exceptionToThrow = EncryptDeviceRequestException(
                 "Error encrypting DeviceRequest",
                 RuntimeException("AES failure")
@@ -481,12 +422,11 @@ class VerifierOrchestratorTest {
             logger = logger,
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
-            verifierConfig = verifierConfigStub,
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
             verifierCryptoService = verifierCryptoService,
-            buildDeviceRequestUseCase = failingBuild
+            deviceRequestHandler = failingHandler
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)
@@ -498,7 +438,7 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `AC4 - counter is not incremented when encryption fails`() = runTest {
-        val failingBuild = FakeBuildDeviceRequestUseCase(
+        val failingHandler = FakeDeviceRequestHandler(
             exceptionToThrow = EncryptDeviceRequestException(
                 "Error encrypting DeviceRequest",
                 RuntimeException("AES failure")
@@ -508,12 +448,11 @@ class VerifierOrchestratorTest {
             logger = logger,
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
-            verifierConfig = verifierConfigStub,
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
             verifierCryptoService = verifierCryptoService,
-            buildDeviceRequestUseCase = failingBuild
+            deviceRequestHandler = failingHandler
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)
