@@ -17,4 +17,12 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionData
  * @param data The encrypted ciphertext and authentication tag, or null if not present.
  * @param status The termination status code, or null if not present.
  */
-data class SessionData(val data: ByteArray? = null, val status: SessionDataStatus? = null)
+data class SessionData(val data: ByteArray? = null, val status: SessionDataStatus? = null) {
+    constructor(
+        code: UInt?,
+        data: ByteArray? = null
+    ) : this(
+        data = data,
+        status = SessionDataStatus.from(code)
+    )
+}
