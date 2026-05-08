@@ -105,7 +105,7 @@ dependencies {
         libs.hilt.android,
         libs.uk.gov.logging.impl,
         libs.uk.gov.logging.api,
-        libs.kotlinx.serialization.json,
+        libs.kotlinx.serialization.json
     ).forEach(::implementation)
     ksp(libs.hilt.compiler)
 
