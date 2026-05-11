@@ -9,9 +9,5 @@ fun interface EncryptDeviceRequestUseCase {
      * @return The encrypted bytes as Ciphertext || Authentication Tag (16 bytes).
      * @throws EncryptDeviceRequestException if encryption fails.
      */
-    fun encrypt(
-        deviceRequestBytes: ByteArray,
-        skReader: ByteArray,
-        encryptCounter: UInt
-    ): ByteArray
+    fun encrypt(deviceRequestBytes: ByteArray, skReader: ByteArray, encryptCounter: UInt): ByteArray
 }

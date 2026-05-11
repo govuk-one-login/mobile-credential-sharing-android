@@ -9,8 +9,5 @@ fun interface DeviceRequestHandler {
      * @throws EncryptDeviceRequestException if encryption fails.
      */
     @Throws(EncryptDeviceRequestException::class)
-    fun buildAndEncrypt(
-        skReader: ByteArray,
-        encryptCounter: UInt
-    ): ByteArray
+    fun buildAndEncrypt(skReader: ByteArray, encryptCounter: UInt): ByteArray
 }

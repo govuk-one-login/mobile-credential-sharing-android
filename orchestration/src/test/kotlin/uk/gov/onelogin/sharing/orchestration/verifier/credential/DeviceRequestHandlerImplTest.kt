@@ -1,17 +1,17 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.credential
 
+import kotlin.test.assertFailsWith
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
-import uk.gov.onelogin.sharing.orchestration.verifier.session.FakeBuildDeviceRequestUseCase
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
-import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
+import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
-import kotlin.test.assertFailsWith
+import uk.gov.onelogin.sharing.orchestration.verifier.session.FakeBuildDeviceRequestUseCase
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 
 class DeviceRequestHandlerImplTest {
 

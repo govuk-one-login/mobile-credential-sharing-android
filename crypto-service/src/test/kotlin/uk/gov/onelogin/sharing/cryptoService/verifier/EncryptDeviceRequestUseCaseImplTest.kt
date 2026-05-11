@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
 import javax.crypto.AEADBadTagException
+import kotlin.test.assertFailsWith
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -10,7 +11,6 @@ import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.NIST_INITIALISATION_VECTOR_SIZE
 import uk.gov.onelogin.sharing.cryptoService.cryptography.createNistInitialisationVector
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
-import kotlin.test.assertFailsWith
 
 class EncryptDeviceRequestUseCaseImplTest {
 
@@ -53,7 +53,12 @@ class EncryptDeviceRequestUseCaseImplTest {
     fun `successful encryption logs counter incremented to 2`() {
         useCase.encrypt(plaintext, skReader, encryptCounter)
 
-        assertTrue(logger.any { it.message == "Message counter: 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x02" })
+        assertTrue(
+            logger.any {
+                it.message == "Message counter: 0x00 0x00 0x00 0x00 0x00 0x00" +
+                    " 0x00 0x00 0x00 0x00 0x00 0x02"
+            }
+        )
     }
 
     @Test

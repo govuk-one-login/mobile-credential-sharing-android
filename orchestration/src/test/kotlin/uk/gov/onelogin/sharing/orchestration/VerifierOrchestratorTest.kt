@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration
 
+import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.assertEquals
@@ -8,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -21,9 +23,10 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTr
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
+import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
-import uk.gov.onelogin.sharing.orchestration.verifier.credential.FakeDeviceRequestHandler
+import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -32,8 +35,10 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
+import uk.gov.onelogin.sharing.orchestration.verifier.credential.FakeDeviceRequestHandler
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
@@ -64,7 +69,6 @@ class VerifierOrchestratorTest {
         VerifierSessionState.NotStarted
     )
 
-
     private val sessionFactory by lazy {
         FakeSessionFactory(
             initialStates.map { initialState ->
@@ -83,7 +87,8 @@ class VerifierOrchestratorTest {
     }
 
     private val centralBluetoothTransport = FakeCentralBluetoothTransport()
-    private val verifierCryptoService = FakeVerifierCryptoService()
+    private val fakeCryptoService = FakeVerifierCryptoService()
+    private var verifierCryptoService: VerifierCryptoService = fakeCryptoService
 
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
 
@@ -271,6 +276,42 @@ class VerifierOrchestratorTest {
 
         assert("$TRANSITION_SUCCESSFUL_TO_STATE ProcessingEngagement" in logger)
         assert("$TRANSITION_SUCCESSFUL_TO_STATE $currentState" in logger)
+    }
+
+    @Test
+    fun `Session establishment failure means that engagement cannot be processed`() = runTest {
+        fakeCryptoService.exceptionToThrow = Exception()
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
+        orchestrator.verifierSessionState.test {
+            assertThat(
+                expectMostRecentItem(),
+                isFailed(
+                    hasReason(
+                        instanceOf(SessionErrorReason.CannotProcessEngagement::class.java)
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Null crypto contexts fail QR processing with Service UUID not found`() = runTest {
+        verifierCryptoService = DeferredVerifierCryptoService()
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
+        orchestrator.verifierSessionState.test {
+            assertThat(
+                expectMostRecentItem(),
+                isFailed(
+                    hasReason(
+                        instanceOf(SessionErrorReason.ServiceUuidNotFound::class.java)
+                    )
+                )
+            )
+        }
     }
 
     @Test

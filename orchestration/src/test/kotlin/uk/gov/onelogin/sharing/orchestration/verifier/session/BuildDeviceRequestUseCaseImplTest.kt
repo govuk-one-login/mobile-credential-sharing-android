@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
+import kotlin.test.assertFailsWith
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -9,7 +10,6 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.FakeEncryptDeviceRequestUs
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
-import kotlin.test.assertFailsWith
 
 class BuildDeviceRequestUseCaseImplTest {
 
