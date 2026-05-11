@@ -6,6 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.NIST_INITIALISATION_VECTOR_SIZE
 import uk.gov.onelogin.sharing.cryptoService.cryptography.createNistInitialisationVector
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
@@ -17,41 +18,16 @@ class EncryptDeviceRequestUseCaseImplTest {
     private val plaintext = ByteArray(32) { it.toByte() }
     private val skReader = ByteArray(32) { 0x01 }
     private val encryptCounter = 1u
+    private val encryptedResult = ByteArray(plaintext.size + 16) { 0xAA.toByte() }
 
-    private val fakeEncryption = object : uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionEncryption {
-        var lastKey: ByteArray? = null
-        var lastData: ByteArray? = null
-        var lastRole: DeviceRole? = null
-        var lastCounter: UInt? = null
-        var exceptionToThrow: Exception? = null
-        val encryptedResult = ByteArray(plaintext.size + 16) { 0xAA.toByte() }
-
-        override fun encryptPayload(
-            key: ByteArray,
-            data: ByteArray,
-            role: DeviceRole,
-            encryptCounter: UInt
-        ): ByteArray {
-            lastKey = key
-            lastData = data
-            lastRole = role
-            lastCounter = encryptCounter
-            exceptionToThrow?.let { throw it }
-            return encryptedResult
-        }
-
-        override fun decryptPayload(
-            key: ByteArray,
-            data: ByteArray,
-            role: DeviceRole,
-            decryptCounter: UInt
-        ): ByteArray = byteArrayOf()
+    private val fakeSessionSecurity = FakeSessionSecurity().apply {
+        encryptedToReturn = encryptedResult
     }
 
-    private val useCase = EncryptDeviceRequestUseCaseImpl(fakeEncryption, logger)
+    private val useCase = EncryptDeviceRequestUseCaseImpl(fakeSessionSecurity, logger)
 
     @Test
-    fun `AC1 - IV is 12 bytes with 8 zero identifier bytes and counter 1 as last 4 bytes`() {
+    fun `IV is 12 bytes with 8 zero identifier bytes and counter 1 as last 4 bytes`() {
         val iv = createNistInitialisationVector(
             DeviceRole.VERIFIER.nistInitialisationVectorIdentifier,
             encryptCounter
@@ -63,41 +39,31 @@ class EncryptDeviceRequestUseCaseImplTest {
     }
 
     @Test
-    fun `AC2 - successful encryption returns ciphertext plus 16 byte auth tag`() {
+    fun `successful encryption returns ciphertext plus 16 byte auth tag`() {
         val result = useCase.encrypt(plaintext, skReader, encryptCounter)
 
         assertEquals(plaintext.size + 16, result.size)
-        assertEquals(DeviceRole.VERIFIER, fakeEncryption.lastRole)
-        assertEquals(encryptCounter, fakeEncryption.lastCounter)
-        assertArrayEquals(skReader, fakeEncryption.lastKey)
+        assertEquals(DeviceRole.VERIFIER, fakeSessionSecurity.lastEncryptRole)
+        assertEquals(encryptCounter, fakeSessionSecurity.lastEncryptCounter)
+        assertArrayEquals(skReader, fakeSessionSecurity.lastEncryptKey)
         assertTrue(logger.any { it.message == EncryptDeviceRequestUseCaseImpl.LOG_ENCRYPT_SUCCESS })
     }
 
     @Test
-    fun `AC3 - successful encryption logs counter incremented to 2`() {
+    fun `successful encryption logs counter incremented to 2`() {
         useCase.encrypt(plaintext, skReader, encryptCounter)
 
-        assertTrue(logger.any { it.message == "Message counter: 2" })
+        assertTrue(logger.any { it.message == "Message counter: 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x02" })
     }
 
     @Test
-    fun `AC4 - encryption failure logs error and throws EncryptDeviceRequestException`() {
-        fakeEncryption.exceptionToThrow = AEADBadTagException("bad tag")
+    fun `encryption failure logs error and throws EncryptDeviceRequestException`() {
+        fakeSessionSecurity.encryptException = AEADBadTagException("bad tag")
 
         assertFailsWith<EncryptDeviceRequestException> {
             useCase.encrypt(plaintext, skReader, encryptCounter)
         }
 
         assertTrue(logger.any { it.message == EncryptDeviceRequestUseCaseImpl.LOG_ENCRYPT_ERROR })
-    }
-
-    @Test
-    fun `AC4 - counter is not incremented on encryption failure`() {
-        fakeEncryption.exceptionToThrow = AEADBadTagException("bad tag")
-        val counterBefore = fakeEncryption.lastCounter
-
-        runCatching { useCase.encrypt(plaintext, skReader, encryptCounter) }
-
-        assertEquals(counterBefore, fakeEncryption.lastCounter)
     }
 }

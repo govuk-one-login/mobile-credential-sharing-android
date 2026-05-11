@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
 import kotlin.test.assertFailsWith
 
 class DeviceRequestHandlerImplTest {

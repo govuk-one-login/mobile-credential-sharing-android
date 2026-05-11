@@ -34,6 +34,9 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
@@ -60,6 +63,7 @@ class VerifierOrchestratorTest {
         VerifierSessionState.NotStarted,
         VerifierSessionState.NotStarted
     )
+
 
     private val sessionFactory by lazy {
         FakeSessionFactory(
@@ -90,6 +94,7 @@ class VerifierOrchestratorTest {
             logger = logger,
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
+            verifierConfig = verifierConfigStub,
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
@@ -399,7 +404,7 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `AC3 - ConnectionStateStarted encrypts DeviceRequest with counter 1 and increments to 2`() =
+    fun `ConnectionStateStarted encrypts DeviceRequest with counter 1 and increments to 2`() =
         runTest {
             backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
             orchestrator.processQrCode(VALID_MDOC_URI)
@@ -411,7 +416,7 @@ class VerifierOrchestratorTest {
         }
 
     @Test
-    fun `AC4 - encryption failure transitions to Failed and stops BLE`() = runTest {
+    fun `encryption failure transitions to Failed and stops BLE`() = runTest {
         val failingHandler = FakeDeviceRequestHandler(
             exceptionToThrow = EncryptDeviceRequestException(
                 "Error encrypting DeviceRequest",
@@ -422,6 +427,7 @@ class VerifierOrchestratorTest {
             logger = logger,
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
+            verifierConfig = photoAndAgeOver21Config,
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
@@ -437,7 +443,7 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `AC4 - counter is not incremented when encryption fails`() = runTest {
+    fun `counter is not incremented when encryption fails`() = runTest {
         val failingHandler = FakeDeviceRequestHandler(
             exceptionToThrow = EncryptDeviceRequestException(
                 "Error encrypting DeviceRequest",
@@ -448,6 +454,7 @@ class VerifierOrchestratorTest {
             logger = logger,
             prerequisiteGate = gate,
             sessionFactory = sessionFactory,
+            verifierConfig = nameRetainAndAgeOver18Config,
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),

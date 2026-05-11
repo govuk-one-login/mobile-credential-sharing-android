@@ -6,6 +6,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.cryptography.createNistInitialisationVector
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionEncryption
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
@@ -21,6 +22,7 @@ class EncryptDeviceRequestUseCaseImpl(
         skReader: ByteArray,
         encryptCounter: UInt
     ): ByteArray = try {
+        logger.debug(logTag, "Encrypting DeviceRequest with counter: $encryptCounter")
         sessionEncryption.encryptPayload(
             key = skReader,
             data = deviceRequestBytes,
@@ -28,7 +30,15 @@ class EncryptDeviceRequestUseCaseImpl(
             encryptCounter = encryptCounter
         ).also {
             logger.debug(logTag, LOG_ENCRYPT_SUCCESS)
-            logger.debug(logTag, "Message counter: ${encryptCounter + 1u}")
+            val nextCounter = encryptCounter + 1u
+            val nextIv = createNistInitialisationVector(
+                DeviceRole.VERIFIER.nistInitialisationVectorIdentifier,
+                nextCounter
+            )
+            logger.debug(
+                logTag,
+                "Message counter: ${nextIv.joinToString(" ") { "0x%02x".format(it) }}"
+            )
         }
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         logger.error(logTag, LOG_ENCRYPT_ERROR, e)
