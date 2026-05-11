@@ -1,14 +1,17 @@
 package uk.gov.onelogin.sharing.cryptoService.dto
 
+import com.fasterxml.jackson.dataformat.cbor.CBORConstants.PREFIX_TYPE_BYTES
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import java.io.ByteArrayOutputStream
+import kotlin.test.assertContains
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
@@ -30,12 +33,26 @@ class DeviceResponseDtoTest {
     )
 
     private val docType = "org.iso.18013.5.1.mDL"
-    private val hexFormatter: (Byte) -> CharSequence = { "%02x".format(it) }
+    private val hexFormatter: (Any) -> CharSequence = { "%02x".format(it) }
+    private val deviceNameSpacesData = ByteArrayOutputStream().also { out ->
+        CBORFactory().createGenerator(out).use { gen ->
+            gen.writeStartObject(0)
+            gen.writeEndObject()
+        }
+    }.toByteArray()
+    private val validDeviceSignedDto = DeviceResponseDto.DeviceSignedDTO(
+        nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+        deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+            deviceSignature = byteArrayOf()
+        )
+    )
+
+    private val tag24 = byteArrayOf(0xd8.toByte(), 24.toByte())
+    private val tag24Hex = tag24.joinToString("", transform = hexFormatter)
 
     @Test
     fun `Validate CBOR Tag 24 for IssuerSigned and DeviceSigned`() {
         val issuerSignedItemData = byteArrayOf(0x01, 0x02)
-        val deviceNameSpacesData = byteArrayOf(0x03, 0x04)
 
         val document = DeviceResponseDto.DocumentDTO(
             docType = docType,
@@ -45,12 +62,7 @@ class DeviceResponseDtoTest {
                 ),
                 issuerAuth = RawCbor(byteArrayOf())
             ),
-            deviceSigned = DeviceResponseDto.DeviceSignedDTO(
-                nameSpaces = EmbeddedCbor(deviceNameSpacesData),
-                deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-                    deviceSignature = byteArrayOf()
-                )
-            )
+            deviceSigned = validDeviceSignedDto
         )
 
         val deviceResponse = DeviceResponseDto.DeviceResponse(
@@ -60,22 +72,35 @@ class DeviceResponseDtoTest {
 
         val encoded = mapper.writeValueAsBytes(deviceResponse)
 
-        val tag24 = byteArrayOf(0xd8.toByte(), 24.toByte())
-        val tag24Hex = tag24.joinToString("", transform = hexFormatter)
-        val cborHeader = "42"
-
         val issuerSignedItemHex = issuerSignedItemData.joinToString("", transform = hexFormatter)
         val deviceNameSpacesHex = deviceNameSpacesData.joinToString("", transform = hexFormatter)
 
         val encodedString = encoded.joinToString("", transform = hexFormatter)
 
-        assertTrue(
-            "Encoded output should contain tagged issuerSigned item data",
-            encodedString.contains("$tag24Hex$cborHeader$issuerSignedItemHex")
+        assertContains(
+            message = "Encoded output should contain tagged issuerSigned item data",
+            charSequence = encodedString,
+            other = "$tag24Hex${generateBytesTag(2)}$issuerSignedItemHex"
         )
-        assertTrue(
-            "Encoded output should contain tagged deviceSigned namespaces data",
-            encodedString.contains("$tag24Hex$cborHeader$deviceNameSpacesHex")
+
+        assertContains(
+            message = "Encoded output should contain tagged deviceSigned namespaces data",
+            charSequence = encodedString,
+            other = "$tag24Hex${generateBytesTag(1)}$deviceNameSpacesHex"
+        )
+    }
+
+    @Test
+    fun `Validate CBOR structure for DeviceSignedDto nameSpaces`() {
+        val deviceNameSpacesHex = deviceNameSpacesData.joinToString("", transform = hexFormatter)
+
+        val encoded = mapper.writeValueAsBytes(validDeviceSignedDto)
+        val encodedString = encoded.joinToString("", transform = hexFormatter)
+
+        assertContains(
+            message = "Encoded output should contain tagged deviceSigned namespaces data",
+            charSequence = encodedString,
+            other = "$tag24Hex${generateBytesTag(1)}$deviceNameSpacesHex"
         )
     }
 
@@ -155,4 +180,6 @@ class DeviceResponseDtoTest {
             equalTo("Received invalid device response status code: 13")
         )
     }
+
+    private fun generateBytesTag(elementSize: Int) = hexFormatter(PREFIX_TYPE_BYTES + elementSize)
 }
