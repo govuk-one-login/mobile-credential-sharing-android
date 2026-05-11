@@ -4,23 +4,42 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseDto {
 
+    /**
+     * ```
+     * DeviceResponse = {
+     *   "version" : tstr,
+     *   ? "documents" : [+ Document],
+     *   "status" : uint
+     * }
+     * ```
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     data class DeviceResponse(
         @JsonProperty("version")
         val version: String = "1.0",
 
         @JsonProperty("documents")
-        val documents: List<DocumentDTO>?,
+        val documents: List<DocumentDTO>? = null,
 
         @JsonProperty("documentErrors")
-        val documentErrors: Map<String, UInt>?,
+        val documentErrors: Map<String, UInt>? = null,
 
         @JsonProperty("status")
         val status: UInt
-    )
+    ) {
+        init {
+            require(version.startsWith("1.")) {
+                "Received invalid device response version: $version"
+            }
+            require(status in Status.applicableCodes) {
+                "Received invalid device response status code: $status"
+            }
+        }
+    }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     data class DocumentDTO(

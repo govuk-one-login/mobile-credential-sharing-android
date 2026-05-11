@@ -15,12 +15,6 @@ data class DeviceResponse(
     val documentErrors: Map<String, Status>? = null,
     val status: Status = Status.OK
 ) {
-    init {
-        require(version.startsWith("1.")) {
-            "Received invalid device response version: $version"
-        }
-    }
-
     constructor(
         statusCode: UInt?,
         documents: List<Document>? = null,

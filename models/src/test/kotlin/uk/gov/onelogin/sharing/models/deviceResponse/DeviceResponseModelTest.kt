@@ -55,17 +55,17 @@ class DeviceResponseModelTest {
 
     @Test
     fun `DeviceResponse status defaults to OK`() {
-        val response = DeviceResponse(documents = null, documentErrors = null)
+        val response = DeviceResponse()
         assertEquals(Status.OK, response.status)
-        assertEquals(0, response.status.code)
+        assertEquals(0u, response.status.code)
     }
 
     @Test
     fun `DeviceResponse status supports GENERAL_ERROR`() {
         val response =
-            DeviceResponse(documents = null, documentErrors = null, status = Status.GENERAL_ERROR)
+            DeviceResponse(status = Status.GENERAL_ERROR)
         assertEquals(Status.GENERAL_ERROR, response.status)
-        assertEquals(10, response.status.code)
+        assertEquals(10u, response.status.code)
     }
 
     @Test
@@ -76,7 +76,7 @@ class DeviceResponseModelTest {
             status = Status.CBOR_DECODING_ERROR
         )
         assertEquals(Status.CBOR_DECODING_ERROR, response.status)
-        assertEquals(11, response.status.code)
+        assertEquals(11u, response.status.code)
     }
 
     @Test
@@ -87,7 +87,7 @@ class DeviceResponseModelTest {
             status = Status.CBOR_VALIDATION_ERROR
         )
         assertEquals(Status.CBOR_VALIDATION_ERROR, response.status)
-        assertEquals(12, response.status.code)
+        assertEquals(12u, response.status.code)
     }
 
     @Test

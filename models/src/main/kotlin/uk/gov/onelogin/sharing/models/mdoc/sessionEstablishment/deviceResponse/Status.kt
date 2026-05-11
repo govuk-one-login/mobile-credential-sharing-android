@@ -7,7 +7,7 @@ enum class Status(val code: UInt) {
     CBOR_VALIDATION_ERROR(12u);
 
     companion object {
-        private val applicableCodes = Status.entries.map(Status::code)
+        val applicableCodes = Status.entries.map(Status::code)
 
         fun from(code: UInt?): Status {
             require(code in applicableCodes) {
