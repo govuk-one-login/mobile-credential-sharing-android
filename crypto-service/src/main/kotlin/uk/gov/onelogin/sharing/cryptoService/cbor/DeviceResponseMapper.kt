@@ -58,7 +58,5 @@ fun IssuerSigned.encodeCbor(): ByteArray {
  */
 fun DeviceSigned.toDto(): DeviceResponseDto.DeviceSignedDTO = DeviceResponseDto.DeviceSignedDTO(
     nameSpaces = EmbeddedCbor(nameSpaces),
-    deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-        deviceSignature = deviceAuth
-    )
+    deviceAuth = RawCbor(deviceAuth)
 )

@@ -45,11 +45,11 @@ class HolderResponseUseCaseImplTest {
     )
 
     @Test
-    fun `generateDeviceResponse returns DeviceSigned with nameSpaces from deviceSigned`() =
+    fun `generateDeviceResponse returns DeviceSigned with empty CBOR map nameSpaces`() =
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes
@@ -62,7 +62,7 @@ class HolderResponseUseCaseImplTest {
                 deviceAuthBytes
             )
 
-            assertArrayEquals(deviceSignedBytes, result.nameSpaces)
+            assertArrayEquals(byteArrayOf(0xA0.toByte()), result.nameSpaces)
         }
 
     @Test
@@ -70,7 +70,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes
@@ -91,7 +91,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes
@@ -106,7 +106,7 @@ class HolderResponseUseCaseImplTest {
 
             coVerify {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             }
@@ -117,7 +117,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes

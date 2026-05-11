@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.CBORParser
+import com.fasterxml.jackson.core.JsonToken
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 
@@ -14,22 +16,76 @@ class RawCredentialParserImpl : RawCredentialParser {
         val cborMapper = ObjectMapper(CBORFactory())
         val root = cborMapper.readTree(rawCredential)
 
-        val nameSpacesNode = root.get(KEY_NAME_SPACES)
+        // Support both flat {nameSpaces, issuerAuth} and full Document
+        // {docType, issuerSigned: {nameSpaces, issuerAuth}} structures
+        val issuerSignedNode = root.get(KEY_ISSUER_SIGNED) ?: root
+
+        val nameSpacesNode = issuerSignedNode.get(KEY_NAME_SPACES)
             ?: throw RawCredentialParsingException(ERROR_MISSING_NAMESPACES)
-        val issuerAuthNode = root.get(KEY_ISSUER_AUTH) as? ArrayNode
+        val issuerAuthNode = issuerSignedNode.get(KEY_ISSUER_AUTH) as? ArrayNode
             ?: throw RawCredentialParsingException(ERROR_MISSING_ISSUER_AUTH)
 
         val msoDocType = extractMsoDocType(cborMapper, issuerAuthNode)
 
+        // Extract issuerAuth raw bytes directly from the credential to preserve
+        // CBOR integer keys (Jackson's JsonNode converts them to strings)
+        val issuerAuthBytes = extractIssuerAuthRawBytes(rawCredential)
+
         ParsedRawCredential(
             nameSpaces = cborMapper.writeValueAsBytes(nameSpacesNode),
-            issuerAuth = cborMapper.writeValueAsBytes(issuerAuthNode),
+            issuerAuth = issuerAuthBytes,
             msoDocType = msoDocType
         )
     } catch (e: RawCredentialParsingException) {
         throw e
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         throw RawCredentialParsingException(FAILED_TO_PARSE_RAW_CREDENTIAL_CBOR, e)
+    }
+
+    /**
+     * Extracts the raw CBOR bytes of the issuerAuth field, preserving the original
+     * encoding including integer keys in nested maps.
+     *
+     * Uses the streaming parser to locate the field, then reads the raw value bytes
+     * via [ObjectMapper] with the token buffer to get an exact CBOR re-encoding.
+     * Since Jackson re-encoding loses integer keys, we instead locate the byte offset
+     * and extract the raw slice from the input.
+     */
+    @Suppress("NestedBlockDepth")
+    private fun extractIssuerAuthRawBytes(cborData: ByteArray): ByteArray {
+        val factory = CBORFactory()
+        val parser = factory.createParser(cborData) as CBORParser
+        parser.use { p ->
+            p.nextToken() // START_OBJECT (top-level map)
+            while (p.nextToken() != null && p.currentToken() != JsonToken.END_OBJECT) {
+                val name = p.currentName() ?: run { p.skipChildren(); continue }
+                p.nextToken() // move to value
+
+                if (name == KEY_ISSUER_AUTH) {
+                    return extractCurrentValueBytes(p, cborData)
+                }
+                if (name == KEY_ISSUER_SIGNED) {
+                    // Navigate into issuerSigned
+                    while (p.nextToken() != null && p.currentToken() != JsonToken.END_OBJECT) {
+                        val innerName = p.currentName() ?: run { p.skipChildren(); continue }
+                        p.nextToken()
+                        if (innerName == KEY_ISSUER_AUTH) {
+                            return extractCurrentValueBytes(p, cborData)
+                        }
+                        p.skipChildren()
+                    }
+                }
+                p.skipChildren()
+            }
+        }
+        throw RawCredentialParsingException(ERROR_MISSING_ISSUER_AUTH)
+    }
+
+    private fun extractCurrentValueBytes(parser: CBORParser, source: ByteArray): ByteArray {
+        val startOffset = parser.currentTokenLocation().byteOffset.toInt()
+        parser.skipChildren()
+        val endOffset = parser.currentLocation().byteOffset.toInt()
+        return source.copyOfRange(startOffset, endOffset)
     }
 
     @Suppress("ThrowsCount")
@@ -51,6 +107,7 @@ class RawCredentialParserImpl : RawCredentialParser {
     }
 
     private companion object {
+        const val KEY_ISSUER_SIGNED = "issuerSigned"
         const val KEY_NAME_SPACES = "nameSpaces"
         const val KEY_ISSUER_AUTH = "issuerAuth"
         const val KEY_DOC_TYPE = "docType"

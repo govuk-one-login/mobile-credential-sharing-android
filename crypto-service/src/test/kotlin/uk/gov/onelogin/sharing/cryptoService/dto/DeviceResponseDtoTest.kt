@@ -37,9 +37,7 @@ class DeviceResponseDtoTest {
             ),
             deviceSigned = DeviceResponseDto.DeviceSignedDTO(
                 nameSpaces = EmbeddedCbor(deviceNameSpacesData),
-                deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-                    deviceSignature = byteArrayOf()
-                )
+                deviceAuth = RawCbor(byteArrayOf())
             )
         )
 

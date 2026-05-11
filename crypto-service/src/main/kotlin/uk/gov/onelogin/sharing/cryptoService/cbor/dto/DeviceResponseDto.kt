@@ -64,11 +64,6 @@ class DeviceResponseDto {
         val nameSpaces: EmbeddedCbor,
 
         @JsonProperty("deviceAuth")
-        val deviceAuth: DeviceAuthDTO
-    )
-
-    data class DeviceAuthDTO(
-        @JsonProperty("deviceSignature")
-        val deviceSignature: ByteArray
+        val deviceAuth: RawCbor
     )
 }
