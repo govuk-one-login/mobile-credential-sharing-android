@@ -30,6 +30,7 @@ class DeviceResponseDtoTest {
     )
 
     private val docType = "org.iso.18013.5.1.mDL"
+    private val hexFormatter: (Byte) -> CharSequence = { "%02x".format(it) }
 
     @Test
     fun `Validate CBOR Tag 24 for IssuerSigned and DeviceSigned`() {
@@ -54,22 +55,19 @@ class DeviceResponseDtoTest {
 
         val deviceResponse = DeviceResponseDto.DeviceResponse(
             documents = listOf(document),
-            documentErrors = null,
             status = 0u
         )
 
         val encoded = mapper.writeValueAsBytes(deviceResponse)
 
         val tag24 = byteArrayOf(0xd8.toByte(), 24.toByte())
-        val tag24Hex = tag24.joinToString("") { "%02x".format(it) }
+        val tag24Hex = tag24.joinToString("", transform = hexFormatter)
         val cborHeader = "42"
 
-        val issuerSignedItemHex = issuerSignedItemData.joinToString("")
-            { "%02x".format(it) }
-        val deviceNameSpacesHex = deviceNameSpacesData.joinToString("")
-            { "%02x".format(it) }
+        val issuerSignedItemHex = issuerSignedItemData.joinToString("", transform = hexFormatter)
+        val deviceNameSpacesHex = deviceNameSpacesData.joinToString("", transform = hexFormatter)
 
-        val encodedString = encoded.joinToString("") { "%02x".format(it) }
+        val encodedString = encoded.joinToString("", transform = hexFormatter)
 
         assertTrue(
             "Encoded output should contain tagged issuerSigned item data",

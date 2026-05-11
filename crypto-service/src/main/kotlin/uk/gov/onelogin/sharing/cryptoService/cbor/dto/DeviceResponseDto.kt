@@ -41,6 +41,15 @@ class DeviceResponseDto {
         }
     }
 
+    /**
+     * ```
+     * Document = {
+     *   "docType" : DocType (tstr),
+     *   "issuerSigned" : IssuerSigned,
+     *   "deviceSigned" : DeviceSigned
+     * }
+     * ```
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     data class DocumentDTO(
         @JsonProperty("docType")
@@ -56,9 +65,17 @@ class DeviceResponseDto {
         val errors: Map<String, Int>? = null
     )
 
+    /**
+     * ```
+     * IssuerSigned = {
+     *   "issuerAuth" : IssuerAuth,
+     *   ? "nameSpaces" : IssuerNameSpaces
+     * }
+     * ```
+     */
     data class IssuerSignedDTO(
         @JsonProperty("nameSpaces")
-        val nameSpaces: Map<String, List<EmbeddedCbor>>?,
+        val nameSpaces: Map<String, List<EmbeddedCbor>>? = null,
 
         @JsonProperty("issuerAuth")
         val issuerAuth: RawCbor
@@ -78,6 +95,16 @@ class DeviceResponseDto {
         val elementValue: Any
     )
 
+    /**
+     * ```
+     * DeviceSigned = {
+     *   "nameSpaces" : DeviceNameSpacesBytes,
+     *   "deviceAuth" : DeviceAuth
+     * }
+     *
+     * DeviceNameSpacesBytes = #6.24(bstr .cbor DeviceNameSpaces)
+     * ```
+     */
     data class DeviceSignedDTO(
         @JsonProperty("nameSpaces")
         val nameSpaces: EmbeddedCbor,
