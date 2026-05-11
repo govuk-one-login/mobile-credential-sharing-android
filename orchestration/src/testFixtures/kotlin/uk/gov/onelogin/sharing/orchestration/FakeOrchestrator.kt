@@ -58,6 +58,10 @@ class FakeOrchestrator(
 
     override fun confirmConsent() = onConfirmConsent()
 
+    override fun denyConsent() {
+        cancelCount++
+    }
+
     override fun reset() {
         startCount = 0
         cancelCount = 0

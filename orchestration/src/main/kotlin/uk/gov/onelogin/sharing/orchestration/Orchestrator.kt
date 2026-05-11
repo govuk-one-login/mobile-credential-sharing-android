@@ -29,6 +29,8 @@ interface Orchestrator : Resettable {
 
         fun confirmConsent()
 
+        fun denyConsent()
+
         companion object {
             const val JOURNEY_NAME: String = "holder"
         }
