@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
@@ -111,7 +112,18 @@ class DeviceResponseDto {
 
         @JsonProperty("deviceAuth")
         val deviceAuth: DeviceAuthDTO
-    )
+    ) {
+        init {
+            val nameSpacesMap = CborMapper.default.readValue(
+                nameSpaces.encoded,
+                Map::class.java
+            )
+
+            require(nameSpacesMap.isEmpty()) {
+                "Received unexpected data in 'nameSpaces' property: $nameSpacesMap"
+            }
+        }
+    }
 
     data class DeviceAuthDTO(
         @JsonProperty("deviceSignature")

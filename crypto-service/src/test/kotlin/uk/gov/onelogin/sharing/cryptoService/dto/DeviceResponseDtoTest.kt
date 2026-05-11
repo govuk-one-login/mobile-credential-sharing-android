@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream
 import kotlin.test.assertContains
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
@@ -17,20 +18,13 @@ import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCborSerializer
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 @RunWith(TestParameterInjector::class)
 class DeviceResponseDtoTest {
 
-    private val mapper = CborMapper.create(
-        mapOf(
-            EmbeddedCbor::class.java to EmbeddedCborSerializer(),
-            RawCbor::class.java to RawCborSerializer()
-        )
-    )
+    private val mapper = CborMapper.default
 
     private val docType = "org.iso.18013.5.1.mDL"
     private val hexFormatter: (Any) -> CharSequence = { "%02x".format(it) }
@@ -90,6 +84,9 @@ class DeviceResponseDtoTest {
         )
     }
 
+    /**
+     * DCMAW-19837: AC4: Enforce empty namespaces for DeviceSigned items
+     */
     @Test
     fun `Validate CBOR structure for DeviceSignedDto nameSpaces`() {
         val deviceNameSpacesHex = deviceNameSpacesData.joinToString("", transform = hexFormatter)
@@ -101,6 +98,43 @@ class DeviceResponseDtoTest {
             message = "Encoded output should contain tagged deviceSigned namespaces data",
             charSequence = encodedString,
             other = "$tag24Hex${generateBytesTag(1)}$deviceNameSpacesHex"
+        )
+    }
+
+    /**
+     * DCMAW-19837: AC4: Enforce empty namespaces for DeviceSigned items
+     */
+    @Test
+    fun `DeviceSignedDto instances with namespace data throw IllegalArgumentExceptions`() {
+        val nameSpacesData = mapOf(
+            "portrait" to false,
+            "age_over_21" to false
+        )
+
+        val nameSpacesBytes = ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartObject(nameSpacesData.size)
+                nameSpacesData.forEach { (key, value) ->
+                    gen.writeBooleanField(key, value)
+                }
+                gen.writeEndObject()
+            }
+        }.toByteArray()
+
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            DeviceResponseDto.DeviceSignedDTO(
+                nameSpaces = EmbeddedCbor(nameSpacesBytes),
+                deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                    deviceSignature = byteArrayOf()
+                )
+            )
+        }
+
+        assertThat(
+            exception.message,
+            containsString(
+                "Received unexpected data in 'nameSpaces' property: $nameSpacesData"
+            )
         )
     }
 

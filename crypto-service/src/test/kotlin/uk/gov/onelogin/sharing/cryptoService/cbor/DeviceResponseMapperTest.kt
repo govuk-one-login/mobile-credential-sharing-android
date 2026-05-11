@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import java.io.ByteArrayOutputStream
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -16,14 +18,19 @@ class DeviceResponseMapperTest {
     private val docType = "org.iso.18013.5.1.mDL"
     private val namespace = "org.iso.18013.5.1"
 
+    private val nameSpacesBytes = ByteArrayOutputStream().also { out ->
+        CBORFactory().createGenerator(out).use { gen ->
+            gen.writeStartObject(0)
+            gen.writeEndObject()
+        }
+    }.toByteArray()
+
     @Test
     fun `maps DeviceResponse domain model to DTO`() {
         val issuerAuth = byteArrayOf(0x01, 0x02)
-        val nameSpacesBytes = byteArrayOf(0x03, 0x04)
         val itemBytes = byteArrayOf(0xA4.toByte(), 0x01, 0x02)
 
         val domainModel = DeviceResponse(
-            version = "1.0",
             documents = listOf(
                 Document(
                     docType = docType,
