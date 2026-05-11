@@ -43,6 +43,6 @@ class HolderConsentViewModel(
     }
 
     fun onDeny() = viewModelScope.launch(dispatcher) {
-        orchestrator.cancel()
+        orchestrator.denyConsent()
     }
 }

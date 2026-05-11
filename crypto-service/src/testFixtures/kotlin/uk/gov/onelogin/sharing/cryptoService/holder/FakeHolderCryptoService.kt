@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.holder
 
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class FakeHolderCryptoService : HolderCryptoService {
@@ -12,7 +12,6 @@ class FakeHolderCryptoService : HolderCryptoService {
     var lastErrorDeviceResponseStatus: Status? = null
     var lastErrorSessionDataStatus: SessionDataStatus? = null
 
-    var lastEncryptedDeviceResponse: DeviceResponse? = null
     var lastEncryptSkDevice: ByteArray? = null
     var lastEncryptCounter: UInt? = null
 
@@ -41,13 +40,12 @@ class FakeHolderCryptoService : HolderCryptoService {
         return byteArrayOf()
     }
 
-    override fun encryptDeviceResponse(
-        deviceResponse: DeviceResponse,
+    override fun buildDeviceResponse(
+        documents: List<Document>,
         skDevice: ByteArray,
         encryptCounter: UInt
     ): ByteArray {
         encryptException?.let { throw it }
-        lastEncryptedDeviceResponse = deviceResponse
         lastEncryptSkDevice = skDevice
         lastEncryptCounter = encryptCounter
         return encryptedToReturn
