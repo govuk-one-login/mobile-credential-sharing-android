@@ -41,7 +41,7 @@ class HolderResponseUseCaseImpl(
 
             return DeviceSigned(
                 nameSpaces = EMPTY_DEVICE_NAMESPACES,
-                deviceAuth = signatureResult.deviceAuth
+                deviceAuth = signatureResult.coseSign1Array
             )
         } catch (e: DeviceSignatureException) {
             throw DeviceSignatureException("Failed to generate device response", e)

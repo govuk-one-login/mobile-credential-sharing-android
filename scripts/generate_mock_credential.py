@@ -6,7 +6,7 @@ Requirements:
     pip install cbor2 cryptography
 
 Usage:
-    python generate_mock_credential.py --private-key app/src/main/assets/test_private_key.pem \
+    python3 generate_mock_credential.py --private-key app/src/main/assets/test_private_key.pem \
                                        --output app/src/main/res/raw/mock_credential.txt
 
 The generated credential uses the device key from the provided PEM file and creates

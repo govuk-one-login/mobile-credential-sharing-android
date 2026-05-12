@@ -39,10 +39,11 @@ class HolderResponseUseCaseImplTest {
     private val deviceAuthBytes = byteArrayOf(0x01, 0x02, 0x03)
     private val signatureBytes = byteArrayOf(0x04, 0x05, 0x06)
     private val deviceSignedBytes = byteArrayOf(0x07, 0x08)
+    private val coseSign1Bytes = byteArrayOf(0x0b, 0x0c)
     private val deviceAuthResultBytes = byteArrayOf(0x09, 0x0a)
 
     private val signatureResult = DeviceSignatureResult(
-        coseSign1Array = byteArrayOf(),
+        coseSign1Array = coseSign1Bytes,
         deviceAuth = deviceAuthResultBytes,
         deviceSigned = deviceSignedBytes
     )
@@ -85,7 +86,7 @@ class HolderResponseUseCaseImplTest {
                 deviceAuthBytes
             )
 
-            assertArrayEquals(deviceAuthResultBytes, result.deviceAuth)
+            assertArrayEquals(coseSign1Bytes, result.deviceAuth)
         }
 
     @Test

@@ -37,7 +37,7 @@ class DeviceResponseDtoTest {
     private val validDeviceSignedDto = DeviceResponseDto.DeviceSignedDTO(
         nameSpaces = EmbeddedCbor(deviceNameSpacesData),
         deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-            deviceSignature = byteArrayOf()
+            deviceSignature = RawCbor(byteArrayOf())
         )
     )
 
@@ -125,7 +125,7 @@ class DeviceResponseDtoTest {
             DeviceResponseDto.DeviceSignedDTO(
                 nameSpaces = EmbeddedCbor(nameSpacesBytes),
                 deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-                    deviceSignature = byteArrayOf()
+                    deviceSignature = RawCbor(byteArrayOf())
                 )
             )
         }
