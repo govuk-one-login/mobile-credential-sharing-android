@@ -113,22 +113,7 @@ internal suspend fun convertSessionStateToNavigation(
 
         is HolderSessionState.Complete.Failed -> {
             {
-                if ((state.sessionReason as? SessionErrorReason.UnrecoverableThrowable)
-                        ?.exception is BluetoothDisconnectedException
-                ) {
-                    navController.navigateToBluetoothConnectionErrorRoute(
-                        errorTitle(
-                            context,
-                            BluetoothSessionError.BluetoothConnectionError
-                        )
-                    )
-                } else {
-                    navController.navigateToUnrecoverableHolderError {
-                        popUpTo<HolderRoutes> {
-                            inclusive = true
-                        }
-                    }
-                }
+                handleHolderSessionFailure(state, navController, context)
             }
         }
 
@@ -140,6 +125,29 @@ internal suspend fun convertSessionStateToNavigation(
         -> {
             {
                 // do nothing with unrelated / unimplemented states
+            }
+        }
+    }
+}
+
+private fun handleHolderSessionFailure(
+    state: HolderSessionState.Complete.Failed,
+    navController: NavHostController,
+    context: Context
+) {
+    if ((state.sessionReason as? SessionErrorReason.UnrecoverableThrowable)
+            ?.exception is BluetoothDisconnectedException
+    ) {
+        navController.navigateToBluetoothConnectionErrorRoute(
+            errorTitle(
+                context,
+                BluetoothSessionError.BluetoothConnectionError
+            )
+        )
+    } else {
+        navController.navigateToUnrecoverableHolderError {
+            popUpTo<HolderRoutes> {
+                inclusive = true
             }
         }
     }
