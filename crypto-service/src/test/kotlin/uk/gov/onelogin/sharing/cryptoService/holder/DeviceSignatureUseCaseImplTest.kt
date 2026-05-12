@@ -127,6 +127,28 @@ class DeviceSignatureUseCaseImplTest {
     }
 
     @Test
+    fun `buildCoseSignStructure produces a valid COSE Sig_structure`() {
+        val payload = byteArrayOf(0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte())
+
+        val result = deviceSignatureUseCase.buildCoseSignStructure(payload)
+        val tree: JsonNode = cborMapper.readTree(result)
+
+        assertTrue(tree.isArray)
+        assertEquals(4, tree.size())
+        assertEquals("Signature1", tree[0].textValue())
+        // protected header: bstr containing {1: -7}
+        val protectedHeader = cborMapper.readTree(tree[1].binaryValue())
+        assertEquals(
+            ES256_ALG_VALUE,
+            protectedHeader[ES256_ALG_LABEL.toString()].intValue()
+        )
+        // external_aad: empty bstr
+        assertEquals(0, tree[2].binaryValue().size)
+        // payload
+        assertTrue(tree[3].binaryValue().contentEquals(payload))
+    }
+
+    @Test
     fun `all result fields are non-empty`() {
         assertTrue(result.coseSign1Array.isNotEmpty())
         assertTrue(result.deviceAuth.isNotEmpty())

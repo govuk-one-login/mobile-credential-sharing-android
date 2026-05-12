@@ -6,7 +6,7 @@ Requirements:
     pip install cbor2 cryptography
 
 Usage:
-    python3 generate_mock_credential.py --private-key app/src/main/assets/test_private_key.pem \
+    python3 scripts/generate_mock_credential.py --private-key app/src/main/assets/test_private_key.pem \
                                        --output app/src/main/res/raw/mock_credential.txt
 
 The generated credential uses the device key from the provided PEM file and creates
@@ -134,13 +134,13 @@ def main():
     mso_tagged = cbor2.dumps(cbor2.CBORTag(24, mso_bytes))
 
     # Sign (COSE_Sign1)
-    protected_header = cbor2.dumps({1: -7})
-    sig_structure = cbor2.dumps(["Signature1", protected_header, b"", mso_tagged])
+    body_protected = cbor2.dumps({1: -7})
+    sig_structure = cbor2.dumps(["Signature1", body_protected, b"", mso_tagged])
     signature_der = issuer_private_key.sign(sig_structure, ec.ECDSA(hashes.SHA256()))
     r, s = decode_dss_signature(signature_der)
     signature = r.to_bytes(32, "big") + s.to_bytes(32, "big")
 
-    issuer_auth = [protected_header, {33: cert_der}, mso_tagged, signature]
+    issuer_auth = [body_protected, {33: cert_der}, mso_tagged, signature]
 
     # Assemble credential (flat format)
     credential = {"nameSpaces": namespaces, "issuerAuth": issuer_auth}

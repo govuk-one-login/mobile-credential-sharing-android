@@ -47,7 +47,7 @@ class DeviceSignatureUseCaseImpl(private val logger: Logger) : DeviceSignatureUs
             CBORFactory().createGenerator(output).use { gen ->
                 gen.writeStartArray(null, COSE_SIGN1_ARRAY_SIZE)
                 gen.writeString("Signature1")
-                gen.writeBinary(createProtectedHeader())
+                gen.writeBinary(createBodyProtected())
                 gen.writeBinary(ByteArray(0))
                 gen.writeBinary(payload)
                 gen.writeEndArray()
@@ -58,7 +58,7 @@ class DeviceSignatureUseCaseImpl(private val logger: Logger) : DeviceSignatureUs
         ByteArrayOutputStream().also { output ->
             CBORFactory().createGenerator(output).use { gen ->
                 gen.writeStartArray(null, COSE_SIGN1_ARRAY_SIZE)
-                gen.writeBinary(createProtectedHeader())
+                gen.writeBinary(createBodyProtected())
                 gen.writeStartObject(0)
                 gen.writeEndObject()
                 gen.writeNull()
@@ -67,7 +67,7 @@ class DeviceSignatureUseCaseImpl(private val logger: Logger) : DeviceSignatureUs
             }
         }.toByteArray()
 
-    private fun createProtectedHeader(): ByteArray = ByteArrayOutputStream().also { output ->
+    private fun createBodyProtected(): ByteArray = ByteArrayOutputStream().also { output ->
         CBORFactory().createGenerator(output).use { gen ->
             gen.writeStartObject(1)
             gen.writeFieldId(1)

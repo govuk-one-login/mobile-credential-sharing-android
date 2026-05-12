@@ -38,22 +38,24 @@ class RawCredentialParserImpl : RawCredentialParser {
     /**
      * Extracts the raw CBOR bytes of the issuerAuth field from the credential.
      *
-     * There is an issue with the Jackson library converting integers to strings
-     * which then causes a mismatch on the verifier
+     * Jackson library converts CBOR integer map keys to strings which produces
+     * invalid COSE headers and breaks signature verification on the verifier.
+     *
+     * This uses the parser to locate the field by byte offset and extract the
+     * original bytes without re-encoding.
      *
      */
-    @Suppress("NestedBlockDepth")
     private fun extractIssuerAuthRawBytes(cborData: ByteArray): ByteArray {
         val factory = CBORFactory()
         val parser = factory.createParser(cborData) as CBORParser
         parser.use { p ->
-            p.nextToken() // START_OBJECT (top-level map)
+            p.nextToken()
             while (p.nextToken() != null && p.currentToken() != JsonToken.END_OBJECT) {
                 val name = p.currentName() ?: run {
                     p.skipChildren()
                     continue
                 }
-                p.nextToken() // move to value
+                p.nextToken()
 
                 if (name == KEY_ISSUER_AUTH) {
                     return extractCurrentValueBytes(p, cborData)

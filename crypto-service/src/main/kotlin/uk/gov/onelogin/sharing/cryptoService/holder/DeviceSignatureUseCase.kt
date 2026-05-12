@@ -13,8 +13,12 @@ interface DeviceSignatureUseCase {
     fun buildDeviceSignedStructures(signatureBytes: ByteArray): DeviceSignatureResult
 
     /**
-     * Builds the COSE Sig_structure for COSE_Sign1 per RFC 9052 §4.4:
-     * `["Signature1", protectedHeaders, external_aad, payload]`
+     * Builds the COSE Sig_structure for COSE_Sign1 per RFC 9052 4.4:
+     * https://www.rfc-editor.org/rfc/rfc9052#name-signing-and-verification-pr
+     *
+     * `["Signature1", body_protected, external_aad, payload]`
+     *
+     * Note: `body_protected` can also be referred to as `protected_header` (outdated RFC 8152)
      *
      * @param payload The DeviceAuthentication bytes to be signed
      * @return The serialized CBOR Sig_structure
