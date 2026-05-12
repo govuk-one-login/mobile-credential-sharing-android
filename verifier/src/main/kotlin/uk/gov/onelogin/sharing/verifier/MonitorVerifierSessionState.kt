@@ -122,6 +122,8 @@ internal suspend fun convertSessionStateToNavigation(
                         }
                     }
 
+                    is SessionErrorReason.CannotEncryptDeviceRequest,
+                    is SessionErrorReason.MissingCryptoContext,
                     is SessionErrorReason.CannotProcessEngagement,
                     is SessionErrorReason.UnrecoverableThrowable,
                     is SessionErrorReason.UnrecoverablePrerequisite

@@ -38,7 +38,6 @@ import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
-import uk.gov.onelogin.sharing.orchestration.verifier.credential.FakeDeviceRequestHandler
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
@@ -92,8 +91,6 @@ class VerifierOrchestratorTest {
 
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
 
-    private val fakeDeviceRequestHandler = FakeDeviceRequestHandler()
-
     private val orchestrator by lazy {
         VerifierOrchestrator(
             logger = logger,
@@ -103,8 +100,7 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService,
-            deviceRequestHandler = fakeDeviceRequestHandler
+            verifierCryptoService = verifierCryptoService
         )
     }
 
@@ -451,18 +447,16 @@ class VerifierOrchestratorTest {
             orchestrator.processQrCode(VALID_MDOC_URI)
             centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
-            assertEquals(1u, fakeDeviceRequestHandler.lastEncryptCounter)
+            assertEquals(1u, fakeCryptoService.lastEncryptCounter)
             val context = sessionFactory.getCurrentSession().cryptoContext
             assertEquals(2u, context?.encryptCounter)
         }
 
     @Test
     fun `encryption failure transitions to Failed and stops BLE`() = runTest {
-        val failingHandler = FakeDeviceRequestHandler(
-            exceptionToThrow = EncryptDeviceRequestException(
-                "Error encrypting DeviceRequest",
-                RuntimeException("AES failure")
-            )
+        fakeCryptoService.buildAndEncryptException = EncryptDeviceRequestException(
+            "Error encrypting DeviceRequest",
+            RuntimeException("AES failure")
         )
         val orchestrator = VerifierOrchestrator(
             logger = logger,
@@ -472,8 +466,7 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService,
-            deviceRequestHandler = failingHandler
+            verifierCryptoService = fakeCryptoService
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)
@@ -485,11 +478,9 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `counter is not incremented when encryption fails`() = runTest {
-        val failingHandler = FakeDeviceRequestHandler(
-            exceptionToThrow = EncryptDeviceRequestException(
-                "Error encrypting DeviceRequest",
-                RuntimeException("AES failure")
-            )
+        fakeCryptoService.buildAndEncryptException = EncryptDeviceRequestException(
+            "Error encrypting DeviceRequest",
+            RuntimeException("AES failure")
         )
         val orchestrator = VerifierOrchestrator(
             logger = logger,
@@ -499,8 +490,7 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService,
-            deviceRequestHandler = failingHandler
+            verifierCryptoService = fakeCryptoService
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)

@@ -20,7 +20,6 @@ import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
-import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
@@ -39,7 +38,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
-import uk.gov.onelogin.sharing.orchestration.verifier.credential.DeviceRequestHandler
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
@@ -50,13 +49,11 @@ class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,
     private val sessionFactory: SessionFactory<VerifierSession>,
-    @Suppress("UnusedPrivateProperty")
     private val verifierConfig: VerifierConfig,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val barcodeParser: QrParser,
     private val centralBluetoothTransport: CentralBluetoothTransport,
-    private val verifierCryptoService: VerifierCryptoService,
-    private val deviceRequestHandler: DeviceRequestHandler
+    private val verifierCryptoService: VerifierCryptoService
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -267,26 +264,32 @@ class VerifierOrchestrator(
     private fun handleConnectionStateStarted() {
         val context = sessionFlow.value.cryptoContext ?: return failWith(
             "Missing crypto context when building DeviceRequest",
-            IllegalStateException("Missing crypto context when building DeviceRequest")
+            SessionErrorReason.MissingCryptoContext
         )
 
-        val encryptedDeviceRequest = try {
-            deviceRequestHandler.buildAndEncrypt(
+        val itemsRequest = verifierConfig.verificationRequest.attributeGroup
+            .toItemsRequest(verifierConfig.verificationRequest.documentType)
+        val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
+
+        runCatching {
+            verifierCryptoService.encryptDeviceRequest(
+                deviceRequestBytes = deviceRequestBytes,
                 skReader = context.skReader,
                 encryptCounter = context.encryptCounter
             )
-        } catch (e: EncryptDeviceRequestException) {
-            failWith(e.message ?: "Error encrypting DeviceRequest", e)
-            return
-        }
-
-        sessionFlow.value.updateCryptoContext {
-            context.copy(
-                encryptCounter =
-                    context.encryptCounter + 1u
+        }.onFailure { e ->
+            failWith(
+                e.message ?: "Error encrypting DeviceRequest",
+                SessionErrorReason.CannotEncryptDeviceRequest
             )
+        }.onSuccess { encryptedDeviceRequest ->
+            sessionFlow.value.updateCryptoContext {
+                context.copy(
+                    encryptCounter = context.encryptCounter + 1u
+                )
+            }
+            logger.debug(logTag, "Encrypted DeviceRequest: ${encryptedDeviceRequest.toHexString()}")
         }
-        logger.debug(logTag, "Encrypted DeviceRequest: ${encryptedDeviceRequest.toHexString()}")
     }
 
     private fun failWith(message: String, exception: Throwable) {

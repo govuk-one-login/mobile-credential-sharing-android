@@ -9,7 +9,7 @@ class FakeEncryptDeviceRequestUseCase(
     var lastSkReader: ByteArray? = null
     var lastEncryptCounter: UInt? = null
 
-    override fun encrypt(
+    override operator fun invoke(
         deviceRequestBytes: ByteArray,
         skReader: ByteArray,
         encryptCounter: UInt

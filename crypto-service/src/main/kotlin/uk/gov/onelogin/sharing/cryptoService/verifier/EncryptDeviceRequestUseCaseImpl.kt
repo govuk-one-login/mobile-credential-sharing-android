@@ -17,7 +17,7 @@ class EncryptDeviceRequestUseCaseImpl(
     private val logger: Logger
 ) : EncryptDeviceRequestUseCase {
 
-    override fun encrypt(
+    override operator fun invoke(
         deviceRequestBytes: ByteArray,
         skReader: ByteArray,
         encryptCounter: UInt

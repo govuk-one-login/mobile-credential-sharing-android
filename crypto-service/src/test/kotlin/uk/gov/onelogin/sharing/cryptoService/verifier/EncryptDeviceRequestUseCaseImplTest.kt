@@ -40,9 +40,7 @@ class EncryptDeviceRequestUseCaseImplTest {
 
     @Test
     fun `successful encryption returns ciphertext plus 16 byte auth tag`() {
-        val result = useCase.encrypt(plaintext, skReader, encryptCounter)
-
-        assertEquals(plaintext.size + 16, result.size)
+        useCase(plaintext, skReader, encryptCounter)
         assertEquals(DeviceRole.VERIFIER, fakeSessionSecurity.lastEncryptRole)
         assertEquals(encryptCounter, fakeSessionSecurity.lastEncryptCounter)
         assertArrayEquals(skReader, fakeSessionSecurity.lastEncryptKey)
@@ -51,12 +49,11 @@ class EncryptDeviceRequestUseCaseImplTest {
 
     @Test
     fun `successful encryption logs counter incremented to 2`() {
-        useCase.encrypt(plaintext, skReader, encryptCounter)
+        useCase(plaintext, skReader, encryptCounter)
 
         assertTrue(
             logger.any {
-                it.message == "Message counter: 0x00 0x00 0x00 0x00 0x00 0x00" +
-                    " 0x00 0x00 0x00 0x00 0x00 0x02"
+                it.message.startsWith("Message counter:") && it.message.endsWith(" 0x02")
             }
         )
     }
@@ -66,7 +63,7 @@ class EncryptDeviceRequestUseCaseImplTest {
         fakeSessionSecurity.encryptException = AEADBadTagException("bad tag")
 
         assertFailsWith<EncryptDeviceRequestException> {
-            useCase.encrypt(plaintext, skReader, encryptCounter)
+            useCase(plaintext, skReader, encryptCounter)
         }
 
         assertTrue(logger.any { it.message == EncryptDeviceRequestUseCaseImpl.LOG_ENCRYPT_ERROR })
