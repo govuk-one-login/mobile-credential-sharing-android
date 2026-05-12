@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration
 
+import androidx.annotation.Keep
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
@@ -42,6 +43,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
+@Keep
 @Suppress("LongParameterList", "TooManyFunctions")
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 @SingleIn(AppScope::class)
