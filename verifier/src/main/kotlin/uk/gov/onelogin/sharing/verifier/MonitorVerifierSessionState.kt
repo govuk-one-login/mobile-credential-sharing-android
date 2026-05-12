@@ -84,13 +84,21 @@ internal suspend fun convertSessionStateToNavigation(
     when (state) {
         VerifierSessionState.NotStarted -> {
             {
-                navController.navigateToVerifierPrerequisitesScreen()
+                navController.navigateToVerifierPrerequisitesScreen {
+                    popUpTo<VerifierRoutes> {
+                        inclusive = true
+                    }
+                }
             }
         }
 
         is VerifierSessionState.Preflight -> {
             {
-                navController.navigateToRetryVerifierPrerequisites()
+                navController.navigateToRetryVerifierPrerequisites {
+                    popUpTo<VerifierRoutes> {
+                        inclusive = true
+                    }
+                }
             }
         }
 
@@ -112,26 +120,7 @@ internal suspend fun convertSessionStateToNavigation(
 
         is VerifierSessionState.Complete.Failed -> {
             {
-                when (val sessionErrorReason = state.error.reason) {
-                    is SessionErrorReason.UnsupportedQrCodeFormat ->
-                        navController.navigateToScannedInvalidQrRoute(sessionErrorReason.rawValue)
-
-                    SessionErrorReason.ServiceUuidNotFound -> {
-                        errorTitle(context, BluetoothSessionError.BluetoothConnectionError).let {
-                            navController.navigateToBluetoothConnectionErrorRoute(title = it)
-                        }
-                    }
-
-                    is SessionErrorReason.CannotProcessEngagement,
-                    is SessionErrorReason.UnrecoverableThrowable,
-                    is SessionErrorReason.UnrecoverablePrerequisite
-                    ->
-                        navController.navigateToUnrecoverableVerifierError {
-                            popUpTo<VerifierRoutes> {
-                                inclusive = true
-                            }
-                        }
-                }
+                handleSessionFailure(state, navController, context)
             }
         }
 
@@ -142,5 +131,32 @@ internal suspend fun convertSessionStateToNavigation(
         -> {
             {}
         }
+    }
+}
+
+private fun handleSessionFailure(
+    state: VerifierSessionState.Complete.Failed,
+    navController: NavHostController,
+    context: Context
+) {
+    when (val sessionErrorReason = state.error.reason) {
+        is SessionErrorReason.UnsupportedQrCodeFormat ->
+            navController.navigateToScannedInvalidQrRoute(sessionErrorReason.rawValue)
+
+        SessionErrorReason.ServiceUuidNotFound -> {
+            errorTitle(context, BluetoothSessionError.BluetoothConnectionError).let {
+                navController.navigateToBluetoothConnectionErrorRoute(title = it)
+            }
+        }
+
+        is SessionErrorReason.CannotProcessEngagement,
+        is SessionErrorReason.UnrecoverableThrowable,
+        is SessionErrorReason.UnrecoverablePrerequisite
+        ->
+            navController.navigateToUnrecoverableVerifierError {
+                popUpTo<VerifierRoutes> {
+                    inclusive = true
+                }
+            }
     }
 }
