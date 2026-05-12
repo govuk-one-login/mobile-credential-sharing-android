@@ -12,8 +12,6 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializ
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.CoseKeySerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceEngagementSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceRetrievalMethodSerializer
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SecuritySerializer
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_TYPE
@@ -29,7 +27,6 @@ object DeviceEngagementStub {
         DeviceRetrievalMethod::class.java to DeviceRetrievalMethodSerializer(),
         BleOptions::class.java to BleOptionsSerializer(),
         Security::class.java to SecuritySerializer(),
-        EmbeddedCbor::class.java to EmbeddedCborSerializer(),
         CoseKey::class.java to CoseKeySerializer()
     )
 

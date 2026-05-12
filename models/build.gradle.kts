@@ -6,7 +6,8 @@ plugins {
 
 dependencies {
     listOf(
-        libs.junit
+        libs.junit,
+        libs.com.google.test.parameter.injector
     ).forEach(::testImplementation)
 }
 
