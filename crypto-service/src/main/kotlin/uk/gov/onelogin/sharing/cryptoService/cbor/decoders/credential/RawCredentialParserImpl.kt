@@ -1,11 +1,11 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential
 
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
-import com.fasterxml.jackson.core.JsonToken
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 
@@ -49,7 +49,10 @@ class RawCredentialParserImpl : RawCredentialParser {
         parser.use { p ->
             p.nextToken() // START_OBJECT (top-level map)
             while (p.nextToken() != null && p.currentToken() != JsonToken.END_OBJECT) {
-                val name = p.currentName() ?: run { p.skipChildren(); continue }
+                val name = p.currentName() ?: run {
+                    p.skipChildren()
+                    continue
+                }
                 p.nextToken() // move to value
 
                 if (name == KEY_ISSUER_AUTH) {

@@ -48,25 +48,24 @@ class HolderResponseUseCaseImplTest {
     )
 
     @Test
-    fun `generateDeviceResponse returns DeviceSigned with empty CBOR map nameSpaces`() =
-        runTest {
-            coEvery {
-                credentialProvider.sign(
-                    any(),
-                    validatedCredential.credentialId
-                )
-            } returns signatureBytes
-            coEvery {
-                deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
-            } returns signatureResult
-
-            val result = useCase.generateDeviceResponse(
-                validatedCredential,
-                deviceAuthBytes
+    fun `generateDeviceResponse returns DeviceSigned with empty CBOR map nameSpaces`() = runTest {
+        coEvery {
+            credentialProvider.sign(
+                any(),
+                validatedCredential.credentialId
             )
+        } returns signatureBytes
+        coEvery {
+            deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
+        } returns signatureResult
 
-            assertArrayEquals(byteArrayOf(0xA0.toByte()), result.nameSpaces)
-        }
+        val result = useCase.generateDeviceResponse(
+            validatedCredential,
+            deviceAuthBytes
+        )
+
+        assertArrayEquals(byteArrayOf(0xA0.toByte()), result.nameSpaces)
+    }
 
     @Test
     fun `generateDeviceResponse returns DeviceSigned with deviceAuth from signatureResult`() =

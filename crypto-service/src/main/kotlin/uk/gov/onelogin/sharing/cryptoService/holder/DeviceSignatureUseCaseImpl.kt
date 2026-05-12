@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.holder
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -12,12 +11,14 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
 
-private const val CBOR_TAG_COSE_SIGN1 = 18
 private const val COSE_SIGN1_ARRAY_SIZE = 4
 private const val ES256_ALGORITHM = -7
 private const val CBOR_MAP_MAJOR_TYPE = 0xa0
 private const val CBOR_TEXT_MAJOR_TYPE = 0x60
 private const val P256_COORDINATE_SIZE = 32
+private const val DER_SEQUENCE_TAG = 0x30
+private const val DER_INTEGER_TAG = 0x02
+private const val BYTE_MASK = 0xFF
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<DeviceSignatureUseCase>())
@@ -104,18 +105,18 @@ class DeviceSignatureUseCaseImpl(private val logger: Logger) : DeviceSignatureUs
      */
     private fun derSignatureToRaw(derSignature: ByteArray): ByteArray {
         // DER: 0x30 <len> 0x02 <rLen> <r> 0x02 <sLen> <s>
-        require(derSignature[0].toInt() == 0x30) { "Not a DER signature" }
+        require(derSignature[0].toInt() == DER_SEQUENCE_TAG) { "Not a DER signature" }
         var offset = 2 // skip SEQUENCE tag and length byte
 
-        require(derSignature[offset].toInt() == 0x02) { "Expected INTEGER tag for r" }
+        require(derSignature[offset].toInt() == DER_INTEGER_TAG) { "Expected INTEGER tag for r" }
         offset++
-        val rLen = derSignature[offset++].toInt() and 0xFF
+        val rLen = derSignature[offset++].toInt() and BYTE_MASK
         val r = BigInteger(1, derSignature.copyOfRange(offset, offset + rLen))
         offset += rLen
 
-        require(derSignature[offset].toInt() == 0x02) { "Expected INTEGER tag for s" }
+        require(derSignature[offset].toInt() == DER_INTEGER_TAG) { "Expected INTEGER tag for s" }
         offset++
-        val sLen = derSignature[offset++].toInt() and 0xFF
+        val sLen = derSignature[offset++].toInt() and BYTE_MASK
         val s = BigInteger(1, derSignature.copyOfRange(offset, offset + sLen))
 
         return r.toFixedByteArray(P256_COORDINATE_SIZE) +
