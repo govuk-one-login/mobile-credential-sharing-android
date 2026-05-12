@@ -16,13 +16,9 @@ class RawCredentialParserImpl : RawCredentialParser {
         val cborMapper = ObjectMapper(CBORFactory())
         val root = cborMapper.readTree(rawCredential)
 
-        // Support both flat {nameSpaces, issuerAuth} and full Document
-        // {docType, issuerSigned: {nameSpaces, issuerAuth}} structures
-        val issuerSignedNode = root.get(KEY_ISSUER_SIGNED) ?: root
-
-        val nameSpacesNode = issuerSignedNode.get(KEY_NAME_SPACES)
+        val nameSpacesNode = root.get(KEY_NAME_SPACES)
             ?: throw RawCredentialParsingException(ERROR_MISSING_NAMESPACES)
-        val issuerAuthNode = issuerSignedNode.get(KEY_ISSUER_AUTH) as? ArrayNode
+        val issuerAuthNode = root.get(KEY_ISSUER_AUTH) as? ArrayNode
             ?: throw RawCredentialParsingException(ERROR_MISSING_ISSUER_AUTH)
 
         val msoDocType = extractMsoDocType(cborMapper, issuerAuthNode)
@@ -64,17 +60,6 @@ class RawCredentialParserImpl : RawCredentialParser {
                 if (name == KEY_ISSUER_AUTH) {
                     return extractCurrentValueBytes(p, cborData)
                 }
-                if (name == KEY_ISSUER_SIGNED) {
-                    // Navigate into issuerSigned
-                    while (p.nextToken() != null && p.currentToken() != JsonToken.END_OBJECT) {
-                        val innerName = p.currentName() ?: run { p.skipChildren(); continue }
-                        p.nextToken()
-                        if (innerName == KEY_ISSUER_AUTH) {
-                            return extractCurrentValueBytes(p, cborData)
-                        }
-                        p.skipChildren()
-                    }
-                }
                 p.skipChildren()
             }
         }
@@ -107,7 +92,6 @@ class RawCredentialParserImpl : RawCredentialParser {
     }
 
     private companion object {
-        const val KEY_ISSUER_SIGNED = "issuerSigned"
         const val KEY_NAME_SPACES = "nameSpaces"
         const val KEY_ISSUER_AUTH = "issuerAuth"
         const val KEY_DOC_TYPE = "docType"
