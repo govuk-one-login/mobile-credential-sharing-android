@@ -28,6 +28,14 @@ sealed class SessionErrorReason {
     }
 
     /**
+     * State for when the app cannot establish a secure session due to missing
+     * cryptographic context.
+     */
+    data object MissingCryptoContext : SessionErrorReason()
+
+    data object CannotEncryptDeviceRequest : SessionErrorReason()
+
+    /**
      * State for when the app cannot process the provided QR code.
      *
      * @see uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult.Invalid

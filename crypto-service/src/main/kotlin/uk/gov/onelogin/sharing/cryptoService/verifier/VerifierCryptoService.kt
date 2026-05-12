@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 /**
  * Handles cryptographic operations for the Verifier role.
@@ -9,24 +10,29 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDeriva
  * 1. [establishSession] — Decodes the QR code, generates ephemeral keys,
  *    calculates the Session Transcript, computes the shared secret, and derives
  *    the SKReader and SKDevice session keys.
+ * 2. [encryptDeviceRequest] — Encrypts pre-built DeviceRequest CBOR bytes
+ *    using the SKReader session key.
  */
-fun interface VerifierCryptoService {
-    /**
-     * Processes the scanned Device Engagement data: generates the Verifier's
-     * ephemeral key pair, constructs the SessionTranscriptBytes, computes the
-     * shared secret (ZAB), and derives the session keys.
-     *
-     * @param qrCodeData The base64url-encoded Device Engagement string
-     *   (with the `mdoc:` prefix already stripped).
-     * @param updateContext Callback to decorate the session's crypto context.
-     * @throws IllegalArgumentException if [qrCodeData] is blank.
-     * @throws IllegalStateException if key pair generation fails.
-     * @throws SharedSecretException.IncompatibleCurve if EDeviceKey.Pub is not on P-256.
-     * @throws SharedSecretException.MalformedKey if EDeviceKey.Pub is malformed.
-     * @throws SessionKeyDerivationException if either session key derivation fails.
-     */
+interface VerifierCryptoService {
     fun establishSession(
         qrCodeData: String,
         updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
     )
+
+    /**
+     * Encrypts [deviceRequestBytes] using AES-256-GCM with the [skReader] session key.
+     *
+     * @throws EncryptDeviceRequestException if encryption fails.
+     */
+    @Throws(EncryptDeviceRequestException::class)
+    fun encryptDeviceRequest(
+        deviceRequestBytes: ByteArray,
+        skReader: ByteArray,
+        encryptCounter: UInt
+    ): ByteArray
+
+    /**
+     * Constructs a [DeviceRequest] from the [itemsRequest] and encodes it to CBOR bytes.
+     */
+    fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray
 }

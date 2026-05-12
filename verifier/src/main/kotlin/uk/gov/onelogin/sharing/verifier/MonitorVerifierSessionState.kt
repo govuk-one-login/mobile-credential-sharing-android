@@ -149,6 +149,8 @@ private fun handleSessionFailure(
             }
         }
 
+        is SessionErrorReason.CannotEncryptDeviceRequest,
+        is SessionErrorReason.MissingCryptoContext,
         is SessionErrorReason.CannotProcessEngagement,
         is SessionErrorReason.UnrecoverableThrowable,
         is SessionErrorReason.UnrecoverablePrerequisite

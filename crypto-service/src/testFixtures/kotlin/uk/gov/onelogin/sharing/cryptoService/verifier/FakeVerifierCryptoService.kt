@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
 import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 class FakeVerifierCryptoService : VerifierCryptoService {
     var establishSessionCallCount = 0
@@ -12,6 +13,11 @@ class FakeVerifierCryptoService : VerifierCryptoService {
     var exceptionToThrow: Exception? = null
     var sessionKeysToReturn: Pair<ByteArray, ByteArray> =
         Pair(ByteArray(32), ByteArray(32))
+    var buildAndEncryptToReturn: ByteArray = byteArrayOf(0x01, 0x02)
+    var buildAndEncryptException: EncryptDeviceRequestException? = null
+    var lastDeviceRequestBytes: ByteArray? = null
+    var lastSkReader: ByteArray? = null
+    var lastEncryptCounter: UInt? = null
 
     override fun establishSession(
         qrCodeData: String,
@@ -32,5 +38,19 @@ class FakeVerifierCryptoService : VerifierCryptoService {
                 skDevice = sessionKeysToReturn.second
             )
         }.establishSession(qrCodeData, updateContext)
+    }
+
+    override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = byteArrayOf(0x01, 0x02)
+
+    override fun encryptDeviceRequest(
+        deviceRequestBytes: ByteArray,
+        skReader: ByteArray,
+        encryptCounter: UInt
+    ): ByteArray {
+        lastDeviceRequestBytes = deviceRequestBytes
+        lastSkReader = skReader
+        lastEncryptCounter = encryptCounter
+        buildAndEncryptException?.let { throw it }
+        return buildAndEncryptToReturn
     }
 }

@@ -19,12 +19,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -54,7 +51,6 @@ class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,
     private val sessionFactory: SessionFactory<VerifierSession>,
-    @Suppress("UnusedPrivateProperty")
     private val verifierConfig: VerifierConfig,
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val barcodeParser: QrParser,
@@ -103,18 +99,6 @@ class VerifierOrchestrator(
             return
         }
 
-        // The below could be moved in to a usecase when we need to form the device request
-        logger.debug(logTag, "AttributeGroup: ${verifierConfig.verificationRequest.attributeGroup}")
-        val itemsRequest = verifierConfig.verificationRequest.attributeGroup
-            .toItemsRequest(verifierConfig.verificationRequest.documentType)
-        logger.debug(logTag, "ItemsRequest: $itemsRequest")
-
-        val deviceRequest = DeviceRequest(
-            version = "1.0",
-            docRequests = listOf(DocRequest(itemsRequest))
-        )
-        val deviceRequestBytes = deviceRequest.encodeCbor()
-        logger.debug(logTag, "DeviceRequest bytes: ${deviceRequestBytes.toHexString()}")
         performPreflightChecks()
     }
 
@@ -248,6 +232,8 @@ class VerifierOrchestrator(
         logger.debug(logTag, "BLE state = $state")
 
         when (state) {
+            is CentralBluetoothState.ConnectionStateStarted -> handleConnectionStateStarted()
+
             is CentralBluetoothState.Disconnected -> {
                 if (state.isSessionEnd) return
 
@@ -274,6 +260,37 @@ class VerifierOrchestrator(
             }
 
             else -> Unit
+        }
+    }
+
+    private fun handleConnectionStateStarted() {
+        val context = sessionFlow.value.cryptoContext ?: return failWith(
+            "Missing crypto context when building DeviceRequest",
+            SessionErrorReason.MissingCryptoContext
+        )
+
+        val itemsRequest = verifierConfig.verificationRequest.attributeGroup
+            .toItemsRequest(verifierConfig.verificationRequest.documentType)
+        val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
+
+        runCatching {
+            verifierCryptoService.encryptDeviceRequest(
+                deviceRequestBytes = deviceRequestBytes,
+                skReader = context.skReader,
+                encryptCounter = context.encryptCounter
+            )
+        }.onFailure { e ->
+            failWith(
+                e.message ?: "Error encrypting DeviceRequest",
+                SessionErrorReason.CannotEncryptDeviceRequest
+            )
+        }.onSuccess { encryptedDeviceRequest ->
+            sessionFlow.value.updateCryptoContext {
+                context.copy(
+                    encryptCounter = context.encryptCounter + 1u
+                )
+            }
+            logger.debug(logTag, "Encrypted DeviceRequest: ${encryptedDeviceRequest.toHexString()}")
         }
     }
 
