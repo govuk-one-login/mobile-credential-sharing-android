@@ -84,13 +84,21 @@ internal suspend fun convertSessionStateToNavigation(
     when (state) {
         VerifierSessionState.NotStarted -> {
             {
-                navController.navigateToVerifierPrerequisitesScreen()
+                navController.navigateToVerifierPrerequisitesScreen {
+                    popUpTo<VerifierRoutes> {
+                        inclusive = true
+                    }
+                }
             }
         }
 
         is VerifierSessionState.Preflight -> {
             {
-                navController.navigateToRetryVerifierPrerequisites()
+                navController.navigateToRetryVerifierPrerequisites {
+                    popUpTo<VerifierRoutes> {
+                        inclusive = true
+                    }
+                }
             }
         }
 

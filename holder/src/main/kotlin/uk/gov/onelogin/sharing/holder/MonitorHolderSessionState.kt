@@ -77,13 +77,21 @@ internal suspend fun convertSessionStateToNavigation(
     when (state) {
         HolderSessionState.NotStarted -> {
             {
-                navController.navigateToHolderPrerequisitesScreen()
+                navController.navigateToHolderPrerequisitesScreen {
+                    popUpTo<HolderRoutes> {
+                        inclusive = true
+                    }
+                }
             }
         }
 
         is HolderSessionState.Preflight -> {
             {
-                navController.navigateToRetryHolderPrerequisites()
+                navController.navigateToRetryHolderPrerequisites {
+                    popUpTo<HolderRoutes> {
+                        inclusive = true
+                    }
+                }
             }
         }
 
