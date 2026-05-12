@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration
 
+import androidx.annotation.Keep
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
@@ -30,8 +31,6 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
@@ -57,6 +56,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 
+@Keep
 @Suppress("LongParameterList", "TooManyFunctions")
 @SingleIn(AppScope::class)
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
@@ -68,7 +68,6 @@ class HolderOrchestrator(
     private val decryptDeviceRequestUseCase: DecryptDeviceRequestUseCase,
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
-    @Suppress("UnusedPrivateProperty")
     private val confirmConsentUseCase: ConfirmConsentUseCase,
     private val credentialRequestHandler: CredentialRequestHandler
 ) : Orchestrator.Holder {
@@ -185,6 +184,7 @@ class HolderOrchestrator(
 
     override fun confirmConsent() {
         val state = holderSessionState.value
+        val context = currentContext
         try {
             assert(state is HolderSessionState.AwaitingUserConsent) {
                 "confirmConsent called in an invalid state: $state"
@@ -192,24 +192,81 @@ class HolderOrchestrator(
             check(state is HolderSessionState.AwaitingUserConsent)
             safeTransitionTo(HolderSessionState.ProcessingResponse)
 
-            val sessionTranscript = checkNotNull(currentContext.sessionTranscriptBytes) {
+            val sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
                 "Missing session transcript"
             }
-            val validatedCredential = checkNotNull(currentContext.validatedCredential) {
+            val validatedCredential = checkNotNull(context.validatedCredential) {
                 "Missing validated credential"
+            }
+            val filteredIssuerSigned = checkNotNull(context.filteredIssuerSigned) {
+                "Missing filtered issuer signed"
+            }
+
+            val skDevice = checkNotNull(context.skDevice) {
+                "Missing skDevice"
             }
 
             appCoroutineScope.launch {
                 try {
-                    confirmConsentUseCase.execute(
+                    val document = confirmConsentUseCase.execute(
                         sessionTranscript = sessionTranscript,
                         deviceRequest = state.request,
-                        validatedCredential = validatedCredential
+                        validatedCredential = validatedCredential,
+                        filteredIssuerSigned = filteredIssuerSigned
                     )
+
+                    val sessionDataBytes = holderCryptoService.buildDeviceResponse(
+                        documents = listOf(document),
+                        skDevice = skDevice,
+                        encryptCounter = context.encryptCounter
+                    )
+
+                    peripheralBluetoothTransport.sendMessage(
+                        serviceUuid = context.sessionUuid,
+                        data = sessionDataBytes
+                    )
+
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(encryptCounter = it.encryptCounter + 1u)
+                    }
+
+                    safeTransitionTo(HolderSessionState.Complete.Success)
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
                 }
             }
+        } catch (e: IllegalStateException) {
+            sendTerminationAndFail(e)
+        }
+    }
+
+    override fun denyConsent() {
+        val state = holderSessionState.value
+        val context = currentContext
+        try {
+            assert(state is HolderSessionState.AwaitingUserConsent) {
+                "confirmConsent called in an invalid state: $state"
+            }
+            check(state is HolderSessionState.AwaitingUserConsent)
+            safeTransitionTo(HolderSessionState.ProcessingResponse)
+
+            val skDevice = checkNotNull(context.skDevice) {
+                "Missing skDevice"
+            }
+
+            val sessionDataBytes = holderCryptoService.buildErrorSessionData(
+                deviceResponseStatus = Status.OK,
+                sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+                skDevice = skDevice,
+                encryptCounter = context.encryptCounter
+            )
+
+            peripheralBluetoothTransport.sendMessage(
+                serviceUuid = context.sessionUuid,
+                data = sessionDataBytes
+            )
+
+            safeTransitionTo(HolderSessionState.Complete.Cancelled)
         } catch (e: IllegalStateException) {
             sendTerminationAndFail(e)
         }
@@ -247,6 +304,11 @@ class HolderOrchestrator(
     @Suppress("LongMethod")
     private fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
+
+        if (sessionFlow.value.isComplete()) {
+            logger.debug(logTag, "Session already complete, ignoring BLE state")
+            return
+        }
 
         when (state) {
             is PeripheralBluetoothState.Connected -> {
@@ -366,10 +428,16 @@ class HolderOrchestrator(
         deviceRequest: DeviceRequest
     ) {
         try {
-            val validatedCredential = credentialRequestHandler.requestAndValidate(requestedDocType)
+            val result = credentialRequestHandler.requestAndValidate(
+                requestedDocType,
+                deviceRequest
+            )
 
             sessionFlow.value.updateSessionContext {
-                it.copy(validatedCredential = validatedCredential)
+                it.copy(
+                    validatedCredential = result.validatedCredential,
+                    filteredIssuerSigned = result.filteredIssuerSigned
+                )
             }
 
             logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)
@@ -379,7 +447,7 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleNoMatchTermination(exception: CredentialRequestException) {
+    private fun handleNoMatchTermination(exception: Exception) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         val context = currentContext
         val skDevice = context.skDevice
@@ -401,33 +469,6 @@ class HolderOrchestrator(
                 )
             )
         )
-    }
-
-    fun assembleAndEncryptResponse(documents: List<Document>): ByteArray {
-        val deviceResponse = DeviceResponse(
-            documents = documents,
-            documentErrors = null
-        )
-        val context = currentContext
-        val skDevice = context.skDevice
-            ?: error("Missing skDevice")
-
-        return try {
-            val encryptedResponse = holderCryptoService.encryptDeviceResponse(
-                deviceResponse = deviceResponse,
-                skDevice = skDevice,
-                encryptCounter = context.encryptCounter
-            )
-
-            sessionFlow.value.updateSessionContext {
-                it.copy(encryptCounter = it.encryptCounter + 1u)
-            }
-
-            encryptedResponse
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            sendTerminationAndFail(e)
-            throw e
-        }
     }
 
     private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {

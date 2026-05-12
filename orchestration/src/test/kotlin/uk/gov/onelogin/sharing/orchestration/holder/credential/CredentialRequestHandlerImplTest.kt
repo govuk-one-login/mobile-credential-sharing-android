@@ -4,20 +4,31 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeFilterIssuerSignedUseCase
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeRawCredentialParser
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParsingException
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_DOCTYPE_MISMATCH
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_GET_CREDENTIALS_ERROR
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_MSO_DECODE_ERROR
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_NO_CREDENTIALS
+import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_NO_MATCHING_ATTRIBUTES
 
 class CredentialRequestHandlerImplTest {
     private val docType = "org.iso.18013.5.1.mDL"
     private val nameSpaces = byteArrayOf(0xA0.toByte())
     private val issuerAuth = byteArrayOf(0x01)
+    private val deviceRequest = DeviceRequestStub.deviceRequestStub
+
+    private val filteredIssuerSigned = IssuerSigned(
+        nameSpaces = emptyMap(),
+        issuerAuth = issuerAuth
+    )
 
     private val fakeCredentialProvider = FakeCredentialProvider().apply {
         credentialsToReturn = listOf(
@@ -33,22 +44,25 @@ class CredentialRequestHandlerImplTest {
         )
     }
 
+    private val fakeFilter = FakeFilterIssuerSignedUseCase(
+        issuerSignedToReturn = filteredIssuerSigned
+    )
+
     private val handler = CredentialRequestHandlerImpl(
         credentialProvider = fakeCredentialProvider,
-        rawCredentialParser = fakeParser
+        rawCredentialParser = fakeParser,
+        filterIssuerSignedUseCase = fakeFilter
     )
 
     @Test
-    fun `requestAndValidate returns ValidatedCredential on success`() = runTest {
-        val result = handler.requestAndValidate(docType)
+    fun `requestAndValidate returns CredentialRequestResult on success`() = runTest {
+        val result = handler.requestAndValidate(docType, deviceRequest)
 
-        assertEquals("test-id", result.credentialId)
-        assertArrayEquals(nameSpaces, result.nameSpaces)
-        assertArrayEquals(issuerAuth, result.issuerAuth)
-        assertEquals(
-            listOf(docType),
-            fakeCredentialProvider.lastRequest?.documentTypes
-        )
+        assertEquals("test-id", result.validatedCredential.credentialId)
+        assertArrayEquals(nameSpaces, result.validatedCredential.nameSpaces)
+        assertArrayEquals(issuerAuth, result.validatedCredential.issuerAuth)
+        assertEquals(filteredIssuerSigned, result.filteredIssuerSigned)
+        assertEquals(listOf(docType), fakeCredentialProvider.lastRequest?.documentTypes)
     }
 
     @Test
@@ -56,7 +70,7 @@ class CredentialRequestHandlerImplTest {
         fakeCredentialProvider.getCredentialsException = RuntimeException("host app error")
 
         val exception = try {
-            handler.requestAndValidate(docType)
+            handler.requestAndValidate(docType, deviceRequest)
             null
         } catch (e: CredentialRequestException) {
             e
@@ -70,7 +84,7 @@ class CredentialRequestHandlerImplTest {
         fakeCredentialProvider.credentialsToReturn = emptyList()
 
         val exception = try {
-            handler.requestAndValidate(docType)
+            handler.requestAndValidate(docType, deviceRequest)
             null
         } catch (e: CredentialRequestException) {
             e
@@ -84,7 +98,7 @@ class CredentialRequestHandlerImplTest {
         fakeParser.exceptionToThrow = RawCredentialParsingException("invalid cbor")
 
         val exception = try {
-            handler.requestAndValidate(docType)
+            handler.requestAndValidate(docType, deviceRequest)
             null
         } catch (e: CredentialRequestException) {
             e
@@ -102,7 +116,7 @@ class CredentialRequestHandlerImplTest {
         )
 
         val exception = try {
-            handler.requestAndValidate(docType)
+            handler.requestAndValidate(docType, deviceRequest)
             null
         } catch (e: CredentialRequestException) {
             e
@@ -112,13 +126,34 @@ class CredentialRequestHandlerImplTest {
     }
 
     @Test
+    fun `requestAndValidate throws when filter finds no matching attributes`() = runTest {
+        val failingFilter = FakeFilterIssuerSignedUseCase(
+            exceptionToThrow = NoMatchingAttributesException(LOG_NO_MATCHING_ATTRIBUTES)
+        )
+        val handlerWithFailingFilter = CredentialRequestHandlerImpl(
+            credentialProvider = fakeCredentialProvider,
+            rawCredentialParser = fakeParser,
+            filterIssuerSignedUseCase = failingFilter
+        )
+
+        val exception = try {
+            handlerWithFailingFilter.requestAndValidate(docType, deviceRequest)
+            null
+        } catch (e: CredentialRequestException) {
+            e
+        }
+
+        assertEquals(LOG_NO_MATCHING_ATTRIBUTES, exception?.message)
+    }
+
+    @Test
     fun `requestAndValidate selects first credential when multiple returned`() = runTest {
         fakeCredentialProvider.credentialsToReturn = listOf(
             Credential(id = "first", rawCredential = byteArrayOf(0x01)),
             Credential(id = "second", rawCredential = byteArrayOf(0x02))
         )
 
-        val result = handler.requestAndValidate(docType)
-        assertEquals("first", result.credentialId)
+        val result = handler.requestAndValidate(docType, deviceRequest)
+        assertEquals("first", result.validatedCredential.credentialId)
     }
 }

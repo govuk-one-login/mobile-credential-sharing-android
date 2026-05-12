@@ -41,12 +41,12 @@ data object VerifierRoutes {
      */
     fun NavGraphBuilder.configureVerifierRoutes(navController: NavHostController) {
         navigation<VerifierRoutes>(startDestination = VerifierPrerequisitesRoute) {
-            configureVerifierPrerequisitesRoute(navController)
+            configureVerifierPrerequisitesRoute()
             configureUnrecoverableVerifierError(navController)
-            configureRetryVerifierPrerequisites(navController)
-            configureVerifierScannerRoute(navController)
+            configureRetryVerifierPrerequisites()
+            configureVerifierScannerRoute()
             configureScannedInvalidQrRoute(navController)
-            configureConnectWithHolderDeviceRoute(navController)
+            configureConnectWithHolderDeviceRoute()
             configureBluetoothConnectionErrorRoute(controller = navController)
         }
     }

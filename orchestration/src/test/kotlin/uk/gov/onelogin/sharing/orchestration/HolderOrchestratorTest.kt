@@ -13,7 +13,6 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,12 +24,12 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
-import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
@@ -59,6 +58,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isSuccessful
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
@@ -115,6 +115,7 @@ class HolderOrchestratorTest {
         }
     )
 
+    @SuppressWarnings("LongParameterList")
     private fun createOrchestrator(
         peripheralBluetoothTransport: PeripheralBluetoothTransport =
             FakePeripheralBluetoothTransport(),
@@ -327,6 +328,28 @@ class HolderOrchestratorTest {
             orchestrator.holderSessionState.value,
             isProcessingEstablishment()
         )
+    }
+
+    @Test
+    fun `ignores BLE state changes when session is already complete`() = runTest {
+        initialStates = mutableListOf(
+            HolderSessionState.Complete.Success
+        )
+
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            peripheralBluetoothTransport = peripheralBluetoothTransport
+        )
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        peripheralBluetoothTransport.emitState(
+            PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false)
+        )
+
+        assert("Session already complete, ignoring BLE state" in logger)
     }
 
     @Test
@@ -585,41 +608,6 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `assembleAndEncryptResponse encrypts DeviceResponse and increments counter`() = runTest {
-        val fakeSessionSecurity = FakeSessionSecurity()
-        fakeSessionSecurity.encryptedToReturn = byteArrayOf(0x0A, 0x0B, 0x0C)
-        val skDevice = byteArrayOf(0x01, 0x02)
-
-        val contextWithSkDevice = holderSessionContextStub.copy(skDevice = skDevice)
-        val sessionFactory = FakeSessionFactory(
-            listOf(
-                HolderSessionImpl(
-                    logger = logger,
-                    internalState = MutableStateFlow(HolderSessionState.NotStarted),
-                    initialContext = contextWithSkDevice
-                )
-            )
-        )
-
-        val orchestrator = createOrchestrator(
-            sessionFactory = sessionFactory,
-            holderCryptoService = HolderCryptoServiceImpl(
-                sessionSecurity = fakeSessionSecurity,
-                logger = logger
-            )
-        )
-
-        val result = orchestrator.assembleAndEncryptResponse(emptyList())
-
-        val currentSession = sessionFactory.getCurrentSession()
-        assertArrayEquals(byteArrayOf(0x0A, 0x0B, 0x0C), result)
-        assertArrayEquals(skDevice, fakeSessionSecurity.lastEncryptKey)
-        assertEquals(DeviceRole.HOLDER, fakeSessionSecurity.lastEncryptRole)
-        assertEquals(1u, fakeSessionSecurity.lastEncryptCounter)
-        assertEquals(2u, currentSession.sessionContext.encryptCounter)
-    }
-
-    @Test
     fun `parsing failure builds error SessionData with status 11 and transitions to failed`() =
         runTest {
             fakeDecryptDeviceRequestUseCase.exceptionAfterKeyDerivation =
@@ -659,37 +647,39 @@ class HolderOrchestratorTest {
         }
 
     @Test
-    fun `encryption failure builds termination SessionData and transitions to failed`() = runTest {
-        val fakeCryptoService = FakeHolderCryptoService().apply {
-            encryptException = RuntimeException("Encryption failed")
-        }
-        val skDevice = byteArrayOf(0x01, 0x02)
-        val contextWithSkDevice = holderSessionContextStub.copy(skDevice = skDevice)
-        val sessionFactory = FakeSessionFactory(
-            listOf(
-                HolderSessionImpl(
-                    logger = logger,
-                    internalState = MutableStateFlow(HolderSessionState.NotStarted),
-                    initialContext = contextWithSkDevice
-                )
-            )
-        )
+    fun `confirm consent builds device response and sends over BLE`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
         val peripheralTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(
-            sessionFactory = sessionFactory,
             peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService
+            holderCryptoService = fakeCryptoService,
+            sessionFactory = sessionFactory
         )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
 
-        assertThrows(RuntimeException::class.java) {
-            orchestrator.assembleAndEncryptResponse(emptyList())
-        }
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
 
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        assertArrayEquals(
+            fakeDecryptDeviceRequestUseCase.skDeviceToReturn,
+            fakeCryptoService.lastEncryptSkDevice
+        )
+        assertEquals(1u, fakeCryptoService.lastEncryptCounter)
         assertEquals(
-            SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastBuildTerminationStatus
+            2u,
+            sessionFactory.getCurrentSession().sessionContext.encryptCounter
         )
-        assertEquals(0, peripheralTransport.stopCalls)
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
     }
 
     @Test
@@ -788,5 +778,92 @@ class HolderOrchestratorTest {
             fakeCryptoService.lastErrorSessionDataStatus
         )
         assertEquals(0, peripheralTransport.stopCalls)
+    }
+
+    @Test
+    fun `filter failure triggers no match termination before consent`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val failingHandler = FakeCredentialRequestHandler().apply {
+            exceptionToThrow = CredentialRequestException("no matching attributes")
+        }
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            credentialRequestHandler = failingHandler
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assert("no matching attributes" in logger)
+        assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastErrorSessionDataStatus
+        )
+        assertEquals(0, peripheralTransport.stopCalls)
+    }
+
+    @Test
+    fun `deny consent sends termination and transitions to Cancelled`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        orchestrator.denyConsent()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isCancelled())
+        assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastErrorSessionDataStatus
+        )
+    }
+
+    @Test
+    fun `deny consent without skDevice transitions to failed`() = runTest {
+        val initialState = HolderSessionState.AwaitingUserConsent(deviceRequestStub)
+        initialStates = mutableListOf(initialState, HolderSessionState.NotStarted)
+        val sessionFactory = FakeSessionFactory(
+            listOf(
+                HolderSessionImpl(
+                    logger = logger,
+                    internalState = MutableStateFlow(initialState),
+                    initialContext = holderSessionContextStub.copy(skDevice = null)
+                )
+            )
+        )
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        orchestrator.denyConsent()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
     }
 }

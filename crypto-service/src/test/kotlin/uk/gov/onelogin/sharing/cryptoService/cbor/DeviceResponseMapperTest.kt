@@ -10,7 +10,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSignedItem
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseMapperTest {
@@ -22,7 +21,7 @@ class DeviceResponseMapperTest {
     fun `maps DeviceResponse domain model to DTO`() {
         val issuerAuth = byteArrayOf(0x01, 0x02)
         val nameSpacesBytes = byteArrayOf(0x03, 0x04)
-        val randomBytes = byteArrayOf(0x05, 0x06)
+        val itemBytes = byteArrayOf(0xA4.toByte(), 0x01, 0x02)
 
         val domainModel = DeviceResponse(
             version = "1.0",
@@ -30,16 +29,7 @@ class DeviceResponseMapperTest {
                 Document(
                     docType = docType,
                     issuerSigned = IssuerSigned(
-                        nameSpaces = mapOf(
-                            namespace to listOf(
-                                IssuerSignedItem(
-                                    digestId = 1,
-                                    random = randomBytes,
-                                    elementIdentifier = "family_name",
-                                    elementValue = "Doe"
-                                )
-                            )
-                        ),
+                        nameSpaces = mapOf(namespace to listOf(itemBytes)),
                         issuerAuth = issuerAuth
                     ),
                     deviceSigned = DeviceSigned(
@@ -66,7 +56,7 @@ class DeviceResponseMapperTest {
         assertNotNull(documentDto.issuerSigned.nameSpaces)
         val issuerItems = documentDto.issuerSigned.nameSpaces!![namespace]
         assertEquals(1, issuerItems?.size)
-        assertNotNull(issuerItems!![0].encoded)
+        assertArrayEquals(itemBytes, issuerItems!![0].encoded)
 
         assertArrayEquals(nameSpacesBytes, documentDto.deviceSigned.nameSpaces.encoded)
         assertArrayEquals(
@@ -91,18 +81,15 @@ class DeviceResponseMapperTest {
     }
 
     @Test
-    fun `toEmbeddedCbor for IssuerSignedItem encodes correctly`() {
-        val randomBytes = byteArrayOf(0x01, 0x02)
-        val item = IssuerSignedItem(
-            digestId = 1,
-            random = randomBytes,
-            elementIdentifier = "given_name",
-            elementValue = "Jane"
+    fun `IssuerSigned nameSpaces wraps raw bytes as EmbeddedCbor without re-encoding`() {
+        val rawItemBytes = byteArrayOf(0xD8.toByte(), 0x18, 0x43, 0x01, 0x02, 0x03)
+        val issuerSigned = IssuerSigned(
+            nameSpaces = mapOf(namespace to listOf(rawItemBytes)),
+            issuerAuth = byteArrayOf()
         )
 
-        val embeddedCbor = item.toEmbeddedCbor()
+        val dto = issuerSigned.toDto()
 
-        assertNotNull(embeddedCbor.encoded)
-        assertTrue(embeddedCbor.encoded.isNotEmpty())
+        assertArrayEquals(rawItemBytes, dto.nameSpaces!![namespace]!![0].encoded)
     }
 }

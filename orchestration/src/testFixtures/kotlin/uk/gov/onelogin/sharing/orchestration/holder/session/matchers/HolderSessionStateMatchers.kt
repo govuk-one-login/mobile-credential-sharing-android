@@ -67,4 +67,8 @@ object HolderSessionStateMatchers {
     fun isAwaitingUserConsent(): Matcher<in HolderSessionState> = instanceOf(
         HolderSessionState.AwaitingUserConsent::class.java
     )
+
+    fun isSuccessful(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.Complete.Success::class.java
+    )
 }

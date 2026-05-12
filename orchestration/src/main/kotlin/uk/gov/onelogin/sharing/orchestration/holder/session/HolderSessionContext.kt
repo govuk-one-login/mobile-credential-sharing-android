@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import java.security.KeyPair
 import java.util.UUID
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
 data class HolderSessionContext(
@@ -13,5 +14,6 @@ data class HolderSessionContext(
     val encryptCounter: UInt = 1u,
     val skDevice: ByteArray? = null,
     val sessionTranscriptBytes: ByteArray? = null,
-    val validatedCredential: ValidatedCredential? = null
+    val validatedCredential: ValidatedCredential? = null,
+    val filteredIssuerSigned: IssuerSigned? = null
 )

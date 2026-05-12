@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration
 
+import androidx.annotation.Keep
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
@@ -45,7 +46,8 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
-@Suppress("LongParameterList")
+@Keep
+@Suppress("LongParameterList", "TooManyFunctions")
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 @SingleIn(AppScope::class)
 class VerifierOrchestrator(
@@ -184,27 +186,30 @@ class VerifierOrchestrator(
                         context
                     }
                 }.onFailure { e ->
-                    failWith("Error processing engagement: ${e.message}", e as Exception)
+                    failWith(
+                        "Error processing engagement: ${e.message}",
+                        SessionErrorReason.CannotProcessEngagement(result.value)
+                    )
                 }.onSuccess {
                     sessionFlow.value.cryptoContext?.let {
                         safeTransitionTo(VerifierSessionState.Connecting)
                         centralBluetoothTransport.scanAndConnect(it.serviceUuid)
                     } ?: failWith(
                         "Service UUID not found in device engagement",
-                        IllegalStateException("Service UUID not found in device engagement")
+                        SessionErrorReason.ServiceUuidNotFound
                     )
                 }
             }
 
             is QrScanResult.Invalid -> {
-                safeTransitionTo(
-                    VerifierSessionState.Complete.Failed(
-                        SessionError(
-                            message = result.rawValue,
-                            exception = IllegalArgumentException("Qr Code is an unsupported format")
+                result.rawValue
+                    .let(SessionErrorReason::UnsupportedQrCodeFormat)
+                    .let {
+                        failWith(
+                            "Qr code is an unsupported format: ${it.rawValue}",
+                            it
                         )
-                    )
-                )
+                    }
             }
 
             QrScanResult.NotFound -> Unit
@@ -272,12 +277,20 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun failWith(message: String, exception: Exception) {
+    private fun failWith(message: String, exception: Throwable) {
         logger.error(logTag, message, exception)
+        failWith(
+            message,
+            SessionErrorReason.UnrecoverableThrowable(exception)
+        )
+    }
+
+    private fun failWith(message: String, reason: SessionErrorReason) {
+        logger.error(logTag, message)
         stopCentralTransport()
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(
-                SessionError(message = message, exception = exception)
+                SessionError(message = message, reason = reason)
             )
         )
     }
