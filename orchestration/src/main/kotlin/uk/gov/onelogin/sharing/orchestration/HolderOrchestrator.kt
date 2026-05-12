@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration
 
+import androidx.annotation.Keep
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
@@ -55,6 +56,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 
+@Keep
 @Suppress("LongParameterList", "TooManyFunctions")
 @SingleIn(AppScope::class)
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
