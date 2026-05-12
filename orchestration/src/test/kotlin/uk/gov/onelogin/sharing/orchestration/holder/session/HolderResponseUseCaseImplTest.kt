@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import java.security.GeneralSecurityException
 import kotlin.test.assertFailsWith
@@ -19,7 +20,9 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredenti
 class HolderResponseUseCaseImplTest {
 
     private val logger = SystemLogger()
-    private val deviceSignatureService = mockk<DeviceSignatureUseCase>()
+    private val deviceSignatureService = mockk<DeviceSignatureUseCase> {
+        every { buildCoseSignStructure(any()) } returns byteArrayOf(0x01)
+    }
     private val credentialProvider = mockk<CredentialProvider>()
 
     private val useCase = HolderResponseUseCaseImpl(
@@ -45,11 +48,11 @@ class HolderResponseUseCaseImplTest {
     )
 
     @Test
-    fun `generateDeviceResponse returns DeviceSigned with nameSpaces from deviceSigned`() =
+    fun `generateDeviceResponse returns DeviceSigned with empty CBOR map nameSpaces`() =
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes
@@ -62,7 +65,7 @@ class HolderResponseUseCaseImplTest {
                 deviceAuthBytes
             )
 
-            assertArrayEquals(deviceSignedBytes, result.nameSpaces)
+            assertArrayEquals(byteArrayOf(0xA0.toByte()), result.nameSpaces)
         }
 
     @Test
@@ -70,7 +73,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes
@@ -91,7 +94,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes
@@ -106,7 +109,7 @@ class HolderResponseUseCaseImplTest {
 
             coVerify {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             }
@@ -117,7 +120,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes

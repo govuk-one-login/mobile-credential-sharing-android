@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.holder
 /**
  * Service for handling COSE_Sign1 construction from a raw signature.
  */
-fun interface DeviceSignatureUseCase {
+interface DeviceSignatureUseCase {
     /**
      * Constructs the COSE_Sign1, DeviceAuth, and DeviceSigned structures from a raw signature.
      *
@@ -11,6 +11,15 @@ fun interface DeviceSignatureUseCase {
      * @return DeviceSignatureResult containing the constructed structures
      */
     fun buildDeviceSignedStructures(signatureBytes: ByteArray): DeviceSignatureResult
+
+    /**
+     * Builds the COSE Sig_structure for COSE_Sign1 per RFC 9052 §4.4:
+     * `["Signature1", protectedHeaders, external_aad, payload]`
+     *
+     * @param payload The DeviceAuthentication bytes to be signed
+     * @return The serialized CBOR Sig_structure
+     */
+    fun buildCoseSignStructure(payload: ByteArray): ByteArray
 }
 
 /**
