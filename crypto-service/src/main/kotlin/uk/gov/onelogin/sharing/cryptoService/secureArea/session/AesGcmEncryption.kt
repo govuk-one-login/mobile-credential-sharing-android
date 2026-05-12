@@ -94,6 +94,12 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
 
         val encryptedData = Cipher.getInstance(AES_256_TRANSFORMATION).run {
             logger.debug(logTag, "Encrypt Counter = $encryptCounter")
+            logger.debug(
+                logTag,
+                "IV: ${nistInitialisationVector.joinToString("") {
+                    "%02x".format(it)
+                }}"
+            )
 
             init(
                 Cipher.ENCRYPT_MODE,

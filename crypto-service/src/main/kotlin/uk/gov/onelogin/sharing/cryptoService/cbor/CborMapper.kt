@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCborSerializer
 
 /**
  * A factory object for creating and configuring Jackson [ObjectMapper] instances
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
  * This object centralizes the setup of [CBORMapper] and provides a way to add custom serializers.
  */
 object CborMapper {
+    val default: ObjectMapper = create()
 
     /**
      * Creates a configured [ObjectMapper] for CBOR serialization with a given
@@ -29,11 +32,13 @@ object CborMapper {
      *                    to CBOR.
      * @return A fully configured [ObjectMapper] ready for CBOR serialization.
      */
-    fun create(serializers: Map<Class<*>, StdSerializer<*>>): ObjectMapper =
+    fun create(serializers: Map<Class<*>, StdSerializer<*>> = emptyMap()): ObjectMapper =
         CBORMapper.builder(CBORFactory())
             .addModule(KotlinModule.Builder().build())
             .addModule(
                 SimpleModule().apply {
+                    addSerializer(EmbeddedCborSerializer())
+                    addSerializer(RawCborSerializer())
                     serializers.forEach { (clazz, serializer) ->
                         @Suppress("UNCHECKED_CAST")
                         addSerializer(clazz as Class<Any>, serializer as StdSerializer<Any>)

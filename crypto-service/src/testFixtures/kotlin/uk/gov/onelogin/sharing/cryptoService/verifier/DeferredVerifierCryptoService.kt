@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+
 /**
  * [VerifierCryptoService] implementation that defers to the [updater] property for obtaining a
  * [VerifierCryptoContext].
@@ -16,4 +18,12 @@ class DeferredVerifierCryptoService(
     ) {
         updater(qrCodeData)?.let(updateContext)
     }
+
+    override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = byteArrayOf()
+
+    override fun encryptDeviceRequest(
+        deviceRequestBytes: ByteArray,
+        skReader: ByteArray,
+        encryptCounter: UInt
+    ): ByteArray = byteArrayOf()
 }

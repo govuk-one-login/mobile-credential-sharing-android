@@ -26,5 +26,7 @@ data class VerifierCryptoContext(
     /** The 32-byte session key used by the Verifier to encrypt requests. */
     val skReader: ByteArray,
     /** The 32-byte session key used by the Verifier to decrypt responses. */
-    val skDevice: ByteArray
+    val skDevice: ByteArray,
+    /** The message counter for encryption, starts at 1 for SessionEstablishment. */
+    val encryptCounter: UInt = 1u
 )

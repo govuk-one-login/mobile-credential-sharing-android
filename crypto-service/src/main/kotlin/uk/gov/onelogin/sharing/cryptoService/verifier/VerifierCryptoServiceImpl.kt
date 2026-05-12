@@ -28,13 +28,17 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDeriva
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.HOLDER
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
 class VerifierCryptoServiceImpl(
     private val logger: Logger,
     private val keyPairGenerator: KeyPairGenerator,
     private val sharedSecretGenerator: SharedSecretGenerator,
-    private val sessionKeyGenerator: SessionKeyGenerator
+    private val sessionKeyGenerator: SessionKeyGenerator,
+    private val encryptDeviceRequestUseCase: EncryptDeviceRequestUseCase
 ) : VerifierCryptoService {
 
     override fun establishSession(
@@ -109,6 +113,23 @@ class VerifierCryptoServiceImpl(
             )
         )
     }
+
+    override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = DeviceRequest(
+        version = "1.0",
+        docRequests = listOf(DocRequest(itemsRequest))
+    ).encodeCbor().also {
+        logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
+    }
+
+    override fun encryptDeviceRequest(
+        deviceRequestBytes: ByteArray,
+        skReader: ByteArray,
+        encryptCounter: UInt
+    ): ByteArray = encryptDeviceRequestUseCase(
+        deviceRequestBytes = deviceRequestBytes,
+        skReader = skReader,
+        encryptCounter = encryptCounter
+    )
 
     private fun computeSharedSecret(
         eReaderPrivateKey: ECPrivateKey,

@@ -22,10 +22,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransp
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
-import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
-import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
+import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
@@ -442,7 +441,23 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `start logs ItemsRequest for Photo and Age Over 21 attribute group`() = runTest {
+    fun `ConnectionStateStarted encrypts DeviceRequest with counter 1 and increments to 2`() =
+        runTest {
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.processQrCode(VALID_MDOC_URI)
+            centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+
+            assertEquals(1u, fakeCryptoService.lastEncryptCounter)
+            val context = sessionFactory.getCurrentSession().cryptoContext
+            assertEquals(2u, context?.encryptCounter)
+        }
+
+    @Test
+    fun `encryption failure transitions to Failed and stops BLE`() = runTest {
+        fakeCryptoService.buildAndEncryptException = EncryptDeviceRequestException(
+            "Error encrypting DeviceRequest",
+            RuntimeException("AES failure")
+        )
         val orchestrator = VerifierOrchestrator(
             logger = logger,
             prerequisiteGate = gate,
@@ -451,22 +466,22 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService
+            verifierCryptoService = fakeCryptoService
         )
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
-        orchestrator.start()
-
-        assert(
-            logger.contains(
-                "ItemsRequest: ItemsRequest(" +
-                    "docType=$MDL_DOC_TYPE, " +
-                    "nameSpaces={$MDL_NAMESPACE={portrait=false, age_over_21=false}})"
-            )
-        )
+        assertThat(orchestrator.verifierSessionState.value, isFailed())
+        assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 
     @Test
-    fun `start logs ItemsRequest for Name Retain and Age Over 18 attribute group`() = runTest {
+    fun `counter is not incremented when encryption fails`() = runTest {
+        fakeCryptoService.buildAndEncryptException = EncryptDeviceRequestException(
+            "Error encrypting DeviceRequest",
+            RuntimeException("AES failure")
+        )
         val orchestrator = VerifierOrchestrator(
             logger = logger,
             prerequisiteGate = gate,
@@ -475,18 +490,13 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService
+            verifierCryptoService = fakeCryptoService
         )
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
-        orchestrator.start()
-
-        assert(
-            logger.contains(
-                "ItemsRequest: ItemsRequest(" +
-                    "docType=$MDL_DOC_TYPE, " +
-                    "nameSpaces={$MDL_NAMESPACE={given_name=true, family_name=true, " +
-                    "age_over_18=false}})"
-            )
-        )
+        val context = sessionFactory.getCurrentSession().cryptoContext
+        assertEquals(1u, context?.encryptCounter)
     }
 }
