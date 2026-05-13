@@ -9,47 +9,43 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import uk.gov.logging.api.v2.Logger
-import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
-import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
-import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_ARRAY_4
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_BSTR_1
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_EMPTY_MAP
-import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.COSE_SIGN1_TAG
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.ES256_ALG_LABEL
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.ES256_ALG_VALUE
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.TAG_24_MAJOR
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.TAG_24_VALUE
 
+private const val P256_RAW_SIGNATURE_SIZE = 64
+
 class DeviceSignatureUseCaseImplTest {
 
     private val logger = mockk<Logger>(relaxed = true)
     private val deviceSignatureUseCase = DeviceSignatureUseCaseImpl(logger)
-    private val holderCryptoService = HolderCryptoServiceImpl(
-        sessionSecurity = FakeSessionSecurity(),
-        logger = SystemLogger()
-    )
     private val cborMapper = ObjectMapper(CBORFactory())
 
-    private val signatureBytes = holderCryptoService.buildDeviceAuthenticationBytes(
-        sessionTranscript = validSessionTranscript,
-        docType = MDL_DOC_TYPE
-    ).deviceAuthenticationBytes
+    private val signatureBytes = createTestDerSignature()
+
+    private fun createTestDerSignature(): ByteArray {
+        // A valid DER-encoded ECDSA signature with 32-byte r and s values
+        val r = ByteArray(32) { 0x01 }
+        val s = ByteArray(32) { 0x02 }
+        // DER: 0x30 <totalLen> 0x02 <rLen> <r> 0x02 <sLen> <s>
+        val rDer = byteArrayOf(0x02, r.size.toByte()) + r
+        val sDer = byteArrayOf(0x02, s.size.toByte()) + s
+        val content = rDer + sDer
+        return byteArrayOf(0x30, content.size.toByte()) + content
+    }
 
     private val result by lazy {
         deviceSignatureUseCase.buildDeviceSignedStructures(signatureBytes)
     }
 
     @Test
-    fun `coseSign1Array starts with COSE_Sign1 tag 18`() {
-        assertEquals(COSE_SIGN1_TAG, result.coseSign1Array[0])
-    }
-
-    @Test
-    fun `coseSign1Array has 4-element array header after tag`() {
-        assertEquals(CBOR_ARRAY_4, result.coseSign1Array[1])
+    fun `coseSign1Array starts with 4-element array header`() {
+        assertEquals(CBOR_ARRAY_4, result.coseSign1Array[0])
     }
 
     @Test
@@ -75,11 +71,14 @@ class DeviceSignatureUseCaseImplTest {
     }
 
     @Test
-    fun `coseSign1Array signature element contains the provided signature bytes`() {
+    fun `coseSign1Array signature element contains the raw r-s signature`() {
         val tree: JsonNode = cborMapper.readTree(result.coseSign1Array)
         val sig = tree[3].binaryValue()
         assertNotNull(sig)
-        assertTrue(sig.contentEquals(signatureBytes))
+        assertEquals(P256_RAW_SIGNATURE_SIZE, sig.size)
+        // r = 32 bytes of 0x01, s = 32 bytes of 0x02
+        assertTrue(sig.copyOfRange(0, 32).all { it == 0x01.toByte() })
+        assertTrue(sig.copyOfRange(32, 64).all { it == 0x02.toByte() })
     }
 
     @Test
@@ -125,6 +124,28 @@ class DeviceSignatureUseCaseImplTest {
             1 + 1 + nameSpacesKeyLength + nameSpacesBytesLength + 1 + deviceAuthKeyLength
         val embeddedAuth = result.deviceSigned.copyOfRange(valueOffset, result.deviceSigned.size)
         assertTrue(embeddedAuth.contentEquals(result.deviceAuth))
+    }
+
+    @Test
+    fun `buildCoseSignStructure produces a valid COSE Sig_structure`() {
+        val payload = byteArrayOf(0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte())
+
+        val result = deviceSignatureUseCase.buildCoseSignStructure(payload)
+        val tree: JsonNode = cborMapper.readTree(result)
+
+        assertTrue(tree.isArray)
+        assertEquals(4, tree.size())
+        assertEquals("Signature1", tree[0].textValue())
+        // protected header: bstr containing {1: -7}
+        val protectedHeader = cborMapper.readTree(tree[1].binaryValue())
+        assertEquals(
+            ES256_ALG_VALUE,
+            protectedHeader[ES256_ALG_LABEL.toString()].intValue()
+        )
+        // external_aad: empty bstr
+        assertEquals(0, tree[2].binaryValue().size)
+        // payload
+        assertTrue(tree[3].binaryValue().contentEquals(payload))
     }
 
     @Test

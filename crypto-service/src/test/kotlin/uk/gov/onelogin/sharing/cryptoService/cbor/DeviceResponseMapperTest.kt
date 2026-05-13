@@ -67,7 +67,7 @@ class DeviceResponseMapperTest {
         assertArrayEquals(nameSpacesBytes, documentDto.deviceSigned.nameSpaces.encoded)
         assertArrayEquals(
             byteArrayOf(0x07, 0x08),
-            documentDto.deviceSigned.deviceAuth.deviceSignature
+            documentDto.deviceSigned.deviceAuth.deviceSignature.encoded
         )
     }
 

@@ -26,8 +26,12 @@ class HolderResponseUseCaseImpl(
         deviceAuthenticationBytes: ByteArray
     ): DeviceSigned {
         try {
+            val toBeSigned = deviceSignatureService.buildCoseSignStructure(
+                deviceAuthenticationBytes
+            )
+
             val signatureBytes = credentialProvider.sign(
-                payload = deviceAuthenticationBytes,
+                payload = toBeSigned,
                 documentId = validatedCredential.credentialId
             )
             logger.debug(logTag, "Successfully retrieved signature from credential provider")
@@ -36,13 +40,18 @@ class HolderResponseUseCaseImpl(
             logger.debug(logTag, "Successfully generated DeviceSigned")
 
             return DeviceSigned(
-                nameSpaces = signatureResult.deviceSigned,
-                deviceAuth = signatureResult.deviceAuth
+                nameSpaces = EMPTY_DEVICE_NAMESPACES,
+                deviceAuth = signatureResult.coseSign1Array
             )
         } catch (e: DeviceSignatureException) {
             throw DeviceSignatureException("Failed to generate device response", e)
         } catch (e: GeneralSecurityException) {
             throw DeviceSignatureException("Failed to generate device response", e)
         }
+    }
+
+    private companion object {
+        /** CBOR encoding of an empty map: major type 5, length 0 */
+        val EMPTY_DEVICE_NAMESPACES = byteArrayOf(0xA0.toByte())
     }
 }
