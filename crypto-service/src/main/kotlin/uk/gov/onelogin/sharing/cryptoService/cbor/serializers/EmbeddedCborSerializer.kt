@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 
-@JvmInline
-value class EmbeddedCbor(val encoded: ByteArray)
+data class EmbeddedCbor(val encoded: ByteArray)
 
 class EmbeddedCborSerializer : StdSerializer<EmbeddedCbor>(EmbeddedCbor::class.java) {
     override fun serialize(value: EmbeddedCbor, gen: JsonGenerator, provider: SerializerProvider) {
