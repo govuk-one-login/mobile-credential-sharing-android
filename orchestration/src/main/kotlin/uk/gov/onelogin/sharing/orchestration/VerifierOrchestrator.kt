@@ -285,7 +285,7 @@ class VerifierOrchestrator(
                 is SessionEstablishmentException ->
                     SessionErrorReason.CannotBuildSessionEstablishment
 
-                else -> SessionErrorReason.CannotBuildSessionEstablishment
+                else -> SessionErrorReason.UnrecoverableThrowable(e)
             }
             failWith(e.message ?: "Error building SessionEstablishment", reason)
         }
