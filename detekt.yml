@@ -9,6 +9,9 @@ naming:
   FunctionNaming:
     # Remove the rule for Android Composable functions as they expect TitleCase.
     ignoreAnnotated: ["Composable"]
+  PackageNaming:
+    # ISO standard numbers require underscores in the package name
+    excludes: ["**/iso18013-6-tests/**"]
 style:
   ReturnCount:
     excludeGuardClauses: true
