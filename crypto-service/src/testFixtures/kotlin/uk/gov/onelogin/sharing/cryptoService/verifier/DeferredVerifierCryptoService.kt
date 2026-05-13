@@ -21,6 +21,11 @@ class DeferredVerifierCryptoService(
 
     override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = byteArrayOf()
 
+    override fun buildSessionEstablishment(
+        eReaderKeyBytes: ByteArray,
+        encryptedDeviceRequest: ByteArray
+    ): ByteArray = byteArrayOf()
+
     override fun encryptDeviceRequest(
         deviceRequestBytes: ByteArray,
         skReader: ByteArray,

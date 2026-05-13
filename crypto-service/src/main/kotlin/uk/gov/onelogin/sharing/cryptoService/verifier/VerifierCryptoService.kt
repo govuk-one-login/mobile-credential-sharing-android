@@ -35,4 +35,16 @@ interface VerifierCryptoService {
      * Constructs a [DeviceRequest] from the [itemsRequest] and encodes it to CBOR bytes.
      */
     fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray
+
+    /**
+     * Constructs and CBOR-encodes a [SessionEstablishment] map from [eReaderKeyBytes]
+     * and [encryptedDeviceRequest].
+     *
+     * @throws SessionEstablishmentException if construction or encoding fails.
+     */
+    @Throws(SessionEstablishmentException::class)
+    fun buildSessionEstablishment(
+        eReaderKeyBytes: ByteArray,
+        encryptedDeviceRequest: ByteArray
+    ): ByteArray
 }

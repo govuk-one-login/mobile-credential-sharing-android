@@ -16,7 +16,9 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveSessionTranscript
+import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
@@ -114,6 +116,21 @@ class VerifierCryptoServiceImpl(
         )
     }
 
+    override fun buildSessionEstablishment(
+        eReaderKeyBytes: ByteArray,
+        encryptedDeviceRequest: ByteArray
+    ): ByteArray = try {
+        SessionEstablishmentDto(
+            eReaderKey = EmbeddedCbor(deriveUntaggedCbor(eReaderKeyBytes)),
+            data = encryptedDeviceRequest
+        ).encodeCbor().also {
+            logger.debug(logTag, LOG_SESSION_ESTABLISHMENT_SUCCESS)
+        }
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        logger.error(logTag, LOG_SESSION_ESTABLISHMENT_ERROR, e)
+        throw SessionEstablishmentException(LOG_SESSION_ESTABLISHMENT_ERROR, e)
+    }
+
     override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = DeviceRequest(
         version = "1.0",
         docRequests = listOf(DocRequest(itemsRequest))
@@ -181,5 +198,11 @@ class VerifierCryptoServiceImpl(
         val ecSpec = params.getParameterSpec(java.security.spec.ECParameterSpec::class.java)
         return KeyFactory.getInstance(ELLIPTIC_CURVE_ALGORITHM)
             .generatePublic(ECPublicKeySpec(ecPoint, ecSpec)) as ECPublicKey
+    }
+
+    internal companion object {
+        const val LOG_SESSION_ESTABLISHMENT_SUCCESS = "SessionEstablishment message constructed"
+        const val LOG_SESSION_ESTABLISHMENT_ERROR =
+            "error constructing SessionEstablishment message"
     }
 }
