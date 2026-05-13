@@ -1,7 +1,7 @@
 package uk.gov.android.credentialsharing.iso18013_6
 
-import org.junit.Test
 import kotlin.test.assertTrue
+import org.junit.Test
 
 /**
  * ISO 18013-6 conformance tests for device engagement over NFC.

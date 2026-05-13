@@ -2,3 +2,7 @@
 # Duplicates the overrides in BaseKotlinExtension.digitalWalletKtlintConfig
 ktlint_code_style=android_studio
 ktlint_function_naming_ignore_when_annotated_with=Composable
+
+[iso18013-6-tests/src/**/*.{kt,kts}]
+# ISO standard numbers require underscores in the package name
+ktlint_standard_package-name=disabled
