@@ -12,6 +12,7 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertArrayEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -26,6 +27,7 @@ import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
+import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -453,35 +455,45 @@ class VerifierOrchestratorTest {
         }
 
     @Test
-    fun `encryption failure transitions to Failed and stops BLE`() = runTest {
-        fakeCryptoService.buildAndEncryptException = EncryptDeviceRequestException(
-            "Error encrypting DeviceRequest",
-            RuntimeException("AES failure")
-        )
-        val orchestrator = VerifierOrchestrator(
-            logger = logger,
-            prerequisiteGate = gate,
-            sessionFactory = sessionFactory,
-            verifierConfig = photoAndAgeOver21Config,
-            centralBluetoothTransport = centralBluetoothTransport,
-            appCoroutineScope = scope,
-            barcodeParser = FakeQrParser(),
-            verifierCryptoService = fakeCryptoService
-        )
-        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
-        orchestrator.processQrCode(VALID_MDOC_URI)
-        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+    fun `AC4 - encryption failure transitions to Failed with CannotEncryptDeviceRequest reason`() =
+        runTest {
+            val failingCryptoService = FakeVerifierCryptoService().apply {
+                buildAndEncryptException = EncryptDeviceRequestException(
+                    "Error encrypting DeviceRequest",
+                    RuntimeException("AES failure")
+                )
+            }
+            val orchestrator = VerifierOrchestrator(
+                logger = logger,
+                prerequisiteGate = gate,
+                sessionFactory = sessionFactory,
+                verifierConfig = photoAndAgeOver21Config,
+                centralBluetoothTransport = centralBluetoothTransport,
+                appCoroutineScope = scope,
+                barcodeParser = FakeQrParser(),
+                verifierCryptoService = failingCryptoService
+            )
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.processQrCode(VALID_MDOC_URI)
+            centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
-        assertThat(orchestrator.verifierSessionState.value, isFailed())
-        assertEquals(1, centralBluetoothTransport.stopCalls)
-    }
+            assertThat(
+                orchestrator.verifierSessionState.value,
+                isFailed(
+                    hasReason(instanceOf(SessionErrorReason.CannotEncryptDeviceRequest::class.java))
+                )
+            )
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+        }
 
     @Test
     fun `counter is not incremented when encryption fails`() = runTest {
-        fakeCryptoService.buildAndEncryptException = EncryptDeviceRequestException(
-            "Error encrypting DeviceRequest",
-            RuntimeException("AES failure")
-        )
+        val failingCryptoService = FakeVerifierCryptoService().apply {
+            buildAndEncryptException = EncryptDeviceRequestException(
+                "Error encrypting DeviceRequest",
+                RuntimeException("AES failure")
+            )
+        }
         val orchestrator = VerifierOrchestrator(
             logger = logger,
             prerequisiteGate = gate,
@@ -490,7 +502,7 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = fakeCryptoService
+            verifierCryptoService = failingCryptoService
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)
@@ -498,5 +510,51 @@ class VerifierOrchestratorTest {
 
         val context = sessionFactory.getCurrentSession().cryptoContext
         assertEquals(1u, context?.encryptCounter)
+    }
+
+    @Test
+    fun `eReaderKey and encryptedDeviceRequest passed to buildSessionEstablishment`() = runTest {
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+
+        assertArrayEquals(byteArrayOf(), fakeCryptoService.lastEReaderKeyBytes)
+        assertArrayEquals(
+            fakeCryptoService.buildAndEncryptToReturn,
+            fakeCryptoService.lastEncryptedDeviceRequest
+        )
+    }
+
+    @Test
+    fun `SessionEstablishment failure transitions to Failed with reason`() = runTest {
+        val failingCryptoService = FakeVerifierCryptoService().apply {
+            buildSessionEstablishmentException = SessionEstablishmentException(
+                "error constructing SessionEstablishment message",
+                RuntimeException("encoding failure")
+            )
+        }
+        val orchestrator = VerifierOrchestrator(
+            logger = logger,
+            prerequisiteGate = gate,
+            sessionFactory = sessionFactory,
+            verifierConfig = verifierConfigStub,
+            centralBluetoothTransport = centralBluetoothTransport,
+            appCoroutineScope = scope,
+            barcodeParser = FakeQrParser(),
+            verifierCryptoService = failingCryptoService
+        )
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(
+                hasReason(
+                    instanceOf(SessionErrorReason.CannotBuildSessionEstablishment::class.java)
+                )
+            )
+        )
+        assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 }

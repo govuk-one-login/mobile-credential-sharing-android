@@ -19,6 +19,8 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.HkdfSessionKeyGe
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
+import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_ERROR
+import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_SUCCESS
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 class VerifierCryptoServiceImplTest {
@@ -279,5 +281,38 @@ class VerifierCryptoServiceImplTest {
         assertThrows(EncryptDeviceRequestException::class.java) {
             service.encryptDeviceRequest(byteArrayOf(0x01), ByteArray(32), 1u)
         }
+    }
+
+    @Test
+    fun `buildSessionEstablishment returns CBOR map with eReaderKey and data and logs success`() {
+        val eReaderKeyTagged = service.run {
+            var tagged: ByteArray? = null
+            establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) {
+                tagged = it.eReaderKeyTagged
+                it
+            }
+            tagged!!
+        }
+        val encryptedDeviceRequest = ByteArray(48) { 0x02 }
+
+        val result = service.buildSessionEstablishment(
+            eReaderKeyBytes = eReaderKeyTagged,
+            encryptedDeviceRequest = encryptedDeviceRequest
+        )
+
+        assertTrue(result.isNotEmpty())
+        assertTrue(logger.any { it.message == LOG_SESSION_ESTABLISHMENT_SUCCESS })
+    }
+
+    @Test
+    fun `buildSessionEstablishment logs error and throws on invalid input`() {
+        assertThrows(SessionEstablishmentException::class.java) {
+            service.buildSessionEstablishment(
+                eReaderKeyBytes = byteArrayOf(0x00),
+                encryptedDeviceRequest = ByteArray(16) { 0x02 }
+            )
+        }
+
+        assertTrue(logger.any { it.message == LOG_SESSION_ESTABLISHMENT_ERROR })
     }
 }
