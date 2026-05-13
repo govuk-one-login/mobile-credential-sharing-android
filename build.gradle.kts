@@ -194,6 +194,16 @@ sonarqube {
     }
 }
 
+// Ensure sonar tasks run after source/resource generating tasks to avoid provider resolution errors
+subprojects {
+    tasks.matching { it.name == "sonarResolver" }.configureEach {
+        dependsOn(tasks.matching {
+            it.name.startsWith("generate") ||
+                it.name.contains("ksp") && it.name.contains("Kotlin")
+        })
+    }
+}
+
 subprojects {
     // list of directories that aren't fully fledged gradle modules
     val intermediateFolders = listOf(
