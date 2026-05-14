@@ -127,6 +127,6 @@ class DeviceResponseDto {
 
     data class DeviceAuthDTO(
         @JsonProperty("deviceSignature")
-        val deviceSignature: ByteArray
+        val deviceSignature: RawCbor
     )
 }

@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import java.security.GeneralSecurityException
 import kotlin.test.assertFailsWith
@@ -19,7 +20,9 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredenti
 class HolderResponseUseCaseImplTest {
 
     private val logger = SystemLogger()
-    private val deviceSignatureService = mockk<DeviceSignatureUseCase>()
+    private val deviceSignatureService = mockk<DeviceSignatureUseCase> {
+        every { buildCoseSignStructure(any()) } returns byteArrayOf(0x01)
+    }
     private val credentialProvider = mockk<CredentialProvider>()
 
     private val useCase = HolderResponseUseCaseImpl(
@@ -36,41 +39,41 @@ class HolderResponseUseCaseImplTest {
     private val deviceAuthBytes = byteArrayOf(0x01, 0x02, 0x03)
     private val signatureBytes = byteArrayOf(0x04, 0x05, 0x06)
     private val deviceSignedBytes = byteArrayOf(0x07, 0x08)
+    private val coseSign1Bytes = byteArrayOf(0x0b, 0x0c)
     private val deviceAuthResultBytes = byteArrayOf(0x09, 0x0a)
 
     private val signatureResult = DeviceSignatureResult(
-        coseSign1Array = byteArrayOf(),
+        coseSign1Array = coseSign1Bytes,
         deviceAuth = deviceAuthResultBytes,
         deviceSigned = deviceSignedBytes
     )
 
     @Test
-    fun `generateDeviceResponse returns DeviceSigned with nameSpaces from deviceSigned`() =
-        runTest {
-            coEvery {
-                credentialProvider.sign(
-                    deviceAuthBytes,
-                    validatedCredential.credentialId
-                )
-            } returns signatureBytes
-            coEvery {
-                deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
-            } returns signatureResult
-
-            val result = useCase.generateDeviceResponse(
-                validatedCredential,
-                deviceAuthBytes
+    fun `generateDeviceResponse returns DeviceSigned with empty CBOR map nameSpaces`() = runTest {
+        coEvery {
+            credentialProvider.sign(
+                any(),
+                validatedCredential.credentialId
             )
+        } returns signatureBytes
+        coEvery {
+            deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
+        } returns signatureResult
 
-            assertArrayEquals(deviceSignedBytes, result.nameSpaces)
-        }
+        val result = useCase.generateDeviceResponse(
+            validatedCredential,
+            deviceAuthBytes
+        )
+
+        assertArrayEquals(byteArrayOf(0xA0.toByte()), result.nameSpaces)
+    }
 
     @Test
     fun `generateDeviceResponse returns DeviceSigned with deviceAuth from signatureResult`() =
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes
@@ -83,7 +86,7 @@ class HolderResponseUseCaseImplTest {
                 deviceAuthBytes
             )
 
-            assertArrayEquals(deviceAuthResultBytes, result.deviceAuth)
+            assertArrayEquals(coseSign1Bytes, result.deviceAuth)
         }
 
     @Test
@@ -91,7 +94,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes
@@ -106,7 +109,7 @@ class HolderResponseUseCaseImplTest {
 
             coVerify {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             }
@@ -117,7 +120,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             coEvery {
                 credentialProvider.sign(
-                    deviceAuthBytes,
+                    any(),
                     validatedCredential.credentialId
                 )
             } returns signatureBytes

@@ -1,21 +1,24 @@
 package uk.gov.onelogin.sharing.cryptoService.holder
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import java.io.ByteArrayOutputStream
+import java.math.BigInteger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
 
-private const val CBOR_TAG_COSE_SIGN1 = 18
 private const val COSE_SIGN1_ARRAY_SIZE = 4
 private const val ES256_ALGORITHM = -7
 private const val CBOR_MAP_MAJOR_TYPE = 0xa0
 private const val CBOR_TEXT_MAJOR_TYPE = 0x60
+private const val P256_COORDINATE_SIZE = 32
+private const val DER_SEQUENCE_TAG = 0x30
+private const val DER_INTEGER_TAG = 0x02
+private const val BYTE_MASK = 0xFF
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<DeviceSignatureUseCase>())
@@ -39,21 +42,32 @@ class DeviceSignatureUseCaseImpl(private val logger: Logger) : DeviceSignatureUs
         )
     }
 
-    private fun createCoseSign1Array(signatureBytes: ByteArray): ByteArray =
+    override fun buildCoseSignStructure(payload: ByteArray): ByteArray =
         ByteArrayOutputStream().also { output ->
             CBORFactory().createGenerator(output).use { gen ->
-                (gen as CBORGenerator).writeTag(CBOR_TAG_COSE_SIGN1)
                 gen.writeStartArray(null, COSE_SIGN1_ARRAY_SIZE)
-                gen.writeBinary(createProtectedHeader())
-                gen.writeStartObject(0)
-                gen.writeEndObject()
-                gen.writeNull()
-                gen.writeBinary(signatureBytes)
+                gen.writeString("Signature1")
+                gen.writeBinary(createBodyProtected())
+                gen.writeBinary(ByteArray(0))
+                gen.writeBinary(payload)
                 gen.writeEndArray()
             }
         }.toByteArray()
 
-    private fun createProtectedHeader(): ByteArray = ByteArrayOutputStream().also { output ->
+    private fun createCoseSign1Array(signatureBytes: ByteArray): ByteArray =
+        ByteArrayOutputStream().also { output ->
+            CBORFactory().createGenerator(output).use { gen ->
+                gen.writeStartArray(null, COSE_SIGN1_ARRAY_SIZE)
+                gen.writeBinary(createBodyProtected())
+                gen.writeStartObject(0)
+                gen.writeEndObject()
+                gen.writeNull()
+                gen.writeBinary(derSignatureToRaw(signatureBytes))
+                gen.writeEndArray()
+            }
+        }.toByteArray()
+
+    private fun createBodyProtected(): ByteArray = ByteArrayOutputStream().also { output ->
         CBORFactory().createGenerator(output).use { gen ->
             gen.writeStartObject(1)
             gen.writeFieldId(1)
@@ -83,5 +97,38 @@ class DeviceSignatureUseCaseImpl(private val logger: Logger) : DeviceSignatureUs
     private fun cborTextKey(key: String): ByteArray {
         val keyBytes = key.toByteArray(Charsets.UTF_8)
         return byteArrayOf((CBOR_TEXT_MAJOR_TYPE or keyBytes.size).toByte()) + keyBytes
+    }
+
+    /**
+     * Converts a DER-encoded ECDSA signature to the raw (r||s) format required by COSE.
+     * Each integer is zero-padded to [P256_COORDINATE_SIZE] bytes.
+     */
+    private fun derSignatureToRaw(derSignature: ByteArray): ByteArray {
+        // DER: 0x30 <len> 0x02 <rLen> <r> 0x02 <sLen> <s>
+        require(derSignature[0].toInt() == DER_SEQUENCE_TAG) { "Not a DER signature" }
+        var offset = 2 // skip SEQUENCE tag and length byte
+
+        require(derSignature[offset].toInt() == DER_INTEGER_TAG) { "Expected INTEGER tag for r" }
+        offset++
+        val rLen = derSignature[offset++].toInt() and BYTE_MASK
+        val r = BigInteger(1, derSignature.copyOfRange(offset, offset + rLen))
+        offset += rLen
+
+        require(derSignature[offset].toInt() == DER_INTEGER_TAG) { "Expected INTEGER tag for s" }
+        offset++
+        val sLen = derSignature[offset++].toInt() and BYTE_MASK
+        val s = BigInteger(1, derSignature.copyOfRange(offset, offset + sLen))
+
+        return r.toFixedByteArray(P256_COORDINATE_SIZE) +
+            s.toFixedByteArray(P256_COORDINATE_SIZE)
+    }
+
+    private fun BigInteger.toFixedByteArray(size: Int): ByteArray {
+        val bytes = toByteArray()
+        return when {
+            bytes.size == size -> bytes
+            bytes.size > size -> bytes.copyOfRange(bytes.size - size, bytes.size)
+            else -> ByteArray(size - bytes.size) + bytes
+        }
     }
 }

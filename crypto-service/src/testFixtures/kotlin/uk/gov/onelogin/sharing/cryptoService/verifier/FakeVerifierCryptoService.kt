@@ -18,6 +18,10 @@ class FakeVerifierCryptoService : VerifierCryptoService {
     var lastDeviceRequestBytes: ByteArray? = null
     var lastSkReader: ByteArray? = null
     var lastEncryptCounter: UInt? = null
+    var buildSessionEstablishmentToReturn: ByteArray = byteArrayOf(0x03, 0x04)
+    var buildSessionEstablishmentException: SessionEstablishmentException? = null
+    var lastEReaderKeyBytes: ByteArray? = null
+    var lastEncryptedDeviceRequest: ByteArray? = null
 
     override fun establishSession(
         qrCodeData: String,
@@ -52,5 +56,15 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         lastEncryptCounter = encryptCounter
         buildAndEncryptException?.let { throw it }
         return buildAndEncryptToReturn
+    }
+
+    override fun buildSessionEstablishment(
+        eReaderKeyBytes: ByteArray,
+        encryptedDeviceRequest: ByteArray
+    ): ByteArray {
+        lastEReaderKeyBytes = eReaderKeyBytes
+        lastEncryptedDeviceRequest = encryptedDeviceRequest
+        buildSessionEstablishmentException?.let { throw it }
+        return buildSessionEstablishmentToReturn
     }
 }

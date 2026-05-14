@@ -21,7 +21,11 @@ import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
+import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
+import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
+import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -271,26 +275,41 @@ class VerifierOrchestrator(
 
         val itemsRequest = verifierConfig.verificationRequest.attributeGroup
             .toItemsRequest(verifierConfig.verificationRequest.documentType)
-        val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
 
         runCatching {
-            verifierCryptoService.encryptDeviceRequest(
-                deviceRequestBytes = deviceRequestBytes,
-                skReader = context.skReader,
-                encryptCounter = context.encryptCounter
-            )
+            buildAndSendSessionEstablishment(context, itemsRequest)
         }.onFailure { e ->
-            failWith(
-                e.message ?: "Error encrypting DeviceRequest",
-                SessionErrorReason.CannotEncryptDeviceRequest
-            )
-        }.onSuccess { encryptedDeviceRequest ->
-            sessionFlow.value.updateCryptoContext {
-                context.copy(
-                    encryptCounter = context.encryptCounter + 1u
-                )
+            val reason = when (e) {
+                is EncryptDeviceRequestException -> SessionErrorReason.CannotEncryptDeviceRequest
+
+                is SessionEstablishmentException ->
+                    SessionErrorReason.CannotBuildSessionEstablishment
+
+                else -> SessionErrorReason.UnrecoverableThrowable(e)
             }
-            logger.debug(logTag, "Encrypted DeviceRequest: ${encryptedDeviceRequest.toHexString()}")
+            failWith(e.message ?: "Error building SessionEstablishment", reason)
+        }
+    }
+
+    private fun buildAndSendSessionEstablishment(
+        context: VerifierCryptoContext,
+        itemsRequest: ItemsRequest
+    ) {
+        val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
+        val encryptedDeviceRequest = verifierCryptoService.encryptDeviceRequest(
+            deviceRequestBytes = deviceRequestBytes,
+            skReader = context.skReader,
+            encryptCounter = context.encryptCounter
+        )
+        sessionFlow.value.updateCryptoContext {
+            context.copy(encryptCounter = context.encryptCounter + 1u)
+        }
+        logger.debug(logTag, "Encrypted DeviceRequest: ${encryptedDeviceRequest.toHexString()}")
+        verifierCryptoService.buildSessionEstablishment(
+            eReaderKeyBytes = context.eReaderKeyTagged,
+            encryptedDeviceRequest = encryptedDeviceRequest
+        ).also {
+            logger.debug(logTag, "SessionEstablishment bytes: ${it.toHexString()}")
         }
     }
 

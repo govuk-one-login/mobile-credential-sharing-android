@@ -1,9 +1,11 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential
 
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 
@@ -20,16 +22,55 @@ class RawCredentialParserImpl : RawCredentialParser {
             ?: throw RawCredentialParsingException(ERROR_MISSING_ISSUER_AUTH)
 
         val msoDocType = extractMsoDocType(cborMapper, issuerAuthNode)
+        val issuerAuthBytes = extractIssuerAuthRawBytes(rawCredential)
 
         ParsedRawCredential(
             nameSpaces = cborMapper.writeValueAsBytes(nameSpacesNode),
-            issuerAuth = cborMapper.writeValueAsBytes(issuerAuthNode),
+            issuerAuth = issuerAuthBytes,
             msoDocType = msoDocType
         )
     } catch (e: RawCredentialParsingException) {
         throw e
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         throw RawCredentialParsingException(FAILED_TO_PARSE_RAW_CREDENTIAL_CBOR, e)
+    }
+
+    /**
+     * Extracts the raw CBOR bytes of the issuerAuth field from the credential.
+     *
+     * Jackson library converts CBOR integer map keys to strings which produces
+     * invalid COSE headers and breaks signature verification on the verifier.
+     *
+     * This uses the parser to locate the field by byte offset and extract the
+     * original bytes without re-encoding.
+     *
+     */
+    private fun extractIssuerAuthRawBytes(cborData: ByteArray): ByteArray {
+        val factory = CBORFactory()
+        val parser = factory.createParser(cborData) as CBORParser
+        parser.use { p ->
+            p.nextToken()
+            while (p.nextToken() != null && p.currentToken() != JsonToken.END_OBJECT) {
+                val name = p.currentName() ?: run {
+                    p.skipChildren()
+                    continue
+                }
+                p.nextToken()
+
+                if (name == KEY_ISSUER_AUTH) {
+                    return extractCurrentValueBytes(p, cborData)
+                }
+                p.skipChildren()
+            }
+        }
+        throw RawCredentialParsingException(ERROR_MISSING_ISSUER_AUTH)
+    }
+
+    private fun extractCurrentValueBytes(parser: CBORParser, source: ByteArray): ByteArray {
+        val startOffset = parser.currentTokenLocation().byteOffset.toInt()
+        parser.skipChildren()
+        val endOffset = parser.currentLocation().byteOffset.toInt()
+        return source.copyOfRange(startOffset, endOffset)
     }
 
     @Suppress("ThrowsCount")

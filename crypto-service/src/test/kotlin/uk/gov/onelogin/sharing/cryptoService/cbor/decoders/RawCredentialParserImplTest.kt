@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.RawCredentialStub
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.RawCredentialStub.validRawCredentialBytes
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParserImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParsingException
@@ -84,6 +85,13 @@ class RawCredentialParserImplTest {
         assertThrows(RawCredentialParsingException::class.java) {
             parser.parse(raw)
         }
+    }
+
+    @Test
+    fun `issuerAuth preserves integers from raw credential bytes`() {
+        val result = parser.parse(RawCredentialStub.credentialWithIntegerKeysBytes)
+
+        assert(result.issuerAuth.contentEquals(RawCredentialStub.issuerAuthWithIntegerKeysBytes))
     }
 
     private fun writeCoseSign1(gen: CBORGenerator) {
