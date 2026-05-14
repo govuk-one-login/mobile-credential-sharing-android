@@ -16,7 +16,10 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -147,6 +150,56 @@ class AndroidGattClientManager(
                 GattClientEvent.Error(ClientError.BLUETOOTH_PERMISSION_MISSING)
             )
         }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+        val gatt = bluetoothGatt ?: return false
+        val characteristic = gatt.getService(serviceUuid)
+            ?.getCharacteristic(CLIENT_2_SERVER_UUID) ?: return false
+
+        if (data.isEmpty()) {
+            logger.error(logTag, "sendMessage called with empty data")
+            return false
+        }
+
+        val chunkSize = MtuValues.dataChunkSize(mtu)
+        logger.debug(logTag, "Sending ${data.size} bytes in chunks of $chunkSize (MTU=$mtu)")
+
+        var offset = 0
+        while (offset < data.size) {
+            val end = minOf(offset + chunkSize, data.size)
+            val isLast = end == data.size
+            val header = if (isLast) LAST_PART else NON_LAST_PART
+            val chunk = byteArrayOf(header) + data.copyOfRange(offset, end)
+
+            val success = gattWriter.writeCharacteristic(
+                gatt = gatt,
+                characteristic = characteristic,
+                value = chunk
+            )
+
+            if (!success) {
+                logger.error(
+                    logTag,
+                    "Failed to write SessionEstablishment packet at offset $offset"
+                )
+                return false
+            }
+
+            if (isLast) {
+                logger.debug(logTag, "Final SessionEstablishment chunk generated and sent")
+            } else {
+                logger.debug(
+                    logTag,
+                    "Intermediate SessionEstablishment chunk generated, more data will follow"
+                )
+            }
+            offset = end
+        }
+
+        logger.debug(logTag, "SessionEstablishment transmission complete")
+        return true
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

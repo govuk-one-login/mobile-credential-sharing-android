@@ -9,12 +9,18 @@ class FakeGattWriter(val success: Boolean = true) : GattWriter {
     var writes = 0
     val sentChunks = mutableListOf<ByteArray>()
 
+    fun reset() {
+        writes = 0
+        sentChunks.clear()
+    }
+
     override fun writeCharacteristic(
         gatt: BluetoothGatt,
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
     ): Boolean {
         writes++
+        sentChunks.add(value)
         return success
     }
 

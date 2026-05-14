@@ -91,13 +91,13 @@ class VerifierCryptoServiceImpl(
 
         val skReader = deriveSessionKey(
             sharedSecret = sharedSecret,
-            sessionTranscriptBytes = sessionTranscriptBytes,
+            sessionTranscriptBytes = sessionTranscript,
             role = VERIFIER,
             label = "SKReader"
         )
         val skDevice = deriveSessionKey(
             sharedSecret = sharedSecret,
-            sessionTranscriptBytes = sessionTranscriptBytes,
+            sessionTranscriptBytes = sessionTranscript,
             role = HOLDER,
             label = "SKDevice"
         )

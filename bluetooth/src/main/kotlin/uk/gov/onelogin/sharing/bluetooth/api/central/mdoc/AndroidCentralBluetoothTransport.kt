@@ -91,6 +91,9 @@ class AndroidCentralBluetoothTransport(
         }
     }
 
+    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean =
+        gattClientManager.sendMessage(serviceUuid, data)
+
     override suspend fun stop() {
         scanJob?.cancel()
         scanJob = null

@@ -29,6 +29,7 @@ import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
@@ -38,6 +39,7 @@ import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
@@ -770,5 +772,119 @@ internal class AndroidGattClientManagerTest {
 
             validate(callbackSlot)
         }
+    }
+
+    private fun setupConnectedGatt(
+        gattWriter: GattWriter = fakeGattWriter
+    ): Pair<AndroidGattClientManager, CapturingSlot<BluetoothGattCallback>> {
+        val callbackSlot = slot<BluetoothGattCallback>()
+        every {
+            bluetoothDevice.connectGatt(context, any(), capture(callbackSlot), any())
+        } returns bluetoothGatt
+        val mgr = createManager(gattWriter)
+        mgr.connect(bluetoothDevice, uuid)
+        return mgr to callbackSlot
+    }
+
+    @Test
+    fun `sendMessage with data fitting single chunk prepends 0x00 and writes once`() {
+        val (mgr, _) = setupConnectedGatt()
+        val data = ByteArray(10) { it.toByte() }
+        val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(uuid) } returns service
+        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+
+        val result = mgr.sendMessage(uuid, data)
+
+        assertEquals(true, result)
+        assertEquals(1, fakeGattWriter.writes)
+        assertEquals(0x00.toByte(), fakeGattWriter.sentChunks.first().first())
+    }
+
+    @Test
+    fun `sendMessage with data exceeding chunk size splits and prepends 0x01 then 0x00`() {
+        val (mgr, callbackSlot) = setupConnectedGatt()
+        callbackSlot.captured.onMtuChanged(
+            bluetoothGatt,
+            MtuValues.MIN_MTU,
+            BluetoothGatt.GATT_SUCCESS
+        )
+        fakeGattWriter.reset()
+        val data = ByteArray(30) { it.toByte() }
+        val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(uuid) } returns service
+        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+
+        val result = mgr.sendMessage(uuid, data)
+
+        assertEquals(true, result)
+        assertEquals(2, fakeGattWriter.writes)
+        assertEquals(0x01.toByte(), fakeGattWriter.sentChunks[0].first())
+        assertEquals(0x00.toByte(), fakeGattWriter.sentChunks[1].first())
+    }
+
+    @Test
+    fun `sendMessage returns false and stops when write fails`() {
+        val failingWriter = FakeGattWriter(success = false)
+        val (mgr, _) = setupConnectedGatt(failingWriter)
+        val data = ByteArray(10) { it.toByte() }
+        val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(uuid) } returns service
+        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+
+        val result = mgr.sendMessage(uuid, data)
+
+        assertEquals(false, result)
+        assertEquals(1, failingWriter.writes)
+        assert(logger.contains("Failed to write SessionEstablishment packet at offset 0"))
+    }
+
+    @Test
+    fun `sendMessage logs success after final chunk written`() {
+        val (mgr, _) = setupConnectedGatt()
+        val data = ByteArray(10) { it.toByte() }
+        val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(uuid) } returns service
+        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+
+        mgr.sendMessage(uuid, data)
+
+        assert(logger.contains("Final SessionEstablishment chunk generated and sent"))
+        assert(logger.contains("SessionEstablishment transmission complete"))
+    }
+
+    @Test
+    fun `sendMessage logs intermediate chunk before final chunk`() {
+        val (mgr, callbackSlot) = setupConnectedGatt()
+        callbackSlot.captured.onMtuChanged(
+            bluetoothGatt,
+            MtuValues.MIN_MTU,
+            BluetoothGatt.GATT_SUCCESS
+        )
+        fakeGattWriter.reset()
+        val data = ByteArray(30) { it.toByte() }
+        val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(uuid) } returns service
+        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+
+        mgr.sendMessage(uuid, data)
+
+        assert(
+            logger.contains(
+                "Intermediate SessionEstablishment chunk generated, more data will follow"
+            )
+        )
+        assert(logger.contains("Final SessionEstablishment chunk generated and sent"))
+        assert(logger.contains("SessionEstablishment transmission complete"))
+    }
+
+    @Test
+    fun `chunk size is MTU minus 3 BLE overhead minus 1 ISO header`() {
+        assertEquals(MtuValues.MIN_MTU - 3 - 1, MtuValues.dataChunkSize(MtuValues.MIN_MTU))
     }
 }

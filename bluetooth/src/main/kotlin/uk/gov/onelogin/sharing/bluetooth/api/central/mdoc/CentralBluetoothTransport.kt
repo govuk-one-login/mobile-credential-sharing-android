@@ -32,4 +32,11 @@ interface CentralBluetoothTransport {
      * Stops the BLE session, optionally sending a session end command first.
      */
     suspend fun stop()
+
+    /**
+     * Sends [data] to the connected Holder device, chunked according to the negotiated MTU.
+     *
+     * @return `true` if all chunks were sent successfully, `false` otherwise.
+     */
+    fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean
 }

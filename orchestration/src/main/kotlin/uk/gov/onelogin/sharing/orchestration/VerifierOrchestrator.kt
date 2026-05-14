@@ -285,7 +285,7 @@ class VerifierOrchestrator(
                 is SessionEstablishmentException ->
                     SessionErrorReason.CannotBuildSessionEstablishment
 
-                else -> SessionErrorReason.UnrecoverableThrowable(e)
+                else -> SessionErrorReason.CannotSendMessage
             }
             failWith(e.message ?: "Error building SessionEstablishment", reason)
         }
@@ -308,8 +308,16 @@ class VerifierOrchestrator(
         verifierCryptoService.buildSessionEstablishment(
             eReaderKeyBytes = context.eReaderKeyTagged,
             encryptedDeviceRequest = encryptedDeviceRequest
-        ).also {
-            logger.debug(logTag, "SessionEstablishment bytes: ${it.toHexString()}")
+        ).also { sessionEstablishmentBytes ->
+            logger.debug(
+                logTag,
+                "SessionEstablishment bytes: ${sessionEstablishmentBytes.toHexString()}"
+            )
+            val sent = centralBluetoothTransport.sendMessage(
+                serviceUuid = context.serviceUuid,
+                data = sessionEstablishmentBytes
+            )
+            if (!sent) error("Failed to send SessionEstablishment message")
         }
     }
 

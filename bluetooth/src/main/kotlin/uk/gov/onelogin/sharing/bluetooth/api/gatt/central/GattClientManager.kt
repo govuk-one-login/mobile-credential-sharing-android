@@ -13,4 +13,13 @@ interface GattClientManager {
     fun disconnect()
 
     fun notifySessionEnd(): SessionEndStates
+
+    /**
+     * Sends [data] to the connected device, chunked according to the negotiated MTU.
+     *
+     * @param serviceUuid The UUID of the active GATT service.
+     * @param data The bytes to transmit.
+     * @return `true` if all chunks were sent successfully, `false` otherwise.
+     */
+    fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean
 }

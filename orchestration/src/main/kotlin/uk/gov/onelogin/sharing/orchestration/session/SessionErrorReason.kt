@@ -37,6 +37,8 @@ sealed class SessionErrorReason {
 
     data object CannotBuildSessionEstablishment : SessionErrorReason()
 
+    data object CannotSendMessage : SessionErrorReason()
+
     /**
      * State for when the app cannot process the provided QR code.
      *
