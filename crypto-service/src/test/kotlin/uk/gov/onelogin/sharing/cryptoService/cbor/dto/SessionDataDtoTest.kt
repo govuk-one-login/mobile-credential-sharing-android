@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORConstants
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameters
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -22,8 +23,9 @@ import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.cryptoService.cbor.HexFormatter
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoMatchers.hasData
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoMatchers.hasStatus
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.dataFieldName
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.emptySessionDataDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.invalidStatusDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.statusFieldName
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.validSessionDataHexString
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 
@@ -33,15 +35,12 @@ class SessionDataDtoTest {
     private val mapper: ObjectMapper = CBORMapper.builder()
         .build()
 
-    private val dataFieldName = mapper.writeValueAsBytes("data").toHexString()
-    private val statusFieldName = mapper.writeValueAsBytes("status").toHexString()
-
     @Test
     fun `Using a Mapper without CBOR features throw a JsonMappingException`() {
         val jsonMapper = ObjectMapper()
 
         val exception = assertFailsWith(JsonMappingException::class) {
-            jsonMapper.writeValueAsBytes(emptySessionDataDto)
+            emptySessionDataDto.toCbor(jsonMapper)
         }
 
         assertThat(
@@ -62,10 +61,13 @@ class SessionDataDtoTest {
         )
     }
 
+    /**
+     * DCMAW-19837: AC1: Enforce SessionData status constraints
+     */
     @Test
     fun `Invalid status codes throw IllegalArgumentExceptions`() {
         val exception = assertFailsWith(IllegalArgumentException::class) {
-            invalidStatusDto()
+            SessionDataDto(status = UInt.MAX_VALUE)
         }
 
         assertThat(
@@ -78,21 +80,20 @@ class SessionDataDtoTest {
 
     @Test
     fun `DTOs with null properties serialize to CBOR objects with 0 elements`() {
-        val result = mapper.writeValueAsBytes(emptySessionDataDto)
+        val result = emptySessionDataDto.toCbor(mapper)
         assertThat(
             result.toHexString(),
             equalTo(HexFormatter(CBORConstants.PREFIX_TYPE_OBJECT))
         )
     }
 
+    /**
+     * DCMAW-19837: AC1: Enforce SessionData status constraints
+     */
     @Test
     fun `DTOs with only data serialize to a CBOR object with 1 element`() {
         val data = byteArrayOf(0x1, 0x2)
-        val result = mapper.writeValueAsBytes(
-            SessionDataDto(
-                data = data
-            )
-        )
+        val result = SessionDataDto(data = data).toCbor(mapper)
 
         assertThat(
             result.toHexString(),
@@ -106,13 +107,14 @@ class SessionDataDtoTest {
         )
     }
 
+    /**
+     * DCMAW-19837: AC1: Enforce SessionData status constraints
+     */
     @Test
     fun `DTOs with only status serialize to a CBOR object with 1 element`(
         @TestParameter status: SessionDataStatus
     ) {
-        val result = mapper.writeValueAsBytes(
-            SessionDataDto(status = status.code)
-        )
+        val result = SessionDataDto(status = status.code).toCbor(mapper)
 
         assertThat(
             result.toHexString(),
@@ -130,12 +132,10 @@ class SessionDataDtoTest {
     fun `Fully formed DTOs serialize to a CBOR object with 2 elements`() {
         val data = byteArrayOf(0x1, 0x2)
 
-        val result = mapper.writeValueAsBytes(
-            SessionDataDto(
-                data = data,
-                status = SessionDataStatus.SESSION_TERMINATION.code
-            )
-        )
+        val result = SessionDataDto(
+            data = data,
+            status = SessionDataStatus.SESSION_TERMINATION.code
+        ).toCbor(mapper)
 
         assertThat(
             result.toHexString(),
@@ -153,13 +153,13 @@ class SessionDataDtoTest {
         )
     }
 
-    //    @TestParameters(valuesProvider = ExampleSessionDataDtos::class)
     @Test
-    fun `Can deserialize a previously serialized DTO`() {
-        val sessionDataBytes = mapper.writeValueAsBytes(emptySessionDataDto)
+    @TestParameters(valuesProvider = ExampleSessionDataDtoInputs::class)
+    fun `Can deserialize a previously serialized DTO`(dto: SessionDataDto) {
+        val sessionDataBytes = dto.toCbor(mapper)
         val result = mapper.readValue(sessionDataBytes, SessionDataDto::class.java)
 
-        assertEquals(emptySessionDataDto, result)
+        assertEquals(dto, result)
     }
 
     @Test
@@ -182,18 +182,3 @@ class SessionDataDtoTest {
     private fun getStatusFieldCborString(input: UInt) =
         statusFieldName + input.toUByte().toHexString()
 }
-
-// class ExampleSessionDataDtos : TestParametersValuesProvider() {
-//    private val statusOnlyDtos = SessionDataStatus.entries.map { SessionDataDto(status = it.code) }
-//    private val inputs = listOf(
-//        "Empty SessionDataDto" to emptySessionDataDto,
-//    ) + statusOnlyDtos
-//
-//    override fun provideValues(
-//        context: Context?
-//    ): List<TestParameters.TestParametersValues?>? = inputs.map { (name, dto) ->
-//        TestParameters.TestParametersValues.builder()
-//            .name(name)
-//            .build()
-//    }
-// }

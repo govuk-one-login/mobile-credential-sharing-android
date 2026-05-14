@@ -13,10 +13,18 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborEncodable
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 
 /**
+ * Represents the ISO 18013-5 `SessionData` transport envelope.
+ *
+ * This is the top-level message structure used to communicate with the Verifier over the BLE
+ * transport layer. It can carry an encrypted credential payload, a termination/error status code,
+ * or both.
+ *
  * ```
  * SessionData = {
  *     ? "data" : bstr
@@ -25,8 +33,8 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
  * }
  * ```
  *
- * @param data The encrypted mdoc request / response. Defaults to `null`.
- * @param status The associated status code. Defaults to `null`.
+ * @param data The encrypted ciphertext and authentication tag, or null if not present.
+ * @param status The session data status code, or null if not present.
  */
 @Keep
 @JsonSerialize(using = SessionDataDto.Serializer::class)
@@ -36,7 +44,7 @@ data class SessionDataDto(
     val data: ByteArray? = null,
     @JsonProperty(KEY_STATUS)
     val status: UInt? = null
-) {
+) : CborEncodable {
     init {
         status?.let { code ->
             require(code in SessionDataStatus.applicableCodes) {
@@ -44,6 +52,14 @@ data class SessionDataDto(
             }
         }
     }
+
+    /**
+     * @return A [SessionData] representation of this object.
+     */
+    fun toDomain(): SessionData = SessionData(
+        data = this.data,
+        status = SessionDataStatus.from(this.status)
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -121,5 +137,10 @@ data class SessionDataDto(
 
         @Keep
         const val KEY_STATUS: String = "status"
+
+        fun SessionData.toDto(): SessionDataDto = SessionDataDto(
+            data = this.data,
+            status = this.status?.code
+        )
     }
 }

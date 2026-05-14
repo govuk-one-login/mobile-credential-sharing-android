@@ -1,10 +1,13 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.dto
 
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromHexStringFile
 
 object SessionDataDtoStubs {
+    val dataFieldName = CborMapper.default.writeValueAsBytes("data").toHexString()
+    val statusFieldName = CborMapper.default.writeValueAsBytes("status").toHexString()
+
     val emptySessionDataDto = SessionDataDto()
-    fun invalidStatusDto() = SessionDataDto(status = UInt.MAX_VALUE)
 
     /**
      * D.5.1 example SessionData object

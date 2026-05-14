@@ -5,6 +5,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
@@ -23,7 +24,7 @@ class HolderCryptoServiceImpl(
     private val logger: Logger
 ) : HolderCryptoService {
     override fun buildTerminationSessionData(status: SessionDataStatus): ByteArray =
-        SessionData(status = status).encodeCbor()
+        SessionData(status = status).toDto().toCbor()
 
     override fun buildErrorSessionData(
         deviceResponseStatus: Status,
@@ -33,14 +34,14 @@ class HolderCryptoServiceImpl(
     ): ByteArray {
         val encryptedPayload = encryptDeviceResponse(
             deviceResponse = DeviceResponse(
-                documents = null,
-                documentErrors = null,
                 status = deviceResponseStatus
             ),
             skDevice = skDevice,
             encryptCounter = encryptCounter
         )
-        return SessionData(data = encryptedPayload, status = sessionDataStatus).encodeCbor()
+        return SessionData(data = encryptedPayload, status = sessionDataStatus)
+            .toDto()
+            .toCbor()
     }
 
     override fun buildDeviceResponse(
@@ -50,13 +51,12 @@ class HolderCryptoServiceImpl(
     ): ByteArray {
         val encryptedPayload = encryptDeviceResponse(
             deviceResponse = DeviceResponse(
-                documents = documents,
-                documentErrors = null
+                documents = documents
             ),
             skDevice = skDevice,
             encryptCounter = encryptCounter
         )
-        return SessionData(data = encryptedPayload).encodeCbor()
+        return SessionData(data = encryptedPayload).toDto().toCbor()
     }
 
     private fun encryptDeviceResponse(
