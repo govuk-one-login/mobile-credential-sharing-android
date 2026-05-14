@@ -33,13 +33,17 @@ data class MockCredentialState(
     override fun toString(): String = "MockCredentialState(id=$id, displayName=$displayName)"
 
     fun toCredential(context: Context): MockCredential {
-        val privateKey = context.assets.open(privateKeyAssetName)
-            .bufferedReader()
-            .readText()
-            .lines()
-            .filter { !it.startsWith("-----") }
-            .joinToString("")
-            .let { Base64.getDecoder().decode(it) }
+        val privateKey = try {
+            context.assets.open(privateKeyAssetName)
+                .bufferedReader()
+                .readText()
+                .lines()
+                .filter { !it.startsWith("-----") }
+                .joinToString("")
+                .let { Base64.getDecoder().decode(it) }
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            throw IllegalArgumentException("Failed to load private key from assets", e)
+        }
 
         val base64EncodedRawCredential = context.resources
             .openRawResource(rawCredentialRes)
