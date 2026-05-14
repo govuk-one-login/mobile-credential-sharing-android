@@ -10,8 +10,8 @@ class SecuritySerializer : StdSerializer<Security>(Security::class.java) {
     override fun serialize(value: Security, gen: JsonGenerator, provider: SerializerProvider) {
         (gen as CBORGenerator).writeStartArray(value, ELEMENT_COUNT)
         gen.writeNumber(value.cipherSuiteIdentifier)
-        val taggedBytes = EmbeddedCbor(value.eDeviceKeyBytes)
-        provider.defaultSerializeValue(taggedBytes, gen)
+        gen.writeTag(EmbeddedCborSerializer.EMBEDDED_CBOR_TAG)
+        gen.writeBinary(value.eDeviceKeyBytes)
         gen.writeEndArray()
     }
 

@@ -12,8 +12,7 @@ import java.io.OutputStream
  * Used for [issuerAuth] (COSE_Sign1 array, starts with 0x84) which must be spliced inline
  * per ISO 18013-5, not wrapped in a byte string.
  */
-@JvmInline
-value class RawCbor(val encoded: ByteArray)
+data class RawCbor(val encoded: ByteArray)
 
 class RawCborSerializer : StdSerializer<RawCbor>(RawCbor::class.java) {
     override fun serialize(value: RawCbor, gen: JsonGenerator, provider: SerializerProvider) {
