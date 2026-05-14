@@ -11,7 +11,7 @@ enum class SessionDataStatus(val code: UInt) {
     SESSION_TERMINATION(20u);
 
     companion object {
-        private val applicableCodes = SessionDataStatus.entries.map(SessionDataStatus::code)
+        val applicableCodes = SessionDataStatus.entries.map(SessionDataStatus::code)
         fun from(code: UInt? = null): SessionDataStatus? = code?.let { code ->
             require(code in applicableCodes) {
                 "Received invalid session data status: $code"

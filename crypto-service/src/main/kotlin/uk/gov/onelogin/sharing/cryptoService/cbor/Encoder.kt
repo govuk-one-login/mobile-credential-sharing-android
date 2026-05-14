@@ -19,7 +19,6 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
-import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceAuthentication
@@ -112,26 +111,6 @@ fun ItemsRequest.encodeCbor(): ByteArray = ByteArrayOutputStream().also { output
         gen.writeEndObject()
     }
 }.toByteArray()
-
-/**
- * Encodes a [SessionData] into a CBOR map as defined by ISO 18013-5.
- *
- * Null fields are omitted entirely from the resulting map.
- *
- * @receiver The [SessionData] to encode.
- * @return A [ByteArray] containing the CBOR representation.
- */
-fun SessionData.encodeCbor(): ByteArray {
-    val output = ByteArrayOutputStream()
-    val fieldCount = listOfNotNull(data, status).size
-    CBORFactory().createGenerator(output).use { gen ->
-        gen.writeStartObject(fieldCount)
-        data?.let { gen.writeBinaryField("data", it) }
-        status?.let { gen.writeNumberField("status", it.code.toLong()) }
-        gen.writeEndObject()
-    }
-    return output.toByteArray()
-}
 
 /**
  * Encodes a [DeviceAuthentication] into DeviceAuthenticationBytes

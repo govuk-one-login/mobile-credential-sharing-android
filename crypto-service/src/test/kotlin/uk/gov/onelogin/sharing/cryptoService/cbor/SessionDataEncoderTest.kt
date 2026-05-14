@@ -7,6 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 
@@ -21,7 +22,7 @@ class SessionDataEncoderTest {
         val payload = byteArrayOf(0x01, 0x02, 0x03)
         val sessionData = SessionData(data = payload)
 
-        val result = decodeCborMap(sessionData.encodeCbor())
+        val result = decodeCborMap(sessionData.toDto().toCbor())
 
         assertTrue(result.containsKey("data"))
         assertFalse(result.containsKey("status"))
@@ -32,7 +33,7 @@ class SessionDataEncoderTest {
     fun `encodes SessionData with status only`() {
         val sessionData = SessionData(status = SessionDataStatus.SESSION_TERMINATION)
 
-        val result = decodeCborMap(sessionData.encodeCbor())
+        val result = decodeCborMap(sessionData.toDto().toCbor())
 
         assertFalse(result.containsKey("data"))
         assertTrue(result.containsKey("status"))
@@ -45,7 +46,7 @@ class SessionDataEncoderTest {
         val sessionData = SessionData(status = SessionDataStatus.SESSION_TERMINATION)
 
         val expected = "a16673746174757314"
-        val actual = sessionData.encodeCbor().toHexString()
+        val actual = sessionData.toDto().toCbor().toHexString()
 
         assertEquals(expected, actual)
     }
@@ -58,7 +59,7 @@ class SessionDataEncoderTest {
             status = SessionDataStatus.SESSION_TERMINATION
         )
 
-        val result = decodeCborMap(sessionData.encodeCbor())
+        val result = decodeCborMap(sessionData.toDto().toCbor())
 
         assertTrue(result.containsKey("data"))
         assertTrue(result.containsKey("status"))

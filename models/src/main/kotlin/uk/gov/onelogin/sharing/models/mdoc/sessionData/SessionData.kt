@@ -17,19 +17,4 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionData
  * @param data The encrypted ciphertext and authentication tag, or null if not present.
  * @param status The session data status code, or null if not present.
  */
-data class SessionData(val data: ByteArray? = null, val status: SessionDataStatus? = null) {
-
-    /**
-     * @param code The session data status code represented as a [UInt]. Must be a valid [UInt]
-     * as defined in [SessionDataStatus].
-     * @param data The encrypted ciphertext and authentication tag, or null if not present.
-     * @throws IllegalArgumentException when receiving an invalid [code].
-     */
-    constructor(
-        code: UInt?,
-        data: ByteArray? = null
-    ) : this(
-        data = data,
-        status = SessionDataStatus.from(code)
-    )
-}
+data class SessionData(val data: ByteArray? = null, val status: SessionDataStatus? = null)
