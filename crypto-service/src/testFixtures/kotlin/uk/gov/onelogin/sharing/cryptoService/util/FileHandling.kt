@@ -7,6 +7,18 @@ fun getByteArrayFromFile(packageName: String, fileName: String): ByteArray = Fil
 ).readBytes()
 
 @OptIn(ExperimentalStdlibApi::class)
-fun getByteArrayFromHexStringFile(packageName: String, fileName: String): ByteArray = File(
-    packageName + fileName
-).readText().hexToByteArray()
+fun getByteArrayFromHexStringFile(
+    packageName: String,
+    fileName: String,
+    containsLineBreaks: Boolean = false
+): ByteArray {
+    val file = File(
+        packageName + fileName
+    )
+
+    return if (containsLineBreaks) {
+        file.readLines().joinToString("")
+    } else {
+        file.readText()
+    }.hexToByteArray()
+}

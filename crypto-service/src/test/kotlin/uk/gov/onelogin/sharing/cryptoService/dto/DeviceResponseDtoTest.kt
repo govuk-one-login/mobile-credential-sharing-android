@@ -16,6 +16,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
+import uk.gov.onelogin.sharing.cryptoService.cbor.HexFormatter
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
@@ -27,7 +28,7 @@ class DeviceResponseDtoTest {
     private val mapper = CborMapper.default
 
     private val docType = "org.iso.18013.5.1.mDL"
-    private val hexFormatter: (Any) -> CharSequence = { "%02x".format(it) }
+    private val hexFormatter: (Any) -> CharSequence = HexFormatter::invoke
     private val deviceNameSpacesData = ByteArrayOutputStream().also { out ->
         CBORFactory().createGenerator(out).use { gen ->
             gen.writeStartObject(0)
