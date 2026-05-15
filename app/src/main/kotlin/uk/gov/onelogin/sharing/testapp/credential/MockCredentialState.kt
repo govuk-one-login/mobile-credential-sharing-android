@@ -34,12 +34,22 @@ data class MockCredentialState(
 
     fun toCredential(context: Context): MockCredential {
         val privateKey = try {
-            context.assets.open(privateKeyAssetName)
+            val lines = context.assets.open(privateKeyAssetName)
                 .bufferedReader()
                 .readText()
                 .lines()
+
+            require(lines.any { it.startsWith("-----BEGIN") }) {
+                "PEM file missing BEGIN header"
+            }
+            require(lines.any { it.startsWith("-----END") }) {
+                "PEM file missing END header"
+            }
+
+            lines
                 .filter { !it.startsWith("-----") }
                 .joinToString("")
+                .also { require(it.isNotBlank()) { "PEM file has no key content" } }
                 .let { Base64.getDecoder().decode(it) }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             throw IllegalArgumentException("Failed to load private key from assets", e)
