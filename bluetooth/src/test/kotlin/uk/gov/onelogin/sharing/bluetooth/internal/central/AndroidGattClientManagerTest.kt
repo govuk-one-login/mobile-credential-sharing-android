@@ -588,7 +588,15 @@ internal class AndroidGattClientManagerTest {
         val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
 
         every { stateCharacteristic.uuid } returns GattUuids.SERVER_2_CLIENT_UUID
-        val expectedBytes = SessionDataDto().toCbor(CborMapper.default)
+        val expectedBytes = byteArrayOf(
+            0,
+            64,
+            92,
+            117,
+            10,
+            20,
+            50
+        )
         val inputBytes = expectedBytes.toList().chunked(5).map {
             it.toByteArray()
         }

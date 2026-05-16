@@ -41,9 +41,10 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        projects.cryptoService,
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),
-        projects.cryptoService
+        testFixtures(projects.cryptoService)
     ).forEach(::testImplementation)
 }
 
