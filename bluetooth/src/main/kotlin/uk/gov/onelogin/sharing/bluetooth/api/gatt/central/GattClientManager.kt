@@ -3,9 +3,10 @@ package uk.gov.onelogin.sharing.bluetooth.api.gatt.central
 import android.bluetooth.BluetoothDevice
 import java.util.UUID
 import kotlinx.coroutines.flow.SharedFlow
+import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
-interface GattClientManager {
+interface GattClientManager : MessageSender {
     val events: SharedFlow<GattClientEvent>
 
     fun connect(device: BluetoothDevice, serviceUuid: UUID)
@@ -13,13 +14,4 @@ interface GattClientManager {
     fun disconnect()
 
     fun notifySessionEnd(): SessionEndStates
-
-    /**
-     * Sends [data] to the connected device, chunked according to the negotiated MTU.
-     *
-     * @param serviceUuid The UUID of the active GATT service.
-     * @param data The bytes to transmit.
-     * @return `true` if all chunks were sent successfully, `false` otherwise.
-     */
-    fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean
 }
