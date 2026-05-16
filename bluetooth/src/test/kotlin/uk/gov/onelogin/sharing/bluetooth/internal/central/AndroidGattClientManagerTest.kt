@@ -20,6 +20,7 @@ import io.mockk.verifyCount
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -573,6 +574,57 @@ internal class AndroidGattClientManagerTest {
      */
     @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
     @Test
+    fun `Strips chunked bytes into a completed 'Server2Client' message`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+
+        every { stateCharacteristic.uuid } returns GattUuids.SERVER_2_CLIENT_UUID
+        val expectedBytes = SessionDataDto().toCbor(CborMapper.default)
+        val inputBytes = expectedBytes.toList().chunked(5).map {
+            it.toByteArray()
+        }
+
+        testEvents { callbackSlot ->
+            inputBytes.forEach { input ->
+                val prefixBytes = if (inputBytes.last().contentEquals(input)) {
+                    MdocState.END
+                } else {
+                    MdocState.START
+                }.code
+
+                callbackSlot.captured.onCharacteristicChanged(
+                    bluetoothGatt,
+                    stateCharacteristic,
+                    byteArrayOf(prefixBytes) + input
+                )
+            }
+
+            assertEquals(
+                GattClientEvent.Message.Complete(value = expectedBytes),
+                awaitItem()
+            )
+
+            inputBytes.dropLast(1).forEach { chunk ->
+                assertTrue(
+                    "Chunked 'Server2Client' characteristic update: ${chunk.toHexString()}"
+                        in logger
+                )
+            }
+
+            assertTrue(
+                "Completed 'Server2Client' message transfer: ${expectedBytes.toHexString()}"
+                    in logger
+            )
+        }
+    }
+
+    /**
+     * DCMAW-16908: AC2: Process a complete or final message packet (0x00)
+     */
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    @Test
     fun `Strips 'END' bytes from a completed 'Server2Client' message`() = runTest {
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(any()) } returns service
@@ -595,6 +647,10 @@ internal class AndroidGattClientManagerTest {
                 awaitItem()
             )
         }
+
+        assertTrue(
+            "Completed 'Server2Client' message transfer: ${expectedBytes.toHexString()}" in logger
+        )
     }
 
     @Test

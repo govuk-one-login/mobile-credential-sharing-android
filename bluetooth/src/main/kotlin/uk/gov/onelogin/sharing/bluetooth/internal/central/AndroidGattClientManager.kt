@@ -53,6 +53,8 @@ class AndroidGattClientManager(
     private var isSessionEnd = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
 
+    private val messagesMap: MutableMap<UUID, ByteArray> = mutableMapOf()
+
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
@@ -108,7 +110,7 @@ class AndroidGattClientManager(
 
         val state = gatt
             .getService(serviceUuid)
-            .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
+            .getCharacteristic(STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
             INVALID_SERVICE
         ).let { SessionEndStates.WRITE_TO_SERVER_FAILED }
@@ -372,11 +374,11 @@ class AndroidGattClientManager(
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleCharacteristicChanged(event: GattEvent.CharacteristicChanged) {
-        event.value?.firstOrNull() ?: return
+        val firstByte = event.value?.firstOrNull() ?: return
 
         when (event.characteristic.uuid) {
             STATE_UUID -> {
-                when (event.value.first()) {
+                when (firstByte) {
                     MdocState.END.code -> {
                         logger.debug(logTag, "GATT: Received notification 0x02 on State")
                         isSessionEnd = true
@@ -393,7 +395,44 @@ class AndroidGattClientManager(
             }
 
             SERVER_2_CLIENT_UUID -> {
-                event.value.drop(1).toByteArray().let(GattClientEvent.Message::Complete)
+                val messageBytes = event.value.drop(1).toByteArray()
+
+                when (firstByte) {
+                    MdocState.START.code -> {
+                        messagesMap[SERVER_2_CLIENT_UUID] =
+                            (
+                                (messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) +
+                                    messageBytes
+                                )
+                        logger.debug(
+                            logTag,
+                            "Chunked 'Server2Client' characteristic update: ${messageBytes.toHexString()}"
+                        )
+                        null
+                    }
+
+                    MdocState.END.code -> {
+                        (
+                            (
+                                messagesMap[SERVER_2_CLIENT_UUID]
+                                    ?: byteArrayOf()
+                                ) + messageBytes
+                            ).let(GattClientEvent.Message::Complete)
+                            .also {
+                                logger.debug(
+                                    logTag,
+                                    "Completed 'Server2Client' message transfer: ${it.value.toHexString()}"
+                                )
+
+                                messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
+                            }
+                    }
+
+                    else -> {
+                        // DCMAW-16908: Handle invalid status codes
+                        null
+                    }
+                }
             }
 
             else -> {
