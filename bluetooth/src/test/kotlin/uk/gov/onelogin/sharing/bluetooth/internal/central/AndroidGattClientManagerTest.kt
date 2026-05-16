@@ -36,6 +36,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
 
 @RunWith(RobolectricTestRunner::class)
 internal class AndroidGattClientManagerTest {
@@ -563,6 +565,35 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS), awaitItem())
+        }
+    }
+
+    /**
+     * DCMAW-16908: AC2: Process a complete or final message packet (0x00)
+     */
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    @Test
+    fun `Strips 'END' bytes from a completed 'Server2Client' message`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val endByte = MdocState.END.code
+
+        every { stateCharacteristic.uuid } returns GattUuids.SERVER_2_CLIENT_UUID
+        val expectedBytes = SessionDataDto().toCbor(CborMapper.default)
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onCharacteristicChanged(
+                bluetoothGatt,
+                stateCharacteristic,
+                byteArrayOf(endByte) + expectedBytes
+            )
+
+            assertEquals(
+                GattClientEvent.Message.Complete(value = expectedBytes),
+                awaitItem()
+            )
         }
     }
 

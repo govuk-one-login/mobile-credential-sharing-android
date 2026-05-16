@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -373,15 +374,31 @@ class AndroidGattClientManager(
     private fun handleCharacteristicChanged(event: GattEvent.CharacteristicChanged) {
         event.value?.firstOrNull() ?: return
 
-        if (event.characteristic.uuid == STATE_UUID) {
-            when (event.value.first()) {
-                MdocState.END.code -> {
-                    logger.debug(logTag, "GATT: Received notification 0x02 on State")
-                    isSessionEnd = true
-                    bluetoothGatt?.disconnect()
-                    _events.tryEmit(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS))
+        when (event.characteristic.uuid) {
+            STATE_UUID -> {
+                when (event.value.first()) {
+                    MdocState.END.code -> {
+                        logger.debug(logTag, "GATT: Received notification 0x02 on State")
+                        isSessionEnd = true
+                        bluetoothGatt?.disconnect()
+
+                        GattClientEvent.SessionEnd(SessionEndStates.SUCCESS)
+                    }
+
+                    else -> {
+                        // Currently do nothing with codes other than [END].
+                        null
+                    }
                 }
             }
-        }
+
+            SERVER_2_CLIENT_UUID -> {
+                event.value.drop(1).toByteArray().let(GattClientEvent.Message::Complete)
+            }
+
+            else -> {
+                null
+            }
+        }?.let { _events.tryEmit(it) }
     }
 }

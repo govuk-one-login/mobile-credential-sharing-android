@@ -133,6 +133,10 @@ class AndroidCentralBluetoothTransport(
                     event.sessionEndStates
                 )
 
+            is GattClientEvent.Message.Complete -> {
+                // DCMAW-16908: Handle message completion.
+            }
+
             is GattClientEvent.UnsupportedEvent ->
                 logger.debug(logTag, "Unhandled event: $event")
         }
