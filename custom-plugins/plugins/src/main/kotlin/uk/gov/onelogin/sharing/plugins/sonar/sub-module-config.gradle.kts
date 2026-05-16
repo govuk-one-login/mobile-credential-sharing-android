@@ -18,10 +18,6 @@ listOf(
     libs.findPlugin(versionCatalogId).get().get().pluginId
 }.forEach(pluginManager::apply)
 
-val testSourceRegex = Regex(
-    "${layout.projectDirectory.asFile.absolutePath}/src/.*?[tT]est.*?/.*"
-)
-
 val androidLintReportFiles = fileTree(
     layout.buildDirectory.dir("reports")
 ).matching {
@@ -83,15 +79,8 @@ val sonarExclusions by project.extra(
 if (pluginManager.isAndroidApp()) {
     configure<ApplicationAndroidComponentsExtension> {
         onVariants { variant ->
-            val (productionSources, testSources) = fetchKotlinSources(
-                variant.sources.kotlin?.all
-            )
-
             configureSonarExtension(
-                generateBaseSonarProperties(
-                    productionSources = productionSources,
-                    testSources = testSources,
-                ) + mapOf(
+                generateBaseSonarProperties() + mapOf(
                     "sonar.androidLint.reportPaths" to androidLintReportFiles,
                 )
             )
@@ -100,15 +89,8 @@ if (pluginManager.isAndroidApp()) {
 } else if (pluginManager.isAndroidLibrary()) {
     configure<LibraryAndroidComponentsExtension> {
         onVariants { variant ->
-            val (productionSources, testSources) = fetchKotlinSources(
-                variant.sources.kotlin?.all
-            )
-
             configureSonarExtension(
-                generateBaseSonarProperties(
-                    productionSources = productionSources,
-                    testSources = testSources,
-                ) + mapOf(
+                generateBaseSonarProperties() + mapOf(
                     "sonar.androidLint.reportPaths" to androidLintReportFiles,
                 )
             )
@@ -144,8 +126,8 @@ fun generateCommaSeparatedFiles(
 )
 
 fun generateBaseSonarProperties(
-    productionSources: Provider<String>?,
-    testSources: Provider<String>?,
+    productionSources: Provider<String>? = null,
+    testSources: Provider<String>? = null,
 ) = mapOf<String, Any?>(
     "sonar.sources" to productionSources?.get(),
     "sonar.tests" to testSources?.get(),
@@ -169,24 +151,4 @@ fun configureSonarExtension(
             }
         }
     }
-}
-
-fun fetchKotlinSources(
-    kotlinSources: Provider<out Collection<Directory>>?,
-): Pair<Provider<String>?, Provider<String>?> = kotlinSources?.map { directories ->
-    directories.filter { directory ->
-        !directory.asFile.absolutePath.matches(testSourceRegex)
-    }.filter { it.asFile.exists() }
-}?.map(
-    ::asCommaSeparatedString
-) to kotlinSources?.map { directories ->
-    directories.filter { directory ->
-        directory.asFile.absolutePath.matches(testSourceRegex)
-    }.filter { it.asFile.exists() }
-}?.map(::asCommaSeparatedString)
-
-fun asCommaSeparatedString(
-    directories: List<Directory>
-) = directories.joinToString(",") { directory ->
-    directory.asFile.absolutePath
 }

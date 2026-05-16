@@ -8,6 +8,7 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.cbor.HexFormatter
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.AES_256_ALGORITHM
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.AES_256_NONCE_LENGTH
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.AES_256_TRANSFORMATION
@@ -97,7 +98,7 @@ class AesGcmEncryption(private val logger: Logger) : SessionEncryption {
             logger.debug(
                 logTag,
                 "IV: ${nistInitialisationVector.joinToString("") {
-                    "%02x".format(it)
+                    HexFormatter(it)
                 }}"
             )
 

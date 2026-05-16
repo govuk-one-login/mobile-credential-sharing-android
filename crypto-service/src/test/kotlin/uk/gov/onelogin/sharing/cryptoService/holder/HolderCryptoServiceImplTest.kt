@@ -11,6 +11,8 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
@@ -33,7 +35,8 @@ class HolderCryptoServiceImplTest {
     @Test
     fun `buildTerminationSessionData matches directly encoded SessionData`() {
         val result = service.buildTerminationSessionData(SessionDataStatus.SESSION_TERMINATION)
-        val expected = SessionData(status = SessionDataStatus.SESSION_TERMINATION).encodeCbor()
+        val expected = SessionDataDto(status = SessionDataStatus.SESSION_TERMINATION.code)
+            .toCbor()
 
         assertEquals(expected.toHexString(), result.toHexString())
     }
@@ -59,10 +62,9 @@ class HolderCryptoServiceImplTest {
         val result = service.buildDeviceResponse(documents, skDevice, encryptCounter)
 
         val expectedCborBytes = DeviceResponse(
-            documents = documents,
-            documentErrors = null
+            documents = documents
         ).toDto().encodeCbor()
-        val expectedSessionData = SessionData(data = expectedEncrypted).encodeCbor()
+        val expectedSessionData = SessionData(data = expectedEncrypted).toDto().toCbor()
         assertArrayEquals(expectedSessionData, result)
         assertArrayEquals(skDevice, fakeSessionSecurity.lastEncryptKey)
         assertArrayEquals(expectedCborBytes, fakeSessionSecurity.lastEncryptData)

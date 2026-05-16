@@ -7,7 +7,7 @@ import uk.gov.onelogin.sharing.models.mdoc.security.Security
 object SecurityTestStub {
     const val FAKE_CIPHER_ID = 1
     const val FAKE_EDEVICE_KEY = "FAKE_EDEVICE_KEY"
-    const val SECURITY_EXPECTED_BASE64 = "ggFQRkFLRV9FREVWSUNFX0tFWQ=="
+    const val SECURITY_EXPECTED_BASE64 = "ggHYGFBGQUtFX0VERVZJQ0VfS0VZ"
 
     private val jsonNodeFactory: JsonNodeFactory = JsonNodeFactory.instance
     val SECURITY = Security(
