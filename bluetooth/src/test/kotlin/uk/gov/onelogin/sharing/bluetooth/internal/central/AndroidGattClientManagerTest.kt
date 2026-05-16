@@ -22,6 +22,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.hasProperty
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,6 +35,8 @@ import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
@@ -589,10 +596,10 @@ internal class AndroidGattClientManagerTest {
         testEvents { callbackSlot ->
             inputBytes.forEach { input ->
                 val prefixBytes = if (inputBytes.last().contentEquals(input)) {
-                    MdocState.END
+                    LAST_PART
                 } else {
-                    MdocState.START
-                }.code
+                    NON_LAST_PART
+                }
 
                 callbackSlot.captured.onCharacteristicChanged(
                     bluetoothGatt,
@@ -630,7 +637,6 @@ internal class AndroidGattClientManagerTest {
         every { bluetoothGatt.getService(any()) } returns service
 
         val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
-        val endByte = MdocState.END.code
 
         every { stateCharacteristic.uuid } returns GattUuids.SERVER_2_CLIENT_UUID
         val expectedBytes = SessionDataDto().toCbor(CborMapper.default)
@@ -639,7 +645,7 @@ internal class AndroidGattClientManagerTest {
             callbackSlot.captured.onCharacteristicChanged(
                 bluetoothGatt,
                 stateCharacteristic,
-                byteArrayOf(endByte) + expectedBytes
+                byteArrayOf(LAST_PART) + expectedBytes
             )
 
             assertEquals(
@@ -651,6 +657,40 @@ internal class AndroidGattClientManagerTest {
         assertTrue(
             "Completed 'Server2Client' message transfer: ${expectedBytes.toHexString()}" in logger
         )
+    }
+
+    /**
+     * DCMAW-16908: AC3: Reject a message packet with an invalid header byte
+     */
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    @Test
+    fun `Message errors occur with invalid status prefixes`() = runTest {
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(any()) } returns service
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+
+        every { stateCharacteristic.uuid } returns GattUuids.SERVER_2_CLIENT_UUID
+        val expectedBytes = SessionDataDto().toCbor(CborMapper.default)
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onCharacteristicChanged(
+                bluetoothGatt,
+                stateCharacteristic,
+                byteArrayOf(0x02) + expectedBytes
+            )
+
+            assertThat(
+                awaitItem(),
+                allOf(
+                    instanceOf(GattClientEvent.Error::class.java),
+                    hasProperty(
+                        "error",
+                        equalTo(ClientError.INVALID_MESSAGE_PREFIX)
+                    )
+                )
+            )
+        }
     }
 
     @Test

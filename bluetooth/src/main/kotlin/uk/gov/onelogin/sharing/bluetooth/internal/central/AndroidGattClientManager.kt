@@ -16,6 +16,8 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
@@ -398,7 +400,7 @@ class AndroidGattClientManager(
                 val messageBytes = event.value.drop(1).toByteArray()
 
                 when (firstByte) {
-                    MdocState.START.code -> {
+                    NON_LAST_PART -> {
                         messagesMap[SERVER_2_CLIENT_UUID] =
                             (
                                 (messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) +
@@ -408,10 +410,12 @@ class AndroidGattClientManager(
                             logTag,
                             "Chunked 'Server2Client' characteristic update: ${messageBytes.toHexString()}"
                         )
+
+                        // don't emit a message event until the message is complete.
                         null
                     }
 
-                    MdocState.END.code -> {
+                    LAST_PART -> {
                         (
                             (
                                 messagesMap[SERVER_2_CLIENT_UUID]
@@ -429,8 +433,13 @@ class AndroidGattClientManager(
                     }
 
                     else -> {
-                        // DCMAW-16908: Handle invalid status codes
-                        null
+                        GattClientEvent.Error(ClientError.INVALID_MESSAGE_PREFIX).also {
+                            logger.debug(
+                                logTag,
+                                "Received invalid status byte: ${firstByte.toHexString()}"
+                            )
+                            messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
+                        }
                     }
                 }
             }

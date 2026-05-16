@@ -39,5 +39,10 @@ enum class ClientError {
     /**
      * Indicates that the Bluetooth GATT client failed to set the state characteristic to 'Start'
      */
-    FAILED_TO_START
+    FAILED_TO_START,
+
+    /**
+     * Indicates that a Bluetooth characteristic value's first byte is invalid.
+     */
+    INVALID_MESSAGE_PREFIX
 }
