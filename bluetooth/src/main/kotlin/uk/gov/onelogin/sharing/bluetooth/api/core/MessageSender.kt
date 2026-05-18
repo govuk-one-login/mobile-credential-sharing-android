@@ -5,7 +5,7 @@ import java.util.UUID
 /**
  * Sends data to the connected remote device over BLE.
  */
-interface MessageSender {
+fun interface MessageSender {
     /**
      * Sends [data] to the connected device, chunked according to the negotiated MTU.
      *
