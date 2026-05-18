@@ -17,9 +17,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag

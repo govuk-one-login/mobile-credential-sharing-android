@@ -230,7 +230,7 @@ class VerifierOrchestrator(
         appCoroutineScope.launch { centralBluetoothTransport.stop() }
     }
 
-    private fun handleCentralBluetoothState(state: CentralBluetoothState) {
+    private suspend fun handleCentralBluetoothState(state: CentralBluetoothState) {
         if (sessionFlow.value.isComplete()) return
 
         logger.debug(logTag, "BLE state = $state")
@@ -267,7 +267,7 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun handleConnectionStateStarted() {
+    private suspend fun handleConnectionStateStarted() {
         val context = sessionFlow.value.cryptoContext ?: return failWith(
             "Missing crypto context when building DeviceRequest",
             SessionErrorReason.MissingCryptoContext
@@ -291,7 +291,7 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun buildAndSendSessionEstablishment(
+    private suspend fun buildAndSendSessionEstablishment(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {

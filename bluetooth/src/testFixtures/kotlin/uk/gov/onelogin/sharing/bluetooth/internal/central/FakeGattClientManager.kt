@@ -27,7 +27,7 @@ class FakeGattClientManager : GattClientManager {
 
     override fun notifySessionEnd(): SessionEndStates = SessionEndStates.SUCCESS
 
-    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
         lastSentData = data
         return sendMessageToReturn
     }

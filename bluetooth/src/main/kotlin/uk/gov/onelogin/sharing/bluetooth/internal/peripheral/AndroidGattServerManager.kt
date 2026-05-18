@@ -22,7 +22,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
-import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
@@ -31,6 +30,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
+import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -244,7 +244,7 @@ class AndroidGattServerManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
         val server = gattServer ?: return false
         val device = connectedDevice ?: return false
         val characteristic = server.getService(serviceUuid)

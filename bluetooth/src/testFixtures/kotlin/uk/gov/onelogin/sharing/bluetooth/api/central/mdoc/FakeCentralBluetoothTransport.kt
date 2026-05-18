@@ -29,7 +29,7 @@ class FakeCentralBluetoothTransport(
         stopCalls++
     }
 
-    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
         lastSentData = data
         return sendMessageToReturn
     }

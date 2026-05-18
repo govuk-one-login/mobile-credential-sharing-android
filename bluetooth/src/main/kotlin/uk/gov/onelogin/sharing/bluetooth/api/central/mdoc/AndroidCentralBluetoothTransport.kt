@@ -91,7 +91,7 @@ class AndroidCentralBluetoothTransport(
         }
     }
 
-    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean =
+    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean =
         gattClientManager.sendMessage(serviceUuid, data)
 
     override suspend fun stop() {

@@ -787,7 +787,7 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `sendMessage with data fitting single chunk prepends 0x00 and writes once`() {
+    fun `sendMessage with data fitting single chunk prepends 0x00 and writes once`() = runTest {
         val (mgr, _) = setupConnectedGatt()
         val data = ByteArray(10) { it.toByte() }
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
@@ -803,30 +803,31 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `sendMessage with data exceeding chunk size splits and prepends 0x01 then 0x00`() {
-        val (mgr, callbackSlot) = setupConnectedGatt()
-        callbackSlot.captured.onMtuChanged(
-            bluetoothGatt,
-            MtuValues.MIN_MTU,
-            BluetoothGatt.GATT_SUCCESS
-        )
-        fakeGattWriter.reset()
-        val data = ByteArray(30) { it.toByte() }
-        val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+    fun `sendMessage with data exceeding chunk size splits and prepends 0x01 then 0x00`() =
+        runTest {
+            val (mgr, callbackSlot) = setupConnectedGatt()
+            callbackSlot.captured.onMtuChanged(
+                bluetoothGatt,
+                MtuValues.MIN_MTU,
+                BluetoothGatt.GATT_SUCCESS
+            )
+            fakeGattWriter.reset()
+            val data = ByteArray(30) { it.toByte() }
+            val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+            val service = mockk<BluetoothGattService>(relaxed = true)
+            every { bluetoothGatt.getService(uuid) } returns service
+            every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
 
-        val result = mgr.sendMessage(uuid, data)
+            val result = mgr.sendMessage(uuid, data)
 
-        assertEquals(true, result)
-        assertEquals(2, fakeGattWriter.writes)
-        assertEquals(0x01.toByte(), fakeGattWriter.sentChunks[0].first())
-        assertEquals(0x00.toByte(), fakeGattWriter.sentChunks[1].first())
-    }
+            assertEquals(true, result)
+            assertEquals(2, fakeGattWriter.writes)
+            assertEquals(0x01.toByte(), fakeGattWriter.sentChunks[0].first())
+            assertEquals(0x00.toByte(), fakeGattWriter.sentChunks[1].first())
+        }
 
     @Test
-    fun `sendMessage returns false and stops when write fails`() {
+    fun `sendMessage returns false and stops when write fails`() = runTest {
         val failingWriter = FakeGattWriter(success = false)
         val (mgr, _) = setupConnectedGatt(failingWriter)
         val data = ByteArray(10) { it.toByte() }
@@ -843,7 +844,7 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `sendMessage logs success after final chunk written`() {
+    fun `sendMessage logs success after final chunk written`() = runTest {
         val (mgr, _) = setupConnectedGatt()
         val data = ByteArray(10) { it.toByte() }
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
@@ -858,7 +859,7 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `sendMessage logs intermediate chunk before final chunk`() {
+    fun `sendMessage logs intermediate chunk before final chunk`() = runTest {
         val (mgr, callbackSlot) = setupConnectedGatt()
         callbackSlot.captured.onMtuChanged(
             bluetoothGatt,
