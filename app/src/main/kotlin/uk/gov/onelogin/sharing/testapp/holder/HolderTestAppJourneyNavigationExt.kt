@@ -1,12 +1,16 @@
 package uk.gov.onelogin.sharing.testapp.holder
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +29,8 @@ import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.testapp.credential.MockCredential
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState.Companion.MockCredentialStateType
+
+private const val HOLDER_TEST_APP_JOURNEY_NAV_EXT = "HolderTestAppJourneyNavExt"
 
 object HolderTestAppJourneyNavigationExt {
     fun NavController.navigateToTestAppHolderJourney(
@@ -48,8 +54,27 @@ object HolderTestAppJourneyNavigationExt {
             val context = LocalContext.current
             val scope = rememberCoroutineScope { Dispatchers.Main }
 
+            val credential = remember(arguments.state) {
+                try {
+                    arguments.state.toCredential(context)
+                } catch (e: IllegalArgumentException) {
+                    Log.e(HOLDER_TEST_APP_JOURNEY_NAV_EXT, "Invalid credential configuration", e)
+                    null
+                }
+            }
+
+            if (credential == null) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = "Invalid credential"
+                    )
+                }
+                return@composable
+            }
+
             val presenter by produceCredentialPresenter(
-                arguments.state.toCredential(context),
+                credential,
                 component
             )
 

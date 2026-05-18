@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral
+package uk.gov.onelogin.sharing.bluetooth.api.core
 
 import java.util.UUID
 
@@ -13,5 +13,5 @@ fun interface MessageSender {
      * @param data The CBOR-encoded SessionData bytes to transmit.
      * @return `true` if all chunks were sent successfully, `false` otherwise.
      */
-    fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean
+    suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean
 }

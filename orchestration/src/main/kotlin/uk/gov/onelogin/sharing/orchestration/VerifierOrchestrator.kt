@@ -231,7 +231,7 @@ class VerifierOrchestrator(
         appCoroutineScope.launch { centralBluetoothTransport.stop() }
     }
 
-    private fun handleCentralBluetoothState(state: CentralBluetoothState) {
+    private suspend fun handleCentralBluetoothState(state: CentralBluetoothState) {
         if (sessionFlow.value.isComplete()) return
 
         logger.debug(logTag, "BLE state = $state")
@@ -295,7 +295,7 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun handleConnectionStateStarted() {
+    private suspend fun handleConnectionStateStarted() {
         val context = sessionFlow.value.cryptoContext ?: return failWith(
             "Missing crypto context when building DeviceRequest",
             SessionErrorReason.MissingCryptoContext
@@ -313,13 +313,13 @@ class VerifierOrchestrator(
                 is SessionEstablishmentException ->
                     SessionErrorReason.CannotBuildSessionEstablishment
 
-                else -> SessionErrorReason.UnrecoverableThrowable(e)
+                else -> SessionErrorReason.CannotSendMessage
             }
             failWith(e.message ?: "Error building SessionEstablishment", reason)
         }
     }
 
-    private fun buildAndSendSessionEstablishment(
+    private suspend fun buildAndSendSessionEstablishment(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {
@@ -336,8 +336,16 @@ class VerifierOrchestrator(
         verifierCryptoService.buildSessionEstablishment(
             eReaderKeyBytes = context.eReaderKeyTagged,
             encryptedDeviceRequest = encryptedDeviceRequest
-        ).also {
-            logger.debug(logTag, "SessionEstablishment bytes: ${it.toHexString()}")
+        ).also { sessionEstablishmentBytes ->
+            logger.debug(
+                logTag,
+                "SessionEstablishment bytes: ${sessionEstablishmentBytes.toHexString()}"
+            )
+            val sent = centralBluetoothTransport.sendMessage(
+                serviceUuid = context.serviceUuid,
+                data = sessionEstablishmentBytes
+            )
+            if (!sent) error("Failed to send SessionEstablishment message")
         }
     }
 

@@ -34,7 +34,7 @@ class FakeGattServerManager : GattServerManager {
             SessionEndStateQueued.Success
         }
 
-    override fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
         sentMessages.add(data)
         return sendMessageResult
     }

@@ -37,6 +37,8 @@ sealed class SessionErrorReason {
 
     data object CannotBuildSessionEstablishment : SessionErrorReason()
 
+    data object CannotSendMessage : SessionErrorReason()
+
     /**
      * State for when there's an issue with obtaining a
      * [uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData] instance from an updated

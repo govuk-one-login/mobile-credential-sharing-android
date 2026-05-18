@@ -511,7 +511,7 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `sendMessage sends single chunk with 0x00 header when data fits in one chunk`() {
+    fun `sendMessage sends single chunk with 0x00 header when data fits in one chunk`() = runTest {
         val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
         val server2ClientChar = mockk<BluetoothGattCharacteristic>()
         val service = mockk<BluetoothGattService> {
@@ -536,38 +536,40 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `sendMessage chunks data and prefixes intermediate chunks with 0x01 and final with 0x00`() {
-        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
-        val server2ClientChar = mockk<BluetoothGattCharacteristic>()
-        val service = mockk<BluetoothGattService> {
-            every { getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns server2ClientChar
+    fun `sendMessage chunks data and prefixes intermediate chunks with 0x01 and final with 0x00`() =
+        runTest {
+            val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+            val server2ClientChar = mockk<BluetoothGattCharacteristic>()
+            val service = mockk<BluetoothGattService> {
+                every { getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns
+                    server2ClientChar
+            }
+            every { gattServer.getService(uuid) } returns service
+
+            manager.open(uuid)
+            // Simulate a small value MTU value negotiation so we get multiple chunks
+            callbackSlot.captured.onMtuChanged(device, 23)
+            callbackSlot.captured.onConnectionStateChange(
+                device,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothProfile.STATE_CONNECTED
+            )
+
+            val data = ByteArray(40) { it.toByte() } // forces 3 chunks
+            val result = manager.sendMessage(uuid, data)
+
+            assert(result)
+            val chunks = fakeGattWriter.sentChunks
+            // All intermediate chunks should have header 0x01
+            chunks.dropLast(1).forEach { chunk ->
+                assertEquals(0x01.toByte(), chunk[0])
+            }
+            // Final chunk should have header 0x00
+            assertEquals(0x00.toByte(), chunks.last()[0])
         }
-        every { gattServer.getService(uuid) } returns service
-
-        manager.open(uuid)
-        // Simulate a small value MTU value negotiation so we get multiple chunks
-        callbackSlot.captured.onMtuChanged(device, 23)
-        callbackSlot.captured.onConnectionStateChange(
-            device,
-            BluetoothGatt.GATT_SUCCESS,
-            BluetoothProfile.STATE_CONNECTED
-        )
-
-        val data = ByteArray(40) { it.toByte() } // forces 3 chunks
-        val result = manager.sendMessage(uuid, data)
-
-        assert(result)
-        val chunks = fakeGattWriter.sentChunks
-        // All intermediate chunks should have header 0x01
-        chunks.dropLast(1).forEach { chunk ->
-            assertEquals(0x01.toByte(), chunk[0])
-        }
-        // Final chunk should have header 0x00
-        assertEquals(0x00.toByte(), chunks.last()[0])
-    }
 
     @Test
-    fun `sendMessage returns false when data is empty`() {
+    fun `sendMessage returns false when data is empty`() = runTest {
         val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
         val server2ClientChar = mockk<BluetoothGattCharacteristic>()
         val service = mockk<BluetoothGattService> {
@@ -589,7 +591,7 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `sendMessage returns false when no device connected`() {
+    fun `sendMessage returns false when no device connected`() = runTest {
         val (_, gattServer) = setupOpenGattServer(bluetoothManager, context)
         every { gattServer.getService(uuid) } returns mockk()
 
@@ -602,7 +604,7 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `sendMessage returns false when notify fails`() {
+    fun `sendMessage returns false when notify fails`() = runTest {
         val fakeGattWriter = FakeGattWriter(success = false)
         val manager = AndroidGattServerManager(
             context = context,

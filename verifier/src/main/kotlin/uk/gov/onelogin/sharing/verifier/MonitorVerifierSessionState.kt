@@ -149,6 +149,7 @@ private fun handleSessionFailure(
             }
         }
 
+        is SessionErrorReason.CannotSendMessage,
         is SessionErrorReason.CannotEncryptDeviceRequest,
         is SessionErrorReason.CannotBuildSessionEstablishment,
         is SessionErrorReason.MissingCryptoContext,

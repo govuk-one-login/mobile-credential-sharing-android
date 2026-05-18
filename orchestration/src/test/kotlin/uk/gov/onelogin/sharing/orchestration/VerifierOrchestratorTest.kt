@@ -568,6 +568,33 @@ class VerifierOrchestratorTest {
         assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 
+    @Test
+    fun `sendMessage success completes transmission`() = runTest {
+        centralBluetoothTransport.sendMessageToReturn = true
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+
+        assertArrayEquals(
+            fakeCryptoService.buildSessionEstablishmentToReturn,
+            centralBluetoothTransport.lastSentData
+        )
+    }
+
+    @Test
+    fun `sendMessage failure transitions to Failed with CannotSendMessage reason`() = runTest {
+        centralBluetoothTransport.sendMessageToReturn = false
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(hasReason(instanceOf(SessionErrorReason.CannotSendMessage::class.java)))
+        )
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
     /**
      * DCMAW-19310: AC1: Route a SessionData envelope containing a payload
      */
