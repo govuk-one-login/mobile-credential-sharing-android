@@ -3,13 +3,14 @@ package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 
 /**
  * Responsible for orchestrating BLE scanning and GATT client connection.
  *
  * Exposes [CentralBluetoothState] via a [StateFlow].
  */
-interface CentralBluetoothTransport {
+interface CentralBluetoothTransport : MessageSender {
     /**
      * The current state of the BLE session, exposed as a [StateFlow].
      */

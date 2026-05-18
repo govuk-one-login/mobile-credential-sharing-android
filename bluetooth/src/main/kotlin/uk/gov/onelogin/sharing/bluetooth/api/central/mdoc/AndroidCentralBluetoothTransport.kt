@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
+import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
@@ -23,7 +25,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(scope = AppScope::class)
+@ContributesBinding(scope = AppScope::class, binding = binding<CentralBluetoothTransport>())
 @SingleIn(AppScope::class)
 class AndroidCentralBluetoothTransport(
     private val gattClientManager: GattClientManager,
@@ -31,7 +33,8 @@ class AndroidCentralBluetoothTransport(
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
     private val logger: Logger
-) : CentralBluetoothTransport {
+) : CentralBluetoothTransport,
+    MessageSender by gattClientManager {
 
     private val _state = MutableStateFlow<CentralBluetoothState>(CentralBluetoothState.Idle)
     override val state: StateFlow<CentralBluetoothState> = _state

@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral
 
 import java.util.UUID
 import kotlinx.coroutines.flow.SharedFlow
+import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 
 interface GattServerManager :

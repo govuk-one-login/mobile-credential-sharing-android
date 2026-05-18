@@ -17,10 +17,12 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
+import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
@@ -145,6 +147,21 @@ class AndroidGattClientManager(
             logger.error(logTag, "Security exception", e)
             _events.tryEmit(
                 GattClientEvent.Error(ClientError.BLUETOOTH_PERMISSION_MISSING)
+            )
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+        val gatt = bluetoothGatt ?: return false
+        val characteristic = gatt.getService(serviceUuid)
+            ?.getCharacteristic(CLIENT_2_SERVER_UUID) ?: return false
+
+        return sendChunkedMessage(data, mtu, logger) { chunk ->
+            gattWriter.writeCharacteristic(
+                gatt = gatt,
+                characteristic = characteristic,
+                value = chunk
             )
         }
     }

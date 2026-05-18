@@ -261,12 +261,14 @@ class HolderOrchestrator(
                 encryptCounter = context.encryptCounter
             )
 
-            peripheralBluetoothTransport.sendMessage(
-                serviceUuid = context.sessionUuid,
-                data = sessionDataBytes
-            )
+            appCoroutineScope.launch {
+                peripheralBluetoothTransport.sendMessage(
+                    serviceUuid = context.sessionUuid,
+                    data = sessionDataBytes
+                )
 
-            safeTransitionTo(HolderSessionState.Complete.Cancelled)
+                safeTransitionTo(HolderSessionState.Complete.Cancelled)
+            }
         } catch (e: IllegalStateException) {
             sendTerminationAndFail(e)
         }
