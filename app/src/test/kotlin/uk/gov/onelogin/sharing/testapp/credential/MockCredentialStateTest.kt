@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import org.junit.Assert.assertArrayEquals
 import uk.gov.onelogin.sharing.testapp.R
@@ -17,10 +18,7 @@ import uk.gov.onelogin.sharing.testapp.credential.MockCredentialData.mockCredent
 class MockCredentialStateTest {
     private val base64EncodedCredential = "AQID"
 
-    private val privateKeyContent = this::class.java.classLoader
-        ?.getResourceAsStream("test_private_key.pem")
-        ?.bufferedReader()
-        ?.readText() ?: ""
+    private val privateKeyContent = MockCredentialData.mockPrivateKeyPem
 
     private val context: Context = mockk {
         every { resources } returns mockk<Resources> {
@@ -55,5 +53,49 @@ class MockCredentialStateTest {
     fun `mockCredential returns credential with a valid UUID id`() {
         val credential = mockCredentialState.toCredential(context)
         assertEquals(UUID.fromString(credential.id).toString(), credential.id)
+    }
+
+    @Test
+    fun `toCredential throws when PEM missing BEGIN header`() {
+        val invalidPem = "MIGHAgEA\n-----END PRIVATE KEY-----"
+        val context = contextWithPrivateKey(invalidPem)
+        val exception = assertFailsWith<IllegalArgumentException> {
+            mockCredentialState.toCredential(context)
+        }
+
+        assertEquals("Failed to load private key from assets", exception.message)
+    }
+
+    @Test
+    fun `toCredential throws when PEM missing END header`() {
+        val invalidPem = "-----BEGIN PRIVATE KEY-----\nMIGHAgEA"
+        val context = contextWithPrivateKey(invalidPem)
+        val exception = assertFailsWith<IllegalArgumentException> {
+            mockCredentialState.toCredential(context)
+        }
+
+        assertEquals("Failed to load private key from assets", exception.message)
+    }
+
+    @Test
+    fun `toCredential throws when PEM has no key content`() {
+        val invalidPem = "-----BEGIN PRIVATE KEY-----\n-----END PRIVATE KEY-----"
+        val context = contextWithPrivateKey(invalidPem)
+        val exception = assertFailsWith<IllegalArgumentException> {
+            mockCredentialState.toCredential(context)
+        }
+
+        assertEquals("Failed to load private key from assets", exception.message)
+    }
+
+    private fun contextWithPrivateKey(pemContent: String): Context = mockk {
+        every { resources } returns mockk<Resources> {
+            every { openRawResource(R.raw.mock_credential) } returns
+                ByteArrayInputStream(base64EncodedCredential.toByteArray())
+        }
+        every { assets } returns mockk<AssetManager> {
+            every { open("test_private_key.pem") } returns
+                ByteArrayInputStream(pemContent.toByteArray())
+        }
     }
 }
