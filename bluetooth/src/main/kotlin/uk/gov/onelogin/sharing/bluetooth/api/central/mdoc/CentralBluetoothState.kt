@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
+import java.util.UUID
+import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 /**
@@ -47,4 +49,38 @@ sealed interface CentralBluetoothState {
      * A session end command has been received.
      */
     data class CentralBluetoothEnded(val status: SessionEndStates) : CentralBluetoothState
+
+    /**
+     * A data structure has been received from the other device.
+     *
+     * @param uuid The bluetooth characteristic [UUID] where the message originates from.
+     * @param value The completed data from the associated [uuid] characteristic.
+     */
+    data class Message(val uuid: UUID, val value: ByteArray) : CentralBluetoothState {
+
+        constructor(
+            message: GattClientEvent.Message
+        ) : this(
+            uuid = message.uuid,
+            value = message.value
+        )
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Message
+
+            if (uuid != other.uuid) return false
+            if (!value.contentEquals(other.value)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = uuid.hashCode()
+            result = 31 * result + value.contentHashCode()
+            return result
+        }
+    }
 }

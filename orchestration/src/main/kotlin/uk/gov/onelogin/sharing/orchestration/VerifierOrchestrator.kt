@@ -263,6 +263,10 @@ class VerifierOrchestrator(
                 stopCentralTransport()
             }
 
+            is CentralBluetoothState.Message -> {
+                // DCMAW-16908: Decrypt session data envelope.
+            }
+
             else -> Unit
         }
     }

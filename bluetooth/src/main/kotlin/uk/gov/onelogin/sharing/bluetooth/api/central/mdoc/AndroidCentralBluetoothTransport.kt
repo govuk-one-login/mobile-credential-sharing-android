@@ -109,36 +109,43 @@ class AndroidCentralBluetoothTransport(
     private fun handleGattClientEvent(event: GattClientEvent) {
         when (event) {
             GattClientEvent.Connecting ->
-                _state.value = CentralBluetoothState.Connecting
+                CentralBluetoothState.Connecting
 
             is GattClientEvent.Connected ->
-                _state.value = CentralBluetoothState.Connected(event.deviceAddress)
+                CentralBluetoothState.Connected(event.deviceAddress)
 
             is GattClientEvent.Disconnected ->
-                _state.value = CentralBluetoothState.Disconnected(
+                CentralBluetoothState.Disconnected(
                     event.deviceAddress,
                     event.isSessionEnd
                 )
 
             GattClientEvent.ConnectionStateStarted ->
-                _state.value = CentralBluetoothState.ConnectionStateStarted
+                CentralBluetoothState.ConnectionStateStarted
 
             is GattClientEvent.Error ->
-                _state.value = CentralBluetoothState.Error(
+                CentralBluetoothState.Error(
                     CentralBluetoothTransportError.fromClientError(event.error)
                 )
 
             is GattClientEvent.SessionEnd ->
-                _state.value = CentralBluetoothState.CentralBluetoothEnded(
+                CentralBluetoothState.CentralBluetoothEnded(
                     event.sessionEndStates
                 )
 
-            is GattClientEvent.Message -> {
-                // DCMAW-16908: Handle message completion.
-            }
+            is GattClientEvent.Message -> event.let(CentralBluetoothState::Message)
 
-            is GattClientEvent.UnsupportedEvent ->
+            is GattClientEvent.UnsupportedEvent -> {
                 logger.debug(logTag, "Unhandled event: $event")
+                null
+            }
+        }?.let { bluetoothState ->
+            _state.value = bluetoothState
+        }.also {
+            logger.debug(
+                logTag,
+                "Completed handling gatt client event: $event"
+            )
         }
     }
 }
