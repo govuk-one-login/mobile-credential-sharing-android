@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
-import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 /**
@@ -47,4 +47,6 @@ interface VerifierCryptoService {
         eReaderKeyBytes: ByteArray,
         encryptedDeviceRequest: ByteArray
     ): ByteArray
+
+    fun deserializeSessionData(input: ByteArray): SessionData
 }

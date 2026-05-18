@@ -1,12 +1,16 @@
 package uk.gov.onelogin.sharing.orchestration
 
 import app.cash.turbine.test
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
@@ -21,14 +25,19 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -55,6 +64,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierS
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
 class VerifierOrchestratorTest {
     @get:Rule
@@ -556,5 +566,114 @@ class VerifierOrchestratorTest {
             )
         )
         assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    /**
+     * DCMAW-19310: AC1: Route a SessionData envelope containing a payload
+     */
+    @Test
+    fun `Serializes SessionData from central bluetooth message`() = runTest {
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        orchestrator.hashCode()
+        advanceUntilIdle()
+
+        assertTrue {
+            "Deserialized SessionData from bluetooth central Message" in logger
+        }
+    }
+
+    /**
+     * DCMAW-19310: AC2: Handle SessionData reporting a session-level transport error
+     */
+    @Test
+    fun `Navigates to failure state due to SessionDataStatus`(
+        @TestParameter status: SessionDataStatus
+    ) = runTest {
+        fakeCryptoService.sessionData = SessionData(status = status)
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        orchestrator.hashCode()
+        advanceUntilIdle()
+
+        assertInvalidSessionDataInstance()
+    }
+
+    /**
+     * DCMAW-19310: AC3: Handle a SessionData envelope missing a payload
+     */
+    @Test
+    fun `Navigates to failure state due to missing SessionData payload`() = runTest {
+        fakeCryptoService.sessionData = SessionData()
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        orchestrator.hashCode()
+        advanceUntilIdle()
+
+        assertInvalidSessionDataInstance()
+    }
+
+    /**
+     * DCMAW-19310: AC4: Handle malformed CBOR during SessionData decoding
+     */
+    @Test
+    fun `Navigates to failure state due to SessionData CBOR encoding exception`() = runTest {
+        fakeCryptoService.exceptionToThrow = JsonMappingException.from(
+            CborMapper.default.createParser(byteArrayOf()),
+            "This is a unit test"
+        )
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        orchestrator.hashCode()
+        advanceUntilIdle()
+
+        assertInvalidSessionDataInstance()
+    }
+
+    private suspend fun assertInvalidSessionDataInstance() {
+        assertTrue {
+            "Received invalid SessionData instance" in logger
+        }
+
+        orchestrator.verifierSessionState.test {
+            assertThat(
+                expectMostRecentItem(),
+                isFailed(
+                    hasReason(
+                        equalTo(SessionErrorReason.InvalidSessionDataPayload)
+                    )
+                )
+            )
+        }
     }
 }

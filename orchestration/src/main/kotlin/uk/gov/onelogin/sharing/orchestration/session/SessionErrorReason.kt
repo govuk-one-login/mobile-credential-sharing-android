@@ -38,6 +38,13 @@ sealed class SessionErrorReason {
     data object CannotBuildSessionEstablishment : SessionErrorReason()
 
     /**
+     * State for when there's an issue with obtaining a
+     * [uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData] instance from an updated
+     * bluetooth characteristic event.
+     */
+    data object InvalidSessionDataPayload : SessionErrorReason()
+
+    /**
      * State for when the app cannot process the provided QR code.
      *
      * @see uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult.Invalid
