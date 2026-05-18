@@ -431,7 +431,7 @@ class AndroidGattClientManager(
                         logTag,
                         "Completed 'Server2Client' message transfer:"
                     )
-                    it.value.toList().chunked(3072).forEach { chunkedMessage ->
+                    it.value.toList().chunked(THREE_KILOBYTES).forEach { chunkedMessage ->
                         logger.debug(
                             logTag,
                             chunkedMessage.toByteArray().toHexString()
@@ -452,5 +452,9 @@ class AndroidGattClientManager(
                 }
             }
         }
+    }
+
+    companion object {
+        const val THREE_KILOBYTES = 3072
     }
 }

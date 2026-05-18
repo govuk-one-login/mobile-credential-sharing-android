@@ -47,6 +47,7 @@ import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPe
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
