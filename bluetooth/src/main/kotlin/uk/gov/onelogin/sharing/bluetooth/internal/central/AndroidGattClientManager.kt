@@ -429,9 +429,14 @@ class AndroidGattClientManager(
                 }.also {
                     logger.debug(
                         logTag,
-                        "Completed 'Server2Client' message transfer: " +
-                            it.value.toHexString()
+                        "Completed 'Server2Client' message transfer:"
                     )
+                    it.value.toList().chunked(3072).forEach { chunkedMessage ->
+                        logger.debug(
+                            logTag,
+                            chunkedMessage.toByteArray().toHexString()
+                        )
+                    }
 
                     messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
                 }

@@ -618,8 +618,7 @@ internal class AndroidGattClientManagerTest {
             }
 
             assertTrue(
-                "Completed 'Server2Client' message transfer: ${expectedBytes.toHexString()}"
-                    in logger
+                "Completed 'Server2Client' message transfer:" in logger
             )
         }
     }
@@ -651,7 +650,7 @@ internal class AndroidGattClientManagerTest {
         }
 
         assertTrue(
-            "Completed 'Server2Client' message transfer: ${expectedBytes.toHexString()}" in logger
+            "Completed 'Server2Client' message transfer:" in logger
         )
     }
 
