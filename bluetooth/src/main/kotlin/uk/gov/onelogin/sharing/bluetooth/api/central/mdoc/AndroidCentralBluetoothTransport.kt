@@ -133,7 +133,7 @@ class AndroidCentralBluetoothTransport(
                     event.sessionEndStates
                 )
 
-            is GattClientEvent.Message.Complete -> {
+            is GattClientEvent.Message -> {
                 // DCMAW-16908: Handle message completion.
             }
 

@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.gatt.central
 
+import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 sealed interface GattClientEvent {
@@ -16,18 +17,16 @@ sealed interface GattClientEvent {
 
     data class SessionEnd(val sessionEndStates: SessionEndStates) : GattClientEvent
 
-    sealed class Message {
-        data class Complete(val value: ByteArray) : GattClientEvent {
-            override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (javaClass != other?.javaClass) return false
+    data class Message(val uuid: UUID, val value: ByteArray) : GattClientEvent {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
 
-                other as Complete
+            other as Message
 
-                return value.contentEquals(other.value)
-            }
-
-            override fun hashCode(): Int = value.contentHashCode()
+            return value.contentEquals(other.value)
         }
+
+        override fun hashCode(): Int = value.contentHashCode()
     }
 }

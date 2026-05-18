@@ -397,56 +397,55 @@ class AndroidGattClientManager(
             }
 
             SERVER_2_CLIENT_UUID -> {
-                val messageBytes = event.value.drop(1).toByteArray()
-
-                when (firstByte) {
-                    NON_LAST_PART -> {
-                        messagesMap[SERVER_2_CLIENT_UUID] =
-                            (
-                                (messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) +
-                                    messageBytes
-                                )
-                        logger.debug(
-                            logTag,
-                            "Chunked 'Server2Client' characteristic update: ${messageBytes.toHexString()}"
-                        )
-
-                        // don't emit a message event until the message is complete.
-                        null
-                    }
-
-                    LAST_PART -> {
-                        (
-                            (
-                                messagesMap[SERVER_2_CLIENT_UUID]
-                                    ?: byteArrayOf()
-                                ) + messageBytes
-                            ).let(GattClientEvent.Message::Complete)
-                            .also {
-                                logger.debug(
-                                    logTag,
-                                    "Completed 'Server2Client' message transfer: ${it.value.toHexString()}"
-                                )
-
-                                messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
-                            }
-                    }
-
-                    else -> {
-                        GattClientEvent.Error(ClientError.INVALID_MESSAGE_PREFIX).also {
-                            logger.debug(
-                                logTag,
-                                "Received invalid status byte: ${firstByte.toHexString()}"
-                            )
-                            messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
-                        }
-                    }
-                }
+                handleServerToClientMessage(event.value, firstByte)
             }
 
             else -> {
                 null
             }
         }?.let { _events.tryEmit(it) }
+    }
+
+    private fun handleServerToClientMessage(value: ByteArray, firstByte: Byte): GattClientEvent? {
+        val messageBytes = value.drop(1).toByteArray()
+
+        return when (firstByte) {
+            NON_LAST_PART -> {
+                messagesMap[SERVER_2_CLIENT_UUID] =
+                    ((messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) + messageBytes)
+                logger.debug(
+                    logTag,
+                    "Chunked 'Server2Client' characteristic update: " +
+                        messageBytes.toHexString()
+                )
+
+                // don't emit a message event until the message is complete.
+                null
+            }
+
+            LAST_PART -> {
+                ((messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) + messageBytes).let {
+                    GattClientEvent.Message(uuid = SERVER_2_CLIENT_UUID, value = it)
+                }.also {
+                    logger.debug(
+                        logTag,
+                        "Completed 'Server2Client' message transfer: " +
+                            it.value.toHexString()
+                    )
+
+                    messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
+                }
+            }
+
+            else -> {
+                GattClientEvent.Error(ClientError.INVALID_MESSAGE_PREFIX).also {
+                    logger.debug(
+                        logTag,
+                        "Received invalid status byte: ${firstByte.toHexString()}"
+                    )
+                    messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
+                }
+            }
+        }
     }
 }

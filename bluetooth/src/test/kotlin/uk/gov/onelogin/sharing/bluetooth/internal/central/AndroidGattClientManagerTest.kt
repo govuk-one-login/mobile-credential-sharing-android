@@ -603,7 +603,10 @@ internal class AndroidGattClientManagerTest {
             }
 
             assertEquals(
-                GattClientEvent.Message.Complete(value = expectedBytes),
+                GattClientEvent.Message(
+                    uuid = GattUuids.SERVER_2_CLIENT_UUID,
+                    value = expectedBytes
+                ),
                 awaitItem()
             )
 
@@ -639,7 +642,10 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.Message.Complete(value = expectedBytes),
+                GattClientEvent.Message(
+                    uuid = GattUuids.SERVER_2_CLIENT_UUID,
+                    value = expectedBytes
+                ),
                 awaitItem()
             )
         }
