@@ -448,12 +448,14 @@ class AndroidGattClientManager(
                         logTag,
                         "Completed 'Server2Client' message transfer:"
                     )
-                    it.value.toList().chunked(THREE_KILOBYTES).forEach { chunkedMessage ->
-                        logger.debug(
-                            logTag,
-                            chunkedMessage.toByteArray().toHexString()
-                        )
-                    }
+                    it.value.toHexString()
+                        .chunked(THREE_KILOBYTE_CHAR_LENGTH)
+                        .forEach { chunkedMessage ->
+                            logger.debug(
+                                logTag,
+                                chunkedMessage
+                            )
+                        }
 
                     messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
                 }
@@ -472,6 +474,11 @@ class AndroidGattClientManager(
     }
 
     companion object {
-        const val THREE_KILOBYTES = 3072
+
+        /**
+         * The [String] length for 3 kilobytes of data, as kotlin uses 16 bits per [Char].
+         * This is used for chunking long log messages due to android limitations of
+         */
+        const val THREE_KILOBYTE_CHAR_LENGTH = 192
     }
 }
