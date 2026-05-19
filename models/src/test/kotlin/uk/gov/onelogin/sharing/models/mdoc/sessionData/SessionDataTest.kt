@@ -11,16 +11,21 @@ class SessionDataTest {
         data = byteArrayOf(),
         status = SessionDataStatus.SESSION_TERMINATION
     )
+    private val okSessionData = fullSessionData.copy(
+        status = SessionDataStatus.OK
+    )
 
     @Test
     fun `Can check if an instance has a 'data' property`() {
         assertFalse(emptySessionData.hasData())
         assertTrue(fullSessionData.hasData())
+        assertTrue(okSessionData.hasData())
     }
 
     @Test
     fun `Can check if an instance has a 'status' property`() {
-        assertFalse(emptySessionData.hasErrorStatus())
-        assertTrue(fullSessionData.hasErrorStatus())
+        assertTrue(emptySessionData.hasOkStatus())
+        assertFalse(fullSessionData.hasOkStatus())
+        assertTrue(okSessionData.hasOkStatus())
     }
 }

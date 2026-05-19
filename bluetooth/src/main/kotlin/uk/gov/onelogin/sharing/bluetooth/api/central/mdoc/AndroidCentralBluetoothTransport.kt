@@ -57,8 +57,8 @@ class AndroidCentralBluetoothTransport(
             bluetoothStateMonitor.states.collect { status ->
                 when (status) {
                     BluetoothStatus.OFF,
-                    BluetoothStatus.TURNING_OFF,
-                        -> {
+                    BluetoothStatus.TURNING_OFF
+                    -> {
                         _bluetoothStatus.value = BluetoothStatus.OFF
                         scanJob?.cancel()
                         scanJob = null
