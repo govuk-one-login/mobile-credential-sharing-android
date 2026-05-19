@@ -5,7 +5,6 @@ import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -42,7 +41,8 @@ class AndroidCentralBluetoothTransportTest {
             scanner = scanner,
             bluetoothStateMonitor = bluetoothStateMonitor,
             coroutineScope = testScope.backgroundScope,
-            logger = logger
+            logger = logger,
+            ioDispatcher = dispatcherRule.testDispatcher
         )
     }
 
