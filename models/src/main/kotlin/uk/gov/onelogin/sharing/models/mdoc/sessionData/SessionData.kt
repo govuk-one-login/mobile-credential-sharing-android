@@ -19,5 +19,5 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionData
  */
 data class SessionData(val data: ByteArray? = null, val status: SessionDataStatus? = null) {
     fun hasData(): Boolean = data != null
-    fun hasStatus(): Boolean = status != null
+    fun hasErrorStatus(): Boolean = status?.let { it != SessionDataStatus.OK } ?: false
 }

@@ -273,7 +273,7 @@ class VerifierOrchestrator(
     private fun handleCentralBluetoothStateMessage(state: CentralBluetoothState.Message) {
         runCatching {
             verifierCryptoService.deserializeSessionData(state.value).run {
-                check(!hasStatus()) {
+                check(hasErrorStatus()) {
                     "Received SessionData error status: ${status?.code}"
                 }
                 check(hasData()) {

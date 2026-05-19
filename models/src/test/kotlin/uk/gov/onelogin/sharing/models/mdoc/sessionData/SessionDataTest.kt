@@ -20,7 +20,7 @@ class SessionDataTest {
 
     @Test
     fun `Can check if an instance has a 'status' property`() {
-        assertFalse(emptySessionData.hasStatus())
-        assertTrue(fullSessionData.hasStatus())
+        assertFalse(emptySessionData.hasErrorStatus())
+        assertTrue(fullSessionData.hasErrorStatus())
     }
 }
