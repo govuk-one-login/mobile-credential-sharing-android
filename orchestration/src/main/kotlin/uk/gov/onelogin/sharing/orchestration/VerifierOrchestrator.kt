@@ -176,7 +176,8 @@ class VerifierOrchestrator(
                 }.onFailure { e ->
                     failWith(
                         "Error processing engagement: ${e.message}",
-                        SessionErrorReason.CannotProcessEngagement(result.value)
+                        SessionErrorReason.CannotProcessEngagement(result.value),
+                        e
                     )
                 }.onSuccess {
                     sessionFlow.value.cryptoContext?.let {
@@ -263,7 +264,34 @@ class VerifierOrchestrator(
                 stopCentralTransport()
             }
 
+            is CentralBluetoothState.Message -> handleCentralBluetoothStateMessage(state)
+
             else -> Unit
+        }
+    }
+
+    private fun handleCentralBluetoothStateMessage(state: CentralBluetoothState.Message) {
+        runCatching {
+            verifierCryptoService.deserializeSessionData(state.value).run {
+                check(hasOkStatus()) {
+                    "Received SessionData error status: ${status?.code}"
+                }
+                check(hasData()) {
+                    "Received empty SessionData payload"
+                }
+            }
+        }.onFailure { throwable ->
+            failWith(
+                "Received invalid SessionData instance",
+                SessionErrorReason.InvalidSessionDataPayload,
+                throwable
+            )
+        }.onSuccess {
+            // DCMAW-19311: Handle SessionData
+            logger.debug(
+                logTag,
+                "Deserialized SessionData from bluetooth central Message"
+            )
         }
     }
 
@@ -321,16 +349,24 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun failWith(message: String, exception: Throwable) {
-        logger.error(logTag, message, exception)
-        failWith(
-            message,
-            SessionErrorReason.UnrecoverableThrowable(exception)
-        )
-    }
+    private fun failWith(message: String, exception: Throwable) = failWith(
+        message = message,
+        reason = SessionErrorReason.UnrecoverableThrowable(exception),
+        throwable = exception
+    )
 
     private fun failWith(message: String, reason: SessionErrorReason) {
         logger.error(logTag, message)
+        stopCentralTransport()
+        safeTransitionTo(
+            VerifierSessionState.Complete.Failed(
+                SessionError(message = message, reason = reason)
+            )
+        )
+    }
+
+    private fun failWith(message: String, reason: SessionErrorReason, throwable: Throwable) {
+        logger.error(logTag, message, throwable)
         stopCentralTransport()
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(

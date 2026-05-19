@@ -13,7 +13,7 @@ class ExampleSessionDataDtoInputs : TestParametersValuesProvider() {
     private val inputs = listOf(
         "Empty SessionDataDto" to SessionDataDtoStubs.emptySessionDataDto,
         "ISO spec example" to CborMapper.default.readValue(
-            SessionDataDtoStubs.validSessionDataHexString,
+            SessionDataDtoStubs.validSessionDataDtoBytes,
             SessionDataDto::class.java
         )
     ) + statusOnlyDtoList

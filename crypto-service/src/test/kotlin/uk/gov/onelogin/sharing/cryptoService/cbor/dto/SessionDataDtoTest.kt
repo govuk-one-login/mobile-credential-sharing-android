@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoMatchers.has
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.dataFieldName
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.emptySessionDataDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.statusFieldName
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.validSessionDataHexString
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.validSessionDataDtoBytes
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 
 @RunWith(TestParameterInjector::class)
@@ -164,7 +164,7 @@ class SessionDataDtoTest {
 
     @Test
     fun `Can deserialize a valid test data hex string`() {
-        val result = mapper.readValue(validSessionDataHexString, SessionDataDto::class.java)
+        val result = mapper.readValue(validSessionDataDtoBytes, SessionDataDto::class.java)
         assertThat(
             result,
             hasStatus(nullValue())

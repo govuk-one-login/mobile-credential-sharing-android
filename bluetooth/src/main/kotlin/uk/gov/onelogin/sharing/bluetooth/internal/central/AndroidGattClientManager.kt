@@ -16,8 +16,11 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
@@ -53,6 +56,8 @@ class AndroidGattClientManager(
     private var mtu = MIN_MTU
     private var isSessionEnd = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
+
+    private val messagesMap: MutableMap<UUID, ByteArray> = mutableMapOf()
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
@@ -109,7 +114,7 @@ class AndroidGattClientManager(
 
         val state = gatt
             .getService(serviceUuid)
-            .getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
+            .getCharacteristic(STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
             INVALID_SERVICE
         ).let { SessionEndStates.WRITE_TO_SERVER_FAILED }
@@ -388,17 +393,92 @@ class AndroidGattClientManager(
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleCharacteristicChanged(event: GattEvent.CharacteristicChanged) {
-        event.value?.firstOrNull() ?: return
+        val firstByte = event.value?.firstOrNull() ?: return
 
-        if (event.characteristic.uuid == STATE_UUID) {
-            when (event.value.first()) {
-                MdocState.END.code -> {
-                    logger.debug(logTag, "GATT: Received notification 0x02 on State")
-                    isSessionEnd = true
-                    bluetoothGatt?.disconnect()
-                    _events.tryEmit(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS))
+        when (event.characteristic.uuid) {
+            STATE_UUID -> {
+                when (firstByte) {
+                    MdocState.END.code -> {
+                        logger.debug(logTag, "GATT: Received notification 0x02 on State")
+                        isSessionEnd = true
+                        bluetoothGatt?.disconnect()
+
+                        GattClientEvent.SessionEnd(SessionEndStates.SUCCESS)
+                    }
+
+                    else -> {
+                        // Currently do nothing with codes other than [END].
+                        null
+                    }
+                }
+            }
+
+            SERVER_2_CLIENT_UUID -> {
+                handleServerToClientMessage(event.value, firstByte)
+            }
+
+            else -> {
+                null
+            }
+        }?.let { _events.tryEmit(it) }
+    }
+
+    private fun handleServerToClientMessage(value: ByteArray, firstByte: Byte): GattClientEvent? {
+        val messageBytes = value.drop(1).toByteArray()
+
+        return when (firstByte) {
+            NON_LAST_PART -> {
+                messagesMap[SERVER_2_CLIENT_UUID] =
+                    ((messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) + messageBytes)
+                logger.debug(
+                    logTag,
+                    "Chunked 'Server2Client' characteristic update: " +
+                        messageBytes.toHexString()
+                )
+
+                // don't emit a message event until the message is complete.
+                null
+            }
+
+            LAST_PART -> {
+                ((messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) + messageBytes).let {
+                    GattClientEvent.Message(uuid = SERVER_2_CLIENT_UUID, value = it)
+                }.also {
+                    logger.debug(
+                        logTag,
+                        "Completed 'Server2Client' message transfer:"
+                    )
+                    it.value.toHexString()
+                        .chunked(THREE_KILOBYTE_CHAR_LENGTH)
+                        .forEach { chunkedMessage ->
+                            logger.debug(
+                                logTag,
+                                chunkedMessage
+                            )
+                        }
+
+                    messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
+                }
+            }
+
+            else -> {
+                GattClientEvent.Error(ClientError.INVALID_MESSAGE_PREFIX).also {
+                    logger.debug(
+                        logTag,
+                        "Received invalid status byte: ${firstByte.toHexString()}"
+                    )
+                    messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
                 }
             }
         }
+    }
+
+    companion object {
+
+        /**
+         * The [String] length for 3 kilobytes of data, as kotlin uses 16 bits per [Char].
+         * This is used for chunking long log messages due to android limitations of
+         */
+        const val THREE_KILOBYTE_CHAR_LENGTH = 192
     }
 }

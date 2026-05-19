@@ -37,7 +37,10 @@ android {
 
 dependencies {
     listOf(
-        libs.jackson.cbor,
+        libs.jackson.cbor
+    ).forEach(::api)
+
+    listOf(
         libs.jackson.core,
         libs.jackson.kotlin,
         libs.metro.viewmodel.compose,

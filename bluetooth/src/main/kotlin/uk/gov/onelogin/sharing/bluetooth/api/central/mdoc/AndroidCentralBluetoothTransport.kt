@@ -5,13 +5,16 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
@@ -32,7 +35,8 @@ class AndroidCentralBluetoothTransport(
     private val scanner: BluetoothScanner,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
-    private val logger: Logger
+    private val logger: Logger,
+    private val ioDispatcher: CoroutineContext = Dispatchers.IO
 ) : CentralBluetoothTransport,
     MessageSender by gattClientManager {
 
@@ -53,7 +57,8 @@ class AndroidCentralBluetoothTransport(
             bluetoothStateMonitor.states.collect { status ->
                 when (status) {
                     BluetoothStatus.OFF,
-                    BluetoothStatus.TURNING_OFF -> {
+                    BluetoothStatus.TURNING_OFF
+                    -> {
                         _bluetoothStatus.value = BluetoothStatus.OFF
                         scanJob?.cancel()
                         scanJob = null
@@ -75,20 +80,22 @@ class AndroidCentralBluetoothTransport(
         _state.value = CentralBluetoothState.Scanning
 
         scanJob = coroutineScope.launch {
-            when (val result = scanner.scan(serviceUuid).first()) {
-                is ScanEvent.DeviceFound -> {
-                    logger.debug(logTag, "Device found: ${result.device.address}")
-                    gattClientManager.connect(
-                        device = result.device,
-                        serviceUuid = serviceUuid
-                    )
-                }
+            withContext(ioDispatcher) {
+                when (val result = scanner.scan(serviceUuid).first()) {
+                    is ScanEvent.DeviceFound -> {
+                        logger.debug(logTag, "Device found: ${result.device.address}")
+                        gattClientManager.connect(
+                            device = result.device,
+                            serviceUuid = serviceUuid
+                        )
+                    }
 
-                is ScanEvent.ScanFailed -> {
-                    logger.debug(logTag, "Scan failed: ${result.failure}")
-                    _state.value = CentralBluetoothState.Error(
-                        CentralBluetoothTransportError.SCAN_FAILED
-                    )
+                    is ScanEvent.ScanFailed -> {
+                        logger.debug(logTag, "Scan failed: ${result.failure}")
+                        _state.value = CentralBluetoothState.Error(
+                            CentralBluetoothTransportError.SCAN_FAILED
+                        )
+                    }
                 }
             }
         }
@@ -112,32 +119,43 @@ class AndroidCentralBluetoothTransport(
     private fun handleGattClientEvent(event: GattClientEvent) {
         when (event) {
             GattClientEvent.Connecting ->
-                _state.value = CentralBluetoothState.Connecting
+                CentralBluetoothState.Connecting
 
             is GattClientEvent.Connected ->
-                _state.value = CentralBluetoothState.Connected(event.deviceAddress)
+                CentralBluetoothState.Connected(event.deviceAddress)
 
             is GattClientEvent.Disconnected ->
-                _state.value = CentralBluetoothState.Disconnected(
+                CentralBluetoothState.Disconnected(
                     event.deviceAddress,
                     event.isSessionEnd
                 )
 
             GattClientEvent.ConnectionStateStarted ->
-                _state.value = CentralBluetoothState.ConnectionStateStarted
+                CentralBluetoothState.ConnectionStateStarted
 
             is GattClientEvent.Error ->
-                _state.value = CentralBluetoothState.Error(
+                CentralBluetoothState.Error(
                     CentralBluetoothTransportError.fromClientError(event.error)
                 )
 
             is GattClientEvent.SessionEnd ->
-                _state.value = CentralBluetoothState.CentralBluetoothEnded(
+                CentralBluetoothState.CentralBluetoothEnded(
                     event.sessionEndStates
                 )
 
-            is GattClientEvent.UnsupportedEvent ->
+            is GattClientEvent.Message -> event.let(CentralBluetoothState::Message)
+
+            is GattClientEvent.UnsupportedEvent -> {
                 logger.debug(logTag, "Unhandled event: $event")
+                null
+            }
+        }?.let { bluetoothState ->
+            _state.value = bluetoothState
+        }.also {
+            logger.debug(
+                logTag,
+                "Completed handling gatt client event: $event"
+            )
         }
     }
 }
