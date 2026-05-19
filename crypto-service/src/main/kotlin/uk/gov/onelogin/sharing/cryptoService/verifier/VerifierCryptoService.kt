@@ -49,4 +49,16 @@ interface VerifierCryptoService {
     ): ByteArray
 
     fun deserializeSessionData(input: ByteArray): SessionData
+
+    /**
+     * Decrypts [deviceResponseBytes] using AES-256-GCM with the [skDevice] session key.
+     *
+     * @throws DecryptDeviceResponseException if decryption fails.
+     */
+    @Throws(DecryptDeviceResponseException::class)
+    fun decryptDeviceResponse(
+        deviceResponseBytes: ByteArray,
+        skDevice: ByteArray,
+        decryptCounter: UInt
+    ): ByteArray
 }

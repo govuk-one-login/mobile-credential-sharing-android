@@ -82,4 +82,18 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         exceptionToThrow?.let { throw it }
         return sessionData
     }
+
+    var decryptDeviceResponseToReturn: ByteArray = byteArrayOf(0x01, 0x02, 0x03)
+    var decryptDeviceResponseException: Exception? = null
+    var lastDecryptCounter: UInt? = null
+
+    override fun decryptDeviceResponse(
+        deviceResponseBytes: ByteArray,
+        skDevice: ByteArray,
+        decryptCounter: UInt
+    ): ByteArray {
+        lastDecryptCounter = decryptCounter
+        decryptDeviceResponseException?.let { throw it }
+        return decryptDeviceResponseToReturn
+    }
 }

@@ -29,8 +29,7 @@ class DecryptDeviceResponseUseCaseImpl(
         ).also {
             logger.debug(logTag, LOG_DECRYPT_SUCCESS)
         }
-
-    } catch (e: Exception) {
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         logger.error(logTag, LOG_DECRYPT_ERROR, e)
         throw DecryptDeviceResponseException(LOG_DECRYPT_ERROR, e)
     }
