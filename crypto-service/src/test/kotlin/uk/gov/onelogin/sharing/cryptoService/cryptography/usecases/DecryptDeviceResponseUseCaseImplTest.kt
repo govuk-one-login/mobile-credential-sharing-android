@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CUR
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
 
-class DecryptDeviceRequestUseCaseImplTest {
+class DecryptDeviceResponseUseCaseImplTest {
     private val logger = SystemLogger()
     private val sessionSecurity = FakeSessionSecurity()
     val fakeDecoder = FakeDeviceRequestDecoder(
