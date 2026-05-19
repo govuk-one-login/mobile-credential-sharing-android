@@ -10,6 +10,7 @@ import androidx.annotation.RequiresPermission
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.logging.api.v2.Logger
@@ -53,6 +54,7 @@ class AndroidGattClientManager(
     private var mtu = MIN_MTU
     private var isSessionEnd = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
+    private val writeAck = Channel<Boolean>(capacity = 1)
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
@@ -158,11 +160,13 @@ class AndroidGattClientManager(
             ?.getCharacteristic(CLIENT_2_SERVER_UUID) ?: return false
 
         return sendChunkedMessage(data, mtu, logger) { chunk ->
-            gattWriter.writeCharacteristic(
+            val written = gattWriter.writeCharacteristic(
                 gatt = gatt,
                 characteristic = characteristic,
                 value = chunk
             )
+            if (written) writeAck.receive()
+            written
         }
     }
 
@@ -361,6 +365,7 @@ class AndroidGattClientManager(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun characteristicWritten(event: GattEvent.CharacteristicWrite) {
         if (event.status != BluetoothGatt.GATT_SUCCESS) {
+            if (event.characteristic.uuid == CLIENT_2_SERVER_UUID) writeAck.trySend(false)
             return handleError(
                 ClientError.FAILED_TO_START,
                 "Failed to write 'Start' state"
@@ -368,6 +373,7 @@ class AndroidGattClientManager(
         }
 
         logger.debug(logTag, "Wrote value to characteristic: ${event.characteristic.uuid}")
+        if (event.characteristic.uuid == CLIENT_2_SERVER_UUID) writeAck.trySend(true)
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

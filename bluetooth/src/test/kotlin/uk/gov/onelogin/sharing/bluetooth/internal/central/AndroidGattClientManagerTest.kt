@@ -20,6 +20,7 @@ import io.mockk.verifyCount
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -487,7 +488,7 @@ internal class AndroidGattClientManagerTest {
         testEvents { callbackSlot ->
             callbackSlot.captured.onCharacteristicWrite(
                 bluetoothGatt,
-                mockk(),
+                mockk(relaxed = true),
                 BluetoothGatt.GATT_FAILURE
             )
 
@@ -736,7 +737,7 @@ internal class AndroidGattClientManagerTest {
             s2cCharacteristic.getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
         } returns if (hasDescriptors) s2cDescriptor else null
         every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns
-            s2cCharacteristic
+                s2cCharacteristic
 
         return CccdMocks(stateDescriptor, s2cDescriptor)
     }
@@ -788,13 +789,23 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `sendMessage with data fitting single chunk prepends 0x00 and writes once`() = runTest {
-        val (mgr, _) = setupConnectedGatt()
+        val (mgr, callbackSlot) = setupConnectedGatt()
         val data = ByteArray(10) { it.toByte() }
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
         every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
 
+        launch {
+            repeat(1) {
+                callbackSlot.captured.onCharacteristicWrite(
+                    bluetoothGatt,
+                    characteristic,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+            }
+        }
         val result = mgr.sendMessage(uuid, data)
 
         assertEquals(true, result)
@@ -817,7 +828,17 @@ internal class AndroidGattClientManagerTest {
             val service = mockk<BluetoothGattService>(relaxed = true)
             every { bluetoothGatt.getService(uuid) } returns service
             every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+            every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
 
+            launch {
+                repeat(2) {
+                    callbackSlot.captured.onCharacteristicWrite(
+                        bluetoothGatt,
+                        characteristic,
+                        BluetoothGatt.GATT_SUCCESS
+                    )
+                }
+            }
             val result = mgr.sendMessage(uuid, data)
 
             assertEquals(true, result)
@@ -845,13 +866,23 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `sendMessage logs success after final chunk written`() = runTest {
-        val (mgr, _) = setupConnectedGatt()
+        val (mgr, callbackSlot) = setupConnectedGatt()
         val data = ByteArray(10) { it.toByte() }
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
         every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
 
+        launch {
+            repeat(1) {
+                callbackSlot.captured.onCharacteristicWrite(
+                    bluetoothGatt,
+                    characteristic,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+            }
+        }
         mgr.sendMessage(uuid, data)
 
         assert(logger.contains("Final SessionEstablishment chunk generated and sent"))
@@ -872,7 +903,17 @@ internal class AndroidGattClientManagerTest {
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
         every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
 
+        launch {
+            repeat(2) {
+                callbackSlot.captured.onCharacteristicWrite(
+                    bluetoothGatt,
+                    characteristic,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+            }
+        }
         mgr.sendMessage(uuid, data)
 
         assert(
