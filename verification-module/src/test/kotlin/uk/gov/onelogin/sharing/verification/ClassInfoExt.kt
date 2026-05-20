@@ -15,7 +15,7 @@ internal object ClassInfoExt {
             .scan()
     }
 
-    internal fun assertInterfaceSignatures(
+    internal fun assertInterfaceReturnTypes(
         expectedMethods: List<Pair<String, Class<out Any>>>,
         classInfo: ClassInfo,
     ) {

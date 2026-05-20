@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.verification
 
 import org.junit.Test
-import uk.gov.onelogin.sharing.verification.ClassInfoExt.assertInterfaceSignatures
+import uk.gov.onelogin.sharing.verification.ClassInfoExt.assertInterfaceReturnTypes
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 
 class VerifiableDocumentTest {
@@ -18,7 +18,7 @@ class VerifiableDocumentTest {
 
         val classInfo = scanResult.getClassInfo(VerifiableDocument::class.java.name)
 
-        assertInterfaceSignatures(expectedMethods, classInfo)
+        assertInterfaceReturnTypes(expectedMethods, classInfo)
     }
 
     /**
@@ -37,6 +37,6 @@ class VerifiableDocumentTest {
             VerifiableDocument.WithPresentation::class.java.name
         )
 
-        assertInterfaceSignatures(expectedMethods, classInfo)
+        assertInterfaceReturnTypes(expectedMethods, classInfo)
     }
 }
