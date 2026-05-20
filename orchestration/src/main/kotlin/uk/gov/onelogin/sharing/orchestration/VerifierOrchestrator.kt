@@ -307,11 +307,14 @@ class VerifierOrchestrator(
         }.onSuccess {
             sessionFlow.value.updateCryptoContext {
                 context.copy(decryptCounter = context.decryptCounter + 1u)
+            }.also {
+                val updatedContext = sessionFlow.value.cryptoContext ?: return@onSuccess
+                logger.debug(
+                    logTag,
+                    "Decrypt counter incremented to: ${updatedContext.decryptCounter}"
+                )
             }
-
-            logger.debug(logTag, "DeviceResponse decrypted successfully")
-        }.onFailure { throwable ->
-            logger.error(logTag, "Error decrypting DeviceResponse", throwable)
+        }.onFailure { _ ->
             stopCentralTransport()
             safeTransitionTo(
                 VerifierSessionState.Complete.Failed(

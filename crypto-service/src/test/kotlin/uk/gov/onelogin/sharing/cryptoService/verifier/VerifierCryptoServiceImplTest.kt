@@ -314,7 +314,7 @@ class VerifierCryptoServiceImplTest {
     @Test
     fun `decryptDeviceResponse delegates to use case and returns plaintext`() {
         val fakeDecryptUseCase = FakeDecryptDeviceResponseUseCase().apply {
-            plaintextToReturn = byteArrayOf(0x0A, 0x0B)
+            fakeDeviceResponse = byteArrayOf(0x0A, 0x0B)
         }
         val service = createService(decryptDeviceResponseUseCase = fakeDecryptUseCase)
 
@@ -324,7 +324,7 @@ class VerifierCryptoServiceImplTest {
 
         val result = service.decryptDeviceResponse(deviceResponseBytes, skDevice, decryptCounter)
 
-        assertEquals(fakeDecryptUseCase.plaintextToReturn.toList(), result.toList())
+        assertEquals(fakeDecryptUseCase.fakeDeviceResponse.toList(), result.toList())
         assertEquals(deviceResponseBytes, fakeDecryptUseCase.lastDeviceResponseBytes)
         assertEquals(skDevice, fakeDecryptUseCase.lastSkDevice)
         assertEquals(decryptCounter, fakeDecryptUseCase.lastEncryptCounter)
