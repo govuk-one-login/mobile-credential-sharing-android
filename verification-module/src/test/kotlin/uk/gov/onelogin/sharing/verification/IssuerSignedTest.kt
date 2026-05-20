@@ -6,7 +6,8 @@ import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 
 class IssuerSignedTest {
     /**
-     * DCMAW-20245: AC4: [VerifiableDocument] exposes docType and issuerSigned as defined.
+     * DCMAW-20245: AC5: [IssuerSigned] exposes `issuerAuth: ByteArray` and
+     * `nameSpaces: Map<String, ByteArray>` as defined.
      */
     @Test
     fun `Ensure VerifiableDocument constraints`() {
