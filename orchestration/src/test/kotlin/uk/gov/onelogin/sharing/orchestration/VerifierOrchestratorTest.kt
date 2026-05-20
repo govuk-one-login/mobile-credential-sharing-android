@@ -766,5 +766,8 @@ class VerifierOrchestratorTest {
         )
         assertEquals(1, centralBluetoothTransport.stopCalls)
         assertTrue { "Error decrypting DeviceResponse" in logger }
+
+        val context = sessionFactory.getCurrentSession().cryptoContext
+        assertEquals(1u, context?.decryptCounter)
     }
 }

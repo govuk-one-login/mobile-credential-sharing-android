@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.HkdfSessionKeyGe
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
+import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceResponseUseCase
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_ERROR
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_SUCCESS
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
@@ -255,14 +256,7 @@ class VerifierCryptoServiceImplTest {
     fun `encryptDeviceRequest returns encrypted bytes`() {
         val encryptedResult = byteArrayOf(0xAA.toByte(), 0xBB.toByte())
         val fakeEncrypt = FakeEncryptDeviceRequestUseCase(encryptedToReturn = encryptedResult)
-        val service = VerifierCryptoServiceImpl(
-            logger = logger,
-            keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-            sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-            encryptDeviceRequestUseCase = fakeEncrypt,
-            decryptDeviceResponseUseCase = fakeDecrypt
-        )
+        val service = createService(encryptDeviceRequestUseCase = fakeEncrypt)
 
         val result = service.encryptDeviceRequest(byteArrayOf(0x01), ByteArray(32), 1u)
 
@@ -277,14 +271,7 @@ class VerifierCryptoServiceImplTest {
                 RuntimeException("AES failure")
             )
         )
-        val service = VerifierCryptoServiceImpl(
-            logger = logger,
-            keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-            sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-            encryptDeviceRequestUseCase = failingEncrypt,
-            decryptDeviceResponseUseCase = fakeDecrypt
-        )
+        val service = createService(encryptDeviceRequestUseCase = failingEncrypt)
 
         assertThrows(EncryptDeviceRequestException::class.java) {
             service.encryptDeviceRequest(byteArrayOf(0x01), ByteArray(32), 1u)
@@ -323,4 +310,47 @@ class VerifierCryptoServiceImplTest {
 
         assertTrue(logger.any { it.message == LOG_SESSION_ESTABLISHMENT_ERROR })
     }
+
+    @Test
+    fun `decryptDeviceResponse delegates to use case and returns plaintext`() {
+        val fakeDecryptUseCase = FakeDecryptDeviceResponseUseCase().apply {
+            plaintextToReturn = byteArrayOf(0x0A, 0x0B)
+        }
+        val service = createService(decryptDeviceResponseUseCase = fakeDecryptUseCase)
+
+        val deviceResponseBytes = byteArrayOf(0x01, 0x02, 0x03)
+        val skDevice = ByteArray(32) { 0x04 }
+        val decryptCounter = 2u
+
+        val result = service.decryptDeviceResponse(deviceResponseBytes, skDevice, decryptCounter)
+
+        assertEquals(fakeDecryptUseCase.plaintextToReturn.toList(), result.toList())
+        assertEquals(deviceResponseBytes, fakeDecryptUseCase.lastDeviceResponseBytes)
+        assertEquals(skDevice, fakeDecryptUseCase.lastSkDevice)
+        assertEquals(decryptCounter, fakeDecryptUseCase.lastEncryptCounter)
+    }
+
+    @Test
+    fun `decryptDeviceResponse propagates DecryptDeviceResponseException`() {
+        val fakeDecryptUseCase = FakeDecryptDeviceResponseUseCase().apply {
+            exception = DecryptDeviceResponseException("decrypt failed", RuntimeException())
+        }
+        val service = createService(decryptDeviceResponseUseCase = fakeDecryptUseCase)
+
+        assertThrows(DecryptDeviceResponseException::class.java) {
+            service.decryptDeviceResponse(byteArrayOf(0x01), ByteArray(32), 1u)
+        }
+    }
+
+    private fun createService(
+        encryptDeviceRequestUseCase: EncryptDeviceRequestUseCase = fakeEncrypt,
+        decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase = fakeDecrypt
+    ) = VerifierCryptoServiceImpl(
+        logger = logger,
+        keyPairGenerator = EcKeyPairGenerator(logger),
+        sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
+        sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
+        encryptDeviceRequestUseCase = encryptDeviceRequestUseCase,
+        decryptDeviceResponseUseCase = decryptDeviceResponseUseCase
+    )
 }
