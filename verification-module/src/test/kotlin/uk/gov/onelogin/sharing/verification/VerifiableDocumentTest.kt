@@ -1,16 +1,10 @@
 package uk.gov.onelogin.sharing.verification
 
-import io.github.classgraph.ClassGraph
-import io.github.classgraph.ClassInfo
-import org.hamcrest.CoreMatchers.containsString
-import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
+import uk.gov.onelogin.sharing.verification.ClassInfoExt.assertInterfaceSignatures
+import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 
 class VerifiableDocumentTest {
-    private val scanResult = ClassGraph()
-        .enableAllInfo()
-        .acceptPackages(VerifiableDocument::class.java.packageName)
-        .scan()
 
     /**
      * DCMAW-20245: AC4: [VerifiableDocument] exposes docType and issuerSigned as defined.
@@ -44,18 +38,5 @@ class VerifiableDocumentTest {
         )
 
         assertInterfaceSignatures(expectedMethods, classInfo)
-    }
-
-    private fun assertInterfaceSignatures(
-        expectedMethods: List<Pair<String, Class<out Any>>>,
-        classInfo: ClassInfo,
-    ) {
-        expectedMethods.forEach { (expectedName, expectedType) ->
-            val methodInfo = classInfo.methodInfo.getSingleMethod(expectedName)
-            assertThat(
-                methodInfo.typeDescriptorStr,
-                containsString(expectedType.name.replace(".", "/"))
-            )
-        }
     }
 }

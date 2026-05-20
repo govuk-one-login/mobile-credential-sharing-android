@@ -12,6 +12,7 @@ import org.hamcrest.Matchers.hasProperty
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 
 @RunWith(TestParameterInjector::class)
 class VerificationResultTest {
@@ -29,10 +30,6 @@ class VerificationResultTest {
             "Success"
         )
 
-        val scanResult = classGraphConfig
-            .acceptPackages(VerificationResult::class.java.packageName)
-            .scan()
-
         val classInfo = scanResult.getClassesImplementing(VerificationResult::class.java)
 
         assertThat(
@@ -48,20 +45,13 @@ class VerificationResultTest {
      */
     @Test
     fun `Failures only have a single property`() {
-        val scanResult = classGraphConfig
-            .acceptClasses(
-                VerificationResult.Failure::class.java.name,
-                VerificationError::class.java.name,
-            )
-            .scan()
-            .getClassInfo(VerificationResult.Failure::class.java.name)
-
+        val classInfo = scanResult.getClassInfo(VerificationResult.Failure::class.java.name)
         assertThat(
-            scanResult.fieldInfo.size,
+            classInfo.fieldInfo.size,
             equalTo(1)
         )
 
-        val fieldInfo = scanResult.fieldInfo[0]
+        val fieldInfo = classInfo.fieldInfo[0]
 
         assertThat(
             fieldInfo,

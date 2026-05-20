@@ -1,12 +1,12 @@
 package uk.gov.onelogin.sharing.verification
 
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import io.github.classgraph.ClassGraph
 import io.github.classgraph.FieldInfo
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 
 @RunWith(TestParameterInjector::class)
 class VerificationErrorTest {
@@ -33,11 +33,6 @@ class VerificationErrorTest {
             "VALIDITY_UNTIL_EXPIRED",
             "VALIDITY_UNTIL_OUT_OF_RANGE",
         )
-
-        val scanResult = ClassGraph()
-            .enableAllInfo()
-            .acceptClasses(VerificationError::class.java.name)
-            .scan()
 
         val info = scanResult.getClassInfo(VerificationError::class.java.name)
 
