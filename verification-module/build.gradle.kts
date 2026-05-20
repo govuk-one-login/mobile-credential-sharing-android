@@ -10,6 +10,7 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.io.github.classgraph,
         libs.junit,
         libs.com.google.test.parameter.injector
     ).forEach(::testImplementation)
