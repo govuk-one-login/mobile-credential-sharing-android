@@ -726,10 +726,6 @@ class VerifierOrchestratorTest {
         advanceUntilIdle()
 
         assertEquals(1u, fakeCryptoService.lastDecryptCounter)
-        assertThat(
-            orchestrator.verifierSessionState.value,
-            instanceOf(VerifierSessionState.Complete.Success::class.java)
-        )
         assertTrue { "DeviceResponse decrypted successfully" in logger }
 
         val context = sessionFactory.getCurrentSession().cryptoContext

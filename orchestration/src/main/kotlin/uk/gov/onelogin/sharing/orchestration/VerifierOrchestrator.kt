@@ -310,7 +310,6 @@ class VerifierOrchestrator(
             }
 
             logger.debug(logTag, "DeviceResponse decrypted successfully")
-            safeTransitionTo(VerifierSessionState.Complete.Success(DeviceResponse))
         }.onFailure { throwable ->
             logger.error(logTag, "Error decrypting DeviceResponse", throwable)
             stopCentralTransport()
