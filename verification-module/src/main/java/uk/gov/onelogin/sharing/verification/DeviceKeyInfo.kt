@@ -6,5 +6,5 @@ package uk.gov.onelogin.sharing.verification
  */
 data class DeviceKeyInfo(
     val deviceKey: ByteArray,
-    val keyAuthorizations: Map<String, Any>?
+    val keyAuthorizations: Map<String, String>? = null
 )
