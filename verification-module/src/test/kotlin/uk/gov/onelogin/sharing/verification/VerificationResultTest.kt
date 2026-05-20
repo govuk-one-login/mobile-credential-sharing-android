@@ -1,10 +1,12 @@
 package uk.gov.onelogin.sharing.verification
 
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -12,7 +14,7 @@ import org.junit.runner.RunWith
 class VerificationResultTest {
 
     /**
-     * DCMAW-20245: AC1: VerificationResult has exactly two states: Success and Failure.
+     * DCMAW-20245: AC1: [VerificationResult] has exactly two states: Success and Failure.
      */
     @Test
     fun `There are only 2 inheritors of 'VerificationResult'`() {
@@ -33,6 +35,25 @@ class VerificationResultTest {
             .map(ClassInfo::getSimpleName)
             .toSet(),
             equalTo(expectedInheritors.toSet())
+        )
+    }
+
+    /**
+     * DCMAW-20245: AC3: [VerificationResult.Failure] is usable as a throwable error type.
+     */
+    @Test
+    fun `Failures are considered to be throwable`(
+        @TestParameter error: VerificationError
+    ) {
+        val expected = VerificationResult.Failure(error)
+
+        val actual = assertThrows(VerificationResult.Failure::class.java) {
+            throw expected
+        }
+
+        assertThat(
+            actual,
+            equalTo(expected)
         )
     }
 }
