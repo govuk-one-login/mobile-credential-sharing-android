@@ -13,14 +13,39 @@ package uk.gov.onelogin.sharing.verification
  * implemented.
  */
 data class MobileSecurityObject(
-    val version: String,
-    val digestAlgorithm: String,
+    val version: String = MSO_SCHEMA_VERSION,
+    val digestAlgorithm: String = MSO_DIGEST_ALGORITHM,
     val docType: String,
     val valueDigests: Map<String, Map<Int, ByteArray>>,
     val deviceKeyInfo: DeviceKeyInfo,
     val validityInfo: ValidityInfo,
     val status: ByteArray? = null,
 ) {
+
+    init {
+        if (MSO_SCHEMA_VERSION != version) {
+            throw VerificationResult.Failure(
+                VerificationError.INVALID_MSO_VERSION
+            )
+        }
+
+        if (MSO_DIGEST_ALGORITHM != digestAlgorithm) {
+            throw VerificationResult.Failure(
+                VerificationError.UNSUPPORTED_DIGEST_ALGORITHM
+            )
+        }
+    }
+
+    fun hasDocType(expected: String): Boolean {
+        if (expected != docType) {
+            throw VerificationResult.Failure(
+                VerificationError.INVALID_DOC_TYPE
+            )
+        }
+
+        return true
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -47,5 +72,10 @@ data class MobileSecurityObject(
         result = 31 * result + validityInfo.hashCode()
         result = 31 * result + (status?.contentHashCode() ?: 0)
         return result
+    }
+
+    companion object {
+        private const val MSO_SCHEMA_VERSION = "1.0"
+        private const val MSO_DIGEST_ALGORITHM = "SHA-256"
     }
 }
