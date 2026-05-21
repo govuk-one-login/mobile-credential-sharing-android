@@ -10,7 +10,7 @@ fun interface DocumentVerifier {
      * @param document The [VerifiableDocument] to verify.
      * @param transcript Provides additional information for use in verifying
      * [VerifiableDocument.WithPresentation] instances.
-     * @throws uk.gov.onelogin.sharing.verification.result.VerificationResult.Failure when unable to successfully verify the provided
+     * @throws VerificationResult.Failure when unable to successfully verify the provided
      * [document].
      * @sample exampleVerifierUsage
      */

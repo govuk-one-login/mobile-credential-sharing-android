@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.verification.result
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.containsString
@@ -16,10 +15,6 @@ import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 
 @RunWith(TestParameterInjector::class)
 class VerificationResultTest {
-
-    private val classGraphConfig = ClassGraph()
-        .enableAllInfo()
-
     /**
      * DCMAW-20245: AC1: [VerificationResult] has exactly two states: Success and Failure.
      */

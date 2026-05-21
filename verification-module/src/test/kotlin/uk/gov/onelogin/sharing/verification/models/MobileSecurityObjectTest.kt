@@ -3,11 +3,13 @@ package uk.gov.onelogin.sharing.verification.models
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 import uk.gov.onelogin.sharing.verification.result.VerificationError
 import uk.gov.onelogin.sharing.verification.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.result.VerificationResultMatchers.hasError
@@ -54,6 +56,23 @@ class MobileSecurityObjectTest {
         ).forEach {
             assertNotEquals(mso, it)
         }
+    }
+
+    /**
+     * DCMAW-20245: AC13: [MobileSecurityObject.valueDigests] uses [Int] as the inner key type for
+     * digest identifiers.
+     */
+    @Test
+    fun `Value digest Map values is a Map associating Integers with ByteArrays`() {
+        val signature = scanResult.getClassInfo(MobileSecurityObject::class.java.name)
+            .getFieldInfo("valueDigests")
+            .typeSignature
+            .toStringWithSimpleNames()
+
+        assertThat(
+            signature,
+            equalTo("Map<String, Map<Integer, byte[]>>")
+        )
     }
 
     @Test
