@@ -16,13 +16,13 @@ import uk.gov.onelogin.sharing.verification.result.VerificationResult
  * implemented.
  */
 data class MobileSecurityObject(
-    val version: String = MSO_SCHEMA_VERSION,
-    val digestAlgorithm: String = MSO_DIGEST_ALGORITHM,
     val docType: String,
     val valueDigests: Map<String, Map<Int, ByteArray>>,
     val deviceKeyInfo: DeviceKeyInfo,
     val validityInfo: ValidityInfo,
+    val digestAlgorithm: String = MSO_DIGEST_ALGORITHM,
     val status: ByteArray? = null,
+    val version: String = MSO_SCHEMA_VERSION,
 ) {
 
     init {

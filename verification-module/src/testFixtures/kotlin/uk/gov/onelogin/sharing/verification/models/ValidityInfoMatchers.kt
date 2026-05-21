@@ -3,7 +3,9 @@ package uk.gov.onelogin.sharing.verification.models
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.Description
 import org.hamcrest.Matcher
+import org.hamcrest.TypeSafeMatcher
 
 @OptIn(ExperimentalTime::class)
 object ValidityInfoMatchers {
@@ -38,4 +40,19 @@ object ValidityInfoMatchers {
     fun hasValidUntil(
         matcher: Matcher<in Instant>
     ): Matcher<in ValidityInfo> = ValidityInfoMatcher(matcher) { it?.validUntil }
+
+    private class ValidityInfoMatcher<Type>(
+        private val matcher: Matcher<in Type>,
+        private val transformer: (ValidityInfo?) -> Type?
+    ) : TypeSafeMatcher<ValidityInfo>() {
+        override fun describeTo(description: Description?) = matcher.describeTo(description)
+        override fun describeMismatchSafely(
+            item: ValidityInfo?,
+            mismatchDescription: Description?
+        ) = matcher.describeMismatch(transformer(item), mismatchDescription)
+
+        override fun matchesSafely(item: ValidityInfo?): Boolean =
+            matcher.matches(transformer(item))
+    }
+
 }
