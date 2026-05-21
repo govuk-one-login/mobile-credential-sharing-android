@@ -46,6 +46,8 @@ sealed class SessionErrorReason {
      */
     data object InvalidSessionDataPayload : SessionErrorReason()
 
+    data object CannotDecryptDeviceResponse : SessionErrorReason()
+
     /**
      * State for when the app cannot process the provided QR code.
      *
