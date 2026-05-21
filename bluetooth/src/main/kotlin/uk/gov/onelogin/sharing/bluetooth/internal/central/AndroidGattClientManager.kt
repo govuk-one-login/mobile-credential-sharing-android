@@ -168,7 +168,7 @@ class AndroidGattClientManager(
                 characteristic = characteristic,
                 value = chunk
             )
-            if (written) writeQueue.awaitWriteConfirmation() else false
+            written && writeQueue.awaitWriteConfirmation()
         }
     }
 
