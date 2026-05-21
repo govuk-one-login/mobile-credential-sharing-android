@@ -20,8 +20,14 @@ import io.mockk.verifyCount
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.hasProperty
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,6 +36,8 @@ import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
@@ -38,6 +46,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
@@ -286,8 +296,8 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `subscribes to state changes when service discovery is successful`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
+        val service = setupBluetoothGattService()
+
         every {
             bluetoothGatt.setCharacteristicNotification(any(), true)
         } returns true
@@ -312,8 +322,7 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `emits error when state characteristic does not exist during subscription`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
+        val service = setupBluetoothGattService()
         every { service.getCharacteristic(GattUuids.STATE_UUID) } returns null
 
         testEvents { callbackSlot ->
@@ -338,8 +347,7 @@ internal class AndroidGattClientManagerTest {
     @Test
     fun `emits error when server to client characteristic does not exist during subscription`() =
         runTest {
-            val service = mockk<BluetoothGattService>(relaxed = true)
-            every { bluetoothGatt.getService(any()) } returns service
+            val service = setupBluetoothGattService()
             every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns null
 
             testEvents { callbackSlot ->
@@ -363,8 +371,8 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `subscribes to serverToClient messages when service discovery is successful`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
+        val service = setupBluetoothGattService()
+
         every {
             bluetoothGatt.setCharacteristicNotification(any(), true)
         } returns true
@@ -391,11 +399,8 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `sets state to start when Mtu is agreed`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
-
-        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
-        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+        setupBluetoothGattService()
+        setupCharacteristic(GattUuids.STATE_UUID)
 
         testEvents { callbackSlot ->
             callbackSlot.captured.onMtuChanged(
@@ -415,11 +420,8 @@ internal class AndroidGattClientManagerTest {
         val failingWriter = FakeGattWriter(false)
         manager = createManager(failingWriter)
 
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
-
-        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
-        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+        setupBluetoothGattService()
+        setupCharacteristic(GattUuids.STATE_UUID)
 
         testEvents { callbackSlot ->
             callbackSlot.captured.onMtuChanged(
@@ -436,8 +438,7 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `emits error when state characteristic does not exist when Mtu is agreed`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
+        val service = setupBluetoothGattService()
         every { service.getCharacteristic(GattUuids.STATE_UUID) } returns null
 
         testEvents { callbackSlot ->
@@ -550,13 +551,11 @@ internal class AndroidGattClientManagerTest {
     @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
     @Test
     fun `handles incoming end command and emits SessionEnd event`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
+        setupBluetoothGattService()
 
-        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val endByte = MdocState.END.code
 
-        every { stateCharacteristic.uuid } returns GattUuids.STATE_UUID
+        val stateCharacteristic = setupCharacteristic(GattUuids.STATE_UUID)
 
         testEvents { callbackSlot ->
             callbackSlot.captured.onCharacteristicChanged(
@@ -569,10 +568,134 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    /**
+     * DCMAW-16908: AC1: Process an intermediate message packet (0x01)
+     */
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    @Test
+    fun `Strips chunked bytes into a completed 'Server2Client' message`() = runTest {
+        setupBluetoothGattService()
+        val stateCharacteristic = setupCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
+
+        val expectedBytes = byteArrayOf(
+            0,
+            64,
+            92,
+            117,
+            10,
+            20,
+            50
+        )
+        val inputBytes = expectedBytes.toList().chunked(5).map {
+            it.toByteArray()
+        }
+
+        testEvents { callbackSlot ->
+            inputBytes.forEach { input ->
+                val prefixBytes = if (inputBytes.last().contentEquals(input)) {
+                    LAST_PART
+                } else {
+                    NON_LAST_PART
+                }
+
+                callbackSlot.captured.onCharacteristicChanged(
+                    bluetoothGatt,
+                    stateCharacteristic,
+                    byteArrayOf(prefixBytes) + input
+                )
+            }
+
+            assertEquals(
+                GattClientEvent.Message(
+                    uuid = GattUuids.SERVER_2_CLIENT_UUID,
+                    value = expectedBytes
+                ),
+                awaitItem()
+            )
+
+            inputBytes.dropLast(1).forEach { chunk ->
+                assertTrue(
+                    "Chunked 'Server2Client' characteristic update: ${chunk.toHexString()}"
+                        in logger
+                )
+            }
+
+            assertTrue(
+                "Completed 'Server2Client' message transfer:" in logger
+            )
+        }
+    }
+
+    /**
+     * DCMAW-16908: AC2: Process a complete or final message packet (0x00)
+     */
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    @Test
+    fun `Strips 'END' bytes from a completed 'Server2Client' message`() = runTest {
+        setupBluetoothGattService()
+        val stateCharacteristic = setupCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
+        val expectedBytes = SessionDataDto().toCbor(CborMapper.default)
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onCharacteristicChanged(
+                bluetoothGatt,
+                stateCharacteristic,
+                byteArrayOf(LAST_PART) + expectedBytes
+            )
+
+            assertEquals(
+                GattClientEvent.Message(
+                    uuid = GattUuids.SERVER_2_CLIENT_UUID,
+                    value = expectedBytes
+                ),
+                awaitItem()
+            )
+        }
+
+        assertTrue(
+            "Completed 'Server2Client' message transfer:" in logger
+        )
+    }
+
+    /**
+     * DCMAW-16908: AC3: Reject a message packet with an invalid header byte
+     */
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    @Test
+    fun `Message errors occur with invalid status prefixes`() = runTest {
+        setupBluetoothGattService()
+        val stateCharacteristic = setupCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
+        val expectedBytes = SessionDataDto().toCbor(CborMapper.default)
+
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onCharacteristicChanged(
+                bluetoothGatt,
+                stateCharacteristic,
+                byteArrayOf(0x02) + expectedBytes
+            )
+
+            assertThat(
+                awaitItem(),
+                allOf(
+                    instanceOf(GattClientEvent.Error::class.java),
+                    hasProperty(
+                        "error",
+                        equalTo(ClientError.INVALID_MESSAGE_PREFIX)
+                    )
+                )
+            )
+        }
+
+        assertTrue(
+            logger.any {
+                it.message.startsWith("Received invalid status byte: ")
+            }
+        )
+    }
+
     @Test
     fun `writes session end to server and emits SessionEnd`() = runTest {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
+        val service = setupBluetoothGattService()
 
         val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
@@ -588,8 +711,7 @@ internal class AndroidGattClientManagerTest {
         val failingWriter = FakeGattWriter(false)
         manager = createManager(failingWriter)
 
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
+        val service = setupBluetoothGattService()
 
         val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
@@ -718,8 +840,8 @@ internal class AndroidGattClientManagerTest {
     )
 
     private fun setupCccdService(hasDescriptors: Boolean = true): CccdMocks {
-        val service = mockk<BluetoothGattService>(relaxed = true)
-        every { bluetoothGatt.getService(any()) } returns service
+        val service = setupBluetoothGattService()
+
         every {
             bluetoothGatt.setCharacteristicNotification(any(), true)
         } returns true
@@ -928,5 +1050,18 @@ internal class AndroidGattClientManagerTest {
     @Test
     fun `chunk size is MTU minus 3 BLE overhead minus 1 ISO header`() {
         assertEquals(MtuValues.MIN_MTU - 3 - 1, MtuValues.dataChunkSize(MtuValues.MIN_MTU))
+    }
+
+    private fun setupBluetoothGattService(
+        mock: BluetoothGattService = mockk(relaxed = true)
+    ): BluetoothGattService {
+        every { bluetoothGatt.getService(any()) } returns mock
+        return mock
+    }
+
+    private fun setupCharacteristic(uuid: UUID): BluetoothGattCharacteristic {
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { stateCharacteristic.uuid } returns uuid
+        return stateCharacteristic
     }
 }

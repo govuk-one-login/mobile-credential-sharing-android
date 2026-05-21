@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import kotlinx.coroutines.channels.Channel
+import java.util.UUID
 
 /**
  * Coordinates BLE characteristic writes by suspending between each write until
@@ -10,7 +11,7 @@ import kotlinx.coroutines.channels.Channel
  * sender after each write, and [onWriteComplete] unblocks it once
  * [onCharacteristicWrite] fires for the [targetUuid].
  */
-internal class GattWriteQueue(private val targetUuid: java.util.UUID) {
+internal class GattWriteQueue(private val targetUuid: UUID) {
     private val channel = Channel<Boolean>(capacity = 1)
 
     /**
@@ -23,7 +24,7 @@ internal class GattWriteQueue(private val targetUuid: java.util.UUID) {
      * Called from [onCharacteristicWrite]. Only signals if the characteristic
      * matches [targetUuid] to avoid stale confirmations from unrelated writes.
      */
-    fun onWriteComplete(characteristicUuid: java.util.UUID, success: Boolean) {
+    fun onWriteComplete(characteristicUuid: UUID, success: Boolean) {
         if (characteristicUuid == targetUuid) channel.trySend(success)
     }
 }

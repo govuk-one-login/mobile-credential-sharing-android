@@ -155,7 +155,8 @@ private fun handleSessionFailure(
         is SessionErrorReason.MissingCryptoContext,
         is SessionErrorReason.CannotProcessEngagement,
         is SessionErrorReason.UnrecoverableThrowable,
-        is SessionErrorReason.UnrecoverablePrerequisite
+        is SessionErrorReason.UnrecoverablePrerequisite,
+        is SessionErrorReason.InvalidSessionDataPayload
         ->
             navController.navigateToUnrecoverableVerifierError {
                 popUpTo<VerifierRoutes> {

@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.dto
 
+import java.io.File
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromHexStringFile
 
 object SessionDataDtoStubs {
     val dataFieldName = CborMapper.default.writeValueAsBytes("data").toHexString()
@@ -10,13 +10,13 @@ object SessionDataDtoStubs {
     val emptySessionDataDto = SessionDataDto()
 
     /**
-     * D.5.1 example SessionData object
+     * Uses the [ClassLoader] from [SessionDataDtoStubs] to obtain the `sessionDataExample.txt`
+     * file contents within the java `resources` directory, so that external gradle modules
+     * are capable of accessing this information.
      */
-    val validSessionDataHexString = getByteArrayFromHexStringFile(
-        CBOR_FILE_PATH,
-        "sessionDataExample.txt",
-        containsLineBreaks = true
-    )
+    val validSessionDataDtoBytes: ByteArray = this::class.java.classLoader?.getResource(
+        "uk/gov/onelogin/sharing/crypto-service/cbor/dto/sessionDataExample.txt"
+    )?.path?.let(::File)?.readLines()?.joinToString("")?.hexToByteArray()!!
 
     private const val CBOR_FILE_PATH =
         "src/testFixtures/resources/uk/gov/onelogin/sharing/crypto-service/cbor/dto/"
