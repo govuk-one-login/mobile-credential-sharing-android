@@ -24,8 +24,8 @@ fun interface DocumentVerifier {
             verifier: DocumentVerifier,
             document: VerifiableDocument,
             transcript: SessionTranscript? = null,
-            handleVerificationFailure: (VerificationError) -> Unit = {},
-            handleJourneyCompletion: () -> Unit = {}
+            handleVerificationFailure: (VerificationError) -> Unit,
+            handleJourneyCompletion: () -> Unit
         ) {
             runCatching {
                 verifier.verifyDocument(document, transcript)

@@ -16,6 +16,7 @@ dependencies {
     listOf(
         libs.io.github.classgraph,
         libs.junit,
+        libs.mockk,
         libs.org.hamcrest,
         libs.com.google.test.parameter.injector
     ).forEach(::testImplementation)

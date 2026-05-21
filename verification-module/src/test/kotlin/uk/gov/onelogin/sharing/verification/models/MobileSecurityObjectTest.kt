@@ -6,8 +6,10 @@ import kotlin.time.ExperimentalTime
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 import uk.gov.onelogin.sharing.verification.result.VerificationError
@@ -34,6 +36,30 @@ class MobileSecurityObjectTest {
             validFrom = now.minus(2.minutes),
             validUntil = now.plus(2.minutes)
         )
+    )
+
+    private val differentDocType = mso.copy(
+        docType = "Different"
+    )
+
+    private val differentValueDigests = mso.copy(
+        valueDigests = mapOf("unit test" to mapOf(1 to byteArrayOf(1, 2)))
+    )
+
+    private val differentDeviceKeyInfo = mso.copy(
+        deviceKeyInfo = mso.deviceKeyInfo.copy(
+            deviceKey = byteArrayOf(1, 2)
+        )
+    )
+
+    private val differentValidityInfo = mso.copy(
+        validityInfo = mso.validityInfo.copy(
+            signed = now.minus(2.minutes)
+        )
+    )
+
+    private val differentStatus = mso.copy(
+        status = byteArrayOf(1, 2)
     )
 
     /**
@@ -76,6 +102,31 @@ class MobileSecurityObjectTest {
     }
 
     @Test
+    fun `Equality contract`() {
+        assertEquals(mso, mso)
+        assertEquals(mso, mso.copy())
+
+        assertFalse(mso.equals(null))
+        assertFalse(mso.equals("different type"))
+        assertNotEquals(mso, differentDocType)
+        assertNotEquals(mso, differentValueDigests)
+        assertNotEquals(mso, differentDeviceKeyInfo)
+        assertNotEquals(mso, differentValidityInfo)
+        assertNotEquals(mso, differentStatus)
+    }
+
+    @Test
+    fun `Hashcode contract`() {
+        assertEquals(mso.hashCode(), mso.copy().hashCode())
+
+        assertNotEquals(mso.hashCode(), differentDocType.hashCode())
+        assertNotEquals(mso.hashCode(), differentValueDigests.hashCode())
+        assertNotEquals(mso.hashCode(), differentDeviceKeyInfo.hashCode())
+        assertNotEquals(mso.hashCode(), differentValidityInfo.hashCode())
+        assertNotEquals(mso.hashCode(), differentStatus.hashCode())
+    }
+
+    @Test
     fun `Invalid versions throw Verification failures`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             mso.copy(version = "2.0")
@@ -96,6 +147,20 @@ class MobileSecurityObjectTest {
         assertThat(
             exception,
             hasError(VerificationError.UNSUPPORTED_DIGEST_ALGORITHM)
+        )
+    }
+
+    @Test
+    fun `Throws a Verification failure when checking against document types`() {
+        assertTrue(mso.hasDocType(mso.docType))
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            mso.hasDocType("invalid document")
+        }
+
+        assertThat(
+            exception,
+            hasError(VerificationError.INVALID_DOC_TYPE)
         )
     }
 }
