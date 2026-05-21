@@ -92,6 +92,7 @@ jobs:
           path: |
             **/build/outputs/unit_test_code_coverage/**/*.exec
             **/build/reports/coverage/test/debug/*.xml
+            **/build/reports/jacoco/**/*.xml
 
   instrumentation_tests:
     runs-on: ubuntu-latest
