@@ -11,7 +11,7 @@ class DeviceSignedTest {
      * `deviceSignature: ByteArray` as defined.
      */
     @Test
-    fun `Ensure VerifiableDocument constraints`() {
+    fun `Ensure DeviceSigned constraints`() {
         val expectedMethods = listOf(
             "getDeviceNameSpacesBytes" to ByteArray::class.java,
             "getDeviceSignature" to ByteArray::class.java

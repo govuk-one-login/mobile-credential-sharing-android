@@ -34,7 +34,7 @@ class CertificateValidityPeriodTest {
      * timezone-aware timestamps.
      */
     @Test
-    fun `Ensure VerifiableDocument constraints`() {
+    fun `Ensure CertificateValidityPeriod constraints`() {
         val expectedMethods = listOf(
             "getNotBefore" to Instant::class.java,
             "getNotAfter" to Instant::class.java

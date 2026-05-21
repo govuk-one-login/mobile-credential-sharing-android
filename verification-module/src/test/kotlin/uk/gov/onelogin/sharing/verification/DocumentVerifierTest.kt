@@ -24,7 +24,7 @@ class DocumentVerifierTest {
      * returning [uk.gov.onelogin.sharing.verification.result.VerificationResult.Success].
      */
     @Test
-    fun `Ensure VerifiableDocument constraints`() {
+    fun `Ensure DocumentVerifier constraints`() {
         val expectedMethods = listOf(
             "verifyDocument" to VerificationResult.Success::class.java
         )

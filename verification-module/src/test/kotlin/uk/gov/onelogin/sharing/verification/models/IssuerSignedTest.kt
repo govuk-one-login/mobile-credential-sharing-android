@@ -10,7 +10,7 @@ class IssuerSignedTest {
      * `nameSpaces: Map<String, ByteArray>` as defined.
      */
     @Test
-    fun `Ensure VerifiableDocument constraints`() {
+    fun `Ensure IssuerSigned constraints`() {
         val expectedMethods = listOf(
             "getIssuerAuth" to ByteArray::class.java,
             "getNameSpaces" to Map::class.java
