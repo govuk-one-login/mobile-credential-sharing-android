@@ -33,6 +33,7 @@ class DeviceKeyInfoTest {
         )
     }
 
+    @Suppress("EqualsNullCall")
     @Test
     fun `Equality contract`() {
         assertEquals(info, info)

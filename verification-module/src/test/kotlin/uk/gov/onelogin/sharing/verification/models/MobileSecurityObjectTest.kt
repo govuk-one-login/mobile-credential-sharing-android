@@ -101,6 +101,7 @@ class MobileSecurityObjectTest {
         )
     }
 
+    @Suppress("EqualsNullCall")
     @Test
     fun `Equality contract`() {
         assertEquals(mso, mso)
