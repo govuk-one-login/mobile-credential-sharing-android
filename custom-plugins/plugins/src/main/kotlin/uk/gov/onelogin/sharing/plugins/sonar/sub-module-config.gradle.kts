@@ -106,13 +106,11 @@ if (pluginManager.isAndroidApp()) {
     configure<KotlinJvmProjectExtension> {
         val productionSources = sourceSets.named("main").map(conversion)
         val testSources = sourceSets.named("test").map(conversion)
-        val testFixtureSources = sourceSets.named("testFixtures").map(conversion)
 
         configureSonarExtension(
             generateBaseSonarProperties(
                 productionSources = productionSources,
                 testSources = testSources,
-                testFixtureSources = testFixtureSources
             )
         )
     }
@@ -130,10 +128,9 @@ fun generateCommaSeparatedFiles(
 fun generateBaseSonarProperties(
     productionSources: Provider<String>? = null,
     testSources: Provider<String>? = null,
-    testFixtureSources: Provider<String>? = null
 ) = mapOf<String, Any?>(
     "sonar.sources" to productionSources?.get(),
-    "sonar.tests" to testSources?.let { "$it," } + testFixtureSources?.get(),
+    "sonar.tests" to testSources?.get(),
     "sonar.exclusions" to sonarExclusions,
     "sonar.coverage.jacoco.xmlReportPaths" to jacocoXmlReportFiles,
     "sonar.kotlin.detekt.reportPaths" to detektReportFiles,
