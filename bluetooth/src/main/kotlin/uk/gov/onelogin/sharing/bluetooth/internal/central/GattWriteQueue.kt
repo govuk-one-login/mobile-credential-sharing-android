@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.central
 
-import kotlinx.coroutines.channels.Channel
 import java.util.UUID
+import kotlinx.coroutines.channels.Channel
 
 /**
  * Coordinates BLE characteristic writes by suspending between each write until
