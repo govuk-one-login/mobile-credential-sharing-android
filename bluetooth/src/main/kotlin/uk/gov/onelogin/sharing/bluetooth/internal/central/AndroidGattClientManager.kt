@@ -41,7 +41,8 @@ class AndroidGattClientManager(
     private val permissionChecker: PermissionCheckerV2,
     private val serviceValidator: ServiceValidator,
     private val gattWriter: GattWriter,
-    private val logger: Logger
+    private val logger: Logger,
+    private val writeQueue: GattWriteQueue
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
         extraBufferCapacity = 32
@@ -56,8 +57,6 @@ class AndroidGattClientManager(
     private var mtu = MIN_MTU
     private var isSessionEnd = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
-    private val writeQueue = GattWriteQueue(CLIENT_2_SERVER_UUID)
-
     private val messagesMap: MutableMap<UUID, ByteArray> = mutableMapOf()
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
@@ -169,8 +168,7 @@ class AndroidGattClientManager(
                 characteristic = characteristic,
                 value = chunk
             )
-            if (written) writeQueue.awaitWriteConfirmation()
-            written
+            if (written) writeQueue.awaitWriteConfirmation() else false
         }
     }
 

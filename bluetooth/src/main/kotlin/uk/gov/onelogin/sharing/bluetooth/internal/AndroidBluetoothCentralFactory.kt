@@ -8,6 +8,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralComponents
 import uk.gov.onelogin.sharing.bluetooth.api.BluetoothCentralFactory
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.central.AndroidGattWriter
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueueImpl
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.core.VerifierUiScope
@@ -37,7 +39,8 @@ class AndroidBluetoothCentralFactory(
             permissionChecker = permissionChecker,
             serviceValidator = serviceValidator,
             gattWriter = gattWriter,
-            logger = logger
+            logger = logger,
+            writeQueue = GattWriteQueueImpl(GattUuids.CLIENT_2_SERVER_UUID)
         )
 
         val bluetoothStateMonitor = AndroidBluetoothStateMonitor(

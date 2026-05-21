@@ -9,7 +9,7 @@ import org.junit.Test
 internal class GattWriteQueueTest {
     private val targetUuid = UUID.randomUUID()
     private val otherUuid = UUID.randomUUID()
-    private val queue = GattWriteQueue(targetUuid)
+    private val queue = GattWriteQueueImpl(targetUuid)
 
     @Test
     fun `awaitWriteConfirmation returns true when onWriteComplete signals success`() = runTest {
