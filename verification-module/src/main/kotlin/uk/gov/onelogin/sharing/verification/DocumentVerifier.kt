@@ -16,7 +16,7 @@ fun interface DocumentVerifier {
      */
     fun verifyDocument(
         document: VerifiableDocument,
-        transcript: SessionTranscript?,
+        transcript: SessionTranscript?
     ): VerificationResult.Success
 
     companion object {

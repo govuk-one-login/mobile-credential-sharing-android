@@ -9,22 +9,16 @@ import org.hamcrest.TypeSafeMatcher
 
 @OptIn(ExperimentalTime::class)
 object CertificateValidityPeriodMatchers {
-    fun hasNotAfter(
-        expected: Instant
-    ) = hasNotAfter(equalTo(expected))
-    fun hasNotAfter(
-        matcher: Matcher<in Instant>
-    ): Matcher<in CertificateValidityPeriod> = CertificateValidityPeriodMatcher(matcher) {
-        it?.notAfter
-    }
-    fun hasNotBefore(
-        expected: Instant
-    ) = hasNotBefore(equalTo(expected))
-    fun hasNotBefore(
-        matcher: Matcher<in Instant>
-    ): Matcher<in CertificateValidityPeriod> = CertificateValidityPeriodMatcher(matcher) {
-        it?.notBefore
-    }
+    fun hasNotAfter(expected: Instant) = hasNotAfter(equalTo(expected))
+    fun hasNotAfter(matcher: Matcher<in Instant>): Matcher<in CertificateValidityPeriod> =
+        CertificateValidityPeriodMatcher(matcher) {
+            it?.notAfter
+        }
+    fun hasNotBefore(expected: Instant) = hasNotBefore(equalTo(expected))
+    fun hasNotBefore(matcher: Matcher<in Instant>): Matcher<in CertificateValidityPeriod> =
+        CertificateValidityPeriodMatcher(matcher) {
+            it?.notBefore
+        }
 
     private class CertificateValidityPeriodMatcher<Type>(
         private val matcher: Matcher<in Type>,
@@ -38,6 +32,4 @@ object CertificateValidityPeriodMatchers {
         override fun matchesSafely(item: CertificateValidityPeriod?): Boolean =
             matcher.matches(transformer(item))
     }
-
 }
-

@@ -17,7 +17,7 @@ internal object ClassInfoExt {
 
     internal fun assertInterfaceReturnTypes(
         expectedMethods: List<Pair<String, Class<out Any>>>,
-        classInfo: ClassInfo,
+        classInfo: ClassInfo
     ) {
         expectedMethods.forEach { (expectedName, expectedType) ->
             val methodInfo = classInfo.methodInfo.getSingleMethod(expectedName)

@@ -39,14 +39,11 @@ data class SessionTranscript(
     }
 
     companion object {
-        fun qrHandover(
-            deviceEngagement: DeviceEngagement?,
-            eReaderKey: ByteArray?
-        ) = SessionTranscript(
-            deviceEngagement = deviceEngagement,
-            eReaderKey = eReaderKey,
-            handover = Handover.QR
-        )
+        fun qrHandover(deviceEngagement: DeviceEngagement?, eReaderKey: ByteArray?) =
+            SessionTranscript(
+                deviceEngagement = deviceEngagement,
+                eReaderKey = eReaderKey,
+                handover = Handover.QR
+            )
     }
 }
-

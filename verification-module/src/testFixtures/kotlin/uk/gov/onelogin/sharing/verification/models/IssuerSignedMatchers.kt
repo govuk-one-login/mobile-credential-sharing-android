@@ -6,22 +6,16 @@ import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 
 object IssuerSignedMatchers {
-    fun hasIssuerAuth(
-        expected: ByteArray
-    ) = hasIssuerAuth(equalTo(expected))
-    fun hasIssuerAuth(
-        matcher: Matcher<in ByteArray>
-    ): Matcher<in IssuerSigned> = IssuerSignedMatcher(matcher) {
-        it?.issuerAuth
-    }
-    fun hasNameSpaces(
-        expected: Map<String, ByteArray>
-    ) = hasNameSpaces(equalTo(expected))
-    fun hasNameSpaces(
-        matcher: Matcher<in Map<String, ByteArray>>
-    ): Matcher<in IssuerSigned> = IssuerSignedMatcher(matcher) {
-        it?.nameSpaces
-    }
+    fun hasIssuerAuth(expected: ByteArray) = hasIssuerAuth(equalTo(expected))
+    fun hasIssuerAuth(matcher: Matcher<in ByteArray>): Matcher<in IssuerSigned> =
+        IssuerSignedMatcher(matcher) {
+            it?.issuerAuth
+        }
+    fun hasNameSpaces(expected: Map<String, ByteArray>) = hasNameSpaces(equalTo(expected))
+    fun hasNameSpaces(matcher: Matcher<in Map<String, ByteArray>>): Matcher<in IssuerSigned> =
+        IssuerSignedMatcher(matcher) {
+            it?.nameSpaces
+        }
 
     private class IssuerSignedMatcher<Type>(
         private val matcher: Matcher<in Type>,
@@ -35,6 +29,4 @@ object IssuerSignedMatchers {
         override fun matchesSafely(item: IssuerSigned?): Boolean =
             matcher.matches(transformer(item))
     }
-
 }
-

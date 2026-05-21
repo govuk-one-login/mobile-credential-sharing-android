@@ -34,8 +34,8 @@ class VerificationResultTest {
 
         assertThat(
             classInfo
-            .map(ClassInfo::getSimpleName)
-            .toSet(),
+                .map(ClassInfo::getSimpleName)
+                .toSet(),
             equalTo(expectedInheritors.toSet())
         )
     }
@@ -72,9 +72,7 @@ class VerificationResultTest {
      * DCMAW-20245: AC3: [VerificationResult.Failure] is usable as a throwable error type.
      */
     @Test
-    fun `Failures are considered to be throwable`(
-        @TestParameter error: VerificationError
-    ) {
+    fun `Failures are considered to be throwable`(@TestParameter error: VerificationError) {
         val expected = VerificationResult.Failure(error)
 
         val actual = assertThrows(VerificationResult.Failure::class.java) {

@@ -10,7 +10,7 @@ dependencies {
     ).forEach(::api)
 
     listOf(
-        libs.org.hamcrest,
+        libs.org.hamcrest
     ).forEach(::testFixturesApi)
 
     listOf(

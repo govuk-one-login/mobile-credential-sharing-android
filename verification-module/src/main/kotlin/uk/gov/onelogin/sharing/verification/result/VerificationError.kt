@@ -84,5 +84,5 @@ enum class VerificationError {
      * The MSO validUntil timestamp is after the issuer certificate's expiry; the credential would
      * outlive its issuing certificate.
      */
-    VALIDITY_UNTIL_OUT_OF_RANGE,
+    VALIDITY_UNTIL_OUT_OF_RANGE
 }

@@ -8,7 +8,4 @@ import kotlin.time.Instant
  * @param notAfter The leaf certificate's end of validity.
  */
 @OptIn(ExperimentalTime::class)
-data class CertificateValidityPeriod(
-    val notBefore: Instant,
-    val notAfter: Instant,
-)
+data class CertificateValidityPeriod(val notBefore: Instant, val notAfter: Instant)

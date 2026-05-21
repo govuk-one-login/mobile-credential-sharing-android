@@ -6,15 +6,13 @@ import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 
 object VerificationResultMatchers {
-    fun hasError(
-        expected: VerificationError
-    ): Matcher<in VerificationResult> = hasError(equalTo(expected))
+    fun hasError(expected: VerificationError): Matcher<in VerificationResult> =
+        hasError(equalTo(expected))
 
-    fun hasError(
-        matcher: Matcher<in VerificationError>
-    ): Matcher<in VerificationResult> = VerificationResultMatcher(matcher) {
-        (it as? VerificationResult.Failure)?.error
-    }
+    fun hasError(matcher: Matcher<in VerificationError>): Matcher<in VerificationResult> =
+        VerificationResultMatcher(matcher) {
+            (it as? VerificationResult.Failure)?.error
+        }
 
     private class VerificationResultMatcher<Type>(
         private val matcher: Matcher<in Type>,
@@ -29,5 +27,4 @@ object VerificationResultMatchers {
         override fun matchesSafely(item: VerificationResult?): Boolean =
             matcher.matches(transformer(item))
     }
-
 }

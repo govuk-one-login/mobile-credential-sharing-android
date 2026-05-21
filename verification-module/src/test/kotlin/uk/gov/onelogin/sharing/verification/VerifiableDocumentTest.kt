@@ -32,7 +32,7 @@ class VerifiableDocumentTest {
         val expectedMethods = listOf(
             "getDocType" to String::class.java,
             "getIssuerSigned" to IssuerSigned::class.java,
-            "getDeviceSigned" to DeviceSigned::class.java,
+            "getDeviceSigned" to DeviceSigned::class.java
         )
 
         val classInfo = scanResult.getClassInfo(

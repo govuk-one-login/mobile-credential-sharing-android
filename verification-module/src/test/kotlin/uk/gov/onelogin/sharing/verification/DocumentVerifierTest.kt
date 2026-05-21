@@ -16,11 +16,11 @@ class DocumentVerifierTest {
     @Test
     fun `Ensure VerifiableDocument constraints`() {
         val expectedMethods = listOf(
-            "verifyDocument" to VerificationResult.Success::class.java,
+            "verifyDocument" to VerificationResult.Success::class.java
         )
         val expectedMethodParameters = listOf(
             VerifiableDocument::class,
-            SessionTranscript::class,
+            SessionTranscript::class
         ).map { it.java.name }
 
         val classInfo = scanResult.getClassInfo(DocumentVerifier::class.java.name)

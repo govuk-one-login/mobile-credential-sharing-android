@@ -6,22 +6,16 @@ import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 
 object DeviceSignedMatchers {
-    fun hasDeviceNameSpaceBytes(
-        expected: ByteArray
-    ) = hasDeviceNameSpaceBytes(equalTo(expected))
-    fun hasDeviceNameSpaceBytes(
-        matcher: Matcher<in ByteArray>
-    ): Matcher<in DeviceSigned> = DeviceSignedMatcher(matcher) {
-        it?.deviceNameSpacesBytes
-    }
-    fun hasDeviceSignature(
-        expected: ByteArray
-    ) = hasDeviceSignature(equalTo(expected))
-    fun hasDeviceSignature(
-        matcher: Matcher<in ByteArray>
-    ): Matcher<in DeviceSigned> = DeviceSignedMatcher(matcher) {
-        it?.deviceSignature
-    }
+    fun hasDeviceNameSpaceBytes(expected: ByteArray) = hasDeviceNameSpaceBytes(equalTo(expected))
+    fun hasDeviceNameSpaceBytes(matcher: Matcher<in ByteArray>): Matcher<in DeviceSigned> =
+        DeviceSignedMatcher(matcher) {
+            it?.deviceNameSpacesBytes
+        }
+    fun hasDeviceSignature(expected: ByteArray) = hasDeviceSignature(equalTo(expected))
+    fun hasDeviceSignature(matcher: Matcher<in ByteArray>): Matcher<in DeviceSigned> =
+        DeviceSignedMatcher(matcher) {
+            it?.deviceSignature
+        }
 
     private class DeviceSignedMatcher<Type>(
         private val matcher: Matcher<in Type>,
@@ -35,6 +29,4 @@ object DeviceSignedMatchers {
         override fun matchesSafely(item: DeviceSigned?): Boolean =
             matcher.matches(transformer(item))
     }
-
 }
-

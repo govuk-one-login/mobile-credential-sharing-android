@@ -31,7 +31,7 @@ class VerificationErrorTest {
             "VALIDITY_FROM_OUT_OF_RANGE",
             "VALIDITY_SIGNED_OUT_OF_RANGE",
             "VALIDITY_UNTIL_EXPIRED",
-            "VALIDITY_UNTIL_OUT_OF_RANGE",
+            "VALIDITY_UNTIL_OUT_OF_RANGE"
         )
 
         val info = scanResult.getClassInfo(VerificationError::class.java.name)

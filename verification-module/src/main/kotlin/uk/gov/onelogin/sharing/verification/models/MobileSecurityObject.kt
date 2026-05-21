@@ -22,7 +22,7 @@ data class MobileSecurityObject(
     val validityInfo: ValidityInfo,
     val digestAlgorithm: String = MSO_DIGEST_ALGORITHM,
     val status: ByteArray? = null,
-    val version: String = MSO_SCHEMA_VERSION,
+    val version: String = MSO_SCHEMA_VERSION
 ) {
 
     init {

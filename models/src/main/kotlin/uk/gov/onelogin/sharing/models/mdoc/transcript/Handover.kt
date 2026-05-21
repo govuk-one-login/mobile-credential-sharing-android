@@ -28,10 +28,8 @@ sealed class Handover {
      * @param selectMessage Binary value of the Handover Select Message
      * @param requestMessage Binary value of the Handover Request Message.
      */
-    data class NFC(
-        val selectMessage: ByteArray,
-        val requestMessage: ByteArray? = null
-    ) : Handover() {
+    data class NFC(val selectMessage: ByteArray, val requestMessage: ByteArray? = null) :
+        Handover() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false

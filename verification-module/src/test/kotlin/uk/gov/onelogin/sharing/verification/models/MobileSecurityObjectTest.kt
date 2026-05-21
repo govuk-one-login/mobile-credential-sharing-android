@@ -25,7 +25,7 @@ class MobileSecurityObjectTest {
         docType = "Unit test",
         valueDigests = emptyMap(),
         deviceKeyInfo = DeviceKeyInfo(
-            deviceKey = byteArrayOf(),
+            deviceKey = byteArrayOf()
         ),
         validityInfo = ValidityInfo(
             signed = now,
@@ -79,5 +79,4 @@ class MobileSecurityObjectTest {
             hasError(VerificationError.UNSUPPORTED_DIGEST_ALGORITHM)
         )
     }
-
 }

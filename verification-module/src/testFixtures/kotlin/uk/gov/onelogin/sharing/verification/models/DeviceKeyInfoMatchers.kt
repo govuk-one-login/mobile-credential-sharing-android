@@ -6,17 +6,13 @@ import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 
 object DeviceKeyInfoMatchers {
-    fun hasDeviceKey(
-        expected: ByteArray
-    ) = hasDeviceKey(equalTo(expected))
+    fun hasDeviceKey(expected: ByteArray) = hasDeviceKey(equalTo(expected))
 
-    fun hasDeviceKey(
-        matcher: Matcher<in ByteArray>
-    ): Matcher<in DeviceKeyInfo> = DeviceKeyInfoMatcher(matcher) { it?.deviceKey }
+    fun hasDeviceKey(matcher: Matcher<in ByteArray>): Matcher<in DeviceKeyInfo> =
+        DeviceKeyInfoMatcher(matcher) { it?.deviceKey }
 
-    fun hasKeyAuthorizations(
-        expected: Map<String, Map<Int, ByteArray>>
-    ) = hasKeyAuthorizations(equalTo(expected))
+    fun hasKeyAuthorizations(expected: Map<String, Map<Int, ByteArray>>) =
+        hasKeyAuthorizations(equalTo(expected))
 
     fun hasKeyAuthorizations(
         matcher: Matcher<in Map<String, Map<Int, ByteArray>>>
