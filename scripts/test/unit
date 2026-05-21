@@ -10,7 +10,9 @@ set -o errexit
 # `./scripts/test/unit --debug` -> adds `--debug` to the command.
 ./gradlew \
   :models:test \
+  :verification-module:test \
   :models:jacocoTestReport \
+  :verification-module:jacocoTestReport \
   testDebugUnitTest \
   createDebugUnitTestCoverageReport \
   "${@}"
