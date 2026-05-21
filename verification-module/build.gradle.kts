@@ -10,6 +10,10 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.org.hamcrest,
+    ).forEach(::testFixturesApi)
+
+    listOf(
         libs.io.github.classgraph,
         libs.junit,
         libs.org.hamcrest,
