@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.models
 
 /**
  * @see uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned

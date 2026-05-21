@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.result
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector

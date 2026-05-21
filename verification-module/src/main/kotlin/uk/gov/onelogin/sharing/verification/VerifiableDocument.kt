@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.verification
 
+import uk.gov.onelogin.sharing.verification.models.DeviceSigned
+import uk.gov.onelogin.sharing.verification.models.IssuerSigned
+
 interface VerifiableDocument {
     /**
      * The document type identifier.

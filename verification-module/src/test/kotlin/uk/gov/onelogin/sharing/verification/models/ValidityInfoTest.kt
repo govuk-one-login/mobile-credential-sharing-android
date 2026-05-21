@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.models
 
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
@@ -7,7 +7,7 @@ import kotlin.time.ExperimentalTime
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.nullValue
 import org.junit.Test
-import uk.gov.onelogin.sharing.verification.ValidityInfoMatchers.hasExpectedUpdate
+import uk.gov.onelogin.sharing.verification.models.ValidityInfoMatchers.hasExpectedUpdate
 
 @OptIn(ExperimentalTime::class)
 class ValidityInfoTest {

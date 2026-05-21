@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.models
 
 /**
  * @param deviceKey The raw binary encoding of the device's COSE key.

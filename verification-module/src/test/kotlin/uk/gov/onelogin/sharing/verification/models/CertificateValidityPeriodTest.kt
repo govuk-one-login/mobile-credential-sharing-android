@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.models
 
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant

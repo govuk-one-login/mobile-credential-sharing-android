@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.verification
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.assertInterfaceReturnTypes
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
+import uk.gov.onelogin.sharing.verification.models.DeviceSigned
+import uk.gov.onelogin.sharing.verification.models.IssuerSigned
 
 class VerifiableDocumentTest {
 

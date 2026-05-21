@@ -6,11 +6,12 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.assertInterfaceReturnTypes
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
+import uk.gov.onelogin.sharing.verification.result.VerificationResult
 
 class DocumentVerifierTest {
     /**
      * DCMAW-20245: AC8: [DocumentVerifier] exposes `verifyDocument(document, sessionTranscript?)`
-     * returning [VerificationResult.Success].
+     * returning [uk.gov.onelogin.sharing.verification.result.VerificationResult.Success].
      */
     @Test
     fun `Ensure VerifiableDocument constraints`() {

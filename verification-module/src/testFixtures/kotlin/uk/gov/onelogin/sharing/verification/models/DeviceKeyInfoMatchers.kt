@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.models
 
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matcher

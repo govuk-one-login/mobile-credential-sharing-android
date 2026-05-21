@@ -1,4 +1,7 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.models
+
+import uk.gov.onelogin.sharing.verification.result.VerificationError
+import uk.gov.onelogin.sharing.verification.result.VerificationResult
 
 /**
  * [MobileSecurityObject] (MSO) acts as a context object for verification.

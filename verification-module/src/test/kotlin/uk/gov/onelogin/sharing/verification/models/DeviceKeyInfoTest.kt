@@ -1,9 +1,9 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.models
 
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.nullValue
 import org.junit.Test
-import uk.gov.onelogin.sharing.verification.DeviceKeyInfoMatchers.hasKeyAuthorizations
+import uk.gov.onelogin.sharing.verification.models.DeviceKeyInfoMatchers.hasKeyAuthorizations
 
 class DeviceKeyInfoTest {
 

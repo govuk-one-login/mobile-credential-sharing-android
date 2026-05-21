@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification
+package uk.gov.onelogin.sharing.verification.models
 
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
@@ -9,6 +9,8 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.VerificationResultMatchers.hasError
+import uk.gov.onelogin.sharing.verification.result.VerificationError
+import uk.gov.onelogin.sharing.verification.result.VerificationResult
 
 @OptIn(ExperimentalTime::class)
 class MobileSecurityObjectTest {
