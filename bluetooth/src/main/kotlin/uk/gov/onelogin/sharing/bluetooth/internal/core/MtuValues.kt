@@ -50,5 +50,5 @@ object MtuValues {
      * @param mtu The negotiated MTU size. Must be between [MIN_MTU] and [MAX_MTU].
      * @return The maximum data payload size per chunk.
      */
-    fun dataChunkSize(mtu: Int): Int = 19
+    fun dataChunkSize(mtu: Int): Int = maxChunkBytes(mtu) - ISO_HEADER
 }

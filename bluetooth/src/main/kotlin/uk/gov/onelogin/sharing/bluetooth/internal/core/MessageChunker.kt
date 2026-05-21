@@ -9,7 +9,7 @@ private const val LOG_TAG = "MessageChunker"
 /**
  * Centralised chunking logic for BLE message transmission.
  * Splits [data] into MTU-sized chunks with ISO header bytes and writes each via [writeChunk].
- * Suspends between intermediate chunks to allow the BLE stack to flush each write.
+ * The [writeChunk] lambda is suspend to allow callers to await BLE stack confirmation between chunks.
  *
  * @param data The full payload to transmit.
  * @param mtu The negotiated MTU value.

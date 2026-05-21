@@ -737,7 +737,7 @@ internal class AndroidGattClientManagerTest {
             s2cCharacteristic.getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
         } returns if (hasDescriptors) s2cDescriptor else null
         every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns
-                s2cCharacteristic
+            s2cCharacteristic
 
         return CccdMocks(stateDescriptor, s2cDescriptor)
     }
