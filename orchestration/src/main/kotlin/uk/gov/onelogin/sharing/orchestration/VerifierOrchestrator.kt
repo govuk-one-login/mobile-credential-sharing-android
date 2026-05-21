@@ -39,6 +39,7 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartE
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
+import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
@@ -271,8 +272,8 @@ class VerifierOrchestrator(
     }
 
     private fun handleCentralBluetoothStateMessage(state: CentralBluetoothState.Message) {
-        runCatching {
-            verifierCryptoService.deserializeSessionData(state.value).run {
+        val sessionData = runCatching {
+            verifierCryptoService.deserializeSessionData(state.value).apply {
                 check(hasOkStatus()) {
                     "Received SessionData error status: ${status?.code}"
                 }
@@ -286,11 +287,42 @@ class VerifierOrchestrator(
                 SessionErrorReason.InvalidSessionDataPayload,
                 throwable
             )
+        }.getOrNull() ?: return
+
+        logger.debug(logTag, "Deserialized SessionData from bluetooth central Message")
+
+        safeTransitionTo(VerifierSessionState.Verifying)
+
+        val context = sessionFlow.value.cryptoContext ?: return failWith(
+            "Missing crypto context when decrypting DeviceResponse",
+            SessionErrorReason.MissingCryptoContext
+        )
+
+        runCatching {
+            verifierCryptoService.decryptDeviceResponse(
+                deviceResponseBytes = sessionData.data!!,
+                skDevice = context.skDevice,
+                decryptCounter = context.decryptCounter
+            )
         }.onSuccess {
-            // DCMAW-19311: Handle SessionData
-            logger.debug(
-                logTag,
-                "Deserialized SessionData from bluetooth central Message"
+            sessionFlow.value.updateCryptoContext {
+                context.copy(decryptCounter = context.decryptCounter + 1u)
+            }.also {
+                val updatedContext = sessionFlow.value.cryptoContext ?: return@onSuccess
+                logger.debug(
+                    logTag,
+                    "Decrypt counter incremented to: ${updatedContext.decryptCounter}"
+                )
+            }
+        }.onFailure { _ ->
+            stopCentralTransport()
+            safeTransitionTo(
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "Error decrypting DeviceResponse",
+                        reason = SessionErrorReason.CannotDecryptDeviceResponse
+                    )
+                )
             )
         }
     }

@@ -31,6 +31,7 @@ import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
+import uk.gov.onelogin.sharing.cryptoService.verifier.DecryptDeviceResponseException
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
@@ -600,6 +601,10 @@ class VerifierOrchestratorTest {
      */
     @Test
     fun `Serializes SessionData from central bluetooth message`() = runTest {
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
         centralBluetoothTransport.emitState(
             CentralBluetoothState.Message(
                 SERVER_2_CLIENT_UUID,
@@ -609,7 +614,6 @@ class VerifierOrchestratorTest {
             )
         )
 
-        orchestrator.hashCode()
         advanceUntilIdle()
 
         assertTrue {
@@ -702,5 +706,62 @@ class VerifierOrchestratorTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `decrypts DeviceResponse and transitions to Success`() = runTest {
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        advanceUntilIdle()
+
+        assertEquals(1u, fakeCryptoService.lastDecryptCounter)
+
+        val context = sessionFactory.getCurrentSession().cryptoContext
+        assertEquals(2u, context?.decryptCounter)
+    }
+
+    @Test
+    fun `decryption failure transitions to Failed with CannotDecryptDeviceResponse`() = runTest {
+        fakeCryptoService.decryptDeviceResponseException =
+            DecryptDeviceResponseException("Error decrypting DeviceResponse", RuntimeException())
+
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        advanceUntilIdle()
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(
+                hasReason(
+                    equalTo(SessionErrorReason.CannotDecryptDeviceResponse)
+                )
+            )
+        )
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+
+        val context = sessionFactory.getCurrentSession().cryptoContext
+        assertEquals(1u, context?.decryptCounter)
     }
 }

@@ -43,7 +43,8 @@ class VerifierCryptoServiceImpl(
     private val keyPairGenerator: KeyPairGenerator,
     private val sharedSecretGenerator: SharedSecretGenerator,
     private val sessionKeyGenerator: SessionKeyGenerator,
-    private val encryptDeviceRequestUseCase: EncryptDeviceRequestUseCase
+    private val encryptDeviceRequestUseCase: EncryptDeviceRequestUseCase,
+    private val decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase
 ) : VerifierCryptoService {
 
     override fun establishSession(
@@ -154,6 +155,16 @@ class VerifierCryptoServiceImpl(
     override fun deserializeSessionData(input: ByteArray): SessionData =
         CborMapper.default.readValue(input, SessionDataDto::class.java)
             .toDomain()
+
+    override fun decryptDeviceResponse(
+        deviceResponseBytes: ByteArray,
+        skDevice: ByteArray,
+        decryptCounter: UInt
+    ): ByteArray = decryptDeviceResponseUseCase(
+        deviceResponseBytes = deviceResponseBytes,
+        skDevice = skDevice,
+        encryptCounter = decryptCounter
+    )
 
     private fun computeSharedSecret(
         eReaderPrivateKey: ECPrivateKey,
