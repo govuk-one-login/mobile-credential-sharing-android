@@ -17,10 +17,11 @@ class Iso18013DocumentVerifier(
         document: VerifiableDocument,
         transcript: SessionTranscript?,
     ): VerificationResult.Success {
-        trustVerifier.verifyCOSESign1(
+        val (certificateValidity, data) = trustVerifier.verifyCOSESign1(
             document.issuerSigned.issuerAuth,
             trustedRootCertificate
         )
+        val mso = decodeMSO(data)
 
         return VerificationResult.Success
     }

@@ -29,12 +29,14 @@ class Iso18013DocumentVerifierTest {
     private val classInfo = scanResult.getClassInfo(Iso18013DocumentVerifier::class.java.name)
     private val privateFunctionSuffix = $$"$credential_verification"
 
-    private val mockDocument: VerifiableDocument = mockk()
-    private val issuerSigned: IssuerSigned = mockk()
+    private val mockDocument: VerifiableDocument = mockk(relaxed = true)
+    private val issuerSigned: IssuerSigned = mockk(relaxed = true)
     private val issuerAuth: ByteArray = byteArrayOf()
-    private val mockTranscript: SessionTranscript = mockk()
-    private val mockRootCertificate: X509Certificate = mockk()
-    private val trustVerifier: TrustVerifier = mockk()
+    private val mockTranscript: SessionTranscript = mockk(relaxed = true)
+    private val mockRootCertificate: X509Certificate = mockk(relaxed = true)
+    private val trustVerifier: TrustVerifier = mockk(relaxed = true)
+    private val certificateValidityPeriod: CertificateValidityPeriod = mockk(relaxed = true)
+    private val msoBytes: ByteArray = byteArrayOf()
 
     private val documentVerifier by lazy {
         Iso18013DocumentVerifier(
@@ -136,10 +138,8 @@ class Iso18013DocumentVerifierTest {
     }
 
     /**
-     * DCMAW-20246: AC4: verifyDocument() calls [TrustVerifier.verifyCOSESign1] first,
-     * then [Iso18013DocumentVerifier.decodeMSO], then the remaining three validators in order,
-     * then [Iso18013DocumentVerifier.verifyDeviceAuth] conditionally - each step fails the call
-     * if it throws.
+     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] calls [TrustVerifier.verifyCOSESign1]
+     * first.
      */
     @Test
     fun `Fails verification due to TrustVerifier failing COSE sign`(
@@ -167,5 +167,36 @@ class Iso18013DocumentVerifierTest {
             exception,
             hasError(error)
         )
+    }
+
+    /**
+     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] calls
+     * [Iso18013DocumentVerifier.decodeMSO] after verifying trust.
+     *
+     * then the remaining three validators in order,
+     * then [Iso18013DocumentVerifier.verifyDeviceAuth] conditionally - each step fails the call
+     * if it throws.
+     */
+    @Test
+    fun `Fails verification due to MSO decoding error`() {
+        stubTrustVerifierSuccess()
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            documentVerifier.verifyDocument(
+                document = mockDocument,
+                transcript = mockTranscript
+            )
+        }
+
+        assertThat(
+            exception,
+            hasError(VerificationError.MALFORMED_MSO)
+        )
+    }
+
+    private fun stubTrustVerifierSuccess() {
+        every {
+            trustVerifier.verifyCOSESign1(any(), any())
+        } returns Pair(certificateValidityPeriod, msoBytes)
     }
 }
