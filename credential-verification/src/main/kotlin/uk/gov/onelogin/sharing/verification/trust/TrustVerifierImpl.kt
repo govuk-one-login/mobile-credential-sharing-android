@@ -22,8 +22,6 @@ class TrustVerifierImpl : TrustVerifier {
         payload: ByteArray
     ): Unit = throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
 
-    internal fun decodeCOSESign1(): Unit =
-        error("This function isn't implemented yet")
-    internal fun verifyCertificateChain(): Unit =
-        error("This function isn't implemented yet")
+    internal fun decodeCOSESign1(): Unit = error("This function isn't implemented yet")
+    internal fun verifyCertificateChain(): Unit = error("This function isn't implemented yet")
 }

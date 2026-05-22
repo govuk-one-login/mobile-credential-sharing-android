@@ -1,3 +1,5 @@
+@file:Suppress("UnusedParameter")
+
 package uk.gov.onelogin.sharing.verification.document
 
 import dev.zacsweers.metro.ContributesBinding
