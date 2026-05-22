@@ -200,7 +200,8 @@ class DeviceResponseDto {
         }
 
         private fun deserializeDocument(docNode: JsonNode): DocumentDTO {
-            val docType = docNode[KEY_DOC_TYPE].asText()
+            val docType = docNode[KEY_DOC_TYPE]?.asText()
+                ?: throw IllegalArgumentException("Missing 'docType' in Document")
             val issuerSigned = deserializeIssuerSigned(docNode[KEY_ISSUER_SIGNED])
             val deviceSigned = deserializeDeviceSigned(docNode[KEY_DEVICE_SIGNED])
 

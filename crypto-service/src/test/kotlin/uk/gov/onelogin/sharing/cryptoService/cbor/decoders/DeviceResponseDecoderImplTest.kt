@@ -237,4 +237,25 @@ class DeviceResponseDecoderImplTest {
             decoder.decode(missingStatus)
         }
     }
+
+    @Test
+    fun `throws DeviceResponseDecodingException when docType is missing`() {
+        val missingDocType = ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartObject(3)
+                gen.writeStringField("version", "1.0")
+                gen.writeNumberField("status", 0)
+                gen.writeFieldName("documents")
+                gen.writeStartArray()
+                gen.writeStartObject(0)
+                gen.writeEndObject()
+                gen.writeEndArray()
+                gen.writeEndObject()
+            }
+        }.toByteArray()
+
+        assertFailsWith<DeviceResponseDecodingException> {
+            decoder.decode(missingDocType)
+        }
+    }
 }

@@ -21,10 +21,10 @@ class DeviceResponseDecoderImpl(private val logger: Logger) : DeviceResponseDeco
 
         dto.toDomain()
     } catch (e: IllegalArgumentException) {
-        logger.error(logTag, "${LOG_CBOR_VALIDATION_ERROR}: ${e.message}")
+        logger.error(logTag, LOG_CBOR_VALIDATION_ERROR, e)
         throw DeviceResponseDecodingException(e.message ?: LOG_CBOR_VALIDATION_ERROR, e)
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-        logger.error(logTag, LOG_CBOR_DECODING_ERROR)
+        logger.error(logTag, LOG_CBOR_DECODING_ERROR, e)
         throw DeviceResponseDecodingException(LOG_CBOR_DECODING_ERROR, e)
     }
 
