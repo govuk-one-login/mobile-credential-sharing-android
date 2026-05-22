@@ -207,4 +207,34 @@ class DeviceResponseDecoderImplTest {
 
         assert(logger.contains("DeviceResponse decoded successfully"))
     }
+
+    @Test
+    fun `throws DeviceResponseDecodingException when version is missing`() {
+        val missingVersion = ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartObject(1)
+                gen.writeNumberField("status", 0)
+                gen.writeEndObject()
+            }
+        }.toByteArray()
+
+        assertFailsWith<DeviceResponseDecodingException> {
+            decoder.decode(missingVersion)
+        }
+    }
+
+    @Test
+    fun `throws DeviceResponseDecodingException when status is missing`() {
+        val missingStatus = ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartObject(1)
+                gen.writeStringField("version", "1.0")
+                gen.writeEndObject()
+            }
+        }.toByteArray()
+
+        assertFailsWith<DeviceResponseDecodingException> {
+            decoder.decode(missingStatus)
+        }
+    }
 }
