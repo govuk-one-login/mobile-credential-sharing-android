@@ -1,17 +1,15 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
-import kotlinx.coroutines.delay
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 
 private const val LOG_TAG = "MessageChunker"
-private const val INTER_CHUNK_DELAY_MS = 20L
 
 /**
  * Centralised chunking logic for BLE message transmission.
  * Splits [data] into MTU-sized chunks with ISO header bytes and writes each via [writeChunk].
- * Suspends between intermediate chunks to allow the BLE stack to flush each write.
+ * The [writeChunk] lambda is suspend to allow callers to await BLE stack confirmation between chunks.
  *
  * @param data The full payload to transmit.
  * @param mtu The negotiated MTU value.
@@ -23,7 +21,7 @@ internal suspend fun sendChunkedMessage(
     data: ByteArray,
     mtu: Int,
     logger: Logger,
-    writeChunk: (chunk: ByteArray) -> Boolean
+    writeChunk: suspend (chunk: ByteArray) -> Boolean
 ): Boolean {
     if (data.isEmpty()) {
         logger.error(LOG_TAG, "sendChunkedMessage called with empty data")
@@ -52,7 +50,6 @@ internal suspend fun sendChunkedMessage(
                 LOG_TAG,
                 "Intermediate SessionEstablishment chunk generated, more data will follow"
             )
-            delay(INTER_CHUNK_DELAY_MS)
         }
         offset = end
     }

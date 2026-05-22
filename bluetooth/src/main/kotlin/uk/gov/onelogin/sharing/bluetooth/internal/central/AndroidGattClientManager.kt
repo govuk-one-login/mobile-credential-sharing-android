@@ -41,7 +41,8 @@ class AndroidGattClientManager(
     private val permissionChecker: PermissionCheckerV2,
     private val serviceValidator: ServiceValidator,
     private val gattWriter: GattWriter,
-    private val logger: Logger
+    private val logger: Logger,
+    private val writeQueue: GattWriteQueue
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
         extraBufferCapacity = 32
@@ -56,7 +57,6 @@ class AndroidGattClientManager(
     private var mtu = MIN_MTU
     private var isSessionEnd = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
-
     private val messagesMap: MutableMap<UUID, ByteArray> = mutableMapOf()
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
@@ -163,11 +163,12 @@ class AndroidGattClientManager(
             ?.getCharacteristic(CLIENT_2_SERVER_UUID) ?: return false
 
         return sendChunkedMessage(data, mtu, logger) { chunk ->
-            gattWriter.writeCharacteristic(
+            val written = gattWriter.writeCharacteristic(
                 gatt = gatt,
                 characteristic = characteristic,
                 value = chunk
             )
+            written && writeQueue.awaitWriteConfirmation()
         }
     }
 
@@ -366,6 +367,7 @@ class AndroidGattClientManager(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun characteristicWritten(event: GattEvent.CharacteristicWrite) {
         if (event.status != BluetoothGatt.GATT_SUCCESS) {
+            writeQueue.onWriteComplete(event.characteristic.uuid, false)
             return handleError(
                 ClientError.FAILED_TO_START,
                 "Failed to write 'Start' state"
@@ -373,6 +375,7 @@ class AndroidGattClientManager(
         }
 
         logger.debug(logTag, "Wrote value to characteristic: ${event.characteristic.uuid}")
+        writeQueue.onWriteComplete(event.characteristic.uuid, true)
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
