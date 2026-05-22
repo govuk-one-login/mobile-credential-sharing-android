@@ -79,9 +79,9 @@ fun Any.encodeCbor(): ByteArray {
 }
 
 /**
- * Extension to encode the [DeviceResponseDto.DeviceResponse] to CBOR bytes.
+ * Extension to encode the [DeviceResponseDto.DeviceResponseDTO] to CBOR bytes.
  */
-fun DeviceResponseDto.DeviceResponse.encodeCbor(): ByteArray = CborMapper.default
+fun DeviceResponseDto.DeviceResponseDTO.encodeCbor(): ByteArray = CborMapper.default
     .writeValueAsBytes(this)
 
 /**

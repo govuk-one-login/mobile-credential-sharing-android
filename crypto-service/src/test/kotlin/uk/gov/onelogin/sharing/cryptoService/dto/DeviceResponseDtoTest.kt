@@ -60,7 +60,7 @@ class DeviceResponseDtoTest {
             deviceSigned = validDeviceSignedDto
         )
 
-        val deviceResponse = DeviceResponseDto.DeviceResponse(
+        val deviceResponse = DeviceResponseDto.DeviceResponseDTO(
             documents = listOf(document),
             status = 0u
         )
@@ -141,7 +141,7 @@ class DeviceResponseDtoTest {
 
     @Test
     fun `Instantiate DeviceResponse model for user denial scenario`() {
-        val deviceResponse = DeviceResponseDto.DeviceResponse(
+        val deviceResponse = DeviceResponseDto.DeviceResponseDTO(
             status = 0u,
             documentErrors = mapOf(docType to 0u)
         )
@@ -164,7 +164,7 @@ class DeviceResponseDtoTest {
             "1.x"
         )
     ) {
-        DeviceResponseDto.DeviceResponse(
+        DeviceResponseDto.DeviceResponseDTO(
             version = version,
             status = 0u
         )
@@ -181,7 +181,7 @@ class DeviceResponseDtoTest {
         )
     ) {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            DeviceResponseDto.DeviceResponse(
+            DeviceResponseDto.DeviceResponseDTO(
                 version = version,
                 status = 0u
             )
@@ -198,7 +198,7 @@ class DeviceResponseDtoTest {
      */
     @Test
     fun `Valid status codes come from the 'Status' enum`(@TestParameter status: Status) {
-        DeviceResponseDto.DeviceResponse(status = status.code)
+        DeviceResponseDto.DeviceResponseDTO(status = status.code)
     }
 
     /**
@@ -207,7 +207,7 @@ class DeviceResponseDtoTest {
     @Test
     fun `Invalid status codes throw IllegalArgumentExceptions`() {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            DeviceResponseDto.DeviceResponse(status = 13u)
+            DeviceResponseDto.DeviceResponseDTO(status = 13u)
         }
 
         assertThat(
