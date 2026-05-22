@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,6 +34,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.t
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.DecryptDeviceResponseException
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
+import uk.gov.onelogin.sharing.cryptoService.verifier.DeviceResponseStub
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
@@ -745,10 +747,41 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `DeviceResponse with error status transitions to Failed - DeviceRequestProcessingError`() =
+    fun `DeviceResponse with error status transitions to Failed - DeviceRequestProcessingError`(
+        @TestParameter(valuesProvider = ErrorStatusProvider::class) errorStatus: Status
+    ) = runTest {
+        fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
+            status = errorStatus
+        )
+
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        advanceUntilIdle()
+
+        val failedState =
+            orchestrator.verifierSessionState.value as VerifierSessionState.Complete.Failed
+        val reason = failedState.error.reason as SessionErrorReason.DeviceRequestProcessingError
+        assertEquals(errorStatus.code, reason.statusCode)
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `DeviceResponse with null documents transitions to Failed - DocumentNotReturned`() =
         runTest {
             fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
-                status = Status.GENERAL_ERROR
+                status = Status.OK,
+                documents = null
             )
 
             backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
@@ -768,22 +801,47 @@ class VerifierOrchestratorTest {
 
             assertThat(
                 orchestrator.verifierSessionState.value,
-                isFailed(
-                    hasReason(
-                        instanceOf(
-                            SessionErrorReason.DeviceRequestProcessingError::class.java
-                        )
-                    )
-                )
+                isFailed(hasReason(equalTo(SessionErrorReason.DocumentNotReturned)))
             )
             assertEquals(1, centralBluetoothTransport.stopCalls)
         }
 
     @Test
-    fun `DeviceResponse with no documents transitions to Failed - DocumentNotReturned`() = runTest {
+    fun `DeviceResponse with empty documents list transitions to Failed - DocumentNotReturned`() =
+        runTest {
+            fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
+                status = Status.OK,
+                documents = emptyList()
+            )
+
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
+            orchestrator.processQrCode(VALID_MDOC_URI)
+
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(
+                    SERVER_2_CLIENT_UUID,
+                    CborMapper.default.writeValueAsBytes(
+                        fakeCryptoService.sessionData.toDto()
+                    )
+                )
+            )
+
+            advanceUntilIdle()
+
+            assertThat(
+                orchestrator.verifierSessionState.value,
+                isFailed(hasReason(equalTo(SessionErrorReason.DocumentNotReturned)))
+            )
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+        }
+
+    @Test
+    fun `DeviceResponse with multiple documents passes all through to Success`() = runTest {
+        val secondDocument = DeviceResponseStub.document.copy(docType = "org.iso.18013.5.1.mID")
         fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
             status = Status.OK,
-            documents = null
+            documents = listOf(DeviceResponseStub.document, secondDocument)
         )
 
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
@@ -801,15 +859,11 @@ class VerifierOrchestratorTest {
 
         advanceUntilIdle()
 
-        assertThat(
-            orchestrator.verifierSessionState.value,
-            isFailed(
-                hasReason(
-                    equalTo(SessionErrorReason.DocumentNotReturned)
-                )
-            )
-        )
-        assertEquals(1, centralBluetoothTransport.stopCalls)
+        val successState =
+            orchestrator.verifierSessionState.value as VerifierSessionState.Complete.Success
+        assertEquals(2, successState.data.documents.size)
+        assertEquals("org.iso.18013.5.1.mDL", successState.data.documents[0].docType)
+        assertEquals("org.iso.18013.5.1.mID", successState.data.documents[1].docType)
     }
 
     @Test
@@ -844,5 +898,13 @@ class VerifierOrchestratorTest {
 
         val context = sessionFactory.getCurrentSession().cryptoContext
         assertEquals(1u, context?.decryptCounter)
+    }
+
+    class ErrorStatusProvider : TestParameterValuesProvider() {
+        override fun provideValues(context: Context?): List<Status> = listOf(
+            Status.GENERAL_ERROR,
+            Status.CBOR_DECODING_ERROR,
+            Status.CBOR_VALIDATION_ERROR
+        )
     }
 }

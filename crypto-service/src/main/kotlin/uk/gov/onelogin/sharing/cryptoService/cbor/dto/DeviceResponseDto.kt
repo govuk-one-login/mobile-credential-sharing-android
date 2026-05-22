@@ -179,13 +179,13 @@ class DeviceResponseDto {
         ): DeviceResponseDTO {
             val root = CborMapper.default.readTree<JsonNode>(jsonParser)
 
-            val version = root.get(KEY_VERSION)?.asText()
+            val version = root[KEY_VERSION]?.asText()
                 ?: throw IllegalArgumentException("Missing 'version' in DeviceResponse")
-            val status = root.get(KEY_STATUS)?.asInt()?.toUInt()
+            val status = root[KEY_STATUS]?.asInt()?.toUInt()
                 ?: throw IllegalArgumentException("Missing 'status' in DeviceResponse")
 
             val documents = if (root.has(KEY_DOCUMENTS)) {
-                root.get(KEY_DOCUMENTS).map { docNode ->
+                root[KEY_DOCUMENTS].map { docNode ->
                     deserializeDocument(docNode)
                 }
             } else {
@@ -200,9 +200,9 @@ class DeviceResponseDto {
         }
 
         private fun deserializeDocument(docNode: JsonNode): DocumentDTO {
-            val docType = docNode.get(KEY_DOC_TYPE).asText()
-            val issuerSigned = deserializeIssuerSigned(docNode.get(KEY_ISSUER_SIGNED))
-            val deviceSigned = deserializeDeviceSigned(docNode.get(KEY_DEVICE_SIGNED))
+            val docType = docNode[KEY_DOC_TYPE].asText()
+            val issuerSigned = deserializeIssuerSigned(docNode[KEY_ISSUER_SIGNED])
+            val deviceSigned = deserializeDeviceSigned(docNode[KEY_DEVICE_SIGNED])
 
             return DocumentDTO(
                 docType = docType,
@@ -213,10 +213,10 @@ class DeviceResponseDto {
 
         private fun deserializeIssuerSigned(node: JsonNode): IssuerSignedDTO {
             val nameSpaces = if (node.has(KEY_NAME_SPACES)) {
-                val nsNode = node.get(KEY_NAME_SPACES)
+                val nsNode = node[KEY_NAME_SPACES]
                 val result = mutableMapOf<String, List<EmbeddedCbor>>()
                 nsNode.fieldNames().forEach { nameSpace ->
-                    val items = nsNode.get(nameSpace).map { itemNode ->
+                    val items = nsNode[nameSpace].map { itemNode ->
                         EmbeddedCbor(itemNode.binaryValue())
                     }
                     result[nameSpace] = items
@@ -227,7 +227,7 @@ class DeviceResponseDto {
             }
 
             val issuerAuthBytes = CborMapper.default.writeValueAsBytes(
-                node.get(KEY_ISSUER_AUTH)
+                node[KEY_ISSUER_AUTH]
             )
 
             return IssuerSignedDTO(
@@ -237,9 +237,9 @@ class DeviceResponseDto {
         }
 
         private fun deserializeDeviceSigned(node: JsonNode): DeviceSignedDTO {
-            val nameSpacesBytes = node.get(KEY_NAME_SPACES).binaryValue()
+            val nameSpacesBytes = node[KEY_NAME_SPACES].binaryValue()
             val deviceSignatureBytes = CborMapper.default.writeValueAsBytes(
-                node.get(KEY_DEVICE_AUTH).get(KEY_DEVICE_SIGNATURE)
+                node[KEY_DEVICE_AUTH][KEY_DEVICE_SIGNATURE]
             )
 
             return DeviceSignedDTO(
