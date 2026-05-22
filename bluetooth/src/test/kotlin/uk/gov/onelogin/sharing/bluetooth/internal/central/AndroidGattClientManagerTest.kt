@@ -21,6 +21,7 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
@@ -57,6 +58,7 @@ internal class AndroidGattClientManagerTest {
     private val permissionResponse = mutableListOf<PermissionCheckerV2.PermissionCheckResult>()
     private val fakePermissionChecker = FakePermissionChecker { permissionResponse }
     private val fakeGattWriter = FakeGattWriter()
+    private val fakeWriteQueue = FakeGattWriteQueue()
 
     private val fakeServiceValidator = FakeServiceValidator()
     private val logger = SystemLogger()
@@ -64,17 +66,21 @@ internal class AndroidGattClientManagerTest {
 
     private lateinit var manager: AndroidGattClientManager
 
-    private fun createManager(gattWriter: GattWriter) = AndroidGattClientManager(
+    private fun createManager(
+        gattWriter: GattWriter = fakeGattWriter,
+        writeQueue: GattWriteQueue = fakeWriteQueue
+    ) = AndroidGattClientManager(
         context,
         fakePermissionChecker,
         fakeServiceValidator,
         gattWriter,
-        logger
+        logger,
+        writeQueue
     )
 
     @Before
     fun setup() {
-        manager = createManager(fakeGattWriter)
+        manager = createManager()
     }
 
     @Test
@@ -417,7 +423,7 @@ internal class AndroidGattClientManagerTest {
     @Test
     fun `does not set state to start when write characteristic fails`() = runTest {
         val failingWriter = FakeGattWriter(false)
-        manager = createManager(failingWriter)
+        manager = createManager(gattWriter = failingWriter)
 
         setupBluetoothGattService()
         setupCharacteristic(GattUuids.STATE_UUID)
@@ -488,7 +494,7 @@ internal class AndroidGattClientManagerTest {
         testEvents { callbackSlot ->
             callbackSlot.captured.onCharacteristicWrite(
                 bluetoothGatt,
-                mockk(),
+                mockk(relaxed = true),
                 BluetoothGatt.GATT_FAILURE
             )
 
@@ -708,7 +714,7 @@ internal class AndroidGattClientManagerTest {
     @Test
     fun `writes session handles error`() = runTest {
         val failingWriter = FakeGattWriter(false)
-        manager = createManager(failingWriter)
+        manager = createManager(gattWriter = failingWriter)
 
         val service = setupBluetoothGattService()
 
@@ -897,26 +903,37 @@ internal class AndroidGattClientManagerTest {
     }
 
     private fun setupConnectedGatt(
-        gattWriter: GattWriter = fakeGattWriter
+        gattWriter: GattWriter = fakeGattWriter,
+        writeQueue: GattWriteQueue = fakeWriteQueue
     ): Pair<AndroidGattClientManager, CapturingSlot<BluetoothGattCallback>> {
         val callbackSlot = slot<BluetoothGattCallback>()
         every {
             bluetoothDevice.connectGatt(context, any(), capture(callbackSlot), any())
         } returns bluetoothGatt
-        val mgr = createManager(gattWriter)
+        val mgr = createManager(gattWriter, writeQueue)
         mgr.connect(bluetoothDevice, uuid)
         return mgr to callbackSlot
     }
 
     @Test
     fun `sendMessage with data fitting single chunk prepends 0x00 and writes once`() = runTest {
-        val (mgr, _) = setupConnectedGatt()
+        val (mgr, callbackSlot) = setupConnectedGatt()
         val data = ByteArray(10) { it.toByte() }
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
         every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
 
+        launch {
+            repeat(1) {
+                callbackSlot.captured.onCharacteristicWrite(
+                    bluetoothGatt,
+                    characteristic,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+            }
+        }
         val result = mgr.sendMessage(uuid, data)
 
         assertEquals(true, result)
@@ -939,7 +956,17 @@ internal class AndroidGattClientManagerTest {
             val service = mockk<BluetoothGattService>(relaxed = true)
             every { bluetoothGatt.getService(uuid) } returns service
             every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+            every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
 
+            launch {
+                repeat(2) {
+                    callbackSlot.captured.onCharacteristicWrite(
+                        bluetoothGatt,
+                        characteristic,
+                        BluetoothGatt.GATT_SUCCESS
+                    )
+                }
+            }
             val result = mgr.sendMessage(uuid, data)
 
             assertEquals(true, result)
@@ -966,14 +993,40 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `sendMessage logs success after final chunk written`() = runTest {
-        val (mgr, _) = setupConnectedGatt()
+    fun `sendMessage returns false when BLE stack signals write confirmation failure`() = runTest {
+        val failingQueue = FakeGattWriteQueue(confirmationResult = false)
+        val (mgr, _) = setupConnectedGatt(writeQueue = failingQueue)
         val data = ByteArray(10) { it.toByte() }
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
         every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
 
+        val result = mgr.sendMessage(uuid, data)
+
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `sendMessage logs success after final chunk written`() = runTest {
+        val (mgr, callbackSlot) = setupConnectedGatt()
+        val data = ByteArray(10) { it.toByte() }
+        val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        val service = mockk<BluetoothGattService>(relaxed = true)
+        every { bluetoothGatt.getService(uuid) } returns service
+        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+
+        launch {
+            repeat(1) {
+                callbackSlot.captured.onCharacteristicWrite(
+                    bluetoothGatt,
+                    characteristic,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+            }
+        }
         mgr.sendMessage(uuid, data)
 
         assert(logger.contains("Final SessionEstablishment chunk generated and sent"))
@@ -994,7 +1047,17 @@ internal class AndroidGattClientManagerTest {
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
         every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
 
+        launch {
+            repeat(2) {
+                callbackSlot.captured.onCharacteristicWrite(
+                    bluetoothGatt,
+                    characteristic,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+            }
+        }
         mgr.sendMessage(uuid, data)
 
         assert(
