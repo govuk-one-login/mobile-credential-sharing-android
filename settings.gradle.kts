@@ -41,14 +41,15 @@ listOf(
     ":bluetooth",
     ":camera-service",
     ":core",
+    ":credential-verification",
+    ":crypto-service",
     ":holder",
     ":models",
     ":orchestration",
     ":sdk",
-    ":crypto-service",
-    ":verifier",
     ":ui:ui-api",
-    ":ui:ui-impl"
+    ":ui:ui-impl",
+    ":verifier",
 ).forEach(::include)
 
 /**

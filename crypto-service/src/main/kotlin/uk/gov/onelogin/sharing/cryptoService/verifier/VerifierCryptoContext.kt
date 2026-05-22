@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
 import java.security.KeyPair
 import java.security.interfaces.ECPublicKey
 import java.util.UUID
+import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 
 /**
  * Holds ephemeral cryptographic resources for a single Verifier transaction.
@@ -17,7 +18,10 @@ data class VerifierCryptoContext(
     val serviceUuid: UUID,
     /** The Verifier's ephemeral public key in COSE format, wrapped in CBOR Tag 24. */
     val eReaderKeyTagged: ByteArray,
-    /** The CBOR Tag 24 wrapped SessionTranscript, used as salt for key derivation. */
+    /**
+     * The CBOR Tag 24 wrapped SessionTranscript, used as salt for key derivation.
+     * This should be updated to be an instance of [SessionTranscript].
+     */
     val sessionTranscriptBytes: ByteArray,
     /** The Verifier's ephemeral key pair (EReaderKey), retained for shared secret computation. */
     val eReaderKeyPair: KeyPair,

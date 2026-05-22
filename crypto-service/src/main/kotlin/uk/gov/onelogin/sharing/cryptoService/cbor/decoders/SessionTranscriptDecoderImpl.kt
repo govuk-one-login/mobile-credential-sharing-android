@@ -9,6 +9,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.base64Decode
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 
 private const val CBOR_ARRAY = 0x83
 private const val CBOR_NULL = 0xF6
@@ -16,6 +17,8 @@ private const val CBOR_NULL = 0xF6
 /**
  * Standard [SessionTranscriptDecoder] implementation, converting device engagement and
  * session establishment data into a session transcript.
+ *
+ * This should be updated to return [SessionTranscript] instances.
  */
 class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscriptDecoder {
     @Throws(
