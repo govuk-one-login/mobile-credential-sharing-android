@@ -17,7 +17,12 @@ class Iso18013DocumentVerifier(
         document: VerifiableDocument,
         transcript: SessionTranscript?,
     ): VerificationResult.Success {
-        TODO("Not yet implemented")
+        trustVerifier.verifyCOSESign1(
+            document.issuerSigned.issuerAuth,
+            trustedRootCertificate
+        )
+
+        return VerificationResult.Success
     }
 
     /**
