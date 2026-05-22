@@ -1,0 +1,34 @@
+package uk.gov.onelogin.sharing.verification.trust
+
+import dev.zacsweers.metro.ContributesBinding
+import java.security.cert.X509Certificate
+import java.security.interfaces.ECPublicKey
+import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
+import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriod
+import uk.gov.onelogin.sharing.verification.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
+
+@ContributesBinding(CredentialVerificationScope::class)
+class TrustVerifierImpl : TrustVerifier {
+    override fun verifyCOSESign1(
+        data: ByteArray,
+        trustedRoot: X509Certificate,
+    ): Pair<CertificateValidityPeriod, ByteArray> {
+        throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
+    }
+
+    override fun verifyCOSESign1(
+        coseData: ByteArray,
+        publicKey: ECPublicKey,
+        payload: ByteArray,
+    ) {
+        throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
+    }
+
+    internal fun decodeCOSESign1() {
+        throw IllegalStateException("This function isn't implemented yet")
+    }
+    internal fun verifyCertificateChain() {
+        throw IllegalStateException("This function isn't implemented yet")
+    }
+}
