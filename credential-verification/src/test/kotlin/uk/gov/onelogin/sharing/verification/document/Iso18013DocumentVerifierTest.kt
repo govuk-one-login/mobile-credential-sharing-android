@@ -23,7 +23,12 @@ import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityP
 import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriodStubs
 import uk.gov.onelogin.sharing.verification.document.models.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.document.models.IssuerSigned
+import uk.gov.onelogin.sharing.verification.document.models.IssuerSignedStubs.validIssuerAuth
 import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObject
+import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
+import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObjectStubs.encodedMsoWithMismatchedDigests
+import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObjectStubs.malformedEncodedMSO
+import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObjectStubs.validEncodedMSO
 import uk.gov.onelogin.sharing.verification.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.document.result.VerificationResultMatchers.hasError
@@ -38,17 +43,10 @@ class Iso18013DocumentVerifierTest {
     private val mockProvisionedDocument: VerifiableDocument = mockk(relaxed = true)
     private val mockPresentedDocument: VerifiableDocument.WithPresentation = mockk(relaxed = true)
     private val issuerSigned: IssuerSigned = mockk(relaxed = true)
-    private val issuerAuth: ByteArray = byteArrayOf()
     private val mockTranscript: SessionTranscript = mockk(relaxed = true)
     private val mockRootCertificate: X509Certificate = mockk(relaxed = true)
     private val trustVerifier: TrustVerifier = mockk(relaxed = true)
     private val validityPeriod: CertificateValidityPeriod = mockk(relaxed = true)
-
-    private val encodedMSO: ByteArray = byteArrayOf()
-    private val malformedMSO: ByteArray = byteArrayOf()
-    private val msoWithInvalidVersion = byteArrayOf()
-    private val msoWithMismatchedDigests = byteArrayOf()
-
 
     private val documentVerifier by lazy {
         Iso18013DocumentVerifier(
@@ -64,7 +62,7 @@ class Iso18013DocumentVerifierTest {
         } returns issuerSigned
         every {
             issuerSigned.issuerAuth
-        } returns issuerAuth
+        } returns validIssuerAuth
     }
 
     /**
@@ -163,7 +161,7 @@ class Iso18013DocumentVerifierTest {
     ) {
         every {
             trustVerifier.verifyCOSESign1(
-                eq(issuerAuth),
+                eq(validIssuerAuth),
                 eq(mockRootCertificate)
             )
         } throws VerificationResult.Failure(error)
@@ -187,7 +185,7 @@ class Iso18013DocumentVerifierTest {
      */
     @Test
     fun `Fails verification due to MSO decoding error`() {
-        stubTrustVerifierSuccess(encodedMSO = malformedMSO)
+        stubTrustVerifierSuccess(encodedMSO = malformedEncodedMSO)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
@@ -205,7 +203,7 @@ class Iso18013DocumentVerifierTest {
     @Test
     fun `decodeMSO is stubbed to throw a Failure`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.decodeMSO(encodedMSO)
+            documentVerifier.decodeMSO(validEncodedMSO)
         }
 
         assertThat(
@@ -220,7 +218,7 @@ class Iso18013DocumentVerifierTest {
     @Ignore("Currently untestable via interface functions")
     @Test
     fun `Fails verification due to invalid MSO fields`() {
-        stubTrustVerifierSuccess(encodedMSO = msoWithInvalidVersion)
+        stubTrustVerifierSuccess(encodedMSO = encodedMsoWithInvalidVersion)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
@@ -254,7 +252,7 @@ class Iso18013DocumentVerifierTest {
     @Ignore("Currently untestable via interface functions")
     @Test
     fun `Fails verification due to invalid Document Digests`() {
-        stubTrustVerifierSuccess(encodedMSO = msoWithMismatchedDigests)
+        stubTrustVerifierSuccess(encodedMSO = encodedMsoWithMismatchedDigests)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
@@ -420,7 +418,7 @@ class Iso18013DocumentVerifierTest {
     }
 
     private fun stubTrustVerifierSuccess(
-        encodedMSO: ByteArray = this.encodedMSO,
+        encodedMSO: ByteArray = validEncodedMSO,
         validityPeriod: CertificateValidityPeriod = this.validityPeriod,
     ) {
         every {

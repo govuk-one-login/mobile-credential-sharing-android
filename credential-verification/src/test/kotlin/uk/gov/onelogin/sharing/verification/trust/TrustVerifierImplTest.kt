@@ -39,7 +39,7 @@ class TrustVerifierImplTest {
     }
 
     @Test
-    fun `The private decodeCOSESign1 function isn't implemented`() {
+    fun `decodeCOSESign1() isn't implemented`() {
         val exception = assertThrows(IllegalStateException::class.java) {
             verifier.decodeCOSESign1()
         }
@@ -51,7 +51,7 @@ class TrustVerifierImplTest {
     }
 
     @Test
-    fun `The private verifyCertificateChain function isn't implemented`() {
+    fun `verifyCertificateChain() isn't implemented`() {
         val exception = assertThrows(IllegalStateException::class.java) {
             verifier.verifyCertificateChain()
         }
