@@ -1,7 +1,9 @@
 package uk.gov.onelogin.sharing.verification.document
 
+import dev.zacsweers.metro.ContributesBinding
 import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
+import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.document.models.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObject
@@ -9,6 +11,7 @@ import uk.gov.onelogin.sharing.verification.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
+@ContributesBinding(CredentialVerificationScope::class)
 class Iso18013DocumentVerifier(
     private val trustedRootCertificate: X509Certificate,
     private val trustVerifier: TrustVerifier,
@@ -17,11 +20,29 @@ class Iso18013DocumentVerifier(
         document: VerifiableDocument,
         transcript: SessionTranscript?,
     ): VerificationResult.Success {
-        val (certificateValidity, data) = trustVerifier.verifyCOSESign1(
+        val (validityPeriod, encodedMSO) = trustVerifier.verifyCOSESign1(
             document.issuerSigned.issuerAuth,
             trustedRootCertificate
         )
-        val mso = decodeMSO(data)
+        val mso = decodeMSO(encodedMSO)
+
+        verifyMSOFields(document, mso)
+        verifyDocumentDigests(document, mso)
+        verifyValidityInfo(validityPeriod, mso)
+
+        if (document is VerifiableDocument.WithPresentation) {
+            if (transcript == null) {
+                throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
+            }
+
+            verifyDeviceAuth(document, transcript, mso.deviceKeyInfo)
+            // move the proceeding call to `verifyDeviceAuth` during implementation.
+            buildDeviceAuthenticationBytes(
+                transcript,
+                document.docType,
+                document.deviceSigned.deviceNameSpacesBytes
+            )
+        }
 
         return VerificationResult.Success
     }
