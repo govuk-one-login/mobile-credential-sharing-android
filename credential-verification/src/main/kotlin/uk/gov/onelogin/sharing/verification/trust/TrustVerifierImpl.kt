@@ -23,7 +23,7 @@ class TrustVerifierImpl : TrustVerifier {
     ): Unit = throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
 
     internal fun decodeCOSESign1(): Unit =
-        throw IllegalStateException("This function isn't implemented yet")
+        error("This function isn't implemented yet")
     internal fun verifyCertificateChain(): Unit =
-        throw IllegalStateException("This function isn't implemented yet")
+        error("This function isn't implemented yet")
 }
