@@ -39,6 +39,8 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -67,6 +69,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierS
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
+@Suppress("LargeClass")
 class VerifierOrchestratorTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -729,6 +732,84 @@ class VerifierOrchestratorTest {
 
         val context = sessionFactory.getCurrentSession().cryptoContext
         assertEquals(2u, context?.decryptCounter)
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            instanceOf(VerifierSessionState.Complete.Success::class.java)
+        )
+        val successState =
+            orchestrator.verifierSessionState.value as VerifierSessionState.Complete.Success
+        assertEquals(1, successState.data.documents.size)
+        assertEquals("org.iso.18013.5.1.mDL", successState.data.documents.first().docType)
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `DeviceResponse with error status transitions to Failed - DeviceRequestProcessingError`() =
+        runTest {
+            fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
+                status = Status.GENERAL_ERROR
+            )
+
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
+            orchestrator.processQrCode(VALID_MDOC_URI)
+
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(
+                    SERVER_2_CLIENT_UUID,
+                    CborMapper.default.writeValueAsBytes(
+                        fakeCryptoService.sessionData.toDto()
+                    )
+                )
+            )
+
+            advanceUntilIdle()
+
+            assertThat(
+                orchestrator.verifierSessionState.value,
+                isFailed(
+                    hasReason(
+                        instanceOf(
+                            SessionErrorReason.DeviceRequestProcessingError::class.java
+                        )
+                    )
+                )
+            )
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+        }
+
+    @Test
+    fun `DeviceResponse with no documents transitions to Failed - DocumentNotReturned`() = runTest {
+        fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
+            status = Status.OK,
+            documents = null
+        )
+
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        advanceUntilIdle()
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(
+                hasReason(
+                    equalTo(SessionErrorReason.DocumentNotReturned)
+                )
+            )
+        )
+        assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 
     @Test

@@ -8,6 +8,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.validS
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 class FakeVerifierCryptoService : VerifierCryptoService {
     var establishSessionCallCount = 0
@@ -83,7 +84,7 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         return sessionData
     }
 
-    var decryptDeviceResponseToReturn: ByteArray = byteArrayOf(0x01, 0x02, 0x03)
+    var decryptDeviceResponseToReturn: DeviceResponse = DeviceResponseStub.successWithDocuments
     var decryptDeviceResponseException: Exception? = null
     var lastDecryptCounter: UInt? = null
 
@@ -91,7 +92,7 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         deviceResponseBytes: ByteArray,
         skDevice: ByteArray,
         decryptCounter: UInt
-    ): ByteArray {
+    ): DeviceResponse {
         lastDecryptCounter = decryptCounter
         decryptDeviceResponseException?.let { throw it }
         return decryptDeviceResponseToReturn

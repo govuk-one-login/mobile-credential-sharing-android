@@ -51,12 +51,11 @@ class DeviceResponseDto {
             }
         }
 
-        fun toDomain(): DeviceResponse =
-            DeviceResponse(
-                statusCode = status,
-                documents = documents?.map { it.toDomain() },
-                version = version
-            )
+        fun toDomain(): DeviceResponse = DeviceResponse(
+            statusCode = status,
+            documents = documents?.map { it.toDomain() },
+            version = version
+        )
     }
 
     /**

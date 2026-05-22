@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
 
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 /**
  * [VerifierCryptoService] implementation that defers to the [updater] property for obtaining a
@@ -41,5 +42,5 @@ class DeferredVerifierCryptoService(
         deviceResponseBytes: ByteArray,
         skDevice: ByteArray,
         decryptCounter: UInt
-    ): ByteArray = byteArrayOf()
+    ): DeviceResponse = DeviceResponse()
 }

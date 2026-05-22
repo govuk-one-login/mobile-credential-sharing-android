@@ -179,14 +179,14 @@ class DeviceResponseDecoderImplTest {
     @Test
     fun `throws DeviceResponseDecodingException for invalid status code`() {
         val invalidStatus = byteArrayOf(
-            0xA2.toByte(),       // map(2)
-            0x67,                // text(7)
+            0xA2.toByte(), // map(2)
+            0x67, // text(7)
             0x76, 0x65, 0x72, 0x73, 0x69, 0x6F, 0x6E, // "version"
-            0x63,                // text(3)
-            0x31, 0x2E, 0x30,   // "1.0"
-            0x66,                // text(6)
+            0x63, // text(3)
+            0x31, 0x2E, 0x30, // "1.0"
+            0x66, // text(6)
             0x73, 0x74, 0x61, 0x74, 0x75, 0x73, // "status"
-            0x0D                 // uint(13) - invalid
+            0x0D // uint(13) - invalid
         )
 
         assertFailsWith<DeviceResponseDecodingException> {

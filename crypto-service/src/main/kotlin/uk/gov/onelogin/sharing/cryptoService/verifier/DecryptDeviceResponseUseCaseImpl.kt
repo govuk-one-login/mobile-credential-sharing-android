@@ -8,6 +8,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceResponseDecoder
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionEncryption
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 @ContributesBinding(AppScope::class, binding = binding<DecryptDeviceResponseUseCase>())
 class DecryptDeviceResponseUseCaseImpl(
@@ -20,7 +21,7 @@ class DecryptDeviceResponseUseCaseImpl(
         deviceResponseBytes: ByteArray,
         skDevice: ByteArray,
         encryptCounter: UInt
-    ): ByteArray = try {
+    ): DeviceResponse = try {
         logger.debug(logTag, "Decrypting DeviceResponse with counter: $encryptCounter")
 
         val plaintext = sessionEncryption.decryptPayload(
@@ -32,10 +33,7 @@ class DecryptDeviceResponseUseCaseImpl(
             logger.debug(logTag, LOG_DECRYPT_SUCCESS)
         }
 
-        val deviceResponse = deviceResponseDecoder.decode(plaintext)
-
-        return plaintext
-
+        deviceResponseDecoder.decode(plaintext)
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         logger.error(logTag, LOG_DECRYPT_ERROR, e)
         throw DecryptDeviceResponseException(LOG_DECRYPT_ERROR, e)

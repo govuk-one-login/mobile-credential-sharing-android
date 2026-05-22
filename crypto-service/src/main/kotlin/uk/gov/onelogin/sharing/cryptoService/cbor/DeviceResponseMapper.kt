@@ -11,12 +11,13 @@ import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 /**
  * Maps the [DeviceResponse] domain model to its corresponding [DeviceResponseDto.DeviceResponseDTO].
  */
-fun DeviceResponse.toDto(): DeviceResponseDto.DeviceResponseDTO = DeviceResponseDto.DeviceResponseDTO(
-    version = version,
-    documents = documents?.map { it.toDto() },
-    documentErrors = documentErrors?.mapValues { it.value.code },
-    status = status.code
-)
+fun DeviceResponse.toDto(): DeviceResponseDto.DeviceResponseDTO =
+    DeviceResponseDto.DeviceResponseDTO(
+        version = version,
+        documents = documents?.map { it.toDto() },
+        documentErrors = documentErrors?.mapValues { it.value.code },
+        status = status.code
+    )
 
 /**
  * Maps the [VerifiableDocument.WithPresentation] domain interface to its corresponding

@@ -23,11 +23,13 @@ import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceResponseU
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_ERROR
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_SUCCESS
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class VerifierCryptoServiceImplTest {
     private val logger = SystemLogger()
     private val fakeEncrypt = FakeEncryptDeviceRequestUseCase()
-    private val fakeDecrypt = DecryptDeviceResponseUseCase { _, _, _ -> byteArrayOf() }
+    private val fakeDecrypt = DecryptDeviceResponseUseCase { _, _, _ -> DeviceResponse() }
     private val service = VerifierCryptoServiceImpl(
         logger = logger,
         keyPairGenerator = EcKeyPairGenerator(logger),
@@ -312,9 +314,10 @@ class VerifierCryptoServiceImplTest {
     }
 
     @Test
-    fun `decryptDeviceResponse delegates to use case and returns plaintext`() {
+    fun `decryptDeviceResponse delegates to use case and returns DeviceResponse`() {
+        val expectedResponse = DeviceResponse(status = Status.GENERAL_ERROR)
         val fakeDecryptUseCase = FakeDecryptDeviceResponseUseCase().apply {
-            fakeDeviceResponse = byteArrayOf(0x0A, 0x0B)
+            fakeDeviceResponse = expectedResponse
         }
         val service = createService(decryptDeviceResponseUseCase = fakeDecryptUseCase)
 
@@ -324,7 +327,7 @@ class VerifierCryptoServiceImplTest {
 
         val result = service.decryptDeviceResponse(deviceResponseBytes, skDevice, decryptCounter)
 
-        assertEquals(fakeDecryptUseCase.fakeDeviceResponse.toList(), result.toList())
+        assertEquals(expectedResponse, result)
         assertEquals(deviceResponseBytes, fakeDecryptUseCase.lastDeviceResponseBytes)
         assertEquals(skDevice, fakeDecryptUseCase.lastSkDevice)
         assertEquals(decryptCounter, fakeDecryptUseCase.lastEncryptCounter)

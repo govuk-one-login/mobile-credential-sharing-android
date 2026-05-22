@@ -20,7 +20,6 @@ class DeviceResponseDecoderImpl(private val logger: Logger) : DeviceResponseDeco
         logger.debug(logTag, "DeviceResponse decoded successfully")
 
         dto.toDomain()
-
     } catch (e: IllegalArgumentException) {
         logger.error(logTag, "${LOG_CBOR_VALIDATION_ERROR}: ${e.message}")
         throw DeviceResponseDecodingException(e.message ?: LOG_CBOR_VALIDATION_ERROR, e)
