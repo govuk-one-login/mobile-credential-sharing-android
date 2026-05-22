@@ -14,11 +14,11 @@ import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 @ContributesBinding(CredentialVerificationScope::class)
 class Iso18013DocumentVerifier(
     private val trustedRootCertificate: X509Certificate,
-    private val trustVerifier: TrustVerifier,
+    private val trustVerifier: TrustVerifier
 ) : DocumentVerifier {
     override fun verifyDocument(
         document: VerifiableDocument,
-        transcript: SessionTranscript?,
+        transcript: SessionTranscript?
     ): VerificationResult.Success {
         val (validityPeriod, encodedMSO) = trustVerifier.verifyCOSESign1(
             document.issuerSigned.issuerAuth,
@@ -50,23 +50,22 @@ class Iso18013DocumentVerifier(
     /**
      * @throws VerificationResult.Failure
      */
-    internal fun decodeMSO(encodedMSO: ByteArray): MobileSecurityObject {
+    internal fun decodeMSO(encodedMSO: ByteArray): MobileSecurityObject =
         throw VerificationResult.Failure(VerificationError.MALFORMED_MSO)
-    }
 
     /**
      * @throws VerificationResult.Failure
      */
-    internal fun verifyMSOFields(document: VerifiableDocument, mso: MobileSecurityObject) {
+    internal fun verifyMSOFields(document: VerifiableDocument, mso: MobileSecurityObject): Unit =
         throw VerificationResult.Failure(VerificationError.INVALID_MSO_VERSION)
-    }
 
     /**
      * @throws VerificationResult.Failure
      */
-    internal fun verifyDocumentDigests(document: VerifiableDocument, mso: MobileSecurityObject) {
-        throw VerificationResult.Failure(VerificationError.DIGEST_MISMATCH)
-    }
+    internal fun verifyDocumentDigests(
+        document: VerifiableDocument,
+        mso: MobileSecurityObject
+    ): Unit = throw VerificationResult.Failure(VerificationError.DIGEST_MISMATCH)
 
     /**
      * @throws VerificationResult.Failure
@@ -74,9 +73,7 @@ class Iso18013DocumentVerifier(
     internal fun verifyValidityInfo(
         validityPeriod: CertificateValidityPeriod,
         mso: MobileSecurityObject
-    ) {
-        throw VerificationResult.Failure(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE)
-    }
+    ): Unit = throw VerificationResult.Failure(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE)
 
     /**
      * @throws VerificationResult.Failure
@@ -85,9 +82,7 @@ class Iso18013DocumentVerifier(
         document: VerifiableDocument.WithPresentation,
         sessionTranscript: SessionTranscript,
         deviceKeyInfo: DeviceKeyInfo
-    ) {
-        throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-    }
+    ): Unit = throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
 
     internal fun buildDeviceAuthenticationBytes(
         sessionTranscript: SessionTranscript,

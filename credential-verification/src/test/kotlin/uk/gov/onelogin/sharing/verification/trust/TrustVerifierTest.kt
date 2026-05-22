@@ -24,7 +24,7 @@ class TrustVerifierTest {
 
         val expectedDescriptors = listOf(
             "${Pair::class.java.name} " +
-                    "(byte[], ${X509Certificate::class.java.simpleName})",
+                "(byte[], ${X509Certificate::class.java.simpleName})",
             "void (byte[], ${ECPublicKey::class.java.simpleName}, byte[])"
         )
 

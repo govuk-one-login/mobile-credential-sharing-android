@@ -29,7 +29,7 @@ object CertificateValidityPeriodStubs {
      */
     fun notBeforeLaterThanNotAfter(instant: Instant = now) = CertificateValidityPeriod(
         notAfter = instant.plus(1.minutes),
-        notBefore = instant.plus(2.minutes),
+        notBefore = instant.plus(2.minutes)
     )
 
     /**

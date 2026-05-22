@@ -82,8 +82,8 @@ class Iso18013DocumentVerifierTest {
             constructorInfo[0].typeDescriptor.toStringWithSimpleNames(),
             equalTo(
                 "void (" +
-                        "${X509Certificate::class.java.simpleName}, " +
-                        "${TrustVerifier::class.java.simpleName})"
+                    "${X509Certificate::class.java.simpleName}, " +
+                    "${TrustVerifier::class.java.simpleName})"
             )
         )
     }
@@ -111,32 +111,32 @@ class Iso18013DocumentVerifierTest {
         @TestParameter functionsToDescriptors: Pair<String, String> = testValues(
             "decodeMSO" to "${MobileSecurityObject::class.java.name} (byte[])",
             "verifyMSOFields" to "void (" +
-                    "${VerifiableDocument::class.java.simpleName}, " +
-                    "${MobileSecurityObject::class.java.simpleName}" +
-                    ")",
+                "${VerifiableDocument::class.java.simpleName}, " +
+                "${MobileSecurityObject::class.java.simpleName}" +
+                ")",
             "verifyDocumentDigests" to
-                    "void (" +
-                    "${VerifiableDocument::class.java.simpleName}, " +
-                    "${MobileSecurityObject::class.java.simpleName}" +
-                    ")",
+                "void (" +
+                "${VerifiableDocument::class.java.simpleName}, " +
+                "${MobileSecurityObject::class.java.simpleName}" +
+                ")",
             "verifyValidityInfo" to
-                    "void (" +
-                    "${CertificateValidityPeriod::class.java.simpleName}, " +
-                    "${MobileSecurityObject::class.java.simpleName}" +
-                    ")",
+                "void (" +
+                "${CertificateValidityPeriod::class.java.simpleName}, " +
+                "${MobileSecurityObject::class.java.simpleName}" +
+                ")",
             "verifyDeviceAuth" to
-                    "void (" +
-                    "${VerifiableDocument.WithPresentation::class.java.simpleName}, " +
-                    "${SessionTranscript::class.java.simpleName}, " +
-                    "${DeviceKeyInfo::class.java.simpleName}" +
-                    ")",
+                "void (" +
+                "${VerifiableDocument.WithPresentation::class.java.simpleName}, " +
+                "${SessionTranscript::class.java.simpleName}, " +
+                "${DeviceKeyInfo::class.java.simpleName}" +
+                ")",
             "buildDeviceAuthenticationBytes" to
-                    "${ByteArray::class.java.simpleName} (" +
-                    "${SessionTranscript::class.java.simpleName}, " +
-                    "${String::class.java.simpleName}, " +
-                    "${ByteArray::class.java.simpleName}" +
-                    ")"
-        ),
+                "${ByteArray::class.java.simpleName} (" +
+                "${SessionTranscript::class.java.simpleName}, " +
+                "${String::class.java.simpleName}, " +
+                "${ByteArray::class.java.simpleName}" +
+                ")"
+        )
     ) {
         val (name, expectedDescriptor) = functionsToDescriptors
         val methodInfo = classInfo.methodInfo.getSingleMethod("$name$privateFunctionSuffix")
@@ -156,8 +156,8 @@ class Iso18013DocumentVerifierTest {
         @TestParameter error: VerificationError = testValues(
             VerificationError.MALFORMED_ISSUER_AUTH,
             VerificationError.INVALID_ISSUER_SIGNATURE,
-            VerificationError.UNTRUSTED_CERTIFICATE,
-        ),
+            VerificationError.UNTRUSTED_CERTIFICATE
+        )
     ) {
         every {
             trustVerifier.verifyCOSESign1(
@@ -311,7 +311,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyValidityInfo(
                 validityPeriod = CertificateValidityPeriodStubs.expired(),
-                mso = mockk(),
+                mso = mockk()
             )
         }
 
@@ -413,13 +413,13 @@ class Iso18013DocumentVerifierTest {
 
         assertThat(
             deviceAuthBytes,
-            equalTo(byteArrayOf()),
+            equalTo(byteArrayOf())
         )
     }
 
     private fun stubTrustVerifierSuccess(
         encodedMSO: ByteArray = validEncodedMSO,
-        validityPeriod: CertificateValidityPeriod = this.validityPeriod,
+        validityPeriod: CertificateValidityPeriod = this.validityPeriod
     ) {
         every {
             trustVerifier.verifyCOSESign1(any(), any())

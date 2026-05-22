@@ -12,23 +12,18 @@ import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
 class TrustVerifierImpl : TrustVerifier {
     override fun verifyCOSESign1(
         data: ByteArray,
-        trustedRoot: X509Certificate,
-    ): Pair<CertificateValidityPeriod, ByteArray> {
+        trustedRoot: X509Certificate
+    ): Pair<CertificateValidityPeriod, ByteArray> =
         throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
-    }
 
     override fun verifyCOSESign1(
         coseData: ByteArray,
         publicKey: ECPublicKey,
-        payload: ByteArray,
-    ) {
-        throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-    }
+        payload: ByteArray
+    ): Unit = throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
 
-    internal fun decodeCOSESign1() {
+    internal fun decodeCOSESign1(): Unit =
         throw IllegalStateException("This function isn't implemented yet")
-    }
-    internal fun verifyCertificateChain() {
+    internal fun verifyCertificateChain(): Unit =
         throw IllegalStateException("This function isn't implemented yet")
-    }
 }

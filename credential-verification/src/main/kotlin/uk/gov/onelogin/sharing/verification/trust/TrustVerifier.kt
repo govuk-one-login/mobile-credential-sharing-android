@@ -19,9 +19,5 @@ interface TrustVerifier {
         trustedRoot: X509Certificate
     ): Pair<CertificateValidityPeriod, ByteArray>
 
-    fun verifyCOSESign1(
-        coseData: ByteArray,
-        publicKey: ECPublicKey,
-        payload: ByteArray
-    )
+    fun verifyCOSESign1(coseData: ByteArray, publicKey: ECPublicKey, payload: ByteArray)
 }
