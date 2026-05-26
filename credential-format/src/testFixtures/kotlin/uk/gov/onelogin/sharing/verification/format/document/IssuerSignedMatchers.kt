@@ -12,7 +12,7 @@ object IssuerSignedMatchers {
             it?.issuerAuth
         }
     fun hasNameSpaces(expected: Map<String, ByteArray>) = hasNameSpaces(equalTo(expected))
-    fun hasNameSpaces(matcher: Matcher<in Map<String, ByteArray>>): Matcher<in IssuerSigned> =
+    fun hasNameSpaces(matcher: Matcher<in Map<String, List<ByteArray>>>): Matcher<in IssuerSigned> =
         IssuerSignedMatcher(matcher) {
             it?.nameSpaces
         }

@@ -105,7 +105,7 @@ class DeviceResponseModelTest {
     fun `IssuerSigned nameSpaces contains expected namespace`() {
         val issuerSigned = model.documents!!.first().issuerSigned
         assertTrue(issuerSigned.nameSpaces!!.containsKey(namespace))
-        assertEquals(2, issuerSigned.nameSpaces[namespace]!!.size)
+        assertEquals(2, issuerSigned.nameSpaces!![namespace]!!.size)
     }
 
     @Test
