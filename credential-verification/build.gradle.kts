@@ -1,6 +1,7 @@
 plugins {
     listOf(
-        libs.plugins.templates.kotlin.library
+        libs.plugins.templates.kotlin.library,
+        libs.plugins.metro.di
     ).forEach { alias(it) }
 }
 
