@@ -6,10 +6,6 @@ plugins {
 
 dependencies {
     listOf(
-        projects.credentialFormat
-    ).forEach(::api)
-
-    listOf(
         libs.junit,
         libs.com.google.test.parameter.injector
     ).forEach(::testImplementation)
@@ -32,12 +28,12 @@ tasks.jacocoTestReport {
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(
-            "GOV.UK One Login Wallet Sharing: Digital Credential models"
+            "GOV.UK One Login Wallet Sharing: Verification formats"
         )
         description.set(
             """
-            Provides data structures for digital credentials passed between credential holders and
-            credential verifiers.
+            Provides data structures for the Credential verification (`:credential-verification`)
+            module.
             """.trimIndent()
         )
     }

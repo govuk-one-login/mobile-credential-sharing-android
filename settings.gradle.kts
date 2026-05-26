@@ -41,6 +41,7 @@ listOf(
     ":bluetooth",
     ":camera-service",
     ":core",
+    ":credential-format",
     ":credential-verification",
     ":crypto-service",
     ":exchange-format",
