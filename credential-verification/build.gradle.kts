@@ -20,7 +20,8 @@ dependencies {
         libs.junit,
         libs.mockk,
         libs.org.hamcrest,
-        libs.com.google.test.parameter.injector
+        libs.com.google.test.parameter.injector,
+        projects.exchangeFormat
     ).forEach(::testImplementation)
 }
 

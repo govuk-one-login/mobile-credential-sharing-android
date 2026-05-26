@@ -13,12 +13,12 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
-import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocument
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
-import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
@@ -40,9 +40,18 @@ class Iso18013DocumentVerifierTest {
     private val classInfo = scanResult.getClassInfo(Iso18013DocumentVerifier::class.java.name)
     private val privateFunctionSuffix = $$"$credential_verification"
 
-    private val mockProvisionedDocument: VerifiableDocument = mockk(relaxed = true)
+    /**
+     * DCMAW-20269: AC1: A Sharing SDK document can be wrapped in [SharingVerifiableDocument] and
+     * passed directly to [Iso18013DocumentVerifier.verifyDocument].
+     */
+    private val mockProvisionedDocument: VerifiableDocument = SharingVerifiableDocument(
+        docType = "unit test",
+        issuerSigned = SharingIssuerSigned(
+            issuerAuth = validIssuerAuth,
+            nameSpaces = null
+        )
+    )
     private val mockPresentedDocument: VerifiableDocument.WithPresentation = mockk(relaxed = true)
-    private val issuerSigned: IssuerSigned = mockk(relaxed = true)
     private val sessionTranscriptBytes: ByteArray = byteArrayOf(1, 2)
     private val mockRootCertificate: X509Certificate = mockk(relaxed = true)
     private val trustVerifier: TrustVerifier = mockk(relaxed = true)
@@ -53,16 +62,6 @@ class Iso18013DocumentVerifierTest {
             mockRootCertificate,
             trustVerifier
         )
-    }
-
-    @Before
-    fun setUp() {
-        every {
-            mockProvisionedDocument.issuerSigned
-        } returns issuerSigned
-        every {
-            issuerSigned.issuerAuth
-        } returns validIssuerAuth
     }
 
     /**
