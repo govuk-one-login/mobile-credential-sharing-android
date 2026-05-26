@@ -7,11 +7,13 @@ plugins {
 
 dependencies {
     listOf(
+        projects.credentialFormat,
         projects.exchangeFormat
     ).forEach(::api)
 
     listOf(
-        libs.org.hamcrest
+        libs.org.hamcrest,
+        testFixtures(projects.credentialFormat)
     ).forEach(::testFixturesApi)
 
     listOf(

@@ -2,14 +2,15 @@ package uk.gov.onelogin.sharing.verification.document
 
 import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier.Companion.exampleVerifierUsage
-import uk.gov.onelogin.sharing.verification.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 
 fun interface DocumentVerifier {
     /**
-     * @param document The [VerifiableDocument] to verify.
+     * @param document The [uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument] to verify.
      * @param transcript Provides additional information for use in verifying
-     * [VerifiableDocument.WithPresentation] instances.
+     * [uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument.WithPresentation] instances.
      * @throws VerificationResult.Failure when unable to successfully verify the provided
      * [document].
      * @sample exampleVerifierUsage

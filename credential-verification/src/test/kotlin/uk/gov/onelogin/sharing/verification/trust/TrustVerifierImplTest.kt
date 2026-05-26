@@ -5,9 +5,9 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.onelogin.sharing.verification.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResultMatchers.hasError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 
 class TrustVerifierImplTest {
     private val verifier by lazy {

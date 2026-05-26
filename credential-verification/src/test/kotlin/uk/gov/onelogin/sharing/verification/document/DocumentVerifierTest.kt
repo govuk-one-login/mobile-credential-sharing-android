@@ -14,8 +14,9 @@ import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.assertInterfaceReturnTypes
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
-import uk.gov.onelogin.sharing.verification.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 
 @RunWith(TestParameterInjector::class)
 class DocumentVerifierTest {

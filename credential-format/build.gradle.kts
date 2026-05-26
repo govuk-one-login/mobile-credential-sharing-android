@@ -6,8 +6,13 @@ plugins {
 
 dependencies {
     listOf(
+        libs.org.hamcrest
+    ).forEach(::testFixturesApi)
+
+    listOf(
         libs.junit,
-        libs.com.google.test.parameter.injector
+        libs.com.google.test.parameter.injector,
+        libs.io.github.classgraph,
     ).forEach(::testImplementation)
 }
 

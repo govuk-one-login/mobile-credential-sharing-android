@@ -2,17 +2,15 @@ package uk.gov.onelogin.sharing.verification.trust
 
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
-import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriod
-import uk.gov.onelogin.sharing.verification.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 
 interface TrustVerifier {
     /**
-     * @throws VerificationResult.Failure When [data] cannot be verified, with one of the proceeding
+     * @throws uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult.Failure When [data] cannot be verified, with one of the proceeding
      * errors:
-     * - [VerificationError.MALFORMED_ISSUER_AUTH]
-     * - [VerificationError.INVALID_ISSUER_SIGNATURE]
-     * - [VerificationError.UNTRUSTED_CERTIFICATE]
+     * - [uk.gov.onelogin.sharing.verification.format.document.result.VerificationError.MALFORMED_ISSUER_AUTH]
+     * - [uk.gov.onelogin.sharing.verification.format.document.result.VerificationError.INVALID_ISSUER_SIGNATURE]
+     * - [uk.gov.onelogin.sharing.verification.format.document.result.VerificationError.UNTRUSTED_CERTIFICATE]
      */
     fun verifyCOSESign1(
         data: ByteArray,

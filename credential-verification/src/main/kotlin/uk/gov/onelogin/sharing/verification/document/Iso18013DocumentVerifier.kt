@@ -6,11 +6,12 @@ import dev.zacsweers.metro.ContributesBinding
 import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
-import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriod
-import uk.gov.onelogin.sharing.verification.document.models.DeviceKeyInfo
-import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObject
-import uk.gov.onelogin.sharing.verification.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 @ContributesBinding(CredentialVerificationScope::class)

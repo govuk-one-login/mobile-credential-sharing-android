@@ -19,19 +19,20 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
-import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriod
-import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriodStubs
-import uk.gov.onelogin.sharing.verification.document.models.DeviceKeyInfo
-import uk.gov.onelogin.sharing.verification.document.models.IssuerSigned
-import uk.gov.onelogin.sharing.verification.document.models.IssuerSignedStubs.validIssuerAuth
-import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObject
-import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
-import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObjectStubs.encodedMsoWithMismatchedDigests
-import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObjectStubs.malformedEncodedMSO
-import uk.gov.onelogin.sharing.verification.document.models.MobileSecurityObjectStubs.validEncodedMSO
-import uk.gov.onelogin.sharing.verification.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResultMatchers.hasError
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithMismatchedDigests
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.malformedEncodedMSO
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.validEncodedMSO
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
+import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
+import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriodStubs
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 @OptIn(ExperimentalTime::class)

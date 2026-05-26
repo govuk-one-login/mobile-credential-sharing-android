@@ -4,9 +4,10 @@ import dev.zacsweers.metro.ContributesBinding
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
-import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriod
-import uk.gov.onelogin.sharing.verification.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
+import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 @ContributesBinding(CredentialVerificationScope::class)
 class TrustVerifierImpl : TrustVerifier {
