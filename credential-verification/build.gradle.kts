@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     listOf(
-        projects.credentialFormat,
+        projects.credentialFormat
     ).forEach(::api)
 
     listOf(

@@ -12,7 +12,7 @@ dependencies {
     listOf(
         libs.junit,
         libs.com.google.test.parameter.injector,
-        libs.io.github.classgraph,
+        libs.io.github.classgraph
     ).forEach(::testImplementation)
 }
 

@@ -12,10 +12,10 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.format.ClassInfoExt.scanResult
+import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
-import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.format.document.validity.ValidityInfo
 
 @OptIn(ExperimentalTime::class)

@@ -75,5 +75,4 @@ class SharingVerifiableDocumentTest {
             interfaceInstance.issuerSigned
         )
     }
-
 }

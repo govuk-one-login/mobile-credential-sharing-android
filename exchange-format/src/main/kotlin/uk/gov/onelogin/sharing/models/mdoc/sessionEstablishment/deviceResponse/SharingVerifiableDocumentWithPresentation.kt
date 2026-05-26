@@ -8,7 +8,8 @@ data class SharingVerifiableDocumentWithPresentation(
     override val docType: String,
     override val issuerSigned: IssuerSigned,
     override val deviceSigned: DeviceSigned
-) : SharingVerifiableDocument(docType, issuerSigned), VerifiableDocument.WithPresentation {
+) : SharingVerifiableDocument(docType, issuerSigned),
+    VerifiableDocument.WithPresentation {
 
     constructor(
         document: VerifiableDocument,

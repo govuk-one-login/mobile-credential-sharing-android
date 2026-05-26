@@ -10,7 +10,7 @@ class SharingIssuerSignedTest {
 
     private val issuerSigned = SharingIssuerSigned(
         issuerAuth = byteArrayOf(0, 1),
-        nameSpaces = mapOf("unit test" to listOf(byteArrayOf(1, 2))),
+        nameSpaces = mapOf("unit test" to listOf(byteArrayOf(1, 2)))
     )
 
     private val differentAuth = issuerSigned.copy(

@@ -23,7 +23,7 @@ class SharingVerifiableDocumentWithPresentationTest {
     )
 
     private val differentDocType = document.copy(
-        docType = "another test",
+        docType = "another test"
     )
     private val differentIssuerAuth = document.copy(
         issuerSigned = issuerSigned.copy(
@@ -105,7 +105,7 @@ class SharingVerifiableDocumentWithPresentationTest {
 
         assertEquals(
             document,
-            secondDocument,
+            secondDocument
         )
     }
 }

@@ -67,7 +67,10 @@ class ConfirmConsentUseCaseImplTest {
 
         assertEquals(docType, result.docType)
         assertEquals(filteredIssuerSigned, result.issuerSigned)
-        assertArrayEquals(expectedDeviceSigned.deviceNameSpacesBytes, result.deviceSigned.deviceNameSpacesBytes)
+        assertArrayEquals(
+            expectedDeviceSigned.deviceNameSpacesBytes,
+            result.deviceSigned.deviceNameSpacesBytes
+        )
         assertArrayEquals(expectedDeviceSigned.deviceSignature, result.deviceSigned.deviceSignature)
     }
 

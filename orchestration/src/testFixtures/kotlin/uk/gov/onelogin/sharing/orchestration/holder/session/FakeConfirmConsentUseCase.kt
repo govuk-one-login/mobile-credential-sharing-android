@@ -22,14 +22,14 @@ class FakeConfirmConsentUseCase(
                 deviceNameSpacesBytes = byteArrayOf(),
                 deviceSignature = byteArrayOf()
             )
-        ),
+        )
 ) : ConfirmConsentUseCase {
 
     override suspend fun execute(
         sessionTranscript: ByteArray,
         deviceRequest: DeviceRequest,
         validatedCredential: ValidatedCredential,
-        filteredIssuerSigned: IssuerSigned,
+        filteredIssuerSigned: IssuerSigned
     ): VerifiableDocument.WithPresentation {
         exception?.let { throw DeviceSignatureException("Sign failed", it) }
         return documentToReturn
