@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
+import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
 class SharingDeviceSignedTest {
 
@@ -41,5 +42,33 @@ class SharingDeviceSignedTest {
 
         assertNotEquals(deviceSigned.hashCode(), differentNameSpaces.hashCode())
         assertNotEquals(deviceSigned.hashCode(), differentSignature.hashCode())
+    }
+
+    /**
+     * DCMAW-20269: AC6: [SharingDeviceSigned.deviceNameSpacesBytes] returns the raw
+     * DeviceNameSpaces bytes from the underlying document, unchanged.
+     */
+    @Test
+    fun `Signing implementation's name spaces bytes are accessible via interface`() {
+        val interfaceInstance = deviceSigned as DeviceSigned
+
+        assertEquals(
+            deviceSigned.deviceNameSpacesBytes,
+            interfaceInstance.deviceNameSpacesBytes
+        )
+    }
+
+    /**
+     * DCMAW-20269: AC7: [SharingDeviceSigned.deviceSignature] returns the same bytes as the
+     * underlying document's device signature field.
+     */
+    @Test
+    fun `Signing implementation's device signature is accessible via interface`() {
+        val interfaceInstance = deviceSigned as DeviceSigned
+
+        assertEquals(
+            deviceSigned.deviceSignature,
+            interfaceInstance.deviceSignature
+        )
     }
 }
