@@ -6,9 +6,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseModelTest {
@@ -31,9 +31,9 @@ class DeviceResponseModelTest {
                     ),
                     issuerAuth = byteArrayOf()
                 ),
-                deviceSigned = DeviceSigned(
-                    nameSpaces = emptyNameSpacesBytes,
-                    deviceAuth = byteArrayOf()
+                deviceSigned = SharingDeviceSigned(
+                    deviceNameSpacesBytes = emptyNameSpacesBytes,
+                    deviceSignature = byteArrayOf()
                 )
             )
         ),
@@ -118,6 +118,6 @@ class DeviceResponseModelTest {
     @Test
     fun `DeviceSigned nameSpaces is empty CBOR map`() {
         val deviceSigned = model.documents!!.first().deviceSigned
-        assertArrayEquals(emptyNameSpacesBytes, deviceSigned.nameSpaces)
+        assertArrayEquals(emptyNameSpacesBytes, deviceSigned.deviceNameSpacesBytes)
     }
 }

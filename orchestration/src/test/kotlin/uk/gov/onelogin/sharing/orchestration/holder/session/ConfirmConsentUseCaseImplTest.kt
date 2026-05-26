@@ -9,8 +9,8 @@ import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceAuthenticationResult
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
 class ConfirmConsentUseCaseImplTest {
@@ -43,9 +43,9 @@ class ConfirmConsentUseCaseImplTest {
 
     @Test
     fun `execute returns Document with DeviceSigned from holderResponseUseCase`() = runTest {
-        val expectedDeviceSigned = DeviceSigned(
-            nameSpaces = byteArrayOf(0x01),
-            deviceAuth = byteArrayOf(0x02)
+        val expectedDeviceSigned = SharingDeviceSigned(
+            deviceNameSpacesBytes = byteArrayOf(0x01),
+            deviceSignature = byteArrayOf(0x02)
         )
         fakeHolderCryptoService.deviceAuthResultToReturn = DeviceAuthenticationResult(
             deviceAuthenticationBytes = deviceAuthBytes,
@@ -67,8 +67,8 @@ class ConfirmConsentUseCaseImplTest {
 
         assertEquals(docType, result.docType)
         assertEquals(filteredIssuerSigned, result.issuerSigned)
-        assertArrayEquals(expectedDeviceSigned.nameSpaces, result.deviceSigned.nameSpaces)
-        assertArrayEquals(expectedDeviceSigned.deviceAuth, result.deviceSigned.deviceAuth)
+        assertArrayEquals(expectedDeviceSigned.deviceNameSpacesBytes, result.deviceSigned.deviceNameSpacesBytes)
+        assertArrayEquals(expectedDeviceSigned.deviceSignature, result.deviceSigned.deviceSignature)
     }
 
     @Test

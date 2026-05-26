@@ -4,9 +4,9 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
 /**
  * Maps the [DeviceResponse] domain model to its corresponding [DeviceResponseDto.DeviceResponse].
@@ -46,9 +46,9 @@ fun IssuerSigned.encodeCbor(): ByteArray = CborMapper.default
     .writeValueAsBytes(this.toDto())
 
 /**
- * Maps [DeviceSigned] domain model to its corresponding [DeviceResponseDto.DeviceSignedDTO].
+ * Maps [DeviceSigned] domain interface to its corresponding [DeviceResponseDto.DeviceSignedDTO].
  */
 fun DeviceSigned.toDto(): DeviceResponseDto.DeviceSignedDTO = DeviceResponseDto.DeviceSignedDTO(
-    nameSpaces = EmbeddedCbor(nameSpaces),
-    deviceAuth = DeviceResponseDto.DeviceAuthDTO(deviceSignature = RawCbor(deviceAuth))
+    nameSpaces = EmbeddedCbor(deviceNameSpacesBytes),
+    deviceAuth = DeviceResponseDto.DeviceAuthDTO(deviceSignature = RawCbor(deviceSignature))
 )

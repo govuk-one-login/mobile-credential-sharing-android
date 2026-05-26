@@ -8,9 +8,9 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseMapperTest {
@@ -38,9 +38,9 @@ class DeviceResponseMapperTest {
                         nameSpaces = mapOf(namespace to listOf(itemBytes)),
                         issuerAuth = issuerAuth
                     ),
-                    deviceSigned = DeviceSigned(
-                        nameSpaces = nameSpacesBytes,
-                        deviceAuth = byteArrayOf(0x07, 0x08)
+                    deviceSigned = SharingDeviceSigned(
+                        deviceNameSpacesBytes = nameSpacesBytes,
+                        deviceSignature = byteArrayOf(0x07, 0x08)
                     )
                 )
             ),
