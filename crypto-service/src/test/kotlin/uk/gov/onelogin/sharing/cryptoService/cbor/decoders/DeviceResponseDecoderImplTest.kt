@@ -37,24 +37,36 @@ class DeviceResponseDecoderImplTest {
     private val itemBytes1 = byteArrayOf(0xA4.toByte(), 0x01, 0x02, 0x03)
     private val itemBytes2 = byteArrayOf(0xA4.toByte(), 0x04, 0x05, 0x06)
 
+    private fun createDocument(
+        docType: String = this.docType,
+        items: List<ByteArray> = listOf(itemBytes1)
+    ) = Document(
+        docType = docType,
+        issuerSigned = IssuerSigned(
+            nameSpaces = mapOf(namespace to items),
+            issuerAuth = issuerAuthBytes
+        ),
+        deviceSigned = DeviceSigned(
+            nameSpaces = emptyNameSpacesBytes,
+            deviceAuth = deviceAuthBytes
+        )
+    )
+
+    private fun createDeviceResponse(
+        documents: List<Document>? = listOf(createDocument()),
+        status: Status = Status.OK,
+        documentErrors: Map<String, Status>? = null
+    ) = DeviceResponse(
+        version = "1.0",
+        documents = documents,
+        status = status,
+        documentErrors = documentErrors
+    )
+
     @Test
     fun `decodes successful DeviceResponse with documents`() {
-        val original = DeviceResponse(
-            version = "1.0",
-            documents = listOf(
-                Document(
-                    docType = docType,
-                    issuerSigned = IssuerSigned(
-                        nameSpaces = mapOf(namespace to listOf(itemBytes1, itemBytes2)),
-                        issuerAuth = issuerAuthBytes
-                    ),
-                    deviceSigned = DeviceSigned(
-                        nameSpaces = emptyNameSpacesBytes,
-                        deviceAuth = deviceAuthBytes
-                    )
-                )
-            ),
-            status = Status.OK
+        val original = createDeviceResponse(
+            documents = listOf(createDocument(items = listOf(itemBytes1, itemBytes2)))
         )
 
         val encoded = original.toDto().encodeCbor()
@@ -70,25 +82,7 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `decodes nameSpaces items as raw byte arrays`() {
-        val original = DeviceResponse(
-            version = "1.0",
-            documents = listOf(
-                Document(
-                    docType = docType,
-                    issuerSigned = IssuerSigned(
-                        nameSpaces = mapOf(namespace to listOf(itemBytes1)),
-                        issuerAuth = issuerAuthBytes
-                    ),
-                    deviceSigned = DeviceSigned(
-                        nameSpaces = emptyNameSpacesBytes,
-                        deviceAuth = deviceAuthBytes
-                    )
-                )
-            ),
-            status = Status.OK
-        )
-
-        val encoded = original.toDto().encodeCbor()
+        val encoded = createDeviceResponse().toDto().encodeCbor()
         val decoded = decoder.decode(encoded)
 
         val items = decoded.documents!!.first().issuerSigned.nameSpaces!![namespace]!!
@@ -98,33 +92,11 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `decodes multiple documents`() {
-        val original = DeviceResponse(
-            version = "1.0",
+        val original = createDeviceResponse(
             documents = listOf(
-                Document(
-                    docType = docType,
-                    issuerSigned = IssuerSigned(
-                        nameSpaces = mapOf(namespace to listOf(itemBytes1)),
-                        issuerAuth = issuerAuthBytes
-                    ),
-                    deviceSigned = DeviceSigned(
-                        nameSpaces = emptyNameSpacesBytes,
-                        deviceAuth = deviceAuthBytes
-                    )
-                ),
-                Document(
-                    docType = "org.iso.18013.5.1.mID",
-                    issuerSigned = IssuerSigned(
-                        nameSpaces = mapOf(namespace to listOf(itemBytes2)),
-                        issuerAuth = issuerAuthBytes
-                    ),
-                    deviceSigned = DeviceSigned(
-                        nameSpaces = emptyNameSpacesBytes,
-                        deviceAuth = deviceAuthBytes
-                    )
-                )
-            ),
-            status = Status.OK
+                createDocument(),
+                createDocument(docType = "org.iso.18013.5.1.mID", items = listOf(itemBytes2))
+            )
         )
 
         val encoded = original.toDto().encodeCbor()
@@ -138,13 +110,7 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `decodes DeviceResponse with null documents`() {
-        val original = DeviceResponse(
-            version = "1.0",
-            documents = null,
-            status = Status.OK
-        )
-
-        val encoded = original.toDto().encodeCbor()
+        val encoded = createDeviceResponse(documents = null).toDto().encodeCbor()
         val decoded = decoder.decode(encoded)
 
         assertEquals(Status.OK, decoded.status)
@@ -153,13 +119,10 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `decodes error status codes`() {
-        val original = DeviceResponse(
-            version = "1.0",
+        val encoded = createDeviceResponse(
             documents = null,
             status = Status.GENERAL_ERROR
-        )
-
-        val encoded = original.toDto().encodeCbor()
+        ).toDto().encodeCbor()
         val decoded = decoder.decode(encoded)
 
         assertEquals(Status.GENERAL_ERROR, decoded.status)
@@ -178,16 +141,14 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `throws DeviceResponseDecodingException for invalid status code`() {
-        val invalidStatus = byteArrayOf(
-            0xA2.toByte(), // map(2)
-            0x67, // text(7)
-            0x76, 0x65, 0x72, 0x73, 0x69, 0x6F, 0x6E, // "version"
-            0x63, // text(3)
-            0x31, 0x2E, 0x30, // "1.0"
-            0x66, // text(6)
-            0x73, 0x74, 0x61, 0x74, 0x75, 0x73, // "status"
-            0x0D // uint(13) - invalid
-        )
+        val invalidStatus = ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartObject(2)
+                gen.writeStringField("version", "1.0")
+                gen.writeNumberField("status", 13)
+                gen.writeEndObject()
+            }
+        }.toByteArray()
 
         assertFailsWith<DeviceResponseDecodingException> {
             decoder.decode(invalidStatus)
@@ -196,13 +157,7 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `logs success message on successful decode`() {
-        val original = DeviceResponse(
-            version = "1.0",
-            documents = null,
-            status = Status.OK
-        )
-
-        val encoded = original.toDto().encodeCbor()
+        val encoded = createDeviceResponse(documents = null).toDto().encodeCbor()
         decoder.decode(encoded)
 
         assert(logger.contains("DeviceResponse decoded successfully"))
@@ -236,6 +191,20 @@ class DeviceResponseDecoderImplTest {
         assertFailsWith<DeviceResponseDecodingException> {
             decoder.decode(missingStatus)
         }
+    }
+
+    @Test
+    fun `decodes successfully when payload contains unsupported optional fields`() {
+        val encoded = createDeviceResponse(
+            documentErrors = mapOf(docType to Status.GENERAL_ERROR)
+        ).toDto().encodeCbor()
+        val decoded = decoder.decode(encoded)
+
+        assertEquals(Status.OK, decoded.status)
+        assertEquals("1.0", decoded.version)
+        assertNotNull(decoded.documents)
+        assertEquals(1, decoded.documents!!.size)
+        assertEquals(docType, decoded.documents!!.first().docType)
     }
 
     @Test
