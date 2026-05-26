@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+
 /**
  * ```
  * DeviceResponse = {
@@ -11,13 +13,13 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
  */
 data class DeviceResponse(
     val version: String = "1.0",
-    val documents: List<Document>? = null,
+    val documents: List<VerifiableDocument.WithPresentation>? = null,
     val documentErrors: Map<String, Status>? = null,
     val status: Status = Status.OK
 ) {
     constructor(
         statusCode: UInt?,
-        documents: List<Document>? = null,
+        documents: List<VerifiableDocument.WithPresentation>? = null,
         documentErrors: Map<String, Status>? = null,
         version: String = "1.0"
     ) : this(

@@ -49,7 +49,7 @@ class SharingDeviceSignedTest {
      * DeviceNameSpaces bytes from the underlying document, unchanged.
      */
     @Test
-    fun `Signing implementation's name spaces bytes are accessible via interface`() {
+    fun `Sharing implementation's name spaces bytes are accessible via interface`() {
         val interfaceInstance = deviceSigned as DeviceSigned
 
         assertEquals(
@@ -63,7 +63,7 @@ class SharingDeviceSignedTest {
      * underlying document's device signature field.
      */
     @Test
-    fun `Signing implementation's device signature is accessible via interface`() {
+    fun `Sharing implementation's device signature is accessible via interface`() {
         val interfaceInstance = deviceSigned as DeviceSigned
 
         assertEquals(

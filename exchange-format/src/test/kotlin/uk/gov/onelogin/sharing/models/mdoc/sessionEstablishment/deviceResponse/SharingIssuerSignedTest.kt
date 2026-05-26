@@ -46,7 +46,7 @@ class SharingIssuerSignedTest {
      * underlying document's issuer auth field.
      */
     @Test
-    fun `Signing implementation's name spaces bytes are accessible via interface`() {
+    fun `Sharing implementation's IssuerAuth are accessible via interface`() {
         val interfaceInstance = issuerSigned as IssuerSigned
 
         assertEquals(
@@ -60,7 +60,7 @@ class SharingIssuerSignedTest {
      * underlying document; each list entry is the original Tag-24 byte sequence, unchanged.
      */
     @Test
-    fun `Signing implementation's device signature is accessible via interface`() {
+    fun `Sharing implementation's name spaces are accessible via interface`() {
         val interfaceInstance = issuerSigned as IssuerSigned
 
         assertEquals(

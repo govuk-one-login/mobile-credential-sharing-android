@@ -2,8 +2,8 @@ package uk.gov.onelogin.sharing.cryptoService.holder
 
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 /**
  * Handles cryptographic operations for the Holder role.
@@ -43,7 +43,7 @@ interface HolderCryptoService {
      * @return The encrypted ciphertext + authentication tag bytes.
      */
     fun buildDeviceResponse(
-        documents: List<Document>,
+        documents: List<VerifiableDocument.WithPresentation>,
         skDevice: ByteArray,
         encryptCounter: UInt
     ): ByteArray

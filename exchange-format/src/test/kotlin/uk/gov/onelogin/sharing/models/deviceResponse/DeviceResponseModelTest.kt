@@ -6,9 +6,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocumentWithPresentation
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseModelTest {
@@ -23,7 +23,7 @@ class DeviceResponseModelTest {
     private val model = DeviceResponse(
         version = "1.0",
         documents = listOf(
-            Document(
+            SharingVerifiableDocumentWithPresentation(
                 docType = docType,
                 issuerSigned = SharingIssuerSigned(
                     nameSpaces = mapOf(

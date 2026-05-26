@@ -4,8 +4,8 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
 /**
@@ -19,14 +19,16 @@ fun DeviceResponse.toDto(): DeviceResponseDto.DeviceResponse = DeviceResponseDto
 )
 
 /**
- * Maps the [Document] domain model to its corresponding [DeviceResponseDto.DocumentDTO].
+ * Maps the [VerifiableDocument.WithPresentation] domain interface to its corresponding
+ * [DeviceResponseDto.DocumentDTO].
  */
-fun Document.toDto(): DeviceResponseDto.DocumentDTO = DeviceResponseDto.DocumentDTO(
-    docType = docType,
-    issuerSigned = issuerSigned.toDto(),
-    deviceSigned = deviceSigned.toDto(),
-    errors = null
-)
+fun VerifiableDocument.WithPresentation.toDto(): DeviceResponseDto.DocumentDTO =
+    DeviceResponseDto.DocumentDTO(
+        docType = docType,
+        issuerSigned = issuerSigned.toDto(),
+        deviceSigned = deviceSigned.toDto(),
+        errors = null
+    )
 
 /**
  * Maps [IssuerSigned] domain interface to its corresponding [DeviceResponseDto.IssuerSignedDTO].

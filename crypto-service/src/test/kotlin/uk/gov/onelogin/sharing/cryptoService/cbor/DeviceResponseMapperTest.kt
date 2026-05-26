@@ -8,9 +8,9 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocumentWithPresentation
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseMapperTest {
@@ -32,7 +32,7 @@ class DeviceResponseMapperTest {
 
         val domainModel = DeviceResponse(
             documents = listOf(
-                Document(
+                SharingVerifiableDocumentWithPresentation(
                     docType = docType,
                     issuerSigned = SharingIssuerSigned(
                         nameSpaces = mapOf(namespace to listOf(itemBytes)),
