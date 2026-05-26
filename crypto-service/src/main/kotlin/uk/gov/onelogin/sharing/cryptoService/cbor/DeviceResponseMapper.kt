@@ -5,7 +5,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
 /**
@@ -29,7 +29,7 @@ fun Document.toDto(): DeviceResponseDto.DocumentDTO = DeviceResponseDto.Document
 )
 
 /**
- * Maps [IssuerSigned] domain model to its corresponding [DeviceResponseDto.IssuerSignedDTO].
+ * Maps [IssuerSigned] domain interface to its corresponding [DeviceResponseDto.IssuerSignedDTO].
  * Each ByteArray in nameSpaces is the original Tag 24 encoded IssuerSignedItemBytes.
  */
 fun IssuerSigned.toDto(): DeviceResponseDto.IssuerSignedDTO = DeviceResponseDto.IssuerSignedDTO(

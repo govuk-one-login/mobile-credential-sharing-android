@@ -9,8 +9,8 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseMapperTest {
@@ -34,7 +34,7 @@ class DeviceResponseMapperTest {
             documents = listOf(
                 Document(
                     docType = docType,
-                    issuerSigned = IssuerSigned(
+                    issuerSigned = SharingIssuerSigned(
                         nameSpaces = mapOf(namespace to listOf(itemBytes)),
                         issuerAuth = issuerAuth
                     ),
@@ -89,7 +89,7 @@ class DeviceResponseMapperTest {
     @Test
     fun `IssuerSigned nameSpaces wraps raw bytes as EmbeddedCbor without re-encoding`() {
         val rawItemBytes = byteArrayOf(0xD8.toByte(), 0x18, 0x43, 0x01, 0x02, 0x03)
-        val issuerSigned = IssuerSigned(
+        val issuerSigned = SharingIssuerSigned(
             nameSpaces = mapOf(namespace to listOf(rawItemBytes)),
             issuerAuth = byteArrayOf()
         )

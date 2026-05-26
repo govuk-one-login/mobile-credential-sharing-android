@@ -12,7 +12,8 @@ import dev.zacsweers.metro.binding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<FilterIssuerSignedUseCase>())
@@ -53,7 +54,7 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
 
         logger.debug(logTag, "nameSpaces: ${filteredNameSpaces.keys}")
 
-        val issuerSigned = IssuerSigned(
+        val issuerSigned = SharingIssuerSigned(
             nameSpaces = filteredNameSpaces,
             issuerAuth = validatedCredential.issuerAuth
         )

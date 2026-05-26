@@ -7,8 +7,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class DeviceResponseModelTest {
@@ -25,7 +25,7 @@ class DeviceResponseModelTest {
         documents = listOf(
             Document(
                 docType = docType,
-                issuerSigned = IssuerSigned(
+                issuerSigned = SharingIssuerSigned(
                     nameSpaces = mapOf(
                         namespace to listOf(familyNameItemBytes, portraitItemBytes)
                     ),

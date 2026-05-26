@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential
 
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 
 fun interface FilterIssuerSignedUseCase {
     /**

@@ -12,5 +12,5 @@ interface IssuerSigned {
     /**
      * A map from namespace string to an ordered list of raw Tag-24-encoded IssuerSignedItemBytes.
      */
-    val nameSpaces: Map<String, ByteArray>
+    val nameSpaces: Map<String, List<ByteArray>>?
 }

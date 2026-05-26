@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeRawCredentialPars
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParsingException
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
 import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl.Companion.LOG_DOCTYPE_MISMATCH
@@ -25,7 +25,7 @@ class CredentialRequestHandlerImplTest {
     private val issuerAuth = byteArrayOf(0x01)
     private val deviceRequest = DeviceRequestStub.deviceRequestStub
 
-    private val filteredIssuerSigned = IssuerSigned(
+    private val filteredIssuerSigned = SharingIssuerSigned(
         nameSpaces = emptyMap(),
         issuerAuth = issuerAuth
     )

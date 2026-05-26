@@ -9,8 +9,8 @@ import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceAuthenticationResult
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
 class ConfirmConsentUseCaseImplTest {
@@ -26,7 +26,7 @@ class ConfirmConsentUseCaseImplTest {
         issuerAuth = byteArrayOf()
     )
 
-    private val filteredIssuerSigned = IssuerSigned(
+    private val filteredIssuerSigned = SharingIssuerSigned(
         nameSpaces = emptyMap(),
         issuerAuth = byteArrayOf()
     )
