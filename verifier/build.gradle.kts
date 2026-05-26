@@ -41,7 +41,7 @@ dependencies {
     listOf(
         projects.bluetooth,
         projects.core,
-        projects.models,
+        projects.exchangeFormat,
         projects.cryptoService,
         projects.orchestration,
         projects.sdk

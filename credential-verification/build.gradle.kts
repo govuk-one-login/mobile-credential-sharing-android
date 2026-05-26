@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     listOf(
-        projects.models
+        projects.exchangeFormat
     ).forEach(::api)
 
     listOf(

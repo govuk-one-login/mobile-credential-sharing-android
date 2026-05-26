@@ -46,7 +46,7 @@ mavenPublishingConfig {
 dependencies {
     listOf(
         projects.core,
-        projects.models
+        projects.exchangeFormat
     ).forEach(::api)
 
     listOf(
