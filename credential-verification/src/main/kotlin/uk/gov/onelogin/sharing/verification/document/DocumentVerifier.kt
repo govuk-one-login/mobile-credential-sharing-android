@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verification.document
 
-import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier.Companion.exampleVerifierUsage
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
@@ -9,7 +8,7 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 fun interface DocumentVerifier {
     /**
      * @param document The [uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument] to verify.
-     * @param transcript Provides additional information for use in verifying
+     * @param sessionTranscriptBytes Provides additional information for use in verifying
      * [uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument.WithPresentation] instances.
      * @throws VerificationResult.Failure when unable to successfully verify the provided
      * [document].
@@ -17,14 +16,14 @@ fun interface DocumentVerifier {
      */
     fun verifyDocument(
         document: VerifiableDocument,
-        transcript: SessionTranscript?
+        sessionTranscriptBytes: ByteArray?
     ): VerificationResult.Success
 
     companion object {
         internal fun exampleVerifierUsage(
             verifier: DocumentVerifier,
             document: VerifiableDocument,
-            transcript: SessionTranscript? = null,
+            transcript: ByteArray? = null,
             handleVerificationFailure: (VerificationError) -> Unit,
             handleJourneyCompletion: () -> Unit
         ) {

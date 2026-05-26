@@ -11,7 +11,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.assertInterfaceReturnTypes
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
@@ -30,9 +29,9 @@ class DocumentVerifierTest {
             "verifyDocument" to VerificationResult.Success::class.java
         )
         val expectedMethodParameters = listOf(
-            VerifiableDocument::class,
-            SessionTranscript::class
-        ).map { it.java.name }
+            VerifiableDocument::class.java.name,
+            "byte[]"
+        )
 
         val classInfo = scanResult.getClassInfo(DocumentVerifier::class.java.name)
 

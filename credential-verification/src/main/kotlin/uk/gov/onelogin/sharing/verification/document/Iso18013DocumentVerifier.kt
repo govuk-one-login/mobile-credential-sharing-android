@@ -4,7 +4,6 @@ package uk.gov.onelogin.sharing.verification.document
 
 import dev.zacsweers.metro.ContributesBinding
 import java.security.cert.X509Certificate
-import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
@@ -21,7 +20,7 @@ class Iso18013DocumentVerifier(
 ) : DocumentVerifier {
     override fun verifyDocument(
         document: VerifiableDocument,
-        transcript: SessionTranscript?
+        sessionTranscriptBytes: ByteArray?
     ): VerificationResult.Success {
         val (validityPeriod, encodedMSO) = trustVerifier.verifyCOSESign1(
             document.issuerSigned.issuerAuth,
@@ -34,14 +33,14 @@ class Iso18013DocumentVerifier(
         verifyValidityInfo(validityPeriod, mso)
 
         if (document is VerifiableDocument.WithPresentation) {
-            if (transcript == null) {
+            if (sessionTranscriptBytes == null) {
                 throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
             }
 
-            verifyDeviceAuth(document, transcript, mso.deviceKeyInfo)
+            verifyDeviceAuth(document, sessionTranscriptBytes, mso.deviceKeyInfo)
             // move the proceeding call to `verifyDeviceAuth` during implementation.
             buildDeviceAuthenticationBytes(
-                transcript,
+                sessionTranscriptBytes,
                 document.docType,
                 document.deviceSigned.deviceNameSpacesBytes
             )
@@ -83,12 +82,12 @@ class Iso18013DocumentVerifier(
      */
     internal fun verifyDeviceAuth(
         document: VerifiableDocument.WithPresentation,
-        sessionTranscript: SessionTranscript,
+        sessionTranscriptBytes: ByteArray?,
         deviceKeyInfo: DeviceKeyInfo
     ): Unit = throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
 
     internal fun buildDeviceAuthenticationBytes(
-        sessionTranscript: SessionTranscript,
+        sessionTranscriptBytes: ByteArray?,
         docType: String,
         deviceNameSpacesBytes: ByteArray
     ): ByteArray = byteArrayOf()

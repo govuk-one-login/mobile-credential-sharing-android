@@ -17,7 +17,6 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
@@ -44,7 +43,7 @@ class Iso18013DocumentVerifierTest {
     private val mockProvisionedDocument: VerifiableDocument = mockk(relaxed = true)
     private val mockPresentedDocument: VerifiableDocument.WithPresentation = mockk(relaxed = true)
     private val issuerSigned: IssuerSigned = mockk(relaxed = true)
-    private val mockTranscript: SessionTranscript = mockk(relaxed = true)
+    private val sessionTranscriptBytes: ByteArray = byteArrayOf(1, 2)
     private val mockRootCertificate: X509Certificate = mockk(relaxed = true)
     private val trustVerifier: TrustVerifier = mockk(relaxed = true)
     private val validityPeriod: CertificateValidityPeriod = mockk(relaxed = true)
@@ -128,12 +127,12 @@ class Iso18013DocumentVerifierTest {
             "verifyDeviceAuth" to
                 "void (" +
                 "${VerifiableDocument.WithPresentation::class.java.simpleName}, " +
-                "${SessionTranscript::class.java.simpleName}, " +
+                "byte[], " +
                 "${DeviceKeyInfo::class.java.simpleName}" +
                 ")",
             "buildDeviceAuthenticationBytes" to
                 "${ByteArray::class.java.simpleName} (" +
-                "${SessionTranscript::class.java.simpleName}, " +
+                "byte[], " +
                 "${String::class.java.simpleName}, " +
                 "${ByteArray::class.java.simpleName}" +
                 ")"
@@ -170,7 +169,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
                 document = mockProvisionedDocument,
-                transcript = mockTranscript
+                sessionTranscriptBytes = sessionTranscriptBytes
             )
         }
 
@@ -191,7 +190,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
                 document = mockProvisionedDocument,
-                transcript = mockTranscript
+                sessionTranscriptBytes = sessionTranscriptBytes
             )
         }
 
@@ -224,7 +223,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
                 document = mockProvisionedDocument,
-                transcript = mockTranscript
+                sessionTranscriptBytes = sessionTranscriptBytes
             )
         }
 
@@ -258,7 +257,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
                 document = mockProvisionedDocument,
-                transcript = mockTranscript
+                sessionTranscriptBytes = sessionTranscriptBytes
             )
         }
 
@@ -297,7 +296,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
                 document = mockProvisionedDocument,
-                transcript = mockTranscript
+                sessionTranscriptBytes = sessionTranscriptBytes
             )
         }
 
@@ -334,7 +333,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
                 document = mockPresentedDocument,
-                transcript = mockTranscript
+                sessionTranscriptBytes = sessionTranscriptBytes
             )
         }
 
@@ -349,7 +348,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDeviceAuth(
                 document = mockPresentedDocument,
-                sessionTranscript = mockTranscript,
+                sessionTranscriptBytes = sessionTranscriptBytes,
                 deviceKeyInfo = mockk()
             )
         }
@@ -372,7 +371,7 @@ class Iso18013DocumentVerifierTest {
 
         documentVerifierSpy.verifyDocument(
             document = mockProvisionedDocument,
-            transcript = mockTranscript
+            sessionTranscriptBytes = sessionTranscriptBytes
         )
 
         verify(exactly = 0) {
@@ -394,7 +393,7 @@ class Iso18013DocumentVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDocument(
                 document = mockPresentedDocument,
-                transcript = null
+                sessionTranscriptBytes = null
             )
         }
 
@@ -407,7 +406,7 @@ class Iso18013DocumentVerifierTest {
     @Test
     fun `buildDeviceAuthenticationBytes is stubbed to return an empty ByteArray`() {
         val deviceAuthBytes = documentVerifier.buildDeviceAuthenticationBytes(
-            mockk(),
+            sessionTranscriptBytes,
             "unit test",
             byteArrayOf()
         )

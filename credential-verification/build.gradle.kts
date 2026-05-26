@@ -8,7 +8,6 @@ plugins {
 dependencies {
     listOf(
         projects.credentialFormat,
-        projects.exchangeFormat
     ).forEach(::api)
 
     listOf(
