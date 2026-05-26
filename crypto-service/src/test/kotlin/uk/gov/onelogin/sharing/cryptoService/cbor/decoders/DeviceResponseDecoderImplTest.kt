@@ -1,6 +1,10 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.decoders
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameters
+import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -8,6 +12,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
+import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
@@ -17,6 +22,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
+@RunWith(TestParameterInjector::class)
 class DeviceResponseDecoderImplTest {
 
     private val logger = SystemLogger()
@@ -129,7 +135,15 @@ class DeviceResponseDecoderImplTest {
     }
 
     @Test
-    fun `throws DeviceResponseDecodingException for malformed CBOR`() {
+    @TestParameters(valuesProvider = MalformedPayloadsProvider::class)
+    fun `throws DeviceResponseDecodingException for malformed payloads`(payload: ByteArray) {
+        assertFailsWith<DeviceResponseDecodingException> {
+            decoder.decode(payload)
+        }
+    }
+
+    @Test
+    fun `throws DeviceResponseDecodingException for malformed CBOR logs error`() {
         val malformedBytes = byteArrayOf(0xFF.toByte())
 
         assertFailsWith<DeviceResponseDecodingException> {
@@ -140,57 +154,11 @@ class DeviceResponseDecoderImplTest {
     }
 
     @Test
-    fun `throws DeviceResponseDecodingException for invalid status code`() {
-        val invalidStatus = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartObject(2)
-                gen.writeStringField("version", "1.0")
-                gen.writeNumberField("status", 13)
-                gen.writeEndObject()
-            }
-        }.toByteArray()
-
-        assertFailsWith<DeviceResponseDecodingException> {
-            decoder.decode(invalidStatus)
-        }
-    }
-
-    @Test
     fun `logs success message on successful decode`() {
         val encoded = createDeviceResponse(documents = null).toDto().encodeCbor()
         decoder.decode(encoded)
 
         assert(logger.contains("DeviceResponse decoded successfully"))
-    }
-
-    @Test
-    fun `throws DeviceResponseDecodingException when version is missing`() {
-        val missingVersion = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartObject(1)
-                gen.writeNumberField("status", 0)
-                gen.writeEndObject()
-            }
-        }.toByteArray()
-
-        assertFailsWith<DeviceResponseDecodingException> {
-            decoder.decode(missingVersion)
-        }
-    }
-
-    @Test
-    fun `throws DeviceResponseDecodingException when status is missing`() {
-        val missingStatus = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartObject(1)
-                gen.writeStringField("version", "1.0")
-                gen.writeEndObject()
-            }
-        }.toByteArray()
-
-        assertFailsWith<DeviceResponseDecodingException> {
-            decoder.decode(missingStatus)
-        }
     }
 
     @Test
@@ -227,4 +195,37 @@ class DeviceResponseDecoderImplTest {
             decoder.decode(missingDocType)
         }
     }
+}
+
+private class MalformedPayloadsProvider : TestParametersValuesProvider() {
+    override fun provideValues(context: Context?): List<TestParameters.TestParametersValues> =
+        listOf(
+            "malformed CBOR" to byteArrayOf(0xFF.toByte()),
+            "invalid status code" to buildCbor {
+                writeStartObject(2)
+                writeStringField("version", "1.0")
+                writeNumberField("status", 13)
+                writeEndObject()
+            },
+            "missing version" to buildCbor {
+                writeStartObject(1)
+                writeNumberField("status", 0)
+                writeEndObject()
+            },
+            "missing status" to buildCbor {
+                writeStartObject(1)
+                writeStringField("version", "1.0")
+                writeEndObject()
+            }
+        ).map { (name, bytes) ->
+            TestParameters.TestParametersValues.builder()
+                .name(name)
+                .addParameter("payload", bytes)
+                .build()
+        }
+
+    private fun buildCbor(block: CBORGenerator.() -> Unit): ByteArray =
+        ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen -> gen.block() }
+        }.toByteArray()
 }
