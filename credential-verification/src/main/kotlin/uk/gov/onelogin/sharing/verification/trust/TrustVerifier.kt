@@ -2,9 +2,9 @@ package uk.gov.onelogin.sharing.verification.trust
 
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
-import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriod
-import uk.gov.onelogin.sharing.verification.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 
 interface TrustVerifier {
     /**

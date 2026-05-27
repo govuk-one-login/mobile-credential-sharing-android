@@ -7,7 +7,8 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
-import uk.gov.onelogin.sharing.verification.document.models.CertificateValidityPeriod
+import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
+import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 @OptIn(ExperimentalTime::class)
 class TrustVerifierTest {

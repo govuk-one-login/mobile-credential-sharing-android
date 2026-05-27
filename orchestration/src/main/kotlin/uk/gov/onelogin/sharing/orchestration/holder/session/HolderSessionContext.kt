@@ -2,8 +2,8 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import java.security.KeyPair
 import java.util.UUID
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 
 data class HolderSessionContext(
     val sessionUuid: UUID,

@@ -46,7 +46,7 @@ dependencies {
         libs.metro.viewmodel.compose,
         libs.kotlinx.io.bytestring,
         projects.core,
-        projects.models
+        projects.exchangeFormat
     ).forEach(::implementation)
 
     listOf(
@@ -56,7 +56,7 @@ dependencies {
     listOf(
         libs.jackson.cbor,
         projects.cryptoService,
-        projects.models
+        projects.exchangeFormat
     ).forEach(::testFixturesImplementation)
 }
 

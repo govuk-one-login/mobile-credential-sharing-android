@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.cryptoService.holder
 
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 class FakeHolderCryptoService : HolderCryptoService {
     var encryptedToReturn: ByteArray = byteArrayOf()
@@ -41,7 +41,7 @@ class FakeHolderCryptoService : HolderCryptoService {
     }
 
     override fun buildDeviceResponse(
-        documents: List<Document>,
+        documents: List<VerifiableDocument.WithPresentation>,
         skDevice: ByteArray,
         encryptCounter: UInt
     ): ByteArray {

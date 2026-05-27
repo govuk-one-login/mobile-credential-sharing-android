@@ -39,7 +39,7 @@ dependencies {
         projects.cryptoService
     ).forEach(::api)
 
-    listOf(projects.models)
+    listOf(projects.exchangeFormat)
         .forEach(::implementation)
 
     listOf(
@@ -53,7 +53,7 @@ dependencies {
         libs.com.google.test.parameter.injector,
         libs.junit,
         projects.cameraService,
-        projects.models,
+        projects.exchangeFormat,
         testFixtures(projects.cryptoService)
     ).forEach(::testFixturesApi)
 

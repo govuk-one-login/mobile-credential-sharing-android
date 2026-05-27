@@ -65,7 +65,7 @@ class HolderResponseUseCaseImplTest {
             deviceAuthBytes
         )
 
-        assertArrayEquals(byteArrayOf(0xA0.toByte()), result.nameSpaces)
+        assertArrayEquals(byteArrayOf(0xA0.toByte()), result.deviceNameSpacesBytes)
     }
 
     @Test
@@ -86,7 +86,7 @@ class HolderResponseUseCaseImplTest {
                 deviceAuthBytes
             )
 
-            assertArrayEquals(coseSign1Bytes, result.deviceAuth)
+            assertArrayEquals(coseSign1Bytes, result.deviceSignature)
         }
 
     @Test

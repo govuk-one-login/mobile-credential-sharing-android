@@ -2,9 +2,9 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 fun interface ConfirmConsentUseCase {
     @Throws(DeviceSignatureException::class)
@@ -13,5 +13,5 @@ fun interface ConfirmConsentUseCase {
         deviceRequest: DeviceRequest,
         validatedCredential: ValidatedCredential,
         filteredIssuerSigned: IssuerSigned
-    ): Document
+    ): VerifiableDocument.WithPresentation
 }

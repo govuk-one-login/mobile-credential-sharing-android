@@ -19,8 +19,8 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 class HolderCryptoServiceImplTest {
 
@@ -57,7 +57,7 @@ class HolderCryptoServiceImplTest {
         val skDevice = byteArrayOf(0x01, 0x02)
         val encryptCounter = 3u
 
-        val documents = emptyList<Document>()
+        val documents = emptyList<VerifiableDocument.WithPresentation>()
 
         val result = service.buildDeviceResponse(documents, skDevice, encryptCounter)
 

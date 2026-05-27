@@ -9,9 +9,10 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCase
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
+import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<HolderResponseUseCase>())
@@ -39,9 +40,9 @@ class HolderResponseUseCaseImpl(
             val signatureResult = deviceSignatureService.buildDeviceSignedStructures(signatureBytes)
             logger.debug(logTag, "Successfully generated DeviceSigned")
 
-            return DeviceSigned(
-                nameSpaces = EMPTY_DEVICE_NAMESPACES,
-                deviceAuth = signatureResult.coseSign1Array
+            return SharingDeviceSigned(
+                deviceNameSpacesBytes = EMPTY_DEVICE_NAMESPACES,
+                deviceSignature = signatureResult.coseSign1Array
             )
         } catch (e: DeviceSignatureException) {
             throw DeviceSignatureException("Failed to generate device response", e)

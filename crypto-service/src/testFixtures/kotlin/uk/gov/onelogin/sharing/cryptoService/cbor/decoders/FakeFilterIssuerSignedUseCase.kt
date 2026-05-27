@@ -4,11 +4,12 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssu
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 
 class FakeFilterIssuerSignedUseCase(
     private val exceptionToThrow: NoMatchingAttributesException? = null,
-    private val issuerSignedToReturn: IssuerSigned = IssuerSigned(
+    private val issuerSignedToReturn: IssuerSigned = SharingIssuerSigned(
         nameSpaces = emptyMap(),
         issuerAuth = byteArrayOf()
     )

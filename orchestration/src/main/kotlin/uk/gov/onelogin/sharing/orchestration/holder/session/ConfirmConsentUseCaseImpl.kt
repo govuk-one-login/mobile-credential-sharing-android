@@ -7,9 +7,10 @@ import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocumentWithPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<ConfirmConsentUseCase>())
@@ -23,7 +24,7 @@ class ConfirmConsentUseCaseImpl(
         deviceRequest: DeviceRequest,
         validatedCredential: ValidatedCredential,
         filteredIssuerSigned: IssuerSigned
-    ): Document {
+    ): VerifiableDocument.WithPresentation {
         val docType = deviceRequest.docRequests.firstOrNull()?.itemsRequest?.docType
             ?: throw DeviceSignatureException("Missing docType")
 
@@ -37,7 +38,7 @@ class ConfirmConsentUseCaseImpl(
             deviceAuthenticationBytes = authResult.deviceAuthenticationBytes
         )
 
-        return Document(
+        return SharingVerifiableDocumentWithPresentation(
             docType = docType,
             issuerSigned = filteredIssuerSigned,
             deviceSigned = deviceSigned
