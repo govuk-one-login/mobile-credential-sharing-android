@@ -1,9 +1,10 @@
 package uk.gov.onelogin.sharing.cryptoService.usecases
 
 import uk.gov.onelogin.sharing.cryptoService.verifier.DecryptDeviceResponseUseCase
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 class FakeDecryptDeviceResponseUseCase : DecryptDeviceResponseUseCase {
-    var fakeDeviceResponse: ByteArray = byteArrayOf(0x01, 0x02, 0x03)
+    var fakeDeviceResponse: DeviceResponse = DeviceResponse()
     var exception: Exception? = null
     var lastDeviceResponseBytes: ByteArray? = null
     var lastSkDevice: ByteArray? = null
@@ -13,7 +14,7 @@ class FakeDecryptDeviceResponseUseCase : DecryptDeviceResponseUseCase {
         deviceResponseBytes: ByteArray,
         skDevice: ByteArray,
         encryptCounter: UInt
-    ): ByteArray {
+    ): DeviceResponse {
         lastDeviceResponseBytes = deviceResponseBytes
         lastSkDevice = skDevice
         lastEncryptCounter = encryptCounter

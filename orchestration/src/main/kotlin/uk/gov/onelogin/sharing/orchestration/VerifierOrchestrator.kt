@@ -26,6 +26,8 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse as DomainDeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -304,7 +306,7 @@ class VerifierOrchestrator(
                 skDevice = context.skDevice,
                 decryptCounter = context.decryptCounter
             )
-        }.onSuccess {
+        }.onSuccess { deviceResponse ->
             sessionFlow.value.updateCryptoContext {
                 context.copy(decryptCounter = context.decryptCounter + 1u)
             }.also {
@@ -314,6 +316,8 @@ class VerifierOrchestrator(
                     "Decrypt counter incremented to: ${updatedContext.decryptCounter}"
                 )
             }
+
+            evaluateDeviceResponse(deviceResponse)
         }.onFailure { _ ->
             stopCentralTransport()
             safeTransitionTo(
@@ -325,6 +329,34 @@ class VerifierOrchestrator(
                 )
             )
         }
+    }
+
+    private fun evaluateDeviceResponse(deviceResponse: DomainDeviceResponse) {
+        val status = deviceResponse.status
+
+        if (status != DeviceResponseStatus.OK) {
+            failWith(
+                "DeviceRequest processing error: status ${status.code}",
+                SessionErrorReason.DeviceRequestProcessingError(status.code)
+            )
+            return
+        }
+
+        val documents = deviceResponse.documents
+        if (documents.isNullOrEmpty()) {
+            failWith(
+                "Document not returned: status ${status.code}",
+                SessionErrorReason.DocumentNotReturned
+            )
+            return
+        }
+
+        stopCentralTransport()
+        safeTransitionTo(
+            VerifierSessionState.Complete.Success(
+                DeviceResponse(documents = documents)
+            )
+        )
     }
 
     private suspend fun handleConnectionStateStarted() {

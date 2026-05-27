@@ -120,6 +120,36 @@ class VerifierStateToNavigationRoute : TestParametersValuesProvider() {
                 ).matches(
                     currentBackStackEntry?.toRoute<UnrecoverableVerifierErrorRoute>()
                 )
+            },
+            Triple(
+                "Failure: DeviceRequestProcessingError -> UnrecoverableVerifierErrorRoute",
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        "DeviceRequest processing error",
+                        SessionErrorReason.DeviceRequestProcessingError(10u)
+                    )
+                )
+            ) {
+                instanceOf<UnrecoverableVerifierErrorRoute>(
+                    UnrecoverableVerifierErrorRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<UnrecoverableVerifierErrorRoute>()
+                )
+            },
+            Triple(
+                "Failure: DocumentNotReturned -> UnrecoverableVerifierErrorRoute",
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        "Document not returned",
+                        SessionErrorReason.DocumentNotReturned
+                    )
+                )
+            ) {
+                instanceOf<UnrecoverableVerifierErrorRoute>(
+                    UnrecoverableVerifierErrorRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<UnrecoverableVerifierErrorRoute>()
+                )
             }
         )
 

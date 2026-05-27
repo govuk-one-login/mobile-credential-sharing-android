@@ -157,7 +157,9 @@ private fun handleSessionFailure(
         is SessionErrorReason.CannotProcessEngagement,
         is SessionErrorReason.UnrecoverableThrowable,
         is SessionErrorReason.UnrecoverablePrerequisite,
-        is SessionErrorReason.InvalidSessionDataPayload
+        is SessionErrorReason.InvalidSessionDataPayload,
+        is SessionErrorReason.DeviceRequestProcessingError,
+        SessionErrorReason.DocumentNotReturned
         ->
             navController.navigateToUnrecoverableVerifierError {
                 popUpTo<VerifierRoutes> {

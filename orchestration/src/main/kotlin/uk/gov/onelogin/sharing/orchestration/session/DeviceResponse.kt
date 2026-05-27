@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.orchestration.session
 
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+
 /**
- * Stub object that'll hold information about a completed User journey.
+ * Holds the verified document data from a completed Verifier journey.
  */
-data object DeviceResponse
+data class DeviceResponse(val documents: List<VerifiableDocument.WithPresentation> = emptyList())

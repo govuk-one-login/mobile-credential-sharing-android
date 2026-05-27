@@ -36,6 +36,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
 class VerifierCryptoServiceImpl(
@@ -160,7 +161,7 @@ class VerifierCryptoServiceImpl(
         deviceResponseBytes: ByteArray,
         skDevice: ByteArray,
         decryptCounter: UInt
-    ): ByteArray = decryptDeviceResponseUseCase(
+    ): DeviceResponse = decryptDeviceResponseUseCase(
         deviceResponseBytes = deviceResponseBytes,
         skDevice = skDevice,
         encryptCounter = decryptCounter

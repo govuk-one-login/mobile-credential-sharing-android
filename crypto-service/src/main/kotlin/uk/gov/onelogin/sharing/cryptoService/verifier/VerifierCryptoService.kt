@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
 
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 /**
  * Handles cryptographic operations for the Verifier role.
@@ -51,14 +52,15 @@ interface VerifierCryptoService {
     fun deserializeSessionData(input: ByteArray): SessionData
 
     /**
-     * Decrypts [deviceResponseBytes] using AES-256-GCM with the [skDevice] session key.
+     * Decrypts [deviceResponseBytes] using AES-256-GCM with the [skDevice] session key
+     * and decodes the plaintext into a [DeviceResponse] domain model.
      *
-     * @throws DecryptDeviceResponseException if decryption fails.
+     * @throws DecryptDeviceResponseException if decryption or decoding fails.
      */
     @Throws(DecryptDeviceResponseException::class)
     fun decryptDeviceResponse(
         deviceResponseBytes: ByteArray,
         skDevice: ByteArray,
         decryptCounter: UInt
-    ): ByteArray
+    ): DeviceResponse
 }

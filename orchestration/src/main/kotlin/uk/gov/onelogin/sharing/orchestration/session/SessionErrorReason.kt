@@ -49,6 +49,17 @@ sealed class SessionErrorReason {
     data object CannotDecryptDeviceResponse : SessionErrorReason()
 
     /**
+     * The Holder encountered a general, decoding, or validation error while processing the
+     * DeviceRequest. The [statusCode] indicates the specific error (10, 11, or 12).
+     */
+    data class DeviceRequestProcessingError(val statusCode: UInt) : SessionErrorReason()
+
+    /**
+     * The Holder returned a successful status (0) but the documents array is empty or missing.
+     */
+    data object DocumentNotReturned : SessionErrorReason()
+
+    /**
      * State for when the app cannot process the provided QR code.
      *
      * @see uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult.Invalid
