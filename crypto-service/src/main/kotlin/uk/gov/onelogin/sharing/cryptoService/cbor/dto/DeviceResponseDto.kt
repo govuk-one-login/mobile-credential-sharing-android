@@ -82,14 +82,15 @@ class DeviceResponseDto {
         @JsonProperty("errors")
         val errors: Map<String, Int>? = null
     ) {
-        fun toDomain(): VerifiableDocument.WithPresentation = SharingVerifiableDocumentWithPresentation(
-            docType = docType,
-            issuerSigned = issuerSigned.toDomain(),
-            deviceSigned = SharingDeviceSigned(
-                deviceNameSpacesBytes = deviceSigned.nameSpaces.encoded,
-                deviceSignature = deviceSigned.deviceAuth.deviceSignature.encoded
+        fun toDomain(): VerifiableDocument.WithPresentation =
+            SharingVerifiableDocumentWithPresentation(
+                docType = docType,
+                issuerSigned = issuerSigned.toDomain(),
+                deviceSigned = SharingDeviceSigned(
+                    deviceNameSpacesBytes = deviceSigned.nameSpaces.encoded,
+                    deviceSignature = deviceSigned.deviceAuth.deviceSignature.encoded
+                )
             )
-        )
     }
 
     /**
