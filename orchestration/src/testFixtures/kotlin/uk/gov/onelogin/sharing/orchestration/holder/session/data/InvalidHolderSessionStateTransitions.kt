@@ -26,7 +26,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.PresentingEngagement(""),
             HolderSessionState.ProcessingEstablishment,
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
-            HolderSessionState.SendingResponse,
+            HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub,
             HolderSessionStateStubs.userCancellation
         ).map {
@@ -38,7 +38,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.PresentingEngagement(""),
             HolderSessionState.ProcessingEstablishment,
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
-            HolderSessionState.SendingResponse,
+            HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionStateStubs.preflightEmptyPermissions to it
@@ -49,7 +49,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.ReadyToPresent,
             HolderSessionState.ProcessingEstablishment,
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
-            HolderSessionState.SendingResponse,
+            HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.ReadyToPresent to it
@@ -60,7 +60,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
-            HolderSessionState.SendingResponse,
+            HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.PresentingEngagement("") to it
@@ -71,7 +71,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
             HolderSessionState.ProcessingEstablishment,
-            HolderSessionState.SendingResponse,
+            HolderSessionState.ProcessingResponse,
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.ProcessingEstablishment to it
@@ -95,7 +95,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.ProcessingEstablishment,
             HolderSessionState.AwaitingUserConsent(deviceRequestStub)
         ).map {
-            HolderSessionState.SendingResponse to it
+            HolderSessionState.ProcessingResponse to it
         }
 
         val inputs: List<Pair<HolderSessionState, HolderSessionState>> =

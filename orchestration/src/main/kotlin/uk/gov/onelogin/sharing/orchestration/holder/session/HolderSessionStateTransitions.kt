@@ -10,8 +10,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.N
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.SendingResponse
 
 /**
  * Convenience alias for defining a [Map] of [HolderSessionState] types to a [Set] of
@@ -56,9 +56,9 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
         AwaitingUserConsent::class
     ) + fullErrorHandling,
     AwaitingUserConsent::class to singleton(
-        SendingResponse::class
+        ProcessingResponse::class
     ) + fullErrorHandling,
-    SendingResponse::class to singleton(
+    ProcessingResponse::class to singleton(
         Success::class
     ) + fullErrorHandling
 )
