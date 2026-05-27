@@ -81,7 +81,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val awaitingUserConsentTransitions = listOf(
             "User cancels the data transfer request" to userCancellation,
             "Data transfer disconnects before completion" to userJourneyFailure,
-            "Holder device begins processing the response" to HolderSessionState.ProcessingResponse
+            "Holder device begins processing the response" to HolderSessionState.SendingResponse
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -96,7 +96,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.ProcessingResponse,
+                HolderSessionState.SendingResponse,
                 transition
             )
         }

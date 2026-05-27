@@ -190,7 +190,7 @@ class HolderOrchestrator(
                 "confirmConsent called in an invalid state: $state"
             }
             check(state is HolderSessionState.AwaitingUserConsent)
-            safeTransitionTo(HolderSessionState.ProcessingResponse)
+            safeTransitionTo(HolderSessionState.SendingResponse)
 
             val sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
                 "Missing session transcript"
@@ -248,7 +248,7 @@ class HolderOrchestrator(
                 "confirmConsent called in an invalid state: $state"
             }
             check(state is HolderSessionState.AwaitingUserConsent)
-            safeTransitionTo(HolderSessionState.ProcessingResponse)
+            safeTransitionTo(HolderSessionState.SendingResponse)
 
             val skDevice = checkNotNull(context.skDevice) {
                 "Missing skDevice"

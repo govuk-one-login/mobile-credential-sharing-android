@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
@@ -67,7 +66,7 @@ sealed class HolderSessionState : Completable {
      * State for when the consenting User is generating the proof before completing the
      * Holder User journey.
      */
-    data object ProcessingResponse : HolderSessionState()
+    data object SendingResponse : HolderSessionState()
 
     /**
      * State for when a User has finished a digital credential verification journey.

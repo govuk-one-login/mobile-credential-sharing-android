@@ -8,8 +8,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.N
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.SendingResponse
 
 class TransitionableHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*>? = inputs
@@ -22,7 +22,7 @@ class TransitionableHolderSessionStates : TestParameterValuesProvider() {
             PresentingEngagement::class,
             ProcessingEstablishment::class,
             AwaitingUserConsent::class,
-            ProcessingResponse::class
+            SendingResponse::class
         )
     }
 }
