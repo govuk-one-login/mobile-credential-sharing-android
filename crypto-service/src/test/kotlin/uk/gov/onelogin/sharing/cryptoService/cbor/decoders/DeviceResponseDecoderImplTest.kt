@@ -17,10 +17,11 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocumentWithPresentation
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 @RunWith(TestParameterInjector::class)
 class DeviceResponseDecoderImplTest {
@@ -46,20 +47,20 @@ class DeviceResponseDecoderImplTest {
     private fun createDocument(
         docType: String = this.docType,
         items: List<ByteArray> = listOf(itemBytes1)
-    ) = Document(
+    ) = SharingVerifiableDocumentWithPresentation(
         docType = docType,
-        issuerSigned = IssuerSigned(
+        issuerSigned = SharingIssuerSigned(
             nameSpaces = mapOf(namespace to items),
             issuerAuth = issuerAuthBytes
         ),
-        deviceSigned = DeviceSigned(
-            nameSpaces = emptyNameSpacesBytes,
-            deviceAuth = deviceAuthBytes
+        deviceSigned = SharingDeviceSigned(
+            deviceNameSpacesBytes = emptyNameSpacesBytes,
+            deviceSignature = deviceAuthBytes
         )
     )
 
     private fun createDeviceResponse(
-        documents: List<Document>? = listOf(createDocument()),
+        documents: List<VerifiableDocument.WithPresentation>? = listOf(createDocument()),
         status: Status = Status.OK,
         documentErrors: Map<String, Status>? = null
     ) = DeviceResponse(

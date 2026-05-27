@@ -11,10 +11,11 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceSigned
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Document
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.IssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocumentWithPresentation
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 class DeviceResponseDto {
 
@@ -81,12 +82,12 @@ class DeviceResponseDto {
         @JsonProperty("errors")
         val errors: Map<String, Int>? = null
     ) {
-        fun toDomain(): Document = Document(
+        fun toDomain(): VerifiableDocument.WithPresentation = SharingVerifiableDocumentWithPresentation(
             docType = docType,
             issuerSigned = issuerSigned.toDomain(),
-            deviceSigned = DeviceSigned(
-                nameSpaces = deviceSigned.nameSpaces.encoded,
-                deviceAuth = deviceSigned.deviceAuth.deviceSignature.encoded
+            deviceSigned = SharingDeviceSigned(
+                deviceNameSpacesBytes = deviceSigned.nameSpaces.encoded,
+                deviceSignature = deviceSigned.deviceAuth.deviceSignature.encoded
             )
         )
     }
@@ -106,7 +107,7 @@ class DeviceResponseDto {
         @JsonProperty("issuerAuth")
         val issuerAuth: RawCbor
     ) {
-        fun toDomain(): IssuerSigned = IssuerSigned(
+        fun toDomain(): SharingIssuerSigned = SharingIssuerSigned(
             nameSpaces = nameSpaces?.mapValues { entry ->
                 entry.value.map { it.encoded }
             },
