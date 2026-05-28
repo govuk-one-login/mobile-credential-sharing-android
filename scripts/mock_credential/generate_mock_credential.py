@@ -7,8 +7,9 @@ Requirements:
 
 Usage:
     python3 scripts/mock_credential/generate_mock_credential.py \
+    --issuer-private-key app/src/main/assets/test_private_issuer_key.pem \
     --private-key app/src/main/assets/test_private_key.pem \
-    --output app/src/main/res/raw/mock_credential.txt
+    --output app/src/main/res/raw/mock_credential.txt \
 
 The generated credential uses the device key from the provided PEM file and creates
 a self-signed issuer certificate. The credential is valid for 1 year.
@@ -38,9 +39,12 @@ SAMPLE_ITEMS = {
         {"digestID": 1, "elementIdentifier": "family_name", "elementValue": "Doe"},
         {"digestID": 2, "elementIdentifier": "given_name", "elementValue": "Jane"},
         {"digestID": 3, "elementIdentifier": "portrait", "elementValue": PORTRAIT_BYTES},
-        {"digestID": 4, "elementIdentifier": "birth_date", "elementValue": cbor2.CBORTag(1004, "2007-01-15")},
-        {"digestID": 5, "elementIdentifier": "issue_date", "elementValue": cbor2.CBORTag(1004, "2024-01-01")},
-        {"digestID": 6, "elementIdentifier": "expiry_date", "elementValue": cbor2.CBORTag(1004, "2034-01-01")},
+        {"digestID": 4, "elementIdentifier": "birth_date",
+         "elementValue": cbor2.CBORTag(1004, "2007-01-15")},
+        {"digestID": 5, "elementIdentifier": "issue_date",
+         "elementValue": cbor2.CBORTag(1004, "2024-01-01")},
+        {"digestID": 6, "elementIdentifier": "expiry_date",
+         "elementValue": cbor2.CBORTag(1004, "2034-01-01")},
         {"digestID": 7, "elementIdentifier": "issuing_country", "elementValue": "GB"},
         {"digestID": 8, "elementIdentifier": "issuing_authority", "elementValue": "DVLA"},
         {"digestID": 9, "elementIdentifier": "age_over_18", "elementValue": True},
@@ -66,19 +70,7 @@ def build_issuer_signed_item(item):
 
 
 def generate():
-    parser = argparse.ArgumentParser(description="Generate a mock credential for the test app")
-    parser.add_argument(
-        "--private-key",
-        help="Path to device private key PEM",
-        default="app/src/main/assets/test_private_key.pem"
-    )
-    parser.add_argument(
-        "--output",
-        help="Output path for credential txt file",
-        default="app/src/main/res/raw/mock_credential.txt"
-    )
-    parser.add_argument("--validity-days", type=int, default=365, help="Validity period in days")
-    args = parser.parse_args()
+    args = get_argument_parser()
 
     # Load device private key
     with open(args.private_key, "rb") as f:
@@ -94,8 +86,8 @@ def generate():
     for ns_name, items in SAMPLE_ITEMS.items():
         namespaces[ns_name] = [build_issuer_signed_item(item) for item in items]
 
-    # Generate issuer key and self-signed certificate
-    issuer_private_key = ec.generate_private_key(ec.SECP256R1())
+    issuer_private_key = get_issuer_private_key(args.issuer_private_key)
+
     issuer_pub = issuer_private_key.public_key()
     now = datetime.now(timezone.utc)
     cert = (
@@ -142,7 +134,8 @@ def generate():
         "validityInfo": {
             "signed": cbor2.CBORTag(0, now.strftime("%Y-%m-%dT%H:%M:%SZ")),
             "validFrom": cbor2.CBORTag(0, now.strftime("%Y-%m-%dT%H:%M:%SZ")),
-            "validUntil": cbor2.CBORTag(0, (now + timedelta(days=args.validity_days)).strftime("%Y-%m-%dT%H:%M:%SZ")),
+            "validUntil": cbor2.CBORTag(0, (now + timedelta(days=args.validity_days)).strftime(
+                "%Y-%m-%dT%H:%M:%SZ")),
         },
     }
 
@@ -173,5 +166,89 @@ def generate():
     print(f"  Size: {len(credential_bytes)} bytes")
 
 
+def get_issuer_private_key(issuer_private_key_file: str) -> ec.EllipticCurve:
+    """
+    Obtains an EC private key for use in signing a mock credential.
+
+    :param issuer_private_key_file: The file path of the Issuer private EC key to load. If this
+           doesn't exist, the caught exception calls :func:`generate_issuer_private_key` to create
+           a PEM file at this location.
+    :return: The successfully obtains private EC key.
+    """
+
+    try:
+        with open(issuer_private_key_file, "rb") as issuer_private_key_file:
+            issuer_private_key = serialization.load_pem_private_key(
+                issuer_private_key_file.read(),
+                password=None
+            )
+            print(f"Loaded existing issuer private key: {issuer_private_key_file}")
+
+    except FileNotFoundError as exception:
+        issuer_private_key = generate_issuer_private_key(issuer_private_key_file)
+
+    return issuer_private_key
+
+
+def generate_issuer_private_key(issuer_private_key_file: str) -> ec.EllipticCurve:
+    """
+    :param issuer_private_key_file: The file path of the Issuer private key to generate.
+    :return: The successfully generated EC private key, used for Issuer signing.
+    """
+
+    print(f"'{issuer_private_key_file}' not found! Creating...")
+    issuer_private_key = ec.generate_private_key(ec.SECP256R1())
+    with open(issuer_private_key_file, "x") as f:
+        f.write(
+            issuer_private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption()
+            ).decode("utf-8")
+        )
+        print(f"Generated EC private key: {issuer_private_key_file}")
+    return issuer_private_key
+
+
+def get_argument_parser() -> argparse.Namespace:
+    """
+    Obtains the command-line arguments necessary to use this script. These are:
+
+    * `--private-key`
+    * `--issuer-private-key`
+    * `--output`
+    * `--validity-days`
+
+    The arguments are optional, with default values that may be overwritten at call-time.
+
+    :return: The parsed arguments that this script requires
+    """
+
+    parser = argparse.ArgumentParser(description="Generate a mock credential for the test app")
+    parser.add_argument(
+        "--private-key",
+        help="Path to device private key PEM",
+        default="app/src/main/assets/test_private_key.pem"
+    )
+    parser.add_argument(
+        "--issuer-private-key",
+        help="The private EC key that issued the credential",
+        default="app/src/main/assets/test_private_issuer_key.pem"
+    )
+    parser.add_argument(
+        "--output",
+        help="Output path for credential txt file",
+        default="app/src/main/res/raw/mock_credential.txt"
+    )
+    parser.add_argument(
+        "--validity-days",
+        type=int,
+        default=365,
+        help="Validity period in days"
+    )
+    return parser.parse_args()
+
+
+# Prefer using `pipx install -e .` to install a symlinked `generate-mock-credential` command
 if __name__ == "__main__":
     generate()
