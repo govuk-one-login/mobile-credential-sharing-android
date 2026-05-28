@@ -6,8 +6,9 @@ Requirements:
     pip install cbor2 cryptography
 
 Usage:
-    python3 scripts/mock_credential/generate_mock_credential.py --private-key app/src/main/assets/test_private_key.pem \
-                                       --output app/src/main/res/raw/mock_credential.txt
+    python3 scripts/mock_credential/generate_mock_credential.py \
+    --private-key app/src/main/assets/test_private_key.pem \
+    --output app/src/main/res/raw/mock_credential.txt
 
 The generated credential uses the device key from the provided PEM file and creates
 a self-signed issuer certificate. The credential is valid for 1 year.
@@ -18,13 +19,13 @@ import base64
 import cbor2
 import hashlib
 import os
-from datetime import datetime, timezone, timedelta
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from cryptography.x509 import CertificateBuilder, Name, NameAttribute
 from cryptography.x509.oid import NameOID
-from cryptography import x509
+from datetime import datetime, timezone, timedelta
 
 # Sample IssuerSignedItems for a test mDL
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -64,10 +65,18 @@ def build_issuer_signed_item(item):
     return cbor2.CBORTag(24, encoded)
 
 
-def main():
+def generate():
     parser = argparse.ArgumentParser(description="Generate a mock credential for the test app")
-    parser.add_argument("--private-key", required=True, help="Path to device private key PEM")
-    parser.add_argument("--output", required=True, help="Output path for credential txt file")
+    parser.add_argument(
+        "--private-key",
+        help="Path to device private key PEM",
+        default="app/src/main/assets/test_private_key.pem"
+    )
+    parser.add_argument(
+        "--output",
+        help="Output path for credential txt file",
+        default="app/src/main/res/raw/mock_credential.txt"
+    )
     parser.add_argument("--validity-days", type=int, default=365, help="Validity period in days")
     args = parser.parse_args()
 
@@ -165,4 +174,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    generate()
