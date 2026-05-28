@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.session
 
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 
 sealed class SessionErrorReason {
     /**
@@ -65,4 +66,11 @@ sealed class SessionErrorReason {
      * @see uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult.Invalid
      */
     data class UnsupportedQrCodeFormat(val rawValue: String) : SessionErrorReason()
+
+    /**
+     * State for when a decoded [DeviceResponse] cannot be verified.
+     *
+     * @see uk.gov.onelogin.sharing.verification.document.DocumentVerifier.verifyDocument
+     */
+    data class UnverifiableDocument(val error: VerificationError) : SessionErrorReason()
 }

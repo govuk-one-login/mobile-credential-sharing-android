@@ -17,6 +17,8 @@ data class DeviceResponse(
     val documentErrors: Map<String, Status>? = null,
     val status: Status = Status.OK
 ) {
+    val documentCount: Int = documents?.size ?: 0
+
     constructor(
         statusCode: UInt?,
         documents: List<VerifiableDocument.WithPresentation>? = null,

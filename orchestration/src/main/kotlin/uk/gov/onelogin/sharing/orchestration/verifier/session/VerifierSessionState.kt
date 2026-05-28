@@ -4,6 +4,7 @@ import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 /**
  * Represents a digital credential verification journey's state for validating another device's
@@ -66,7 +67,12 @@ sealed class VerifierSessionState : Completable {
          * The User has completed a digital credential verification journey without un-resolvable
          * errors occurring.
          */
-        data class Success(val data: DeviceResponse) : Complete("Successful journey")
+        data class Success(val data: DeviceResponse) :
+            Complete("Successful journey"),
+            Iterable<VerifiableDocument.WithPresentation> by data {
+                val size: Int = data.size
+            operator fun get(index: Int): VerifiableDocument.WithPresentation = data[index]
+            }
 
         /**
          * The User cannot complete a digital credential verification journey due to encountering

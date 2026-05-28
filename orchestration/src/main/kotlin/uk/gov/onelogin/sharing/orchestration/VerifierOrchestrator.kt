@@ -26,8 +26,6 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse as DomainDeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -49,6 +47,11 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse as DomainDeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -62,7 +65,8 @@ class VerifierOrchestrator(
     @param:ApplicationScope private val appCoroutineScope: CoroutineScope,
     private val barcodeParser: QrParser,
     private val centralBluetoothTransport: CentralBluetoothTransport,
-    private val verifierCryptoService: VerifierCryptoService
+    private val verifierCryptoService: VerifierCryptoService,
+    private val documentVerifier: DocumentVerifier
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -351,12 +355,31 @@ class VerifierOrchestrator(
             return
         }
 
-        stopCentralTransport()
-        safeTransitionTo(
-            VerifierSessionState.Complete.Success(
-                DeviceResponse(documents = documents)
+        verifyDocuments(documents)
+    }
+
+    private fun verifyDocuments(documents: List<VerifiableDocument.WithPresentation>) {
+        try {
+            documents.forEach { document ->
+                documentVerifier.verifyDocument(
+                    document,
+                    sessionFlow.value.cryptoContext?.sessionTranscriptBytes
+                )
+            }
+            safeTransitionTo(
+                VerifierSessionState.Complete.Success(
+                    DeviceResponse(documents = documents)
+                )
             )
-        )
+        } catch (exception: VerificationResult.Failure) {
+            failWith(
+                "Failed to verify provided documents",
+                SessionErrorReason.UnverifiableDocument(exception.error),
+                exception
+            )
+        } finally {
+            stopCentralTransport()
+        }
     }
 
     private suspend fun handleConnectionStateStarted() {
