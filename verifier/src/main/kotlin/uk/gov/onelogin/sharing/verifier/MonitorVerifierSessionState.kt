@@ -22,6 +22,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.navigateToUnrecoverableVerifierError
+import uk.gov.onelogin.sharing.verifier.finish.FinishedVerifierJourneyNavigationExt.navigateToFinishedVerifierJourney
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesNavigationExt.navigateToVerifierPrerequisitesScreen
@@ -123,10 +124,18 @@ internal suspend fun convertSessionStateToNavigation(
                 handleSessionFailure(state, navController, context)
             }
         }
+        is VerifierSessionState.Complete.Success -> {
+            {
+                navController.navigateToFinishedVerifierJourney(state.data) {
+                    popUpTo<VerifierRoutes> {
+                        inclusive = true
+                    }
+                }
+            }
+        }
 
         VerifierSessionState.ProcessingEngagement,
         VerifierSessionState.Verifying,
-        is VerifierSessionState.Complete.Success,
         VerifierSessionState.Complete.Cancelled
         -> {
             {}
