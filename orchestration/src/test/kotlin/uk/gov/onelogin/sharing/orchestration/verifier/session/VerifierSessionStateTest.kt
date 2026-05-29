@@ -21,7 +21,7 @@ class VerifierSessionStateTest {
      * reason from [VerificationResult.Failure] is available on the Failed state.
      */
     @Test
-    fun `Something`(
+    fun `Failures can contain Document verification errors`(
         @TestParameter error: VerificationError,
     ) {
         val failure = Failed(
