@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.sdk
 
 import io.mockk.every
 import io.mockk.mockk
-import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,11 +15,16 @@ import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.sdk.internal.verifier.CredentialVerifierImpl
 import uk.gov.onelogin.sharing.sdk.internal.verifier.VerifyCredentialSdkImpl
+import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 
 class VerifierSharingSdkImplTest {
     private val appGraph = mockk<CredentialSharingAppGraph>()
     private val verifierGraphFactory = mockk<VerifyCredentialGraph.Factory>()
+    private val credentialVerificationFactory = mockk<CredentialVerificationGraph.Factory>(
+        relaxed = true
+    )
     private val verifierGraph = mockk<VerifyCredentialGraph>()
+    private val credentialVerificationGraph = mockk<CredentialVerificationGraph>()
     private val orchestrator = mockk<Orchestrator.Verifier>()
 
     @Test
@@ -33,15 +38,20 @@ class VerifierSharingSdkImplTest {
                 )
             )
         )
-        val trustedCertificates = emptyList<Certificate>()
+        val trustedRootCertificate: X509Certificate = mockk()
         val verifierConfig = VerifierConfig(
             verificationRequest = verificationRequest,
-            trustedCertificates = trustedCertificates
+            trustedRootCertificate = trustedRootCertificate
         )
+
+        every {
+            credentialVerificationFactory.create(trustedRootCertificate)
+        } returns credentialVerificationGraph
 
         every {
             verifierGraphFactory.create(
                 appGraph = appGraph,
+                credentialVerificationGraph = credentialVerificationGraph,
                 verifierConfig = verifierConfig
             )
         } returns verifierGraph
@@ -49,7 +59,8 @@ class VerifierSharingSdkImplTest {
 
         val sdk = VerifyCredentialSdkImpl(
             appGraph = appGraph,
-            verifierGraphFactory = verifierGraphFactory
+            verifierGraphFactory = verifierGraphFactory,
+            credentialVerificationGraphFactory = credentialVerificationFactory,
         )
 
         val result = sdk.verifier(verifierConfig)

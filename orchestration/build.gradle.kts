@@ -60,6 +60,10 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        libs.mockk
+    ).forEach(::testFixturesImplementation)
+
+    listOf(
         libs.bundles.androidx.camera,
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),

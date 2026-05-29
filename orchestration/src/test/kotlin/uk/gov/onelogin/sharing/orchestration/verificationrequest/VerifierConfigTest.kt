@@ -1,7 +1,8 @@
 package uk.gov.onelogin.sharing.orchestration.verificationrequest
 
+import io.mockk.mockk
+import java.security.cert.X509Certificate
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class VerifierConfigTest {
@@ -14,18 +15,18 @@ class VerifierConfigTest {
         )
         val config = VerifierConfig(
             verificationRequest = request,
-            trustedCertificates = emptyList()
+            trustedRootCertificate = mockk()
         )
 
         assertEquals(request, config.verificationRequest)
-        assertTrue(config.trustedCertificates.isEmpty())
     }
 
     @Test
     fun `data class equality`() {
+        val certificate: X509Certificate = mockk()
         val request = VerificationRequest.raw("type", mapOf("a" to true))
-        val a = VerifierConfig(request, emptyList())
-        val b = VerifierConfig(request, emptyList())
+        val a = VerifierConfig(request, certificate)
+        val b = VerifierConfig(request, certificate)
 
         assertEquals(a, b)
     }

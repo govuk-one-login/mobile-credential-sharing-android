@@ -159,6 +159,7 @@ private fun handleSessionFailure(
         is SessionErrorReason.UnrecoverablePrerequisite,
         is SessionErrorReason.InvalidSessionDataPayload,
         is SessionErrorReason.DeviceRequestProcessingError,
+        is SessionErrorReason.UnverifiableDocument,
         SessionErrorReason.DocumentNotReturned
         ->
             navController.navigateToUnrecoverableVerifierError {

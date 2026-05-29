@@ -165,7 +165,7 @@ def generate():
 def get_x509_certificate(x509_certificate_file_path: str) -> Optional[Certificate]:
     result = None
     with open(x509_certificate_file_path, "rb") as x509_certificate_file:
-        result = x509.load_pem_x509_certificate(x509_certificate_file.read())
+        result = x509.load_der_x509_certificate(x509_certificate_file.read())
         print(f"Obtained existing X509 Certificate: {x509_certificate_file_path}")
     return result
 
@@ -196,9 +196,9 @@ def generate_x509_certificate(
         .sign(issuer_private_key, hashes.SHA256())
     )
 
-    with open(x509_certificate_file_path, "x") as f:
+    with open(x509_certificate_file_path, "xb") as f:
         f.write(
-            result.public_bytes(serialization.Encoding.PEM,).decode("utf-8")
+            result.public_bytes(serialization.Encoding.DER)
         )
 
     print(f"Generated X509 Certificate: {x509_certificate_file_path}")
@@ -236,13 +236,13 @@ def generate_issuer_private_key(issuer_private_key_file_path: str) -> ec.Ellipti
 
     print(f"'{issuer_private_key_file_path}' not found! Creating...")
     issuer_private_key = ec.generate_private_key(ec.SECP256R1())
-    with open(issuer_private_key_file_path, "x") as f:
+    with open(issuer_private_key_file_path, "xb") as f:
         f.write(
             issuer_private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.PKCS8,
                 encryption_algorithm=serialization.NoEncryption()
-            ).decode("utf-8")
+            )
         )
         print(f"Generated EC private key: {issuer_private_key_file_path}")
     return issuer_private_key
@@ -275,8 +275,8 @@ def get_argument_parser() -> argparse.Namespace:
     )
     parser.add_argument(
         "--x509-certificate",
-        help="The X509 Certificate file path, in PEM format",
-        default="app/src/main/assets/test_x509_certificate.pem"
+        help="The X509 Certificate file path, in DER format",
+        default="app/src/main/assets/test_x509_certificate.der"
     )
     parser.add_argument(
         "--output",

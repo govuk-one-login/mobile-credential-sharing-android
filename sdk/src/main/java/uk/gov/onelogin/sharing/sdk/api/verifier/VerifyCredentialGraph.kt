@@ -7,6 +7,7 @@ import dev.zacsweers.metro.Provides
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
+import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 
 @DependencyGraph(AppScope::class)
 interface VerifyCredentialGraph {
@@ -15,6 +16,7 @@ interface VerifyCredentialGraph {
     fun interface Factory {
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
+            @Includes credentialVerificationGraph: CredentialVerificationGraph,
             @Provides verifierConfig: VerifierConfig
         ): VerifyCredentialGraph
     }
