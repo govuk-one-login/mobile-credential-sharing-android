@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -39,7 +40,6 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartE
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
-import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
@@ -48,9 +48,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
-import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse as DomainDeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
 
 @Keep
@@ -335,7 +333,7 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun evaluateDeviceResponse(deviceResponse: DomainDeviceResponse) {
+    private fun evaluateDeviceResponse(deviceResponse: DeviceResponse) {
         val status = deviceResponse.status
 
         if (status != DeviceResponseStatus.OK) {
@@ -355,21 +353,19 @@ class VerifierOrchestrator(
             return
         }
 
-        verifyDocuments(documents)
+        verifyDocuments(deviceResponse)
     }
 
-    private fun verifyDocuments(documents: List<VerifiableDocument.WithPresentation>) {
+    private fun verifyDocuments(deviceResponse: DeviceResponse) {
         try {
-            documents.forEach { document ->
+            deviceResponse.documents!!.forEach { document ->
                 documentVerifier.verifyDocument(
                     document,
                     sessionFlow.value.cryptoContext?.sessionTranscriptBytes
                 )
             }
             safeTransitionTo(
-                VerifierSessionState.Complete.Success(
-                    DeviceResponse(documents = documents)
-                )
+                VerifierSessionState.Complete.Success(deviceResponse)
             )
         } catch (exception: VerificationResult.Failure) {
             failWith(

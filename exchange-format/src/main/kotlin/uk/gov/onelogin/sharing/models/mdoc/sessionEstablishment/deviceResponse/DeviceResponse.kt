@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 /**
@@ -11,6 +12,7 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
  * }
  * ```
  */
+@Serializable
 data class DeviceResponse(
     val version: String = "1.0",
     val documents: List<VerifiableDocument.WithPresentation>? = null,

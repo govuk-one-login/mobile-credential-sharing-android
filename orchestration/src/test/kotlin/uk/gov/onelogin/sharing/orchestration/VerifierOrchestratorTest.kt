@@ -65,6 +65,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.UncancellableVerifierSessionStates
@@ -967,6 +968,13 @@ class VerifierOrchestratorTest {
      * DCMAW-20270: AC3: A [DeviceResponse] containing multiple documents fails immediately when
      * the first document produces [VerificationResult.Failure]; remaining documents are not
      * verified.
+     *
+     * DCMAW-20270: AC6: The [uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript]
+     * is passed from the Sharing SDK session context directly to [DocumentVerifier.verifyDocument]
+     * without transformation.
+     *
+     * DCMAW-20270: AC7: When the session transitions to [Failed], the [VerificationError]
+     * reason from [VerificationResult.Failure] is available on the Failed state.
      */
     @Test
     fun `Doesn't verify additional documents after a verification failure`(
@@ -1010,10 +1018,16 @@ class VerifierOrchestratorTest {
         }
 
         verify(exactly = 1) {
-            documentVerifier.verifyDocument(DeviceResponseStub.document, any())
+            documentVerifier.verifyDocument(
+                DeviceResponseStub.document,
+                sessionFactory.getCurrentSession().cryptoContext?.sessionTranscriptBytes
+            )
         }
         verify(exactly = 0) {
-            documentVerifier.verifyDocument(secondDocument, any())
+            documentVerifier.verifyDocument(
+                secondDocument,
+                sessionFactory.getCurrentSession().cryptoContext?.sessionTranscriptBytes
+            )
         }
     }
 

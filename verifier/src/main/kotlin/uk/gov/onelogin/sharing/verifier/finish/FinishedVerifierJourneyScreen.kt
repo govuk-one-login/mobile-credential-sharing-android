@@ -16,7 +16,7 @@ import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
-import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 @Composable
 internal fun FinishedVerifierJourneyScreen(
@@ -44,7 +44,7 @@ internal fun FinishedVerifierJourneyScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(spacingSingle)
         ) {
-            items(response.documents, key = { it.docType }) { document ->
+            items(response.documents!!, key = { it.docType }) { document ->
                 Text(document.toString())
             }
         }

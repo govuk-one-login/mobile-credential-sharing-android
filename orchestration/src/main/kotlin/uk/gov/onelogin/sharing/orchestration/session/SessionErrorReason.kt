@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.session
 
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 
@@ -18,7 +19,7 @@ sealed class SessionErrorReason {
     data class UnrecoverableThrowable(val exception: Throwable) : SessionErrorReason()
 
     data class UnrecoverablePrerequisite(
-        val unrecoverablePrerequisites: List<MissingPrerequisite>
+        private val unrecoverablePrerequisites: List<MissingPrerequisite>
     ) : SessionErrorReason(),
         Iterable<MissingPrerequisite> by unrecoverablePrerequisites {
         constructor(

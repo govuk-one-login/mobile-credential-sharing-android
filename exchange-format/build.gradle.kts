@@ -1,6 +1,7 @@
 plugins {
     listOf(
-        libs.plugins.templates.kotlin.library
+        libs.plugins.templates.kotlin.library,
+        libs.plugins.kotlin.serialization
     ).forEach { alias(it) }
 }
 
@@ -10,8 +11,12 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.kotlinx.serialization.json,
+    ).forEach(::implementation)
+
+    listOf(
         libs.junit,
-        libs.com.google.test.parameter.injector
+        libs.com.google.test.parameter.injector,
     ).forEach(::testImplementation)
 }
 

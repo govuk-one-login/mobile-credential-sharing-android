@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import uk.gov.onelogin.sharing.core.Completable
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
@@ -69,9 +69,10 @@ sealed class VerifierSessionState : Completable {
          */
         data class Success(val data: DeviceResponse) :
             Complete("Successful journey"),
-            Iterable<VerifiableDocument.WithPresentation> by data {
-                val size: Int = data.size
-            operator fun get(index: Int): VerifiableDocument.WithPresentation = data[index]
+            Iterable<VerifiableDocument.WithPresentation> by data.documents!! {
+                val size: Int = data.documents!!.size
+            operator fun get(index: Int): VerifiableDocument.WithPresentation =
+                data.documents!![index]
             }
 
         /**

@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.sharing.orchestration.session.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 object FinishedVerifierJourneyNavigationExt {
     fun NavController.navigateToFinishedVerifierJourney(
