@@ -373,7 +373,7 @@ class VerifierOrchestrator(
             )
         } catch (exception: VerificationResult.Failure) {
             failWith(
-                "Failed to verify provided documents",
+                "Failed to verify provided documents (${exception.error})",
                 SessionErrorReason.UnverifiableDocument(exception.error),
                 exception
             )

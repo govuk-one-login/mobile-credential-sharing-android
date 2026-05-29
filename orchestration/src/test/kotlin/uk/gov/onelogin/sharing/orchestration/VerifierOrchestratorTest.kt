@@ -839,9 +839,17 @@ class VerifierOrchestratorTest {
             assertEquals(1, centralBluetoothTransport.stopCalls)
         }
 
+    /**
+     * DCMAW-20270: AC1: After a [DeviceResponse] is received, the session transitions to
+     * [VerifierSessionState.Verifying] before any call to [DocumentVerifier.verifyDocument] is
+     * made.
+     *
+     * Note that this is the last step before performing document verification.
+     */
     @Test
     fun `DeviceResponse with empty documents list transitions to Failed - DocumentNotReturned`() =
         runTest {
+            documentVerifier = mockk(relaxed = true)
             fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
                 status = Status.OK,
                 documents = emptyList()
@@ -867,6 +875,10 @@ class VerifierOrchestratorTest {
                 isFailed(hasReason(equalTo(SessionErrorReason.DocumentNotReturned)))
             )
             assertEquals(1, centralBluetoothTransport.stopCalls)
+
+            verify(exactly = 0) {
+                documentVerifier.verifyDocument(any(), any())
+            }
         }
 
     /**
