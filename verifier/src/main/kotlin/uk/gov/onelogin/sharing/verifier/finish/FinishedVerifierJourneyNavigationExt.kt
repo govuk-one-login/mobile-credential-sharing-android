@@ -13,15 +13,13 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 object FinishedVerifierJourneyNavigationExt {
     fun NavController.navigateToFinishedVerifierJourney(
         response: DeviceResponse,
-        options: NavOptionsBuilder.() -> Unit = {},
+        options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(
         FinishedVerifierJourneyRoute(response = response),
         options
     )
 
-    internal fun NavGraphBuilder.configureFinishedVerifierJourney(
-        controller: NavController
-    ) {
+    internal fun NavGraphBuilder.configureFinishedVerifierJourney(controller: NavController) {
         composable<FinishedVerifierJourneyRoute> { backStackEntry ->
             val scope = rememberCoroutineScope { Dispatchers.Main }
             val args: FinishedVerifierJourneyRoute = backStackEntry.toRoute()
@@ -37,4 +35,3 @@ object FinishedVerifierJourneyNavigationExt {
         }
     }
 }
-

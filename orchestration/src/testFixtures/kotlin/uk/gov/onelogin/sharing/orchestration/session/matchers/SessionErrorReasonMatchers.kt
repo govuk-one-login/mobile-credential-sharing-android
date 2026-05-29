@@ -14,7 +14,7 @@ object SessionErrorReasonMatchers {
     fun isUnrecoverableThrowable(
         matcher: Matcher<in SessionErrorReason.UnrecoverableThrowable> = instanceOf(
             SessionErrorReason.UnrecoverableThrowable::class.java
-        ),
+        )
     ): Matcher<in SessionErrorReason> = SessionErrorReasonMatcher(matcher) {
         it as? SessionErrorReason.UnrecoverableThrowable
     }
@@ -22,18 +22,16 @@ object SessionErrorReasonMatchers {
     fun isUnrecoverablePrerequisite(
         matcher: Matcher<in SessionErrorReason.UnrecoverablePrerequisite> = instanceOf(
             SessionErrorReason.UnrecoverablePrerequisite::class.java
-        ),
+        )
     ): Matcher<in SessionErrorReason> = SessionErrorReasonMatcher(matcher) {
         it as? SessionErrorReason.UnrecoverablePrerequisite
     }
 
-    fun isUnverifiableDocument(
-        expected: SessionErrorReason.UnverifiableDocument
-    ) = isUnverifiableDocument(equalTo(expected))
+    fun isUnverifiableDocument(expected: SessionErrorReason.UnverifiableDocument) =
+        isUnverifiableDocument(equalTo(expected))
 
-    fun isUnverifiableDocument(
-        failure: VerificationError
-    ) = isUnverifiableDocument(hasError(failure))
+    fun isUnverifiableDocument(failure: VerificationError) =
+        isUnverifiableDocument(hasError(failure))
 
     fun isUnverifiableDocument(
         matcher: Matcher<in SessionErrorReason.UnverifiableDocument> = instanceOf(
@@ -45,7 +43,7 @@ object SessionErrorReasonMatchers {
 
     object UnrecoverableThrowableMatchers {
         fun hasSessionErrorThrowable(
-            matcher: Matcher<in Throwable>,
+            matcher: Matcher<in Throwable>
         ): Matcher<in SessionErrorReason.UnrecoverableThrowable> =
             SessionErrorReasonMatcher(matcher) {
                 (it as? SessionErrorReason.UnrecoverableThrowable)?.exception
@@ -53,9 +51,7 @@ object SessionErrorReasonMatchers {
     }
 
     object UnverifiableDocumentMatchers {
-        fun hasError(
-            expected: VerificationError
-        ) = hasError(equalTo(expected))
+        fun hasError(expected: VerificationError) = hasError(equalTo(expected))
 
         fun hasError(
             matcher: Matcher<in VerificationError>
@@ -67,12 +63,12 @@ object SessionErrorReasonMatchers {
 
     private class SessionErrorReasonMatcher<Type>(
         private val matcher: Matcher<in Type>,
-        private val transformer: (SessionErrorReason?) -> Type?,
+        private val transformer: (SessionErrorReason?) -> Type?
     ) : TypeSafeMatcher<SessionErrorReason>() {
         override fun describeTo(description: Description?) = matcher.describeTo(description)
         override fun describeMismatchSafely(
             item: SessionErrorReason?,
-            mismatchDescription: Description?,
+            mismatchDescription: Description?
         ) = matcher.describeMismatch(transformer(item), mismatchDescription)
 
         override fun matchesSafely(item: SessionErrorReason?): Boolean = matcher.matches(

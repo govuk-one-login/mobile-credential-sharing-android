@@ -16,13 +16,12 @@ import uk.gov.onelogin.sharing.testapp.holder.HolderTestAppJourneyNavigationExt.
 import uk.gov.onelogin.sharing.testapp.home.HomeNavigationExt.configureTestAppHomeScreen
 import uk.gov.onelogin.sharing.testapp.verifier.VerifierTestAppJourneyNavigationExt.configureVerifierJourneyWrapper
 
-
 object MainActivityRoutes {
     internal fun NavGraphBuilder.configureTestAppRoutes(
         mockCredentials: List<MockCredentialState>,
         navController: NavController,
         presentCredentialSdk: PresentCredentialSdk,
-        verifyCredentialSdk: VerifyCredentialSdk,
+        verifyCredentialSdk: VerifyCredentialSdk
     ) {
         configureTestAppHomeScreen(navController)
         configureSelectMockCredentialDialog(

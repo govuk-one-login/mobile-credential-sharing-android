@@ -22,7 +22,7 @@ class VerifierSessionStateTest {
      */
     @Test
     fun `Failures can contain Document verification errors`(
-        @TestParameter error: VerificationError,
+        @TestParameter error: VerificationError
     ) {
         val failure = Failed(
             SessionError(
@@ -40,5 +40,4 @@ class VerifierSessionStateTest {
             )
         )
     }
-
 }

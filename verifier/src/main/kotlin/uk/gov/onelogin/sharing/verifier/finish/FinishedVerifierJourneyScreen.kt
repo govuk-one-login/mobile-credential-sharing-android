@@ -23,7 +23,7 @@ internal fun FinishedVerifierJourneyScreen(
     response: DeviceResponse,
     modifier: Modifier = Modifier,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(spacingDouble),
-    onExitJourney: () -> Unit = {},
+    onExitJourney: () -> Unit = {}
 ) {
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
@@ -32,7 +32,7 @@ internal fun FinishedVerifierJourneyScreen(
 
     Column(
         modifier = modifier,
-        verticalArrangement = verticalArrangement,
+        verticalArrangement = verticalArrangement
     ) {
         Text(
             "You have successfully verified your documents",

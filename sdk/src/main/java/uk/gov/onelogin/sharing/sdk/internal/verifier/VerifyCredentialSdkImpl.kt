@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 class VerifyCredentialSdkImpl(
     private val appGraph: CredentialSharingAppGraph,
     private val verifierGraphFactory: VerifyCredentialGraph.Factory,
-    private val credentialVerificationGraphFactory: CredentialVerificationGraph.Factory,
+    private val credentialVerificationGraphFactory: CredentialVerificationGraph.Factory
 ) : VerifyCredentialSdk {
 
     override fun verifier(verifierConfig: VerifierConfig): CredentialVerifier {
@@ -27,7 +27,7 @@ class VerifyCredentialSdkImpl(
         return CredentialVerifierImpl(
             appGraph = appGraph,
             orchestrator = orchestrator,
-            verificationRequest = verifierConfig.verificationRequest,
+            verificationRequest = verifierConfig.verificationRequest
         )
     }
 }

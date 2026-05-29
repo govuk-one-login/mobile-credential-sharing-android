@@ -209,7 +209,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Starting the Orchestrator journey is possible when the journey is already complete`(
         @TestParameter(valuesProvider = CompleteVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         backgroundScope.launch {
@@ -242,7 +242,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Orchestrator cannot cancel invalid state transitions`(
         @TestParameter(valuesProvider = UncancellableVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         backgroundScope.launch {
@@ -259,7 +259,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Cancelling the User journey is based on the internal session state`(
         @TestParameter(valuesProvider = CancellableVerifierSessionStates::class)
-        state: VerifierSessionState,
+        state: VerifierSessionState
     ) = runTest {
         initialStates[0] = state
         backgroundScope.launch {
@@ -506,7 +506,7 @@ class VerifierOrchestratorTest {
                 appCoroutineScope = scope,
                 barcodeParser = FakeQrParser(),
                 verifierCryptoService = failingCryptoService,
-                documentVerifier = documentVerifier,
+                documentVerifier = documentVerifier
             )
             backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
             orchestrator.processQrCode(VALID_MDOC_URI)
@@ -538,7 +538,7 @@ class VerifierOrchestratorTest {
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
             verifierCryptoService = failingCryptoService,
-            documentVerifier = documentVerifier,
+            documentVerifier = documentVerifier
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)
@@ -652,7 +652,7 @@ class VerifierOrchestratorTest {
      */
     @Test
     fun `Navigates to failure state due to SessionDataStatus`(
-        @TestParameter status: SessionDataStatus,
+        @TestParameter status: SessionDataStatus
     ) = runTest {
         fakeCryptoService.sessionData = SessionData(status = status)
         centralBluetoothTransport.emitState(
@@ -782,7 +782,7 @@ class VerifierOrchestratorTest {
 
     @Test
     fun `DeviceResponse with error status transitions to Failed - DeviceRequestProcessingError`(
-        @TestParameter(valuesProvider = ErrorStatusProvider::class) errorStatus: Status,
+        @TestParameter(valuesProvider = ErrorStatusProvider::class) errorStatus: Status
     ) = runTest {
         fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
             status = errorStatus
@@ -926,7 +926,7 @@ class VerifierOrchestratorTest {
                         )
                     )
                 )
-            ),
+            )
         )
     }
 

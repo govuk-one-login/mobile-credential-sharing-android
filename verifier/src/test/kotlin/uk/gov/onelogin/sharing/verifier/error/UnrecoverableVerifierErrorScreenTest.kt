@@ -84,7 +84,7 @@ class UnrecoverableVerifierErrorScreenTest {
         @TestParameter error: VerificationError
     ) {
         sessionError = SessionError(
-            "Failed to verify provided documents (${error})",
+            "Failed to verify provided documents ($error)",
             SessionErrorReason.UnverifiableDocument(error)
         )
 

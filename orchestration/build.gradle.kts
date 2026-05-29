@@ -37,7 +37,7 @@ dependencies {
         projects.core,
         projects.cameraService,
         projects.cryptoService,
-        projects.credentialVerification,
+        projects.credentialVerification
     ).forEach(::api)
 
     listOf(projects.exchangeFormat)

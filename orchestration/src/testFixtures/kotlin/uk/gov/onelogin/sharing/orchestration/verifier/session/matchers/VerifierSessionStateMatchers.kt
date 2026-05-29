@@ -75,9 +75,7 @@ object VerifierSessionStateMatchers {
     }
 
     object SuccessMatchers {
-        fun hasDocumentCount(
-            expected: Int
-        ) = hasDocumentCount(equalTo(expected))
+        fun hasDocumentCount(expected: Int) = hasDocumentCount(equalTo(expected))
 
         fun hasDocumentCount(
             matcher: Matcher<in Int>
@@ -87,9 +85,8 @@ object VerifierSessionStateMatchers {
             (it as? VerifierSessionState.Complete.Success)?.size
         }
 
-        fun hasDocuments(
-            expected: Iterable<VerifiableDocument.WithPresentation>
-        ) = hasDocuments(equalTo(expected))
+        fun hasDocuments(expected: Iterable<VerifiableDocument.WithPresentation>) =
+            hasDocuments(equalTo(expected))
 
         fun hasDocuments(
             matcher: Matcher<in Iterable<VerifiableDocument.WithPresentation>>

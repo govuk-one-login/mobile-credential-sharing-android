@@ -9,5 +9,5 @@ class CredentialVerifierImpl(
     @Suppress("UnusedPrivateProperty")
     private val verificationRequest: VerificationRequest,
     override val orchestrator: Orchestrator.Verifier,
-    override val appGraph: CredentialSharingAppGraph,
+    override val appGraph: CredentialSharingAppGraph
 ) : CredentialVerifier

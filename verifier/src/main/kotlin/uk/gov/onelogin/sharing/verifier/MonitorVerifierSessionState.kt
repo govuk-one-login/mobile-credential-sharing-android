@@ -124,6 +124,7 @@ internal suspend fun convertSessionStateToNavigation(
                 handleSessionFailure(state, navController, context)
             }
         }
+
         is VerifierSessionState.Complete.Success -> {
             {
                 navController.navigateToFinishedVerifierJourney(state.data) {

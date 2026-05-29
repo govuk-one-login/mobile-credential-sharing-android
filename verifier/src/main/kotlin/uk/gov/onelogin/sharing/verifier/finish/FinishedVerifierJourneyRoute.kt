@@ -6,7 +6,4 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 
 @Keep
 @Serializable
-internal data class FinishedVerifierJourneyRoute(
-    val response: DeviceResponse
-)
-{}
+internal data class FinishedVerifierJourneyRoute(val response: DeviceResponse)

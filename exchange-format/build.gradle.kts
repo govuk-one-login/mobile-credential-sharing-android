@@ -11,12 +11,12 @@ dependencies {
     ).forEach(::api)
 
     listOf(
-        libs.kotlinx.serialization.json,
+        libs.kotlinx.serialization.json
     ).forEach(::implementation)
 
     listOf(
         libs.junit,
-        libs.com.google.test.parameter.injector,
+        libs.com.google.test.parameter.injector
     ).forEach(::testImplementation)
 }
 

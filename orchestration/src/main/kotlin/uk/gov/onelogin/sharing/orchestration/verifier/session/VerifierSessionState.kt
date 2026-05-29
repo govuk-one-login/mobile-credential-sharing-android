@@ -70,10 +70,10 @@ sealed class VerifierSessionState : Completable {
         data class Success(val data: DeviceResponse) :
             Complete("Successful journey"),
             Iterable<VerifiableDocument.WithPresentation> by data.documents!! {
-                val size: Int = data.documents!!.size
+            val size: Int = data.documents!!.size
             operator fun get(index: Int): VerifiableDocument.WithPresentation =
                 data.documents!![index]
-            }
+        }
 
         /**
          * The User cannot complete a digital credential verification journey due to encountering
