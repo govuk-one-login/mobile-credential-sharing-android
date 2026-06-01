@@ -21,6 +21,10 @@ class VerifierConfigTest {
         assertEquals(request, config.verificationRequest)
     }
 
+    /**
+     * DCMAW-20270: AC4: Exposes [VerifierConfig.trustedRootCertificate] as a required field with
+     * no default. The SDK provides no fallback certificate of its own.
+     */
     @Test
     fun `data class equality`() {
         val certificate: X509Certificate = mockk()
