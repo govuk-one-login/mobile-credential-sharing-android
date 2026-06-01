@@ -1,10 +1,15 @@
 plugins {
     listOf(
-        libs.plugins.templates.kotlin.library
+        libs.plugins.templates.kotlin.library,
+        libs.plugins.kotlin.serialization
     ).forEach { alias(it) }
 }
 
 dependencies {
+    listOf(
+        libs.kotlinx.serialization.json
+    ).forEach(::implementation)
+
     listOf(
         libs.org.hamcrest
     ).forEach(::testFixturesApi)

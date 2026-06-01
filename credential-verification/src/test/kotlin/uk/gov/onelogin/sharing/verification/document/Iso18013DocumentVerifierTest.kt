@@ -54,7 +54,8 @@ class Iso18013DocumentVerifierTest {
     )
     private val presentedDocument: VerifiableDocument.WithPresentation =
         SharingVerifiableDocumentWithPresentation(
-            document = provisionedDocument,
+            docType = provisionedDocument.docType,
+            issuerSigned = provisionedDocument.issuerSigned,
             deviceSigned = mockk(relaxed = true)
         )
     private val sessionTranscriptBytes: ByteArray = byteArrayOf(1, 2)

@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 
 /**
@@ -7,6 +8,7 @@ import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
  *                   Each ByteArray is the exact bytes from the credential to preserve MSO hash integrity.
  * @param issuerAuth The untouched issuerAuth bytes (COSE_Sign1) from the raw credential.
  */
+@Serializable
 data class SharingIssuerSigned(
     override val nameSpaces: Map<String, List<ByteArray>>?,
     override val issuerAuth: ByteArray

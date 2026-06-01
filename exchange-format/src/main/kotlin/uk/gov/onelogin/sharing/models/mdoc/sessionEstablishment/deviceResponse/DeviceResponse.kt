@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 @Serializable
 data class DeviceResponse(
     val version: String = "1.0",
+    @Serializable(with = DeviceResponseDocumentsSerializer::class)
     val documents: List<VerifiableDocument.WithPresentation>? = null,
     val documentErrors: Map<String, Status>? = null,
     val status: Status = Status.OK
