@@ -40,7 +40,7 @@ dependencies {
 
     listOf(
         testFixtures(projects.core),
-        testFixtures(projects.orchestration),
+        testFixtures(projects.orchestration)
     ).forEach(::testImplementation)
 }
 
