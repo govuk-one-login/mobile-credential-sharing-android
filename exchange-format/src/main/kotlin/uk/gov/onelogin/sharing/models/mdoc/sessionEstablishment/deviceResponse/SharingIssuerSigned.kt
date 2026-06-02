@@ -25,22 +25,22 @@ data class SharingIssuerSigned(
         return true
     }
 
-    private fun nameSpaceEquals(other: Map<String, List<ByteArray>>?): Boolean {
+    private fun nameSpaceEquals(other: Map<String, List<ByteArray>>?): Boolean =
         if (nameSpaces == null) {
-            if (other != null) return false
+            other == null
         } else {
-            if (other == null) return false
-
-            nameSpaces.entries.all { (key, value) ->
-                other.containsKey(key) &&
+            if (other == null) {
+                false
+            } else if (nameSpaces.keys != other.keys) {
+                false
+            } else {
+                nameSpaces.entries.all { (key, value) ->
                     value.mapIndexed { index, bytes ->
                         other[key]?.get(index)?.contentEquals(bytes) ?: false
                     }.reduce(Boolean::and)
+                }
             }
         }
-
-        return true
-    }
 
     override fun hashCode(): Int {
         var result = nameSpaces?.hashCode() ?: 0
