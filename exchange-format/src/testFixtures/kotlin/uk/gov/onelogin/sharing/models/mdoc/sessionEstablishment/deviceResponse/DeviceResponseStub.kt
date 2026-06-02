@@ -14,10 +14,10 @@ object DeviceResponseStub {
 
     val documentJson =
         "{" +
-                "\"docType\":\"${document.docType}\"," +
-                "\"issuerSigned\":$sharingIssuerSignedJson," +
-                "\"deviceSigned\":$sharingDeviceSignedJson" +
-                "}"
+            "\"docType\":\"${document.docType}\"," +
+            "\"issuerSigned\":$sharingIssuerSignedJson," +
+            "\"deviceSigned\":$sharingDeviceSignedJson" +
+            "}"
 
     val successWithDocuments = DeviceResponse(
         documents = listOf(document)

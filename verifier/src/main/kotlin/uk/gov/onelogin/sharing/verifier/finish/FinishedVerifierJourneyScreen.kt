@@ -23,7 +23,7 @@ internal fun FinishedVerifierJourneyScreen(
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(spacingDouble),
-    onExitJourney: () -> Unit = {},
+    onExitJourney: () -> Unit = {}
 ) {
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {

@@ -9,9 +9,9 @@ object IssuerSignedStub {
     )
     val sharingIssuerSignedJson =
         "{" +
-                "\"nameSpaces\":{" +
-                "\"$sharingNameSpace\":[[1]]" +
-                "}," +
-                "\"issuerAuth\":[2]" +
-                "}"
+            "\"nameSpaces\":{" +
+            "\"$sharingNameSpace\":[[1]]" +
+            "}," +
+            "\"issuerAuth\":[2]" +
+            "}"
 }

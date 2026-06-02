@@ -7,18 +7,16 @@ import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
-class FinishedVerifierJourneyScreenRule(
-    composeTestRule: ComposeContentTestRule
-) : ComposeContentTestRule by composeTestRule {
+class FinishedVerifierJourneyScreenRule(composeTestRule: ComposeContentTestRule) :
+    ComposeContentTestRule by composeTestRule {
     private var hasExitedJourney: Boolean = false
 
     fun assertHasExitedJourney() = waitUntil { hasExitedJourney }
 
-    fun assertDocumentIsDisplayed(
-        document: VerifiableDocument
-    ) = onNodeWithText(document.toString(), substring = true)
-        .assertExists()
-        .assertIsDisplayed()
+    fun assertDocumentIsDisplayed(document: VerifiableDocument) =
+        onNodeWithText(document.toString(), substring = true)
+            .assertExists()
+            .assertIsDisplayed()
 
     fun performExitJourneyClick() = onNodeWithText("Exit journey", useUnmergedTree = true)
         .onParent()

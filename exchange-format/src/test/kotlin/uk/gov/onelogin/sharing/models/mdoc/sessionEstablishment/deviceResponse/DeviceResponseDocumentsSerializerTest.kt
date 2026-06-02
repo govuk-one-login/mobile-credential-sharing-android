@@ -14,7 +14,7 @@ class DeviceResponseDocumentsSerializerTest {
         val result = Json.encodeToString(
             DeviceResponseDocumentsSerializer(),
             documentList
-            )
+        )
 
         assertThat(
             result,

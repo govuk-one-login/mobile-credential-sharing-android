@@ -51,13 +51,13 @@ dependencies {
 
     listOf(
         projects.exchangeFormat,
-        testFixtures(projects.exchangeFormat),
+        testFixtures(projects.exchangeFormat)
     ).forEach(::testFixturesApi)
 
     listOf(
         libs.com.google.test.parameter.injector,
         libs.jackson.cbor,
-        projects.cryptoService,
+        projects.cryptoService
     ).forEach(::testFixturesImplementation)
 }
 

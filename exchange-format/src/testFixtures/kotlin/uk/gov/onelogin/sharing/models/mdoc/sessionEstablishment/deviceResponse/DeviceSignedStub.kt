@@ -7,7 +7,7 @@ object DeviceSignedStub {
     )
     val sharingDeviceSignedJson =
         "{" +
-                "\"deviceNameSpacesBytes\":[3]," +
-                "\"deviceSignature\":[4]" +
-                "}"
+            "\"deviceNameSpacesBytes\":[3]," +
+            "\"deviceSignature\":[4]" +
+            "}"
 }
