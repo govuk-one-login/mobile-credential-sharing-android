@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
-import uk.gov.onelogin.sharing.cryptoService.verifier.DeviceResponseStub
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseStub
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorStubs
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Complete.Cancelled
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Complete.Failed

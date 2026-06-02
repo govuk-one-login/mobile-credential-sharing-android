@@ -56,7 +56,8 @@ dependencies {
         projects.cameraService,
         projects.exchangeFormat,
         testFixtures(projects.cryptoService),
-        testFixtures(projects.credentialFormat)
+        testFixtures(projects.credentialFormat),
+        testFixtures(projects.exchangeFormat),
     ).forEach(::testFixturesApi)
 
     listOf(

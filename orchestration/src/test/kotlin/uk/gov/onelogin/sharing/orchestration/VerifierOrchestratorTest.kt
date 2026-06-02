@@ -39,7 +39,6 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.t
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.DecryptDeviceResponseException
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
-import uk.gov.onelogin.sharing.cryptoService.verifier.DeviceResponseStub
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
@@ -47,6 +46,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseStub
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS

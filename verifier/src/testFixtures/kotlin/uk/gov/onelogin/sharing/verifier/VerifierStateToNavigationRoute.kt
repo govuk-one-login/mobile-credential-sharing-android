@@ -5,7 +5,7 @@ import androidx.navigation.toRoute
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import org.hamcrest.CoreMatchers.instanceOf
-import uk.gov.onelogin.sharing.cryptoService.verifier.DeviceResponseStub
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseStub
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState

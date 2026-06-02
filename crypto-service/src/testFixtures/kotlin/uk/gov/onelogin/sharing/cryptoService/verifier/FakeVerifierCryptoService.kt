@@ -9,6 +9,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGenerator
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseStub
 
 class FakeVerifierCryptoService : VerifierCryptoService {
     var establishSessionCallCount = 0

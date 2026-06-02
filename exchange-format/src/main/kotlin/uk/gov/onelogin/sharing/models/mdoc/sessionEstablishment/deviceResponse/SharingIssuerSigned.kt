@@ -19,7 +19,20 @@ data class SharingIssuerSigned(
 
         other as SharingIssuerSigned
 
-        if (nameSpaces != other.nameSpaces) return false
+        if (nameSpaces == null) {
+            if (other.nameSpaces != null) return false
+        } else {
+            if (other.nameSpaces == null) return false
+            nameSpaces.entries.forEach { (key, value) ->
+                if (!other.nameSpaces.containsKey(key)) return false
+                value.forEachIndexed { index, bytes ->
+                    other.nameSpaces[key]?.get(index)?.let {
+                        if (!bytes.contentEquals(it)) return false
+                    } ?: return false
+                }
+            }
+        }
+
         if (!issuerAuth.contentEquals(other.issuerAuth)) return false
 
         return true
