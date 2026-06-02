@@ -19,21 +19,25 @@ data class SharingIssuerSigned(
 
         other as SharingIssuerSigned
 
+        if (!nameSpaceEquals(other.nameSpaces)) return false
+        if (!issuerAuth.contentEquals(other.issuerAuth)) return false
+
+        return true
+    }
+
+    private fun nameSpaceEquals(other: Map<String, List<ByteArray>>?): Boolean {
         if (nameSpaces == null) {
-            if (other.nameSpaces != null) return false
+            if (other != null) return false
         } else {
-            if (other.nameSpaces == null) return false
-            nameSpaces.entries.forEach { (key, value) ->
-                if (!other.nameSpaces.containsKey(key)) return false
-                value.forEachIndexed { index, bytes ->
-                    other.nameSpaces[key]?.get(index)?.let {
-                        if (!bytes.contentEquals(it)) return false
-                    } ?: return false
-                }
+            if (other == null) return false
+
+            nameSpaces.entries.all { (key, value) ->
+                other.containsKey(key) &&
+                    value.mapIndexed { index, bytes ->
+                        other[key]?.get(index)?.contentEquals(bytes) ?: false
+                    }.reduce(Boolean::and)
             }
         }
-
-        if (!issuerAuth.contentEquals(other.issuerAuth)) return false
 
         return true
     }
