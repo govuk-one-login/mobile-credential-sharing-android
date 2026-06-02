@@ -38,6 +38,7 @@ spotless = "8.4.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+P
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "0.39.15" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
 uk-gov-ui = "16.9.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
+bouncycastle = "1.80" # https://github.com/bcgit/bc-java/releases
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 # Minimum safe versions for vulnerable build classpath transitive dependencies
@@ -52,6 +53,8 @@ play-services-basement = "18.10.0"
 
 [libraries]
 app-cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "androidx-camera" }

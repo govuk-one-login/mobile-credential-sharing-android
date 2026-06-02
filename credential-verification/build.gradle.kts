@@ -11,6 +11,11 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.bouncycastle.bcprov,
+        libs.bouncycastle.bcpkix
+    ).forEach(::implementation)
+
+    listOf(
         libs.org.hamcrest,
         testFixtures(projects.credentialFormat)
     ).forEach(::testFixturesApi)
