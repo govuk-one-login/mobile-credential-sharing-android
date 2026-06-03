@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborEncodable
+import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 
 data class CoseKeyDto(
     @JsonProperty("1")
@@ -11,7 +13,7 @@ data class CoseKeyDto(
     val x: ByteArray,
     @JsonProperty("-3")
     val y: ByteArray
-) {
+) : CborEncodable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -34,3 +36,10 @@ data class CoseKeyDto(
         return result
     }
 }
+
+fun CoseKey.toDto(): CoseKeyDto = CoseKeyDto(
+    keyType = keyType,
+    curve = curve,
+    x = x,
+    y = y
+)

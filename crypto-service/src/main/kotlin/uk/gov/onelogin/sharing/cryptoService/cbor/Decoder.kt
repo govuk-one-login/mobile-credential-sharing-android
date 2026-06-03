@@ -106,7 +106,7 @@ fun decodeSessionEstablishmentModel(rawBytes: ByteArray, logger: Logger): Sessio
         }
 
         val sessionEstablishmentDto = SessionEstablishmentDto(
-            eReaderKey = EmbeddedCbor(rawDto.eReaderKey.encodeCbor()),
+            eReaderKey = EmbeddedCbor(rawDto.eReaderKey.toCbor()),
             data = rawDto.data
         )
 

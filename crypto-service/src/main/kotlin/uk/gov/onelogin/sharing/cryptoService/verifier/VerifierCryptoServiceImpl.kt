@@ -74,7 +74,7 @@ class VerifierCryptoServiceImpl(
         ) ?: error("Failed to generate ephemeral key pair")
 
         val coseKey = CoseKey.generateCoseKey(keyPair.public as ECPublicKey, logger)
-        val eReaderKeyTagged = EmbeddedCbor(coseKey.encodeCbor()).encodeCbor()
+        val eReaderKeyTagged = EmbeddedCbor(coseKey.encodeCbor()).toCbor()
 
         val sessionTranscript = deriveSessionTranscript(
             cborBase64Url = qrCodeData,
@@ -82,7 +82,7 @@ class VerifierCryptoServiceImpl(
             logger = logger
         )
 
-        val sessionTranscriptBytes = EmbeddedCbor(sessionTranscript).encodeCbor()
+        val sessionTranscriptBytes = EmbeddedCbor(sessionTranscript).toCbor()
 
         val eDevicePublicKey = engagementData.security.ephemeralPublicKey
             .toEcPublicKey()
@@ -128,7 +128,7 @@ class VerifierCryptoServiceImpl(
         SessionEstablishmentDto(
             eReaderKey = EmbeddedCbor(deriveUntaggedCbor(eReaderKeyBytes)),
             data = encryptedDeviceRequest
-        ).encodeCbor().also {
+        ).toCbor().also {
             logger.debug(logTag, LOG_SESSION_ESTABLISHMENT_SUCCESS)
         }
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {

@@ -18,7 +18,7 @@ class DefaultCoseKeyToString(private val logger: Logger) : CoseKeyToString {
     override fun convert(key: CoseKey): String = key
         .encodeCbor()
         .let(::EmbeddedCbor)
-        .encodeCbor()
+        .toCbor()
         .toHexString()
         .also {
             logger.debug(

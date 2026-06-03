@@ -64,7 +64,7 @@ class HolderCryptoServiceImpl(
         skDevice: ByteArray,
         encryptCounter: UInt
     ): ByteArray {
-        val cborBytes = deviceResponse.toDto().encodeCbor()
+        val cborBytes = deviceResponse.toDto().toCbor()
 
         logger.debug(logTag, "DeviceResponse encoded to ${cborBytes.size} CBOR bytes")
 

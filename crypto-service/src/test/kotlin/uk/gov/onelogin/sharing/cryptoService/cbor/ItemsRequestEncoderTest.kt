@@ -1,8 +1,5 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -12,34 +9,29 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NA
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.over18Request
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.over21Request
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.ItemsRequestDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.toDto
 
 class ItemsRequestEncoderTest {
 
-    private val cborMapper = ObjectMapper(CBORFactory()).apply { registerKotlinModule() }
-
-    private fun decode(bytes: ByteArray): ItemsRequestDto =
-        cborMapper.readValue(bytes, ItemsRequestDto::class.java)
+    private fun roundtrip(dto: ItemsRequestDto): ItemsRequestDto =
+        CborMapper.default.readValue(dto.toCbor(), ItemsRequestDto::class.java)
 
     @Test
-    fun `encodeCbor decodes back to original docType`() {
-        assertEquals(
-            MDL_DOC_TYPE,
-            decode(over21Request.encodeCbor()).docType
-        )
+    fun `toCbor decodes back to original docType`() {
+        assertEquals(MDL_DOC_TYPE, roundtrip(over21Request.toDto()).docType)
     }
 
     @Test
-    fun `encodeCbor decodes back to original nameSpaces`() {
+    fun `toCbor decodes back to original nameSpaces`() {
         assertEquals(
             over21Request.nameSpaces[MDL_NAMESPACE],
-            decode(over21Request.encodeCbor()).nameSpaces[MDL_NAMESPACE]
+            roundtrip(over21Request.toDto()).nameSpaces[MDL_NAMESPACE]
         )
     }
 
     @Test
-    fun `encodeCbor maps portrait and age_over_21 with intentToRetain false`() {
-        val elements =
-            decode(over21Request.encodeCbor()).nameSpaces[MDL_NAMESPACE]!!
+    fun `toCbor maps portrait and age_over_21 with intentToRetain false`() {
+        val elements = roundtrip(over21Request.toDto()).nameSpaces[MDL_NAMESPACE]!!
 
         assertEquals(false, elements["portrait"])
         assertEquals(false, elements["age_over_21"])
@@ -49,9 +41,8 @@ class ItemsRequestEncoderTest {
     }
 
     @Test
-    fun `maps given_name and family_name retain true and age_over_18 false`() {
-        val elements =
-            decode(over18Request.encodeCbor()).nameSpaces[MDL_NAMESPACE]!!
+    fun `toCbor maps given_name and family_name retain true and age_over_18 false`() {
+        val elements = roundtrip(over18Request.toDto()).nameSpaces[MDL_NAMESPACE]!!
 
         assertEquals(true, elements["given_name"])
         assertEquals(true, elements["family_name"])
@@ -61,11 +52,21 @@ class ItemsRequestEncoderTest {
     }
 
     @Test
-    fun `encodeCbor preserves namespace key`() {
-        assertTrue(
-            decode(over21Request.encodeCbor()).nameSpaces.containsKey(
-                MDL_NAMESPACE
-            )
-        )
+    fun `toCbor preserves namespace key`() {
+        assertTrue(roundtrip(over21Request.toDto()).nameSpaces.containsKey(MDL_NAMESPACE))
+    }
+
+    @Test
+    fun `toDto rejects empty docType`() {
+        org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+            over21Request.copy(docType = "").toDto()
+        }
+    }
+
+    @Test
+    fun `toDto rejects empty nameSpaces`() {
+        org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+            over21Request.copy(nameSpaces = emptyMap()).toDto()
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborEncodable
 import uk.gov.onelogin.sharing.cryptoService.cbor.deserializers.SessionEstablishmentDeserializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 
@@ -21,4 +22,4 @@ data class SessionEstablishmentDto(
     val eReaderKey: EmbeddedCbor,
     @JsonProperty("data")
     val data: ByteArray
-)
+) : CborEncodable
