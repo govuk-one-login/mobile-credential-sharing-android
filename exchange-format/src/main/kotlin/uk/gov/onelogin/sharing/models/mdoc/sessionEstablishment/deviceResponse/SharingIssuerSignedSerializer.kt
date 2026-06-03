@@ -8,7 +8,7 @@ import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 
 class SharingIssuerSignedSerializer : KSerializer<IssuerSigned> {
     override val descriptor: SerialDescriptor
-        get() = SharingDeviceSigned.serializer().descriptor
+        get() = SharingIssuerSigned.serializer().descriptor
 
     override fun serialize(encoder: Encoder, value: IssuerSigned) = encoder.encodeSerializableValue(
         SharingIssuerSigned.serializer(),
