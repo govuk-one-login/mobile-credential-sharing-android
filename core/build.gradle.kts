@@ -2,7 +2,7 @@ plugins {
     listOf(
         libs.plugins.templates.android.library,
         libs.plugins.kotlin.ksp,
-        libs.plugins.hilt.plugin,
+        libs.plugins.hilt.plugin
     ).forEach { alias(it) }
 }
 
@@ -39,8 +39,8 @@ dependencies {
 
     listOf(
         libs.hilt.android,
-        libs.metro.viewmodel.compose,
-        ).forEach(::implementation)
+        libs.metro.viewmodel.compose
+    ).forEach(::implementation)
 
     listOf(
         libs.hilt.compiler
