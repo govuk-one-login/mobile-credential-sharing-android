@@ -19,7 +19,6 @@ data class DeviceRequestDto(
 ) : CborEncodable {
     init {
         require(version.isNotEmpty()) { "DeviceRequest: version must not be empty" }
-        require(docRequest.isNotEmpty()) { "DeviceRequest: docRequests must not be empty" }
     }
 
     fun toDomain(): DeviceRequest = DeviceRequest(

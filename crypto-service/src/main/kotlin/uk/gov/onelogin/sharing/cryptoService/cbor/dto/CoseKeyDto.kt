@@ -1,9 +1,16 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborEncodable
+import uk.gov.onelogin.sharing.cryptoService.cose.Cose
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 
+@JsonSerialize(using = CoseKeyDto.Serializer::class)
 data class CoseKeyDto(
     @JsonProperty("1")
     val keyType: Long,
@@ -14,6 +21,29 @@ data class CoseKeyDto(
     @JsonProperty("-3")
     val y: ByteArray
 ) : CborEncodable {
+    class Serializer : StdSerializer<CoseKeyDto>(CoseKeyDto::class.java) {
+        override fun serialize(
+            value: CoseKeyDto,
+            gen: JsonGenerator,
+            provider: SerializerProvider
+        ) {
+            (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
+            gen.writeFieldId(Cose.KEY_KTY_LABEL)
+            provider.defaultSerializeValue(value.keyType, gen)
+            gen.writeFieldId(Cose.EC_CURVE_LABEL)
+            gen.writeNumber(value.curve)
+            gen.writeFieldId(Cose.EC_X_COORDINATE_LABEL)
+            gen.writeBinary(value.x)
+            gen.writeFieldId(Cose.EC_Y_COORDINATE_LABEL)
+            gen.writeBinary(value.y)
+            gen.writeEndObject()
+        }
+
+        private companion object {
+            const val FIELD_COUNT = 4
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

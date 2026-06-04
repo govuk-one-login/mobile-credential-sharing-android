@@ -7,10 +7,6 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_E_READER_KEY
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeSessionEstablishmentModel
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SessionEstablishmentSerializer
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishment
 
 class SessionEstablishmentMapperTest {
@@ -40,16 +36,7 @@ class SessionEstablishmentMapperTest {
             data = encryptedData
         )
 
-        val encoded = sessionEstablishment.toDto().let { dto ->
-            uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper.create(
-                mapOf(
-                    EmbeddedCbor::class.java
-                        to EmbeddedCborSerializer(),
-                    SessionEstablishmentDto::class.java
-                        to SessionEstablishmentSerializer()
-                )
-            ).writeValueAsBytes(dto)
-        }
+        val encoded = sessionEstablishment.toDto().toCbor()
 
         val roundTripped = decodeSessionEstablishmentModel(encoded, logger).toSessionEstablishment()
 

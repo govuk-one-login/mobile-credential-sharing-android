@@ -44,7 +44,7 @@ class DeviceResponseDto {
 
         @JsonProperty("status")
         val status: UInt
-    ): CborEncodable {
+    ) : CborEncodable {
         init {
             require(version.startsWith("1.")) {
                 "Received invalid device response version: $version"

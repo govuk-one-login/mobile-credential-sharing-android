@@ -21,7 +21,8 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.toDto
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
@@ -74,7 +75,7 @@ class VerifierCryptoServiceImpl(
         ) ?: error("Failed to generate ephemeral key pair")
 
         val coseKey = CoseKey.generateCoseKey(keyPair.public as ECPublicKey, logger)
-        val eReaderKeyTagged = EmbeddedCbor(coseKey.encodeCbor()).toCbor()
+        val eReaderKeyTagged = EmbeddedCbor(coseKey.toDto().toCbor()).toCbor()
 
         val sessionTranscript = deriveSessionTranscript(
             cborBase64Url = qrCodeData,
@@ -139,7 +140,7 @@ class VerifierCryptoServiceImpl(
     override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = DeviceRequest(
         version = "1.0",
         docRequests = listOf(DocRequest(itemsRequest))
-    ).encodeCbor().also {
+    ).toDto().toCbor().also {
         logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
     }
 

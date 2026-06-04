@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.SecurityDeserializerStub.embeddedCoseKey
 import uk.gov.onelogin.sharing.cryptoService.SecurityDeserializerStub.validCoseKey
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
 
 class DefaultCoseKeyToStringTest {
     private val logger = SystemLogger()
@@ -19,7 +19,7 @@ class DefaultCoseKeyToStringTest {
         val actual = converter.convert(validCoseKey)
 
         assertEquals(
-            embeddedCoseKey.encodeCbor().toHexString(),
+            embeddedCoseKey.toCbor().toHexString(),
             actual
         )
 

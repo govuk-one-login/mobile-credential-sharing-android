@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.cryptoService.CoseKeyStub.D_3_1_EDEVICE_KEY_HEX
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeSessionEstablishmentModel
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
 
 class CoseKeyTest {
@@ -99,7 +99,7 @@ class CoseKeyTest {
     fun `CoseKey encodes to definite-length map matching D_3_1 EDeviceKey`() {
         assertEquals(
             D_3_1_EDEVICE_KEY_HEX,
-            D_3_1_EDEVICE_KEY.encodeCbor().toHexString()
+            D_3_1_EDEVICE_KEY.toDto().toCbor().toHexString()
         )
     }
 }

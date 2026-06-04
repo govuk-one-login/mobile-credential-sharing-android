@@ -4,7 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 
 /**
@@ -15,15 +15,8 @@ class DefaultCoseKeyToString(private val logger: Logger) : CoseKeyToString {
     /**
      * @return A hexadecimal string. This is the [EmbeddedCbor] padding of the provided [CoseKey].
      */
-    override fun convert(key: CoseKey): String = key
-        .encodeCbor()
-        .let(::EmbeddedCbor)
+    override fun convert(key: CoseKey): String = EmbeddedCbor(key.toDto().toCbor())
         .toCbor()
         .toHexString()
-        .also {
-            logger.debug(
-                logTag,
-                "Encoded public CoseKey into EReaderKeyBytes: $it"
-            )
-        }
+        .also { logger.debug(logTag, "Encoded public CoseKey into EReaderKeyBytes: $it") }
 }

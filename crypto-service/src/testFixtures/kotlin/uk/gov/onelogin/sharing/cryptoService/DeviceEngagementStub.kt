@@ -9,7 +9,6 @@ import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.bleOptionNodes
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.SECURITY
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.securityNodes
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.CoseKeySerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceEngagementSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceRetrievalMethodSerializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SecuritySerializer
@@ -26,8 +25,7 @@ object DeviceEngagementStub {
         DeviceEngagement::class.java to DeviceEngagementSerializer(),
         DeviceRetrievalMethod::class.java to DeviceRetrievalMethodSerializer(),
         BleOptions::class.java to BleOptionsSerializer(),
-        Security::class.java to SecuritySerializer(),
-        CoseKey::class.java to CoseKeySerializer()
+        Security::class.java to SecuritySerializer()
     )
 
     const val ENGAGEMENT_EXPECTED_BASE_64 =
