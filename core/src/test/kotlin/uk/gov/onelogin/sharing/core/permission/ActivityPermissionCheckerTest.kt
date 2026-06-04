@@ -75,7 +75,6 @@ class ActivityPermissionCheckerTest {
         )
     }
 
-
     private fun processSetUp(input: PermissionCheckerParameters.Input) {
         every {
             ActivityCompat.checkSelfPermission(activity, input.permission)
