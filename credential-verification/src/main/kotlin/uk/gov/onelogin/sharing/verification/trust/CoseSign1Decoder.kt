@@ -34,7 +34,10 @@ internal object CoseSign1Decoder {
 
         val protectedHeader = (root[INDEX_PROTECTED] as? BinaryNode)?.binaryValue()
             ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
-        val unprotected = (root[INDEX_UNPROTECTED] as? BinaryNode)?.binaryValue()
+        val unprotected = when (val node = root[INDEX_UNPROTECTED]) {
+            is BinaryNode -> node.binaryValue()
+            else -> cborMapper.writeValueAsBytes(node)
+        }
         val payload = (root[INDEX_PAYLOAD] as? BinaryNode)?.binaryValue()
         val signature = (root[INDEX_SIGNATURE] as? BinaryNode)?.binaryValue()
             ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
