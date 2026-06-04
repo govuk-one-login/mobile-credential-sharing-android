@@ -1,8 +1,9 @@
 package uk.gov.onelogin.sharing.core.permission
 
-import android.Manifest
 import android.app.Activity
 import androidx.core.app.ActivityCompat
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValuesIn
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameters
 import io.mockk.every
 import io.mockk.mockk
@@ -11,15 +12,18 @@ import io.mockk.unmockkStatic
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
 import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckResultMatchers.hasPermission
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerParameters.Companion.markedDeniedPermissionInputs
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckerParameters.Companion.unmarkedDeniedPermissionInputs
 
 @RunWith(RobolectricTestParameterInjector::class)
 class ActivityPermissionCheckerTest {
     private val activity: Activity = mockk()
-    private val permission = Manifest.permission.CAMERA
 
     private val markerStore by lazy {
         ListPermissionStore()
@@ -49,20 +53,39 @@ class ActivityPermissionCheckerTest {
     @TestParameters(valuesProvider = PermissionCheckerParameters::class)
     @Test
     fun `Permission checker logic`(input: PermissionCheckerParameters.Input) = runTest {
+        processSetUp(input)
+
+        assertThat(
+            checker.checkPermissions(input.permission),
+            input.assertion
+        )
+    }
+
+    @Test
+    fun `Failure results contain the relevant permission`(
+        @TestParameter input: PermissionCheckerParameters.Input = testValuesIn(
+            markedDeniedPermissionInputs + unmarkedDeniedPermissionInputs
+        )
+    ) = runTest {
+        processSetUp(input)
+
+        assertThat(
+            checker.checkPermissions(input.permission),
+            contains(hasPermission(input.permission))
+        )
+    }
+
+
+    private fun processSetUp(input: PermissionCheckerParameters.Input) {
         every {
-            ActivityCompat.checkSelfPermission(activity, permission)
+            ActivityCompat.checkSelfPermission(activity, input.permission)
         } returns input.grantStatus
         every {
-            ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, input.permission)
         } returns input.shouldShowRationale
 
         if (input.wasMarked) {
-            markerStore.mark(permission)
+            markerStore.mark(input.permission)
         }
-
-        assertThat(
-            checker.checkPermissions(permission),
-            input.assertion
-        )
     }
 }
