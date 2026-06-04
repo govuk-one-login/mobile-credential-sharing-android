@@ -7,7 +7,8 @@ plugins {
 
 dependencies {
     listOf(
-        projects.credentialFormat
+        projects.credentialFormat,
+        libs.jackson.cbor
     ).forEach(::api)
 
     listOf(
