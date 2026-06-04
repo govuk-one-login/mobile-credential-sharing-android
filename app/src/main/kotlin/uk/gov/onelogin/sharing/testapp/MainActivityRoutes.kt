@@ -2,6 +2,9 @@ package uk.gov.onelogin.sharing.testapp
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import java.io.InputStream
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
@@ -34,11 +37,17 @@ object MainActivityRoutes {
                 )
         }
         configureVerifierAttributesSelection(navController)
-        configureVerifierJourneyWrapper(navController) { verificationRequest ->
+        configureVerifierJourneyWrapper(navController) { context, verificationRequest ->
+            val factory = CertificateFactory.getInstance("X.509")
+
+            // Example: Reading from assets
+            val stream: InputStream = context.assets.open("test_x509_certificate.der")
+            val certificate: X509Certificate =
+                factory.generateCertificate(stream) as X509Certificate
             verifyCredentialSdk.verifier(
                 VerifierConfig(
                     verificationRequest = verificationRequest,
-                    trustedCertificates = emptyList()
+                    trustedRootCertificate = certificate
                 )
             )
         }

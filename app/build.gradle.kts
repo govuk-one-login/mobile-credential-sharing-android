@@ -74,6 +74,20 @@ android {
 }
 
 dependencies {
+    modules {
+        listOf(
+            "hamcrest-library",
+            "hamcrest-core"
+        ).forEach { dependency ->
+            module("org.hamcrest:$dependency") {
+                replacedBy(
+                    "org.hamcrest:hamcrest",
+                    "Deprecated by the JavaHamcrest team"
+                )
+            }
+        }
+    }
+
     listOf(
         platform(libs.androidx.compose.bom),
         libs.androidx.navigation.testing,

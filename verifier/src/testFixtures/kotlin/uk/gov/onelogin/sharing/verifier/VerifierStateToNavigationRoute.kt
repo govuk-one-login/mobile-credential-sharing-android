@@ -5,6 +5,7 @@ import androidx.navigation.toRoute
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import org.hamcrest.CoreMatchers.instanceOf
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseStub
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
@@ -12,6 +13,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorRoute
+import uk.gov.onelogin.sharing.verifier.finish.FinishedVerifierJourneyRoute
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesRoute
@@ -149,6 +151,18 @@ class VerifierStateToNavigationRoute : TestParametersValuesProvider() {
                     UnrecoverableVerifierErrorRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<UnrecoverableVerifierErrorRoute>()
+                )
+            },
+            Triple(
+                "Successfully finishes the verifier journey",
+                VerifierSessionState.Complete.Success(
+                    DeviceResponseStub.successWithDocuments
+                )
+            ) {
+                instanceOf<FinishedVerifierJourneyRoute>(
+                    FinishedVerifierJourneyRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<FinishedVerifierJourneyRoute>()
                 )
             }
         )

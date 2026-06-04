@@ -1,15 +1,18 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
+@Serializable
 data class SharingVerifiableDocumentWithPresentation(
     override val docType: String,
+    @Serializable(with = SharingIssuerSignedSerializer::class)
     override val issuerSigned: IssuerSigned,
+    @Serializable(with = SharingDeviceSignedSerializer::class)
     override val deviceSigned: DeviceSigned
-) : SharingVerifiableDocument(docType, issuerSigned),
-    VerifiableDocument.WithPresentation {
+) : VerifiableDocument.WithPresentation {
 
     constructor(
         document: VerifiableDocument,
@@ -23,7 +26,6 @@ data class SharingVerifiableDocumentWithPresentation(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
 
         other as SharingVerifiableDocumentWithPresentation
 
@@ -35,8 +37,7 @@ data class SharingVerifiableDocumentWithPresentation(
     }
 
     override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + docType.hashCode()
+        var result = docType.hashCode()
         result = 31 * result + issuerSigned.hashCode()
         result = 31 * result + deviceSigned.hashCode()
         return result

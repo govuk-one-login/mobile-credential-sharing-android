@@ -40,6 +40,20 @@ val testImplementation by configurations
 
 
 dependencies {
+    modules {
+        listOf(
+            "hamcrest-library",
+            "hamcrest-core"
+        ).forEach { dependency ->
+            module("org.hamcrest:$dependency") {
+                replacedBy(
+                    "org.hamcrest:hamcrest",
+                    "Deprecated by the JavaHamcrest team"
+                )
+            }
+        }
+    }
+
     platform(libs.findLibrary("androidx.compose.bom").get()).let {
         androidTestImplementation(it)
         implementation(it)

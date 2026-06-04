@@ -1,8 +1,10 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
+@Serializable
 open class SharingVerifiableDocument(
     override val docType: String,
     override val issuerSigned: IssuerSigned

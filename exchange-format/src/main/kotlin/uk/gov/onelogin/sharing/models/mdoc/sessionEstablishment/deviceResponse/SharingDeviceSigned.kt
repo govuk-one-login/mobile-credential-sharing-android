@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
 /**
@@ -15,6 +16,7 @@ import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
  * @property deviceNameSpacesBytes The Tag-24-wrapped DeviceNameSpaces CBOR bytes (empty for our implementation).
  * @property deviceSignature The DeviceAuth object containing the COSE_Sign1 deviceSignature.
  */
+@Serializable
 data class SharingDeviceSigned(
     override val deviceNameSpacesBytes: ByteArray,
     override val deviceSignature: ByteArray

@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.ui.impl
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
+import java.security.cert.X509Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
@@ -13,6 +14,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
+import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 
 /**
  * Helper function to create a [CredentialSharingAppGraph] instance for use in tests.
@@ -45,8 +47,15 @@ fun createTestHolderGraph(
 
 fun createTestVerifierGraph(
     appGraph: CredentialSharingAppGraph,
+    credentialVerificationGraph: CredentialVerificationGraph,
     config: VerifierConfig = verifierConfigStub
 ): VerifyCredentialGraph = createGraphFactory<VerifyCredentialGraph.Factory>().create(
     appGraph = appGraph,
+    credentialVerificationGraph = credentialVerificationGraph,
     verifierConfig = config
 )
+
+fun createTestCredentialVerificationGraph(
+    certificate: X509Certificate
+): CredentialVerificationGraph = createGraphFactory<CredentialVerificationGraph.Factory>()
+    .create(certificate)

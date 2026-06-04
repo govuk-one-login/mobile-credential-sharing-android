@@ -1,0 +1,30 @@
+# `pipx install -e . --include-deps` installs an editable version of this python project with it's
+# necessary dependencies in a managed virtual environment via `pipx`.
+
+# Installs a `generate-mock-credential` command as per [project.scripts].
+
+[build-system]
+requires = [
+    "setuptools >= 77.0.3",
+    "setuptools-git-versioning>=3.0,<4"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mobile-credential-sharing-android-python-scripts"
+dependencies = [
+    "cbor2",
+    "cryptography",
+]
+dynamic = ["version"]
+
+[console_scripts]
+
+[project.scripts]
+generate-mock-credential = "mock_credential:generate_mock_credential_entry_point"
+
+[tool.setuptools-git-versioning]
+enabled = true
+
+[tool.setuptools]
+package-dir = {"mock_credential" = "scripts/mock_credential"}

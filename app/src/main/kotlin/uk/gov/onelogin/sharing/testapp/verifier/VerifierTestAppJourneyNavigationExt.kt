@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.testapp.verifier
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -35,15 +37,16 @@ object VerifierTestAppJourneyNavigationExt {
 
     internal fun NavGraphBuilder.configureVerifierJourneyWrapper(
         navController: NavController,
-        requestToVerifier: (VerificationRequest) -> CredentialVerifier
+        requestToVerifier: (Context, VerificationRequest) -> CredentialVerifier
     ) {
         composable<VerifierTestAppJourney>(
             typeMap = mapOf(
                 typeOf<VerificationRequest>() to VerificationRequestType
             )
         ) { navBackStackEntry ->
+            val context = LocalContext.current
             val arguments: VerifierTestAppJourney = navBackStackEntry.toRoute()
-            val verifier by produceCredentialVerifier(arguments.request, requestToVerifier)
+            val verifier by produceCredentialVerifier(context, arguments.request, requestToVerifier)
             val scope = rememberCoroutineScope { Dispatchers.Main }
 
             Column(
@@ -68,10 +71,11 @@ object VerifierTestAppJourneyNavigationExt {
 
     @Composable
     private fun produceCredentialVerifier(
+        context: Context,
         request: VerificationRequest,
-        requestToVerifier: (VerificationRequest) -> CredentialVerifier,
+        requestToVerifier: (Context, VerificationRequest) -> CredentialVerifier,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
     ) = produceState<CredentialVerifier?>(null, request, requestToVerifier) {
-        value = withContext(dispatcher) { requestToVerifier(request) }
+        value = withContext(dispatcher) { requestToVerifier(context, request) }
     }
 }

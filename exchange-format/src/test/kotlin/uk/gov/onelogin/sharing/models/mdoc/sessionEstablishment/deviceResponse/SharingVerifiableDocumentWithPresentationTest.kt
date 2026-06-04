@@ -95,17 +95,4 @@ class SharingVerifiableDocumentWithPresentationTest {
             interfaceInstance.deviceSigned
         )
     }
-
-    @Test
-    fun `Verifiable documents can be passed in as a constructor property`() {
-        val secondDocument = SharingVerifiableDocumentWithPresentation(
-            document = document,
-            deviceSigned = deviceSigned
-        )
-
-        assertEquals(
-            document,
-            secondDocument
-        )
-    }
 }

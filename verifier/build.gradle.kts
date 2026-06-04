@@ -1,6 +1,7 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library
+        libs.plugins.templates.android.library,
+        libs.plugins.kotlin.serialization
     ).forEach { alias(it) }
 }
 
@@ -48,7 +49,8 @@ dependencies {
     ).forEach(::api)
 
     listOf(
-        libs.metro.viewmodel.compose
+        libs.metro.viewmodel.compose,
+        libs.kotlinx.serialization.json
     ).forEach(::implementation)
 
     implementation(libs.androidx.browser)

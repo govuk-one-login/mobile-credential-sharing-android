@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,10 +16,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
 import org.junit.Assert.assertArrayEquals
 import org.junit.Before
 import org.junit.Rule
@@ -34,7 +39,6 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.t
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.DecryptDeviceResponseException
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
-import uk.gov.onelogin.sharing.cryptoService.verifier.DeviceResponseStub
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
@@ -42,6 +46,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseStub
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -54,20 +59,29 @@ import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnverifiableDocument
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionImpl
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CancellableVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.CompleteVerifierSessionStates
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.UncancellableVerifierSessionStates
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.SuccessMatchers.hasDocumentCount
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.SuccessMatchers.hasDocuments
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isConnecting
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
+import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isSuccess
+import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocumentMatchers.hasDocType
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -106,6 +120,9 @@ class VerifierOrchestratorTest {
     private val centralBluetoothTransport = FakeCentralBluetoothTransport()
     private val fakeCryptoService = FakeVerifierCryptoService()
     private var verifierCryptoService: VerifierCryptoService = fakeCryptoService
+    private var documentVerifier: DocumentVerifier = DocumentVerifier { _, _ ->
+        VerificationResult.Success
+    }
 
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
 
@@ -118,7 +135,8 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = verifierCryptoService
+            verifierCryptoService = verifierCryptoService,
+            documentVerifier = documentVerifier
         )
     }
 
@@ -487,7 +505,8 @@ class VerifierOrchestratorTest {
                 centralBluetoothTransport = centralBluetoothTransport,
                 appCoroutineScope = scope,
                 barcodeParser = FakeQrParser(),
-                verifierCryptoService = failingCryptoService
+                verifierCryptoService = failingCryptoService,
+                documentVerifier = documentVerifier
             )
             backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
             orchestrator.processQrCode(VALID_MDOC_URI)
@@ -518,7 +537,8 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = failingCryptoService
+            verifierCryptoService = failingCryptoService,
+            documentVerifier = documentVerifier
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)
@@ -557,7 +577,8 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport = centralBluetoothTransport,
             appCoroutineScope = scope,
             barcodeParser = FakeQrParser(),
-            verifierCryptoService = failingCryptoService
+            verifierCryptoService = failingCryptoService,
+            documentVerifier = documentVerifier
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)
@@ -713,38 +734,51 @@ class VerifierOrchestratorTest {
         }
     }
 
+    /**
+     * DCMAW-20270: AC2: The [DeviceResponse] is only emitted when all documents return
+     * [VerificationResult.Success]; it is never emitted if any document fails verification.
+     */
     @Test
-    fun `decrypts DeviceResponse and transitions to Success`() = runTest {
-        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
-        orchestrator.start()
-        orchestrator.processQrCode(VALID_MDOC_URI)
+    fun `Transitions to Success when successfully decrypting and verifying a DeviceResponse`() =
+        runTest {
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
+            orchestrator.processQrCode(VALID_MDOC_URI)
 
-        centralBluetoothTransport.emitState(
-            CentralBluetoothState.Message(
-                SERVER_2_CLIENT_UUID,
-                CborMapper.default.writeValueAsBytes(
-                    fakeCryptoService.sessionData.toDto()
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(
+                    SERVER_2_CLIENT_UUID,
+                    CborMapper.default.writeValueAsBytes(
+                        fakeCryptoService.sessionData.toDto()
+                    )
                 )
             )
-        )
 
-        advanceUntilIdle()
+            advanceUntilIdle()
 
-        assertEquals(1u, fakeCryptoService.lastDecryptCounter)
+            assertEquals(1u, fakeCryptoService.lastDecryptCounter)
 
-        val context = sessionFactory.getCurrentSession().cryptoContext
-        assertEquals(2u, context?.decryptCounter)
+            val context = sessionFactory.getCurrentSession().cryptoContext
+            assertEquals(2u, context?.decryptCounter)
 
-        assertThat(
-            orchestrator.verifierSessionState.value,
-            instanceOf(VerifierSessionState.Complete.Success::class.java)
-        )
-        val successState =
-            orchestrator.verifierSessionState.value as VerifierSessionState.Complete.Success
-        assertEquals(1, successState.data.documents.size)
-        assertEquals("org.iso.18013.5.1.mDL", successState.data.documents.first().docType)
-        assertEquals(1, centralBluetoothTransport.stopCalls)
-    }
+            orchestrator.verifierSessionState.test {
+                assertThat(
+                    expectMostRecentItem(),
+                    isSuccess(
+                        allOf(
+                            hasDocumentCount(1),
+                            hasDocuments(
+                                contains(
+                                    hasDocType("org.iso.18013.5.1.mDL")
+                                )
+                            )
+                        )
+                    )
+                )
+            }
+
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+        }
 
     @Test
     fun `DeviceResponse with error status transitions to Failed - DeviceRequestProcessingError`(
@@ -806,9 +840,17 @@ class VerifierOrchestratorTest {
             assertEquals(1, centralBluetoothTransport.stopCalls)
         }
 
+    /**
+     * DCMAW-20270: AC1: After a [DeviceResponse] is received, the session transitions to
+     * [VerifierSessionState.Verifying] before any call to [DocumentVerifier.verifyDocument] is
+     * made.
+     *
+     * Note that this is the last step before performing document verification.
+     */
     @Test
     fun `DeviceResponse with empty documents list transitions to Failed - DocumentNotReturned`() =
         runTest {
+            documentVerifier = mockk(relaxed = true)
             fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
                 status = Status.OK,
                 documents = emptyList()
@@ -834,8 +876,16 @@ class VerifierOrchestratorTest {
                 isFailed(hasReason(equalTo(SessionErrorReason.DocumentNotReturned)))
             )
             assertEquals(1, centralBluetoothTransport.stopCalls)
+
+            verify(exactly = 0) {
+                documentVerifier.verifyDocument(any(), any())
+            }
         }
 
+    /**
+     * DCMAW-20270: AC2: The [DeviceResponse] is only emitted when all documents return
+     * [VerificationResult.Success]; it is never emitted if any document fails verification.
+     */
     @Test
     fun `DeviceResponse with multiple documents passes all through to Success`() = runTest {
         val secondDocument = DeviceResponseStub.document.copy(docType = "org.iso.18013.5.1.mID")
@@ -861,9 +911,23 @@ class VerifierOrchestratorTest {
 
         val successState =
             orchestrator.verifierSessionState.value as VerifierSessionState.Complete.Success
-        assertEquals(2, successState.data.documents.size)
-        assertEquals("org.iso.18013.5.1.mDL", successState.data.documents[0].docType)
-        assertEquals("org.iso.18013.5.1.mID", successState.data.documents[1].docType)
+
+        assertThat(
+            successState,
+            isSuccess(
+                allOf(
+                    hasDocumentCount(
+                        fakeCryptoService.decryptDeviceResponseToReturn.documentCount
+                    ),
+                    hasDocuments(
+                        contains(
+                            hasDocType("org.iso.18013.5.1.mDL"),
+                            hasDocType("org.iso.18013.5.1.mID")
+                        )
+                    )
+                )
+            )
+        )
     }
 
     @Test
@@ -898,6 +962,73 @@ class VerifierOrchestratorTest {
 
         val context = sessionFactory.getCurrentSession().cryptoContext
         assertEquals(1u, context?.decryptCounter)
+    }
+
+    /**
+     * DCMAW-20270: AC3: A [DeviceResponse] containing multiple documents fails immediately when
+     * the first document produces [VerificationResult.Failure]; remaining documents are not
+     * verified.
+     *
+     * DCMAW-20270: AC6: The [uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript]
+     * is passed from the Sharing SDK session context directly to [DocumentVerifier.verifyDocument]
+     * without transformation.
+     *
+     * DCMAW-20270: AC7: When the session transitions to [Failed], the [VerificationError]
+     * reason from [VerificationResult.Failure] is available on the Failed state.
+     */
+    @Test
+    fun `Doesn't verify additional documents after a verification failure`(
+        @TestParameter error: VerificationError
+    ) = runTest {
+        documentVerifier = mockk(relaxed = true)
+        every {
+            documentVerifier.verifyDocument(DeviceResponseStub.document, any())
+        } throws VerificationResult.Failure(error)
+
+        val secondDocument = DeviceResponseStub.document.copy(docType = "org.iso.18013.5.1.mID")
+        fakeCryptoService.decryptDeviceResponseToReturn = DeviceResponse(
+            status = Status.OK,
+            documents = listOf(DeviceResponseStub.document, secondDocument)
+        )
+
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(
+                    fakeCryptoService.sessionData.toDto()
+                )
+            )
+        )
+
+        advanceUntilIdle()
+
+        orchestrator.verifierSessionState.test {
+            assertThat(
+                expectMostRecentItem(),
+                isFailed(
+                    hasReason(
+                        isUnverifiableDocument(error)
+                    )
+                )
+            )
+        }
+
+        verify(exactly = 1) {
+            documentVerifier.verifyDocument(
+                DeviceResponseStub.document,
+                sessionFactory.getCurrentSession().cryptoContext?.sessionTranscriptBytes
+            )
+        }
+        verify(exactly = 0) {
+            documentVerifier.verifyDocument(
+                secondDocument,
+                sessionFactory.getCurrentSession().cryptoContext?.sessionTranscriptBytes
+            )
+        }
     }
 
     class ErrorStatusProvider : TestParameterValuesProvider() {

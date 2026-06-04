@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
+import io.mockk.mockk
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
@@ -15,7 +16,7 @@ object VerifierConfigStub {
             documentType = "mdoc",
             attributeGroup = AttributeGroup(emptyMap())
         ),
-        trustedCertificates = emptyList()
+        trustedRootCertificate = mockk()
     )
 
     val photoAndAgeOver21Config = VerifierConfig(
@@ -28,7 +29,7 @@ object VerifierConfigStub {
                 )
             )
         ),
-        trustedCertificates = emptyList()
+        trustedRootCertificate = mockk()
     )
 
     val nameRetainAndAgeOver18Config = VerifierConfig(
@@ -42,6 +43,6 @@ object VerifierConfigStub {
                 )
             )
         ),
-        trustedCertificates = emptyList()
+        trustedRootCertificate = mockk()
     )
 }

@@ -1,6 +1,7 @@
 plugins {
     listOf(
-        libs.plugins.templates.kotlin.library
+        libs.plugins.templates.kotlin.library,
+        libs.plugins.kotlin.serialization
     ).forEach { alias(it) }
 }
 
@@ -8,6 +9,10 @@ dependencies {
     listOf(
         projects.credentialFormat
     ).forEach(::api)
+
+    listOf(
+        libs.kotlinx.serialization.json
+    ).forEach(::implementation)
 
     listOf(
         libs.junit,

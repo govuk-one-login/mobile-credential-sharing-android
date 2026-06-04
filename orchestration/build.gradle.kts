@@ -36,7 +36,8 @@ dependencies {
         projects.bluetooth,
         projects.core,
         projects.cameraService,
-        projects.cryptoService
+        projects.cryptoService,
+        projects.credentialVerification
     ).forEach(::api)
 
     listOf(projects.exchangeFormat)
@@ -54,8 +55,14 @@ dependencies {
         libs.junit,
         projects.cameraService,
         projects.exchangeFormat,
-        testFixtures(projects.cryptoService)
+        testFixtures(projects.cryptoService),
+        testFixtures(projects.credentialFormat),
+        testFixtures(projects.exchangeFormat)
     ).forEach(::testFixturesApi)
+
+    listOf(
+        libs.mockk
+    ).forEach(::testFixturesImplementation)
 
     listOf(
         libs.bundles.androidx.camera,

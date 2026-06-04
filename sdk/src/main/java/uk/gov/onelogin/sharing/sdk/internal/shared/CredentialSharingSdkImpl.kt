@@ -12,6 +12,7 @@ import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 import uk.gov.onelogin.sharing.sdk.internal.presenter.PresentCredentialSdkImpl
 import uk.gov.onelogin.sharing.sdk.internal.verifier.VerifyCredentialSdkImpl
+import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 
 class CredentialSharingSdkImpl(
     applicationContext: Context,
@@ -38,6 +39,8 @@ class CredentialSharingSdkImpl(
     override val verifyCredentialSdk: VerifyCredentialSdk =
         VerifyCredentialSdkImpl(
             appGraph = appGraph,
-            verifierGraphFactory = createGraphFactory<VerifyCredentialGraph.Factory>()
+            verifierGraphFactory = createGraphFactory<VerifyCredentialGraph.Factory>(),
+            credentialVerificationGraphFactory =
+                createGraphFactory<CredentialVerificationGraph.Factory>()
         )
 }
