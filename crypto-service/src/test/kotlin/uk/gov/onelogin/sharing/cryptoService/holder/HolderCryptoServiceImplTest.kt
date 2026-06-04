@@ -13,7 +13,6 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DO
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.toDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
@@ -63,7 +62,7 @@ class HolderCryptoServiceImplTest {
 
         val expectedCborBytes = DeviceResponse(
             documents = documents
-        ).toDto().encodeCbor()
+        ).toDto().toCbor()
         val expectedSessionData = SessionData(data = expectedEncrypted).toDto().toCbor()
         assertArrayEquals(expectedSessionData, result)
         assertArrayEquals(skDevice, fakeSessionSecurity.lastEncryptKey)

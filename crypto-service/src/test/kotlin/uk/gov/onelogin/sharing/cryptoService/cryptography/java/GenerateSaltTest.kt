@@ -6,7 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_TRANSCRIPT
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SALT
 
@@ -25,7 +24,7 @@ class GenerateSaltTest {
     @Test
     fun `salt input is tag24 bstr of transcript`() {
         val transcriptBytes = VALID_TRANSCRIPT.hexToByteArray()
-        val saltInput = EmbeddedCbor(transcriptBytes).encodeCbor()
+        val saltInput = EmbeddedCbor(transcriptBytes).toCbor()
 
         assertEquals(0xD8.toByte(), saltInput[0])
         assertEquals(0x18.toByte(), saltInput[1])

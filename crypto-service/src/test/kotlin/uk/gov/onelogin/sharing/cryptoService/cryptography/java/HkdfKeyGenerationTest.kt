@@ -6,7 +6,7 @@ import kotlin.test.assertContentEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.getSharedSecret
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.SHARED_SECRET_BYTES
@@ -16,8 +16,8 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_
 
 class HkdfKeyGenerationTest {
 
-    private val skDeviceAsBytes = "SKDevice".encodeCbor()
-    private val skReaderAsBytes = "SKReader".encodeCbor()
+    private val skDeviceAsBytes = CborMapper.default.writeValueAsBytes("SKDevice")
+    private val skReaderAsBytes = CborMapper.default.writeValueAsBytes("SKReader")
 
     @Test
     fun `when generating key with role as SkDevice, matches binary file resource`() {

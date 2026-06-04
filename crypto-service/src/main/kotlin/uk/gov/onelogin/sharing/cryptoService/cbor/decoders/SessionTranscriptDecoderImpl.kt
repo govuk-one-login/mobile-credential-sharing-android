@@ -7,7 +7,6 @@ import java.io.IOException
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.base64Decode
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 
@@ -45,7 +44,7 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
         }
 
         val deviceEngagementBytes = cborBase64Url.base64Decode()
-        val taggedDevEng = EmbeddedCbor(deviceEngagementBytes).encodeCbor()
+        val taggedDevEng = EmbeddedCbor(deviceEngagementBytes).toCbor()
 
         val encodedSessionTranscript = createCborArray(
             taggedDeviceEngagement = taggedDevEng,

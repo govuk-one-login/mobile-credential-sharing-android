@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborEncodable
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto.DeviceResponseDTO
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
@@ -42,7 +44,7 @@ class DeviceResponseDto {
 
         @JsonProperty("status")
         val status: UInt
-    ) {
+    ) : CborEncodable {
         init {
             require(version.startsWith("1.")) {
                 "Received invalid device response version: $version"

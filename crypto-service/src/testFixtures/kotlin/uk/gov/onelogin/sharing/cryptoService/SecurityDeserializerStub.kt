@@ -4,7 +4,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SecurityDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 
@@ -13,7 +13,7 @@ object SecurityDeserializerStub {
     private val logger = SystemLogger()
     private val keyPair = generateValidPublicKey()
     val validCoseKey = CoseKey.generateCoseKey(keyPair, logger)
-    val embeddedCoseKey = EmbeddedCbor(validCoseKey.encodeCbor())
+    val embeddedCoseKey = EmbeddedCbor(validCoseKey.toDto().toCbor())
 
     val expectedCoseKey = CoseKeyDto(
         keyType = 2,

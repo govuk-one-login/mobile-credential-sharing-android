@@ -14,7 +14,6 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
@@ -76,7 +75,7 @@ class DeviceResponseDecoderImplTest {
             documents = listOf(createDocument(items = listOf(itemBytes1, itemBytes2)))
         )
 
-        val encoded = original.toDto().encodeCbor()
+        val encoded = original.toDto().toCbor()
         val decoded = decoder.decode(encoded)
 
         assertEquals("1.0", decoded.version)
@@ -89,7 +88,7 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `decodes nameSpaces items as raw byte arrays`() {
-        val encoded = createDeviceResponse().toDto().encodeCbor()
+        val encoded = createDeviceResponse().toDto().toCbor()
         val decoded = decoder.decode(encoded)
 
         val items = decoded.documents!!.first().issuerSigned.nameSpaces!![namespace]!!
@@ -106,7 +105,7 @@ class DeviceResponseDecoderImplTest {
             )
         )
 
-        val encoded = original.toDto().encodeCbor()
+        val encoded = original.toDto().toCbor()
         val decoded = decoder.decode(encoded)
 
         val documents = decoded.documents!!
@@ -117,7 +116,7 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `decodes DeviceResponse with null documents`() {
-        val encoded = createDeviceResponse(documents = null).toDto().encodeCbor()
+        val encoded = createDeviceResponse(documents = null).toDto().toCbor()
         val decoded = decoder.decode(encoded)
 
         assertEquals(Status.OK, decoded.status)
@@ -129,7 +128,7 @@ class DeviceResponseDecoderImplTest {
         val encoded = createDeviceResponse(
             documents = null,
             status = Status.GENERAL_ERROR
-        ).toDto().encodeCbor()
+        ).toDto().toCbor()
         val decoded = decoder.decode(encoded)
 
         assertEquals(Status.GENERAL_ERROR, decoded.status)
@@ -156,7 +155,7 @@ class DeviceResponseDecoderImplTest {
 
     @Test
     fun `logs success message on successful decode`() {
-        val encoded = createDeviceResponse(documents = null).toDto().encodeCbor()
+        val encoded = createDeviceResponse(documents = null).toDto().toCbor()
         decoder.decode(encoded)
 
         assert(logger.contains("DeviceResponse decoded successfully"))
@@ -166,7 +165,7 @@ class DeviceResponseDecoderImplTest {
     fun `decodes successfully when payload contains unsupported optional fields`() {
         val encoded = createDeviceResponse(
             documentErrors = mapOf(docType to Status.GENERAL_ERROR)
-        ).toDto().encodeCbor()
+        ).toDto().toCbor()
         val decoded = decoder.decode(encoded)
 
         assertEquals(Status.OK, decoded.status)

@@ -6,6 +6,7 @@ import java.util.Base64
 import java.util.UUID
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
+import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
@@ -26,7 +27,7 @@ class EngagementGenerator(private val logger: Logger) : Engagement {
      *   data
      */
     override fun qrCodeEngagement(key: CoseKey, uuid: UUID): String {
-        val eDeviceKey = key.encodeCbor()
+        val eDeviceKey = key.toDto().toCbor()
         val securityObject = Security(
             cipherSuiteIdentifier = 1,
             eDeviceKeyBytes = eDeviceKey

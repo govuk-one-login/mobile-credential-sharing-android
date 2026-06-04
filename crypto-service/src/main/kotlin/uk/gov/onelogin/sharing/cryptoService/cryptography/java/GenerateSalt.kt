@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.cryptography.java
 
 import java.security.MessageDigest
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.HASH_ALGORITHM_SHA256
 
@@ -12,7 +11,7 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.HASH_ALGORIT
  */
 
 fun generateSalt(byteArray: ByteArray): ByteArray {
-    val saltInput = EmbeddedCbor(byteArray).encodeCbor()
+    val saltInput = EmbeddedCbor(byteArray).toCbor()
     val result = MessageDigest.getInstance(HASH_ALGORITHM_SHA256).digest(saltInput)
 
     return result

@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.cryptoService
 
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishment
 
