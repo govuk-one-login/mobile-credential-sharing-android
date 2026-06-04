@@ -1,6 +1,8 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library
+        libs.plugins.templates.android.library,
+        libs.plugins.kotlin.ksp,
+        libs.plugins.hilt.plugin,
     ).forEach { alias(it) }
 }
 
@@ -36,8 +38,17 @@ dependencies {
     ).forEach(::api)
 
     listOf(
-        libs.metro.viewmodel.compose
-    ).forEach(::implementation)
+        libs.hilt.android,
+        libs.metro.viewmodel.compose,
+        ).forEach(::implementation)
+
+    listOf(
+        libs.hilt.compiler
+    ).forEach(::ksp)
+
+    listOf(
+        libs.hilt.compiler
+    ).forEach(::kspAndroidTest)
 
     listOf(
         libs.com.google.test.parameter.injector
