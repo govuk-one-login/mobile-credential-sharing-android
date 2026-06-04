@@ -14,7 +14,7 @@ interface CredentialSharingAppGraph {
         fun create(
             @Provides applicationContext: Context,
             @Provides logger: Logger,
-            @Provides permissionCheckerV2: PermissionChecker
+            @Provides permissionChecker: PermissionChecker
         ): CredentialSharingAppGraph
     }
 

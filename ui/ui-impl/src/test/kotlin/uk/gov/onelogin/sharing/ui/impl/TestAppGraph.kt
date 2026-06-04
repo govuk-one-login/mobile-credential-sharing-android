@@ -34,7 +34,7 @@ fun createTestAppGraph(
     .create(
         applicationContext = applicationContext,
         logger = logger,
-        permissionCheckerV2 = checker
+        permissionChecker = checker
     )
 
 fun createTestHolderGraph(
