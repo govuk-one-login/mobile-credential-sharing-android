@@ -3,8 +3,6 @@ package uk.gov.onelogin.sharing.verification.format.cose
 /**
  * Represents a decoded COSE_Sign1 structure.
  *
- * This is a pure data class with no parsing logic. Decoding from CBOR
- * is the responsibility of the consuming module.
  *
  * @param protectedHeader The serialised protected header bytes.
  * @param unprotectedHeader The serialised unprotected header bytes (null when empty).

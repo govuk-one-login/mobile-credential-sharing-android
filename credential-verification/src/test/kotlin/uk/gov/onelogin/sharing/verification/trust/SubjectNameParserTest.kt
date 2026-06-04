@@ -11,24 +11,6 @@ import org.junit.Test
 class SubjectNameParserTest {
 
     @Test
-    fun `extracts country from subject`() {
-        val cert = certWithSubject("C=GB,CN=Test")
-
-        val result = parseSubjectName(cert)
-
-        assertThat(result[OID_COUNTRY], equalTo("GB"))
-    }
-
-    @Test
-    fun `extracts state from subject`() {
-        val cert = certWithSubject("ST=England,C=GB,CN=Test")
-
-        val result = parseSubjectName(cert)
-
-        assertThat(result[OID_STATE_OR_PROVINCE], equalTo("England"))
-    }
-
-    @Test
     fun `returns empty map when no matching attributes`() {
         val cert = certWithSubject("CN=Test,O=Example")
 
@@ -38,13 +20,13 @@ class SubjectNameParserTest {
     }
 
     @Test
-    fun `extracts both country and state`() {
-        val cert = certWithSubject("C=GB,ST=England,CN=Test")
+    fun `extracts country and state`() {
+        val cert = certWithSubject("C=GB,ST=London,CN=Test")
 
         val result = parseSubjectName(cert)
 
         assertThat(result[OID_COUNTRY], equalTo("GB"))
-        assertThat(result[OID_STATE_OR_PROVINCE], equalTo("England"))
+        assertThat(result[OID_STATE_OR_PROVINCE], equalTo("London"))
     }
 
     private fun certWithSubject(dn: String): X509Certificate {

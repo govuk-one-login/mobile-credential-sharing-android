@@ -11,8 +11,9 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthR
 
 @OptIn(ExperimentalTime::class)
 class TrustVerifierTest {
+
     /**
-     * DCMAW-20267: [TrustVerifier] exposes 2 [TrustVerifier.verifyCOSESign1] methods with the
+     * DCMAW-20246: AC2: [TrustVerifier] exposes 2 [TrustVerifier.verifyCOSESign1] methods with the
      * correct signatures - the first method (attached payload) returning
      * an [IssuerAuthResult], with the second method (detached payload) returning nothing.
      */

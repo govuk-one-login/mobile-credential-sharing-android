@@ -5,12 +5,12 @@ import java.security.cert.X509Certificate
 private const val OID_SUBJECT_KEY_IDENTIFIER = "2.5.29.14"
 private const val OID_AUTHORITY_KEY_IDENTIFIER = "2.5.29.35"
 
-// ASN.1 DER tag identifiers (X.690 §8.1.2)
+// ASN.1 DER tag identifiers
 private const val TAG_OCTET_STRING = 0x04
 private const val TAG_SEQUENCE = 0x30
 private const val TAG_CONTEXT_SPECIFIC_0 = 0x80
 
-// ASN.1 DER length encoding (X.690 §8.1.3)
+// ASN.1 DER length encoding
 private const val LONG_FORM_FLAG = 0x80
 private const val LONG_FORM_LENGTH_MASK = 0x7F
 private const val BYTE_MASK = 0xFF

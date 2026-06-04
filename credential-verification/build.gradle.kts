@@ -7,9 +7,12 @@ plugins {
 
 dependencies {
     listOf(
-        projects.credentialFormat,
-        libs.jackson.cbor
+        projects.credentialFormat
     ).forEach(::api)
+
+    listOf(
+        libs.jackson.cbor
+    ).forEach(::implementation)
 
     listOf(
         libs.org.hamcrest,

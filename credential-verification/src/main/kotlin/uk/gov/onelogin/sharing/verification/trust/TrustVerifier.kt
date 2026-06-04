@@ -7,9 +7,11 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
 
 interface TrustVerifier {
+
     /**
-     * Decodes the COSE_Sign1 structure, extracts and orders the x5chain, and returns
-     * leaf certificate values and the MSO payload.
+     * Decodes the COSE_Sign1 structure, validates certs, extracts and orders the x5chain.
+     *
+     * Returns leaf certificate values and the MSO payload.
      *
      * @throws VerificationResult.Failure When [data] cannot be verified, with one of the proceeding
      * errors:

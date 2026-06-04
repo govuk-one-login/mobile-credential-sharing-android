@@ -432,8 +432,8 @@ class Iso18013DocumentVerifierTest {
         } returns IssuerAuthResult(
             certificateValidityPeriod = validityPeriod,
             msoPayload = encodedMSO,
-            subjectCountry = "US",
-            subjectState = null
+            subjectCountry = "GB",
+            subjectState = "London"
         )
     }
 }
