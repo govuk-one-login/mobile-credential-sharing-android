@@ -34,7 +34,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 @ContributesBinding(AppScope::class)
 @Suppress("TooManyFunctions")
@@ -46,7 +46,7 @@ class AndroidGattServerManager(
             GattServiceSpec.mdocService(it)
         )
     },
-    private val permissionsChecker: PermissionCheckerV2,
+    private val permissionsChecker: PermissionChecker,
     private val logger: Logger,
     private val gattWriter: GattWriter
 ) : GattServerManager {

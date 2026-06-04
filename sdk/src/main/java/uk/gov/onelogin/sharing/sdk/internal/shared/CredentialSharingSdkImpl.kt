@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.sdk.internal.shared
 import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 class CredentialSharingSdkImpl(
     applicationContext: Context,
     logger: Logger,
-    permissionChecker: PermissionCheckerV2
+    permissionChecker: PermissionChecker
 ) : CredentialSharingSdk {
 
     private val _appGraph: CredentialSharingAppGraph =

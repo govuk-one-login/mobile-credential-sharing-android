@@ -6,7 +6,7 @@ import dev.zacsweers.metro.createGraphFactory
 import java.security.cert.X509Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
@@ -29,7 +29,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 fun createTestAppGraph(
     applicationContext: Context = ApplicationProvider.getApplicationContext(),
     logger: Logger = SystemLogger(),
-    checker: PermissionCheckerV2 = PermissionCheckerV2 { emptyList() }
+    checker: PermissionChecker = PermissionChecker { emptyList() }
 ): CredentialSharingAppGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
     .create(
         applicationContext = applicationContext,

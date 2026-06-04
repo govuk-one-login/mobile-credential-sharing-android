@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleProvider
 import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -32,7 +32,7 @@ internal class AndroidBleAdvertiserTest {
     private lateinit var bleProvider: FakeBleProvider
     private lateinit var bleAdvertiser: AndroidBleAdvertiser
 
-    private val permissionResponse = mutableListOf<PermissionCheckerV2.PermissionCheckResult>()
+    private val permissionResponse = mutableListOf<PermissionChecker.PermissionCheckResult>()
 
     private val permissionChecker = FakePermissionChecker { permissionResponse }
     private val logger = SystemLogger()

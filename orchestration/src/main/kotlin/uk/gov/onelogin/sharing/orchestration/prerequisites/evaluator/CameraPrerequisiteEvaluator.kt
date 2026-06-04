@@ -10,7 +10,7 @@ import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.devicePolicyManager
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasUndeterminedPermissions
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.orchestration.prerequisites.evaluator.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 
@@ -19,8 +19,8 @@ import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 class CameraPrerequisiteEvaluator(
     private val context: Context,
     private val factory: ProcessCameraProviderFactory,
-    permissionChecker: PermissionCheckerV2
-) : PermissionCheckerV2 by permissionChecker,
+    permissionChecker: PermissionChecker
+) : PermissionChecker by permissionChecker,
     PrerequisiteEvaluator<CameraState> {
     override fun evaluate(): CameraState? = evaluatePermissions()
         ?: evaluateSupport()

@@ -7,7 +7,7 @@ import org.hamcrest.Matcher
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.instanceOf
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2.PermissionCheckResult
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult
 
 class PermissionCheckerParameters : TestParametersValuesProvider() {
     data class Input(
