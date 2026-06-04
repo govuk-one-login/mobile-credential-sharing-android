@@ -19,10 +19,12 @@ internal object CoseSign1Decoder {
 
     private val cborMapper: ObjectMapper = ObjectMapper(CBORFactory())
 
+    @Suppress("ThrowsCount")
     fun decode(data: ByteArray): CoseSign1 {
         val root = try {
             cborMapper.readTree(data) as? ArrayNode
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            println(e)
             null
         } ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
 
@@ -58,6 +60,7 @@ internal object CoseSign1Decoder {
         val node = try {
             cborMapper.readTree(headerBytes)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            println(e)
             return null
         }
         return extractX5ChainFromNode(node)

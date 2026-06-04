@@ -3,14 +3,6 @@ package uk.gov.onelogin.sharing.verification.trust
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import io.mockk.mockk
 import java.io.ByteArrayOutputStream
-import java.math.BigInteger
-import java.security.KeyPairGenerator
-import java.security.cert.X509Certificate
-import java.security.spec.ECGenParameterSpec
-import java.util.Date
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.notNullValue
-import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -50,7 +42,6 @@ class TrustVerifierImplTest {
 
     @Test
     fun `decodeCOSESign1 with wrong array size throws MALFORMED_ISSUER_AUTH`() {
-        // CBOR array with 3 elements
         val cbor = buildCborArray(3)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
@@ -62,7 +53,6 @@ class TrustVerifierImplTest {
 
     @Test
     fun `decodeCOSESign1 with no x5chain throws MALFORMED_ISSUER_AUTH`() {
-        // Valid 4-element array but no x5chain in headers
         val cbor = buildCoseSign1WithoutX5Chain()
         val coseSign1 = CoseSign1Decoder.decode(cbor)
 
@@ -71,14 +61,6 @@ class TrustVerifierImplTest {
         }
 
         assertThat(exception, hasError(VerificationError.MALFORMED_ISSUER_AUTH))
-    }
-
-    @Test
-    fun `orderCertificates with single cert returns it unchanged`() {
-        val cert = mockk<X509Certificate>(relaxed = true)
-        val result = verifier.orderCertificates(listOf(cert))
-        assertThat(result.size, equalTo(1))
-        assertThat(result[0], equalTo(cert))
     }
 
     private fun buildCborArray(size: Int): ByteArray {
@@ -97,14 +79,10 @@ class TrustVerifierImplTest {
         CBORFactory().createGenerator(output).use { gen ->
             @Suppress("DEPRECATION")
             gen.writeStartArray(4)
-            // protected header (empty map as bstr)
             gen.writeBinary(buildEmptyMapCbor())
-            // unprotected header (empty map)
             gen.writeStartObject()
             gen.writeEndObject()
-            // payload
             gen.writeBinary(byteArrayOf(0x01))
-            // signature
             gen.writeBinary(byteArrayOf(0x02))
             gen.writeEndArray()
         }

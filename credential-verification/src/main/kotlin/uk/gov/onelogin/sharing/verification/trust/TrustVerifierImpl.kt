@@ -34,12 +34,15 @@ class TrustVerifierImpl : TrustVerifier {
             notAfter = leaf.notAfter.toInstant().toKotlinInstant()
         )
 
+        val subjectName = parseSubjectName(leaf)
+
         return IssuerAuthResult(
             certificateValidityPeriod = validityPeriod,
             msoPayload = coseSign1.payload
                 ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH),
-            subjectCountry = "C",
-            subjectState = "ST"
+            subjectCountry = subjectName[OID_COUNTRY]
+                ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH),
+            subjectState = subjectName[OID_STATE_OR_PROVINCE]
         )
     }
 
@@ -48,30 +51,4 @@ class TrustVerifierImpl : TrustVerifier {
         publicKey: ECPublicKey,
         payload: ByteArray
     ): Unit = throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-
-    internal fun orderCertificates(certs: List<X509Certificate>): List<X509Certificate> {
-        if (certs.size <= 1) return certs
-
-        val skiToCert = mutableMapOf<String, X509Certificate>()
-        certs.forEach { cert ->
-            cert.subjectKeyIdentifierHex()?.let { skiToCert[it] = cert }
-        }
-
-        val leaf = certs.find { cert ->
-            val aki = cert.authorityKeyIdentifierHex() ?: return@find true
-            !skiToCert.containsKey(aki)
-        } ?: certs.first()
-
-        val ordered = mutableListOf(leaf)
-        var current = leaf
-        while (ordered.size < certs.size) {
-            val aki = current.authorityKeyIdentifierHex() ?: break
-            val parent = skiToCert[aki]
-            if (parent == null || ordered.contains(parent)) break
-            ordered.add(parent)
-            current = parent
-        }
-
-        return ordered
-    }
 }
