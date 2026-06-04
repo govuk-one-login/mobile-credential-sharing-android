@@ -26,6 +26,9 @@ dependencies {
     testImplementation(projects.cryptoService)
 
     listOf(
+        libs.jackson.cbor,
+        libs.jackson.core,
+        libs.jackson.kotlin,
         libs.junit,
         libs.kotlin.test
     ).forEach(::testImplementation)
