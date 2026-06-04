@@ -17,10 +17,7 @@ interface TrustVerifier {
      * - [VerificationError.INVALID_ISSUER_SIGNATURE]
      * - [VerificationError.UNTRUSTED_CERTIFICATE]
      */
-    fun verifyCOSESign1(
-        data: ByteArray,
-        trustedRoot: X509Certificate
-    ): IssuerAuthResult
+    fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult
 
     fun verifyCOSESign1(coseData: ByteArray, publicKey: ECPublicKey, payload: ByteArray)
 }

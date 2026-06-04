@@ -54,5 +54,4 @@ private fun asn1Length(data: ByteArray, startIndex: Int): Asn1Length? {
 
 private data class Asn1Length(val length: Int, val offset: Int)
 
-private fun ByteArray.toHexString(): String =
-    joinToString("") { "%02x".format(it) }
+private fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it) }

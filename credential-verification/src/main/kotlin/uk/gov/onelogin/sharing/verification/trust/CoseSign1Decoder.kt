@@ -67,9 +67,11 @@ internal object CoseSign1Decoder {
         val x5chainNode = node.get(X5CHAIN_LABEL.toString()) ?: return null
         return when {
             x5chainNode is BinaryNode -> listOf(x5chainNode.binaryValue())
+
             x5chainNode is ArrayNode -> x5chainNode.mapNotNull { element ->
                 (element as? BinaryNode)?.binaryValue()
             }.ifEmpty { null }
+
             else -> null
         }
     }

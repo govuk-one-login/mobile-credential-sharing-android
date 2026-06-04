@@ -17,10 +17,7 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthR
 class TrustVerifierImpl : TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
-    override fun verifyCOSESign1(
-        data: ByteArray,
-        trustedRoot: X509Certificate
-    ): IssuerAuthResult {
+    override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult {
         val coseSign1 = CoseSign1Decoder.decode(data)
         val x5chain = CoseSign1Decoder.extractX5Chain(coseSign1)
 
