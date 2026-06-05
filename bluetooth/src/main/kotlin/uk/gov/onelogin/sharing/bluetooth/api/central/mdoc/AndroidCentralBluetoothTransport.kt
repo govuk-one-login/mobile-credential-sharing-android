@@ -46,18 +46,16 @@ class AndroidCentralBluetoothTransport(
 ) : CentralBluetoothTransport,
     MessageSender by gattClientManager {
 
+    private val clientEventTransformer = GattClientEventToCentralBluetoothState(logger)
     private val _state = MutableStateFlow<CentralBluetoothState>(CentralBluetoothState.Idle)
     override val state: StateFlow<CentralBluetoothState> = _state
 
-    override val bluetoothStatus: StateFlow<BluetoothStatus> =
+    internal val bluetoothStatus: StateFlow<BluetoothStatus> =
         bluetoothStateMonitor.states.map { status ->
             if (status.isOff()) {
-                scanJob?.cancel()
-                scanJob = null
-                monitoringJob?.cancel()
-                monitoringJob = null
-                gattClientManager.disconnect()
-                bluetoothStateMonitor.stop()
+                _state.value = CentralBluetoothState.Error(
+                    CentralBluetoothTransportError.BLUETOOTH_TURNED_OFF
+                )
             }
 
             status
@@ -67,12 +65,19 @@ class AndroidCentralBluetoothTransport(
             BluetoothStatus.UNKNOWN
         )
 
-    private var scanJob: Job? = null
-    private var monitoringJob: Job? = null
+    internal var scanJob: Job? = null
+    internal var monitoringJob: Job? = null
 
-    override suspend fun scanAndConnect(serviceUuid: UUID) {
+    private fun cancelCurrentJobs() {
         scanJob?.cancel()
         monitoringJob?.cancel()
+
+        scanJob = null
+        monitoringJob = null
+    }
+
+    override suspend fun scanAndConnect(serviceUuid: UUID) {
+        cancelCurrentJobs()
 
         monitoringJob = monitorClientEvents()
         bluetoothStateMonitor.start()
@@ -102,10 +107,7 @@ class AndroidCentralBluetoothTransport(
 
     override suspend fun stop() {
         withContext(ioDispatcher + "$logTag.Stop".asCoroutineName()) {
-            scanJob?.cancel()
-            scanJob = null
-            monitoringJob?.cancel()
-            monitoringJob = null
+            cancelCurrentJobs()
             notifySessionEnd()
             gattClientManager.disconnect()
             bluetoothStateMonitor.stop()
@@ -123,44 +125,12 @@ class AndroidCentralBluetoothTransport(
         ioDispatcher + "$logTag.BluetoothMonitoring".asCoroutineName()
     ) {
         launch("$logTag.HandleGattClientEvent".asCoroutineName()) {
-            gattClientManager.events.collect { handleGattClientEvent(it) }
+            gattClientManager.events.collect(::handleGattClientEvent)
         }
     }
 
     private fun handleGattClientEvent(event: GattClientEvent) {
-        when (event) {
-            GattClientEvent.Connecting ->
-                CentralBluetoothState.Connecting
-
-            is GattClientEvent.Connected ->
-                CentralBluetoothState.Connected(event.deviceAddress)
-
-            is GattClientEvent.Disconnected ->
-                CentralBluetoothState.Disconnected(
-                    event.deviceAddress,
-                    event.isSessionEnd
-                )
-
-            GattClientEvent.ConnectionStateStarted ->
-                CentralBluetoothState.ConnectionStateStarted
-
-            is GattClientEvent.Error ->
-                CentralBluetoothState.Error(
-                    CentralBluetoothTransportError.fromClientError(event.error)
-                )
-
-            is GattClientEvent.SessionEnd ->
-                CentralBluetoothState.CentralBluetoothEnded(
-                    event.sessionEndStates
-                )
-
-            is GattClientEvent.Message -> event.let(CentralBluetoothState::Message)
-
-            is GattClientEvent.UnsupportedEvent -> {
-                logger.debug(logTag, "Unhandled event: $event")
-                null
-            }
-        }?.let { bluetoothState ->
+        event.let(clientEventTransformer::transform)?.let { bluetoothState ->
             _state.value = bluetoothState
         }.also {
             logger.debug(

@@ -17,12 +17,16 @@ sealed interface CentralBluetoothState {
     /** The device is connecting to a peripheral. */
     data object Connecting : CentralBluetoothState
 
+    interface HasDeviceAddress : CentralBluetoothState {
+        val address: String
+    }
+
     /**
      * The device has successfully connected.
      *
      * @param address The address of the connected device.
      */
-    data class Connected(val address: String) : CentralBluetoothState
+    data class Connected(override val address: String) : HasDeviceAddress
 
     /**
      * The device has disconnected.
@@ -30,8 +34,8 @@ sealed interface CentralBluetoothState {
      * @param address The address of the disconnected device.
      * @param isSessionEnd Whether the disconnection was a deliberate session end.
      */
-    data class Disconnected(val address: String, val isSessionEnd: Boolean) :
-        CentralBluetoothState
+    data class Disconnected(override val address: String, val isSessionEnd: Boolean) :
+        HasDeviceAddress
 
     /**
      * The GATT connection state has been started (MTU negotiated, state characteristic written).

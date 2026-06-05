@@ -64,7 +64,7 @@ class VerifierOrchestrator(
     private val barcodeParser: QrParser,
     private val centralBluetoothTransport: CentralBluetoothTransport,
     private val verifierCryptoService: VerifierCryptoService,
-    private val documentVerifier: DocumentVerifier
+    private val documentVerifier: DocumentVerifier,
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -80,7 +80,7 @@ class VerifierOrchestrator(
 
     init {
         appCoroutineScope.launch {
-            centralBluetoothTransport.state.collect { handleCentralBluetoothState(it) }
+            centralBluetoothTransport.state.collect(::handleCentralBluetoothState)
         }
     }
 
@@ -272,7 +272,11 @@ class VerifierOrchestrator(
 
             is CentralBluetoothState.Message -> handleCentralBluetoothStateMessage(state)
 
-            else -> Unit
+            is CentralBluetoothState.Connected,
+            CentralBluetoothState.Connecting,
+            is CentralBluetoothState.Idle,
+            is CentralBluetoothState.Scanning,
+                -> Unit
         }
     }
 
@@ -405,7 +409,7 @@ class VerifierOrchestrator(
 
     private suspend fun buildAndSendSessionEstablishment(
         context: VerifierCryptoContext,
-        itemsRequest: ItemsRequest
+        itemsRequest: ItemsRequest,
     ) {
         val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
         val encryptedDeviceRequest = verifierCryptoService.encryptDeviceRequest(
@@ -462,7 +466,7 @@ class VerifierOrchestrator(
     private fun safeTransitionTo(
         state: VerifierSessionState,
         logMessage: String = "$CANNOT_TRANSITION_TO_STATE $state",
-        exceptionWrapper: ((String, Throwable) -> Exception)? = null
+        exceptionWrapper: ((String, Throwable) -> Exception)? = null,
     ) {
         try {
             sessionFlow.value.transitionTo(state)

@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
-import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 
 /**
@@ -15,11 +14,6 @@ interface CentralBluetoothTransport : MessageSender {
      * The current state of the BLE session, exposed as a [StateFlow].
      */
     val state: StateFlow<CentralBluetoothState>
-
-    /**
-     * Current state of the Bluetooth adapter, exposed as a [StateFlow].
-     */
-    val bluetoothStatus: StateFlow<BluetoothStatus>
 
     /**
      * Starts scanning for a peripheral advertising the given service UUID,

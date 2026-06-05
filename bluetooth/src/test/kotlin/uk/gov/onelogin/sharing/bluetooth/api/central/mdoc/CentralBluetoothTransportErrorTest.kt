@@ -1,70 +1,43 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
-import org.junit.Assert.assertEquals
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValuesIn
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 
+@RunWith(TestParameterInjector::class)
 class CentralBluetoothTransportErrorTest {
 
     @Test
-    fun `BLUETOOTH_PERMISSION_MISSING maps correctly`() {
-        assertEquals(
-            CentralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING,
-            CentralBluetoothTransportError.fromClientError(
-                ClientError.BLUETOOTH_PERMISSION_MISSING
-            )
+    fun `Transforms client errors to Transport errors`(
+        @TestParameter inputs: Pair<ClientError, CentralBluetoothTransportError> = testValuesIn(
+            errorMapping
+        ),
+    ) {
+        val (error, expected) = inputs
+        assertThat(
+            CentralBluetoothTransportError.fromClientError(error),
+            equalTo(expected),
         )
     }
 
-    @Test
-    fun `BLUETOOTH_GATT_NOT_AVAILABLE maps correctly`() {
-        assertEquals(
-            CentralBluetoothTransportError.GATT_NOT_AVAILABLE,
-            CentralBluetoothTransportError.fromClientError(
-                ClientError.BLUETOOTH_GATT_NOT_AVAILABLE
-            )
-        )
-    }
-
-    @Test
-    fun `SERVICE_NOT_FOUND maps correctly`() {
-        assertEquals(
-            CentralBluetoothTransportError.SERVICE_NOT_FOUND,
-            CentralBluetoothTransportError.fromClientError(ClientError.SERVICE_NOT_FOUND)
-        )
-    }
-
-    @Test
-    fun `INVALID_SERVICE maps correctly`() {
-        assertEquals(
-            CentralBluetoothTransportError.INVALID_SERVICE,
-            CentralBluetoothTransportError.fromClientError(ClientError.INVALID_SERVICE)
-        )
-    }
-
-    @Test
-    fun `FAILED_TO_SUBSCRIBE maps correctly`() {
-        assertEquals(
-            CentralBluetoothTransportError.FAILED_TO_SUBSCRIBE,
-            CentralBluetoothTransportError.fromClientError(ClientError.FAILED_TO_SUBSCRIBE)
-        )
-    }
-
-    @Test
-    fun `FAILED_TO_START maps correctly`() {
-        assertEquals(
-            CentralBluetoothTransportError.FAILED_TO_START,
-            CentralBluetoothTransportError.fromClientError(ClientError.FAILED_TO_START)
-        )
-    }
-
-    @Test
-    fun `SERVICE_DISCOVERED_ERROR maps to INVALID_SERVICE`() {
-        assertEquals(
-            CentralBluetoothTransportError.INVALID_SERVICE,
-            CentralBluetoothTransportError.fromClientError(
-                ClientError.SERVICE_DISCOVERED_ERROR
-            )
+    companion object {
+        private val errorMapping = listOf(
+            ClientError.BLUETOOTH_PERMISSION_MISSING to
+                    CentralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING,
+            ClientError.BLUETOOTH_GATT_NOT_AVAILABLE to
+                    CentralBluetoothTransportError.GATT_NOT_AVAILABLE,
+            ClientError.SERVICE_NOT_FOUND to CentralBluetoothTransportError.SERVICE_NOT_FOUND,
+            ClientError.INVALID_SERVICE to CentralBluetoothTransportError.INVALID_SERVICE,
+            ClientError.FAILED_TO_SUBSCRIBE to CentralBluetoothTransportError.FAILED_TO_SUBSCRIBE,
+            ClientError.FAILED_TO_START to CentralBluetoothTransportError.FAILED_TO_START,
+            ClientError.SERVICE_DISCOVERED_ERROR to CentralBluetoothTransportError.INVALID_SERVICE,
+            ClientError.INVALID_MESSAGE_PREFIX to
+                    CentralBluetoothTransportError.INVALID_MESSAGE_PREFIX,
         )
     }
 }

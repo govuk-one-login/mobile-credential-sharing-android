@@ -7,10 +7,16 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.nullValue
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.AndroidCentralBluetoothTransportMatchers.hasMonitoringJob
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.AndroidCentralBluetoothTransportMatchers.hasScanJob
+import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.isError
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
@@ -186,6 +192,8 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt UnsupportedEvent does not change state`() = runTest {
+        transport.monitorClientEvents()
+
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -208,22 +216,42 @@ class AndroidCentralBluetoothTransportTest {
     @Test
     fun `stop cancels scan and disconnects`() = testScope.runTest {
         transport.scanAndConnect(serviceUuid)
+
+        assertThat(
+            transport,
+            allOf(
+                hasScanJob(),
+                hasMonitoringJob()
+            )
+        )
+
         transport.stop()
 
         assertEquals(1, gattClientManager.disconnectCalls)
         assertEquals(1, bluetoothStateMonitor.stopCalls)
+        assertThat(
+            transport,
+            allOf(
+                hasScanJob(nullValue()),
+                hasMonitoringJob(nullValue())
+            )
+        )
     }
 
     @Test
-    fun `bluetooth OFF stops transport`() = runTest {
+    fun `bluetooth OFF emits a CentralBluetoothState error`() = runTest {
         bluetoothStateMonitor.emit(BluetoothStatus.OFF)
 
         transport.bluetoothStatus.test {
-            assertEquals(BluetoothStatus.OFF, awaitItem())
+            assertEquals(BluetoothStatus.OFF, expectMostRecentItem())
         }
 
-        assertEquals(1, gattClientManager.disconnectCalls)
-        assertEquals(1, bluetoothStateMonitor.stopCalls)
+        transport.state.test {
+            assertThat(
+                expectMostRecentItem(),
+                isError(CentralBluetoothTransportError.BLUETOOTH_TURNED_OFF)
+            )
+        }
     }
 
     @Test
@@ -231,7 +259,7 @@ class AndroidCentralBluetoothTransportTest {
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
 
         transport.bluetoothStatus.test {
-            assertEquals(BluetoothStatus.ON, awaitItem())
+            assertEquals(BluetoothStatus.ON, expectMostRecentItem())
         }
     }
 }
