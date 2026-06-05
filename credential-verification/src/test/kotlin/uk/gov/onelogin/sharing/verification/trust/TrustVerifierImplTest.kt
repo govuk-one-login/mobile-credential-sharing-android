@@ -65,8 +65,11 @@ class TrustVerifierImplTest {
     fun `x5chain certificate from mock credential is valid X509`() {
         val issuerAuth = extractIssuerAuth()
         val cert = extractCertFromIssuerAuth(issuerAuth)
+        val result = verifier.verifyCOSESign1(issuerAuth, cert)
 
-        assertEquals(cert.subjectX500Principal.name.contains("mDoc Test Issuer"), true)
+        assertNotNull(result.certificateValidityPeriod)
+        assertEquals(result.subjectCountry, "GB")
+        assertEquals(result.subjectState, "London")
     }
 
     private fun extractIssuerAuth(): ByteArray {

@@ -20,6 +20,16 @@ class SubjectNameParserTest {
     }
 
     @Test
+    fun `extracts country when state is absent`() {
+        val cert = certWithSubject("C=GB,CN=Test")
+
+        val result = parseSubjectName(cert)
+
+        assertThat(result[OID_COUNTRY], equalTo("GB"))
+        assertThat(result[OID_STATE_OR_PROVINCE], equalTo(null))
+    }
+
+    @Test
     fun `extracts country and state`() {
         val cert = certWithSubject("C=GB,ST=London,CN=Test")
 
