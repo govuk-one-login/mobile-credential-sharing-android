@@ -50,14 +50,10 @@ internal object CoseSign1Decoder {
         )
     }
 
-    fun extractX5Chain(coseSign1: CoseSign1): List<ByteArray> {
-        val unprotected = coseSign1.unprotectedHeader
-        if (unprotected != null) {
-            extractX5ChainFromBytes(unprotected)?.let { return it }
-        }
-        extractX5ChainFromBytes(coseSign1.protectedHeader)?.let { return it }
-        throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
-    }
+    fun extractX5Chain(coseSign1: CoseSign1): List<ByteArray> =
+        coseSign1.unprotectedHeader?.let { extractX5ChainFromBytes(it) }
+            ?: extractX5ChainFromBytes(coseSign1.protectedHeader)
+            ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
 
     private fun extractX5ChainFromBytes(headerBytes: ByteArray): List<ByteArray>? {
         val node = try {

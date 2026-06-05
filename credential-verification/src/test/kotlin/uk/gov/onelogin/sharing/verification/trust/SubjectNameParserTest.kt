@@ -31,7 +31,7 @@ class SubjectNameParserTest {
 
     @Test
     fun `extracts country and state`() {
-        val cert = certWithSubject("C=GB,ST=London,CN=Test")
+        val cert = certWithSubject("CN=Smith\\, John,C=GB,ST=London,CN=Test")
 
         val result = parseSubjectName(cert)
 
