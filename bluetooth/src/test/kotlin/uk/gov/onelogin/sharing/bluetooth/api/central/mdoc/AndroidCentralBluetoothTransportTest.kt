@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -28,6 +29,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.coroutines.JobMatchers.isActive
 
 class AndroidCentralBluetoothTransportTest {
 
@@ -98,7 +100,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Connecting event maps to Connecting state`() = runTest {
-        transport.monitorClientEvents()
+        transport.monitorClientEvents().start()
 
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
@@ -110,7 +112,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Connected event maps to Connected state`() = runTest {
-        transport.monitorClientEvents()
+        transport.monitorClientEvents().start()
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -121,7 +123,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Disconnected event maps to Disconnected state`() = runTest {
-        transport.monitorClientEvents()
+        transport.monitorClientEvents().start()
 
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
@@ -136,7 +138,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Disconnected with session end flag maps correctly`() = runTest {
-        transport.monitorClientEvents()
+        transport.monitorClientEvents().start()
 
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
@@ -151,7 +153,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt ConnectionStateStarted event maps to ConnectionStateStarted state`() = runTest {
-        transport.monitorClientEvents()
+        transport.monitorClientEvents().start()
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -162,7 +164,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Error event maps to Error state`() = runTest {
-        transport.monitorClientEvents()
+        transport.monitorClientEvents().start()
 
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
@@ -177,7 +179,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt SessionEnd event maps to CentralBluetoothEnded state`() = runTest {
-        transport.monitorClientEvents()
+        transport.monitorClientEvents().start()
 
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
@@ -192,7 +194,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt UnsupportedEvent does not change state`() = runTest {
-        transport.monitorClientEvents()
+        transport.monitorClientEvents().start()
 
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
@@ -221,7 +223,7 @@ class AndroidCentralBluetoothTransportTest {
             transport,
             allOf(
                 hasScanJob(),
-                hasMonitoringJob()
+                hasMonitoringJob(isActive())
             )
         )
 
@@ -233,18 +235,15 @@ class AndroidCentralBluetoothTransportTest {
             transport,
             allOf(
                 hasScanJob(nullValue()),
-                hasMonitoringJob(nullValue())
+                hasMonitoringJob(isActive(false))
             )
         )
     }
 
     @Test
     fun `bluetooth OFF emits a CentralBluetoothState error`() = runTest {
+        transport.monitorClientEvents().start()
         bluetoothStateMonitor.emit(BluetoothStatus.OFF)
-
-        transport.bluetoothStatus.test {
-            assertEquals(BluetoothStatus.OFF, expectMostRecentItem())
-        }
 
         transport.state.test {
             assertThat(
@@ -255,11 +254,18 @@ class AndroidCentralBluetoothTransportTest {
     }
 
     @Test
-    fun `bluetooth ON updates bluetooth status`() = runTest {
+    fun `bluetooth ON doesn't update states`() = runTest {
+        transport.monitorClientEvents().start()
+
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
 
-        transport.bluetoothStatus.test {
-            assertEquals(BluetoothStatus.ON, expectMostRecentItem())
+        transport.state.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(CentralBluetoothState.Idle)
+            )
+
+            expectNoEvents()
         }
     }
 }

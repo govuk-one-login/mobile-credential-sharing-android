@@ -7,21 +7,17 @@ import dev.zacsweers.metro.binding
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
-import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
@@ -50,59 +46,46 @@ class AndroidCentralBluetoothTransport(
     private val _state = MutableStateFlow<CentralBluetoothState>(CentralBluetoothState.Idle)
     override val state: StateFlow<CentralBluetoothState> = _state
 
-    internal val bluetoothStatus: StateFlow<BluetoothStatus> =
-        bluetoothStateMonitor.states.map { status ->
-            if (status.isOff()) {
-                _state.value = CentralBluetoothState.Error(
-                    CentralBluetoothTransportError.BLUETOOTH_TURNED_OFF
-                )
-            }
-
-            status
-        }.stateIn(
-            coroutineScope.plus(ioDispatcher),
-            SharingStarted.Eagerly,
-            BluetoothStatus.UNKNOWN
-        )
-
     internal var scanJob: Job? = null
-    internal var monitoringJob: Job? = null
+    internal var monitoringJob: Job = monitorClientEvents()
 
     private fun cancelCurrentJobs() {
         scanJob?.cancel()
-        monitoringJob?.cancel()
+        monitoringJob.cancel()
 
         scanJob = null
-        monitoringJob = null
+        monitoringJob = monitorClientEvents()
+    }
+
+    private fun prepareScanJob(serviceUuid: UUID): Job =  coroutineScope.launch(
+        ioDispatcher + "$logTag.ScanAndConnect".asCoroutineName(),
+    ) {
+        when (val result = scanner.scan(serviceUuid).first()) {
+            is ScanEvent.DeviceFound -> {
+                logger.debug(logTag, "Device found: ${result.device.address}")
+                gattClientManager.connect(
+                    device = result.device,
+                    serviceUuid = serviceUuid
+                )
+            }
+
+            is ScanEvent.ScanFailed -> {
+                logger.debug(logTag, "Scan failed: ${result.failure}")
+                _state.value = CentralBluetoothState.Error(
+                    CentralBluetoothTransportError.SCAN_FAILED
+                )
+            }
+        }
     }
 
     override suspend fun scanAndConnect(serviceUuid: UUID) {
         cancelCurrentJobs()
 
-        monitoringJob = monitorClientEvents()
+        monitoringJob.start()
         bluetoothStateMonitor.start()
         _state.value = CentralBluetoothState.Scanning
 
-        scanJob = coroutineScope.launch(
-            ioDispatcher + "$logTag.ScanAndConnect".asCoroutineName()
-        ) {
-            when (val result = scanner.scan(serviceUuid).first()) {
-                is ScanEvent.DeviceFound -> {
-                    logger.debug(logTag, "Device found: ${result.device.address}")
-                    gattClientManager.connect(
-                        device = result.device,
-                        serviceUuid = serviceUuid
-                    )
-                }
-
-                is ScanEvent.ScanFailed -> {
-                    logger.debug(logTag, "Scan failed: ${result.failure}")
-                    _state.value = CentralBluetoothState.Error(
-                        CentralBluetoothTransportError.SCAN_FAILED
-                    )
-                }
-            }
-        }
+        scanJob = prepareScanJob(serviceUuid)
     }
 
     override suspend fun stop() {
@@ -121,9 +104,25 @@ class AndroidCentralBluetoothTransport(
         }
     }
 
+    /**
+     * Prepares an inactive coroutine [Job] that emits bluetooth state errors.
+     *
+     * @return a [Job] that collects values from the [bluetoothStateMonitor]. Updates the [state]
+     * whenever bluetooth isn't enabled and ready for connecting with devices.
+     */
     internal fun monitorClientEvents(): Job = coroutineScope.launch(
-        ioDispatcher + "$logTag.BluetoothMonitoring".asCoroutineName()
+        ioDispatcher + "$logTag.BluetoothMonitoring".asCoroutineName(),
+        start = CoroutineStart.LAZY,
     ) {
+        launch("$logTag.MonitorBluetoothState".asCoroutineName()) {
+            bluetoothStateMonitor.states.collect { status ->
+                if (status.isOff()) {
+                    _state.value = CentralBluetoothState.Error(
+                        CentralBluetoothTransportError.BLUETOOTH_TURNED_OFF
+                    )
+                }
+            }
+        }
         launch("$logTag.HandleGattClientEvent".asCoroutineName()) {
             gattClientManager.events.collect(::handleGattClientEvent)
         }
