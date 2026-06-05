@@ -29,6 +29,7 @@ dependencies {
         projects.core,
         projects.cryptoService,
         projects.holder,
-        projects.verifier
+        projects.verifier,
+        testFixtures(projects.cryptoService)
     ).forEach(::testImplementation)
 }
