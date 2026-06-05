@@ -44,7 +44,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
@@ -55,7 +55,7 @@ internal class AndroidGattClientManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
     private val bluetoothGatt = mockk<BluetoothGatt>(relaxed = true)
-    private val permissionResponse = mutableListOf<PermissionCheckerV2.PermissionCheckResult>()
+    private val permissionResponse = mutableListOf<PermissionChecker.PermissionCheckResult>()
     private val fakePermissionChecker = FakePermissionChecker { permissionResponse }
     private val fakeGattWriter = FakeGattWriter()
     private val fakeWriteQueue = FakeGattWriteQueue()

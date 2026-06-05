@@ -11,15 +11,15 @@ import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.locationManager
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasUndeterminedPermissions
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.LocationState
 
 @ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<LocationState>>())
 @Inject
 class LocationPrerequisiteEvaluator(
     private val context: Context,
-    permissionChecker: PermissionCheckerV2
-) : PermissionCheckerV2 by permissionChecker,
+    permissionChecker: PermissionChecker
+) : PermissionChecker by permissionChecker,
     PrerequisiteEvaluator<LocationState> {
     override fun evaluate(): LocationState? = evaluatePermissions()
         ?: evaluateSupport()

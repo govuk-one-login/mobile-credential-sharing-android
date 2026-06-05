@@ -9,7 +9,7 @@ import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
 import uk.gov.onelogin.sharing.core.permission.ActivityPermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 @InstallIn(ActivityComponent::class)
 @Module
@@ -20,5 +20,5 @@ object PermissionCheckerModule {
     fun providesPermissionChecker(
         @ActivityContext
         context: Context
-    ): PermissionCheckerV2 = ActivityPermissionChecker(context as Activity)
+    ): PermissionChecker = ActivityPermissionChecker(context as Activity)
 }

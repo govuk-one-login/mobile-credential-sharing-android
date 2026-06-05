@@ -37,7 +37,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.Descr
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 
 class AndroidGattServerManagerTest {
@@ -53,7 +53,7 @@ class AndroidGattServerManagerTest {
             listOf()
         )
     )
-    private val permissionResponse = mutableListOf<PermissionCheckerV2.PermissionCheckResult>()
+    private val permissionResponse = mutableListOf<PermissionChecker.PermissionCheckResult>()
     private val fakePermissionChecker = FakePermissionChecker { permissionResponse }
     private val fakeGattWriter = FakeGattWriter()
     private val logger = SystemLogger()

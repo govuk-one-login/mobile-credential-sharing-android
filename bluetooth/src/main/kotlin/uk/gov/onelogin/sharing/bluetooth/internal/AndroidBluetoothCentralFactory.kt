@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueueImpl
 import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.core.VerifierUiScope
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 /**
  * An Android-specific implementation of the [BluetoothCentralFactory] interface.
@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
 @ContributesBinding(AppScope::class)
 @ContributesBinding(VerifierUiScope::class)
 class AndroidBluetoothCentralFactory(
-    private val permissionChecker: PermissionCheckerV2,
+    private val permissionChecker: PermissionChecker,
     private val context: Context,
     private val serviceValidator: ServiceValidator,
     private val logger: Logger

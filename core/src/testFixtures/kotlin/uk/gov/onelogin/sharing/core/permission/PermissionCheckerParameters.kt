@@ -1,17 +1,21 @@
 package uk.gov.onelogin.sharing.core.permission
 
+import android.Manifest
 import android.content.pm.PackageManager
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.hasSize
-import org.hamcrest.Matchers.instanceOf
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2.PermissionCheckResult
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckResultMatchers.isDenied
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckResultMatchers.isPermanentlyDenied
+import uk.gov.onelogin.sharing.core.permission.PermissionCheckResultMatchers.isUndetermined
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult
 
 class PermissionCheckerParameters : TestParametersValuesProvider() {
     data class Input(
         val name: String,
+        val permission: String = Manifest.permission.CAMERA,
         val wasMarked: Boolean = false,
         val grantStatus: Int = PackageManager.PERMISSION_GRANTED,
         val shouldShowRationale: Boolean = false,
@@ -56,42 +60,32 @@ class PermissionCheckerParameters : TestParametersValuesProvider() {
             )
         )
 
-        private val markedDeniedPermissionInputs = listOf(
+        val markedDeniedPermissionInputs = listOf(
             Input(
                 name = "A marked, denied permission without rationale is 'PermanentlyDenied'",
-                assertion = contains(
-                    instanceOf(
-                        PermissionCheckResult.PermanentlyDenied::class.java
-                    )
-                ),
+                assertion = contains(isPermanentlyDenied()),
                 grantStatus = PackageManager.PERMISSION_DENIED,
                 wasMarked = true
             ),
             Input(
                 name = "A marked, denied permission with rationale is 'Denied'",
-                assertion = contains(
-                    instanceOf(PermissionCheckResult.Denied::class.java)
-                ),
+                assertion = contains(isDenied()),
                 grantStatus = PackageManager.PERMISSION_DENIED,
                 shouldShowRationale = true,
                 wasMarked = true
             )
         )
 
-        private val unmarkedDeniedPermissionInputs = listOf(
+        val unmarkedDeniedPermissionInputs = listOf(
             Input(
                 name = "An unmarked, denied permission without rationale is 'Undetermined'",
-                assertion = contains(
-                    instanceOf(PermissionCheckResult.Undetermined::class.java)
-                ),
+                assertion = contains(isUndetermined()),
                 grantStatus = PackageManager.PERMISSION_DENIED
             ),
             Input(
                 name = "Invalid flow: " +
                     "An unmarked, denied permission with rationale is 'Denied'",
-                assertion = contains(
-                    instanceOf(PermissionCheckResult.Denied::class.java)
-                ),
+                assertion = contains(isDenied()),
                 grantStatus = PackageManager.PERMISSION_DENIED,
                 shouldShowRationale = true
             )
