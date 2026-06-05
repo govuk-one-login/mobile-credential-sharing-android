@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
@@ -35,6 +36,7 @@ object CborMapper {
     fun create(serializers: Map<Class<*>, StdSerializer<*>> = emptyMap()): ObjectMapper =
         CBORMapper.builder(CBORFactory())
             .addModule(KotlinModule.Builder().build())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .addModule(
                 SimpleModule().apply {
                     addSerializer(EmbeddedCborSerializer())

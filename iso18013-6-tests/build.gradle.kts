@@ -18,18 +18,17 @@ android {
 }
 
 dependencies {
-    testImplementation(projects.models)
-    testImplementation(projects.core)
-    testImplementation(projects.bluetooth)
-    testImplementation(projects.holder)
-    testImplementation(projects.verifier)
-    testImplementation(projects.cryptoService)
 
     listOf(
         libs.jackson.cbor,
         libs.jackson.core,
         libs.jackson.kotlin,
         libs.junit,
-        libs.kotlin.test
+        libs.kotlin.test,
+        projects.bluetooth,
+        projects.core,
+        projects.cryptoService,
+        projects.holder,
+        projects.verifier
     ).forEach(::testImplementation)
 }

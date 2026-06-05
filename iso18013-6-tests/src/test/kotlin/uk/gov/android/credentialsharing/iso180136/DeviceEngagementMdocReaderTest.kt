@@ -1,15 +1,13 @@
-package uk.gov.android.credentialsharing.iso18013_6
+package uk.gov.android.credentialsharing.iso180136
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import org.junit.Test
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
 
 /**
@@ -26,11 +24,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
  * }
  */
 class DeviceEngagementMdocReaderTest {
-
-    private val cborMapper = ObjectMapper(CBORFactory()).apply {
-        registerModule(KotlinModule.Builder().build())
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    }
+    private val cborMapper = CborMapper.default
 
     /**
      * mDLR_MS_DE_01 - Device Engagement mdoc reader
@@ -44,7 +38,14 @@ class DeviceEngagementMdocReaderTest {
     fun `mDLR_MS_DE_01 - mdoc reader ignores ProtocolInfo RFU key in DeviceEngagement`() {
         // Arrange: DeviceEngagement with key=4 (ProtocolInfo) containing an arbitrary CBOR map
         val cborBytes = buildDeviceEngagementWithExtraKeys(
-            extraKeys = mapOf(4 to { gen -> gen.writeStartObject(1); gen.writeStringField("a", "b"); gen.writeEndObject() })
+            extraKeys = mapOf(
+                4 to
+                    { gen ->
+                        gen.writeStartObject(1)
+                        gen.writeStringField("a", "b")
+                        gen.writeEndObject()
+                    }
+            )
         )
 
         // Act: decode as the mdoc reader would
@@ -69,7 +70,12 @@ class DeviceEngagementMdocReaderTest {
         val cborBytes = buildDeviceEngagementWithExtraKeys(
             extraKeys = mapOf(
                 5 to { gen -> gen.writeString("rfu-text-value") },
-                24 to { gen -> gen.writeStartObject(1); gen.writeStringField("x", "y"); gen.writeEndObject() },
+                24 to
+                    { gen ->
+                        gen.writeStartObject(1)
+                        gen.writeStringField("x", "y")
+                        gen.writeEndObject()
+                    },
                 65535 to { gen -> gen.writeBoolean(false) }
             )
         )
