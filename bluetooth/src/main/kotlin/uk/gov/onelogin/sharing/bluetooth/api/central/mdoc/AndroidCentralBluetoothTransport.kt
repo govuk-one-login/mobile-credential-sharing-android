@@ -28,6 +28,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
+// DCMAW-20404: Expose all bluetooth state events
 @ContributesBinding(scope = AppScope::class, binding = binding<CentralBluetoothTransport>())
 @SingleIn(AppScope::class)
 class AndroidCentralBluetoothTransport(
