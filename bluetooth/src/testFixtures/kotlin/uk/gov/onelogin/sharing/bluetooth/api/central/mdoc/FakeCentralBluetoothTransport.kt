@@ -20,7 +20,7 @@ class FakeCentralBluetoothTransport(
     var sendMessageToReturn: Boolean = true
     var lastSentData: ByteArray? = null
 
-    override fun scanAndConnect(serviceUuid: UUID) {
+    override suspend fun scanAndConnect(serviceUuid: UUID) {
         scanAndConnectCalls++
         lastServiceUuid = serviceUuid
     }

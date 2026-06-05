@@ -27,7 +27,7 @@ interface CentralBluetoothTransport : MessageSender {
      *
      * @param serviceUuid The service [UUID] to scan for.
      */
-    fun scanAndConnect(serviceUuid: UUID)
+    suspend fun scanAndConnect(serviceUuid: UUID)
 
     /**
      * Stops the BLE session, optionally sending a session end command first.

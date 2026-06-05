@@ -164,7 +164,7 @@ class VerifierOrchestrator(
             .let { safeTransitionTo(state = it, logMessage = START_ORCHESTRATION_ERROR) }
     }
 
-    override fun processQrCode(qrCode: String?) {
+    override suspend fun processQrCode(qrCode: String?) {
         val result = barcodeParser.parse(qrCode)
 
         if (result is QrScanResult.NotFound) return

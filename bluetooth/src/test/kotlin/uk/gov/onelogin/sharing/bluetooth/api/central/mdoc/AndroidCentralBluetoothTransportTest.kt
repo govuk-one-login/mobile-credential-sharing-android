@@ -92,6 +92,8 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Connecting event maps to Connecting state`() = runTest {
+        transport.monitorClientEvents()
+
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -102,6 +104,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Connected event maps to Connected state`() = runTest {
+        transport.monitorClientEvents()
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -112,6 +115,8 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Disconnected event maps to Disconnected state`() = runTest {
+        transport.monitorClientEvents()
+
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -125,6 +130,8 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Disconnected with session end flag maps correctly`() = runTest {
+        transport.monitorClientEvents()
+
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -138,6 +145,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt ConnectionStateStarted event maps to ConnectionStateStarted state`() = runTest {
+        transport.monitorClientEvents()
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -148,6 +156,8 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt Error event maps to Error state`() = runTest {
+        transport.monitorClientEvents()
+
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
@@ -161,6 +171,8 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `gatt SessionEnd event maps to CentralBluetoothEnded state`() = runTest {
+        transport.monitorClientEvents()
+
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
