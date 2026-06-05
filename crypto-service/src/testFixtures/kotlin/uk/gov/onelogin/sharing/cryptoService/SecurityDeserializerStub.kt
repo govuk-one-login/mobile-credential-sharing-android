@@ -24,13 +24,7 @@ object SecurityDeserializerStub {
 
     val expectedSecurityDto = SecurityDto(
         cipherSuiteIdentifier = 1,
+        eDeviceKeyBytes = validCoseKey.toDto().toCbor(),
         ephemeralPublicKey = expectedCoseKey
-    )
-
-    val coseKeyMap = mapOf(
-        "1" to expectedCoseKey.keyType,
-        "-1" to expectedCoseKey.curve,
-        "-2" to expectedCoseKey.x,
-        "-3" to expectedCoseKey.y
     )
 }

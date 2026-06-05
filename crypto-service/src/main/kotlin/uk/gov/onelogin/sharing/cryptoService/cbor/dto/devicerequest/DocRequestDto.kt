@@ -8,19 +8,19 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborEncodable
 import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.deserializers.ItemsRequestDeserializer
 import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 
 @JsonSerialize(using = DocRequestDto.Serializer::class)
 data class DocRequestDto(
     @JsonProperty("itemsRequest")
-    @JsonDeserialize(using = ItemsRequestDeserializer::class)
+    @JsonDeserialize(using = ItemsRequestDto.Deserializer::class)
     val itemsRequest: ItemsRequestDto,
     @JsonIgnore
     val readerAuth: ByteArray? = null
-) {
+) : CborEncodable {
     class Serializer : StdSerializer<DocRequestDto>(DocRequestDto::class.java) {
         override fun serialize(
             value: DocRequestDto,

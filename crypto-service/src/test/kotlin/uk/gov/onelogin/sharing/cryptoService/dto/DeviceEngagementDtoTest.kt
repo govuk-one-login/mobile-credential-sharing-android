@@ -1,26 +1,21 @@
 package uk.gov.onelogin.sharing.cryptoService.dto
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
 
 class DeviceEngagementDtoTest {
 
     @Test
     fun `deserialize into DeviceEngagementDto from valid Base64 Url CBOR`() {
-        val cborFactory = CBORFactory()
-        val cborMapper = ObjectMapper(cborFactory)
-
         val cborData = Base64.getUrlDecoder().decode(DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT)
 
-        val actualDto: DeviceEngagementDto = cborMapper.readValue(cborData)
+        val actualDto = CborMapper.default.readValue(cborData, DeviceEngagementDto::class.java)
 
         val expectedDto = DecoderStub.validDeviceEngagementDto
 

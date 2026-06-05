@@ -1,18 +1,67 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborEncodable
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
+
+@JsonSerialize(using = BleOptionsDto.Serializer::class)
+@JsonDeserialize(using = BleOptionsDto.Deserializer::class)
 data class BleOptionsDto(
-    val serverMode: Boolean,
-    val clientMode: Boolean,
-    val peripheralServerModeUuid: ByteArray?
-) {
+    @JsonProperty("0") val serverMode: Boolean,
+    @JsonProperty("1") val clientMode: Boolean,
+    @JsonProperty("10") val peripheralServerModeUuid: ByteArray?
+) : CborEncodable {
     fun getPeripheralServerModeUuidString(): String? = peripheralServerModeUuid?.decodeToString()
+
+    class Serializer : StdSerializer<BleOptionsDto>(BleOptionsDto::class.java) {
+        override fun serialize(
+            value: BleOptionsDto,
+            gen: JsonGenerator,
+            provider: SerializerProvider
+        ) {
+            (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
+            gen.writeFieldId(SERVER_MODE_ID)
+            gen.writeBoolean(value.serverMode)
+            gen.writeFieldId(CLIENT_MODE_ID)
+            gen.writeBoolean(value.clientMode)
+            gen.writeFieldId(PERIPHERAL_UUID_ID)
+            provider.defaultSerializeValue(value.peripheralServerModeUuid, gen)
+            gen.writeEndObject()
+        }
+
+        private companion object {
+            const val FIELD_COUNT = 3
+            const val SERVER_MODE_ID = 0L
+            const val CLIENT_MODE_ID = 1L
+            const val PERIPHERAL_UUID_ID = 10L
+        }
+    }
+
+    class Deserializer : JsonDeserializer<BleOptionsDto>() {
+        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): BleOptionsDto {
+            val root = p.codec.readTree<JsonNode>(p)
+            return BleOptionsDto(
+                serverMode = root["0"].booleanValue(),
+                clientMode = root["1"].booleanValue(),
+                peripheralServerModeUuid = if (root.has("10")) root["10"].binaryValue() else null
+            )
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as BleOptionsDto
-
         if (serverMode != other.serverMode) return false
         if (clientMode != other.clientMode) return false
         if (peripheralServerModeUuid != null) {
@@ -26,7 +75,6 @@ data class BleOptionsDto(
         } else if (other.peripheralServerModeUuid != null) {
             return false
         }
-
         return true
     }
 
@@ -37,3 +85,9 @@ data class BleOptionsDto(
         return result
     }
 }
+
+fun BleOptions.toDto(): BleOptionsDto = BleOptionsDto(
+    serverMode = serverMode,
+    clientMode = clientMode,
+    peripheralServerModeUuid = peripheralServerModeUuid
+)

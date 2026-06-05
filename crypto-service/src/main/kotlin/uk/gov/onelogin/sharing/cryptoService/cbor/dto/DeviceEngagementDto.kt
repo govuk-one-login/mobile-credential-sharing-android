@@ -1,21 +1,91 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import uk.gov.onelogin.sharing.cryptoService.cbor.deserializers.DeviceRetrievalMethodsDeserializer
-import uk.gov.onelogin.sharing.cryptoService.cbor.deserializers.SecurityDeserializer
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborEncodable
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod
+import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(using = DeviceEngagementDto.Serializer::class)
+@JsonDeserialize(using = DeviceEngagementDto.Deserializer::class)
 data class DeviceEngagementDto(
-    @JsonProperty("0")
-    val version: String,
-    @JsonProperty("1")
-    @JsonDeserialize(using = SecurityDeserializer::class)
-    val security: SecurityDto,
-    @JsonProperty("2")
-    @JsonDeserialize(using = DeviceRetrievalMethodsDeserializer::class)
-    val deviceRetrievalMethods: List<DeviceRetrievalMethodDto>
-) {
+    @JsonProperty("0") val version: String,
+    @JsonProperty("1") val security: SecurityDto,
+    @JsonProperty("2") val deviceRetrievalMethods: List<DeviceRetrievalMethodDto>
+) : CborEncodable {
+    init {
+        require(version.isNotEmpty()) { "DeviceEngagement: version must not be empty" }
+        require(deviceRetrievalMethods.isNotEmpty()) {
+            "DeviceEngagement: at least one retrieval method required"
+        }
+    }
+
     fun getFirstPeripheralServerModeUuid() = deviceRetrievalMethods.firstNotNullOfOrNull {
         it.getPeripheralServerModeUuid()
     }
+
+    class Serializer : StdSerializer<DeviceEngagementDto>(DeviceEngagementDto::class.java) {
+        override fun serialize(
+            value: DeviceEngagementDto,
+            gen: JsonGenerator,
+            provider: SerializerProvider
+        ) {
+            (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
+            gen.writeFieldId(VERSION_ID)
+            gen.writeString(value.version)
+            gen.writeFieldId(SECURITY_ID)
+            provider.defaultSerializeValue(value.security, gen)
+            gen.writeFieldId(RETRIEVAL_METHODS_ID)
+            gen.writeStartArray(value.deviceRetrievalMethods, value.deviceRetrievalMethods.size)
+            value.deviceRetrievalMethods.forEach { provider.defaultSerializeValue(it, gen) }
+            gen.writeEndArray()
+            gen.writeEndObject()
+        }
+
+        private companion object {
+            const val FIELD_COUNT = 3
+            const val VERSION_ID = 0L
+            const val SECURITY_ID = 1L
+            const val RETRIEVAL_METHODS_ID = 2L
+        }
+    }
+
+    class Deserializer : JsonDeserializer<DeviceEngagementDto>() {
+        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): DeviceEngagementDto {
+            val root = p.codec.readTree<JsonNode>(p)
+            val version = (root["0"] ?: root["version"])?.asText()
+                ?: throw IllegalArgumentException("Missing version in DeviceEngagement")
+            val security = p.codec.treeToValue(
+                root["1"] ?: root["security"],
+                SecurityDto::class.java
+            )
+            val methodsNode = root["2"] ?: root["deviceRetrievalMethods"]
+                ?: throw IllegalArgumentException(
+                    "Missing deviceRetrievalMethods in DeviceEngagement"
+                )
+            val methods = methodsNode.map {
+                p.codec.treeToValue(it, DeviceRetrievalMethodDto::class.java)
+            }
+            return DeviceEngagementDto(version, security, methods)
+        }
+    }
 }
+
+fun DeviceEngagement.toDto(): DeviceEngagementDto = DeviceEngagementDto(
+    version = version,
+    security = security.toDto(),
+    deviceRetrievalMethods = deviceRetrievalMethods
+        .filterIsInstance<BleDeviceRetrievalMethod>()
+        .map { it.toDto() }
+)

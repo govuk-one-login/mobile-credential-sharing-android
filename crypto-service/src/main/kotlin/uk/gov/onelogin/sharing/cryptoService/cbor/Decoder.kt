@@ -37,11 +37,7 @@ private const val TAG = "decodeDeviceEngagement"
 fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagementDto? = try {
     val cborData = cborBase64Url.base64Decode()
 
-    val cborMapper = ObjectMapper(CBORFactory()).apply {
-        registerModule(KotlinModule.Builder().build())
-    }
-
-    val deviceEngagement: DeviceEngagementDto = cborMapper.readValue(
+    val deviceEngagement: DeviceEngagementDto = CborMapper.default.readValue(
         cborData,
         DeviceEngagementDto::class.java
     )
@@ -64,7 +60,7 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
     logger.debug(
         TAG,
         " - Security - Ephemeral Public Key (as hex): " +
-            "${deviceEngagement.security.ephemeralPublicKey}"
+            "${deviceEngagement.security.eDeviceKeyBytes.size} bytes"
     )
     logger.debug(
         TAG,

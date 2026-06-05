@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService
 
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
+import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.BleOptionsDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
@@ -33,9 +34,8 @@ object DecoderStub {
      */
     val validDeviceEngagementDto = DeviceEngagementDto(
         version = "1.0",
-        security = SecurityDto(
-            cipherSuiteIdentifier = 1,
-            ephemeralPublicKey = CoseKeyDto(
+        security = run {
+            val coseKey = CoseKeyDto(
                 keyType = 2L,
                 curve = 1L,
                 x = byteArrayOf(
@@ -107,7 +107,12 @@ object DecoderStub {
                     45
                 )
             )
-        ),
+            SecurityDto(
+                cipherSuiteIdentifier = 1,
+                eDeviceKeyBytes = CborMapper.default.writeValueAsBytes(coseKey),
+                ephemeralPublicKey = coseKey
+            )
+        },
         deviceRetrievalMethods = listOf(
             DeviceRetrievalMethodDto(
                 type = 2,
