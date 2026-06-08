@@ -13,11 +13,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
@@ -29,7 +31,6 @@ import uk.gov.onelogin.sharing.core.coroutines.CoroutineNameExt.asCoroutineName
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-// DCMAW-20404: Expose all bluetooth state events
 @ContributesBinding(scope = AppScope::class, binding = binding<CentralBluetoothTransport>())
 @SingleIn(AppScope::class)
 class AndroidCentralBluetoothTransport(
@@ -57,7 +58,7 @@ class AndroidCentralBluetoothTransport(
         monitoringJob = monitorClientEvents()
     }
 
-    private fun prepareScanJob(serviceUuid: UUID): Job =  coroutineScope.launch(
+    private fun prepareScanJob(serviceUuid: UUID): Job = coroutineScope.launch(
         ioDispatcher + "$logTag.ScanAndConnect".asCoroutineName(),
     ) {
         when (val result = scanner.scan(serviceUuid).first()) {
@@ -115,12 +116,10 @@ class AndroidCentralBluetoothTransport(
         start = CoroutineStart.LAZY,
     ) {
         launch("$logTag.MonitorBluetoothState".asCoroutineName()) {
-            bluetoothStateMonitor.states.collect { status ->
-                if (status.isOff()) {
-                    _state.value = CentralBluetoothState.Error(
-                        CentralBluetoothTransportError.BLUETOOTH_TURNED_OFF
-                    )
-                }
+            bluetoothStateMonitor.states.filter(BluetoothStatus::isOff).collect { status ->
+                _state.value = CentralBluetoothState.Error(
+                    CentralBluetoothTransportError.BLUETOOTH_TURNED_OFF
+                )
             }
         }
         launch("$logTag.HandleGattClientEvent".asCoroutineName()) {

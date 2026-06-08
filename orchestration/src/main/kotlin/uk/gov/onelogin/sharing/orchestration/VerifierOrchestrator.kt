@@ -236,7 +236,6 @@ class VerifierOrchestrator(
         appCoroutineScope.launch { centralBluetoothTransport.stop() }
     }
 
-    // DCMAW-20404: Handle all bluetooth state events
     private suspend fun handleCentralBluetoothState(state: CentralBluetoothState) {
         if (sessionFlow.value.isComplete()) return
 
@@ -275,7 +274,7 @@ class VerifierOrchestrator(
             is CentralBluetoothState.Connected,
             CentralBluetoothState.Connecting,
             is CentralBluetoothState.Idle,
-            is CentralBluetoothState.Scanning,
+            is CentralBluetoothState.Scanning
                 -> Unit
         }
     }

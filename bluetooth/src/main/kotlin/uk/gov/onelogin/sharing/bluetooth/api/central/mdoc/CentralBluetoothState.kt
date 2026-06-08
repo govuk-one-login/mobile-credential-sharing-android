@@ -17,7 +17,7 @@ sealed interface CentralBluetoothState {
     /** The device is connecting to a peripheral. */
     data object Connecting : CentralBluetoothState
 
-    interface HasDeviceAddress : CentralBluetoothState {
+    sealed interface HasDeviceAddress : CentralBluetoothState {
         val address: String
     }
 
