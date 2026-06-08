@@ -180,10 +180,14 @@ def generate_x509_certificate(
     result = (
         CertificateBuilder()
         .subject_name(Name([
+            NameAttribute(NameOID.COUNTRY_NAME, "GB"),
+            NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "London"),
             NameAttribute(NameOID.COMMON_NAME, "mDoc Test Issuer"),
             NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
         ]))
         .issuer_name(Name([
+            NameAttribute(NameOID.COUNTRY_NAME, "GB"),
+            NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "London"),
             NameAttribute(NameOID.COMMON_NAME, "mDoc Test Issuer"),
             NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
         ]))

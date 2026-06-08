@@ -27,7 +27,7 @@ class FakeOrchestrator(
     override val holderSessionState: StateFlow<HolderSessionState> = initialHolderState
     override val verifierSessionState: StateFlow<VerifierSessionState> = initialVerifierState
 
-    override fun processQrCode(qrCode: String?) {
+    override suspend fun processQrCode(qrCode: String?) {
         when (val result = parser.parse(qrCode)) {
             is QrScanResult.Success -> {
                 initialVerifierState.value =

@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +23,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DEL
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
+// DCMAW-20404: Expose all bluetooth state events
 @ContributesBinding(scope = AppScope::class, binding = binding<PeripheralBluetoothTransport>())
 class AndroidPeripheralBluetoothTransport(
     private val bleAdvertiser: BleAdvertiser,

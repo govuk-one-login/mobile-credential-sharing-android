@@ -3,9 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.core
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import dev.zacsweers.metro.AppScope
@@ -28,26 +26,7 @@ class AndroidBluetoothStateMonitor(private val appContext: Context, private val 
     override val states: SharedFlow<BluetoothStatus> = _states
     private var isRegistered = false
 
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action != BluetoothAdapter.ACTION_STATE_CHANGED) return
-
-            val state = when (
-                intent.getIntExtra(
-                    BluetoothAdapter.EXTRA_STATE,
-                    BluetoothAdapter.ERROR
-                )
-            ) {
-                BluetoothAdapter.STATE_ON -> BluetoothStatus.ON
-                BluetoothAdapter.STATE_OFF -> BluetoothStatus.OFF
-                BluetoothAdapter.STATE_TURNING_ON -> BluetoothStatus.TURNING_ON
-                BluetoothAdapter.STATE_TURNING_OFF -> BluetoothStatus.TURNING_OFF
-                else -> BluetoothStatus.UNKNOWN
-            }
-
-            _states.tryEmit(state)
-        }
-    }
+    private val receiver = BluetoothStateBroadcastReceiver(_states::tryEmit)
 
     override fun start() {
         if (isRegistered) return

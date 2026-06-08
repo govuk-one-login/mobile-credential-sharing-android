@@ -3,9 +3,12 @@ package uk.gov.onelogin.sharing.orchestration.scan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.cameraService.scan.Scanner
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 
@@ -23,12 +26,15 @@ fun CredentialScanner(orchestrator: Orchestrator.Verifier, modifier: Modifier = 
             .create()
             .metroViewModelFactory
     }
+    val scope = rememberCoroutineScope { Dispatchers.IO }
 
     CompositionLocalProvider(LocalMetroViewModelFactory provides factory) {
         Scanner(
             modifier = modifier,
             onScanResult = {
-                orchestrator.processQrCode(it)
+                scope.launch {
+                    orchestrator.processQrCode(it)
+                }
             }
         )
     }

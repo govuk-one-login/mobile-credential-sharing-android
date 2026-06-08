@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 
 enum class CentralBluetoothTransportError {
+    BLUETOOTH_TURNED_OFF,
     BLUETOOTH_PERMISSION_MISSING,
     GATT_NOT_AVAILABLE,
     SERVICE_NOT_FOUND,

@@ -33,6 +33,7 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriodStubs
+import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 @OptIn(ExperimentalTime::class)
@@ -428,6 +429,11 @@ class Iso18013DocumentVerifierTest {
     ) {
         every {
             trustVerifier.verifyCOSESign1(any(), any())
-        } returns Pair(validityPeriod, encodedMSO)
+        } returns IssuerAuthResult(
+            certificateValidityPeriod = validityPeriod,
+            msoPayload = encodedMSO,
+            subjectCountry = "GB",
+            subjectState = "London"
+        )
     }
 }

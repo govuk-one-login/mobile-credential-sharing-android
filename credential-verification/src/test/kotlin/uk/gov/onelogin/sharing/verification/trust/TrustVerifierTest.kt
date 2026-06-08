@@ -7,16 +7,15 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
-import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
-import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
+import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
 
 @OptIn(ExperimentalTime::class)
 class TrustVerifierTest {
+
     /**
      * DCMAW-20246: AC2: [TrustVerifier] exposes 2 [TrustVerifier.verifyCOSESign1] methods with the
      * correct signatures - the first method (attached payload) returning
-     * a [Pair] of [CertificateValidityPeriod] and [ByteArray], with the second method
-     * (detached payload) returning nothing.
+     * an [IssuerAuthResult], with the second method (detached payload) returning nothing.
      */
     @Test
     fun `Ensure TrustVerifier constraints`() {
@@ -24,7 +23,7 @@ class TrustVerifierTest {
             .methodInfo
 
         val expectedDescriptors = listOf(
-            "${Pair::class.java.name} " +
+            "${IssuerAuthResult::class.java.name} " +
                 "(byte[], ${X509Certificate::class.java.simpleName})",
             "void (byte[], ${ECPublicKey::class.java.simpleName}, byte[])"
         )
