@@ -5,5 +5,14 @@ enum class BluetoothStatus {
     OFF,
     TURNING_ON,
     TURNING_OFF,
-    UNKNOWN
+    UNKNOWN;
+
+    fun isOff(): Boolean = this in offStates
+
+    companion object {
+        private val offStates = listOf(
+            OFF,
+            TURNING_OFF
+        )
+    }
 }

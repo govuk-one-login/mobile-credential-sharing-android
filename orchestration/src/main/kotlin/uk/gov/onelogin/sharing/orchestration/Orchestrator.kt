@@ -39,7 +39,7 @@ interface Orchestrator : Resettable {
     interface Verifier : Orchestrator {
         val verifierSessionState: StateFlow<VerifierSessionState>
 
-        fun processQrCode(qrCode: String?)
+        suspend fun processQrCode(qrCode: String?)
 
         companion object {
             const val JOURNEY_NAME: String = "verifier"

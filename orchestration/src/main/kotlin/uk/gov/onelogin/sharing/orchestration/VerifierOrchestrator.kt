@@ -80,7 +80,7 @@ class VerifierOrchestrator(
 
     init {
         appCoroutineScope.launch {
-            centralBluetoothTransport.state.collect { handleCentralBluetoothState(it) }
+            centralBluetoothTransport.state.collect(::handleCentralBluetoothState)
         }
     }
 
@@ -164,7 +164,7 @@ class VerifierOrchestrator(
             .let { safeTransitionTo(state = it, logMessage = START_ORCHESTRATION_ERROR) }
     }
 
-    override fun processQrCode(qrCode: String?) {
+    override suspend fun processQrCode(qrCode: String?) {
         val result = barcodeParser.parse(qrCode)
 
         if (result is QrScanResult.NotFound) return
@@ -271,7 +271,11 @@ class VerifierOrchestrator(
 
             is CentralBluetoothState.Message -> handleCentralBluetoothStateMessage(state)
 
-            else -> Unit
+            is CentralBluetoothState.Connected,
+            CentralBluetoothState.Connecting,
+            is CentralBluetoothState.Idle,
+            is CentralBluetoothState.Scanning
+            -> Unit
         }
     }
 
