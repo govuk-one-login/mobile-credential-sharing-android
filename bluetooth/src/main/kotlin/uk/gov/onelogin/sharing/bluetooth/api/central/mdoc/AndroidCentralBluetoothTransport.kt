@@ -112,7 +112,7 @@ class AndroidCentralBluetoothTransport(
      * @return a [Job] that collects values from the [bluetoothStateMonitor]. Updates the [state]
      * whenever bluetooth isn't enabled and ready for connecting with devices.
      */
-    internal fun monitorClientEvents(): Job = coroutineScope.launch(
+    private fun monitorClientEvents(): Job = coroutineScope.launch(
         ioDispatcher + "$logTag.BluetoothMonitoring".asCoroutineName(),
         start = CoroutineStart.LAZY
     ) {
