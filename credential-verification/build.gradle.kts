@@ -11,6 +11,10 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.jackson.cbor
+    ).forEach(::implementation)
+
+    listOf(
         libs.org.hamcrest,
         testFixtures(projects.credentialFormat)
     ).forEach(::testFixturesApi)
