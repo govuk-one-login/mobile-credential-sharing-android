@@ -9,12 +9,16 @@ sealed interface PeripheralBluetoothState {
     /** This is the initial state. */
     data object Idle : PeripheralBluetoothState
 
+    sealed interface HasDeviceAddress : PeripheralBluetoothState {
+        val address: String
+    }
+
     /**
      * The device has successfully connected.
      *
      * @param address The address of the connected device.
      */
-    data class Connected(val address: String) : PeripheralBluetoothState
+    data class Connected(override val address: String) : HasDeviceAddress
 
     /**
      * The device has disconnected.
@@ -22,8 +26,8 @@ sealed interface PeripheralBluetoothState {
      * @param address The address of the disconnected device, which may be null if the address
      * is not known.
      */
-    data class Disconnected(val address: String?, val isSessionEnd: Boolean) :
-        PeripheralBluetoothState
+    data class Disconnected(override val address: String, val isSessionEnd: Boolean) :
+        HasDeviceAddress
 
     /**
      * An error occurred during the session. This can be and error

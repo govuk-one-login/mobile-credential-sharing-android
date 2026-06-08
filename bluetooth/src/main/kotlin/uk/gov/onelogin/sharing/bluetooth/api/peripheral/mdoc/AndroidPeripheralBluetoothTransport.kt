@@ -30,9 +30,11 @@ class AndroidPeripheralBluetoothTransport(
     private val gattServerManager: GattServerManager,
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @ApplicationScope coroutineScope: CoroutineScope,
-    private val logger: Logger
+    private val logger: Logger,
 ) : PeripheralBluetoothTransport,
     MessageSender by gattServerManager {
+
+    private val serverEventTransformer = GattServerEventToPeripheralBluetoothState(logger)
 
     private val _state = MutableStateFlow<PeripheralBluetoothState>(PeripheralBluetoothState.Idle)
     override val state: StateFlow<PeripheralBluetoothState> = _state
@@ -57,7 +59,8 @@ class AndroidPeripheralBluetoothTransport(
             bluetoothStateMonitor.states.collect { state ->
                 when (state) {
                     BluetoothStatus.OFF,
-                    BluetoothStatus.TURNING_OFF -> {
+                    BluetoothStatus.TURNING_OFF,
+                        -> {
                         bleAdvertiser.stopAdvertise()
                         gattServerManager.close()
                         _bluetoothStatus.value = BluetoothStatus.OFF
@@ -125,47 +128,14 @@ class AndroidPeripheralBluetoothTransport(
     }
 
     private fun handleGattEvent(event: GattServerEvent) {
-        when (event) {
-            is GattServerEvent.Connected ->
-                _state.value = PeripheralBluetoothState.Connected(event.address)
-
-            is GattServerEvent.Disconnected ->
-                _state.value =
-                    PeripheralBluetoothState.Disconnected(event.address, event.isSessionEnd)
-
-            is GattServerEvent.Error ->
-                _state.value = PeripheralBluetoothState.Error(
-                    PeripheralBluetoothTransportError.fromGattError(event.error)
-                )
-
-            is GattServerEvent.ServiceAdded ->
-                logger.debug(logTag, "Service Added: ${event.service?.uuid}")
-
-            GattServerEvent.ServiceStopped ->
-                logger.debug(logTag, "GattService Stopped")
-
-            is GattServerEvent.UnsupportedEvent ->
-                logger.error(
-                    logTag,
-                    "Unsupported event - status: ${event.status} new state: ${event.newState}"
-                )
-
-            GattServerEvent.SessionStarted ->
-                logger.debug(
-                    logTag,
-                    "Connection has been setup successfully - session state started"
-                )
-
-            is GattServerEvent.SessionEnd -> {
-                _state.value = PeripheralBluetoothState.Ended(event.status)
-                logger.debug(
-                    logTag,
-                    "Session end command was received. Closing connection"
-                )
-            }
-
-            is GattServerEvent.MessageReceived ->
-                _state.value = PeripheralBluetoothState.MessageReceived(event.byteArray)
-        }
+       event.let(serverEventTransformer::transform)?.let { bluetoothState ->
+           _state.value = bluetoothState
+       }.also {
+           logger.debug(
+               logTag,
+               "Completed handling gatt server event: $event"
+           )
+       }
     }
 }
+
