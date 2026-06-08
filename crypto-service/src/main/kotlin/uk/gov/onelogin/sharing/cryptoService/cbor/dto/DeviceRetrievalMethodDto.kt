@@ -17,7 +17,8 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetri
 
 @JsonSerialize(using = DeviceRetrievalMethodDto.Serializer::class)
 @JsonDeserialize(using = DeviceRetrievalMethodDto.Deserializer::class)
-data class DeviceRetrievalMethodDto(val type: Int, val version: Int, val options: BleOptionsDto) : CborEncodable {
+data class DeviceRetrievalMethodDto(val type: Int, val version: Int, val options: BleOptionsDto) :
+    CborEncodable {
     fun getPeripheralServerModeUuidString(): String? = options.getPeripheralServerModeUuidString()
     fun getPeripheralServerModeUuid(): UUID? = options.peripheralServerModeUuid?.toUUID()
 
