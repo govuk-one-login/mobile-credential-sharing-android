@@ -5,7 +5,7 @@
         <ignore path="**/com.android.tools.layoutlib/layoutlib-api/31.13.0/**" />
         <ignore path="**/net.java.dev.jna/jna-platform/5.6.0/**" />
         <ignore path="**/org.bouncycastle/bcprov-jdk18on/1.81/**" />
-        <ignore path="**/org.jacoco/org.jacoco.agent/0.8.13/**" />
+        <ignore path="**/org.jacoco/org.jacoco.agent/0.8.14/**" />
         <ignore path="**/org.robolectric/shadows-framework/4.16/**" />
         <ignore path="**/org.robolectric/utils/4.16/**" />
         <!-- https://issuetracker.google.com/issues/423632847 -->
