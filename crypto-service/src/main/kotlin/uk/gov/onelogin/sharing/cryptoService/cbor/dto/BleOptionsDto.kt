@@ -17,9 +17,9 @@ import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
 @JsonSerialize(using = BleOptionsDto.Serializer::class)
 @JsonDeserialize(using = BleOptionsDto.Deserializer::class)
 data class BleOptionsDto(
-    @JsonProperty("0") val serverMode: Boolean,
-    @JsonProperty("1") val clientMode: Boolean,
-    @JsonProperty("10") val peripheralServerModeUuid: ByteArray?
+    @JsonProperty(SERVER_MODE_KEY) val serverMode: Boolean,
+    @JsonProperty(CLIENT_MODE_KEY) val clientMode: Boolean,
+    @JsonProperty(PERIPHERAL_UUID_KEY) val peripheralServerModeUuid: ByteArray?
 ) : CborEncodable {
     fun getPeripheralServerModeUuidString(): String? = peripheralServerModeUuid?.decodeToString()
 
@@ -51,11 +51,24 @@ data class BleOptionsDto(
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): BleOptionsDto {
             val root = p.codec.readTree<JsonNode>(p)
             return BleOptionsDto(
-                serverMode = root["0"].booleanValue(),
-                clientMode = root["1"].booleanValue(),
-                peripheralServerModeUuid = if (root.has("10")) root["10"].binaryValue() else null
+                serverMode = root[SERVER_MODE_KEY].booleanValue(),
+                clientMode = root[CLIENT_MODE_KEY].booleanValue(),
+                peripheralServerModeUuid = if (root.has(PERIPHERAL_UUID_KEY)) {
+                    root[PERIPHERAL_UUID_KEY].binaryValue()
+                } else {
+                    null
+                }
             )
         }
+    }
+
+    companion object {
+        const val SERVER_MODE_KEY = "0"
+        const val CLIENT_MODE_KEY = "1"
+        const val PERIPHERAL_UUID_KEY = "10"
+        const val SERVER_MODE_ID = 0L
+        const val CLIENT_MODE_ID = 1L
+        const val PERIPHERAL_UUID_ID = 10L
     }
 
     override fun equals(other: Any?): Boolean {

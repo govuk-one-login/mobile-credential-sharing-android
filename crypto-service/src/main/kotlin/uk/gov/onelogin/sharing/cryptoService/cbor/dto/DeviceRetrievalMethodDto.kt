@@ -47,23 +47,17 @@ data class DeviceRetrievalMethodDto(val type: Int, val version: Int, val options
             ctxt: DeserializationContext
         ): DeviceRetrievalMethodDto {
             val root = p.codec.readTree<JsonNode>(p)
-            val type = root[0].intValue()
-            val version = root[1].intValue()
-            val optsNode = root[2]
-            val options = BleOptionsDto(
-                serverMode = optsNode["0"].booleanValue(),
-                clientMode = optsNode["1"].booleanValue(),
-                peripheralServerModeUuid = if (optsNode.has(
-                        "10"
-                    )
-                ) {
-                    optsNode["10"].binaryValue()
-                } else {
-                    null
-                }
-            )
+            val type = root[TYPE_INDEX].intValue()
+            val version = root[VERSION_INDEX].intValue()
+            val options = p.codec.treeToValue(root[OPTIONS_INDEX], BleOptionsDto::class.java)
             return DeviceRetrievalMethodDto(type, version, options)
         }
+    }
+
+    companion object {
+        const val TYPE_INDEX = 0
+        const val VERSION_INDEX = 1
+        const val OPTIONS_INDEX = 2
     }
 }
 

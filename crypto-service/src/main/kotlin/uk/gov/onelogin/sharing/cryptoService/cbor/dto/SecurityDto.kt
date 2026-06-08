@@ -62,10 +62,10 @@ data class SecurityDto(
 
             val coseNode = parser.codec.readTree<JsonNode>(parser)
             val cose = CoseKeyDto(
-                keyType = coseNode["1"].longValue(),
-                curve = coseNode["-1"].longValue(),
-                x = coseNode["-2"].binaryValue(),
-                y = coseNode["-3"].binaryValue()
+                keyType = coseNode[CoseKeyDto.KEY_TYPE_KEY].longValue(),
+                curve = coseNode[CoseKeyDto.CURVE_KEY].longValue(),
+                x = coseNode[CoseKeyDto.X_KEY].binaryValue(),
+                y = coseNode[CoseKeyDto.Y_KEY].binaryValue()
             )
             return SecurityDto(
                 cipherSuiteIdentifier = cipherSuiteIdentifier,
@@ -81,12 +81,14 @@ data class SecurityDto(
         other as SecurityDto
         if (cipherSuiteIdentifier != other.cipherSuiteIdentifier) return false
         if (!eDeviceKeyBytes.contentEquals(other.eDeviceKeyBytes)) return false
+        if (ephemeralPublicKey != other.ephemeralPublicKey) return false
         return true
     }
 
     override fun hashCode(): Int {
         var result = cipherSuiteIdentifier
         result = 31 * result + eDeviceKeyBytes.contentHashCode()
+        result = 31 * result + (ephemeralPublicKey?.hashCode() ?: 0)
         return result
     }
 }

@@ -56,13 +56,20 @@ data class DeviceRequestDto(
     class Deserializer : JsonDeserializer<DeviceRequestDto>() {
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): DeviceRequestDto {
             val root = p.codec.readTree<JsonNode>(p)
-            val version = (root["0"] ?: root["version"])?.asText()
+            val version = (root[VERSION_KEY] ?: root["version"])?.asText()
                 ?: throw IllegalArgumentException("Missing version in DeviceRequest")
-            val docRequests = (root["1"] ?: root["docRequests"])
+            val docRequests = (root[DOC_REQUESTS_KEY] ?: root["docRequests"])
                 ?.map { p.codec.treeToValue(it, DocRequestDto::class.java) }
                 ?: emptyList()
             return DeviceRequestDto(version = version, docRequest = docRequests)
         }
+    }
+
+    companion object {
+        const val VERSION_KEY = "0"
+        const val DOC_REQUESTS_KEY = "1"
+        const val VERSION_ID = 0L
+        const val DOC_REQUESTS_ID = 1L
     }
 
     fun toDomain(): DeviceRequest = DeviceRequest(

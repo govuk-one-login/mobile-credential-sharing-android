@@ -45,12 +45,17 @@ data class DocRequestDto(
     class Deserializer : JsonDeserializer<DocRequestDto>() {
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): DocRequestDto {
             val root = p.codec.readTree<JsonNode>(p)
-            val itemsRequestNode = root["1"] ?: root["itemsRequest"]
+            // ISO 18013-5 specifies integer key 1, but some implementations use string key "itemsRequest"
+            val itemsRequestNode = root[ITEMS_REQUEST_KEY] ?: root["itemsRequest"]
                 ?: throw IllegalArgumentException("Missing itemsRequest in DocRequest")
             val itemsRequest = CborMapper.default
                 .readValue(itemsRequestNode.binaryValue(), ItemsRequestDto::class.java)
             return DocRequestDto(itemsRequest = itemsRequest)
         }
+    }
+
+    companion object {
+        const val ITEMS_REQUEST_KEY = "1"
     }
 }
 

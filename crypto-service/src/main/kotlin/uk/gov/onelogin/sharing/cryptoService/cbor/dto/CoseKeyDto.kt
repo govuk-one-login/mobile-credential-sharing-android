@@ -12,14 +12,10 @@ import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 
 @JsonSerialize(using = CoseKeyDto.Serializer::class)
 data class CoseKeyDto(
-    @JsonProperty("1")
-    val keyType: Long,
-    @JsonProperty("-1")
-    val curve: Long,
-    @JsonProperty("-2")
-    val x: ByteArray,
-    @JsonProperty("-3")
-    val y: ByteArray
+    @JsonProperty(KEY_TYPE_KEY) val keyType: Long,
+    @JsonProperty(CURVE_KEY) val curve: Long,
+    @JsonProperty(X_KEY) val x: ByteArray,
+    @JsonProperty(Y_KEY) val y: ByteArray
 ) : CborEncodable {
     class Serializer : StdSerializer<CoseKeyDto>(CoseKeyDto::class.java) {
         override fun serialize(
@@ -44,17 +40,21 @@ data class CoseKeyDto(
         }
     }
 
+    companion object {
+        const val KEY_TYPE_KEY = "1"
+        const val CURVE_KEY = "-1"
+        const val X_KEY = "-2"
+        const val Y_KEY = "-3"
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as CoseKeyDto
-
         if (keyType != other.keyType) return false
         if (curve != other.curve) return false
         if (!x.contentEquals(other.x)) return false
         if (!y.contentEquals(other.y)) return false
-
         return true
     }
 

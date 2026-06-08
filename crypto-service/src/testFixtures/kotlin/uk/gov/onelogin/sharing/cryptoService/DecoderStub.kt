@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService
 
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.BleOptionsDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
@@ -39,77 +38,20 @@ object DecoderStub {
                 keyType = 2L,
                 curve = 1L,
                 x = byteArrayOf(
-                    -109,
-                    -68,
-                    38,
-                    41,
-                    73,
-                    -111,
-                    -26,
-                    -81,
-                    -88,
-                    -51,
-                    -111,
-                    -127,
-                    -42,
-                    -29,
-                    -64,
-                    41,
-                    -8,
-                    -68,
-                    -70,
-                    -104,
-                    -94,
-                    3,
-                    -62,
-                    66,
-                    -13,
-                    -62,
-                    37,
-                    -126,
-                    15,
-                    4,
-                    106,
-                    -86
+                    -109, -68, 38, 41, 73, -111, -26, -81, -88, -51, -111, -127, -42, -29, -64,
+                    41, -8, -68, -70, -104, -94, 3, -62, 66, -13, -62, 37, -126, 15, 4, 106, -86
                 ),
                 y = byteArrayOf(
-                    60,
-                    66,
-                    38,
-                    -6,
-                    108,
-                    39,
-                    -38,
-                    106,
-                    -1,
-                    -71,
-                    3,
-                    -60,
-                    47,
-                    124,
-                    33,
-                    28,
-                    120,
-                    4,
-                    -15,
-                    -44,
-                    127,
-                    71,
-                    71,
-                    -14,
-                    -93,
-                    -39,
-                    -103,
-                    -51,
-                    123,
-                    44,
-                    89,
-                    45
+                    60, 66, 38, -6, 108, 39, -38, 106, -1, -71, 3, -60, 47, 124, 33, 28, 120, 4,
+                    -15, -44, 127, 71, 71, -14, -93, -39, -103, -51, 123, 44, 89, 45
                 )
             )
+            val eDeviceKeyBytes = "bf0102200121582093bc26294991e6afa8cd9181d6e3c029f8bcba98a2" +
+                "03c242f3c225820f046aaa2258203c4226fa6c27da6affb903c42f7c211c7804f1d47f" +
+                "4747f2a3d999cd7b2c592dff"
             SecurityDto(
                 cipherSuiteIdentifier = 1,
-                eDeviceKeyBytes = CborMapper.default.writeValueAsBytes(coseKey),
+                eDeviceKeyBytes = eDeviceKeyBytes.hexToByteArray(),
                 ephemeralPublicKey = coseKey
             )
         },
