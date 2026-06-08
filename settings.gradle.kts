@@ -46,11 +46,12 @@ listOf(
     ":crypto-service",
     ":exchange-format",
     ":holder",
+    ":iso18013-6-tests",
     ":orchestration",
     ":sdk",
     ":ui:ui-api",
     ":ui:ui-impl",
-    ":verifier",
+    ":verifier"
 ).forEach(::include)
 
 /**
