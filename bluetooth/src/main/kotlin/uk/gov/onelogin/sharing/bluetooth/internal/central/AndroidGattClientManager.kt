@@ -30,7 +30,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 
@@ -38,7 +38,7 @@ const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 @Suppress("TooManyFunctions")
 class AndroidGattClientManager(
     private val context: Context,
-    private val permissionChecker: PermissionCheckerV2,
+    private val permissionChecker: PermissionChecker,
     private val serviceValidator: ServiceValidator,
     private val gattWriter: GattWriter,
     private val logger: Logger,

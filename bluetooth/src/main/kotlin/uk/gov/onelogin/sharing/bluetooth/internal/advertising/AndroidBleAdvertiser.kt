@@ -22,12 +22,12 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingExcepti
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 
 @ContributesBinding(AppScope::class)
 class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
-    private val permissionChecker: PermissionCheckerV2,
+    private val permissionChecker: PermissionChecker,
     private val logger: Logger,
     private val startTimeoutMs: Long = 5_000
 ) : BleAdvertiser {

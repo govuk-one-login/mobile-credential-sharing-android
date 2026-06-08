@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.core.permission
 
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2.PermissionCheckResult
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult
 
 object IterablePermissionsExt {
     fun Iterable<PermissionCheckResult>.toPermissionsList(): List<String> =

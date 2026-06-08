@@ -11,15 +11,15 @@ import uk.gov.onelogin.sharing.bluetooth.ContextExt.userManager
 import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasUndeterminedPermissions
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 
 @ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<BluetoothState>>())
 @Inject
 class BluetoothPrerequisiteEvaluator(
     private val context: Context,
-    permissionChecker: PermissionCheckerV2
-) : PermissionCheckerV2 by permissionChecker,
+    permissionChecker: PermissionChecker
+) : PermissionChecker by permissionChecker,
     PrerequisiteEvaluator<BluetoothState> {
     override fun evaluate(): BluetoothState? = evaluatePermissions()
         ?: evaluateSupport()

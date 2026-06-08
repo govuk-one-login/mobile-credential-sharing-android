@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.junit.Before
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toUndeterminedPermissions
@@ -28,7 +28,7 @@ class BluetoothPrerequisiteEvaluatorTest {
         "android.permission.BLUETOOTH_SCAN"
     )
 
-    private var permissionResult: MutableList<PermissionCheckerV2.PermissionCheckResult> =
+    private var permissionResult: MutableList<PermissionChecker.PermissionCheckResult> =
         mutableListOf()
 
     private val evaluator by lazy {

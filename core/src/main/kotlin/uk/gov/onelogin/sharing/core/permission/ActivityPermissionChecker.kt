@@ -3,12 +3,12 @@ package uk.gov.onelogin.sharing.core.permission
 import android.app.Activity
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerV2.PermissionCheckResult
+import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult
 
 class ActivityPermissionChecker internal constructor(
     private val activity: Activity,
     private val markerStore: PermissionDenialMarkerStore
-) : PermissionCheckerV2 {
+) : PermissionChecker {
 
     constructor(
         activity: Activity

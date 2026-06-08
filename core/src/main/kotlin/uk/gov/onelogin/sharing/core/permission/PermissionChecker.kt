@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.core.permission
 
-fun interface PermissionCheckerV2 {
+fun interface PermissionChecker {
     /**
      * @return An empty [List] when all requested [permissions] are granted. Otherwise, a list of
      * [PermissionCheckResult] objects
@@ -17,7 +17,7 @@ fun interface PermissionCheckerV2 {
         )
 
     /**
-     * State table representing the results obtained from [PermissionCheckerV2.checkPermissions].
+     * State table representing the results obtained from [PermissionChecker.checkPermissions].
      *
      * @param permission The android permission [String] causing the failure.
      */
