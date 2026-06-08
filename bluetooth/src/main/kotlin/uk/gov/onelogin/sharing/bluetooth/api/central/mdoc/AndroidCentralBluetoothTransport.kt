@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.logging.api.v2.Logger
@@ -116,11 +117,15 @@ class AndroidCentralBluetoothTransport(
         start = CoroutineStart.LAZY
     ) {
         launch("$logTag.MonitorBluetoothState".asCoroutineName()) {
-            bluetoothStateMonitor.states.filter(BluetoothStatus::isOff).collect { status ->
-                _state.value = CentralBluetoothState.Error(
-                    CentralBluetoothTransportError.BLUETOOTH_TURNED_OFF
-                )
-            }
+            bluetoothStateMonitor.states
+                .filter(BluetoothStatus::isOff)
+                .map {
+                    CentralBluetoothState.Error(
+                        CentralBluetoothTransportError.BLUETOOTH_TURNED_OFF
+                    )
+                }.collect { error ->
+                    _state.value = error
+                }
         }
         launch("$logTag.HandleGattClientEvent".asCoroutineName()) {
             gattClientManager.events.collect(::handleGattClientEvent)
