@@ -1,7 +1,6 @@
 plugins {
     listOf(
-        libs.plugins.templates.android.library,
-        libs.plugins.metro.di
+        libs.plugins.templates.android.library
     ).forEach { alias(it) }
 }
 val androidCompileSdk: Int by rootProject.extra

@@ -11,8 +11,6 @@ set -o errexit
 ./gradlew \
   :credential-format:jacocoTestReport \
   :credential-format:test \
-  :credential-verification:jacocoTestReport \
-  :credential-verification:test \
   :exchange-format:jacocoTestReport \
   :exchange-format:test \
   testDebugUnitTest \

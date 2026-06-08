@@ -6,6 +6,7 @@ import java.security.cert.X509Certificate
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
@@ -19,6 +20,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 
 class VerifierSharingSdkImplTest {
     private val appGraph = mockk<CredentialSharingAppGraph>()
+    private val logger = SystemLogger()
     private val verifierGraphFactory = mockk<VerifyCredentialGraph.Factory>()
     private val credentialVerificationFactory = mockk<CredentialVerificationGraph.Factory>(
         relaxed = true
@@ -45,7 +47,10 @@ class VerifierSharingSdkImplTest {
         )
 
         every {
-            credentialVerificationFactory.create(trustedRootCertificate)
+            appGraph.logger()
+        } returns logger
+        every {
+            credentialVerificationFactory.create(trustedRootCertificate, logger)
         } returns credentialVerificationGraph
 
         every {

@@ -14,12 +14,16 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 
 class TrustVerifierImplTest {
-    private val verifier = TrustVerifierImpl()
+    private val logger: Logger = SystemLogger()
+    private val decoder = CoseSign1Decoder(logger)
+    private val verifier = TrustVerifierImpl(decoder)
     private val cborMapper = ObjectMapper(CBORFactory())
 
     @Test
@@ -44,7 +48,7 @@ class TrustVerifierImplTest {
     fun `CoseSign1Decoder decodes issuerAuth from mock credential`() {
         val issuerAuth = extractIssuerAuth()
 
-        val coseSign1 = CoseSign1Decoder.decode(issuerAuth)
+        val coseSign1 = decoder.decode(issuerAuth)
 
         assertNotNull(coseSign1.protectedHeader)
         assertNotNull(coseSign1.unprotectedHeader)
@@ -55,8 +59,8 @@ class TrustVerifierImplTest {
     @Test
     fun `CoseSign1Decoder extracts x5chain from mock credential`() {
         val issuerAuth = extractIssuerAuth()
-        val coseSign1 = CoseSign1Decoder.decode(issuerAuth)
-        val x5chain = CoseSign1Decoder.extractX5Chain(coseSign1)
+        val coseSign1 = decoder.decode(issuerAuth)
+        val x5chain = decoder.extractX5Chain(coseSign1)
 
         assertEquals(x5chain.size, 1)
     }

@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verification.trust
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import io.mockk.mockk
 import java.io.ByteArrayOutputStream
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.notNullValue
@@ -9,6 +10,8 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.cose.CoseSign1
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
@@ -19,6 +22,8 @@ class CoseSign1DecoderDecodeErrorTest(
     @Suppress("unused") private val name: String,
     private val input: ByteArray
 ) {
+    private val decoder = CoseSign1Decoder(SystemLogger())
+
     companion object {
         private val cborFactory = CBORFactory()
 
@@ -71,7 +76,7 @@ class CoseSign1DecoderDecodeErrorTest(
     @Test
     fun `decode throws MALFORMED_ISSUER_AUTH`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            CoseSign1Decoder.decode(input)
+            decoder.decode(input)
         }
 
         assertThat(exception, hasError(VerificationError.MALFORMED_ISSUER_AUTH))
@@ -80,12 +85,13 @@ class CoseSign1DecoderDecodeErrorTest(
 
 class CoseSign1DecoderTest {
     private val cborFactory = CBORFactory()
+    private val decoder = CoseSign1Decoder(SystemLogger())
 
     @Test
     fun `decode with valid COSE_Sign1 returns CoseSign1`() {
         val cbor = buildCoseSign1Cbor()
 
-        val result = CoseSign1Decoder.decode(cbor)
+        val result = decoder.decode(cbor)
 
         assertThat(result.protectedHeader, notNullValue())
         assertThat(result.signature, notNullValue())
@@ -95,7 +101,7 @@ class CoseSign1DecoderTest {
     fun `decode with null payload returns CoseSign1 with null payload`() {
         val cbor = buildCoseSign1Cbor(payload = null)
 
-        val result = CoseSign1Decoder.decode(cbor)
+        val result = decoder.decode(cbor)
 
         assertThat(result.payload, equalTo(null))
     }
@@ -103,10 +109,10 @@ class CoseSign1DecoderTest {
     @Test
     fun `extractX5Chain with no x5chain throws MALFORMED_ISSUER_AUTH`() {
         val cbor = buildCoseSign1Cbor()
-        val coseSign1 = CoseSign1Decoder.decode(cbor)
+        val coseSign1 = decoder.decode(cbor)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            CoseSign1Decoder.extractX5Chain(coseSign1)
+            decoder.extractX5Chain(coseSign1)
         }
 
         assertThat(exception, hasError(VerificationError.MALFORMED_ISSUER_AUTH))
@@ -116,9 +122,9 @@ class CoseSign1DecoderTest {
     fun `extractX5Chain with single cert in unprotected header returns it`() {
         val certBytes = byteArrayOf(0x30, 0x01, 0x00)
         val cbor = buildCoseSign1Cbor(unprotectedHeader = buildX5ChainMapCbor(certBytes))
-        val coseSign1 = CoseSign1Decoder.decode(cbor)
+        val coseSign1 = decoder.decode(cbor)
 
-        val result = CoseSign1Decoder.extractX5Chain(coseSign1)
+        val result = decoder.extractX5Chain(coseSign1)
 
         assertThat(result.size, equalTo(1))
         assertThat(result[0], equalTo(certBytes))
@@ -129,9 +135,9 @@ class CoseSign1DecoderTest {
         val cert1 = byteArrayOf(0x30, 0x01)
         val cert2 = byteArrayOf(0x30, 0x02)
         val cbor = buildCoseSign1Cbor(unprotectedHeader = buildX5ChainArrayMapCbor(cert1, cert2))
-        val coseSign1 = CoseSign1Decoder.decode(cbor)
+        val coseSign1 = decoder.decode(cbor)
 
-        val result = CoseSign1Decoder.extractX5Chain(coseSign1)
+        val result = decoder.extractX5Chain(coseSign1)
 
         assertThat(result.size, equalTo(2))
         assertThat(result[0], equalTo(cert1))
@@ -148,7 +154,7 @@ class CoseSign1DecoderTest {
             signature = byteArrayOf(0x02)
         )
 
-        val result = CoseSign1Decoder.extractX5Chain(coseSign1)
+        val result = decoder.extractX5Chain(coseSign1)
 
         assertThat(result.size, equalTo(1))
         assertThat(result[0], equalTo(certBytes))
@@ -164,7 +170,7 @@ class CoseSign1DecoderTest {
             signature = byteArrayOf(0x02)
         )
 
-        val result = CoseSign1Decoder.extractX5Chain(coseSign1)
+        val result = decoder.extractX5Chain(coseSign1)
 
         assertThat(result.size, equalTo(1))
         assertThat(result[0], equalTo(certBytes))

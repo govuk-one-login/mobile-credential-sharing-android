@@ -40,7 +40,7 @@ import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 @RunWith(TestParameterInjector::class)
 class Iso18013DocumentVerifierTest {
     private val classInfo = scanResult.getClassInfo(Iso18013DocumentVerifier::class.java.name)
-    private val privateFunctionSuffix = $$"$credential_verification"
+    private val privateFunctionSuffix = $$"$credential_verification_debug"
 
     /**
      * DCMAW-20269: AC1: A Sharing SDK document can be wrapped in [SharingVerifiableDocument] and

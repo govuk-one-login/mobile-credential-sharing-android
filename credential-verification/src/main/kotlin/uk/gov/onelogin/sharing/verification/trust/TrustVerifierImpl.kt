@@ -14,12 +14,12 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.Certificate
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
 
 @ContributesBinding(CredentialVerificationScope::class)
-class TrustVerifierImpl : TrustVerifier {
+class TrustVerifierImpl(private val coseSign1Decoder: CoseSign1Decoder) : TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
     override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult {
-        val coseSign1 = CoseSign1Decoder.decode(data)
-        val x5chain = CoseSign1Decoder.extractX5Chain(coseSign1)
+        val coseSign1 = coseSign1Decoder.decode(data)
+        val x5chain = coseSign1Decoder.extractX5Chain(coseSign1)
 
         val certFactory = CertificateFactory.getInstance("X.509")
         val certs = x5chain.map {
