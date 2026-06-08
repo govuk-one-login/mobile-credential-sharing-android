@@ -34,7 +34,7 @@ class GattClientEventToCentralBluetoothStateTest {
     @Test
     fun `Converts client events to central bluetooth states`(
         @TestParameter inputs: Pair<GattClientEvent, Matcher<in CentralBluetoothState>> =
-            testValuesIn(mapping),
+            testValuesIn(mapping)
     ) {
         val (event, assertion) = inputs
         assertThat(transformer.transform(event), assertion)
@@ -52,7 +52,8 @@ class GattClientEventToCentralBluetoothStateTest {
                 GattClientEvent.Connected(DUMMY_STRING) to isConnected(hasAddress(DUMMY_STRING)),
                 GattClientEvent.Disconnected(DUMMY_STRING, DUMMY_BOOLEAN) to isDisconnected(
                     allOf(
-                        hasAddress(DUMMY_STRING), hasSessionEnd(DUMMY_BOOLEAN)
+                        hasAddress(DUMMY_STRING),
+                        hasSessionEnd(DUMMY_BOOLEAN)
                     )
                 ),
 
@@ -69,14 +70,18 @@ class GattClientEventToCentralBluetoothStateTest {
                     equalTo(SessionEndStates.SUCCESS)
                 ),
                 GattClientEvent.Message(
-                    uuid = dummyUuid, value = dummyByteArray
+                    uuid = dummyUuid,
+                    value = dummyByteArray
                 ) to isMessage(
                     allOf(
-                        hasUuid(dummyUuid), hasValue(dummyByteArray)
+                        hasUuid(dummyUuid),
+                        hasValue(dummyByteArray)
                     )
                 ),
                 GattClientEvent.UnsupportedEvent(
-                    DUMMY_STRING, Int.MAX_VALUE, Int.MAX_VALUE
+                    DUMMY_STRING,
+                    Int.MAX_VALUE,
+                    Int.MAX_VALUE
                 ) to nullValue()
             )
     }

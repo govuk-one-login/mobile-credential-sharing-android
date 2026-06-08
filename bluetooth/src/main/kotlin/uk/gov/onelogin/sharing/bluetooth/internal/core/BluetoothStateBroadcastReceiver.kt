@@ -6,9 +6,8 @@ import android.content.Context
 import android.content.Intent
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 
-class BluetoothStateBroadcastReceiver(
-    private val onStateChange: (BluetoothStatus) -> Unit = {}
-) : BroadcastReceiver() {
+class BluetoothStateBroadcastReceiver(private val onStateChange: (BluetoothStatus) -> Unit = {}) :
+    BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != BluetoothAdapter.ACTION_STATE_CHANGED) return
 

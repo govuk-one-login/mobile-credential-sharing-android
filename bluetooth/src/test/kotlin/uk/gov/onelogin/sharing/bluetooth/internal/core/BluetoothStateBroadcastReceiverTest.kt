@@ -42,7 +42,7 @@ class BluetoothStateBroadcastReceiverTest {
 
     @Test
     fun `Transforms android bluetooth state to a status`(
-        @TestParameter inputs: Pair<Int, BluetoothStatus> = namedTestValuesIn(statesToStatuses),
+        @TestParameter inputs: Pair<Int, BluetoothStatus> = namedTestValuesIn(statesToStatuses)
     ) {
         val (adapterState, expected) = inputs
 
@@ -70,7 +70,7 @@ class BluetoothStateBroadcastReceiverTest {
             "OFF" to (BluetoothAdapter.STATE_OFF to BluetoothStatus.OFF),
             "TURNING_ON" to (BluetoothAdapter.STATE_TURNING_ON to BluetoothStatus.TURNING_ON),
             "TURNING_OFF" to (BluetoothAdapter.STATE_TURNING_OFF to BluetoothStatus.TURNING_OFF),
-            "ERROR -> UNKNOWN" to (BluetoothAdapter.ERROR to BluetoothStatus.UNKNOWN),
+            "ERROR -> UNKNOWN" to (BluetoothAdapter.ERROR to BluetoothStatus.UNKNOWN)
         )
     }
 }

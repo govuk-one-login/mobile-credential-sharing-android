@@ -5,16 +5,16 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.core.Transformer
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-class GattClientEventToCentralBluetoothState(
-    private val logger: Logger,
-) : Transformer<GattClientEvent, CentralBluetoothState?> {
+class GattClientEventToCentralBluetoothState(private val logger: Logger) :
+    Transformer<GattClientEvent, CentralBluetoothState?> {
     override fun transform(source: GattClientEvent): CentralBluetoothState? = when (source) {
         GattClientEvent.Connecting -> CentralBluetoothState.Connecting
 
         is GattClientEvent.Connected -> CentralBluetoothState.Connected(source.deviceAddress)
 
         is GattClientEvent.Disconnected -> CentralBluetoothState.Disconnected(
-            source.deviceAddress, source.isSessionEnd
+            source.deviceAddress,
+            source.isSessionEnd
         )
 
         GattClientEvent.ConnectionStateStarted -> CentralBluetoothState.ConnectionStateStarted

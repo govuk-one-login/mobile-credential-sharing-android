@@ -39,7 +39,7 @@ class AndroidCentralBluetoothTransport(
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
     private val logger: Logger,
-    private val ioDispatcher: CoroutineContext = Dispatchers.IO,
+    private val ioDispatcher: CoroutineContext = Dispatchers.IO
 ) : CentralBluetoothTransport,
     MessageSender by gattClientManager {
 
@@ -59,7 +59,7 @@ class AndroidCentralBluetoothTransport(
     }
 
     private fun prepareScanJob(serviceUuid: UUID): Job = coroutineScope.launch(
-        ioDispatcher + "$logTag.ScanAndConnect".asCoroutineName(),
+        ioDispatcher + "$logTag.ScanAndConnect".asCoroutineName()
     ) {
         when (val result = scanner.scan(serviceUuid).first()) {
             is ScanEvent.DeviceFound -> {
@@ -113,7 +113,7 @@ class AndroidCentralBluetoothTransport(
      */
     internal fun monitorClientEvents(): Job = coroutineScope.launch(
         ioDispatcher + "$logTag.BluetoothMonitoring".asCoroutineName(),
-        start = CoroutineStart.LAZY,
+        start = CoroutineStart.LAZY
     ) {
         launch("$logTag.MonitorBluetoothState".asCoroutineName()) {
             bluetoothStateMonitor.states.filter(BluetoothStatus::isOff).collect { status ->

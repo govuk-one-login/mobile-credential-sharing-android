@@ -11,7 +11,7 @@ object AndroidCentralBluetoothTransportMatchers {
     fun hasMonitoringJob(
         matcher: Matcher<in Job> = not(nullValue())
     ): Matcher<in AndroidCentralBluetoothTransport> = AndroidCentralBluetoothTransportMatcher(
-        matcher,
+        matcher
     ) { it?.monitoringJob }
 
     fun hasScanJob(
@@ -29,10 +29,9 @@ object AndroidCentralBluetoothTransportMatchers {
             item: AndroidCentralBluetoothTransport?,
             mismatchDescription: Description?
         ) = matcher.describeMismatch(transformer(item), mismatchDescription)
-        override fun matchesSafely(
-            item: AndroidCentralBluetoothTransport?
-        ): Boolean = matcher.matches(
-            transformer(item)
-        )
+        override fun matchesSafely(item: AndroidCentralBluetoothTransport?): Boolean =
+            matcher.matches(
+                transformer(item)
+            )
     }
 }
