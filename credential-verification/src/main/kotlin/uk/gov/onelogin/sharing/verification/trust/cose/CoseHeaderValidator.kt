@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.verification.trust.cose
 
+import com.fasterxml.jackson.core.StreamReadFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import dev.zacsweers.metro.Inject
 import uk.gov.logging.api.v2.Logger
@@ -11,7 +13,9 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 @Inject
 internal class CoseHeaderValidator(private val logger: Logger) {
     private val logTag = this::class.java.simpleName
-    private val cborMapper = ObjectMapper(CBORFactory())
+    private val cborMapper: ObjectMapper = JsonMapper.builder(CBORFactory())
+        .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
+        .build()
 
     companion object {
         private const val COSE_ALG_LABEL = 1L
