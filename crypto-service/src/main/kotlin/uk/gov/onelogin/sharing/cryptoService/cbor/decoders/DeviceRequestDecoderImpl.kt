@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.decoders
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.core.JsonProcessingException
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
@@ -43,7 +43,12 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
                 }
             )
         }
-    } catch (e: MismatchedInputException) {
+    } catch (e: DeviceRequestDecodingException) {
+        throw e
+    } catch (e: JsonProcessingException) {
+        logger.error(logger.logTag, "session termination: status code 11")
+        throw DeviceRequestDecodingException(e.message ?: "CBOR decoding error", e)
+    } catch (e: IllegalArgumentException) {
         logger.error(logger.logTag, "session termination: status code 11")
         throw DeviceRequestDecodingException(e.message ?: "CBOR decoding error", e)
     }

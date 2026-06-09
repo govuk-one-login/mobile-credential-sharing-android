@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import io.mockk.mockk
+import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
+import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_ARRAY_4
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_BSTR_1
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_EMPTY_MAP
@@ -38,6 +39,13 @@ class DeviceSignatureUseCaseImplTest {
         val content = rDer + sDer
         return byteArrayOf(0x30, content.size.toByte()) + content
     }
+
+    private fun encodeDeviceNameSpacesBytes(): ByteArray = ByteArrayOutputStream().also { out ->
+        CBORFactory().createGenerator(out).use { gen ->
+            gen.writeStartObject(0)
+            gen.writeEndObject()
+        }
+    }.toByteArray().let { EmbeddedCbor(it).toCbor() }
 
     private val result by lazy {
         deviceSignatureUseCase.buildDeviceSignedStructures(signatureBytes)

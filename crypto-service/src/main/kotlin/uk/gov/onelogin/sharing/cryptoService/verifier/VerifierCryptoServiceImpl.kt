@@ -86,7 +86,8 @@ class VerifierCryptoServiceImpl(
         val sessionTranscriptBytes = EmbeddedCbor(sessionTranscript).toCbor()
 
         val eDevicePublicKey = engagementData.security.ephemeralPublicKey
-            .toEcPublicKey()
+            ?.toEcPublicKey()
+            ?: throw IllegalArgumentException("Missing ephemeral public key in device engagement")
 
         logger.debug(logTag, "SessionTranscriptBytes constructed successfully")
 

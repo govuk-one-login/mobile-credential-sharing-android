@@ -3,35 +3,20 @@ package uk.gov.onelogin.sharing.cryptoService
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.UUID_16_BIT
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.bleOptionNodes
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.SECURITY
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.securityNodes
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceEngagementSerializer
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.DeviceRetrievalMethodSerializer
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.SecuritySerializer
-import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_TYPE
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_VERSION
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
-import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 object DeviceEngagementStub {
-    val deviceEngagementSerializers: Map<Class<*>, StdSerializer<*>> = mapOf(
-        DeviceEngagement::class.java to DeviceEngagementSerializer(),
-        DeviceRetrievalMethod::class.java to DeviceRetrievalMethodSerializer(),
-        BleOptions::class.java to BleOptionsSerializer(),
-        Security::class.java to SecuritySerializer()
-    )
-
     const val ENGAGEMENT_EXPECTED_BASE_64 =
         "owBjMS4wAYIB2BhQRkFLRV9FREVWSUNFX0tFWQKBgwIBowD1AfQKUBEREREiIjMzRERVVVVVVVU="
 
     private val jsonNodeFactory: JsonNodeFactory = JsonNodeFactory.instance
+
     private fun deviceEngagementBuilder(): DeviceEngagement.Builder =
         DeviceEngagement.builder(SECURITY)
             .version("1.0")
@@ -54,11 +39,7 @@ object DeviceEngagementStub {
         deviceRetrievalMethods: List<ArrayNode> = listOf(deviceRetrievalNodes())
     ): ObjectNode {
         val drmsArray = jsonNodeFactory.arrayNode()
-
-        deviceRetrievalMethods.forEach { drm ->
-            drmsArray.add(drm)
-        }
-
+        deviceRetrievalMethods.forEach { drmsArray.add(it) }
         return jsonNodeFactory.objectNode().apply {
             put("0", version)
             set<ArrayNode>("1", securityNode)

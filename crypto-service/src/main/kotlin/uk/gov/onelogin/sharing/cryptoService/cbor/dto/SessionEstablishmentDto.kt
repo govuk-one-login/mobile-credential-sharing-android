@@ -62,12 +62,12 @@ data class SessionEstablishmentDto(val eReaderKey: EmbeddedCbor, val data: ByteA
                 CborErrors.DECODING_ERROR.errorMessage
             }
 
-            val eReaderKeyNode = root["1"] ?: root[E_READER_KEY]
+            val eReaderKeyNode = root[E_READER_KEY_KEY] ?: root[E_READER_KEY_FALLBACK]
             requireNotNull(eReaderKeyNode) {
                 CborErrors.PARSING_ERROR.errorMessage
             }
 
-            val dataNode = root["10"] ?: root[DATA]
+            val dataNode = root[DATA_KEY] ?: root[DATA_FALLBACK]
             requireNotNull(dataNode) {
                 CborErrors.PARSING_ERROR.errorMessage
             }
@@ -80,10 +80,14 @@ data class SessionEstablishmentDto(val eReaderKey: EmbeddedCbor, val data: ByteA
                 data = dataBytes
             )
         }
+    }
 
-        companion object {
-            const val E_READER_KEY = "eReaderKey"
-            const val DATA = "data"
-        }
+    companion object {
+        const val E_READER_KEY_KEY = "1"
+        const val DATA_KEY = "10"
+        const val E_READER_KEY_FALLBACK = "eReaderKey"
+        const val DATA_FALLBACK = "data"
+        const val E_READER_KEY_ID = 1L
+        const val DATA_ID = 10L
     }
 }
