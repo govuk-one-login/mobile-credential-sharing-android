@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService
 
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.UUID_STRING
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
 
 object EmbeddedCborStub {
     val EXPECTED_PREFIX = byteArrayOf(

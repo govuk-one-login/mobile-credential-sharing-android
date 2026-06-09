@@ -3,9 +3,9 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 import kotlin.test.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 
 class SessionEstablishmentDeserializerTest {
 

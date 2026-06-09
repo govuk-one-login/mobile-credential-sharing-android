@@ -2,11 +2,11 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
 
 import java.security.interfaces.ECPublicKey
 import java.util.UUID
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.validSessionDataDtoBytes
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDtoStubs.validSessionDataDtoBytes
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseStub

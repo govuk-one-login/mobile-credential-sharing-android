@@ -7,9 +7,9 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
 import uk.gov.onelogin.sharing.cryptoService.cose.Cose
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
 
 class CoseKeyDtoTest {
 

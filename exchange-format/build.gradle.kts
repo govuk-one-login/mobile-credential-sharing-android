@@ -5,12 +5,21 @@ plugins {
     ).forEach { alias(it) }
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+}
+
 dependencies {
     listOf(
-        projects.credentialFormat
+        projects.credentialFormat,
+        libs.jackson.cbor
     ).forEach(::api)
 
     listOf(
+        libs.jackson.core,
+        libs.jackson.kotlin,
         libs.kotlinx.serialization.json
     ).forEach(::implementation)
 
@@ -18,6 +27,12 @@ dependencies {
         libs.junit,
         libs.com.google.test.parameter.injector
     ).forEach(::testImplementation)
+
+    listOf(
+        libs.junit,
+        libs.jackson.cbor,
+        libs.com.google.test.parameter.injector
+    ).forEach(::testFixturesImplementation)
 }
 
 jacoco {

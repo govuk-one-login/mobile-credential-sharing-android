@@ -6,8 +6,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_TRANSCRIPT
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SALT
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 
 class GenerateSaltTest {
     @Test

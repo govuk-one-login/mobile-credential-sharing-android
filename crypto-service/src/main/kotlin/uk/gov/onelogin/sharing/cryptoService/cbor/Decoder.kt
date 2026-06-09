@@ -12,12 +12,13 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborErrors.DECODING_ERROR
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeriveUntaggedCborImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptDecoderImpl
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborErrors.DECODING_ERROR
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 
 private const val TAG = "decodeDeviceEngagement"
 

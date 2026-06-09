@@ -5,15 +5,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.CBOR_TAG_24_BYTE_0
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.CBOR_TAG_24_BYTE_1
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.DeviceRequestDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.DocRequestDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.ItemsRequestDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.toDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.toDto
 
 class DeviceRequestDtoTest {
 

@@ -46,8 +46,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")

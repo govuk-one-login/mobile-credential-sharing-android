@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService
 
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionEstablishmentDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 
 object SessionEstablishmentStub {
     const val MOCK_SESSION_ESTABLISHMENT_DATA =

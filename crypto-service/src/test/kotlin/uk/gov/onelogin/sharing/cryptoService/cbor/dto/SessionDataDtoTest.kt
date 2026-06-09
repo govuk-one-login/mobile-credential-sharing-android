@@ -21,12 +21,14 @@ import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.cryptoService.cbor.HexFormatter
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoMatchers.hasData
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoMatchers.hasStatus
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.dataFieldName
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.emptySessionDataDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.statusFieldName
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDtoStubs.validSessionDataDtoBytes
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.ExampleSessionDataDtoInputs
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDtoMatchers.hasData
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDtoMatchers.hasStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDtoStubs.dataFieldName
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDtoStubs.emptySessionDataDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDtoStubs.statusFieldName
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDtoStubs.validSessionDataDtoBytes
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 
 @RunWith(TestParameterInjector::class)

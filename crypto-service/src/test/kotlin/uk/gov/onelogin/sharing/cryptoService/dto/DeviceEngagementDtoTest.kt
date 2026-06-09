@@ -4,8 +4,8 @@ import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDto
 
 class DeviceEngagementDtoTest {
 

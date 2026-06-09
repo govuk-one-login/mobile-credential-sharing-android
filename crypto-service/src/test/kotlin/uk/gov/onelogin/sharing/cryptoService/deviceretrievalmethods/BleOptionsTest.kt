@@ -8,8 +8,8 @@ import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_OPTIONS_EXPECT
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.D_3_1_BLE_OPTIONS
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.D_3_1_BLE_OPTIONS_HEX
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.bleOptionNodes
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toDto
 
 class BleOptionsTest {
 

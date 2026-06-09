@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.UUID_16_BIT
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.BleOptionsDto
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptionsDto
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 
 class BleOptionsDtoTest {

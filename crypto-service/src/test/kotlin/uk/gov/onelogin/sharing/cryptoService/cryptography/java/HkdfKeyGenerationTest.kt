@@ -6,13 +6,13 @@ import kotlin.test.assertContentEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.getSharedSecret
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.SHARED_SECRET_BYTES
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_HKDF_DEVICE_KEY
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_HKDF_READER_KEY
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.CryptoStub.VALID_SALT_BYTES
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 
 class HkdfKeyGenerationTest {
 

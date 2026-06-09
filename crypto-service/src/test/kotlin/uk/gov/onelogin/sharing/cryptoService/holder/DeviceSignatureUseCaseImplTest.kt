@@ -10,7 +10,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_ARRAY_4
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_BSTR_1
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_EMPTY_MAP
@@ -18,6 +17,7 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.E
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.ES256_ALG_VALUE
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.TAG_24_MAJOR
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.TAG_24_VALUE
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 
 private const val P256_RAW_SIGNATURE_SIZE = 64
 
