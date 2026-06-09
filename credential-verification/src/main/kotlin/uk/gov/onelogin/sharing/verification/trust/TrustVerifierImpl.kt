@@ -7,7 +7,6 @@ import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
 import kotlin.time.ExperimentalTime
 import kotlin.time.toKotlinInstant
-import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
