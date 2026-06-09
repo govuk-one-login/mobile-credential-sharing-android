@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.orchestration.scan
 
 import androidx.lifecycle.ViewModel
 import dev.zacsweers.metro.DependencyGraph
-import dev.zacsweers.metro.Provider
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
@@ -28,11 +27,11 @@ internal abstract class ScannerGraph : ViewModelGraph {
 
     @Provides
     fun provideMetroViewModelFactory(
-        viewModelProviders: Map<KClass<out ViewModel>, Provider<ViewModel>>,
-        assistedFactoryProviders: Map<KClass<out ViewModel>, Provider<ViewModelAssistedFactory>>,
+        viewModelProviders: Map<KClass<out ViewModel>, () -> ViewModel>,
+        assistedFactoryProviders: Map<KClass<out ViewModel>, () -> ViewModelAssistedFactory>,
         manualAssistedFactoryProviders: Map<
             KClass<out ManualViewModelAssistedFactory>,
-            Provider<ManualViewModelAssistedFactory>
+            () -> ManualViewModelAssistedFactory
             >
     ): MetroViewModelFactory = object : MetroViewModelFactory() {
         override val viewModelProviders = viewModelProviders
