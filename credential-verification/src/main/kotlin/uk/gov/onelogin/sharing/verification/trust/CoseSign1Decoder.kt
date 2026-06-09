@@ -5,26 +5,33 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import dev.zacsweers.metro.Inject
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.verification.format.cose.CoseSign1
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 
-internal object CoseSign1Decoder {
-    private const val COSE_SIGN1_SIZE = 4
-    private const val INDEX_PROTECTED = 0
-    private const val INDEX_UNPROTECTED = 1
-    private const val INDEX_PAYLOAD = 2
-    private const val INDEX_SIGNATURE = 3
-    private const val X5CHAIN_LABEL = 33
+@Inject
+class CoseSign1Decoder(private val logger: Logger) {
+    private val logTag = this::class.java.simpleName
 
     private val cborMapper: ObjectMapper = ObjectMapper(CBORFactory())
+
+    companion object {
+        private const val COSE_SIGN1_SIZE = 4
+        private const val INDEX_PROTECTED = 0
+        private const val INDEX_UNPROTECTED = 1
+        private const val INDEX_PAYLOAD = 2
+        private const val INDEX_SIGNATURE = 3
+        private const val X5CHAIN_LABEL = 33
+    }
 
     @Suppress("ThrowsCount")
     fun decode(data: ByteArray): CoseSign1 {
         val root = try {
             cborMapper.readTree(data) as? ArrayNode
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            println(e)
+            logger.error(logTag, "Failed to decode COSE_Sign1", e)
             null
         } ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
 
@@ -59,7 +66,7 @@ internal object CoseSign1Decoder {
         val node = try {
             cborMapper.readTree(headerBytes)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            println(e)
+            logger.error(logTag, "Failed to extract x5chain header", e)
             return null
         }
         return extractX5ChainFromNode(node)

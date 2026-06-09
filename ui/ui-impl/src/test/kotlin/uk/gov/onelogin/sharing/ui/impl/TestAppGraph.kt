@@ -56,6 +56,7 @@ fun createTestVerifierGraph(
 )
 
 fun createTestCredentialVerificationGraph(
-    certificate: X509Certificate
+    certificate: X509Certificate,
+    logger: Logger = SystemLogger()
 ): CredentialVerificationGraph = createGraphFactory<CredentialVerificationGraph.Factory>()
-    .create(certificate)
+    .create(certificate, logger)
