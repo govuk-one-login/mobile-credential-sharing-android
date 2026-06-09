@@ -84,6 +84,11 @@ class CoseHeaderValidatorFailureTest(
                 VerificationError.INVALID_ISSUER_SIGNATURE
             ),
             arrayOf(
+                "malformed protected header bytes",
+                coseSign1(protectedHeader = byteArrayOf(0xFF.toByte(), 0xFE.toByte())),
+                VerificationError.INVALID_ISSUER_SIGNATURE
+            ),
+            arrayOf(
                 "propagates INVALID_DEVICE_SIGNATURE error",
                 coseSign1(protectedHeader = buildEmptyMap()),
                 VerificationError.INVALID_DEVICE_SIGNATURE
