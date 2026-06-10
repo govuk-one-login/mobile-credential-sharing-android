@@ -187,7 +187,7 @@ class VerifierOrchestrator(
                 }.onSuccess {
                     sessionFlow.value.cryptoContext?.let {
                         safeTransitionTo(VerifierSessionState.Connecting)
-                        centralBluetoothTransport.scanAndConnect(it.serviceUuid)
+                        centralBluetoothTransport.start(it.serviceUuid)
                     } ?: failWith(
                         "Service UUID not found in device engagement",
                         SessionErrorReason.ServiceUuidNotFound

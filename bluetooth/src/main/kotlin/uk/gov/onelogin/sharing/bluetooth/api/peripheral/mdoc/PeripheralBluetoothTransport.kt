@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
+import uk.gov.onelogin.sharing.bluetooth.api.BluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 
 /**
@@ -9,21 +10,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
  *
  * [PeripheralBluetoothState] via a [StateFlow].
  */
-interface PeripheralBluetoothTransport : MessageSender {
-    /**
-     * The current state of the BLE session, exposed as a [StateFlow].
-     * This can be used to observe the session's status, such as whether it's advertising,
-     * connected, or has encountered an error.
-     */
-    val state: StateFlow<PeripheralBluetoothState>
-
-    /**
-     * Starts the BLE advertising and GATT service.
-     *
-     * @param serviceUuid The [UUID] of the service to be advertised.
-     */
-    suspend fun start(serviceUuid: UUID)
-
+interface PeripheralBluetoothTransport : MessageSender,
+    BluetoothTransport<PeripheralBluetoothState> {
     /**
      * Stops the BLE advertising and GATT service.
      *

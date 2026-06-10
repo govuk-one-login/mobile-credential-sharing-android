@@ -63,7 +63,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `scanAndConnect sets state to Scanning and starts bluetooth monitor`() = runTest {
-        transport.scanAndConnect(serviceUuid)
+        transport.start(serviceUuid)
 
         assertEquals(CentralBluetoothState.Scanning, transport.state.value)
         assertEquals(1, bluetoothStateMonitor.startCalls)
@@ -71,12 +71,12 @@ class AndroidCentralBluetoothTransportTest {
     }
 
     @Test
-    fun `scanAndConnect connects when device found`() = testScope.runTest {
+    fun `start connects when device found`() = testScope.runTest {
         val device = mockk<BluetoothDevice> {
             every { address } returns DEVICE_ADDRESS
         }
 
-        transport.scanAndConnect(serviceUuid)
+        transport.start(serviceUuid)
         scannerFlow.emit(ScanEvent.DeviceFound(device))
 
         assertEquals(1, gattClientManager.connectCalls)
@@ -87,7 +87,7 @@ class AndroidCentralBluetoothTransportTest {
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
-            transport.scanAndConnect(serviceUuid)
+            transport.start(serviceUuid)
             assertEquals(CentralBluetoothState.Scanning, awaitItem())
 
             scannerFlow.emit(ScanEvent.ScanFailed(ScannerFailure.INTERNAL_ERROR))
@@ -217,7 +217,7 @@ class AndroidCentralBluetoothTransportTest {
 
     @Test
     fun `stop cancels scan and disconnects`() = testScope.runTest {
-        transport.scanAndConnect(serviceUuid)
+        transport.start(serviceUuid)
 
         assertThat(
             transport,

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * Exposes the implementation's [state] via [StateFlow].
  *
- * Begin the
+ * Begin the transport process via [start].
  */
 interface BluetoothTransport<State> {
     /**

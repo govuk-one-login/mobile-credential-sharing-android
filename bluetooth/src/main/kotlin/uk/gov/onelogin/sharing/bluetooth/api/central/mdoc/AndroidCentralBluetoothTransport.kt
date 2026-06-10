@@ -81,7 +81,7 @@ class AndroidCentralBluetoothTransport(
         }
     }
 
-    override suspend fun scanAndConnect(serviceUuid: UUID) = withContext(
+    override suspend fun start(serviceUuid: UUID) = withContext(
         ioDispatcher + "$logTag.ScanAndConnect".asCoroutineName()
     ) {
         cancelCurrentJobs()
