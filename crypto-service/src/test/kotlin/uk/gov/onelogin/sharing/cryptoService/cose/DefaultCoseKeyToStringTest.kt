@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.SecurityDeserializerStub.embeddedCoseKey
 import uk.gov.onelogin.sharing.cryptoService.SecurityDeserializerStub.validCoseKey
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
+import uk.gov.onelogin.sharing.cryptoService.cose.toDto
 
 class DefaultCoseKeyToStringTest {
     private val logger = SystemLogger()

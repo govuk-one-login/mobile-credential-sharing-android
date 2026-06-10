@@ -3,8 +3,8 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.SecurityDeserializerStub.expectedSecurityDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SecurityDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.security.SecurityDto
 
 class SecurityDeserializerTest {
 

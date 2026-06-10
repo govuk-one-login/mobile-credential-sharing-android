@@ -6,8 +6,8 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.SECURITY
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.SECURITY_EXPECTED_BASE64
 import uk.gov.onelogin.sharing.cryptoService.SecurityTestStub.securityNodes
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.security.toDto
 
 class SecurityTest {
 

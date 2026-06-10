@@ -1,11 +1,11 @@
 package uk.gov.onelogin.sharing.cryptoService
 
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.BleOptionsDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceEngagementDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceRetrievalMethodDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SecurityDto
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptionsDto
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethodDto
+import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDto
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
+import uk.gov.onelogin.sharing.models.mdoc.security.SecurityDto
 
 object DecoderStub {
     const val VALID_ENCODED_DEVICE_ENGAGEMENT =

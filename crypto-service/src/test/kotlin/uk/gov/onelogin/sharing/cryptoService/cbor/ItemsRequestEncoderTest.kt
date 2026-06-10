@@ -8,8 +8,9 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DO
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.over18Request
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.over21Request
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.ItemsRequestDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.toDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.toDto
 
 class ItemsRequestEncoderTest {
 

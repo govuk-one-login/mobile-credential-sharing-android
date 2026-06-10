@@ -3,9 +3,9 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_RETRIEVAL_METHOD_SERVER_MODE
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceRetrievalMethodDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethodDto
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toDto
 
 class DeviceRetrievalMethodsDeserializerTest {
 

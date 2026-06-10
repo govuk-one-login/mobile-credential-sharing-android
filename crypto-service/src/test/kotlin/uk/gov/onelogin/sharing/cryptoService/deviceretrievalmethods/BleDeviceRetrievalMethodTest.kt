@@ -6,8 +6,8 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_RETRIEVAL_METHOD_SERVER_MODE
 import uk.gov.onelogin.sharing.cryptoService.DeviceEngagementStub.deviceRetrievalNodes
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toDto
 
 class BleDeviceRetrievalMethodTest {
 

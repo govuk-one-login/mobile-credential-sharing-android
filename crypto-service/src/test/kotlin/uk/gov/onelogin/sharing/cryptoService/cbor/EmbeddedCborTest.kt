@@ -9,8 +9,8 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.UUID_STRING
 import uk.gov.onelogin.sharing.cryptoService.EmbeddedCborStub.EXPECTED_BYTES
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer
 
 class EmbeddedCborTest {
     private fun testMapper(): ObjectMapper {

@@ -9,8 +9,8 @@ import uk.gov.onelogin.sharing.cryptoService.DeviceEngagementStub.DEVICE_ENGAGEM
 import uk.gov.onelogin.sharing.cryptoService.DeviceEngagementStub.ENGAGEMENT_EXPECTED_BASE_64
 import uk.gov.onelogin.sharing.cryptoService.DeviceEngagementStub.deviceEngagementNodes
 import uk.gov.onelogin.sharing.cryptoService.InvalidDeviceEngagementStub.INVALID_DEVICE_ENGAGEMENT
-import uk.gov.onelogin.sharing.cryptoService.cbor.CborMapper
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.engagment.toDto
 
 class DeviceEngagementTest {
 
