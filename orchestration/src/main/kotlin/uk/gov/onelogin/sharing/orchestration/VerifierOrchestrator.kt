@@ -27,7 +27,6 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -50,6 +49,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -64,7 +64,7 @@ class VerifierOrchestrator(
     private val barcodeParser: QrParser,
     private val centralBluetoothTransport: CentralBluetoothTransport,
     private val verifierCryptoService: VerifierCryptoService,
-    private val documentVerifier: DocumentVerifier
+    private val documentVerifier: DocumentVerifier,
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -249,10 +249,12 @@ class VerifierOrchestrator(
 
                 failWith(
                     "Device ${state.address} disconnected unexpectedly",
-                    BluetoothDisconnectedException(
-                        "Bluetooth disconnected unexpectedly",
-                        IllegalStateException(
-                            "Device ${state.address} disconnected unexpectedly"
+                    SessionErrorReason.InvalidBluetoothState(
+                        BluetoothDisconnectedException(
+                            "Bluetooth disconnected unexpectedly",
+                            IllegalStateException(
+                                "Device ${state.address} disconnected unexpectedly"
+                            )
                         )
                     )
                 )
@@ -261,7 +263,9 @@ class VerifierOrchestrator(
             is CentralBluetoothState.Error -> {
                 failWith(
                     "Bluetooth error: ${state.reason}",
-                    IllegalStateException("Bluetooth error: ${state.reason}")
+                    SessionErrorReason.InvalidBluetoothState(
+                        IllegalStateException("Bluetooth error: ${state.reason}")
+                    )
                 )
             }
 
@@ -274,8 +278,8 @@ class VerifierOrchestrator(
             is CentralBluetoothState.Connected,
             CentralBluetoothState.Connecting,
             is CentralBluetoothState.Idle,
-            is CentralBluetoothState.Scanning
-            -> Unit
+            is CentralBluetoothState.Scanning,
+                -> Unit
         }
     }
 
@@ -408,7 +412,7 @@ class VerifierOrchestrator(
 
     private suspend fun buildAndSendSessionEstablishment(
         context: VerifierCryptoContext,
-        itemsRequest: ItemsRequest
+        itemsRequest: ItemsRequest,
     ) {
         val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
         val encryptedDeviceRequest = verifierCryptoService.encryptDeviceRequest(
@@ -465,7 +469,7 @@ class VerifierOrchestrator(
     private fun safeTransitionTo(
         state: VerifierSessionState,
         logMessage: String = "$CANNOT_TRANSITION_TO_STATE $state",
-        exceptionWrapper: ((String, Throwable) -> Exception)? = null
+        exceptionWrapper: ((String, Throwable) -> Exception)? = null,
     ) {
         try {
             sessionFlow.value.transitionTo(state)
