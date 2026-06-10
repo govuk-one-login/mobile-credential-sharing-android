@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
@@ -49,7 +50,9 @@ object PeripheralBluetoothStateMatchers {
     fun isConnected(expected: PeripheralBluetoothState.Connected) = isConnected(equalTo(expected))
 
     fun isConnected(
-        matcher: Matcher<in PeripheralBluetoothState.Connected>
+        matcher: Matcher<in PeripheralBluetoothState.Connected> = instanceOf(
+            PeripheralBluetoothState.Connected::class.java
+        )
     ): Matcher<PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(matcher) {
         (it as? PeripheralBluetoothState.Connected)
     }
@@ -58,7 +61,9 @@ object PeripheralBluetoothStateMatchers {
         isDisconnected(equalTo(expected))
 
     fun isDisconnected(
-        matcher: Matcher<in PeripheralBluetoothState.Disconnected>
+        matcher: Matcher<in PeripheralBluetoothState.Disconnected> = instanceOf(
+            PeripheralBluetoothState.Disconnected::class.java
+        )
     ): Matcher<in PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(
         matcher
     ) {
@@ -68,7 +73,9 @@ object PeripheralBluetoothStateMatchers {
     fun isEnded(expected: PeripheralBluetoothState.Ended) = isEnded(equalTo(expected))
 
     fun isEnded(
-        matcher: Matcher<in PeripheralBluetoothState.Ended>
+        matcher: Matcher<in PeripheralBluetoothState.Ended> = instanceOf(
+            PeripheralBluetoothState.Ended::class.java
+        )
     ): Matcher<in PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(matcher) {
         (it as? PeripheralBluetoothState.Ended)
     }
@@ -78,7 +85,9 @@ object PeripheralBluetoothStateMatchers {
     fun isError(expected: PeripheralBluetoothTransportError) = isError(hasTransportError(expected))
 
     fun isError(
-        matcher: Matcher<in PeripheralBluetoothState.Error>
+        matcher: Matcher<in PeripheralBluetoothState.Error> = instanceOf(
+            PeripheralBluetoothState.Error::class.java
+        )
     ): Matcher<in PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(matcher) {
         (it as? PeripheralBluetoothState.Error)
     }
@@ -87,7 +96,9 @@ object PeripheralBluetoothStateMatchers {
         isMessageReceived(equalTo(expected))
 
     fun isMessageReceived(
-        matcher: Matcher<in PeripheralBluetoothState.MessageReceived>
+        matcher: Matcher<in PeripheralBluetoothState.MessageReceived> = instanceOf(
+            PeripheralBluetoothState.MessageReceived::class.java
+        )
     ): Matcher<in PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(matcher) {
         (it as? PeripheralBluetoothState.MessageReceived)
     }

@@ -13,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -60,7 +61,9 @@ class AndroidPeripheralBluetoothTransport(
         start = CoroutineStart.LAZY
     ) {
         launch("$logTag.MonitorBluetoothState".asCoroutineName()) {
-            bluetoothStateMonitor.states.filter(BluetoothStatus::isOff).map {
+            bluetoothStateMonitor.states.distinctUntilChanged().filter(
+                BluetoothStatus::isOff
+            ).map {
                 PeripheralBluetoothState.Error(
                     PeripheralBluetoothTransportError.BLUETOOTH_TURNED_OFF
                 )
@@ -74,7 +77,7 @@ class AndroidPeripheralBluetoothTransport(
             }
         }
         launch("$logTag.HandleGattServerEvent".asCoroutineName()) {
-            gattServerManager.events.collect {
+            gattServerManager.events.distinctUntilChanged().collect {
                 handleGattEvent(it)
             }
         }
