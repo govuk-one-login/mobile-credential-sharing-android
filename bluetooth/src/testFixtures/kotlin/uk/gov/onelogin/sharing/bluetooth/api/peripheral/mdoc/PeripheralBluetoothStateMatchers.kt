@@ -96,6 +96,10 @@ object PeripheralBluetoothStateMatchers {
     ) = isError(equalTo(expected))
 
     fun isError(
+        expected: PeripheralBluetoothTransportError
+    ) = isError(hasTransportError(expected))
+
+    fun isError(
         matcher: Matcher<in PeripheralBluetoothState.Error>
     ): Matcher<in PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(matcher) {
         (it as? PeripheralBluetoothState.Error)

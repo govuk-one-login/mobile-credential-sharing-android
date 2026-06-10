@@ -10,6 +10,13 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReason
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 
 object SessionErrorReasonMatchers {
+    fun isInvalidBluetoothState(
+        matcher: Matcher<in SessionErrorReason.InvalidBluetoothState> = instanceOf(
+            SessionErrorReason.InvalidBluetoothState::class.java
+        )
+    ): Matcher<in SessionErrorReason> = SessionErrorReasonMatcher(matcher) {
+        it as? SessionErrorReason.InvalidBluetoothState
+    }
 
     fun isUnrecoverableThrowable(
         matcher: Matcher<in SessionErrorReason.UnrecoverableThrowable> = instanceOf(

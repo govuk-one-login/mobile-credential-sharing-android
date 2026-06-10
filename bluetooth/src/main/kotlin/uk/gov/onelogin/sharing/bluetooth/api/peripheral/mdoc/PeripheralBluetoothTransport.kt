@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
-import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 
 /**
@@ -17,13 +16,6 @@ interface PeripheralBluetoothTransport : MessageSender {
      * connected, or has encountered an error.
      */
     val state: StateFlow<PeripheralBluetoothState>
-
-    /**
-     * Current state of the Bluetooth adapter, exposed as a [StateFlow].
-     *
-     * This exposes the broadcast receiver that listens for Bluetooth state changes.
-     */
-    val bluetoothStatus: StateFlow<BluetoothStatus>
 
     /**
      * Starts the BLE advertising and GATT service.

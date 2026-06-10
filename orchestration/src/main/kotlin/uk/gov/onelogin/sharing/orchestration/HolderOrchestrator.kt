@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothStateException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
@@ -69,7 +69,7 @@ class HolderOrchestrator(
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
     private val confirmConsentUseCase: ConfirmConsentUseCase,
-    private val credentialRequestHandler: CredentialRequestHandler
+    private val credentialRequestHandler: CredentialRequestHandler,
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -326,10 +326,10 @@ class HolderOrchestrator(
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
                             description = "We may need to handle explicit bluetooth " +
-                                "disconnection states to handle common error codes " +
-                                "8, 19, 22 and 133. The function below will handle " +
-                                "treat all disconnect states the same when connected " +
-                                "to a device"
+                                    "disconnection states to handle common error codes " +
+                                    "8, 19, 22 and 133. The function below will handle " +
+                                    "treat all disconnect states the same when connected " +
+                                    "to a device"
                         )
                     ]
                 )
@@ -343,17 +343,14 @@ class HolderOrchestrator(
                 } else {
                     logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
 
-                    stopAdvertising(sendEndCommand = true)
-
-                    safeTransitionTo(
-                        HolderSessionState.Complete.Failed(
-                            SessionError(
-                                "Device ${state.address} disconnected unexpectedly",
-                                BluetoothDisconnectedException(
-                                    "Bluetooth disconnected unexpectedly",
-                                    IllegalStateException(
-                                        "Device ${state.address} disconnected unexpectedly"
-                                    )
+                    val message = "Device ${state.address} disconnected unexpectedly"
+                    failWith(
+                        message = message,
+                        reason = SessionErrorReason.InvalidBluetoothState(
+                            BluetoothDisconnectedException(
+                                "Bluetooth disconnected unexpectedly",
+                                IllegalStateException(
+                                    "Device ${state.address} disconnected unexpectedly"
                                 )
                             )
                         )
@@ -362,7 +359,12 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.Error -> {
-                handleError(state.reason)
+                failWith(
+                    "Mdoc - Error: ${state.reason.message}",
+                    SessionErrorReason.InvalidBluetoothState(
+                        PeripheralBluetoothStateException(state.reason)
+                    )
+                )
             }
 
             PeripheralBluetoothState.Idle -> Unit
@@ -428,7 +430,7 @@ class HolderOrchestrator(
 
     private suspend fun requestAndValidateCredential(
         requestedDocType: String,
-        deviceRequest: DeviceRequest
+        deviceRequest: DeviceRequest,
     ) {
         try {
             val result = credentialRequestHandler.requestAndValidate(
@@ -511,20 +513,31 @@ class HolderOrchestrator(
         )
     }
 
-    private fun handleError(reason: PeripheralBluetoothTransportError) {
-        when (reason) {
-            PeripheralBluetoothTransportError.ADVERTISING_FAILED ->
-                logger.debug(logTag, "Mdoc - Error: Advertising failed")
+    private fun failWith(
+        message: String,
+        reason: SessionErrorReason,
+        sendEndCommand: Boolean = true,
+    ) {
+        logger.error(logTag, message)
+        stopAdvertising(sendEndCommand)
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(
+                SessionError(message = message, reason = reason)
+            )
+        )
+    }
 
-            PeripheralBluetoothTransportError.GATT_NOT_AVAILABLE ->
-                logger.debug(logTag, "Mdoc - Error: GATT not available")
-
-            PeripheralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING ->
-                logger.debug(logTag, "Mdoc - Error: Bluetooth permission missing")
-
-            PeripheralBluetoothTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED ->
-                logger.debug(logTag, "Mdoc - Error: Descriptor write request failed")
-        }
+    private fun failWith(
+        message: String,
+        error: SessionError,
+        throwable: Throwable,
+        sendEndCommand: Boolean = true,
+    ) {
+        logger.error(logTag, message, throwable)
+        stopAdvertising(sendEndCommand)
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(error)
+        )
     }
 
     private fun safeTransitionTo(
@@ -533,7 +546,7 @@ class HolderOrchestrator(
             sessionFlow.value.currentState.value,
             state
         ),
-        exceptionWrapper: ((String, Throwable) -> Exception)? = null
+        exceptionWrapper: ((String, Throwable) -> Exception)? = null,
     ) {
         try {
             sessionFlow.value.transitionTo(state)

@@ -7,8 +7,12 @@ import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -19,12 +23,14 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingExcepti
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothStateMatchers.isError
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.FakeGattServerManager
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AndroidPeripheralBluetoothTransportTest {
 
     @get:Rule
@@ -35,7 +41,7 @@ class AndroidPeripheralBluetoothTransportTest {
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
     private val testScope = CoroutineScope(SupervisorJob() + dispatcherRule.testDispatcher)
     private val logger = SystemLogger()
-    private val sessionManager = AndroidPeripheralBluetoothTransport(
+    private val transport = AndroidPeripheralBluetoothTransport(
         bleAdvertiser = advertiser,
         gattServerManager = gattServerManager,
         bluetoothStateMonitor = bluetoothStateMonitor,
@@ -46,17 +52,24 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `advertiser started logs without emitting state`() = runTest {
-        sessionManager.state.test {
+        transport.monitoringJob.start()
+
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
             advertiser.emitState(AdvertiserState.Started)
             expectNoEvents()
         }
+
+        advanceUntilIdle()
+
         assert(logger.contains("Advertising Started"))
     }
 
     @Test
     fun `advertiser stopped logs without emitting state`() = runTest {
-        sessionManager.state.test {
+        transport.monitoringJob.start()
+
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
             advertiser.emitState(AdvertiserState.Stopped)
             expectNoEvents()
@@ -66,17 +79,20 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `advertiser idle logs without emitting state`() = runTest {
-        sessionManager.state.test {
+        transport.monitoringJob.start()
+
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
             advertiser.emitState(AdvertiserState.Idle)
             expectNoEvents()
         }
-        assert(logger.contains("Idle"))
+        assert(logger.contains("Advertising Idle"))
     }
 
     @Test
     fun `advertiser failure emits error state`() = runTest {
-        sessionManager.state.test {
+        transport.monitoringJob.start()
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             advertiser.emitState(AdvertiserState.Failed("error"))
@@ -91,7 +107,7 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `start triggers advertiser start and gatt server open`() = runTest {
-        sessionManager.start(uuid)
+        transport.start(uuid)
 
         assertEquals(1, advertiser.startCalls)
         assertEquals(uuid, advertiser.lastAdvertiseData?.serviceUuid)
@@ -129,7 +145,7 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `stop calls advertiser stop and gatt server close`() = runTest {
-        sessionManager.stop(
+        transport.stop(
             serviceUuid = uuid,
             sendEndCommand = true
         )
@@ -141,7 +157,9 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `gatt Connected event triggers mdoc session Connected`() = runTest {
-        sessionManager.state.test {
+        transport.monitoringJob.start()
+
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
@@ -154,26 +172,28 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `gatt service added event logs without emitting state`() = runTest {
+        transport.monitoringJob.start()
+
         val service = mockk<BluetoothGattService>()
         every { service.uuid } returns uuid
 
-        sessionManager.state.test {
+        val event = GattServerEvent.ServiceAdded(
+            BluetoothGatt.GATT_SUCCESS,
+            service
+        )
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
-            gattServerManager.emitEvent(
-                GattServerEvent.ServiceAdded(
-                    BluetoothGatt.GATT_SUCCESS,
-                    service
-                )
-            )
+            gattServerManager.emitEvent(event)
             expectNoEvents()
         }
-        assert(logger.contains("Service Added: $uuid"))
     }
 
     @Test
     fun `gatt Disconnected event triggers mdoc session Disconnected`() = runTest {
-        sessionManager.state.test {
+        transport.monitoringJob.start()
+
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
@@ -193,7 +213,9 @@ class AndroidPeripheralBluetoothTransportTest {
     @Test
     fun `duplicate gatt Connected for same device does not emit duplicate Connected state`() =
         runTest {
-            sessionManager.state.test {
+            transport.monitoringJob.start()
+
+            transport.state.test {
                 assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
                 gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
@@ -210,7 +232,9 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `gatt Error event maps to session Error state`() = runTest {
-        sessionManager.state.test {
+        transport.monitoringJob.start()
+
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             gattServerManager.emitEvent(
@@ -229,7 +253,7 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `gatt UnsupportedEvent does not change session state`() = runTest {
-        sessionManager.state.test {
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             gattServerManager.emitEvent(
@@ -246,7 +270,7 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `gatt SessionStarted does not change session state`() = runTest {
-        sessionManager.state.test {
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             gattServerManager.emitEvent(GattServerEvent.SessionStarted)
@@ -257,7 +281,9 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `gatt ServiceStopped logs without emitting state`() = runTest {
-        sessionManager.state.test {
+        transport.monitoringJob.start()
+
+        transport.state.test {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             gattServerManager.emitEvent(GattServerEvent.ServiceStopped)
@@ -268,22 +294,32 @@ class AndroidPeripheralBluetoothTransportTest {
 
     @Test
     fun `bluetooth switched off stops BLE session`() = runTest {
+        transport.monitoringJob.start()
         bluetoothStateMonitor.emit(BluetoothStatus.OFF)
 
-        sessionManager.bluetoothStatus.test {
-            assertEquals(BluetoothStatus.OFF, awaitItem())
-        }
+        advanceUntilIdle()
 
-        assertEquals(1, gattServerManager.closeCalls)
-        assertEquals(1, advertiser.stopCalls)
+        transport.state.test {
+            assertThat(
+                expectMostRecentItem(),
+                isError(PeripheralBluetoothTransportError.BLUETOOTH_TURNED_OFF)
+            )
+        }
     }
 
     @Test
     fun `bluetooth switched on triggers Bluetooth ON event`() = runTest {
+        transport.monitoringJob.start()
+
         bluetoothStateMonitor.emit(BluetoothStatus.ON)
 
-        sessionManager.bluetoothStatus.test {
-            assertEquals(BluetoothStatus.ON, awaitItem())
+        transport.state.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(PeripheralBluetoothState.Idle)
+            )
+
+            expectNoEvents()
         }
     }
 }

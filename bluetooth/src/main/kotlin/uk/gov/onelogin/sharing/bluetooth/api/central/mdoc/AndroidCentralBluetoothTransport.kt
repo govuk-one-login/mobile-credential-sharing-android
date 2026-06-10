@@ -41,7 +41,7 @@ class AndroidCentralBluetoothTransport(
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
     private val logger: Logger,
-    private val ioDispatcher: CoroutineContext = Dispatchers.IO
+    private val ioDispatcher: CoroutineContext = Dispatchers.IO,
 ) : CentralBluetoothTransport,
     MessageSender by gattClientManager {
 
@@ -81,7 +81,9 @@ class AndroidCentralBluetoothTransport(
         }
     }
 
-    override suspend fun scanAndConnect(serviceUuid: UUID) {
+    override suspend fun scanAndConnect(serviceUuid: UUID) = withContext(
+        ioDispatcher + "$logTag.ScanAndConnect".asCoroutineName()
+    ) {
         cancelCurrentJobs()
 
         monitoringJob.start()
@@ -91,13 +93,13 @@ class AndroidCentralBluetoothTransport(
         scanJob = prepareScanJob(serviceUuid)
     }
 
-    override suspend fun stop() {
-        withContext(ioDispatcher + "$logTag.Stop".asCoroutineName()) {
-            cancelCurrentJobs()
-            notifySessionEnd()
-            gattClientManager.disconnect()
-            bluetoothStateMonitor.stop()
-        }
+    override suspend fun stop(): Unit = withContext(
+        ioDispatcher + "$logTag.Stop".asCoroutineName()
+    ) {
+        cancelCurrentJobs()
+        notifySessionEnd()
+        gattClientManager.disconnect()
+        bluetoothStateMonitor.stop()
     }
 
     private suspend fun notifySessionEnd() {
