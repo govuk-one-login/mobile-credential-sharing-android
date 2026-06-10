@@ -12,9 +12,13 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationE
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
+import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
 @ContributesBinding(CredentialVerificationScope::class)
-class TrustVerifierImpl(private val coseSign1Decoder: CoseSign1Decoder) : TrustVerifier {
+class TrustVerifierImpl internal constructor(
+    private val coseSign1Decoder: CoseSign1Decoder,
+    private val signatureVerifier: CoseSignatureVerifier
+) : TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
     override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult {
@@ -29,6 +33,16 @@ class TrustVerifierImpl(private val coseSign1Decoder: CoseSign1Decoder) : TrustV
         val ordered = orderCertificates(certs)
         val leaf = ordered.first()
 
+        val payload = coseSign1.payload
+            ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
+
+        signatureVerifier.verify(
+            coseSign1,
+            leaf.publicKey as ECPublicKey,
+            payload,
+            VerificationError.INVALID_ISSUER_SIGNATURE
+        )
+
         val validityPeriod = CertificateValidityPeriod(
             notBefore = leaf.notBefore.toInstant().toKotlinInstant(),
             notAfter = leaf.notAfter.toInstant().toKotlinInstant()
@@ -38,17 +52,24 @@ class TrustVerifierImpl(private val coseSign1Decoder: CoseSign1Decoder) : TrustV
 
         return IssuerAuthResult(
             certificateValidityPeriod = validityPeriod,
-            msoPayload = coseSign1.payload
-                ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH),
+            msoPayload = payload,
             subjectCountry = subjectName[OID_COUNTRY]
                 ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH),
             subjectState = subjectName[OID_STATE_OR_PROVINCE]
         )
     }
 
-    override fun verifyCOSESign1(
-        coseData: ByteArray,
-        publicKey: ECPublicKey,
-        payload: ByteArray
-    ): Unit = throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
+    override fun verifyCOSESign1(coseData: ByteArray, publicKey: ECPublicKey, payload: ByteArray) {
+        val coseSign1 = try {
+            coseSign1Decoder.decode(coseData)
+        } catch (_: VerificationResult.Failure) {
+            throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
+        }
+        signatureVerifier.verify(
+            coseSign1,
+            publicKey,
+            payload,
+            VerificationError.INVALID_DEVICE_SIGNATURE
+        )
+    }
 }
