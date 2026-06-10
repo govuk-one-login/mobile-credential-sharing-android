@@ -170,6 +170,7 @@ private fun handleSessionFailure(
         is SessionErrorReason.InvalidSessionDataPayload,
         is SessionErrorReason.DeviceRequestProcessingError,
         is SessionErrorReason.UnverifiableDocument,
+        is SessionErrorReason.InvalidBluetoothState,
         SessionErrorReason.DocumentNotReturned
         ->
             navController.navigateToUnrecoverableVerifierError {
