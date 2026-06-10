@@ -33,12 +33,20 @@ class TrustVerifierImpl internal constructor(
         val ordered = orderCertificates(certs)
         val leaf = ordered.first()
 
+        verifyChainAnchoring(ordered, trustedRoot)
+
+        val publicKey = try {
+            leaf.publicKey as ECPublicKey
+        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+            throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
+        }
+
         val payload = coseSign1.payload
             ?: throw VerificationResult.Failure(VerificationError.MALFORMED_ISSUER_AUTH)
 
         signatureVerifier.verify(
             coseSign1,
-            leaf.publicKey as ECPublicKey,
+            publicKey,
             payload,
             VerificationError.INVALID_ISSUER_SIGNATURE
         )
@@ -71,5 +79,17 @@ class TrustVerifierImpl internal constructor(
             payload,
             VerificationError.INVALID_DEVICE_SIGNATURE
         )
+    }
+
+    private fun verifyChainAnchoring(
+        ordered: List<X509Certificate>,
+        trustedRoot: X509Certificate
+    ) {
+        val topCert = ordered.last()
+        try {
+            topCert.verify(trustedRoot.publicKey)
+        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+            throw VerificationResult.Failure(VerificationError.UNTRUSTED_CERTIFICATE)
+        }
     }
 }
