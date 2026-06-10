@@ -81,10 +81,7 @@ class TrustVerifierImpl internal constructor(
         )
     }
 
-    private fun verifyChainAnchoring(
-        ordered: List<X509Certificate>,
-        trustedRoot: X509Certificate
-    ) {
+    private fun verifyChainAnchoring(ordered: List<X509Certificate>, trustedRoot: X509Certificate) {
         val topCert = ordered.last()
         try {
             topCert.verify(trustedRoot.publicKey)
