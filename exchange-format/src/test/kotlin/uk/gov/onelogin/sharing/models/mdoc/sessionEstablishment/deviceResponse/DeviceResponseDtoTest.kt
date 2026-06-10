@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.cryptoService.dto
+package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.PREFIX_TYPE_BYTES
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
@@ -15,12 +15,10 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.cryptoService.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.RawCbor
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 @RunWith(TestParameterInjector::class)
 class DeviceResponseDtoTest {

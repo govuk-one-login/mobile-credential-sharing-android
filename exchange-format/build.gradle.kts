@@ -25,6 +25,8 @@ dependencies {
 
     listOf(
         libs.junit,
+        libs.kotlin.test,
+        libs.org.hamcrest,
         libs.com.google.test.parameter.injector
     ).forEach(::testImplementation)
 
