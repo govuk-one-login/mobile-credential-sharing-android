@@ -2,11 +2,12 @@ package uk.gov.onelogin.sharing.cryptoService
 
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.CoseKeyDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SecurityDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
+import uk.gov.onelogin.sharing.cryptoService.cose.toDto
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
+import uk.gov.onelogin.sharing.models.mdoc.security.SecurityDto
+import uk.gov.onelogin.sharing.models.mdoc.security.toDto
 
 object SecurityDeserializerStub {
 
@@ -24,13 +25,7 @@ object SecurityDeserializerStub {
 
     val expectedSecurityDto = SecurityDto(
         cipherSuiteIdentifier = 1,
+        eDeviceKeyBytes = validCoseKey.toDto().toCbor(),
         ephemeralPublicKey = expectedCoseKey
-    )
-
-    val coseKeyMap = mapOf(
-        "1" to expectedCoseKey.keyType,
-        "-1" to expectedCoseKey.curve,
-        "-2" to expectedCoseKey.x,
-        "-3" to expectedCoseKey.y
     )
 }

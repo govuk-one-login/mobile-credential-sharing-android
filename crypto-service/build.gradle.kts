@@ -37,7 +37,7 @@ android {
 
 dependencies {
     listOf(
-        libs.jackson.cbor
+        projects.exchangeFormat
     ).forEach(::api)
 
     listOf(
@@ -45,8 +45,7 @@ dependencies {
         libs.jackson.kotlin,
         libs.metro.viewmodel.compose,
         libs.kotlinx.io.bytestring,
-        projects.core,
-        projects.exchangeFormat
+        projects.core
     ).forEach(::implementation)
 
     listOf(

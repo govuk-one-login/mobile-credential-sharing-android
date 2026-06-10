@@ -11,11 +11,11 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status

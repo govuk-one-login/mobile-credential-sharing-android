@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 
 private const val COSE_SIGN1_ARRAY_SIZE = 4
 private const val ES256_ALGORITHM = -7
@@ -87,7 +87,14 @@ class DeviceSignatureUseCaseImpl(private val logger: Logger) : DeviceSignatureUs
         ByteArrayOutputStream().also { output ->
             output.write(cborMap(2))
             output.write(cborTextKey("nameSpaces"))
-            output.write(encodeDeviceNameSpacesBytes())
+            output.write(
+                ByteArrayOutputStream().also { out ->
+                    CBORFactory().createGenerator(out).use { gen ->
+                        gen.writeStartObject(0)
+                        gen.writeEndObject()
+                    }
+                }.toByteArray().let { EmbeddedCbor(it).toCbor() }
+            )
             output.write(cborTextKey("deviceAuth"))
             output.write(deviceAuth)
         }.toByteArray()

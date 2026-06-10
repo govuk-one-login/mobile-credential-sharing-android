@@ -22,15 +22,15 @@ class Iso18013DocumentVerifier(
         document: VerifiableDocument,
         sessionTranscriptBytes: ByteArray?
     ): VerificationResult.Success {
-        val (validityPeriod, encodedMSO) = trustVerifier.verifyCOSESign1(
+        val issuerAuthResult = trustVerifier.verifyCOSESign1(
             document.issuerSigned.issuerAuth,
             trustedRootCertificate
         )
-        val mso = decodeMSO(encodedMSO)
+        val mso = decodeMSO(issuerAuthResult.msoPayload)
 
         verifyMSOFields(document, mso)
         verifyDocumentDigests(document, mso)
-        verifyValidityInfo(validityPeriod, mso)
+        verifyValidityInfo(issuerAuthResult.certificateValidityPeriod, mso)
 
         if (document is VerifiableDocument.WithPresentation) {
             if (sessionTranscriptBytes == null) {

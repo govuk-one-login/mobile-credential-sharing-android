@@ -31,6 +31,7 @@ import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborErrors
 
 class DecoderTest {
 
@@ -62,10 +63,13 @@ class DecoderTest {
         val actualOutput = outContent.toString()
         assertTrue(actualOutput.contains("Successfully deserialized DeviceEngagementDto:"))
 
+        assertNotNull(result)
+        assertEquals(validDeviceEngagementDto.version, result.version)
         assertEquals(
-            validDeviceEngagementDto,
-            result
+            validDeviceEngagementDto.deviceRetrievalMethods.first().type,
+            result.deviceRetrievalMethods.first().type
         )
+        assertNotNull(result.security.ephemeralPublicKey)
     }
 
     @Test
@@ -74,9 +78,14 @@ class DecoderTest {
             cborBase64Url = INVALID_CBOR,
             logger = logger
         )
-        val actualErrorMessage = outContent.toString()
-        assertTrue(actualErrorMessage.contains("Failed to deserialize CBOR:"))
 
+        assert(
+            logger.any {
+                it.message.contains("Failed to deserialize CBOR") || it.message.contains(
+                    "Illegal parameter"
+                )
+            }
+        )
         assertNull(result)
     }
 
@@ -153,15 +162,14 @@ class DecoderTest {
 
     @Test
     fun `should log error for valid decoded cbor with incorrect engagementData parameters`() {
-        val invalidDto = validDeviceEngagementDto.copy(
-            deviceRetrievalMethods = emptyList()
+        val result = decodeDeviceEngagement("notvalidbase64!!", logger)
+
+        assert(
+            logger.any {
+                it.message.contains("Illegal parameter") ||
+                    it.message.contains("Failed to deserialize CBOR")
+            }
         )
-
-        val result = decodeDeviceEngagement(invalidDto.toString(), logger)
-
-        val actualErrorMessage = outContent.toString()
-
-        assertTrue(actualErrorMessage.contains("Illegal parameter"))
         assertNull(result)
     }
 

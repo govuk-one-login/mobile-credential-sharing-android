@@ -57,7 +57,7 @@ class VerifierCryptoServiceImplTest {
         assertNotNull(context.sessionTranscriptBytes)
         assertNotNull(context.eReaderKeyPair)
         val eDeviceKey = assertNotNull(context.eDevicePublicKey)
-        val expectedKey = validDeviceEngagementDto.security.ephemeralPublicKey
+        val expectedKey = assertNotNull(validDeviceEngagementDto.security.ephemeralPublicKey)
         assertEquals(
             expectedKey.x.toList(),
             eDeviceKey.w.affineX.toByteArray().takeLast(32).map { it }

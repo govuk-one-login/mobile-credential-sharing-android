@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.cryptoService.CoseKeyStub.D_3_1_EDEVICE_KEY_HEX
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeSessionEstablishmentModel
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
+import uk.gov.onelogin.sharing.cryptoService.cose.toDto
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
 
 class CoseKeyTest {

@@ -1,9 +1,10 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.DeviceResponseDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.RawCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.RawCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned

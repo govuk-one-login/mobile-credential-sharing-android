@@ -33,13 +33,14 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriodStubs
+import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 @OptIn(ExperimentalTime::class)
 @RunWith(TestParameterInjector::class)
 class Iso18013DocumentVerifierTest {
     private val classInfo = scanResult.getClassInfo(Iso18013DocumentVerifier::class.java.name)
-    private val privateFunctionSuffix = $$"$credential_verification"
+    private val privateFunctionSuffix = $$"$credential_verification_debug"
 
     /**
      * DCMAW-20269: AC1: A Sharing SDK document can be wrapped in [SharingVerifiableDocument] and
@@ -428,6 +429,11 @@ class Iso18013DocumentVerifierTest {
     ) {
         every {
             trustVerifier.verifyCOSESign1(any(), any())
-        } returns Pair(validityPeriod, encodedMSO)
+        } returns IssuerAuthResult(
+            certificateValidityPeriod = validityPeriod,
+            msoPayload = encodedMSO,
+            subjectCountry = "GB",
+            subjectState = "London"
+        )
     }
 }

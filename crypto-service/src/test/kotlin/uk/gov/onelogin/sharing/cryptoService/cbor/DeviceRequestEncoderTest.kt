@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.CBOR_T
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoderImpl
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.devicerequest.toDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.toDto
 
 class DeviceRequestEncoderTest {
 

@@ -1,35 +1,20 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
-import uk.gov.onelogin.sharing.cryptoService.DeviceRetrievalMethodsDeserializerStub.expectedMethods
-import uk.gov.onelogin.sharing.cryptoService.DeviceRetrievalMethodsDeserializerStub.rawCborMock
+import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_RETRIEVAL_METHOD_SERVER_MODE
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.DeviceRetrievalMethodDto
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toDto
 
 class DeviceRetrievalMethodsDeserializerTest {
 
-    private lateinit var cborMapper: ObjectMapper
-    private lateinit var deserializer: DeviceRetrievalMethodsDeserializer
-
-    @Before
-    fun setUp() {
-        cborMapper = ObjectMapper(CBORFactory()).apply {
-            registerKotlinModule()
-        }
-        deserializer = DeviceRetrievalMethodsDeserializer()
-    }
-
     @Test
-    fun `deserializes raw CBOR data to DeviceRetrievalMethodsDto`() {
-        val cborData = cborMapper.writeValueAsBytes(rawCborMock)
+    fun `maps DeviceRetrievalMethodDto via CborMapper`() {
+        val dto = BLE_RETRIEVAL_METHOD_SERVER_MODE.toDto()
+        val bytes = CborMapper.default.writeValueAsBytes(dto)
+        val actual = CborMapper.default.readValue(bytes, DeviceRetrievalMethodDto::class.java)
 
-        val jsonParser = cborMapper.factory.createParser(cborData)
-        val context = cborMapper.deserializationContext
-        val result = deserializer.deserialize(jsonParser, context)
-
-        assertEquals(expectedMethods, result)
+        assertEquals(dto, actual)
     }
 }

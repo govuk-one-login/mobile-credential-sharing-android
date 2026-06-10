@@ -1,17 +1,18 @@
 package uk.gov.onelogin.sharing.cryptoService.holder
 
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
+import java.io.ByteArrayOutputStream
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.SessionDataDto.Companion.toDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.SessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceAuthentication
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
@@ -80,18 +81,27 @@ class HolderCryptoServiceImpl(
         sessionTranscript: ByteArray,
         docType: String
     ): DeviceAuthenticationResult {
-        val deviceNameSpacesBytes = encodeDeviceNameSpacesBytes()
+        val deviceNameSpacesBytes = ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartObject(0)
+                gen.writeEndObject()
+            }
+        }.toByteArray().let { EmbeddedCbor(it).toCbor() }
 
         logger.debug(
             logTag,
             "DeviceNameSpacesBytes encoded: ${deviceNameSpacesBytes.toHexString()}"
         )
 
-        val deviceAuthenticationBytes = DeviceAuthentication(
-            sessionTranscript = sessionTranscript,
-            docType = docType,
-            deviceNameSpacesBytes = deviceNameSpacesBytes
-        ).encodeCbor()
+        val deviceAuthenticationArray = ByteArrayOutputStream().also { out ->
+            out.write(CBOR_ARRAY_4)
+            CBORFactory().createGenerator(out)
+                .use { gen -> gen.writeString(DeviceAuthentication.DEVICE_AUTHENTICATION) }
+            out.write(sessionTranscript)
+            CBORFactory().createGenerator(out).use { gen -> gen.writeString(docType) }
+            out.write(deviceNameSpacesBytes)
+        }.toByteArray()
+        val deviceAuthenticationBytes = EmbeddedCbor(deviceAuthenticationArray).toCbor()
 
         logger.debug(
             logTag,
@@ -102,5 +112,9 @@ class HolderCryptoServiceImpl(
             deviceAuthenticationBytes = deviceAuthenticationBytes,
             deviceNameSpacesBytes = deviceNameSpacesBytes
         )
+    }
+
+    private companion object {
+        const val CBOR_ARRAY_4 = 0x84
     }
 }

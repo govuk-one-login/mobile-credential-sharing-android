@@ -15,7 +15,7 @@ fun interface SessionTranscriptDecoder {
      * QR code.
      * @param taggedEReaderKey The Session Establishment byte array.
      *
-     * @return An [uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor.encoded] [ByteArray]
+     * @return An [uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor.encoded] [ByteArray]
      */
     fun deriveSessionTranscript(cborBase64Url: String, taggedEReaderKey: ByteArray): ByteArray
 }

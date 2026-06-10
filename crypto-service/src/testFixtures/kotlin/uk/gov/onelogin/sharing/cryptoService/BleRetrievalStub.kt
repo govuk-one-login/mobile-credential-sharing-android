@@ -2,18 +2,18 @@ package uk.gov.onelogin.sharing.cryptoService
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.util.UUID
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_TYPE
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleDeviceRetrievalMethod.Companion.BLE_VERSION
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptionsDtoStub
 import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toByteArray
 
 object BleRetrievalStub {
     const val BLE_EXPECTED_BASE_64 = "gwIBowD1AfQKUBEREREiIjMzRERVVVVVVVU="
     const val BLE_OPTIONS_EXPECTED_BASE_64 = "owD1AfQKUBEREREiIjMzRERVVVVVVVU="
-    const val UUID_STRING = "11111111-2222-3333-4444-555555555555"
-    val UUID_16_BIT: UUID = UUID.fromString(UUID_STRING)
+    const val UUID_STRING = BleOptionsDtoStub.UUID_STRING
+    val UUID_16_BIT = BleOptionsDtoStub.UUID_16_BIT
 
     private val jsonNodeFactory: JsonNodeFactory = JsonNodeFactory.instance
 

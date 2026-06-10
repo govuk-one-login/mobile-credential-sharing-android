@@ -1,10 +1,5 @@
 package uk.gov.onelogin.sharing.cryptoService.deviceretrievalmethods
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.util.Base64
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
@@ -13,50 +8,29 @@ import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.BLE_OPTIONS_EXPECT
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.D_3_1_BLE_OPTIONS
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.D_3_1_BLE_OPTIONS_HEX
 import uk.gov.onelogin.sharing.cryptoService.BleRetrievalStub.bleOptionNodes
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.BleOptionsSerializer
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCbor
-import uk.gov.onelogin.sharing.cryptoService.cbor.serializers.EmbeddedCborSerializer
-import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.BleOptions
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.deviceretrievalmethods.toDto
 
 class BleOptionsTest {
 
-    private fun testMapper(): ObjectMapper = CBORMapper.builder(CBORFactory())
-        .addModule(KotlinModule.Builder().build())
-        .addModule(
-            SimpleModule().apply {
-                addSerializer(EmbeddedCbor::class.java, EmbeddedCborSerializer())
-                addSerializer(BleOptions::class.java, BleOptionsSerializer())
-            }
-        )
-        .build()
-
     @Test
     fun `encode BleOptions to expected base64 string`() {
-        val encoded = testMapper().writeValueAsBytes(BLE_OPTIONS)
+        val encoded = CborMapper.default.writeValueAsBytes(BLE_OPTIONS.toDto())
         val base64 = Base64.getEncoder().encodeToString(encoded)
         assertEquals(BLE_OPTIONS_EXPECTED_BASE_64, base64)
     }
 
     @Test
     fun `encode BleOptions to expected json structure`() {
-        val mapper = testMapper()
-        val cborBytes = mapper.writeValueAsBytes(BLE_OPTIONS)
-        val actualNode = mapper.readTree(cborBytes)
-
-        val expectedNodes = bleOptionNodes()
-
-        assertEquals(
-            "CBOR structure should match expected JSON",
-            expectedNodes,
-            actualNode
-        )
+        val cborBytes = CborMapper.default.writeValueAsBytes(BLE_OPTIONS.toDto())
+        val actualNode = CborMapper.default.readTree(cborBytes)
+        assertEquals("CBOR structure should match expected JSON", bleOptionNodes(), actualNode)
     }
 
     // Expected CBOR structure derived from ISO 18013-5 Appendix D.3.1
     @Test
     fun `BleOptions encodes to definite-length map matching D_3_1`() {
-        val encoded = testMapper().writeValueAsBytes(D_3_1_BLE_OPTIONS)
-
+        val encoded = CborMapper.default.writeValueAsBytes(D_3_1_BLE_OPTIONS.toDto())
         assertEquals(D_3_1_BLE_OPTIONS_HEX, encoded.toHexString())
     }
 }

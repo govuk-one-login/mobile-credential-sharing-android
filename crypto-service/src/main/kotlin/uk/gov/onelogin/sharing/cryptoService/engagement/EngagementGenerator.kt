@@ -6,10 +6,10 @@ import java.util.Base64
 import java.util.UUID
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
-import uk.gov.onelogin.sharing.cryptoService.cbor.dto.toDto
-import uk.gov.onelogin.sharing.cryptoService.cbor.encodeCbor
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
+import uk.gov.onelogin.sharing.cryptoService.cose.toDto
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagement
+import uk.gov.onelogin.sharing.models.mdoc.engagment.toDto
 import uk.gov.onelogin.sharing.models.mdoc.security.Security
 
 /**
@@ -38,7 +38,7 @@ class EngagementGenerator(private val logger: Logger) : Engagement {
             .ble(peripheralUuid = uuid)
             .build()
 
-        val bytes = deviceEngagement.encodeCbor()
+        val bytes = deviceEngagement.toDto().toCbor()
         val base64 = Base64.getUrlEncoder().encodeToString(bytes)
 
         // for testing purposes - remove when verifier built
