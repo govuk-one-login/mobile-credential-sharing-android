@@ -4,6 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -102,7 +103,7 @@ class AndroidPeripheralBluetoothTransport(
         val result = gattServerManager.notifySessionEnd(serviceUuid)
         if (result == SessionEndStateQueued.Success) {
             // allow time for the END notification to be sent before closing the GATT server
-            delay(BLE_SEND_NOTIFICATION_DELAY)
+            delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
         }
     }
 

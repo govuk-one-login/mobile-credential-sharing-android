@@ -6,6 +6,7 @@ import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +103,7 @@ class AndroidCentralBluetoothTransport(
     private suspend fun notifySessionEnd() {
         val result = gattClientManager.notifySessionEnd()
         if (result == SessionEndStates.SUCCESS) {
-            delay(BLE_SEND_NOTIFICATION_DELAY)
+            delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
         }
     }
 
