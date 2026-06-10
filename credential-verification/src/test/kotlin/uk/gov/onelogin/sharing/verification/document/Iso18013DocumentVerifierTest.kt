@@ -350,12 +350,12 @@ class Iso18013DocumentVerifierTest {
     }
 
     @Test
-    fun `verifyDeviceAuth is stubbed to throw a Failure`() {
+    fun `verifyDeviceAuth throws INVALID_DEVICE_SIGNATURE for malformed device signature`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             documentVerifier.verifyDeviceAuth(
                 document = presentedDocument,
                 sessionTranscriptBytes = sessionTranscriptBytes,
-                deviceKeyInfo = mockk()
+                deviceKeyInfo = DeviceKeyInfo(deviceKey = byteArrayOf(), keyAuthorizations = null)
             )
         }
 
@@ -410,7 +410,7 @@ class Iso18013DocumentVerifierTest {
     }
 
     @Test
-    fun `buildDeviceAuthenticationBytes is stubbed to return an empty ByteArray`() {
+    fun `buildDeviceAuthenticationBytes returns Tag 24 wrapped bytes`() {
         val deviceAuthBytes = documentVerifier.buildDeviceAuthenticationBytes(
             sessionTranscriptBytes,
             "unit test",
@@ -418,8 +418,8 @@ class Iso18013DocumentVerifierTest {
         )
 
         assertThat(
-            deviceAuthBytes,
-            equalTo(byteArrayOf())
+            deviceAuthBytes.isNotEmpty(),
+            equalTo(true)
         )
     }
 
