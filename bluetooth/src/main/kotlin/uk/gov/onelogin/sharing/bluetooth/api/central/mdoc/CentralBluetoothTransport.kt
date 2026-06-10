@@ -9,7 +9,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
  *
  * Exposes [CentralBluetoothState] via a [StateFlow].
  */
-interface CentralBluetoothTransport : MessageSender, BluetoothTransport<CentralBluetoothState> {
+interface CentralBluetoothTransport :
+    MessageSender,
+    BluetoothTransport<CentralBluetoothState> {
     /**
      * Stops the BLE session, optionally sending a session end command first.
      */

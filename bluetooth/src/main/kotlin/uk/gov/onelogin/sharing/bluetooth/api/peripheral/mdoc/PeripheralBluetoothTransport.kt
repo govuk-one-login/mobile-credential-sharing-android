@@ -10,7 +10,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
  *
  * [PeripheralBluetoothState] via a [StateFlow].
  */
-interface PeripheralBluetoothTransport : MessageSender,
+interface PeripheralBluetoothTransport :
+    MessageSender,
     BluetoothTransport<PeripheralBluetoothState> {
     /**
      * Stops the BLE advertising and GATT service.

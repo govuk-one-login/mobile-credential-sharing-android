@@ -122,7 +122,7 @@ class HolderOrchestratorTest {
             logger = logger
         ),
         credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler,
-        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
+        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase()
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -207,7 +207,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Starting the Orchestrator journey is possible when the journey is already complete`(
         @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
-        state: HolderSessionState,
+        state: HolderSessionState
     ) = runTest {
         initialStates[0] = state
         val sessionFactory = createSessionFactory()
@@ -241,7 +241,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Orchestrator cannot cancel invalid state transitions`(
         @TestParameter(valuesProvider = UncancellableHolderSessionStates::class)
-        state: HolderSessionState,
+        state: HolderSessionState
     ) = runTest {
         initialStates[0] = state
         val sessionFactory = createSessionFactory()
@@ -269,7 +269,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Cancelling the User journey is based on the internal session state`(
         @TestParameter(valuesProvider = CancellableHolderSessionStates::class)
-        state: HolderSessionState,
+        state: HolderSessionState
     ) = runTest {
         initialStates[0] = state
         val sessionFactory = createSessionFactory()
@@ -398,9 +398,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `handles error states`(
-        @TestParameter error: PeripheralBluetoothTransportError,
-    ) = runTest {
+    fun `handles error states`(@TestParameter error: PeripheralBluetoothTransportError) = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport)
         backgroundScope.launch {
@@ -719,7 +717,7 @@ class HolderOrchestratorTest {
 
     @Test
     fun `credential request failure triggers no match termination`(
-        @TestParameter case: NoMatchTerminationCase,
+        @TestParameter case: NoMatchTerminationCase
     ) = runTest {
         val handler = FakeCredentialRequestHandler().apply {
             exceptionToThrow = CredentialRequestException(case.errorMessage)

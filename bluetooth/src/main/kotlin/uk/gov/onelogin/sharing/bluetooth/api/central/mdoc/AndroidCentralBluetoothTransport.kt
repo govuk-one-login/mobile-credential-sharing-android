@@ -41,7 +41,7 @@ class AndroidCentralBluetoothTransport(
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
     private val logger: Logger,
-    private val ioDispatcher: CoroutineContext = Dispatchers.IO,
+    private val ioDispatcher: CoroutineContext = Dispatchers.IO
 ) : CentralBluetoothTransport,
     MessageSender by gattClientManager {
 

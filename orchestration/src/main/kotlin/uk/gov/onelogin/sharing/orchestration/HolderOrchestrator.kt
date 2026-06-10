@@ -69,7 +69,7 @@ class HolderOrchestrator(
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
     private val confirmConsentUseCase: ConfirmConsentUseCase,
-    private val credentialRequestHandler: CredentialRequestHandler,
+    private val credentialRequestHandler: CredentialRequestHandler
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -325,10 +325,10 @@ class HolderOrchestrator(
                         ImplementationDetail(
                             ticket = "DCMAW-16898",
                             description = "We may need to handle explicit bluetooth " +
-                                    "disconnection states to handle common error codes " +
-                                    "8, 19, 22 and 133. The function below will handle " +
-                                    "treat all disconnect states the same when connected " +
-                                    "to a device"
+                                "disconnection states to handle common error codes " +
+                                "8, 19, 22 and 133. The function below will handle " +
+                                "treat all disconnect states the same when connected " +
+                                "to a device"
                         )
                     ]
                 )
@@ -429,7 +429,7 @@ class HolderOrchestrator(
 
     private suspend fun requestAndValidateCredential(
         requestedDocType: String,
-        deviceRequest: DeviceRequest,
+        deviceRequest: DeviceRequest
     ) {
         try {
             val result = credentialRequestHandler.requestAndValidate(
@@ -515,7 +515,7 @@ class HolderOrchestrator(
     private fun failWith(
         message: String,
         reason: SessionErrorReason,
-        sendEndCommand: Boolean = true,
+        sendEndCommand: Boolean = true
     ) {
         logger.error(logTag, message)
         stopAdvertising(sendEndCommand)
@@ -530,7 +530,7 @@ class HolderOrchestrator(
         message: String,
         error: SessionError,
         throwable: Throwable,
-        sendEndCommand: Boolean = true,
+        sendEndCommand: Boolean = true
     ) {
         logger.error(logTag, message, throwable)
         stopAdvertising(sendEndCommand)
@@ -545,7 +545,7 @@ class HolderOrchestrator(
             sessionFlow.value.currentState.value,
             state
         ),
-        exceptionWrapper: ((String, Throwable) -> Exception)? = null,
+        exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
         try {
             sessionFlow.value.transitionTo(state)

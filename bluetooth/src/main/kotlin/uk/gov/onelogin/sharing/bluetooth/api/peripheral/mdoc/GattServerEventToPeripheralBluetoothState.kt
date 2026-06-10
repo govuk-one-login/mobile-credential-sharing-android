@@ -5,9 +5,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.core.Transformer
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-class GattServerEventToPeripheralBluetoothState(
-    private val logger: Logger,
-) : Transformer<GattServerEvent, PeripheralBluetoothState?> {
+class GattServerEventToPeripheralBluetoothState(private val logger: Logger) :
+    Transformer<GattServerEvent, PeripheralBluetoothState?> {
 
     override fun transform(source: GattServerEvent): PeripheralBluetoothState? = when (source) {
         is GattServerEvent.Connected ->
@@ -32,7 +31,6 @@ class GattServerEventToPeripheralBluetoothState(
         }
 
         is GattServerEvent.UnsupportedEvent -> {
-
             logger.error(
                 logTag,
                 "Unsupported event - status: ${source.status} new state: ${source.newState}"
@@ -59,5 +57,4 @@ class GattServerEventToPeripheralBluetoothState(
         is GattServerEvent.MessageReceived ->
             PeripheralBluetoothState.MessageReceived(source.byteArray)
     }
-
 }

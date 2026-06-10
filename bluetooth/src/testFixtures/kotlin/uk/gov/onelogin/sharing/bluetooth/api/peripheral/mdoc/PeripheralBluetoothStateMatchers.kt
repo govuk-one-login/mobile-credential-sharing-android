@@ -7,51 +7,38 @@ import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 object PeripheralBluetoothStateMatchers {
-    fun hasAddress(
-        expected: String
-    ) = hasAddress(equalTo(expected))
+    fun hasAddress(expected: String) = hasAddress(equalTo(expected))
 
-    fun hasAddress(
-        matcher: Matcher<in String>
-    ): Matcher<PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(
-        matcher
-    ) {
-        (it as? PeripheralBluetoothState.HasDeviceAddress)?.address
-    }
+    fun hasAddress(matcher: Matcher<in String>): Matcher<PeripheralBluetoothState> =
+        PeripheralBluetoothStateMatcher(
+            matcher
+        ) {
+            (it as? PeripheralBluetoothState.HasDeviceAddress)?.address
+        }
 
-    fun hasMessage(
-        expected: ByteArray
-    ) = hasMessage(equalTo(expected))
+    fun hasMessage(expected: ByteArray) = hasMessage(equalTo(expected))
 
-    fun hasMessage(
-        matcher: Matcher<in ByteArray>
-    ): Matcher<in PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(matcher) {
-        (it as? PeripheralBluetoothState.MessageReceived)?.message
-    }
+    fun hasMessage(matcher: Matcher<in ByteArray>): Matcher<in PeripheralBluetoothState> =
+        PeripheralBluetoothStateMatcher(matcher) {
+            (it as? PeripheralBluetoothState.MessageReceived)?.message
+        }
 
-    fun hasSessionEnd(
-        expected: Boolean
-    ) = hasSessionEnd(equalTo(expected))
+    fun hasSessionEnd(expected: Boolean) = hasSessionEnd(equalTo(expected))
 
-    fun hasSessionEnd(
-        matcher: Matcher<in Boolean>
-    ): Matcher<in PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(matcher) {
-        (it as? PeripheralBluetoothState.Disconnected)?.isSessionEnd
-    }
+    fun hasSessionEnd(matcher: Matcher<in Boolean>): Matcher<in PeripheralBluetoothState> =
+        PeripheralBluetoothStateMatcher(matcher) {
+            (it as? PeripheralBluetoothState.Disconnected)?.isSessionEnd
+        }
 
-    fun hasStatus(
-        expected: SessionEndStates
-    ) = hasStatus(equalTo(expected))
+    fun hasStatus(expected: SessionEndStates) = hasStatus(equalTo(expected))
 
-    fun hasStatus(
-        matcher: Matcher<in SessionEndStates>
-    ): Matcher<in PeripheralBluetoothState> = PeripheralBluetoothStateMatcher(matcher) {
-        (it as? PeripheralBluetoothState.Ended)?.status
-    }
+    fun hasStatus(matcher: Matcher<in SessionEndStates>): Matcher<in PeripheralBluetoothState> =
+        PeripheralBluetoothStateMatcher(matcher) {
+            (it as? PeripheralBluetoothState.Ended)?.status
+        }
 
-    fun hasTransportError(
-        expected: PeripheralBluetoothTransportError
-    ) = hasTransportError(equalTo(expected))
+    fun hasTransportError(expected: PeripheralBluetoothTransportError) =
+        hasTransportError(equalTo(expected))
 
     fun hasTransportError(
         matcher: Matcher<in PeripheralBluetoothTransportError>
@@ -59,9 +46,7 @@ object PeripheralBluetoothStateMatchers {
         (it as? PeripheralBluetoothState.Error)?.reason
     }
 
-    fun isConnected(
-        expected: PeripheralBluetoothState.Connected
-    ) = isConnected(equalTo(expected))
+    fun isConnected(expected: PeripheralBluetoothState.Connected) = isConnected(equalTo(expected))
 
     fun isConnected(
         matcher: Matcher<in PeripheralBluetoothState.Connected>
@@ -69,9 +54,8 @@ object PeripheralBluetoothStateMatchers {
         (it as? PeripheralBluetoothState.Connected)
     }
 
-    fun isDisconnected(
-        expected: PeripheralBluetoothState.Disconnected
-    ) = isDisconnected(equalTo(expected))
+    fun isDisconnected(expected: PeripheralBluetoothState.Disconnected) =
+        isDisconnected(equalTo(expected))
 
     fun isDisconnected(
         matcher: Matcher<in PeripheralBluetoothState.Disconnected>
@@ -81,9 +65,7 @@ object PeripheralBluetoothStateMatchers {
         (it as? PeripheralBluetoothState.Disconnected)
     }
 
-    fun isEnded(
-        expected: PeripheralBluetoothState.Ended
-    ) = isEnded(equalTo(expected))
+    fun isEnded(expected: PeripheralBluetoothState.Ended) = isEnded(equalTo(expected))
 
     fun isEnded(
         matcher: Matcher<in PeripheralBluetoothState.Ended>
@@ -91,13 +73,9 @@ object PeripheralBluetoothStateMatchers {
         (it as? PeripheralBluetoothState.Ended)
     }
 
-    fun isError(
-        expected: PeripheralBluetoothState.Error
-    ) = isError(equalTo(expected))
+    fun isError(expected: PeripheralBluetoothState.Error) = isError(equalTo(expected))
 
-    fun isError(
-        expected: PeripheralBluetoothTransportError
-    ) = isError(hasTransportError(expected))
+    fun isError(expected: PeripheralBluetoothTransportError) = isError(hasTransportError(expected))
 
     fun isError(
         matcher: Matcher<in PeripheralBluetoothState.Error>
@@ -105,9 +83,8 @@ object PeripheralBluetoothStateMatchers {
         (it as? PeripheralBluetoothState.Error)
     }
 
-    fun isMessageReceived(
-        expected: PeripheralBluetoothState.MessageReceived
-    ) = isMessageReceived(equalTo(expected))
+    fun isMessageReceived(expected: PeripheralBluetoothState.MessageReceived) =
+        isMessageReceived(equalTo(expected))
 
     fun isMessageReceived(
         matcher: Matcher<in PeripheralBluetoothState.MessageReceived>

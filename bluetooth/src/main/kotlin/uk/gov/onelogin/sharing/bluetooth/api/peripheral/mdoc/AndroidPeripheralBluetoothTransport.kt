@@ -39,7 +39,7 @@ class AndroidPeripheralBluetoothTransport(
     private val bluetoothStateMonitor: BluetoothStateMonitor,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
     private val logger: Logger,
-    private val ioDispatcher: CoroutineContext = Dispatchers.IO,
+    private val ioDispatcher: CoroutineContext = Dispatchers.IO
 ) : PeripheralBluetoothTransport,
     MessageSender by gattServerManager {
 
@@ -98,18 +98,16 @@ class AndroidPeripheralBluetoothTransport(
         gattServerManager.open(serviceUuid)
     }
 
-    override suspend fun stop(
-        serviceUuid: UUID,
-        sendEndCommand: Boolean,
-    ): Unit = withContext(ioDispatcher + "$logTag.Stop".asCoroutineName()) {
-        cancelCurrentJobs()
-        if (sendEndCommand) {
-            notifySessionEnd(serviceUuid)
+    override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean): Unit =
+        withContext(ioDispatcher + "$logTag.Stop".asCoroutineName()) {
+            cancelCurrentJobs()
+            if (sendEndCommand) {
+                notifySessionEnd(serviceUuid)
+            }
+            bleAdvertiser.stopAdvertise()
+            gattServerManager.close()
+            bluetoothStateMonitor.stop()
         }
-        bleAdvertiser.stopAdvertise()
-        gattServerManager.close()
-        bluetoothStateMonitor.stop()
-    }
 
     override suspend fun notifySessionEnd(serviceUuid: UUID): Unit = withContext(
         ioDispatcher + "$logTag.NotifySessionEnd".asCoroutineName()
@@ -142,4 +140,3 @@ class AndroidPeripheralBluetoothTransport(
         }
     }
 }
-
