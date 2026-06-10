@@ -287,8 +287,12 @@ class AndroidPeripheralBluetoothTransportTest {
             assertEquals(PeripheralBluetoothState.Idle, awaitItem())
 
             gattServerManager.emitEvent(GattServerEvent.ServiceStopped)
+
+            advanceUntilIdle()
+
             expectNoEvents()
         }
+
         assert(logger.contains("GattService Stopped"))
     }
 
