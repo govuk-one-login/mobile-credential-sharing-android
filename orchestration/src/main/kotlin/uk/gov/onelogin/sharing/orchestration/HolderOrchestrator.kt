@@ -303,7 +303,6 @@ class HolderOrchestrator(
         }
     }
 
-    // DCMAW-20404: Handle all bluetooth state events
     @Suppress("LongMethod")
     private fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
