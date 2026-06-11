@@ -24,7 +24,6 @@ permissions:
 
 jobs:
   unit_tests:
-    name: "Unit test suite"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -54,7 +53,6 @@ jobs:
             **/build/reports/jacoco/**/*.xml
 
   instrumentation_tests:
-    name: "Instrumentation test suite"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -84,7 +82,6 @@ jobs:
             **/build/reports/coverage/androidTest/**/*.xml
 
   sonar_scan:
-    name: "Project sonar scan"
     runs-on: ubuntu-latest
     needs: [unit_tests, instrumentation_tests]
     steps:
