@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
-import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
+import uk.gov.onelogin.sharing.bluetooth.api.BluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 
 /**
@@ -9,20 +9,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
  *
  * Exposes [CentralBluetoothState] via a [StateFlow].
  */
-interface CentralBluetoothTransport : MessageSender {
-    /**
-     * The current state of the BLE session, exposed as a [StateFlow].
-     */
-    val state: StateFlow<CentralBluetoothState>
-
-    /**
-     * Starts scanning for a peripheral advertising the given service UUID,
-     * then connects when found.
-     *
-     * @param serviceUuid The service [UUID] to scan for.
-     */
-    suspend fun scanAndConnect(serviceUuid: UUID)
-
+interface CentralBluetoothTransport :
+    MessageSender,
+    BluetoothTransport<CentralBluetoothState> {
     /**
      * Stops the BLE session, optionally sending a session end command first.
      */

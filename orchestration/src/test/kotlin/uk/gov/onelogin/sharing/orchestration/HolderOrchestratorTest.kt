@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -37,7 +36,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRA
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
-import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.credential.FakeCredentialRequestHandler
@@ -67,9 +65,8 @@ import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
-import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.UnrecoverableThrowableMatchers.hasSessionErrorThrowable
+import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isInvalidBluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
-import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverableThrowable
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -372,18 +369,16 @@ class HolderOrchestratorTest {
         assert("Error Mdoc - Disconnected: $DEVICE_ADDRESS" in logger)
         assertEquals(1, peripheralBluetoothTransport.stopCalls)
 
-        assertThat(
-            orchestrator.holderSessionState.value,
-            isFailed(
-                hasReason(
-                    isUnrecoverableThrowable(
-                        hasSessionErrorThrowable(
-                            instanceOf(BluetoothDisconnectedException::class.java)
-                        )
+        orchestrator.holderSessionState.test {
+            assertThat(
+                expectMostRecentItem(),
+                isFailed(
+                    hasReason(
+                        isInvalidBluetoothState()
                     )
                 )
             )
-        )
+        }
     }
 
     @Test
@@ -403,7 +398,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `handles error states`() = runTest {
+    fun `handles error states`(@TestParameter error: PeripheralBluetoothTransportError) = runTest {
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport)
         backgroundScope.launch {
@@ -412,36 +407,10 @@ class HolderOrchestratorTest {
         orchestrator.start()
 
         peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.Error(
-                PeripheralBluetoothTransportError.ADVERTISING_FAILED
-            )
+            PeripheralBluetoothState.Error(error)
         )
 
-        assert("Mdoc - Error: Advertising failed" in logger)
-
-        peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.Error(
-                PeripheralBluetoothTransportError.GATT_NOT_AVAILABLE
-            )
-        )
-
-        assert("Mdoc - Error: GATT not available" in logger)
-
-        peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.Error(
-                PeripheralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING
-            )
-        )
-
-        assert("Mdoc - Error: Bluetooth permission missing" in logger)
-
-        peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.Error(
-                PeripheralBluetoothTransportError.DESCRIPTOR_WRITE_REQUEST_FAILED
-            )
-        )
-
-        assert("Mdoc - Error: Descriptor write request failed" in logger)
+        assert("Mdoc - Error: ${error.message}" in logger)
     }
 
     @Test

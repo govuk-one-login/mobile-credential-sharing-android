@@ -6,6 +6,7 @@ import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +81,9 @@ class AndroidCentralBluetoothTransport(
         }
     }
 
-    override suspend fun scanAndConnect(serviceUuid: UUID) {
+    override suspend fun start(serviceUuid: UUID) = withContext(
+        ioDispatcher + "$logTag.ScanAndConnect".asCoroutineName()
+    ) {
         cancelCurrentJobs()
 
         monitoringJob.start()
@@ -90,19 +93,19 @@ class AndroidCentralBluetoothTransport(
         scanJob = prepareScanJob(serviceUuid)
     }
 
-    override suspend fun stop() {
-        withContext(ioDispatcher + "$logTag.Stop".asCoroutineName()) {
-            cancelCurrentJobs()
-            notifySessionEnd()
-            gattClientManager.disconnect()
-            bluetoothStateMonitor.stop()
-        }
+    override suspend fun stop(): Unit = withContext(
+        ioDispatcher + "$logTag.Stop".asCoroutineName()
+    ) {
+        cancelCurrentJobs()
+        notifySessionEnd()
+        gattClientManager.disconnect()
+        bluetoothStateMonitor.stop()
     }
 
     private suspend fun notifySessionEnd() {
         val result = gattClientManager.notifySessionEnd()
         if (result == SessionEndStates.SUCCESS) {
-            delay(BLE_SEND_NOTIFICATION_DELAY)
+            delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
         }
     }
 
@@ -112,7 +115,7 @@ class AndroidCentralBluetoothTransport(
      * @return a [Job] that collects values from the [bluetoothStateMonitor]. Updates the [state]
      * whenever bluetooth isn't enabled and ready for connecting with devices.
      */
-    internal fun monitorClientEvents(): Job = coroutineScope.launch(
+    private fun monitorClientEvents(): Job = coroutineScope.launch(
         ioDispatcher + "$logTag.BluetoothMonitoring".asCoroutineName(),
         start = CoroutineStart.LAZY
     ) {

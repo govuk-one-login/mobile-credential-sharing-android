@@ -187,7 +187,7 @@ class VerifierOrchestrator(
                 }.onSuccess {
                     sessionFlow.value.cryptoContext?.let {
                         safeTransitionTo(VerifierSessionState.Connecting)
-                        centralBluetoothTransport.scanAndConnect(it.serviceUuid)
+                        centralBluetoothTransport.start(it.serviceUuid)
                     } ?: failWith(
                         "Service UUID not found in device engagement",
                         SessionErrorReason.ServiceUuidNotFound
@@ -249,10 +249,12 @@ class VerifierOrchestrator(
 
                 failWith(
                     "Device ${state.address} disconnected unexpectedly",
-                    BluetoothDisconnectedException(
-                        "Bluetooth disconnected unexpectedly",
-                        IllegalStateException(
-                            "Device ${state.address} disconnected unexpectedly"
+                    SessionErrorReason.InvalidBluetoothState(
+                        BluetoothDisconnectedException(
+                            "Bluetooth disconnected unexpectedly",
+                            IllegalStateException(
+                                "Device ${state.address} disconnected unexpectedly"
+                            )
                         )
                     )
                 )
@@ -261,7 +263,9 @@ class VerifierOrchestrator(
             is CentralBluetoothState.Error -> {
                 failWith(
                     "Bluetooth error: ${state.reason}",
-                    IllegalStateException("Bluetooth error: ${state.reason}")
+                    SessionErrorReason.InvalidBluetoothState(
+                        IllegalStateException("Bluetooth error: ${state.reason}")
+                    )
                 )
             }
 

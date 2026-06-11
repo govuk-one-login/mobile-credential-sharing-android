@@ -29,6 +29,8 @@ sealed class SessionErrorReason {
         )
     }
 
+    data class InvalidBluetoothState(val cause: Throwable) : SessionErrorReason()
+
     /**
      * State for when the app cannot establish a secure session due to missing
      * cryptographic context.

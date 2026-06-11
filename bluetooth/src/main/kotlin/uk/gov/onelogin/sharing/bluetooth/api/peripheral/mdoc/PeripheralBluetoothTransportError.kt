@@ -2,14 +2,12 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 
-enum class PeripheralBluetoothTransportError {
-    ADVERTISING_FAILED,
-
-    GATT_NOT_AVAILABLE,
-
-    BLUETOOTH_PERMISSION_MISSING,
-
-    DESCRIPTOR_WRITE_REQUEST_FAILED;
+enum class PeripheralBluetoothTransportError(val message: String) {
+    BLUETOOTH_TURNED_OFF("Bluetooth is currently turned off"),
+    ADVERTISING_FAILED("Advertising failed"),
+    GATT_NOT_AVAILABLE("GATT not available"),
+    BLUETOOTH_PERMISSION_MISSING("Bluetooth permission missing"),
+    DESCRIPTOR_WRITE_REQUEST_FAILED("Descriptor write request failed");
 
     companion object {
         fun fromGattError(gattServerError: GattServerError): PeripheralBluetoothTransportError =
