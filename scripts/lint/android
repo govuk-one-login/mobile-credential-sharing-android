@@ -4,8 +4,9 @@
 # see also: the 'set' command within the 'Shell Builtin Commands' section of `man bash`
 set -o errexit
 
-SCRIPT_FOLDER=$(dirname "${0}")
-
-"${SCRIPT_FOLDER}"/vale/run
-"${SCRIPT_FOLDER}"/android "${@}"
-"${SCRIPT_FOLDER}"/kotlin "${@}"
+source "$(git rev-parse --show-toplevel)/scripts/env"
+"${GIT_ROOT}"/gradlew \
+    lintDebug \
+    "${@}" \
+    --rerun-tasks \
+    --stacktrace \
