@@ -14,9 +14,7 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 @Inject
-class DeviceAuthVerifier(
-    private val trustVerifier: TrustVerifier
-) {
+class DeviceAuthVerifier(private val trustVerifier: TrustVerifier) {
     private val cborMapper = ObjectMapper(CBORFactory())
     private val coseKeyDecoder = CoseKeyDecoder()
 

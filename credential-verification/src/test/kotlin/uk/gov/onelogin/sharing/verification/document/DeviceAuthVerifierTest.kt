@@ -250,15 +250,13 @@ class DeviceAuthVerifierTest {
         assertThat(exception, hasError(VerificationError.INVALID_DEVICE_KEY))
     }
 
-    private fun buildSessionTranscriptBytes(): ByteArray {
-        return ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartArray(null, 3)
-                gen.writeNull()
-                gen.writeNull()
-                gen.writeNull()
-                gen.writeEndArray()
-            }
-        }.toByteArray()
-    }
+    private fun buildSessionTranscriptBytes(): ByteArray = ByteArrayOutputStream().also { out ->
+        CBORFactory().createGenerator(out).use { gen ->
+            gen.writeStartArray(null, 3)
+            gen.writeNull()
+            gen.writeNull()
+            gen.writeNull()
+            gen.writeEndArray()
+        }
+    }.toByteArray()
 }

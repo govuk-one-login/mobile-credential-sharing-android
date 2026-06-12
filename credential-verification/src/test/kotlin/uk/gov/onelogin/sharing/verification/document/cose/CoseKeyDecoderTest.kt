@@ -29,19 +29,17 @@ class CoseKeyDecoderTest {
         val y = pub.w.affineY.toByteArray().let { fixCoordinate(it) }
 
         val node = cborMapper.createObjectNode()
-        node.put("1", 2)   // kty = EC2
-        node.put("-1", 1)  // crv = P-256
-        node.put("-2", x)  // x
-        node.put("-3", y)  // y
+        node.put("1", 2) // kty = EC2
+        node.put("-1", 1) // crv = P-256
+        node.put("-2", x) // x
+        node.put("-3", y) // y
         return cborMapper.writeValueAsBytes(node)
     }
 
-    private fun fixCoordinate(bytes: ByteArray): ByteArray {
-        return when {
-            bytes.size == 33 && bytes[0] == 0.toByte() -> bytes.copyOfRange(1, 33)
-            bytes.size < 32 -> ByteArray(32 - bytes.size) + bytes
-            else -> bytes
-        }
+    private fun fixCoordinate(bytes: ByteArray): ByteArray = when {
+        bytes.size == 33 && bytes[0] == 0.toByte() -> bytes.copyOfRange(1, 33)
+        bytes.size < 32 -> ByteArray(32 - bytes.size) + bytes
+        else -> bytes
     }
 
     @Test
@@ -65,7 +63,7 @@ class CoseKeyDecoderTest {
         node.put("-1", 1)
         node.put("-2", x)
         node.put("-3", y)
-        node.put("2", 42)  // extra label (kid)
+        node.put("2", 42) // extra label (kid)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             decoder.decode(cborMapper.writeValueAsBytes(node))
@@ -76,7 +74,7 @@ class CoseKeyDecoderTest {
     @Test
     fun `throws INVALID_DEVICE_KEY for wrong kty`() {
         val node = cborMapper.createObjectNode()
-        node.put("1", 1)   // kty = OKP (not EC2)
+        node.put("1", 1) // kty = OKP (not EC2)
         node.put("-1", 1)
         node.put("-2", ByteArray(32))
         node.put("-3", ByteArray(32))
@@ -91,7 +89,7 @@ class CoseKeyDecoderTest {
     fun `throws INVALID_DEVICE_KEY for wrong crv`() {
         val node = cborMapper.createObjectNode()
         node.put("1", 2)
-        node.put("-1", 2)  // crv = P-384
+        node.put("-1", 2) // crv = P-384
         node.put("-2", ByteArray(32))
         node.put("-3", ByteArray(32))
 
