@@ -3,10 +3,14 @@
 [![Merge to main workflow status](https://github.com/govuk-one-login/mobile-credential-sharing-android/actions/workflows/merge-to-main.yml/badge.svg)](https://github.com/govuk-one-login/mobile-credential-sharing-android/actions/workflows/merge-to-main.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=govuk-one-login_mobile-credential-sharing-android&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=govuk-one-login_mobile-credential-sharing-android)
 
-This SDK provides an ISO 18013-5 compliant framework for **Holder** (credential sharing) and *
-*Verifier** (credential requesting) roles. Consuming applications adopt the role relevant to their
-use case (for example, an identity wallet adopts the Holder role, and a relying party app adopts the Verifier
-role).
+This SDK provides an ISO 18013-5 compliant framework for the proceeding roles:
+
+- **Holder** (credential sharing).
+- **Verifier** (credential requesting).
+
+Consuming applications adopt the role relevant to their use case. As an
+example, an identity wallet adopts the Holder role, and a relying party
+app adopts the Verifier role.
 
 The current implementation includes a demo app and implements ISO 18013-5 for in-person Bluetooth
 presentation and verification.
@@ -95,10 +99,10 @@ secure vault, supplying both issuer-signed data and device signatures when a Ver
 request.
 
 To maintain cryptographic boundaries, the consumer provides the exact CBOR `IssuerSignedItem` bytes
-originally signed by the Issuer. The SDK doesn't sign these attributes. To prove device possession
-and bind the credential to the current BLE session, the SDK constructs a `DeviceAuthentication`
-payload, which the consumer then signs using the credential's Android Keystore private key. Finally,
-the SDK handles all mdoc session encryption for the transport tunnel.
+originally signed by the Issuer. The SDK doesn't sign these attributes. The SDK constructs
+`DeviceAuthentication` payloads to prove credentials as part of binding to the current BLE session.
+The Android Keystore's private key signs credentials. Finally, the SDK handles all mdoc session
+encryption for the transport tunnel.
 
 #### 1. Importing the module
 
@@ -169,10 +173,14 @@ ShareCredential(
 The **consumer** adopting the Verifier role requests attributes and consumes the verified response.
 It acts as the trust anchor, supplying the SDK with the Root Certificates of trusted issuers.
 
-To maintain cryptographic boundaries, the SDK handles the complete transaction lifecycle: it manages
-the camera scanner, establishes the secure BLE tunnel, decrypts the `DeviceResponse`, and
-cryptographically validates the Issuer's signature and data integrity. The consumer defines the
-request and receives the validated data.
+To maintain cryptographic boundaries, the SDK handles the complete transaction lifecycle:
+
+- Manages the camera scanner
+- Establishes the secure BLE tunnel
+- Decrypts the `DeviceResponse`
+- Cryptographically validates the Issuer's signature and data integrity.
+
+The consumer defines the request and receives the validated data.
 
 #### 1. Initialise the Verifier Module
 
@@ -203,9 +211,14 @@ val request = CredentialRequest(
 
 #### 3. Start Verification & Process Response
 
-The SDK takes control of the flow: it launches the camera, scans the engagement QR code, establishes
-the BLE connection, transmits the request, and validates the response. The consumer awaits the
-final, cryptographically verified data.
+The SDK takes control of the flow:
+
+- Launches the camera
+- Scans the engagement QR code
+- Establishes the BLE connection
+- Transmits the request
+- Validates the response.
+- Then, the consumer awaits the final, cryptographically verified data.
 
 ```kotlin
 lifecycleScope.launch {
