@@ -16,9 +16,9 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 @JsonSerialize(using = BleOptionsDto.Serializer::class)
 @JsonDeserialize(using = BleOptionsDto.Deserializer::class)
 data class BleOptionsDto(
-    @JsonProperty(SERVER_MODE_KEY) val serverMode: Boolean,
-    @JsonProperty(CLIENT_MODE_KEY) val clientMode: Boolean,
-    @JsonProperty(PERIPHERAL_UUID_KEY) val peripheralServerModeUuid: ByteArray?
+    val serverMode: Boolean,
+    val clientMode: Boolean,
+    val peripheralServerModeUuid: ByteArray?
 ) : CborEncodable {
     fun getPeripheralServerModeUuidString(): String? = peripheralServerModeUuid?.decodeToString()
 
@@ -29,20 +29,13 @@ data class BleOptionsDto(
             provider: SerializerProvider
         ) {
             (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
-            gen.writeFieldId(SERVER_MODE_ID)
+            gen.writeFieldId(SERVER_MODE_KEY)
             gen.writeBoolean(value.serverMode)
-            gen.writeFieldId(CLIENT_MODE_ID)
+            gen.writeFieldId(CLIENT_MODE_KEY)
             gen.writeBoolean(value.clientMode)
-            gen.writeFieldId(PERIPHERAL_UUID_ID)
+            gen.writeFieldId(PERIPHERAL_UUID_KEY)
             provider.defaultSerializeValue(value.peripheralServerModeUuid, gen)
             gen.writeEndObject()
-        }
-
-        private companion object {
-            const val FIELD_COUNT = 3
-            const val SERVER_MODE_ID = 0L
-            const val CLIENT_MODE_ID = 1L
-            const val PERIPHERAL_UUID_ID = 10L
         }
     }
 
@@ -50,10 +43,10 @@ data class BleOptionsDto(
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): BleOptionsDto {
             val root = p.codec.readTree<JsonNode>(p)
             return BleOptionsDto(
-                serverMode = root[SERVER_MODE_KEY].booleanValue(),
-                clientMode = root[CLIENT_MODE_KEY].booleanValue(),
-                peripheralServerModeUuid = if (root.has(PERIPHERAL_UUID_KEY)) {
-                    root[PERIPHERAL_UUID_KEY].binaryValue()
+                serverMode = root[SERVER_MODE_KEY.toString()].booleanValue(),
+                clientMode = root[CLIENT_MODE_KEY.toString()].booleanValue(),
+                peripheralServerModeUuid = if (root.has(PERIPHERAL_UUID_KEY.toString())) {
+                    root[PERIPHERAL_UUID_KEY.toString()].binaryValue()
                 } else {
                     null
                 }
@@ -62,12 +55,10 @@ data class BleOptionsDto(
     }
 
     companion object {
-        const val SERVER_MODE_KEY = "0"
-        const val CLIENT_MODE_KEY = "1"
-        const val PERIPHERAL_UUID_KEY = "10"
-        const val SERVER_MODE_ID = 0L
-        const val CLIENT_MODE_ID = 1L
-        const val PERIPHERAL_UUID_ID = 10L
+        private const val FIELD_COUNT = 3
+        const val SERVER_MODE_KEY = 0L
+        const val CLIENT_MODE_KEY = 1L
+        const val PERIPHERAL_UUID_KEY = 10L
     }
 
     override fun equals(other: Any?): Boolean {

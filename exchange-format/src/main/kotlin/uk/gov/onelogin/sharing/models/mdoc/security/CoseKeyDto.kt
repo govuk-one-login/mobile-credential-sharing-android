@@ -9,12 +9,8 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 
 @JsonSerialize(using = CoseKeyDto.Serializer::class)
-data class CoseKeyDto(
-    @JsonProperty(KEY_TYPE_KEY) val keyType: Long,
-    @JsonProperty(CURVE_KEY) val curve: Long,
-    @JsonProperty(X_KEY) val x: ByteArray,
-    @JsonProperty(Y_KEY) val y: ByteArray
-) : CborEncodable {
+data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val y: ByteArray) :
+    CborEncodable {
     class Serializer : StdSerializer<CoseKeyDto>(CoseKeyDto::class.java) {
         override fun serialize(
             value: CoseKeyDto,
@@ -22,31 +18,24 @@ data class CoseKeyDto(
             provider: SerializerProvider
         ) {
             (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
-            gen.writeFieldId(KEY_KTY_LABEL)
+            gen.writeFieldId(KEY_TYPE_KEY)
             provider.defaultSerializeValue(value.keyType, gen)
-            gen.writeFieldId(EC_CURVE_LABEL)
+            gen.writeFieldId(CURVE_KEY)
             gen.writeNumber(value.curve)
-            gen.writeFieldId(EC_X_COORDINATE_LABEL)
+            gen.writeFieldId(X_KEY)
             gen.writeBinary(value.x)
-            gen.writeFieldId(EC_Y_COORDINATE_LABEL)
+            gen.writeFieldId(Y_KEY)
             gen.writeBinary(value.y)
             gen.writeEndObject()
-        }
-
-        private companion object {
-            const val FIELD_COUNT = 4
-            const val KEY_KTY_LABEL: Long = 1
-            const val EC_CURVE_LABEL: Long = -1
-            const val EC_X_COORDINATE_LABEL: Long = -2
-            const val EC_Y_COORDINATE_LABEL: Long = -3
         }
     }
 
     companion object {
-        const val KEY_TYPE_KEY = "1"
-        const val CURVE_KEY = "-1"
-        const val X_KEY = "-2"
-        const val Y_KEY = "-3"
+        private const val FIELD_COUNT = 4
+        const val KEY_TYPE_KEY: Long = 1
+        const val CURVE_KEY: Long = -1
+        const val X_KEY: Long = -2
+        const val Y_KEY: Long = -3
     }
 
     override fun equals(other: Any?): Boolean {

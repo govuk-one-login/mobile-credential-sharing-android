@@ -29,22 +29,17 @@ data class DocRequestDto(
             provider: SerializerProvider
         ) {
             (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
-            gen.writeFieldId(ITEMS_REQUEST_ID)
+            gen.writeFieldName(ITEMS_REQUEST_KEY)
             gen.writeTag(EMBEDDED_CBOR_TAG)
             gen.writeBinary(CborMapper.default.writeValueAsBytes(value.itemsRequest))
             gen.writeEndObject()
-        }
-
-        private companion object {
-            const val FIELD_COUNT = 1
-            const val ITEMS_REQUEST_ID = 1L
         }
     }
 
     class Deserializer : JsonDeserializer<DocRequestDto>() {
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): DocRequestDto {
             val root = p.codec.readTree<JsonNode>(p)
-            val itemsRequestNode = root[ITEMS_REQUEST_KEY] ?: root["itemsRequest"]
+            val itemsRequestNode = root[ITEMS_REQUEST_KEY]
                 ?: throw IllegalArgumentException("Missing itemsRequest in DocRequest")
             val itemsRequest = CborMapper.default
                 .readValue(itemsRequestNode.binaryValue(), ItemsRequestDto::class.java)
@@ -53,7 +48,8 @@ data class DocRequestDto(
     }
 
     companion object {
-        const val ITEMS_REQUEST_KEY = "1"
+        private const val FIELD_COUNT = 1
+        const val ITEMS_REQUEST_KEY = "itemsRequest"
     }
 }
 
