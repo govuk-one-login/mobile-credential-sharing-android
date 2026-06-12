@@ -13,17 +13,14 @@ import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 class BuildDeviceAuthenticationBytesTest {
     private val cborMapper = ObjectMapper(CBORFactory())
-    private val documentVerifier = Iso18013DocumentVerifier(
-        trustedRootCertificate = mockk(relaxed = true),
-        trustVerifier = mockk<TrustVerifier>(relaxed = true)
-    )
+    private val deviceAuthVerifier = DeviceAuthVerifier(mockk<TrustVerifier>(relaxed = true))
 
     @Test
     fun `result is Tag 24 wrapping CBOR bstr`() {
         val sessionTranscript = buildSessionTranscript()
         val deviceNameSpacesBytes = buildEmptyDeviceNameSpacesBytes()
 
-        val result = documentVerifier.buildDeviceAuthenticationBytes(
+        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
             sessionTranscript,
             "org.iso.18013.5.1.mDL",
             deviceNameSpacesBytes
@@ -41,7 +38,7 @@ class BuildDeviceAuthenticationBytesTest {
         val deviceNameSpacesBytes = buildEmptyDeviceNameSpacesBytes()
         val docType = "org.iso.18013.5.1.mDL"
 
-        val result = documentVerifier.buildDeviceAuthenticationBytes(
+        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
             sessionTranscript,
             docType,
             deviceNameSpacesBytes
@@ -60,7 +57,7 @@ class BuildDeviceAuthenticationBytesTest {
         val sessionTranscript = buildSessionTranscript()
         val deviceNameSpacesBytes = buildEmptyDeviceNameSpacesBytes()
 
-        val result = documentVerifier.buildDeviceAuthenticationBytes(
+        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
             sessionTranscript,
             "org.iso.18013.5.1.mDL",
             deviceNameSpacesBytes
@@ -79,7 +76,7 @@ class BuildDeviceAuthenticationBytesTest {
         val sessionTranscript = buildSessionTranscript()
         val deviceNameSpacesBytes = buildEmptyDeviceNameSpacesBytes()
 
-        val result = documentVerifier.buildDeviceAuthenticationBytes(
+        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
             sessionTranscript,
             "org.iso.18013.5.1.mDL",
             deviceNameSpacesBytes

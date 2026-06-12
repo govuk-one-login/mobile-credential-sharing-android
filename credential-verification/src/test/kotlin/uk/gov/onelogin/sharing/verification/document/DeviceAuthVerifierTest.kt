@@ -19,13 +19,10 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
-class VerifyDeviceAuthTest {
+class DeviceAuthVerifierTest {
     private val cborMapper = ObjectMapper(CBORFactory())
     private val trustVerifier: TrustVerifier = mockk(relaxed = true)
-    private val documentVerifier = Iso18013DocumentVerifier(
-        trustedRootCertificate = mockk(relaxed = true),
-        trustVerifier = trustVerifier
-    )
+    private val deviceAuthVerifier = DeviceAuthVerifier(trustVerifier)
 
     private val keyPair = KeyPairGenerator.getInstance("EC")
         .apply { initialize(ECGenParameterSpec("secp256r1")) }
@@ -130,7 +127,7 @@ class VerifyDeviceAuthTest {
         val document = buildDocument()
         val deviceKeyInfo = DeviceKeyInfo(deviceKey = buildCoseKeyBytes())
 
-        documentVerifier.verifyDeviceAuth(
+        deviceAuthVerifier.verifyDeviceAuth(
             document,
             buildSessionTranscriptBytes(),
             deviceKeyInfo
@@ -143,7 +140,7 @@ class VerifyDeviceAuthTest {
         val deviceKeyInfo = DeviceKeyInfo(deviceKey = buildCoseKeyBytes())
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verifyDeviceAuth(
                 document,
                 buildSessionTranscriptBytes(),
                 deviceKeyInfo
@@ -158,7 +155,7 @@ class VerifyDeviceAuthTest {
         val deviceKeyInfo = DeviceKeyInfo(deviceKey = buildCoseKeyBytes())
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verifyDeviceAuth(
                 document,
                 buildSessionTranscriptBytes(),
                 deviceKeyInfo
@@ -175,7 +172,7 @@ class VerifyDeviceAuthTest {
         )
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verifyDeviceAuth(
                 document,
                 buildSessionTranscriptBytes(),
                 deviceKeyInfo
@@ -192,7 +189,7 @@ class VerifyDeviceAuthTest {
             keyAuthorizations = null
         )
 
-        documentVerifier.verifyDeviceAuth(
+        deviceAuthVerifier.verifyDeviceAuth(
             document,
             buildSessionTranscriptBytes(),
             deviceKeyInfo
@@ -210,7 +207,7 @@ class VerifyDeviceAuthTest {
         val deviceKeyInfo = DeviceKeyInfo(deviceKey = buildCoseKeyBytes())
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verifyDeviceAuth(
                 document,
                 buildSessionTranscriptBytes(),
                 deviceKeyInfo
@@ -244,7 +241,7 @@ class VerifyDeviceAuthTest {
         )
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verifyDeviceAuth(
                 document,
                 buildSessionTranscriptBytes(),
                 deviceKeyInfo
