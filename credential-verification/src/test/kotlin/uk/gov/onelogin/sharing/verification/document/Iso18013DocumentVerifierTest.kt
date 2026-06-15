@@ -66,7 +66,7 @@ class Iso18013DocumentVerifierTest {
         Iso18013DocumentVerifier(
             mockRootCertificate,
             trustVerifier,
-            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder())
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder())
         )
     }
 

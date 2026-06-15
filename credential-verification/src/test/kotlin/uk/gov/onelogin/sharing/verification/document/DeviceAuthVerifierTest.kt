@@ -1,8 +1,5 @@
 package uk.gov.onelogin.sharing.verification.document
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import io.mockk.every
 import io.mockk.mockk
@@ -10,7 +7,6 @@ import java.io.ByteArrayOutputStream
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
-import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -30,9 +26,9 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 class DeviceAuthVerifierTest {
-    private val cborMapper = ObjectMapper(CBORFactory())
     private val trustVerifier: TrustVerifier = mockk(relaxed = true)
-    private val deviceAuthVerifier = DeviceAuthVerifier(trustVerifier, CoseKeyDecoder())
+    private val deviceAuthVerifier =
+        DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder())
 
     private val keyPair = KeyPairGenerator.getInstance("EC")
         .apply { initialize(ECGenParameterSpec("secp256r1")) }
@@ -182,61 +178,20 @@ class DeviceAuthVerifierTest {
     }
 
     @Test
-    fun `buildDeviceAuthenticationBytes result is Tag 24 wrapping CBOR bstr`() {
-        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
-            sessionTranscriptBytes,
-            "org.iso.18013.5.1.mDL",
-            emptyDeviceNameSpacesBytes
+    fun `malformed deviceNameSpacesBytes with keyAuthorizations throws INVALID_DEVICE_KEY`() {
+        val document = buildDocument(deviceNameSpacesBytes = byteArrayOf(0xFF.toByte()))
+        val deviceKeyInfo = DeviceKeyInfo(
+            deviceKey = coseKeyBytes(publicKey),
+            keyAuthorizations = mapOf("org.iso.18013.5.1" to "org.iso.18013.5.1")
         )
 
-        val outerNode = cborMapper.readTree(result)
-        assertThat(outerNode.isBinary, equalTo(true))
-    }
-
-    @Test
-    fun `buildDeviceAuthenticationBytes inner array has 4 elements with correct structure`() {
-        val docType = "org.iso.18013.5.1.mDL"
-
-        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
-            sessionTranscriptBytes,
-            docType,
-            emptyDeviceNameSpacesBytes
-        )
-
-        val innerBytes = (cborMapper.readTree(result) as BinaryNode).binaryValue()
-        val inner = cborMapper.readTree(innerBytes) as ArrayNode
-
-        assertThat(inner.size(), equalTo(4))
-        assertThat(inner[0].asText(), equalTo("DeviceAuthentication"))
-        assertThat(inner[2].asText(), equalTo(docType))
-    }
-
-    @Test
-    fun `buildDeviceAuthenticationBytes SessionTranscript is embedded as decoded CBOR structure`() {
-        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
-            sessionTranscriptBytes,
-            "org.iso.18013.5.1.mDL",
-            emptyDeviceNameSpacesBytes
-        )
-
-        val innerBytes = (cborMapper.readTree(result) as BinaryNode).binaryValue()
-        val inner = cborMapper.readTree(innerBytes) as ArrayNode
-
-        assertThat(inner[1].isArray, equalTo(true))
-        assertThat(inner[1].size(), equalTo(3))
-    }
-
-    @Test
-    fun `buildDeviceAuthenticationBytes DeviceNameSpacesBytes is embedded as raw bytes`() {
-        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
-            sessionTranscriptBytes,
-            "org.iso.18013.5.1.mDL",
-            emptyDeviceNameSpacesBytes
-        )
-
-        val innerBytes = (cborMapper.readTree(result) as BinaryNode).binaryValue()
-        val inner = cborMapper.readTree(innerBytes) as ArrayNode
-
-        assertThat(inner[3].isBinary, equalTo(true))
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            deviceAuthVerifier.verify(
+                document,
+                sessionTranscriptBytes,
+                deviceKeyInfo
+            )
+        }
+        assertThat(exception, hasError(VerificationError.INVALID_DEVICE_KEY))
     }
 }
