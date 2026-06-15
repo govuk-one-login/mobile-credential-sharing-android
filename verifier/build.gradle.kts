@@ -72,6 +72,7 @@ dependencies {
     ).forEach(::testFixturesImplementation)
 
     listOf(
+        projects.prerequisiteGateImpl,
         testFixtures(libs.uk.gov.ui.android.componentsv2.camera),
         testFixtures(projects.core),
         testFixtures(projects.bluetooth),

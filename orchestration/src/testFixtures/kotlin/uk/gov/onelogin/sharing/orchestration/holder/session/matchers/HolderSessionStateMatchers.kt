@@ -6,10 +6,10 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.matchers.MissingPrerequisiteMatchers.hasPrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisiteMatchers.hasPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.Prerequisite
 
 /**
  * Wrapper object for storing hamcrest [Matcher] functions for [HolderSessionState].

@@ -13,10 +13,10 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
+import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisites
+import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.state.CameraState
 
 @RunWith(AndroidJUnit4::class)
 class ResolveHolderPrerequisiteActionTest {
@@ -42,7 +42,7 @@ class ResolveHolderPrerequisiteActionTest {
 
     @Test
     fun `Launches actions from Missing prerequisites`() = runTest {
-        val missingPrerequisite = MissingPrerequisite.Bluetooth(
+        val missingPrerequisite = MissingPrerequisites.Bluetooth(
             BluetoothState.PermissionNotGranted
         )
         initialHolderState = HolderSessionState.Preflight(
@@ -57,8 +57,8 @@ class ResolveHolderPrerequisiteActionTest {
     @Test
     fun `Launches occur based on the number of recoverable actions`() = runTest {
         val missingPrerequisites = listOf(
-            MissingPrerequisite.Bluetooth(BluetoothState.PermissionNotGranted),
-            MissingPrerequisite.Camera(CameraState.Restricted)
+            MissingPrerequisites.Bluetooth(BluetoothState.PermissionNotGranted),
+            MissingPrerequisites.Camera(CameraState.Restricted)
         )
         initialHolderState = HolderSessionState.Preflight(missingPrerequisites)
         resolver.resolve(launcher)
@@ -73,7 +73,7 @@ class ResolveHolderPrerequisiteActionTest {
     fun `Unrecoverable prerequisites cannot launch actions`() = runTest {
         initialHolderState = HolderSessionState.Preflight(
             listOf(
-                MissingPrerequisite.Bluetooth(BluetoothState.Unsupported)
+                MissingPrerequisites.Bluetooth(BluetoothState.Unsupported)
             )
         )
 

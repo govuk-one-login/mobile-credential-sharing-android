@@ -57,7 +57,8 @@ dependencies {
         projects.exchangeFormat,
         testFixtures(projects.cryptoService),
         testFixtures(projects.credentialFormat),
-        testFixtures(projects.exchangeFormat)
+        testFixtures(projects.exchangeFormat),
+        testFixtures(projects.prerequisiteGateApi)
     ).forEach(::testFixturesApi)
 
     listOf(

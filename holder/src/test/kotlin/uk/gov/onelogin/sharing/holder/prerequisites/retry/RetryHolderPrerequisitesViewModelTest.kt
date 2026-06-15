@@ -18,12 +18,12 @@ import org.junit.Rule
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
+import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisites
+import uk.gov.onelogin.sharing.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
 class RetryHolderPrerequisitesViewModelTest {
 
@@ -36,7 +36,7 @@ class RetryHolderPrerequisitesViewModelTest {
 
     private var initialHolderState: HolderSessionState = HolderSessionState.Preflight(
         listOf(
-            MissingPrerequisite.Bluetooth(
+            MissingPrerequisites.Bluetooth(
                 BluetoothState.PermissionNotGranted
             )
         )

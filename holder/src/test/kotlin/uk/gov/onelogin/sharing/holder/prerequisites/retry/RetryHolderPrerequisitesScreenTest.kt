@@ -17,12 +17,12 @@ import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisitesContentRule
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
+import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisites
+import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.ui.RetryPrerequisitesContentRule
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
 @RunWith(RobolectricTestParameterInjector::class)
 class RetryHolderPrerequisitesScreenTest {
@@ -35,7 +35,7 @@ class RetryHolderPrerequisitesScreenTest {
 
     private var navigatorEvents = mutableListOf<NavigationEvent>()
     private var missingPrerequisites = mutableListOf(
-        MissingPrerequisite.Bluetooth(state = BluetoothState.PermissionNotGranted)
+        MissingPrerequisites.Bluetooth(state = BluetoothState.PermissionNotGranted)
     )
 
     private val logger = SystemLogger()

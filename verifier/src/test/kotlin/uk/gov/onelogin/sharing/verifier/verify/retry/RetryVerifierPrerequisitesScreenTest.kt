@@ -15,14 +15,14 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.ui.RetryPrerequisitesContentRule
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 import uk.gov.onelogin.sharing.orchestration.verifier.prerequisites.usecases.ResolveVerifierPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisites
+import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.ui.RetryPrerequisitesContentRule
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
 @RunWith(RobolectricTestParameterInjector::class)
 class RetryVerifierPrerequisitesScreenTest {
@@ -34,7 +34,7 @@ class RetryVerifierPrerequisitesScreenTest {
 
     private var navigatorEvents = mutableListOf<NavigationEvent>()
     private var missingPrerequisites = mutableListOf(
-        MissingPrerequisite.Bluetooth(state = BluetoothState.PermissionNotGranted)
+        MissingPrerequisites.Bluetooth(state = BluetoothState.PermissionNotGranted)
     )
 
     private val logger = SystemLogger()
