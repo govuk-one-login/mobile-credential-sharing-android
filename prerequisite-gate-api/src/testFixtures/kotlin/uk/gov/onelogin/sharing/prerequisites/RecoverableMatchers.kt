@@ -10,6 +10,8 @@ object RecoverableMatchers {
         expected: Boolean = true
     ): Matcher<in Recoverable> = RecoverableMatcher(equalTo(expected))
 
+    fun isUnrecoverable() = isRecoverable(false)
+
     private class RecoverableMatcher(
         private val matcher: Matcher<in Boolean>,
     ) : TypeSafeMatcher<Recoverable>() {
