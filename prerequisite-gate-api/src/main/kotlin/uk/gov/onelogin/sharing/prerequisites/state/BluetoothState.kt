@@ -5,12 +5,32 @@ import uk.gov.onelogin.sharing.prerequisites.Actionable
 import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.Recoverable
 
+/**
+ * Prerequisite evaluation result that's specific to Bluetooth capabilities.
+ */
 enum class BluetoothState :
     Recoverable,
     Actionable<PrerequisiteAction> {
+
+    /**
+     * The Android-powered device doesn't support bluetooth capabilities.
+     */
     Unsupported,
+
+    /**
+     * Organizational / account restrictions stop bluetooth capabilities from working.
+     */
     Restricted,
+
+    /**
+     * Bluetooth capabilities are currently stopped on the Android-powered device.
+     */
     PoweredOff,
+
+    /**
+     * Permissions have reached a terminally denied state, requiring User intervention within the
+     * app's settings.
+     */
     PermissionDeniedPermanently,
     PermissionNotGranted,
     PermissionUndetermined;

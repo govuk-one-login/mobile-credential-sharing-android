@@ -5,9 +5,15 @@ import uk.gov.onelogin.sharing.prerequisites.Actionable
 import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.Recoverable
 
+/**
+ * Prerequisite evaluation result that's specific to Location capabilities.
+ */
 enum class LocationState :
     Recoverable,
     Actionable<PrerequisiteAction> {
+    /**
+     * The Android-powered device doesn't support location capabilities.
+     */
     Unsupported,
     ServicesDisabled,
     PermissionDeniedPermanently,

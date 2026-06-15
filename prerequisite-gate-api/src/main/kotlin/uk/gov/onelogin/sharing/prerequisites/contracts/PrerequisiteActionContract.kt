@@ -7,6 +7,12 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions.Companion.EXTRA_PERMISSIONS
 import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
 
+/**
+ * [ActivityResultContract] implementation that converts a provided [PrerequisiteAction] into an
+ * android [Intent] to launch.
+ *
+ * Note that there's no action performed as part of [ActivityResultContract.parseResult].
+ */
 object PrerequisiteActionContract : ActivityResultContract<PrerequisiteAction, Unit>() {
     override fun createIntent(context: Context, input: PrerequisiteAction): Intent =
         Intent(input.intentAction).let { intent ->

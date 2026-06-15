@@ -4,6 +4,9 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
 
+/**
+ * Obtains the android-powered device's [ProcessCameraProvider].
+ */
 fun interface ProcessCameraProviderFactory {
     @Throws(
         IllegalStateException::class,
