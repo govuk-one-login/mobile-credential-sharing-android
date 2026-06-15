@@ -24,11 +24,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.ResolvePrerequisiteAction
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.usecases.ResolvePrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator
 
 @Inject
 @ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())

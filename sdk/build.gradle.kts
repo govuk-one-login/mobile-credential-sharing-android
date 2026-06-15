@@ -31,6 +31,10 @@ dependencies {
 
 dependencies {
     listOf(
+        projects.prerequisiteGateImpl
+    ).forEach(::implementation)
+
+    listOf(
         projects.core,
         projects.orchestration,
         libs.metro.runtime,
