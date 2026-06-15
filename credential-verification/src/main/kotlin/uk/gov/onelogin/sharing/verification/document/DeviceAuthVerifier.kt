@@ -14,15 +14,17 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
 @Inject
-class DeviceAuthVerifier(private val trustVerifier: TrustVerifier) {
+class DeviceAuthVerifier(
+    private val trustVerifier: TrustVerifier,
+    private val coseKeyDecoder: CoseKeyDecoder
+) {
     private val cborMapper = ObjectMapper(CBORFactory())
-    private val coseKeyDecoder = CoseKeyDecoder()
 
     /**
      * @throws VerificationResult.Failure
      */
     @Suppress("ThrowsCount")
-    fun verifyDeviceAuth(
+    fun verify(
         document: VerifiableDocument.WithPresentation,
         sessionTranscriptBytes: ByteArray?,
         deviceKeyInfo: DeviceKeyInfo
@@ -83,7 +85,7 @@ class DeviceAuthVerifier(private val trustVerifier: TrustVerifier) {
         }
     }
 
-    fun buildDeviceAuthenticationBytes(
+    internal fun buildDeviceAuthenticationBytes(
         sessionTranscriptBytes: ByteArray?,
         docType: String,
         deviceNameSpacesBytes: ByteArray

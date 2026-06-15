@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationE
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 
 @Inject
-internal class CoseKeyDecoder {
+class CoseKeyDecoder {
     private val cborMapper = ObjectMapper(CBORFactory())
 
     companion object {

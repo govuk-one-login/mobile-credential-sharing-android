@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.verification.document
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import io.mockk.every
 import io.mockk.mockk
@@ -8,9 +10,17 @@ import java.io.ByteArrayOutputStream
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.coseKeyBytes
+import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.coseSign1WithNonNullPayload
+import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.emptyDeviceNameSpacesBytes
+import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.malformedCoseSign1
+import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.sessionTranscriptBytes
+import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.validCoseSign1WithNullPayload
+import uk.gov.onelogin.sharing.verification.document.cose.CoseKeyDecoder
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
@@ -22,94 +32,16 @@ import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 class DeviceAuthVerifierTest {
     private val cborMapper = ObjectMapper(CBORFactory())
     private val trustVerifier: TrustVerifier = mockk(relaxed = true)
-    private val deviceAuthVerifier = DeviceAuthVerifier(trustVerifier)
+    private val deviceAuthVerifier = DeviceAuthVerifier(trustVerifier, CoseKeyDecoder())
 
     private val keyPair = KeyPairGenerator.getInstance("EC")
         .apply { initialize(ECGenParameterSpec("secp256r1")) }
         .generateKeyPair()
     private val publicKey = keyPair.public as ECPublicKey
 
-    private fun buildCoseKeyBytes(key: ECPublicKey = publicKey): ByteArray {
-        val x = fixCoordinate(key.w.affineX.toByteArray())
-        val y = fixCoordinate(key.w.affineY.toByteArray())
-        val node = cborMapper.createObjectNode()
-        node.put("1", 2)
-        node.put("-1", 1)
-        node.put("-2", x)
-        node.put("-3", y)
-        return cborMapper.writeValueAsBytes(node)
-    }
-
-    private fun fixCoordinate(bytes: ByteArray): ByteArray = when {
-        bytes.size == 33 && bytes[0] == 0.toByte() -> bytes.copyOfRange(1, 33)
-        bytes.size < 32 -> ByteArray(32 - bytes.size) + bytes
-        else -> bytes
-    }
-
-    private fun buildValidCoseSign1WithNullPayload(): ByteArray {
-        val protectedHeader = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartObject(1)
-                gen.writeFieldId(1)
-                gen.writeNumber(-7L)
-                gen.writeEndObject()
-            }
-        }.toByteArray()
-
-        return ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartArray(null, 4)
-                gen.writeBinary(protectedHeader)
-                gen.writeStartObject(0)
-                gen.writeEndObject()
-                gen.writeNull()
-                gen.writeBinary(ByteArray(64))
-                gen.writeEndArray()
-            }
-        }.toByteArray()
-    }
-
-    private fun buildCoseSign1WithNonNullPayload(): ByteArray {
-        val protectedHeader = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartObject(1)
-                gen.writeFieldId(1)
-                gen.writeNumber(-7L)
-                gen.writeEndObject()
-            }
-        }.toByteArray()
-
-        return ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartArray(null, 4)
-                gen.writeBinary(protectedHeader)
-                gen.writeStartObject(0)
-                gen.writeEndObject()
-                gen.writeBinary(byteArrayOf(0x01, 0x02)) // non-null payload
-                gen.writeBinary(ByteArray(64))
-                gen.writeEndArray()
-            }
-        }.toByteArray()
-    }
-
-    private fun buildEmptyDeviceNameSpacesBytes(): ByteArray {
-        val emptyMap = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartObject(0)
-                gen.writeEndObject()
-            }
-        }.toByteArray()
-        return ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeTag(24)
-                gen.writeBinary(emptyMap)
-            }
-        }.toByteArray()
-    }
-
     private fun buildDocument(
-        deviceSignature: ByteArray = buildValidCoseSign1WithNullPayload(),
-        deviceNameSpacesBytes: ByteArray = buildEmptyDeviceNameSpacesBytes()
+        deviceSignature: ByteArray = validCoseSign1WithNullPayload,
+        deviceNameSpacesBytes: ByteArray = emptyDeviceNameSpacesBytes
     ): VerifiableDocument.WithPresentation {
         val deviceSigned = mockk<DeviceSigned>()
         every { deviceSigned.deviceSignature } returns deviceSignature
@@ -125,24 +57,24 @@ class DeviceAuthVerifierTest {
     @Test
     fun `valid device signature does not throw`() {
         val document = buildDocument()
-        val deviceKeyInfo = DeviceKeyInfo(deviceKey = buildCoseKeyBytes())
+        val deviceKeyInfo = DeviceKeyInfo(deviceKey = coseKeyBytes(publicKey))
 
-        deviceAuthVerifier.verifyDeviceAuth(
+        deviceAuthVerifier.verify(
             document,
-            buildSessionTranscriptBytes(),
+            sessionTranscriptBytes,
             deviceKeyInfo
         )
     }
 
     @Test
     fun `non-null payload throws INVALID_DEVICE_SIGNATURE`() {
-        val document = buildDocument(deviceSignature = buildCoseSign1WithNonNullPayload())
-        val deviceKeyInfo = DeviceKeyInfo(deviceKey = buildCoseKeyBytes())
+        val document = buildDocument(deviceSignature = coseSign1WithNonNullPayload)
+        val deviceKeyInfo = DeviceKeyInfo(deviceKey = coseKeyBytes(publicKey))
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            deviceAuthVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verify(
                 document,
-                buildSessionTranscriptBytes(),
+                sessionTranscriptBytes,
                 deviceKeyInfo
             )
         }
@@ -151,13 +83,13 @@ class DeviceAuthVerifierTest {
 
     @Test
     fun `malformed device signature bytes throw INVALID_DEVICE_SIGNATURE`() {
-        val document = buildDocument(deviceSignature = byteArrayOf(0xFF.toByte(), 0x01))
-        val deviceKeyInfo = DeviceKeyInfo(deviceKey = buildCoseKeyBytes())
+        val document = buildDocument(deviceSignature = malformedCoseSign1)
+        val deviceKeyInfo = DeviceKeyInfo(deviceKey = coseKeyBytes(publicKey))
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            deviceAuthVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verify(
                 document,
-                buildSessionTranscriptBytes(),
+                sessionTranscriptBytes,
                 deviceKeyInfo
             )
         }
@@ -172,9 +104,9 @@ class DeviceAuthVerifierTest {
         )
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            deviceAuthVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verify(
                 document,
-                buildSessionTranscriptBytes(),
+                sessionTranscriptBytes,
                 deviceKeyInfo
             )
         }
@@ -185,16 +117,15 @@ class DeviceAuthVerifierTest {
     fun `null keyAuthorizations skips scope check`() {
         val document = buildDocument()
         val deviceKeyInfo = DeviceKeyInfo(
-            deviceKey = buildCoseKeyBytes(),
+            deviceKey = coseKeyBytes(publicKey),
             keyAuthorizations = null
         )
 
-        deviceAuthVerifier.verifyDeviceAuth(
+        deviceAuthVerifier.verify(
             document,
-            buildSessionTranscriptBytes(),
+            sessionTranscriptBytes,
             deviceKeyInfo
         )
-        // no INVALID_DEVICE_KEY thrown
     }
 
     @Test
@@ -204,12 +135,12 @@ class DeviceAuthVerifierTest {
         } throws VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
 
         val document = buildDocument()
-        val deviceKeyInfo = DeviceKeyInfo(deviceKey = buildCoseKeyBytes())
+        val deviceKeyInfo = DeviceKeyInfo(deviceKey = coseKeyBytes(publicKey))
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            deviceAuthVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verify(
                 document,
-                buildSessionTranscriptBytes(),
+                sessionTranscriptBytes,
                 deviceKeyInfo
             )
         }
@@ -236,27 +167,76 @@ class DeviceAuthVerifierTest {
 
         val document = buildDocument(deviceNameSpacesBytes = deviceNameSpacesBytes)
         val deviceKeyInfo = DeviceKeyInfo(
-            deviceKey = buildCoseKeyBytes(),
+            deviceKey = coseKeyBytes(publicKey),
             keyAuthorizations = mapOf("org.iso.18013.5.1" to "org.iso.18013.5.1")
         )
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            deviceAuthVerifier.verifyDeviceAuth(
+            deviceAuthVerifier.verify(
                 document,
-                buildSessionTranscriptBytes(),
+                sessionTranscriptBytes,
                 deviceKeyInfo
             )
         }
         assertThat(exception, hasError(VerificationError.INVALID_DEVICE_KEY))
     }
 
-    private fun buildSessionTranscriptBytes(): ByteArray = ByteArrayOutputStream().also { out ->
-        CBORFactory().createGenerator(out).use { gen ->
-            gen.writeStartArray(null, 3)
-            gen.writeNull()
-            gen.writeNull()
-            gen.writeNull()
-            gen.writeEndArray()
-        }
-    }.toByteArray()
+    @Test
+    fun `buildDeviceAuthenticationBytes result is Tag 24 wrapping CBOR bstr`() {
+        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
+            sessionTranscriptBytes,
+            "org.iso.18013.5.1.mDL",
+            emptyDeviceNameSpacesBytes
+        )
+
+        val outerNode = cborMapper.readTree(result)
+        assertThat(outerNode.isBinary, equalTo(true))
+    }
+
+    @Test
+    fun `buildDeviceAuthenticationBytes inner array has 4 elements with correct structure`() {
+        val docType = "org.iso.18013.5.1.mDL"
+
+        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
+            sessionTranscriptBytes,
+            docType,
+            emptyDeviceNameSpacesBytes
+        )
+
+        val innerBytes = (cborMapper.readTree(result) as BinaryNode).binaryValue()
+        val inner = cborMapper.readTree(innerBytes) as ArrayNode
+
+        assertThat(inner.size(), equalTo(4))
+        assertThat(inner[0].asText(), equalTo("DeviceAuthentication"))
+        assertThat(inner[2].asText(), equalTo(docType))
+    }
+
+    @Test
+    fun `buildDeviceAuthenticationBytes SessionTranscript is embedded as decoded CBOR structure`() {
+        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
+            sessionTranscriptBytes,
+            "org.iso.18013.5.1.mDL",
+            emptyDeviceNameSpacesBytes
+        )
+
+        val innerBytes = (cborMapper.readTree(result) as BinaryNode).binaryValue()
+        val inner = cborMapper.readTree(innerBytes) as ArrayNode
+
+        assertThat(inner[1].isArray, equalTo(true))
+        assertThat(inner[1].size(), equalTo(3))
+    }
+
+    @Test
+    fun `buildDeviceAuthenticationBytes DeviceNameSpacesBytes is embedded as raw bytes`() {
+        val result = deviceAuthVerifier.buildDeviceAuthenticationBytes(
+            sessionTranscriptBytes,
+            "org.iso.18013.5.1.mDL",
+            emptyDeviceNameSpacesBytes
+        )
+
+        val innerBytes = (cborMapper.readTree(result) as BinaryNode).binaryValue()
+        val inner = cborMapper.readTree(innerBytes) as ArrayNode
+
+        assertThat(inner[3].isBinary, equalTo(true))
+    }
 }

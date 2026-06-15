@@ -18,6 +18,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.S
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocument
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocumentWithPresentation
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
+import uk.gov.onelogin.sharing.verification.document.cose.CoseKeyDecoder
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
@@ -65,7 +66,7 @@ class Iso18013DocumentVerifierTest {
         Iso18013DocumentVerifier(
             mockRootCertificate,
             trustVerifier,
-            DeviceAuthVerifier(trustVerifier)
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder())
         )
     }
 
