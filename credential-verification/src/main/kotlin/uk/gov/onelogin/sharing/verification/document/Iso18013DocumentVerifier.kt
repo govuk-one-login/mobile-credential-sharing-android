@@ -38,7 +38,11 @@ class Iso18013DocumentVerifier(
                 throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
             }
 
-            deviceAuthVerifier.verify(document, sessionTranscriptBytes, mso.deviceKeyInfo)
+            deviceAuthVerifier.verify(
+                document = document,
+                sessionTranscriptBytes = sessionTranscriptBytes,
+                deviceKeyInfo = mso.deviceKeyInfo
+            )
         }
 
         return VerificationResult.Success
