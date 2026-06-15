@@ -29,21 +29,21 @@ class DeviceRequestDtoTest {
     }
 
     @Test
-    fun `DeviceRequestDto serializer writes integer key 0 for version`() {
+    fun `DeviceRequestDto serializer writes text key version`() {
         val parser = CBORFactory().createParser(encoded).apply { codec = CborMapper.default }
         parser.nextToken()
         parser.nextToken()
-        assertEquals(0, parser.currentName().toLong())
+        assertEquals("version", parser.currentName())
     }
 
     @Test
-    fun `DeviceRequestDto serializer writes integer key 1 for docRequests`() {
+    fun `DeviceRequestDto serializer writes text key docRequests`() {
         val parser = CBORFactory().createParser(encoded).apply { codec = CborMapper.default }
         parser.nextToken()
         parser.nextToken()
         parser.nextToken()
         parser.nextToken()
-        assertEquals(1, parser.currentName().toLong())
+        assertEquals("docRequests", parser.currentName())
     }
 
     @Test
@@ -73,8 +73,12 @@ class DeviceRequestDtoTest {
     }
 
     @Test
-    fun `DocRequestDto serializer writes integer key 1 for itemsRequest`() {
-        assertTrue(dto.docRequest.first().toCbor().any { it == 0x01.toByte() })
+    fun `DocRequestDto serializer writes text key itemsRequest`() {
+        val docEncoded = dto.docRequest.first().toCbor()
+        val parser = CBORFactory().createParser(docEncoded).apply { codec = CborMapper.default }
+        parser.nextToken()
+        parser.nextToken()
+        assertEquals("itemsRequest", parser.currentName())
     }
 
     @Test

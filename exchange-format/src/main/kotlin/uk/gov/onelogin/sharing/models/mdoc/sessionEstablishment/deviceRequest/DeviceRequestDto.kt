@@ -34,28 +34,22 @@ data class DeviceRequestDto(
             provider: SerializerProvider
         ) {
             (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
-            gen.writeFieldId(VERSION_ID)
+            gen.writeFieldName(VERSION_KEY)
             gen.writeString(value.version)
-            gen.writeFieldId(DOC_REQUESTS_ID)
+            gen.writeFieldName(DOC_REQUESTS_KEY)
             gen.writeStartArray(value.docRequest, value.docRequest.size)
             value.docRequest.forEach { provider.defaultSerializeValue(it, gen) }
             gen.writeEndArray()
             gen.writeEndObject()
-        }
-
-        private companion object {
-            const val FIELD_COUNT = 2
-            const val VERSION_ID = 0L
-            const val DOC_REQUESTS_ID = 1L
         }
     }
 
     class Deserializer : JsonDeserializer<DeviceRequestDto>() {
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): DeviceRequestDto {
             val root = p.codec.readTree<JsonNode>(p)
-            val version = (root[VERSION_KEY] ?: root["version"])?.asText()
+            val version = root[VERSION_KEY]?.asText()
                 ?: throw IllegalArgumentException("Missing version in DeviceRequest")
-            val docRequests = (root[DOC_REQUESTS_KEY] ?: root["docRequests"])
+            val docRequests = root[DOC_REQUESTS_KEY]
                 ?.map { p.codec.treeToValue(it, DocRequestDto::class.java) }
                 ?: emptyList()
             return DeviceRequestDto(version = version, docRequest = docRequests)
@@ -63,10 +57,9 @@ data class DeviceRequestDto(
     }
 
     companion object {
-        const val VERSION_KEY = "0"
-        const val DOC_REQUESTS_KEY = "1"
-        const val VERSION_ID = 0L
-        const val DOC_REQUESTS_ID = 1L
+        private const val FIELD_COUNT = 2
+        const val VERSION_KEY = "version"
+        const val DOC_REQUESTS_KEY = "docRequests"
     }
 
     fun toDomain(): DeviceRequest = DeviceRequest(

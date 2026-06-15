@@ -23,9 +23,9 @@ import uk.gov.onelogin.sharing.models.mdoc.security.toDto
 @JsonSerialize(using = DeviceEngagementDto.Serializer::class)
 @JsonDeserialize(using = DeviceEngagementDto.Deserializer::class)
 data class DeviceEngagementDto(
-    @JsonProperty(VERSION_KEY) val version: String,
-    @JsonProperty(SECURITY_KEY) val security: SecurityDto,
-    @JsonProperty(RETRIEVAL_METHODS_KEY) val deviceRetrievalMethods: List<DeviceRetrievalMethodDto>
+    val version: String,
+    val security: SecurityDto,
+    val deviceRetrievalMethods: List<DeviceRetrievalMethodDto>
 ) : CborEncodable {
     init {
         require(version.isNotEmpty()) { "DeviceEngagement: version must not be empty" }
@@ -45,32 +45,28 @@ data class DeviceEngagementDto(
             provider: SerializerProvider
         ) {
             (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
-            gen.writeFieldId(VERSION_ID)
+            gen.writeFieldId(VERSION_KEY)
             gen.writeString(value.version)
-            gen.writeFieldId(SECURITY_ID)
+            gen.writeFieldId(SECURITY_KEY)
             provider.defaultSerializeValue(value.security, gen)
-            gen.writeFieldId(RETRIEVAL_METHODS_ID)
+            gen.writeFieldId(RETRIEVAL_METHODS_KEY)
             gen.writeStartArray(value.deviceRetrievalMethods, value.deviceRetrievalMethods.size)
             value.deviceRetrievalMethods.forEach { provider.defaultSerializeValue(it, gen) }
             gen.writeEndArray()
             gen.writeEndObject()
-        }
-
-        private companion object {
-            const val FIELD_COUNT = 3
         }
     }
 
     class Deserializer : JsonDeserializer<DeviceEngagementDto>() {
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): DeviceEngagementDto {
             val root = p.codec.readTree<JsonNode>(p)
-            val version = (root[VERSION_KEY] ?: root["version"])?.asText()
+            val version = root[VERSION_KEY.toString()]?.asText()
                 ?: throw IllegalArgumentException("Missing version in DeviceEngagement")
             val security = p.codec.treeToValue(
-                root[SECURITY_KEY] ?: root["security"],
+                root[SECURITY_KEY.toString()],
                 SecurityDto::class.java
             )
-            val methodsNode = root[RETRIEVAL_METHODS_KEY] ?: root["deviceRetrievalMethods"]
+            val methodsNode = root[RETRIEVAL_METHODS_KEY.toString()]
                 ?: throw IllegalArgumentException(
                     "Missing deviceRetrievalMethods in DeviceEngagement"
                 )
@@ -82,12 +78,10 @@ data class DeviceEngagementDto(
     }
 
     companion object {
-        const val VERSION_KEY = "0"
-        const val SECURITY_KEY = "1"
-        const val RETRIEVAL_METHODS_KEY = "2"
-        const val VERSION_ID = 0L
-        const val SECURITY_ID = 1L
-        const val RETRIEVAL_METHODS_ID = 2L
+        private const val FIELD_COUNT = 3
+        const val VERSION_KEY = 0L
+        const val SECURITY_KEY = 1L
+        const val RETRIEVAL_METHODS_KEY = 2L
     }
 }
 
