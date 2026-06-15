@@ -21,8 +21,8 @@ class LocationStateTest {
     @Test
     fun `Some states are unrecoverable`(
         @TestParameter state: LocationState = testValues(
-            LocationState.Unsupported,
-        ),
+            LocationState.Unsupported
+        )
     ) {
         assertThat(
             state,
@@ -36,8 +36,8 @@ class LocationStateTest {
             LocationState.PermissionDeniedPermanently,
             LocationState.PermissionNotGranted,
             LocationState.PermissionUndetermined,
-            LocationState.ServicesDisabled,
-        ),
+            LocationState.ServicesDisabled
+        )
     ) {
         assertThat(
             state,
@@ -48,8 +48,8 @@ class LocationStateTest {
     @Test
     fun `Unrecoverable states have no action`(
         @TestParameter state: LocationState = testValues(
-            LocationState.Unsupported,
-        ),
+            LocationState.Unsupported
+        )
     ) {
         assertThat(
             state.getAction(),
@@ -72,7 +72,7 @@ class LocationStateTest {
             LocationState.ServicesDisabled to equalTo(
                 PrerequisiteAction.EnableLocationServices
             )
-        ),
+        )
     ) {
         val (state, assertion) = input
         assertThat(

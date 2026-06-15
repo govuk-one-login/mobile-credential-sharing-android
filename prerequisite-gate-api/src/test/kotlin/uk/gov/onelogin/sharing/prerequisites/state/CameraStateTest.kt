@@ -22,8 +22,8 @@ class CameraStateTest {
     fun `Some states are unrecoverable`(
         @TestParameter state: CameraState = testValues(
             CameraState.Restricted,
-            CameraState.Unsupported,
-        ),
+            CameraState.Unsupported
+        )
     ) {
         assertThat(
             state,
@@ -36,8 +36,8 @@ class CameraStateTest {
         @TestParameter state: CameraState = testValues(
             CameraState.PermissionDeniedPermanently,
             CameraState.PermissionNotGranted,
-            CameraState.PermissionUndetermined,
-        ),
+            CameraState.PermissionUndetermined
+        )
     ) {
         assertThat(
             state,
@@ -49,8 +49,8 @@ class CameraStateTest {
     fun `Unrecoverable states have no action`(
         @TestParameter state: CameraState = testValues(
             CameraState.Restricted,
-            CameraState.Unsupported,
-        ),
+            CameraState.Unsupported
+        )
     ) {
         assertThat(
             state.getAction(),
@@ -69,8 +69,8 @@ class CameraStateTest {
             ),
             CameraState.PermissionUndetermined to instanceOf(
                 PrerequisiteAction.RequestPermissions::class.java
-            ),
-        ),
+            )
+        )
     ) {
         val (state, assertion) = input
         assertThat(

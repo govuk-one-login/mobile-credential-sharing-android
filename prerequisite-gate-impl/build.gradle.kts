@@ -33,14 +33,14 @@ android {
 dependencies {
     listOf(
         projects.prerequisiteGateApi,
-        projects.core,
+        projects.core
     ).forEach(::api)
 
     listOf(
         libs.androidx.camera.lifecycle,
         projects.bluetooth,
-        libs.metro.viewmodel.compose,
-        ).forEach(::implementation)
+        libs.metro.viewmodel.compose
+    ).forEach(::implementation)
 
     listOf(
         testFixtures(projects.core)

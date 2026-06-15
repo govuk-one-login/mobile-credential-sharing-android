@@ -11,12 +11,12 @@ object MissingPrerequisiteMatchers {
 
     private class MissingPrerequisiteMatcher<Type>(
         private val matcher: Matcher<in Type>,
-        private val transformer: (MissingPrerequisite?) -> Type?,
+        private val transformer: (MissingPrerequisite?) -> Type?
     ) : TypeSafeMatcher<MissingPrerequisite>() {
         override fun describeTo(description: Description?) = matcher.describeTo(description)
         override fun describeMismatchSafely(
             item: MissingPrerequisite?,
-            mismatchDescription: Description?,
+            mismatchDescription: Description?
         ) = matcher.describeMismatch(transformer(item), mismatchDescription)
 
         override fun matchesSafely(item: MissingPrerequisite?): Boolean = matcher.matches(

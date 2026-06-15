@@ -22,8 +22,8 @@ class BluetoothStateTest {
     fun `Some states are unrecoverable`(
         @TestParameter state: BluetoothState = testValues(
             BluetoothState.Restricted,
-            BluetoothState.Unsupported,
-        ),
+            BluetoothState.Unsupported
+        )
     ) {
         assertThat(
             state,
@@ -37,8 +37,8 @@ class BluetoothStateTest {
             BluetoothState.PermissionDeniedPermanently,
             BluetoothState.PermissionNotGranted,
             BluetoothState.PermissionUndetermined,
-            BluetoothState.PoweredOff,
-        ),
+            BluetoothState.PoweredOff
+        )
     ) {
         assertThat(
             state,
@@ -50,8 +50,8 @@ class BluetoothStateTest {
     fun `Unrecoverable states have no action`(
         @TestParameter state: BluetoothState = testValues(
             BluetoothState.Restricted,
-            BluetoothState.Unsupported,
-        ),
+            BluetoothState.Unsupported
+        )
     ) {
         assertThat(
             state.getAction(),
@@ -73,8 +73,8 @@ class BluetoothStateTest {
             ),
             BluetoothState.PoweredOff to equalTo(
                 PrerequisiteAction.EnableBluetooth
-            ),
-        ),
+            )
+        )
     ) {
         val (state, assertion) = input
         assertThat(

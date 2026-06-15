@@ -32,7 +32,7 @@ android {
 
 dependencies {
     listOf(
-        projects.bluetooth,
+        projects.bluetooth
     ).forEach(::implementation)
 }
 

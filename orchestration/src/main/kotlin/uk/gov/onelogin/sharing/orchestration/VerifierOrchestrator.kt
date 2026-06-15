@@ -27,6 +27,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -49,7 +50,6 @@ import uk.gov.onelogin.sharing.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions")

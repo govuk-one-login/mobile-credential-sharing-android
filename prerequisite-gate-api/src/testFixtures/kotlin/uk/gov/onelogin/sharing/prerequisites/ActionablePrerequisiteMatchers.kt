@@ -18,8 +18,7 @@ object ActionablePrerequisiteMatchers {
             mismatchDescription: Description?
         ) = matcher.describeMismatch(item?.getAction(), mismatchDescription)
 
-        override fun matchesSafely(
-            item: Actionable<PrerequisiteAction>?
-        ): Boolean = matcher.matches(item?.getAction())
+        override fun matchesSafely(item: Actionable<PrerequisiteAction>?): Boolean =
+            matcher.matches(item?.getAction())
     }
 }

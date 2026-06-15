@@ -6,20 +6,16 @@ import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 
 object RecoverableMatchers {
-    fun isRecoverable(
-        expected: Boolean = true
-    ): Matcher<in Recoverable> = RecoverableMatcher(equalTo(expected))
+    fun isRecoverable(expected: Boolean = true): Matcher<in Recoverable> =
+        RecoverableMatcher(equalTo(expected))
 
     fun isUnrecoverable() = isRecoverable(false)
 
-    private class RecoverableMatcher(
-        private val matcher: Matcher<in Boolean>,
-    ) : TypeSafeMatcher<Recoverable>() {
+    private class RecoverableMatcher(private val matcher: Matcher<in Boolean>) :
+        TypeSafeMatcher<Recoverable>() {
         override fun describeTo(description: Description?) = matcher.describeTo(description)
-        override fun describeMismatchSafely(
-            item: Recoverable?,
-            mismatchDescription: Description?
-        ) = matcher.describeMismatch(item?.isRecoverable(), mismatchDescription)
+        override fun describeMismatchSafely(item: Recoverable?, mismatchDescription: Description?) =
+            matcher.describeMismatch(item?.isRecoverable(), mismatchDescription)
 
         override fun matchesSafely(item: Recoverable?): Boolean = matcher.matches(
             item?.isRecoverable()
