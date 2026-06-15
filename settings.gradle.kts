@@ -51,6 +51,8 @@ listOf(
     ":holder",
     ":iso18013-6-tests",
     ":orchestration",
+    ":prerequisite-gate-api",
+    ":prerequisite-gate-impl",
     ":sdk",
     ":ui:ui-api",
     ":ui:ui-impl",
