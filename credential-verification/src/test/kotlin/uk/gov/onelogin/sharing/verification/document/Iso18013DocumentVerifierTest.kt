@@ -5,8 +5,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
 import java.security.cert.X509Certificate
 import kotlin.time.ExperimentalTime
 import org.hamcrest.CoreMatchers.equalTo
@@ -20,6 +18,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.S
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocument
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocumentWithPresentation
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
+import uk.gov.onelogin.sharing.verification.document.cose.CoseKeyDecoder
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.DEFAULT_DOC_TYPE
@@ -28,7 +27,6 @@ import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.malformedEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.validEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
-import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
@@ -68,7 +66,8 @@ class Iso18013DocumentVerifierTest {
     private val documentVerifier by lazy {
         Iso18013DocumentVerifier(
             mockRootCertificate,
-            trustVerifier
+            trustVerifier,
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder())
         )
     }
 
@@ -90,7 +89,8 @@ class Iso18013DocumentVerifierTest {
             equalTo(
                 "void (" +
                     "${X509Certificate::class.java.simpleName}, " +
-                    "${TrustVerifier::class.java.simpleName})"
+                    "${TrustVerifier::class.java.simpleName}, " +
+                    "${DeviceAuthVerifier::class.java.simpleName})"
             )
         )
     }
@@ -105,7 +105,7 @@ class Iso18013DocumentVerifierTest {
 
         assertThat(
             methodInfo,
-            hasSize(7)
+            hasSize(5)
         )
     }
 
@@ -130,18 +130,6 @@ class Iso18013DocumentVerifierTest {
                 "void (" +
                 "${CertificateValidityPeriod::class.java.simpleName}, " +
                 "${MobileSecurityObject::class.java.simpleName}" +
-                ")",
-            "verifyDeviceAuth" to
-                "void (" +
-                "${VerifiableDocument.WithPresentation::class.java.simpleName}, " +
-                "byte[], " +
-                "${DeviceKeyInfo::class.java.simpleName}" +
-                ")",
-            "buildDeviceAuthenticationBytes" to
-                "${ByteArray::class.java.simpleName} (" +
-                "byte[], " +
-                "${String::class.java.simpleName}, " +
-                "${ByteArray::class.java.simpleName}" +
                 ")"
         )
     ) {
@@ -353,42 +341,6 @@ class Iso18013DocumentVerifierTest {
         )
     }
 
-    @Test
-    fun `verifyDeviceAuth is stubbed to throw a Failure`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDeviceAuth(
-                document = presentedDocument,
-                sessionTranscriptBytes = sessionTranscriptBytes,
-                deviceKeyInfo = mockk()
-            )
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.INVALID_DEVICE_SIGNATURE)
-        )
-    }
-
-    /**
-     * DCMAW-20246: AC5: If document does not conform to [VerifiableDocument.WithPresentation],
-     * [Iso18013DocumentVerifier.verifyDeviceAuth] is not called regardless of sessionTranscript.
-     */
-    @Ignore("Currently untestable via interface functions")
-    @Test
-    fun `Doesn't perform device auth verification on Provisioned documents`() {
-        stubTrustVerifierSuccess()
-        val documentVerifierSpy = spyk(documentVerifier)
-
-        documentVerifierSpy.verifyDocument(
-            document = provisionedDocument,
-            sessionTranscriptBytes = sessionTranscriptBytes
-        )
-
-        verify(exactly = 0) {
-            documentVerifierSpy.verifyDeviceAuth(any(), any(), any())
-        }
-    }
-
     /**
      * DCMAW-20246: AC6: If document conforms to [VerifiableDocument.WithPresentation] but
      * sessionTranscript is null, [DocumentVerifier.verifyDocument] fails with
@@ -410,20 +362,6 @@ class Iso18013DocumentVerifierTest {
         assertThat(
             exception,
             hasError(VerificationError.INVALID_DEVICE_SIGNATURE)
-        )
-    }
-
-    @Test
-    fun `buildDeviceAuthenticationBytes is stubbed to return an empty ByteArray`() {
-        val deviceAuthBytes = documentVerifier.buildDeviceAuthenticationBytes(
-            sessionTranscriptBytes,
-            "unit test",
-            byteArrayOf()
-        )
-
-        assertThat(
-            deviceAuthBytes,
-            equalTo(byteArrayOf())
         )
     }
 

@@ -61,10 +61,10 @@ data class SecurityDto(
 
             val coseNode = parser.codec.readTree<JsonNode>(parser)
             val cose = CoseKeyDto(
-                keyType = coseNode[CoseKeyDto.KEY_TYPE_KEY].longValue(),
-                curve = coseNode[CoseKeyDto.CURVE_KEY].longValue(),
-                x = coseNode[CoseKeyDto.X_KEY].binaryValue(),
-                y = coseNode[CoseKeyDto.Y_KEY].binaryValue()
+                keyType = coseNode[CoseKeyDto.KEY_TYPE_KEY.toString()].longValue(),
+                curve = coseNode[CoseKeyDto.CURVE_KEY.toString()].longValue(),
+                x = coseNode[CoseKeyDto.X_KEY.toString()].binaryValue(),
+                y = coseNode[CoseKeyDto.Y_KEY.toString()].binaryValue()
             )
             return SecurityDto(
                 cipherSuiteIdentifier = cipherSuiteIdentifier,

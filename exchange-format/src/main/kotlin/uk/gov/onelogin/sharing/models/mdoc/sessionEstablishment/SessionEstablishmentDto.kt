@@ -26,18 +26,12 @@ data class SessionEstablishmentDto(val eReaderKey: EmbeddedCbor, val data: ByteA
             provider: SerializerProvider
         ) {
             (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
-            gen.writeFieldId(E_READER_KEY_ID)
+            gen.writeFieldName(E_READER_KEY_KEY)
             gen.writeTag(EMBEDDED_CBOR_TAG)
             gen.writeBinary(value.eReaderKey.encoded)
-            gen.writeFieldId(DATA_ID)
+            gen.writeFieldName(DATA_KEY)
             gen.writeBinary(value.data)
             gen.writeEndObject()
-        }
-
-        private companion object {
-            const val FIELD_COUNT = 2
-            const val E_READER_KEY_ID = 1L
-            const val DATA_ID = 10L
         }
     }
 
@@ -52,12 +46,12 @@ data class SessionEstablishmentDto(val eReaderKey: EmbeddedCbor, val data: ByteA
                 CborErrors.DECODING_ERROR.errorMessage
             }
 
-            val eReaderKeyNode = root[E_READER_KEY_KEY] ?: root[E_READER_KEY_FALLBACK]
+            val eReaderKeyNode = root[E_READER_KEY_KEY]
             requireNotNull(eReaderKeyNode) {
                 CborErrors.PARSING_ERROR.errorMessage
             }
 
-            val dataNode = root[DATA_KEY] ?: root[DATA_FALLBACK]
+            val dataNode = root[DATA_KEY]
             requireNotNull(dataNode) {
                 CborErrors.PARSING_ERROR.errorMessage
             }
@@ -73,11 +67,8 @@ data class SessionEstablishmentDto(val eReaderKey: EmbeddedCbor, val data: ByteA
     }
 
     companion object {
-        const val E_READER_KEY_KEY = "1"
-        const val DATA_KEY = "10"
-        const val E_READER_KEY_FALLBACK = "eReaderKey"
-        const val DATA_FALLBACK = "data"
-        const val E_READER_KEY_ID = 1L
-        const val DATA_ID = 10L
+        private const val FIELD_COUNT = 2
+        const val E_READER_KEY_KEY = "eReaderKey"
+        const val DATA_KEY = "data"
     }
 }

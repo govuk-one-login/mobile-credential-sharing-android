@@ -44,6 +44,10 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        libs.jackson.cbor
+    ).forEach(::testFixturesImplementation)
+
+    listOf(
         libs.io.github.classgraph,
         libs.junit,
         libs.mockk,

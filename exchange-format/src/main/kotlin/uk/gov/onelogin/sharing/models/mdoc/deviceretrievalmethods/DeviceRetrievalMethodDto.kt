@@ -34,10 +34,6 @@ data class DeviceRetrievalMethodDto(val type: Int, val version: Int, val options
             provider.defaultSerializeValue(value.options, gen)
             gen.writeEndArray()
         }
-
-        private companion object {
-            const val ELEMENT_COUNT = 3
-        }
     }
 
     class Deserializer : JsonDeserializer<DeviceRetrievalMethodDto>() {
@@ -54,6 +50,7 @@ data class DeviceRetrievalMethodDto(val type: Int, val version: Int, val options
     }
 
     companion object {
+        private const val ELEMENT_COUNT = 3
         const val TYPE_INDEX = 0
         const val VERSION_INDEX = 1
         const val OPTIONS_INDEX = 2
