@@ -7,7 +7,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import uk.gov.onelogin.sharing.bluetooth.ContextExt.devicePolicyManager
+import uk.gov.onelogin.sharing.prerequisites.ContextExt.devicePolicyManager
 import uk.gov.onelogin.sharing.prerequisites.evaluator.camera.ProcessCameraProviderFactory
 import uk.gov.onelogin.sharing.prerequisites.permissions.IterablePermissionsExt.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.prerequisites.permissions.IterablePermissionsExt.hasUndeterminedPermissions

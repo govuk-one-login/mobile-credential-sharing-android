@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth
+package uk.gov.onelogin.sharing.prerequisites
 
 import android.app.admin.DevicePolicyManager
 import android.bluetooth.BluetoothManager

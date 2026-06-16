@@ -37,7 +37,6 @@ dependencies {
 
     listOf(
         libs.androidx.camera.lifecycle,
-        projects.bluetooth,
         libs.metro.viewmodel.compose
     ).forEach(::implementation)
 
