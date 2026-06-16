@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.prerequisites.impl
 
-import uk.gov.onelogin.sharing.prerequisites.Actionable
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
-import uk.gov.onelogin.sharing.prerequisites.Recoverable
+import uk.gov.onelogin.sharing.prerequisites.api.Actionable
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.Recoverable
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.api.state.CameraState
 import uk.gov.onelogin.sharing.prerequisites.api.state.LocationState

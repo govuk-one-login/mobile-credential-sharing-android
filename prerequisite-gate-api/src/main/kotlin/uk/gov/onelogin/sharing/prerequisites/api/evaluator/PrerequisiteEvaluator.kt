@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.prerequisites.api.evaluator
 
 /**
- * Typed functional interface for evaluating a [uk.gov.onelogin.sharing.prerequisites.Prerequisite].
+ * Typed functional interface for evaluating a [uk.gov.onelogin.sharing.prerequisites.api.Prerequisite].
  *
  * Implementations internally decide which Prerequisite gets evaluated, though the [Response] type
  * infers which Prerequisite is being evaluated.

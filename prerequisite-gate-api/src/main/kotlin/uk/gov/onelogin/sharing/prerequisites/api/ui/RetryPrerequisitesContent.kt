@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.spacingSingle
-import uk.gov.onelogin.sharing.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 
 @Composable
 fun RetryPrerequisitesContent(

@@ -11,9 +11,9 @@ import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.prerequisites.ActionablePrerequisiteMatchers.hasAction
-import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.RecoverableMatchers.isRecoverable
 import uk.gov.onelogin.sharing.prerequisites.RecoverableMatchers.isUnrecoverable
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 
 @RunWith(TestParameterInjector::class)
 class BluetoothStateTest {

@@ -63,9 +63,9 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isInvalidBluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.StubPrerequisiteGate
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 

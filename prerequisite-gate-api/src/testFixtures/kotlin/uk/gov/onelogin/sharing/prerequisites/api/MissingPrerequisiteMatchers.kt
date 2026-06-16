@@ -4,6 +4,8 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.TypeSafeMatcher
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 
 object MissingPrerequisiteMatchers {
     fun hasPrerequisite(expected: Prerequisite): Matcher<in MissingPrerequisite> =

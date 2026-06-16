@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.prerequisites
+package uk.gov.onelogin.sharing.prerequisites.api
 
 interface MissingPrerequisite :
     Recoverable,

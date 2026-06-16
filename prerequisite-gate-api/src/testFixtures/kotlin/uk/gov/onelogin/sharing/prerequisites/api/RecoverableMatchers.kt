@@ -4,6 +4,7 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
+import uk.gov.onelogin.sharing.prerequisites.api.Recoverable
 
 object RecoverableMatchers {
     fun isRecoverable(expected: Boolean = true): Matcher<in Recoverable> =

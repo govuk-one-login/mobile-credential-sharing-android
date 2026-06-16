@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.prerequisites.api.state
 
-import uk.gov.onelogin.sharing.prerequisites.Actionable
-import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
-import uk.gov.onelogin.sharing.prerequisites.Recoverable
+import uk.gov.onelogin.sharing.prerequisites.api.Actionable
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.Recoverable
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 
 /**

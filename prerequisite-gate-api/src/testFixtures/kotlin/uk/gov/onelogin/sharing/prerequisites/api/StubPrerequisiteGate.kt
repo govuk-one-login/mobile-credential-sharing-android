@@ -1,5 +1,9 @@
 package uk.gov.onelogin.sharing.prerequisites
 
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
+
 class StubPrerequisiteGate(private val results: List<MissingPrerequisite>) : PrerequisiteGate {
 
     constructor(

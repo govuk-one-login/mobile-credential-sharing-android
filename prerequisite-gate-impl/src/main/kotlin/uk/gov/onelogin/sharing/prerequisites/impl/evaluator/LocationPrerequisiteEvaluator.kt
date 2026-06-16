@@ -8,7 +8,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import uk.gov.onelogin.sharing.prerequisites.ContextExt.locationManager
+import uk.gov.onelogin.sharing.prerequisites.api.ContextExt.locationManager
 import uk.gov.onelogin.sharing.prerequisites.api.evaluator.PrerequisiteEvaluator
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.IterablePermissionsExt.hasPermanentlyDeniedPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.IterablePermissionsExt.hasUndeterminedPermissions

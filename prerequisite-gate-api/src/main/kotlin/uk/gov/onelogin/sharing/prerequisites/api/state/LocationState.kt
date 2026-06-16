@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.prerequisites.api.state
 
 import android.Manifest
-import uk.gov.onelogin.sharing.prerequisites.Actionable
-import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
-import uk.gov.onelogin.sharing.prerequisites.Recoverable
+import uk.gov.onelogin.sharing.prerequisites.api.Actionable
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.Recoverable
 
 /**
  * Prerequisite evaluation result that's specific to Location capabilities.

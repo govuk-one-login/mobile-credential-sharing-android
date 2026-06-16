@@ -9,9 +9,9 @@ import org.hamcrest.Matchers
 import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisiteMatchers.hasPrerequisite
-import uk.gov.onelogin.sharing.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 /**

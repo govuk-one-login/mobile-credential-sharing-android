@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.prerequisites.api.usecases
 
 import androidx.activity.result.ActivityResultLauncher
-import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 
 fun interface ResolvePrerequisiteAction<State : Any> {
     fun resolve(launcher: ActivityResultLauncher<PrerequisiteAction>)

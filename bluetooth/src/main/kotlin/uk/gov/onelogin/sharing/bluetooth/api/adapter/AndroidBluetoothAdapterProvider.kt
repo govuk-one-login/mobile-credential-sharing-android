@@ -6,7 +6,7 @@ import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.onelogin.sharing.core.VerifierUiScope
-import uk.gov.onelogin.sharing.prerequisites.ContextExt.bluetoothManager
+import uk.gov.onelogin.sharing.prerequisites.api.ContextExt.bluetoothManager
 
 @ContributesBinding(AppScope::class)
 @ContributesBinding(VerifierUiScope::class)

@@ -7,9 +7,9 @@ import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisiteMatchers.hasPrerequisite
-import uk.gov.onelogin.sharing.prerequisites.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 
 /**
  * Wrapper object for storing hamcrest [Matcher] functions for [HolderSessionState].

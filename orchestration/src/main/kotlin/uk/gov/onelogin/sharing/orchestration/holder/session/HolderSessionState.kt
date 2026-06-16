@@ -4,7 +4,7 @@ import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 
 /**
  * Represents a digital credential verification journey's state for devices that contain digital

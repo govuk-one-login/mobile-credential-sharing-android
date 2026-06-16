@@ -6,8 +6,8 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import uk.gov.onelogin.sharing.prerequisites.ContextExt.bluetoothManager
-import uk.gov.onelogin.sharing.prerequisites.ContextExt.userManager
+import uk.gov.onelogin.sharing.prerequisites.api.ContextExt.bluetoothManager
+import uk.gov.onelogin.sharing.prerequisites.api.ContextExt.userManager
 import uk.gov.onelogin.sharing.prerequisites.api.evaluator.PrerequisiteEvaluator
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.IterablePermissionsExt.hasPermanentlyDeniedPermissions

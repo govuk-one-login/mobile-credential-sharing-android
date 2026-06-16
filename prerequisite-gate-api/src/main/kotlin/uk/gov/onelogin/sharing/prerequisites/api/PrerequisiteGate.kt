@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.prerequisites
+package uk.gov.onelogin.sharing.prerequisites.api
 
 /**
  * Abstraction for performing various forms of checks based on [Prerequisite] input.

@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.prerequisites
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
+import uk.gov.onelogin.sharing.prerequisites.api.Actionable
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 
 object ActionablePrerequisiteMatchers {
     fun hasAction(

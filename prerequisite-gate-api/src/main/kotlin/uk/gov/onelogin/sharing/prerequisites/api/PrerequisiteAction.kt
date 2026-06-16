@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.prerequisites
+package uk.gov.onelogin.sharing.prerequisites.api
 
 import android.bluetooth.BluetoothAdapter
 import android.provider.Settings

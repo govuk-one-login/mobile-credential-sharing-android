@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions.Companion.EXTRA_PERMISSIONS
-import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 
 /**
  * [ActivityResultContract] implementation that converts a provided [PrerequisiteAction] into an

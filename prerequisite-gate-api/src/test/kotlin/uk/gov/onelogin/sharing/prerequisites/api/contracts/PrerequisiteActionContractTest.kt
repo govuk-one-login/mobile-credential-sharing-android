@@ -23,7 +23,7 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 
 @RunWith(AndroidJUnit4::class)
 class PrerequisiteActionContractTest {
