@@ -30,9 +30,9 @@ dependencies {
 }
 
 dependencies {
-    listOf(
-        projects.prerequisiteGateImpl
-    ).forEach(::implementation)
+    implementation(projects.prerequisiteGateImpl) {
+        because("Provides DI configuration for prerequisite gate")
+    }
 
     listOf(
         projects.core,

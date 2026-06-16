@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.permissions
+package uk.gov.onelogin.sharing.prerequisites.permissions
 
 import android.Manifest
 import android.os.Build

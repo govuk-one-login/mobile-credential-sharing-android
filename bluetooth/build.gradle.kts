@@ -32,8 +32,9 @@ android {
 
 dependencies {
     listOf(
+        libs.metro.viewmodel.compose,
         projects.core,
-        libs.metro.viewmodel.compose
+        projects.prerequisiteGateApi,
     ).forEach(::implementation)
 
     listOf(

@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.prerequisites.state
 
-import uk.gov.onelogin.sharing.bluetooth.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.Actionable
 import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.Recoverable
+import uk.gov.onelogin.sharing.prerequisites.permissions.BluetoothPermissions.getBluetoothPermissions
 
 /**
  * Prerequisite evaluation result that's specific to Bluetooth capabilities.

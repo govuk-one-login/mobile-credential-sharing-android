@@ -30,12 +30,6 @@ android {
     }
 }
 
-dependencies {
-    listOf(
-        projects.bluetooth
-    ).forEach(::implementation)
-}
-
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set("GOV.UK One Login Wallet Sharing: Prerequisite gate API")
