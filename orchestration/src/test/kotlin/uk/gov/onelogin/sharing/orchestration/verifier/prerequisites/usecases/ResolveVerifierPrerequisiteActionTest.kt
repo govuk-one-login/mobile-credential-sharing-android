@@ -12,11 +12,11 @@ import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteAction
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.CameraState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.api.state.CameraState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 
 @RunWith(AndroidJUnit4::class)
 class ResolveVerifierPrerequisiteActionTest {
@@ -42,7 +42,7 @@ class ResolveVerifierPrerequisiteActionTest {
 
     @Test
     fun `Launches actions from Missing prerequisites`() = runTest {
-        val missingPrerequisite = MissingPrerequisite.Bluetooth(
+        val missingPrerequisite = MissingPrerequisites.Bluetooth(
             BluetoothState.PermissionNotGranted
         )
         initialState = VerifierSessionState.Preflight(
@@ -57,8 +57,8 @@ class ResolveVerifierPrerequisiteActionTest {
     @Test
     fun `Launches occur based on the number of recoverable actions`() = runTest {
         val missingPrerequisites = listOf(
-            MissingPrerequisite.Bluetooth(BluetoothState.PermissionNotGranted),
-            MissingPrerequisite.Camera(CameraState.Restricted)
+            MissingPrerequisites.Bluetooth(BluetoothState.PermissionNotGranted),
+            MissingPrerequisites.Camera(CameraState.Restricted)
         )
         initialState = VerifierSessionState.Preflight(missingPrerequisites)
         resolver.resolve(launcher)
@@ -73,7 +73,7 @@ class ResolveVerifierPrerequisiteActionTest {
     fun `Unrecoverable prerequisites cannot launch actions`() = runTest {
         initialState = VerifierSessionState.Preflight(
             listOf(
-                MissingPrerequisite.Bluetooth(BluetoothState.Unsupported)
+                MissingPrerequisites.Bluetooth(BluetoothState.Unsupported)
             )
         )
 

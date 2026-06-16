@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.sdk.internal.shared
 import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph

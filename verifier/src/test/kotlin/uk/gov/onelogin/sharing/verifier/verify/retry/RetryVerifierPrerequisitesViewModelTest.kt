@@ -17,13 +17,13 @@ import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Rule
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
 class RetryVerifierPrerequisitesViewModelTest {
 
@@ -36,7 +36,7 @@ class RetryVerifierPrerequisitesViewModelTest {
 
     private var initialState: VerifierSessionState = VerifierSessionState.Preflight(
         listOf(
-            MissingPrerequisite.Bluetooth(
+            MissingPrerequisites.Bluetooth(
                 BluetoothState.PermissionNotGranted
             )
         )

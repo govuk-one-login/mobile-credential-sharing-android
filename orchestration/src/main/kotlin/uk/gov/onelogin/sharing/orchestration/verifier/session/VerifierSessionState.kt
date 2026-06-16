@@ -2,8 +2,8 @@ package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 /**

@@ -37,17 +37,17 @@ dependencies {
         projects.core,
         projects.cameraService,
         projects.cryptoService,
-        projects.credentialVerification
+        projects.credentialVerification,
+        projects.prerequisiteGateApi
     ).forEach(::api)
-
-    listOf(projects.exchangeFormat)
-        .forEach(::implementation)
 
     listOf(
         libs.com.google.guava.android,
         libs.bundles.androidx.camera,
         libs.kotlinx.serialization.json,
-        libs.metro.viewmodel.compose
+        libs.metro.viewmodel.compose,
+        projects.exchangeFormat,
+        projects.prerequisiteGateImpl
     ).forEach(::implementation)
 
     listOf(
@@ -57,7 +57,8 @@ dependencies {
         projects.exchangeFormat,
         testFixtures(projects.cryptoService),
         testFixtures(projects.credentialFormat),
-        testFixtures(projects.exchangeFormat)
+        testFixtures(projects.exchangeFormat),
+        testFixtures(projects.prerequisiteGateApi)
     ).forEach(::testFixturesApi)
 
     listOf(

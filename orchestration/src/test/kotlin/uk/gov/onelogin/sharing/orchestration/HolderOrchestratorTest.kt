@@ -57,16 +57,17 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isSuccessful
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isInvalidBluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
+import uk.gov.onelogin.sharing.prerequisites.StubPrerequisiteGate
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -163,7 +164,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
         prerequisiteResponses.add(
-            MissingPrerequisite.Bluetooth(BluetoothState.PoweredOff)
+            MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
         )
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
@@ -184,7 +185,7 @@ class HolderOrchestratorTest {
     @Test
     fun `Incapable prerequisite check responses transition to failed`() = runTest {
         prerequisiteResponses.add(
-            MissingPrerequisite.Bluetooth(BluetoothState.Unsupported)
+            MissingPrerequisites.Bluetooth(BluetoothState.Unsupported)
         )
         val sessionFactory = createSessionFactory()
         val orchestrator = createOrchestrator(sessionFactory = sessionFactory)

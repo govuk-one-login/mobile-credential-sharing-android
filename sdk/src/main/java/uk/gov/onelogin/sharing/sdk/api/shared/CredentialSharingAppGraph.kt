@@ -4,7 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
 @DependencyGraph(AppScope::class)
 interface CredentialSharingAppGraph {

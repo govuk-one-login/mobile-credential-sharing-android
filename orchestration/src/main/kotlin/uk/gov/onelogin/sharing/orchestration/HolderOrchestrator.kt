@@ -49,12 +49,12 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCas
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.PrerequisiteGate
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions")

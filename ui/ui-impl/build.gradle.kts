@@ -45,6 +45,7 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        projects.prerequisiteGateImpl,
         testFixtures(projects.core),
         testFixtures(projects.orchestration),
         testFixtures(projects.holder),

@@ -51,10 +51,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.S
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.StubPrerequisiteGate
-import uk.gov.onelogin.sharing.orchestration.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
@@ -78,6 +74,11 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierS
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isSuccess
+import uk.gov.onelogin.sharing.prerequisites.StubPrerequisiteGate
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocumentMatchers.hasDocType
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
@@ -167,7 +168,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Starting without meeting prerequisites then navigates to Preflight state`() = runTest {
         gateResponses.add(
-            MissingPrerequisite.Bluetooth(BluetoothState.PoweredOff)
+            MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
         )
 
         backgroundScope.launch {
@@ -187,7 +188,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Incapable prerequisite check responses transition to failed`() = runTest {
         gateResponses.add(
-            MissingPrerequisite.Bluetooth(BluetoothState.Unsupported)
+            MissingPrerequisites.Bluetooth(BluetoothState.Unsupported)
         )
 
         backgroundScope.launch {

@@ -36,9 +36,9 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.Chara
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
-import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.toDeniedPermission
 
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)

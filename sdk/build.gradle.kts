@@ -30,6 +30,10 @@ dependencies {
 }
 
 dependencies {
+    implementation(projects.prerequisiteGateImpl) {
+        because("Provides DI configuration for prerequisite gate")
+    }
+
     listOf(
         projects.core,
         projects.orchestration,

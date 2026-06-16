@@ -24,10 +24,10 @@ import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.Prerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.ResolvePrerequisiteAction
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.ResolvePrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
 
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())

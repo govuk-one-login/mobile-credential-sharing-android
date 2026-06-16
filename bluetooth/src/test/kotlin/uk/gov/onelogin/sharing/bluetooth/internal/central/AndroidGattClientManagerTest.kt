@@ -43,11 +43,11 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
-import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.toDeniedPermission
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")

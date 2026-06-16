@@ -7,11 +7,11 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.LogMessages.updateNavigationEvent
-import uk.gov.onelogin.sharing.orchestration.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.LogMessages.updateNavigationEvent
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
 
 @ContributesBinding(VerifierUiScope::class)
 class RetryVerifierPrerequisites(orchestrator: Orchestrator.Verifier, private val logger: Logger) :
