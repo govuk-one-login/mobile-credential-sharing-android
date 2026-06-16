@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.testing.TestNavHostController
@@ -22,6 +22,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.preflightEmptyPermissions
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
@@ -29,6 +30,9 @@ import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesR
 
 @RunWith(RobolectricTestParameterInjector::class)
 class MonitorVerifierSessionStateTest {
+
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -82,7 +86,7 @@ class MonitorVerifierSessionStateTest {
                 MonitorVerifierSessionState(
                     sessionState = stateFlow,
                     controller = controller,
-                    dispatcher = this@runTest.testScheduler
+                    dispatcher = mainDispatcherRule.testDispatcher
                 )
                 Render(viewModelFactory)
             }

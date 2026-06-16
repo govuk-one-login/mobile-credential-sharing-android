@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.testapp.verifier
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.mockk.mockk
 import kotlin.test.Test

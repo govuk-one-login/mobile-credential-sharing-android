@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.testapp.credential.attribute.select
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
