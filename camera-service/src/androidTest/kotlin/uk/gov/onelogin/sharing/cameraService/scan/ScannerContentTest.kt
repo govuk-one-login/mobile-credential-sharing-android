@@ -1,11 +1,10 @@
 package uk.gov.onelogin.sharing.cameraService.scan
 
 import android.Manifest
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import org.junit.Rule
@@ -21,13 +20,15 @@ class ScannerContentTest {
     )
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createComposeRule()
+
+    private val lifecycleOwner = TestLifecycleOwner()
 
     @Test
     fun cameraViewfinderIsDisplayed() {
         composeTestRule.setContent {
             ScannerContent(
-                lifecycleOwner = LocalLifecycleOwner.current,
+                lifecycleOwner = lifecycleOwner,
                 barcodeScanResultCallback = { _, _ -> }
             )
         }
