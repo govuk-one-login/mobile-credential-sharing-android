@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.core.permission
+package uk.gov.onelogin.sharing.prerequisites.permissions
 
 import android.content.Context
 import android.content.SharedPreferences

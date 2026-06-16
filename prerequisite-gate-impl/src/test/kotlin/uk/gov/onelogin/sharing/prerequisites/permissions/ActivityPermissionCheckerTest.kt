@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.core.permission
+package uk.gov.onelogin.sharing.prerequisites.permissions
 
 import android.app.Activity
 import androidx.core.app.ActivityCompat
@@ -17,9 +17,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckResultMatchers.hasPermission
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerParameters.Companion.markedDeniedPermissionInputs
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckerParameters.Companion.unmarkedDeniedPermissionInputs
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionCheckResultMatchers.hasPermission
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionCheckerParameters.Companion.markedDeniedPermissionInputs
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionCheckerParameters.Companion.unmarkedDeniedPermissionInputs
 
 @RunWith(RobolectricTestParameterInjector::class)
 class ActivityPermissionCheckerTest {

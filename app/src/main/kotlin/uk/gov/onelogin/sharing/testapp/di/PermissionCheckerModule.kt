@@ -8,8 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
-import uk.gov.onelogin.sharing.core.permission.ActivityPermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.permissions.ActivityPermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker
 
 @InstallIn(ActivityComponent::class)
 @Module

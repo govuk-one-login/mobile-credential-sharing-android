@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.core.permission
+package uk.gov.onelogin.sharing.prerequisites.permissions
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -7,10 +7,10 @@ import com.google.testing.junit.testparameterinjector.TestParametersValuesProvid
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.hasSize
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckResultMatchers.isDenied
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckResultMatchers.isPermanentlyDenied
-import uk.gov.onelogin.sharing.core.permission.PermissionCheckResultMatchers.isUndetermined
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionCheckResultMatchers.isDenied
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionCheckResultMatchers.isPermanentlyDenied
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionCheckResultMatchers.isUndetermined
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker.PermissionCheckResult
 
 class PermissionCheckerParameters : TestParametersValuesProvider() {
     data class Input(

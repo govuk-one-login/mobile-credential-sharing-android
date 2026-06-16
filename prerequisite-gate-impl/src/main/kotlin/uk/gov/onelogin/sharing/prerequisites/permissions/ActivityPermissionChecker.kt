@@ -1,9 +1,9 @@
-package uk.gov.onelogin.sharing.core.permission
+package uk.gov.onelogin.sharing.prerequisites.permissions
 
 import android.app.Activity
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker.PermissionCheckResult
 
 class ActivityPermissionChecker internal constructor(
     private val activity: Activity,

@@ -30,6 +30,12 @@ android {
     }
 }
 
+dependencies {
+    listOf(
+        libs.com.google.test.parameter.injector
+    ).forEach(::testFixturesApi)
+}
+
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set("GOV.UK One Login Wallet Sharing: Prerequisite gate API")

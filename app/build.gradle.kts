@@ -105,7 +105,8 @@ dependencies {
         projects.core, // Remove once SDK prerequisites screen handles permissions
         projects.sdk,
         projects.ui.uiApi,
-        projects.ui.uiImpl
+        projects.ui.uiImpl,
+        projects.prerequisiteGateImpl
     ).forEach(::implementation)
 
     listOf(

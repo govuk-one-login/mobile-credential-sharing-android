@@ -8,10 +8,10 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.bluetooth.ContextExt.devicePolicyManager
-import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasPermanentlyDeniedPermissions
-import uk.gov.onelogin.sharing.core.permission.IterablePermissionsExt.hasUndeterminedPermissions
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.evaluator.camera.ProcessCameraProviderFactory
+import uk.gov.onelogin.sharing.prerequisites.permissions.IterablePermissionsExt.hasPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.prerequisites.permissions.IterablePermissionsExt.hasUndeterminedPermissions
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.state.CameraState
 
 @ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<CameraState>>())

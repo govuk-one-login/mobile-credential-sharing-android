@@ -29,8 +29,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.permissions.BluetoothPermissions.getBluetoothPermissions
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker
 
 const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 

@@ -4,7 +4,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.prerequisites.evaluator.PrerequisiteEvaluator
 import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.state.CameraState
@@ -35,7 +34,7 @@ class PrerequisiteGateImpl(
             else -> null
         }.also {
             logger.debug(
-                logTag,
+                PrerequisiteGateImpl::class.java.simpleName,
                 "Performed prerequisite checks for: $prerequisites"
             )
         }

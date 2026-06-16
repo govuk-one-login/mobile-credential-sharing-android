@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.core.permission
+package uk.gov.onelogin.sharing.prerequisites.permissions
 
 data class ListPermissionStore(
     private val markedPermissions: MutableList<String> = mutableListOf()

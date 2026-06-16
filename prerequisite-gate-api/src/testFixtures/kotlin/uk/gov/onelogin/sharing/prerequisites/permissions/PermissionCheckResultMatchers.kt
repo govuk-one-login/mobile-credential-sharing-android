@@ -1,14 +1,14 @@
-package uk.gov.onelogin.sharing.core.permission
+package uk.gov.onelogin.sharing.prerequisites.permissions
 
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult.Denied
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult.PermanentlyDenied
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker.PermissionCheckResult.Undetermined
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker.PermissionCheckResult
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker.PermissionCheckResult.Denied
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker.PermissionCheckResult.PermanentlyDenied
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker.PermissionCheckResult.Undetermined
 
 object PermissionCheckResultMatchers {
     fun hasPermission(expected: String) = hasPermission(equalTo(expected))

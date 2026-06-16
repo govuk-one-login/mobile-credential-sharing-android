@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.core.permission
+package uk.gov.onelogin.sharing.prerequisites.permissions
 
 fun interface PermissionChecker {
     /**

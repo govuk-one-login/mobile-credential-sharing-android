@@ -32,8 +32,7 @@ android {
 
 dependencies {
     listOf(
-        projects.prerequisiteGateApi,
-        projects.core
+        projects.prerequisiteGateApi
     ).forEach(::api)
 
     listOf(
@@ -41,6 +40,10 @@ dependencies {
         projects.bluetooth,
         libs.metro.viewmodel.compose
     ).forEach(::implementation)
+
+    listOf(
+        testFixtures(projects.prerequisiteGateApi)
+    ).forEach(::testFixturesApi)
 
     listOf(
         testFixtures(projects.core)

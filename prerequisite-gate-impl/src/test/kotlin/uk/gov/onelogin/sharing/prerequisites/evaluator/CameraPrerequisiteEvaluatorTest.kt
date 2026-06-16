@@ -10,12 +10,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.junit.Before
-import uk.gov.onelogin.sharing.core.permission.FakePermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionChecker
-import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toDeniedPermission
-import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toPermanentlyDeniedPermissions
-import uk.gov.onelogin.sharing.core.permission.PermissionsToResultExt.toUndeterminedPermissions
 import uk.gov.onelogin.sharing.prerequisites.evaluator.camera.ProcessCameraProviderFactory
+import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.toDeniedPermission
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.toPermanentlyDeniedPermissions
+import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.toUndeterminedPermissions
 import uk.gov.onelogin.sharing.prerequisites.state.CameraState
 
 class CameraPrerequisiteEvaluatorTest {
