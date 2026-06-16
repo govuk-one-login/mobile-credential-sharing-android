@@ -26,25 +26,22 @@ internal class MsoDecoder {
         parseMso(innerBytes)
     } catch (e: VerificationResult.Failure) {
         throw e
-    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-        throw malformed()
+    } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+        throw malformed
     }
 
     private fun unwrapTag24(data: ByteArray): ByteArray {
         val root = cborMapper.readTree(data)
-        return (root as? BinaryNode)?.binaryValue() ?: throw malformed()
+        return (root as? BinaryNode)?.binaryValue() ?: throw malformed
     }
 
     private fun checkDuplicateKeys(data: ByteArray) {
-        val parser = cborFactory.createParser(data) as CBORParser
-        parser.use { p -> scanForDuplicates(p) }
-    }
-
-    private fun scanForDuplicates(parser: CBORParser) {
-        while (parser.nextToken() != null) {
-            when (parser.currentToken()) {
-                JsonToken.START_OBJECT -> scanObject(parser)
-                else -> {}
+        (cborFactory.createParser(data) as CBORParser).use { parser ->
+            while (parser.nextToken() != null) {
+                when (parser.currentToken()) {
+                    JsonToken.START_OBJECT -> scanObject(parser)
+                    else -> {}
+                }
             }
         }
     }
@@ -54,10 +51,13 @@ internal class MsoDecoder {
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             when (parser.currentToken()) {
                 JsonToken.FIELD_NAME -> {
-                    if (!keys.add(parser.currentName())) throw malformed()
+                    if (!keys.add(parser.currentName())) throw malformed
                 }
+
                 JsonToken.START_OBJECT -> scanObject(parser)
+
                 JsonToken.START_ARRAY -> scanArray(parser)
+
                 else -> {}
             }
         }
@@ -77,12 +77,12 @@ internal class MsoDecoder {
     private fun parseMso(data: ByteArray): MobileSecurityObject {
         val root = cborMapper.readTree(data)
 
-        val version = root.get(KEY_VERSION)?.asText() ?: throw malformed()
-        val digestAlgorithm = root.get(KEY_DIGEST_ALGORITHM)?.asText() ?: throw malformed()
-        val docType = root.get(KEY_DOC_TYPE)?.asText() ?: throw malformed()
-        val valueDigests = parseValueDigests(root.get(KEY_VALUE_DIGESTS) ?: throw malformed())
-        val deviceKeyInfo = parseDeviceKeyInfo(root.get(KEY_DEVICE_KEY_INFO) ?: throw malformed())
-        val validityInfo = parseValidityInfo(root.get(KEY_VALIDITY_INFO) ?: throw malformed())
+        val version = root.get(KEY_VERSION)?.asText() ?: throw malformed
+        val digestAlgorithm = root.get(KEY_DIGEST_ALGORITHM)?.asText() ?: throw malformed
+        val docType = root.get(KEY_DOC_TYPE)?.asText() ?: throw malformed
+        val valueDigests = parseValueDigests(root.get(KEY_VALUE_DIGESTS) ?: throw malformed)
+        val deviceKeyInfo = parseDeviceKeyInfo(root.get(KEY_DEVICE_KEY_INFO) ?: throw malformed)
+        val validityInfo = parseValidityInfo(root.get(KEY_VALIDITY_INFO) ?: throw malformed)
         val status = (root.get(KEY_STATUS) as? BinaryNode)?.binaryValue()
 
         return MobileSecurityObject(
@@ -101,8 +101,8 @@ internal class MsoDecoder {
         node.properties().forEach { (namespace, digestsNode) ->
             val digests = mutableMapOf<Int, ByteArray>()
             digestsNode.properties().forEach { (id, value) ->
-                val digestId = id.toIntOrNull() ?: throw malformed()
-                digests[digestId] = (value as? BinaryNode)?.binaryValue() ?: throw malformed()
+                val digestId = id.toIntOrNull() ?: throw malformed
+                digests[digestId] = (value as? BinaryNode)?.binaryValue() ?: throw malformed
             }
             result[namespace] = digests
         }
@@ -110,16 +110,18 @@ internal class MsoDecoder {
     }
 
     private fun parseDeviceKeyInfo(node: JsonNode): DeviceKeyInfo {
-        val deviceKeyNode = node.get(KEY_DEVICE_KEY) ?: throw malformed()
+        val deviceKeyNode = node.get(KEY_DEVICE_KEY) ?: throw malformed
         val deviceKeyBytes = cborMapper.writeValueAsBytes(deviceKeyNode)
         return DeviceKeyInfo(deviceKey = deviceKeyBytes)
     }
 
     private fun parseValidityInfo(node: JsonNode): ValidityInfo {
-        val signed = parseTimestamp(node.get(KEY_SIGNED)?.asText() ?: throw malformed())
-        val validFrom = parseTimestamp(node.get(KEY_VALID_FROM)?.asText() ?: throw malformed())
-        val validUntil = parseTimestamp(node.get(KEY_VALID_UNTIL)?.asText() ?: throw malformed())
-        val expectedUpdate = node.get(KEY_EXPECTED_UPDATE)?.asText()?.let { parseTimestamp(it) }
+        val signed = node.requireTimestamp(KEY_SIGNED)
+        val validFrom = node.requireTimestamp(KEY_VALID_FROM)
+        val validUntil = node.requireTimestamp(KEY_VALID_UNTIL)
+        val expectedUpdate = node.get(KEY_EXPECTED_UPDATE)?.asText()
+            ?.also { if (!TIMESTAMP_PATTERN.matches(it)) throw malformed }
+            ?.let { Instant.parse(it) }
 
         return ValidityInfo(
             signed = signed,
@@ -129,12 +131,14 @@ internal class MsoDecoder {
         )
     }
 
-    private fun parseTimestamp(value: String): Instant {
-        if (!TIMESTAMP_PATTERN.matches(value)) throw malformed()
+    private fun JsonNode.requireTimestamp(key: String): Instant {
+        val value = get(key)?.asText() ?: throw malformed
+        if (!TIMESTAMP_PATTERN.matches(value)) throw malformed
         return Instant.parse(value)
     }
 
-    private fun malformed() = VerificationResult.Failure(VerificationError.MALFORMED_MSO)
+    private val malformed
+        get() = VerificationResult.Failure(VerificationError.MALFORMED_MSO)
 
     companion object {
         private const val KEY_VERSION = "version"
