@@ -53,13 +53,14 @@ class Iso18013DocumentVerifier(
      * @throws VerificationResult.Failure
      */
     internal fun decodeMSO(encodedMSO: ByteArray): MobileSecurityObject =
-        throw VerificationResult.Failure(VerificationError.MALFORMED_MSO)
+        MsoDecoder().decode(encodedMSO)
 
     /**
      * @throws VerificationResult.Failure
      */
-    internal fun verifyMSOFields(document: VerifiableDocument, mso: MobileSecurityObject): Unit =
-        throw VerificationResult.Failure(VerificationError.INVALID_MSO_VERSION)
+    internal fun verifyMSOFields(document: VerifiableDocument, mso: MobileSecurityObject) {
+        mso.hasDocType(document.docType)
+    }
 
     /**
      * @throws VerificationResult.Failure

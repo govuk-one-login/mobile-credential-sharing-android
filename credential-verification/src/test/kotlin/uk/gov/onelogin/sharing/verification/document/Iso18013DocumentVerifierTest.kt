@@ -22,6 +22,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.S
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.DEFAULT_DOC_TYPE
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithMismatchedDigests
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.malformedEncodedMSO
@@ -207,21 +208,18 @@ class Iso18013DocumentVerifierTest {
     }
 
     @Test
-    fun `decodeMSO is stubbed to throw a Failure`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.decodeMSO(validEncodedMSO)
-        }
+    fun `decodeMSO decodes a valid encoded MSO`() {
+        val mso = documentVerifier.decodeMSO(validEncodedMSO)
 
         assertThat(
-            exception,
-            hasError(VerificationError.MALFORMED_MSO)
+            mso.docType,
+            equalTo(DEFAULT_DOC_TYPE)
         )
     }
 
     /**
      * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] verifies [MobileSecurityObject] fields.
      */
-    @Ignore("Currently untestable via interface functions")
     @Test
     fun `Fails verification due to invalid MSO fields`() {
         stubTrustVerifierSuccess(encodedMSO = encodedMsoWithInvalidVersion)
@@ -240,14 +238,20 @@ class Iso18013DocumentVerifierTest {
     }
 
     @Test
-    fun `verifyMSOFields is stubbed to throw a Failure`() {
+    fun `verifyMSOFields throws INVALID_DOC_TYPE for mismatched docType`() {
+        val mso = MobileSecurityObject(
+            docType = "different_type",
+            valueDigests = emptyMap(),
+            deviceKeyInfo = DeviceKeyInfo(deviceKey = byteArrayOf()),
+            validityInfo = mockk()
+        )
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyMSOFields(provisionedDocument, mockk())
+            documentVerifier.verifyMSOFields(provisionedDocument, mso)
         }
 
         assertThat(
             exception,
-            hasError(VerificationError.INVALID_MSO_VERSION)
+            hasError(VerificationError.INVALID_DOC_TYPE)
         )
     }
 
