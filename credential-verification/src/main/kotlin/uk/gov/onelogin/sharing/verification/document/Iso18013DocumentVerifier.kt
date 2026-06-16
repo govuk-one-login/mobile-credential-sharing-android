@@ -7,7 +7,6 @@ import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
-import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
@@ -16,8 +15,10 @@ import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 @ContributesBinding(CredentialVerificationScope::class)
 class Iso18013DocumentVerifier(
     private val trustedRootCertificate: X509Certificate,
-    private val trustVerifier: TrustVerifier
+    private val trustVerifier: TrustVerifier,
+    private val deviceAuthVerifier: DeviceAuthVerifier
 ) : DocumentVerifier {
+
     override fun verifyDocument(
         document: VerifiableDocument,
         sessionTranscriptBytes: ByteArray?
@@ -37,12 +38,10 @@ class Iso18013DocumentVerifier(
                 throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
             }
 
-            verifyDeviceAuth(document, sessionTranscriptBytes, mso.deviceKeyInfo)
-            // move the proceeding call to `verifyDeviceAuth` during implementation.
-            buildDeviceAuthenticationBytes(
-                sessionTranscriptBytes,
-                document.docType,
-                document.deviceSigned.deviceNameSpacesBytes
+            deviceAuthVerifier.verify(
+                document = document,
+                sessionTranscriptBytes = sessionTranscriptBytes,
+                deviceKeyInfo = mso.deviceKeyInfo
             )
         }
 
@@ -76,19 +75,4 @@ class Iso18013DocumentVerifier(
         validityPeriod: CertificateValidityPeriod,
         mso: MobileSecurityObject
     ): Unit = throw VerificationResult.Failure(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE)
-
-    /**
-     * @throws VerificationResult.Failure
-     */
-    internal fun verifyDeviceAuth(
-        document: VerifiableDocument.WithPresentation,
-        sessionTranscriptBytes: ByteArray?,
-        deviceKeyInfo: DeviceKeyInfo
-    ): Unit = throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-
-    internal fun buildDeviceAuthenticationBytes(
-        sessionTranscriptBytes: ByteArray?,
-        docType: String,
-        deviceNameSpacesBytes: ByteArray
-    ): ByteArray = byteArrayOf()
 }
