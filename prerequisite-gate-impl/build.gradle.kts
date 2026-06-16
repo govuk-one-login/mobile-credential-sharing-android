@@ -9,7 +9,7 @@ val androidMinSdk: Int by rootProject.extra
 val namespacePrefix: String by rootProject.extra
 
 android {
-    namespace = "$namespacePrefix.prerequisites"
+    namespace = "$namespacePrefix.prerequisites.impl"
     compileSdk = androidCompileSdk
 
     defaultConfig {

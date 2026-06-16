@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
-import uk.gov.onelogin.sharing.prerequisites.permissions.BluetoothPermissions.getBluetoothPermissions
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 
 /**
  * Implements [Resettable] for clearing internal state, such as the session state machines.

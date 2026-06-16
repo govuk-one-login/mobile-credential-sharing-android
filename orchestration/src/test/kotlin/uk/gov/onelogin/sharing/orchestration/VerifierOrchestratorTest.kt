@@ -75,10 +75,10 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierS
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isReadyToScan
 import uk.gov.onelogin.sharing.orchestration.verifier.session.matchers.VerifierSessionStateMatchers.isSuccess
 import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.StubPrerequisiteGate
-import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocumentMatchers.hasDocType
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError

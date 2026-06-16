@@ -17,11 +17,11 @@ import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.verifier.prerequisites.usecases.ResolveVerifierPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisites
-import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.ui.RetryPrerequisitesContentRule
-import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator
-import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
 @RunWith(RobolectricTestParameterInjector::class)

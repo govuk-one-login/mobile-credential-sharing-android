@@ -13,10 +13,10 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
-import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
-import uk.gov.onelogin.sharing.prerequisites.state.CameraState
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.api.state.CameraState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 
 @RunWith(AndroidJUnit4::class)
 class ResolveHolderPrerequisiteActionTest {

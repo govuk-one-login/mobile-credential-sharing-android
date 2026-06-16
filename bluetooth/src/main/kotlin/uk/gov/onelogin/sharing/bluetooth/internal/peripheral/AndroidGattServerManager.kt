@@ -33,8 +33,8 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.prerequisites.permissions.BluetoothPermissions.getBluetoothPermissions
-import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
 @ContributesBinding(AppScope::class)
 @Suppress("TooManyFunctions")

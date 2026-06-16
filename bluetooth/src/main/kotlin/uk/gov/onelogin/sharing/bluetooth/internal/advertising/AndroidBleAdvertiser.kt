@@ -21,8 +21,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BleProvider
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.prerequisites.permissions.BluetoothPermissions.getBluetoothPermissions
-import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionChecker
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
 @ContributesBinding(AppScope::class)
 class AndroidBleAdvertiser(

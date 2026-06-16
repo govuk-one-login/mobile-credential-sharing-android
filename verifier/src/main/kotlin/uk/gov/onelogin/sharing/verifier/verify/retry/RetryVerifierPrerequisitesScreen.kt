@@ -16,8 +16,8 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.PrerequisiteAction
-import uk.gov.onelogin.sharing.prerequisites.contracts.PrerequisiteActionContract
-import uk.gov.onelogin.sharing.prerequisites.ui.RetryPrerequisitesContent
+import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
+import uk.gov.onelogin.sharing.prerequisites.api.ui.RetryPrerequisitesContent
 
 @Composable
 internal fun RetryVerifierPrerequisitesScreen(

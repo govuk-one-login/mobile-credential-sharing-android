@@ -9,9 +9,9 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator
-import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator.LogMessages.updateNavigationEvent
-import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigator.NavigationEvent
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.LogMessages.updateNavigationEvent
+import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
 
 @ContributesBinding(HolderUiScope::class)
 class RetryHolderPrerequisites(orchestrator: Orchestrator.Holder, private val logger: Logger) :

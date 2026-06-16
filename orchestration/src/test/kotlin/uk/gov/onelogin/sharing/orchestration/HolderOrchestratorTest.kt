@@ -64,10 +64,10 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatche
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isInvalidBluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
 import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisite
-import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.StubPrerequisiteGate
-import uk.gov.onelogin.sharing.prerequisites.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
