@@ -24,6 +24,7 @@ import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.DEFAULT_DOC_TYPE
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithMismatchedDigests
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithUnsupportedAlgorithm
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.malformedEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.validEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
@@ -82,7 +83,7 @@ class Iso18013DocumentVerifierTest {
 
         assertThat(
             constructorInfo,
-            hasSize(1)
+            hasSize(2)
         )
 
         assertThat(
@@ -91,7 +92,8 @@ class Iso18013DocumentVerifierTest {
                 "void (" +
                     "${X509Certificate::class.java.simpleName}, " +
                     "${TrustVerifier::class.java.simpleName}, " +
-                    "${DeviceAuthVerifier::class.java.simpleName})"
+                    "${DeviceAuthVerifier::class.java.simpleName}, " +
+                    "${MsoDecoder::class.java.simpleName})"
             )
         )
     }
@@ -364,6 +366,24 @@ class Iso18013DocumentVerifierTest {
             exception,
             hasError(VerificationError.INVALID_DEVICE_SIGNATURE)
         )
+    }
+
+    @Test
+    fun `decodeMSO throws MALFORMED_MSO for empty input`() {
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            documentVerifier.decodeMSO(byteArrayOf())
+        }
+
+        assertThat(exception, hasError(VerificationError.MALFORMED_MSO))
+    }
+
+    @Test
+    fun `decodeMSO throws UNSUPPORTED_DIGEST_ALGORITHM for non-SHA-256`() {
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            documentVerifier.decodeMSO(encodedMsoWithUnsupportedAlgorithm)
+        }
+
+        assertThat(exception, hasError(VerificationError.UNSUPPORTED_DIGEST_ALGORITHM))
     }
 
     private fun stubTrustVerifierSuccess(

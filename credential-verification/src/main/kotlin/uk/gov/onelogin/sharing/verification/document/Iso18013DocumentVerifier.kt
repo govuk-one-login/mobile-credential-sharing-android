@@ -16,7 +16,8 @@ import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 class Iso18013DocumentVerifier(
     private val trustedRootCertificate: X509Certificate,
     private val trustVerifier: TrustVerifier,
-    private val deviceAuthVerifier: DeviceAuthVerifier
+    private val deviceAuthVerifier: DeviceAuthVerifier,
+    private val msoDecoder: MsoDecoder = MsoDecoder()
 ) : DocumentVerifier {
 
     override fun verifyDocument(
@@ -52,7 +53,7 @@ class Iso18013DocumentVerifier(
      * @throws VerificationResult.Failure
      */
     internal fun decodeMSO(encodedMSO: ByteArray): MobileSecurityObject =
-        MsoDecoder().decode(encodedMSO)
+        msoDecoder.decode(encodedMSO)
 
     /**
      * @throws VerificationResult.Failure

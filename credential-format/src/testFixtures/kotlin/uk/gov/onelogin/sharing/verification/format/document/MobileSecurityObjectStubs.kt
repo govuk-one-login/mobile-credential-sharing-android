@@ -10,9 +10,10 @@ object MobileSecurityObjectStubs {
     const val DEFAULT_DIGEST_ALGORITHM = "SHA-256"
     const val DEFAULT_DOC_TYPE = "org.iso.18013.5.1.mDL"
     const val DEFAULT_NAMESPACE = "org.iso.18013.5.1"
-    private const val DEFAULT_SIGNED = "2024-01-15T10:00:00Z"
-    private const val DEFAULT_VALID_FROM = "2024-01-15T10:00:00Z"
-    private const val DEFAULT_VALID_UNTIL = "2025-01-15T10:00:00Z"
+    const val DEFAULT_SIGNED = "2024-01-15T10:00:00Z"
+    const val DEFAULT_VALID_FROM = "2024-01-15T10:00:00Z"
+    const val DEFAULT_VALID_UNTIL = "2025-01-15T10:00:00Z"
+    const val DEFAULT_EXPECTED_UPDATE = "2024-06-15T10:00:00Z"
 
     private const val KEY_VERSION = "version"
     private const val KEY_DIGEST_ALGORITHM = "digestAlgorithm"
@@ -24,6 +25,8 @@ object MobileSecurityObjectStubs {
     private const val KEY_SIGNED = "signed"
     private const val KEY_VALID_FROM = "validFrom"
     private const val KEY_VALID_UNTIL = "validUntil"
+    private const val KEY_EXPECTED_UPDATE = "expectedUpdate"
+    private const val KEY_STATUS = "status"
 
     private val cborMapper = ObjectMapper(CBORFactory())
 
@@ -54,7 +57,7 @@ object MobileSecurityObjectStubs {
     private fun buildValidMsoBytes(): ByteArray = buildMsoBytes()
 
     @Suppress("LongParameterList")
-    private fun buildMsoBytes(
+    fun buildMsoBytes(
         version: String = DEFAULT_VERSION,
         digestAlgorithm: String = DEFAULT_DIGEST_ALGORITHM,
         docType: String = DEFAULT_DOC_TYPE,
@@ -63,7 +66,9 @@ object MobileSecurityObjectStubs {
         ),
         signed: String = DEFAULT_SIGNED,
         validFrom: String = DEFAULT_VALID_FROM,
-        validUntil: String = DEFAULT_VALID_UNTIL
+        validUntil: String = DEFAULT_VALID_UNTIL,
+        includeExpectedUpdate: String? = null,
+        includeStatus: ByteArray? = null
     ): ByteArray {
         val root = cborMapper.createObjectNode()
         root.put(KEY_VERSION, version)
@@ -91,7 +96,10 @@ object MobileSecurityObjectStubs {
         vi.put(KEY_SIGNED, signed)
         vi.put(KEY_VALID_FROM, validFrom)
         vi.put(KEY_VALID_UNTIL, validUntil)
+        includeExpectedUpdate?.let { vi.put(KEY_EXPECTED_UPDATE, it) }
         root.set<ObjectNode>(KEY_VALIDITY_INFO, vi)
+
+        includeStatus?.let { root.put(KEY_STATUS, it) }
 
         return cborMapper.writeValueAsBytes(root)
     }
@@ -134,7 +142,7 @@ object MobileSecurityObjectStubs {
         return output.toByteArray()
     }
 
-    private fun wrapTag24(innerBytes: ByteArray): ByteArray {
+    fun wrapTag24(innerBytes: ByteArray): ByteArray {
         val output = java.io.ByteArrayOutputStream()
         val g = CBORFactory().createGenerator(output)
         g.writeTag(24)
@@ -142,4 +150,168 @@ object MobileSecurityObjectStubs {
         g.close()
         return output.toByteArray()
     }
+
+    private fun buildMsoBytesWithoutField(excludedField: String): ByteArray {
+        val output = java.io.ByteArrayOutputStream()
+        val g = CBORFactory().createGenerator(output)
+        g.writeStartObject()
+        if (excludedField != KEY_VERSION) g.writeStringField(KEY_VERSION, DEFAULT_VERSION)
+        if (excludedField != KEY_DIGEST_ALGORITHM) {
+            g.writeStringField(KEY_DIGEST_ALGORITHM, DEFAULT_DIGEST_ALGORITHM)
+        }
+        if (excludedField != KEY_DOC_TYPE) g.writeStringField(KEY_DOC_TYPE, DEFAULT_DOC_TYPE)
+        if (excludedField != KEY_VALUE_DIGESTS) {
+            g.writeFieldName(KEY_VALUE_DIGESTS)
+            g.writeStartObject()
+            g.writeFieldName(DEFAULT_NAMESPACE)
+            g.writeStartObject()
+            g.writeFieldName("0")
+            g.writeBinary(byteArrayOf(0x01, 0x02))
+            g.writeEndObject()
+            g.writeEndObject()
+        }
+        if (excludedField != KEY_DEVICE_KEY_INFO) {
+            g.writeFieldName(KEY_DEVICE_KEY_INFO)
+            g.writeStartObject()
+            g.writeFieldName(KEY_DEVICE_KEY)
+            g.writeStartObject()
+            g.writeFieldName("1")
+            g.writeNumber(2)
+            g.writeEndObject()
+            g.writeEndObject()
+        }
+        if (excludedField != KEY_VALIDITY_INFO) {
+            g.writeFieldName(KEY_VALIDITY_INFO)
+            g.writeStartObject()
+            g.writeStringField(KEY_SIGNED, DEFAULT_SIGNED)
+            g.writeStringField(KEY_VALID_FROM, DEFAULT_VALID_FROM)
+            g.writeStringField(KEY_VALID_UNTIL, DEFAULT_VALID_UNTIL)
+            g.writeEndObject()
+        }
+        g.writeEndObject()
+        g.close()
+        return output.toByteArray()
+    }
+
+    fun buildMsoBytesWithNonIntegerDigestKeys(): ByteArray {
+        val output = java.io.ByteArrayOutputStream()
+        val g = CBORFactory().createGenerator(output)
+        g.writeStartObject()
+        g.writeStringField(KEY_VERSION, DEFAULT_VERSION)
+        g.writeStringField(KEY_DIGEST_ALGORITHM, DEFAULT_DIGEST_ALGORITHM)
+        g.writeStringField(KEY_DOC_TYPE, DEFAULT_DOC_TYPE)
+        g.writeFieldName(KEY_VALUE_DIGESTS)
+        g.writeStartObject()
+        g.writeFieldName(DEFAULT_NAMESPACE)
+        g.writeStartObject()
+        g.writeFieldName("not_a_number")
+        g.writeBinary(byteArrayOf(0x01, 0x02))
+        g.writeEndObject()
+        g.writeEndObject()
+        g.writeFieldName(KEY_DEVICE_KEY_INFO)
+        g.writeStartObject()
+        g.writeFieldName(KEY_DEVICE_KEY)
+        g.writeStartObject()
+        g.writeFieldName("1")
+        g.writeNumber(2)
+        g.writeEndObject()
+        g.writeEndObject()
+        g.writeFieldName(KEY_VALIDITY_INFO)
+        g.writeStartObject()
+        g.writeStringField(KEY_SIGNED, DEFAULT_SIGNED)
+        g.writeStringField(KEY_VALID_FROM, DEFAULT_VALID_FROM)
+        g.writeStringField(KEY_VALID_UNTIL, DEFAULT_VALID_UNTIL)
+        g.writeEndObject()
+        g.writeEndObject()
+        g.close()
+        return output.toByteArray()
+    }
+
+    private fun buildMsoBytesWithEmptyDeviceKeyInfo(): ByteArray {
+        val output = java.io.ByteArrayOutputStream()
+        val g = CBORFactory().createGenerator(output)
+        g.writeStartObject()
+        g.writeStringField(KEY_VERSION, DEFAULT_VERSION)
+        g.writeStringField(KEY_DIGEST_ALGORITHM, DEFAULT_DIGEST_ALGORITHM)
+        g.writeStringField(KEY_DOC_TYPE, DEFAULT_DOC_TYPE)
+        g.writeFieldName(KEY_VALUE_DIGESTS)
+        g.writeStartObject()
+        g.writeFieldName(DEFAULT_NAMESPACE)
+        g.writeStartObject()
+        g.writeFieldName("0")
+        g.writeBinary(byteArrayOf(0x01, 0x02))
+        g.writeEndObject()
+        g.writeEndObject()
+        g.writeFieldName(KEY_DEVICE_KEY_INFO)
+        g.writeStartObject()
+        g.writeEndObject()
+        g.writeFieldName(KEY_VALIDITY_INFO)
+        g.writeStartObject()
+        g.writeStringField(KEY_SIGNED, DEFAULT_SIGNED)
+        g.writeStringField(KEY_VALID_FROM, DEFAULT_VALID_FROM)
+        g.writeStringField(KEY_VALID_UNTIL, DEFAULT_VALID_UNTIL)
+        g.writeEndObject()
+        g.writeEndObject()
+        g.close()
+        return output.toByteArray()
+    }
+
+    val encodedMsoWithExpectedUpdate: ByteArray = wrapTag24(
+        buildMsoBytes(includeExpectedUpdate = DEFAULT_EXPECTED_UPDATE)
+    )
+
+    val encodedMsoWithInvalidExpectedUpdate: ByteArray = wrapTag24(
+        buildMsoBytes(includeExpectedUpdate = "2024-06-15T10:00:00+01:00")
+    )
+
+    val encodedMsoWithStatus: ByteArray = wrapTag24(
+        buildMsoBytes(includeStatus = byteArrayOf(0x01, 0x02))
+    )
+
+    val encodedMsoWithMultipleNamespaces: ByteArray = wrapTag24(
+        buildMsoBytes(
+            valueDigests = mapOf(
+                DEFAULT_NAMESPACE to mapOf(0 to byteArrayOf(0x01)),
+                "org.iso.18013.5.1.aamva" to mapOf(1 to byteArrayOf(0x02))
+            )
+        )
+    )
+
+    val encodedMsoWithMissingVersion: ByteArray = wrapTag24(
+        buildMsoBytesWithoutField(KEY_VERSION)
+    )
+
+    val encodedMsoWithMissingDocType: ByteArray = wrapTag24(
+        buildMsoBytesWithoutField(KEY_DOC_TYPE)
+    )
+
+    val encodedMsoWithMissingValueDigests: ByteArray = wrapTag24(
+        buildMsoBytesWithoutField(KEY_VALUE_DIGESTS)
+    )
+
+    val encodedMsoWithMissingDeviceKeyInfo: ByteArray = wrapTag24(
+        buildMsoBytesWithoutField(KEY_DEVICE_KEY_INFO)
+    )
+
+    val encodedMsoWithMissingValidityInfo: ByteArray = wrapTag24(
+        buildMsoBytesWithoutField(KEY_VALIDITY_INFO)
+    )
+
+    val encodedMsoWithMissingDigestAlgorithm: ByteArray = wrapTag24(
+        buildMsoBytesWithoutField(KEY_DIGEST_ALGORITHM)
+    )
+
+    val encodedMsoWithNonIntegerDigestKeys: ByteArray = wrapTag24(
+        buildMsoBytesWithNonIntegerDigestKeys()
+    )
+
+    val encodedMsoWithEmptyDeviceKeyInfo: ByteArray = wrapTag24(
+        buildMsoBytesWithEmptyDeviceKeyInfo()
+    )
+
+    val encodedMsoNotTag24Wrapped: ByteArray = buildMsoBytes()
+
+    val encodedMsoWithUnsupportedAlgorithm: ByteArray = wrapTag24(
+        buildMsoBytes(digestAlgorithm = "SHA-512")
+    )
 }
