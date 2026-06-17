@@ -17,7 +17,7 @@ class Iso18013DocumentVerifier(
     private val trustedRootCertificate: X509Certificate,
     private val trustVerifier: TrustVerifier,
     private val deviceAuthVerifier: DeviceAuthVerifier,
-    private val msoDecoder: MsoDecoder = MsoDecoder()
+    private val msoDecoder: MsoDecoder
 ) : DocumentVerifier {
 
     override fun verifyDocument(
@@ -28,7 +28,7 @@ class Iso18013DocumentVerifier(
             document.issuerSigned.issuerAuth,
             trustedRootCertificate
         )
-        val mso = decodeMSO(issuerAuthResult.msoPayload)
+        val mso = msoDecoder.decode(issuerAuthResult.msoPayload)
 
         verifyMSOFields(document, mso)
         verifyDocumentDigests(document, mso)
@@ -48,12 +48,6 @@ class Iso18013DocumentVerifier(
 
         return VerificationResult.Success
     }
-
-    /**
-     * @throws VerificationResult.Failure
-     */
-    internal fun decodeMSO(encodedMSO: ByteArray): MobileSecurityObject =
-        msoDecoder.decode(encodedMSO)
 
     /**
      * @throws VerificationResult.Failure

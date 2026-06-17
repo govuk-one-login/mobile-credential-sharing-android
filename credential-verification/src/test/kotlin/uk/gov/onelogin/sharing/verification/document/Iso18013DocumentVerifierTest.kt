@@ -21,10 +21,8 @@ import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 import uk.gov.onelogin.sharing.verification.document.cose.CoseKeyDecoder
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
-import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.DEFAULT_DOC_TYPE
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithMismatchedDigests
-import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithUnsupportedAlgorithm
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.malformedEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.validEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
@@ -69,7 +67,8 @@ class Iso18013DocumentVerifierTest {
         Iso18013DocumentVerifier(
             mockRootCertificate,
             trustVerifier,
-            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder())
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
+            MsoDecoder()
         )
     }
 
@@ -83,7 +82,7 @@ class Iso18013DocumentVerifierTest {
 
         assertThat(
             constructorInfo,
-            hasSize(2)
+            hasSize(1)
         )
 
         assertThat(
@@ -108,7 +107,7 @@ class Iso18013DocumentVerifierTest {
 
         assertThat(
             methodInfo,
-            hasSize(5)
+            hasSize(4)
         )
     }
 
@@ -119,7 +118,6 @@ class Iso18013DocumentVerifierTest {
     @Test
     fun `Ensure private function signature`(
         @TestParameter functionsToDescriptors: Pair<String, String> = testValues(
-            "decodeMSO" to "${MobileSecurityObject::class.java.name} (byte[])",
             "verifyMSOFields" to "void (" +
                 "${VerifiableDocument::class.java.simpleName}, " +
                 "${MobileSecurityObject::class.java.simpleName}" +
@@ -178,8 +176,7 @@ class Iso18013DocumentVerifierTest {
     }
 
     /**
-     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] calls
-     * [Iso18013DocumentVerifier.decodeMSO] after verifying trust.
+     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] decodes the MSO after verifying trust.
      */
     @Test
     fun `Fails verification due to MSO decoding error`() {
@@ -195,16 +192,6 @@ class Iso18013DocumentVerifierTest {
         assertThat(
             exception,
             hasError(VerificationError.MALFORMED_MSO)
-        )
-    }
-
-    @Test
-    fun `decodeMSO decodes a valid encoded MSO`() {
-        val mso = documentVerifier.decodeMSO(validEncodedMSO)
-
-        assertThat(
-            mso.docType,
-            equalTo(DEFAULT_DOC_TYPE)
         )
     }
 
@@ -366,24 +353,6 @@ class Iso18013DocumentVerifierTest {
             exception,
             hasError(VerificationError.INVALID_DEVICE_SIGNATURE)
         )
-    }
-
-    @Test
-    fun `decodeMSO throws MALFORMED_MSO for empty input`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.decodeMSO(byteArrayOf())
-        }
-
-        assertThat(exception, hasError(VerificationError.MALFORMED_MSO))
-    }
-
-    @Test
-    fun `decodeMSO throws UNSUPPORTED_DIGEST_ALGORITHM for non-SHA-256`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.decodeMSO(encodedMsoWithUnsupportedAlgorithm)
-        }
-
-        assertThat(exception, hasError(VerificationError.UNSUPPORTED_DIGEST_ALGORITHM))
     }
 
     private fun stubTrustVerifierSuccess(

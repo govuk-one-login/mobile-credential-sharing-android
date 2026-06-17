@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.StreamReadFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import dev.zacsweers.metro.Inject
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 
+@Inject
 class MsoDecoder {
 
     private val cborMapper = JsonMapper.builder(CBORFactory())
