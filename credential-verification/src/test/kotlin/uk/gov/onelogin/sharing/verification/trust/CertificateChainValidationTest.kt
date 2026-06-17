@@ -12,23 +12,13 @@ import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator.CertB
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
-/**
- * Tests for certificate chain structural validation.
- *
- * Covers acceptance criteria 1-6:
- * - AC1: Happy path (valid chain)
- * - AC2: Untrusted root
- * - AC3: Invalid date/time validity
- * - AC4: Invalid signature
- * - AC5: AKI/SKI mismatch
- * - AC6: Invalid BasicConstraints
- */
 class CertificateChainValidationTest {
     private val logger = SystemLogger()
     private val decoder = CoseSign1Decoder(logger)
     private val verifier = TrustVerifierImpl(
         decoder,
-        CoseSignatureVerifier(CoseHeaderValidator(logger))
+        CoseSignatureVerifier(CoseHeaderValidator(logger)),
+        logger
     )
 
     // Happy path

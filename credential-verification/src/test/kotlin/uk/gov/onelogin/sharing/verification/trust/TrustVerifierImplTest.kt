@@ -34,7 +34,8 @@ class TrustVerifierImplTest {
         decoder,
         CoseSignatureVerifier(
             CoseHeaderValidator(logger)
-        )
+        ),
+        logger
     )
     private val cborMapper = ObjectMapper(CBORFactory())
 

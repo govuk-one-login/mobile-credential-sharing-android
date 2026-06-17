@@ -10,18 +10,21 @@ import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
 import kotlin.time.ExperimentalTime
 import kotlin.time.toKotlinInstant
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
+import uk.gov.onelogin.sharing.verification.trust.certpathcheckers.BasicConstraintsChecker
 import uk.gov.onelogin.sharing.verification.trust.certpathcheckers.KeyUsageChecker
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
 @ContributesBinding(CredentialVerificationScope::class)
 class TrustVerifierImpl internal constructor(
     private val coseSign1Decoder: CoseSign1Decoder,
-    private val signatureVerifier: CoseSignatureVerifier
+    private val signatureVerifier: CoseSignatureVerifier,
+    private val logger: Logger
 ) : TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
@@ -97,12 +100,17 @@ class TrustVerifierImpl internal constructor(
             val params = PKIXParameters(setOf(trustAnchor)).apply {
                 isRevocationEnabled = false
                 addCertPathChecker(KeyUsageChecker(certificates.first()))
+                addCertPathChecker(BasicConstraintsChecker(certificates.first()))
             }
 
             CertPathValidator.getInstance("PKIX").validate(certPath, params)
-
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            logger.error(LOG_TAG, "Certificate chain validation failed", e)
             throw VerificationResult.Failure(VerificationError.UNTRUSTED_CERTIFICATE)
         }
+    }
+
+    companion object {
+        private val LOG_TAG = TrustVerifierImpl::class.java.simpleName
     }
 }

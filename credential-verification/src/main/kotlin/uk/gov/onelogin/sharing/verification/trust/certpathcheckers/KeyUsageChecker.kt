@@ -40,27 +40,21 @@ internal class KeyUsageChecker(private val leafCertificate: X509Certificate) :
     }
 
     private fun validateLeafKeyUsage(keyUsage: BooleanArray) {
-        if (!keyUsage[DIGITAL_SIGNATURE]) {
-            throw CertPathValidatorException("Leaf missing digitalSignature bit")
-        }
-        for (i in keyUsage.indices) {
-            if (i != DIGITAL_SIGNATURE && keyUsage[i]) {
-                throw CertPathValidatorException("Leaf has unexpected KeyUsage bit at position $i")
-            }
+        val valid = keyUsage[DIGITAL_SIGNATURE] &&
+            keyUsage.indices.none { i -> i != DIGITAL_SIGNATURE && keyUsage[i] }
+
+        if (!valid) {
+            throw CertPathValidatorException("Leaf KeyUsage must have only digitalSignature")
         }
     }
 
     private fun validateCaKeyUsage(keyUsage: BooleanArray) {
-        if (!keyUsage[KEY_CERT_SIGN]) {
-            throw CertPathValidatorException("CA missing keyCertSign bit")
-        }
-        if (!keyUsage[CRL_SIGN]) {
-            throw CertPathValidatorException("CA missing cRLSign bit")
-        }
-        for (i in keyUsage.indices) {
-            if (i != KEY_CERT_SIGN && i != CRL_SIGN && keyUsage[i]) {
-                throw CertPathValidatorException("CA has unexpected KeyUsage bit at position $i")
-            }
+        val valid = keyUsage[KEY_CERT_SIGN] &&
+            keyUsage[CRL_SIGN] &&
+            keyUsage.indices.none { i -> i != KEY_CERT_SIGN && i != CRL_SIGN && keyUsage[i] }
+
+        if (!valid) {
+            throw CertPathValidatorException("CA KeyUsage must have only keyCertSign and cRLSign")
         }
     }
 }
