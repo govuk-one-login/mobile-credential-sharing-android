@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationE
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
+import uk.gov.onelogin.sharing.verification.trust.certpathcheckers.KeyUsageChecker
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
 @ContributesBinding(CredentialVerificationScope::class)
@@ -95,6 +96,7 @@ class TrustVerifierImpl internal constructor(
             val trustAnchor = TrustAnchor(trustedRoot, null)
             val params = PKIXParameters(setOf(trustAnchor)).apply {
                 isRevocationEnabled = false
+                addCertPathChecker(KeyUsageChecker(certificates.first()))
             }
 
             CertPathValidator.getInstance("PKIX").validate(certPath, params)
