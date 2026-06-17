@@ -2,7 +2,10 @@ package uk.gov.onelogin.sharing.verification.trust
 
 import dev.zacsweers.metro.ContributesBinding
 import java.io.ByteArrayInputStream
+import java.security.cert.CertPathValidator
 import java.security.cert.CertificateFactory
+import java.security.cert.PKIXParameters
+import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
 import kotlin.time.ExperimentalTime
@@ -33,7 +36,7 @@ class TrustVerifierImpl internal constructor(
         val ordered = orderCertificates(certs)
         val leaf = ordered.first()
 
-        verifyChainAnchoring(ordered, trustedRoot)
+        validateCertificateChain(ordered, trustedRoot)
 
         val publicKey = try {
             leaf.publicKey as ECPublicKey
@@ -81,10 +84,21 @@ class TrustVerifierImpl internal constructor(
         )
     }
 
-    private fun verifyChainAnchoring(ordered: List<X509Certificate>, trustedRoot: X509Certificate) {
-        val topCert = ordered.last()
+    private fun validateCertificateChain(
+        certificates: List<X509Certificate>,
+        trustedRoot: X509Certificate
+    ) {
         try {
-            topCert.verify(trustedRoot.publicKey)
+            val certFactory = CertificateFactory.getInstance("X.509")
+            val certPath = certFactory.generateCertPath(certificates)
+
+            val trustAnchor = TrustAnchor(trustedRoot, null)
+            val params = PKIXParameters(setOf(trustAnchor)).apply {
+                isRevocationEnabled = false
+            }
+
+            CertPathValidator.getInstance("PKIX").validate(certPath, params)
+
         } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
             throw VerificationResult.Failure(VerificationError.UNTRUSTED_CERTIFICATE)
         }
