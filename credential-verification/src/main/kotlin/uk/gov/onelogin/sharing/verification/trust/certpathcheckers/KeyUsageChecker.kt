@@ -12,9 +12,8 @@ private const val DIGITAL_SIGNATURE = 0
 private const val KEY_CERT_SIGN = 5
 private const val CRL_SIGN = 6
 
-internal class KeyUsageChecker(
-    private val leafCertificate: X509Certificate
-) : PKIXCertPathChecker() {
+internal class KeyUsageChecker(private val leafCertificate: X509Certificate) :
+    PKIXCertPathChecker() {
 
     override fun init(forward: Boolean) = Unit
 

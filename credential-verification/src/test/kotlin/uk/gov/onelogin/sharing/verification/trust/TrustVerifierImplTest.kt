@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import io.mockk.every
 import io.mockk.mockk
 import java.io.ByteArrayInputStream
+import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -22,6 +23,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
+import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator.CertBuilder
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
@@ -35,6 +37,29 @@ class TrustVerifierImplTest {
         )
     )
     private val cborMapper = ObjectMapper(CBORFactory())
+
+    private val rootKp = generateKeyPair()
+    private val leafKp = generateKeyPair()
+
+    private val rootCert = CertBuilder(
+        subject = "CN=Test Root CA,C=GB,ST=London",
+        keyPair = rootKp,
+        issuerKeyPair = rootKp,
+        issuer = "CN=Test Root CA,C=GB,ST=London"
+    ).ca().build()
+
+    private val leafCert = CertBuilder(
+        subject = "CN=Test DS,C=GB,ST=London",
+        keyPair = leafKp,
+        issuerKeyPair = rootKp,
+        issuer = "CN=Test Root CA,C=GB,ST=London"
+    ).leaf().build()
+
+    private val validIssuerAuth: ByteArray = CoseSign1Builder.build(
+        chain = listOf(leafCert),
+        leafKeyPair = leafKp,
+        payload = MsoBuilder.build()
+    )
 
     @Test
     fun `verifyCOSESign1 with empty bytes throws MALFORMED_ISSUER_AUTH`() {
@@ -77,9 +102,7 @@ class TrustVerifierImplTest {
 
     @Test
     fun `valid IssuerAuth returns leaf validity period, MSO payload, and subject attributes`() {
-        val issuerAuth = extractIssuerAuth()
-        val cert = extractCertFromIssuerAuth(issuerAuth)
-        val result = verifier.verifyCOSESign1(issuerAuth, cert)
+        val result = verifier.verifyCOSESign1(validIssuerAuth, rootCert)
 
         assertNotNull(result.certificateValidityPeriod)
         assertNotNull(result.msoPayload)
@@ -98,45 +121,41 @@ class TrustVerifierImplTest {
 
     @Test
     fun `tampered signature throws INVALID_ISSUER_SIGNATURE`() {
-        val issuerAuth = extractIssuerAuth()
-        val cert = extractCertFromIssuerAuth(issuerAuth)
-
-        val root = cborMapper.readTree(issuerAuth) as ArrayNode
-        val sigBytes = (root[3] as BinaryNode).binaryValue()
+        val tree = cborMapper.readTree(validIssuerAuth) as ArrayNode
+        val sigBytes = (tree[3] as BinaryNode).binaryValue()
         sigBytes[0] = (sigBytes[0].toInt() xor 0xFF).toByte()
 
         val tampered = cborMapper.createArrayNode()
-        tampered.add(root[0])
-        tampered.add(root[1])
-        tampered.add(root[2])
+        tampered.add(tree[0])
+        tampered.add(tree[1])
+        tampered.add(tree[2])
         tampered.add(sigBytes)
         val tamperedBytes = cborMapper.writeValueAsBytes(tampered)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(tamperedBytes, cert)
+            verifier.verifyCOSESign1(tamperedBytes, rootCert)
         }
         assertThat(exception, hasError(VerificationError.INVALID_ISSUER_SIGNATURE))
     }
 
     @Test
     fun `unanchored chain throws UNTRUSTED_CERTIFICATE`() {
-        val issuerAuth = extractIssuerAuth()
-
-        val keyPairGen = KeyPairGenerator.getInstance("EC")
-        keyPairGen.initialize(ECGenParameterSpec("secp256r1"))
-        val untrustedKeyPair = keyPairGen.generateKeyPair()
-
-        val untrustedRoot = mockk<X509Certificate>()
-        every { untrustedRoot.publicKey } returns untrustedKeyPair.public
+        val untrustedRootKp = generateKeyPair()
+        val untrustedRoot = CertBuilder(
+            subject = "CN=Untrusted,C=GB,ST=London",
+            keyPair = untrustedRootKp,
+            issuerKeyPair = untrustedRootKp,
+            issuer = "CN=Untrusted,C=GB,ST=London"
+        ).ca().build()
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(issuerAuth, untrustedRoot)
+            verifier.verifyCOSESign1(validIssuerAuth, untrustedRoot)
         }
         assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
     }
 
     @Test
-    fun `non-EC leaf public key throws MALFORMED_ISSUER_AUTH`() {
+    fun `non-EC leaf public key throws UNTRUSTED_CERTIFICATE`() {
         val rsaCertDer = buildRsaCertDer()
         val rsaCert = CertificateFactory.getInstance("X.509")
             .generateCertificate(ByteArrayInputStream(rsaCertDer)) as X509Certificate
@@ -146,7 +165,13 @@ class TrustVerifierImplTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             verifier.verifyCOSESign1(coseWithRsaCert, rsaCert)
         }
-        assertThat(exception, hasError(VerificationError.MALFORMED_ISSUER_AUTH))
+        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+    }
+
+    private fun generateKeyPair(): KeyPair {
+        val gen = KeyPairGenerator.getInstance("EC")
+        gen.initialize(ECGenParameterSpec("secp256r1"))
+        return gen.generateKeyPair()
     }
 
     private fun extractIssuerAuth(): ByteArray {
@@ -165,14 +190,6 @@ class TrustVerifierImplTest {
         val root = cborMapper.readTree(credentialBytes)
         val issuerAuthNode = root.get("issuerAuth") as ArrayNode
         return cborMapper.writeValueAsBytes(issuerAuthNode)
-    }
-
-    private fun extractCertFromIssuerAuth(issuerAuth: ByteArray): X509Certificate {
-        val root = cborMapper.readTree(issuerAuth) as ArrayNode
-        val unprotected = root[1]
-        val certBytes = (unprotected.get("33") as BinaryNode).binaryValue()
-        val certFactory = CertificateFactory.getInstance("X.509")
-        return certFactory.generateCertificate(ByteArrayInputStream(certBytes)) as X509Certificate
     }
 
     private fun buildRsaCertDer(): ByteArray {

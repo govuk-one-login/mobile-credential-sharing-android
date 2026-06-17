@@ -48,11 +48,12 @@ dependencies {
     ).forEach(::testFixturesImplementation)
 
     listOf(
+        libs.com.google.test.parameter.injector,
         libs.io.github.classgraph,
         libs.junit,
         libs.mockk,
+        libs.org.bouncycastle.bcpkix,
         libs.org.hamcrest,
-        libs.com.google.test.parameter.injector,
         projects.exchangeFormat
     ).forEach(::testImplementation)
 }
