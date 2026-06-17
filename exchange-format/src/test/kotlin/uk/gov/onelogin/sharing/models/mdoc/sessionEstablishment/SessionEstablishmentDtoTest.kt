@@ -12,6 +12,8 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentStubs.validSessionEstablishmentDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentStubs.validSessionEstablishmentDtoBytes
 
 @RunWith(TestParameterInjector::class)
 class SessionEstablishmentDtoTest {
@@ -64,6 +66,19 @@ class SessionEstablishmentDtoTest {
         assertThat(
             result,
             equalTo(equalityContract)
+        )
+    }
+
+    @Test
+    fun `Stub value matches example input hexadecimal`() {
+        val result = objectMapper.readValue(
+            validSessionEstablishmentDtoBytes,
+            SessionEstablishmentDto::class.java
+        )
+
+        assertThat(
+            result,
+            equalTo(validSessionEstablishmentDto),
         )
     }
 }
