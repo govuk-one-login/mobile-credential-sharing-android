@@ -116,25 +116,21 @@ class MsoDtoTest {
     }
 
     @Test
-    fun `toDomain throws INVALID_MSO_VERSION for unsupported version`() {
+    fun `toDomain succeeds for version other than 1_0`() {
         val bytes = buildMsoBytes(version = "2.0")
         val dto = cborMapper.readValue(bytes, MsoDto::class.java)
+        val mso = dto.toDomain()
 
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            dto.toDomain()
-        }
-        assertThat(exception, hasError(VerificationError.INVALID_MSO_VERSION))
+        assertThat(mso.version, equalTo("2.0"))
     }
 
     @Test
-    fun `toDomain throws UNSUPPORTED_DIGEST_ALGORITHM for non-SHA-256`() {
+    fun `toDomain succeeds for non-SHA-256 algorithm`() {
         val bytes = buildMsoBytes(digestAlgorithm = "SHA-512")
         val dto = cborMapper.readValue(bytes, MsoDto::class.java)
+        val mso = dto.toDomain()
 
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            dto.toDomain()
-        }
-        assertThat(exception, hasError(VerificationError.UNSUPPORTED_DIGEST_ALGORITHM))
+        assertThat(mso.digestAlgorithm, equalTo("SHA-512"))
     }
 
     @Test

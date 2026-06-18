@@ -215,21 +215,17 @@ class MsoDecoderTest {
     }
 
     @Test
-    fun `decode throws INVALID_MSO_VERSION for unsupported version`() {
+    fun `decode does not validate version - delegates to verify use case`() {
         val encoded = MobileSecurityObjectStubs.wrapTag24(
             MobileSecurityObjectStubs.buildMsoBytes(version = "2.0")
         )
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            decoder.decode(encoded)
-        }
-        assertThat(exception, hasError(VerificationError.INVALID_MSO_VERSION))
+        val mso = decoder.decode(encoded)
+        assertThat(mso.version, equalTo("2.0"))
     }
 
     @Test
-    fun `decode throws UNSUPPORTED_DIGEST_ALGORITHM for non-SHA-256`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            decoder.decode(encodedMsoWithUnsupportedAlgorithm)
-        }
-        assertThat(exception, hasError(VerificationError.UNSUPPORTED_DIGEST_ALGORITHM))
+    fun `decode does not validate digestAlgorithm - delegates to verify use case`() {
+        val mso = decoder.decode(encodedMsoWithUnsupportedAlgorithm)
+        assertThat(mso.digestAlgorithm, equalTo("SHA-512"))
     }
 }
