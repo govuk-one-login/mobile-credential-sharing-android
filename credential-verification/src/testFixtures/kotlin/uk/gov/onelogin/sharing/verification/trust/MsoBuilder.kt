@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verification.trust
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -11,7 +12,7 @@ import java.util.TimeZone
  * Builds minimal MSO (Mobile Security Object) CBOR payloads for testing.
  * The payload is Tag-24 wrapped as expected by the decoder.
  */
-internal object MsoBuilder {
+object MsoBuilder {
     private val cborFactory = CBORFactory()
     private val cborMapper = ObjectMapper(cborFactory)
 
@@ -28,11 +29,8 @@ internal object MsoBuilder {
         validity.put("signed", formatDate(validFrom))
         validity.put("validFrom", formatDate(validFrom))
         validity.put("validUntil", formatDate(validUntil))
-        mso.set<com.fasterxml.jackson.databind.node.ObjectNode>("validityInfo", validity)
-        mso.set<com.fasterxml.jackson.databind.node.ObjectNode>(
-            "valueDigests",
-            cborMapper.createObjectNode()
-        )
+        mso.set<ObjectNode>("validityInfo", validity)
+        mso.set<ObjectNode>("valueDigests", cborMapper.createObjectNode())
 
         val msoBytes = cborMapper.writeValueAsBytes(mso)
 

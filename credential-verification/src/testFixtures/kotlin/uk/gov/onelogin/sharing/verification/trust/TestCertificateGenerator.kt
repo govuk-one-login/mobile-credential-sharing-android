@@ -15,7 +15,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 /**
  * Generates X509v3 certificates for testing using Bouncy Castle.
  */
-internal object TestCertificateGenerator {
+object TestCertificateGenerator {
     private var serial = 1L
 
     @Suppress("LongParameterList")

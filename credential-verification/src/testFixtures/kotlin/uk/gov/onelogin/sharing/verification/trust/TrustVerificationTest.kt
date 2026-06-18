@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationE
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 
-internal interface TrustVerificationTest {
+interface TrustVerificationTest {
     val verifier: TrustVerifier
 
     fun generateKeyPair(): KeyPair {

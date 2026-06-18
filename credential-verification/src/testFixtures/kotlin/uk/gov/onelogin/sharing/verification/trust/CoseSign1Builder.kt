@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate
  * Builds valid COSE_Sign1 CBOR structures for testing.
  * Produces a real ECDSA signature over the Sig_structure.
  */
-internal object CoseSign1Builder {
+object CoseSign1Builder {
     private val cborFactory = CBORFactory()
     private val cborMapper = ObjectMapper(cborFactory)
 

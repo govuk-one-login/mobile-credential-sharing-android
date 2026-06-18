@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.verification.trust.certpathcheckers
 
+import java.security.cert.CertPathValidatorException
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
@@ -20,6 +22,60 @@ class BasicConstraintsCheckerTest : TrustVerificationTest {
     )
 
     @Test
+    fun `check throws when CA missing BasicConstraints extension`() {
+        val leafKp = generateKeyPair()
+        val caKp = generateKeyPair()
+
+        val leaf = CertBuilder(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = leafKp,
+            issuerKeyPair = caKp,
+            issuer = "CN=CA,C=GB,ST=London"
+        ).leaf().build()
+
+        val ca = CertBuilder(
+            subject = "CN=CA,C=GB,ST=London",
+            keyPair = caKp,
+            issuerKeyPair = caKp,
+            issuer = "CN=CA,C=GB,ST=London"
+        ).caWithoutBasicConstraints().build()
+
+        val checker = BasicConstraintsChecker(leaf)
+        checker.init(false)
+
+        assertThrows(CertPathValidatorException::class.java) {
+            checker.check(ca, mutableSetOf())
+        }
+    }
+
+    @Test
+    fun `check throws when CA has BasicConstraints but cA flag is false`() {
+        val leafKp = generateKeyPair()
+        val caKp = generateKeyPair()
+
+        val leaf = CertBuilder(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = leafKp,
+            issuerKeyPair = caKp,
+            issuer = "CN=CA,C=GB,ST=London"
+        ).leaf().build()
+
+        val ca = CertBuilder(
+            subject = "CN=CA,C=GB,ST=London",
+            keyPair = caKp,
+            issuerKeyPair = caKp,
+            issuer = "CN=CA,C=GB,ST=London"
+        ).caWithCaFlagFalse().build()
+
+        val checker = BasicConstraintsChecker(leaf)
+        checker.init(false)
+
+        assertThrows(CertPathValidatorException::class.java) {
+            checker.check(ca, mutableSetOf())
+        }
+    }
+
+    @Test
     fun `intermediate with non-critical BasicConstraints throws UNTRUSTED_CERTIFICATE`() {
         val rootKp = generateKeyPair()
         val intermediateKp = generateKeyPair()
@@ -38,76 +94,6 @@ class BasicConstraintsCheckerTest : TrustVerificationTest {
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).caNotCriticalBasicConstraints().build()
-
-        val leaf = CertBuilder(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = intermediateKp,
-            issuer = "CN=Intermediate,C=GB,ST=London"
-        ).leaf().build()
-
-        assertVerificationFailure(
-            listOf(leaf, intermediate),
-            leafKp,
-            root,
-            VerificationError.UNTRUSTED_CERTIFICATE
-        )
-    }
-
-    @Test
-    fun `intermediate without BasicConstraints extension throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val intermediateKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = CertBuilder(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val intermediate = CertBuilder(
-            subject = "CN=Intermediate,C=GB,ST=London",
-            keyPair = intermediateKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).caWithoutBasicConstraints().build()
-
-        val leaf = CertBuilder(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = intermediateKp,
-            issuer = "CN=Intermediate,C=GB,ST=London"
-        ).leaf().build()
-
-        assertVerificationFailure(
-            listOf(leaf, intermediate),
-            leafKp,
-            root,
-            VerificationError.UNTRUSTED_CERTIFICATE
-        )
-    }
-
-    @Test
-    fun `intermediate with cA flag false throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val intermediateKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = CertBuilder(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val intermediate = CertBuilder(
-            subject = "CN=Intermediate,C=GB,ST=London",
-            keyPair = intermediateKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).caWithCaFlagFalse().build()
 
         val leaf = CertBuilder(
             subject = "CN=Leaf,C=GB,ST=London",

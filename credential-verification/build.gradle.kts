@@ -44,7 +44,9 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
-        libs.jackson.cbor
+        libs.jackson.cbor,
+        libs.junit,
+        libs.org.bouncycastle.bcpkix
     ).forEach(::testFixturesImplementation)
 
     listOf(
