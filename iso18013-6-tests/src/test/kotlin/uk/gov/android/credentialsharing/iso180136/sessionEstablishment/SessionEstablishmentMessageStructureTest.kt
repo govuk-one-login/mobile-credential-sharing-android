@@ -3,6 +3,8 @@ package uk.gov.android.credentialsharing.iso180136.sessionEstablishment
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
@@ -56,11 +58,31 @@ class SessionEstablishmentMessageStructureTest {
     }
 
     @Test
-    fun `mDLR_MS_SE_01 (Common_CBOR_02) - Canonicalization rules`() {
-        // initial object map has a defined size of 2
+    fun `mDLR_MS_SE_02 - hex string is a map with 2 elements`() {
         assertThat(
             resultHexString,
             startsWith(HexFormatter(CBORConstants.PREFIX_TYPE_OBJECT + 2))
+        )
+    }
+
+    @Test
+    fun `mDLR_MS_SE_03 - hex string elements are the correct data type`() {
+        val eReaderKeyPrefix = "eReaderKey".toByteArray().toHexString()
+        val dataPrefix = "data".toByteArray().toHexString()
+        val embeddedCborPaddingStart = "d818584b"
+        val hStringPrefix = "5902df"
+
+        val expectedEReaderPrefix = eReaderKeyPrefix +
+                embeddedCborPaddingStart +
+                HexFormatter(CBORConstants.PREFIX_TYPE_OBJECT + 4)
+
+        assertThat(
+            resultHexString,
+            allOf(
+                startsWith(HexFormatter(CBORConstants.PREFIX_TYPE_OBJECT + 2)),
+                containsString(expectedEReaderPrefix),
+                containsString(dataPrefix + hStringPrefix)
+            )
         )
     }
 }
