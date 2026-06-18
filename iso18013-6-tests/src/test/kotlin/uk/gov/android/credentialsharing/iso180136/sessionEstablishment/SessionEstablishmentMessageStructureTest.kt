@@ -10,11 +10,11 @@ import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testV
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.not
+import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
@@ -23,6 +23,11 @@ import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto.Companion.CURVE_KEY
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto.Companion.KEY_TYPE_KEY
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto.Companion.X_KEY
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto.Companion.Y_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto.Companion.DATA_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto.Companion.E_READER_KEY_KEY
@@ -51,30 +56,42 @@ class SessionEstablishmentMessageStructureTest {
     private val result by lazy {
         mapper.writeValueAsBytes(sessionEstablishmentDto)
     }
+    private val coseKeyDto by lazy {
+        mapper.readValue(
+            sessionEstablishmentDto.eReaderKey.encoded,
+            CoseKeyDto::class.java
+        )
+    }
+    private val coseKeyHexString by lazy {
+        sessionEstablishmentDto.eReaderKey.encoded.toHexString()
+    }
     private val resultHexString by lazy {
         result.toHexString()
     }
 
     /**
-     * Scenario ID: mDLR_MS_SE_01
+     * Scenario ID: mDLR_MS_SE_01, mDLR_MS_SE_04
      * sub-scenario: Common_CBOR_01
      */
     @Test
-    fun `Valid CBOR is decodable`() {
-        val result = mapper.readValue(
-            validSessionEstablishmentDtoBytes,
+    fun `sessionEstablishment - Valid CBOR is decodable`() {
+        val dto = mapper.readValue(
+            result,
             SessionEstablishmentDto::class.java
         )
 
-        assertNotNull(result)
+        assertThat(
+            dto,
+            not(nullValue())
+        )
     }
 
     /**
-     * Scenario ID: mDLR_MS_SE_01
+     * Scenario ID: mDLR_MS_SE_01, mDLR_MS_SE_04
      * sub-scenario: Common_CBOR_01
      */
     @Test
-    fun `Deserialization creates valid CBOR`() {
+    fun `sessionEstablishment - Deserialization creates valid CBOR`() {
         assertThat(
             result,
             equalTo(validSessionEstablishmentDtoBytes)
@@ -86,7 +103,7 @@ class SessionEstablishmentMessageStructureTest {
      * sub-scenario: Common_CBOR_02
      */
     @Test
-    fun `There are no indefinite length objects`(
+    fun `sessionEstablishment - There are no indefinite length objects`(
         @TestParameter assertion: Matcher<in String> = namedTestValues(
             "Indefinite length byte strings" to containsString(
                 BYTE_STRING_INDEFINITE.toHexString()
@@ -136,10 +153,10 @@ class SessionEstablishmentMessageStructureTest {
     }
 
     /**
-     * Scenario: mDLR_MS_SE_02
+     * Scenario: mDLR_MS_SE_03
      */
     @Test
-    fun `eReaderKey is an embedded CBOR object with 4 fields`() {
+    fun `'eReaderKey' is an embedded CBOR object with 4 fields`() {
         val eReaderKeyPrefix = "eReaderKey".toByteArray().toHexString()
         val embeddedCborPaddingStart = "d818584b"
 
@@ -157,7 +174,7 @@ class SessionEstablishmentMessageStructureTest {
      * Scenario: mDLR_MS_SE_03
      */
     @Test
-    fun `Hex string elements are the correct data type`() {
+    fun `'data' is the correct data type`() {
         val dataPrefix = "data".toByteArray().toHexString()
         val hStringPrefix = "5902df"
 
@@ -166,6 +183,78 @@ class SessionEstablishmentMessageStructureTest {
             allOf(
                 containsString(dataPrefix + hStringPrefix)
             )
+        )
+    }
+
+    /**
+     * Scenario: mDLR_MS_SE_04, mDLR_MS_SE_05
+     * sub-scenario: Common_CBOR_01
+     */
+    @Test
+    fun `Cose key is obtainable from the eReaderKey bytes`() {
+        assertThat(
+            coseKeyDto,
+            not(nullValue())
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_05
+     * sub-scenario: Common_CBOR_01
+     */
+    @Test
+    fun `eReaderKey - Deserialization creates valid CBOR`() {
+        val bytes = mapper.writeValueAsBytes(coseKeyDto)
+        assertThat(
+            resultHexString,
+            containsString(bytes.toHexString())
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_05
+     * sub-scenario: Common_CBOR_02
+     */
+    @Test
+    fun `eReaderKey - There are no indefinite length objects`(
+        @TestParameter assertion: Matcher<in String> = namedTestValues(
+            "Indefinite length byte strings" to containsString(
+                BYTE_STRING_INDEFINITE.toHexString()
+            ),
+            "Indefinite byte objects" to containsString(
+                BYTE_OBJECT_INDEFINITE.toHexString()
+            ),
+            "Indefinite byte arrays" to containsString(
+                (PREFIX_TYPE_BYTES + SUFFIX_INDEFINITE).toHexString()
+            )
+        )
+    ) {
+
+        assertThat(
+            coseKeyHexString.chunked(2),
+            not(contains(assertion))
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_05
+     * sub-scenario: Common_CBOR_03
+     */
+    @Test
+    fun `eReaderKey - There are no duplicate fields`(
+        @TestParameter propertyName: Long = testValues(
+            KEY_TYPE_KEY,
+            CURVE_KEY,
+            X_KEY,
+            Y_KEY
+        )
+    ) {
+        val values = mapper.readTree(
+            sessionEstablishmentDto.eReaderKey.encoded
+        ).findValues(propertyName.toString())
+        assertThat(
+            values,
+            hasSize(1)
         )
     }
 }
