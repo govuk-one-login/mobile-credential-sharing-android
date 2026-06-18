@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.malformedEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.validEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
@@ -66,7 +67,8 @@ class Iso18013DocumentVerifierTest {
         Iso18013DocumentVerifier(
             mockRootCertificate,
             trustVerifier,
-            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder())
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
+            MsoDecoder()
         )
     }
 
@@ -89,7 +91,8 @@ class Iso18013DocumentVerifierTest {
                 "void (" +
                     "${X509Certificate::class.java.simpleName}, " +
                     "${TrustVerifier::class.java.simpleName}, " +
-                    "${DeviceAuthVerifier::class.java.simpleName})"
+                    "${DeviceAuthVerifier::class.java.simpleName}, " +
+                    "${MsoDecoder::class.java.simpleName})"
             )
         )
     }
@@ -104,7 +107,7 @@ class Iso18013DocumentVerifierTest {
 
         assertThat(
             methodInfo,
-            hasSize(5)
+            hasSize(4)
         )
     }
 
@@ -115,7 +118,6 @@ class Iso18013DocumentVerifierTest {
     @Test
     fun `Ensure private function signature`(
         @TestParameter functionsToDescriptors: Pair<String, String> = testValues(
-            "decodeMSO" to "${MobileSecurityObject::class.java.name} (byte[])",
             "verifyMSOFields" to "void (" +
                 "${VerifiableDocument::class.java.simpleName}, " +
                 "${MobileSecurityObject::class.java.simpleName}" +
@@ -174,8 +176,7 @@ class Iso18013DocumentVerifierTest {
     }
 
     /**
-     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] calls
-     * [Iso18013DocumentVerifier.decodeMSO] after verifying trust.
+     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] decodes the MSO after verifying trust.
      */
     @Test
     fun `Fails verification due to MSO decoding error`() {
@@ -194,22 +195,9 @@ class Iso18013DocumentVerifierTest {
         )
     }
 
-    @Test
-    fun `decodeMSO is stubbed to throw a Failure`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.decodeMSO(validEncodedMSO)
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.MALFORMED_MSO)
-        )
-    }
-
     /**
      * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] verifies [MobileSecurityObject] fields.
      */
-    @Ignore("Currently untestable via interface functions")
     @Test
     fun `Fails verification due to invalid MSO fields`() {
         stubTrustVerifierSuccess(encodedMSO = encodedMsoWithInvalidVersion)
@@ -228,14 +216,20 @@ class Iso18013DocumentVerifierTest {
     }
 
     @Test
-    fun `verifyMSOFields is stubbed to throw a Failure`() {
+    fun `verifyMSOFields throws INVALID_DOC_TYPE for mismatched docType`() {
+        val mso = MobileSecurityObject(
+            docType = "different_type",
+            valueDigests = emptyMap(),
+            deviceKeyInfo = DeviceKeyInfo(deviceKey = byteArrayOf()),
+            validityInfo = mockk()
+        )
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyMSOFields(provisionedDocument, mockk())
+            documentVerifier.verifyMSOFields(provisionedDocument, mso)
         }
 
         assertThat(
             exception,
-            hasError(VerificationError.INVALID_MSO_VERSION)
+            hasError(VerificationError.INVALID_DOC_TYPE)
         )
     }
 
