@@ -31,6 +31,7 @@ internal object TestCertificateGenerator {
         keyUsageBits: IntArray?,
         includeBasicConstraints: Boolean,
         basicConstraintsCritical: Boolean = true,
+        keyUsageCritical: Boolean = true,
         akiKeyPair: KeyPair = issuerKeyPair
     ): X509Certificate {
         val signer = JcaContentSignerBuilder("SHA256withECDSA").build(issuerKeyPair.private)
@@ -58,7 +59,7 @@ internal object TestCertificateGenerator {
             for (bit in keyUsageBits) {
                 usage = usage or keyUsageFlag(bit)
             }
-            builder.addExtension(Extension.keyUsage, true, KeyUsage(usage))
+            builder.addExtension(Extension.keyUsage, keyUsageCritical, KeyUsage(usage))
         }
 
         val skiBytes = org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils()
@@ -102,6 +103,7 @@ internal object TestCertificateGenerator {
         private var includeKeyUsage = true
         private var includeBasicConstraints = true
         private var basicConstraintsCritical = true
+        private var keyUsageCritical = true
         private var akiKeyPair: KeyPair? = null
 
         fun ca(pathLen: Int = -1) = apply {
@@ -161,6 +163,32 @@ internal object TestCertificateGenerator {
             keyUsageBits = intArrayOf(DIGITAL_SIGNATURE)
         }
 
+        fun caWithoutBasicConstraints() = apply {
+            isCa = true
+            includeBasicConstraints = false
+            keyUsageBits = intArrayOf(KEY_CERT_SIGN, CRL_SIGN)
+        }
+
+        fun caWithCaFlagFalse() = apply {
+            isCa = false
+            includeBasicConstraints = true
+            basicConstraintsCritical = true
+            keyUsageBits = intArrayOf(KEY_CERT_SIGN, CRL_SIGN)
+        }
+
+        fun leafWithNonCriticalKeyUsage() = apply {
+            isCa = false
+            includeBasicConstraints = false
+            keyUsageBits = intArrayOf(DIGITAL_SIGNATURE)
+            keyUsageCritical = false
+        }
+
+        fun caWithoutKeyUsage() = apply {
+            isCa = true
+            includeKeyUsage = false
+            keyUsageBits = intArrayOf(KEY_CERT_SIGN, CRL_SIGN)
+        }
+
         fun withAki(keyPair: KeyPair) = apply {
             akiKeyPair = keyPair
         }
@@ -177,6 +205,7 @@ internal object TestCertificateGenerator {
             keyUsageBits = if (includeKeyUsage) keyUsageBits else null,
             includeBasicConstraints = includeBasicConstraints,
             basicConstraintsCritical = basicConstraintsCritical,
+            keyUsageCritical = keyUsageCritical,
             akiKeyPair = akiKeyPair ?: issuerKeyPair
         )
 

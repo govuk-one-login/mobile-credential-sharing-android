@@ -3,11 +3,9 @@ package uk.gov.onelogin.sharing.verification.trust
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import java.io.ByteArrayOutputStream
 import java.security.KeyPair
 import java.security.Signature
 import java.security.cert.X509Certificate
-import java.security.interfaces.ECPublicKey
 
 /**
  * Builds valid COSE_Sign1 CBOR structures for testing.

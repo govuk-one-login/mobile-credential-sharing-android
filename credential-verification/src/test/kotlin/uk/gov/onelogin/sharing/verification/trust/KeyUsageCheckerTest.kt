@@ -109,6 +109,68 @@ class KeyUsageCheckerTest {
     }
 
     @Test
+    fun `leaf with non-critical KeyUsage throws UNTRUSTED_CERTIFICATE`() {
+        val rootKp = CertTestHelpers.generateKeyPair()
+        val leafKp = CertTestHelpers.generateKeyPair()
+
+        val root = CertBuilder(
+            subject = "CN=Root,C=GB,ST=London",
+            keyPair = rootKp,
+            issuerKeyPair = rootKp,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).ca().build()
+
+        val leaf = CertBuilder(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = leafKp,
+            issuerKeyPair = rootKp,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).leafWithNonCriticalKeyUsage().build()
+
+        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf), leafKp)
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            verifier.verifyCOSESign1(coseSign1, root)
+        }
+        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+    }
+
+    @Test
+    fun `CA intermediate without KeyUsage throws UNTRUSTED_CERTIFICATE`() {
+        val rootKp = CertTestHelpers.generateKeyPair()
+        val intermediateKp = CertTestHelpers.generateKeyPair()
+        val leafKp = CertTestHelpers.generateKeyPair()
+
+        val root = CertBuilder(
+            subject = "CN=Root,C=GB,ST=London",
+            keyPair = rootKp,
+            issuerKeyPair = rootKp,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).ca().build()
+
+        val intermediate = CertBuilder(
+            subject = "CN=Intermediate,C=GB,ST=London",
+            keyPair = intermediateKp,
+            issuerKeyPair = rootKp,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).caWithoutKeyUsage().build()
+
+        val leaf = CertBuilder(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = leafKp,
+            issuerKeyPair = intermediateKp,
+            issuer = "CN=Intermediate,C=GB,ST=London"
+        ).leaf().build()
+
+        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf, intermediate), leafKp)
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            verifier.verifyCOSESign1(coseSign1, root)
+        }
+        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+    }
+
+    @Test
     fun `leaf with extra bits set alongside digitalSignature throws UNTRUSTED_CERTIFICATE`() {
         val rootKp = CertTestHelpers.generateKeyPair()
         val leafKp = CertTestHelpers.generateKeyPair()
