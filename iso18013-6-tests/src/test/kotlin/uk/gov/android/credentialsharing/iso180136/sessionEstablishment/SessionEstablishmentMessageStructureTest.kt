@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORConstants.BYTE_STRING_INDEFINIT
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.PREFIX_TYPE_BYTES
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.SUFFIX_INDEFINITE
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.Test
@@ -18,10 +19,13 @@ import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
+import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto.Companion.DATA_KEY
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto.Companion.E_READER_KEY_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentStubs.validSessionEstablishmentDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentStubs.validSessionEstablishmentDtoBytes
 
@@ -95,9 +99,28 @@ class SessionEstablishmentMessageStructureTest {
             )
         )
     ) {
+
         assertThat(
             resultHexString.chunked(2),
             not(contains(assertion))
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_01
+     * sub-scenario: Common_CBOR_03
+     */
+    @Test
+    fun `There are no duplicate fields`(
+        @TestParameter propertyName: String = testValues(
+            E_READER_KEY_KEY,
+            DATA_KEY
+        )
+    ) {
+        val values = mapper.readTree(result).findValues(propertyName)
+        assertThat(
+            values,
+            hasSize(1)
         )
     }
 
