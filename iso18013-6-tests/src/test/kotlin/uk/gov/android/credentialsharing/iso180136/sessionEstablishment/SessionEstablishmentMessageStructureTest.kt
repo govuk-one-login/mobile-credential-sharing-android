@@ -1,10 +1,13 @@
 package uk.gov.android.credentialsharing.iso180136.sessionEstablishment
 
+import com.fasterxml.jackson.dataformat.cbor.CBORConstants
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentStubs.validSessionEstablishmentDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentStubs.validSessionEstablishmentDtoBytes
@@ -26,6 +29,14 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablish
 class SessionEstablishmentMessageStructureTest {
     private val mapper = CborMapper.default
 
+    private var sessionEstablishmentDto = validSessionEstablishmentDto
+    private val result by lazy {
+        mapper.writeValueAsBytes(sessionEstablishmentDto)
+    }
+    private val resultHexString by lazy {
+        result.toHexString()
+    }
+
     @Test
     fun `mDLR_MS_SE_01 (Common_CBOR_01) - Valid CBOR is decodable`() {
         val result = mapper.readValue(
@@ -38,8 +49,6 @@ class SessionEstablishmentMessageStructureTest {
 
     @Test
     fun `mDLR_MS_SE_01 (Common_CBOR_01) - Deserialization creates valid CBOR`() {
-        val result = mapper.writeValueAsBytes(validSessionEstablishmentDto)
-
         assertThat(
             result,
             equalTo(validSessionEstablishmentDtoBytes)
@@ -48,11 +57,10 @@ class SessionEstablishmentMessageStructureTest {
 
     @Test
     fun `mDLR_MS_SE_01 (Common_CBOR_02) - Canonicalization rules`() {
-        val result = mapper.readValue(
-            validSessionEstablishmentDtoBytes,
-            SessionEstablishmentDto::class.java
+        // initial object map has a defined size of 2
+        assertThat(
+            resultHexString,
+            startsWith(HexFormatter(CBORConstants.PREFIX_TYPE_OBJECT + 2))
         )
-
-        assertNotNull(result)
     }
 }
