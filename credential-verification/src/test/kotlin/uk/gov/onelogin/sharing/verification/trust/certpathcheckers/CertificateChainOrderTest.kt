@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification.trust
+package uk.gov.onelogin.sharing.verification.trust.certpathcheckers
 
 import io.mockk.every
 import io.mockk.mockk
@@ -6,6 +6,7 @@ import java.security.cert.X509Certificate
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
+import uk.gov.onelogin.sharing.verification.trust.orderCertificates
 
 class CertificateChainOrderTest {
 

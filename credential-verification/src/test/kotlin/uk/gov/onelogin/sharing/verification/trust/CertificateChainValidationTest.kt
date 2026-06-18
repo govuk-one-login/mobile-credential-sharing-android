@@ -1,21 +1,17 @@
 package uk.gov.onelogin.sharing.verification.trust
 
-import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
-import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator.CertBuilder
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
-class CertificateChainValidationTest {
+class CertificateChainValidationTest : TrustVerificationTest {
     private val logger = SystemLogger()
     private val decoder = CoseSign1Decoder(logger)
-    private val verifier = TrustVerifierImpl(
+    override val verifier: TrustVerifier = TrustVerifierImpl(
         decoder,
         CoseSignatureVerifier(CoseHeaderValidator(logger)),
         logger
@@ -24,9 +20,9 @@ class CertificateChainValidationTest {
     // Happy path
     @Test
     fun `valid chain with root-intermediate-leaf validates successfully`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val intermediateKp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val intermediateKp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val root = CertBuilder(
             subject = "CN=Root,C=GB,ST=London",
@@ -49,7 +45,7 @@ class CertificateChainValidationTest {
             issuer = "CN=Intermediate,C=GB,ST=London"
         ).leaf().build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf, intermediate), leafKp)
+        val coseSign1 = buildCoseSign1WithChain(listOf(leaf, intermediate), leafKp)
         val result = verifier.verifyCOSESign1(coseSign1, root)
 
         assertNotNull(result.msoPayload)
@@ -58,8 +54,8 @@ class CertificateChainValidationTest {
 
     @Test
     fun `valid chain with root-leaf validates successfully`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val root = CertBuilder(
             subject = "CN=Root,C=GB,ST=London",
@@ -75,7 +71,7 @@ class CertificateChainValidationTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf), leafKp)
+        val coseSign1 = buildCoseSign1WithChain(listOf(leaf), leafKp)
         val result = verifier.verifyCOSESign1(coseSign1, root)
 
         assertNotNull(result.msoPayload)
@@ -84,9 +80,9 @@ class CertificateChainValidationTest {
     // Untrusted root
     @Test
     fun `chain not anchored to provided root throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val untrustedRootKp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val untrustedRootKp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val trustedRoot = CertBuilder(
             subject = "CN=Trusted,C=GB,ST=London",
@@ -102,19 +98,19 @@ class CertificateChainValidationTest {
             issuer = "CN=Untrusted,C=GB,ST=London"
         ).leaf().build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf), leafKp)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(coseSign1, trustedRoot)
-        }
-        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+        assertVerificationFailure(
+            listOf(leaf),
+            leafKp,
+            trustedRoot,
+            VerificationError.UNTRUSTED_CERTIFICATE
+        )
     }
 
-    // Invalid date/time validity ---
+    // Invalid date/time validity
     @Test
     fun `expired leaf certificate throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val root = CertBuilder(
             subject = "CN=Root,C=GB,ST=London",
@@ -130,18 +126,18 @@ class CertificateChainValidationTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().expired().build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf), leafKp)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(coseSign1, root)
-        }
-        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+        assertVerificationFailure(
+            listOf(leaf),
+            leafKp,
+            root,
+            VerificationError.UNTRUSTED_CERTIFICATE
+        )
     }
 
     @Test
     fun `not-yet-valid leaf certificate throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val root = CertBuilder(
             subject = "CN=Root,C=GB,ST=London",
@@ -157,21 +153,21 @@ class CertificateChainValidationTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().notYetValid().build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf), leafKp)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(coseSign1, root)
-        }
-        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+        assertVerificationFailure(
+            listOf(leaf),
+            leafKp,
+            root,
+            VerificationError.UNTRUSTED_CERTIFICATE
+        )
     }
 
     // Invalid signature
     @Test
     fun `intermediate signed by wrong key throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val wrongKp = CertTestHelpers.generateKeyPair()
-        val intermediateKp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val wrongKp = generateKeyPair()
+        val intermediateKp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val root = CertBuilder(
             subject = "CN=Root,C=GB,ST=London",
@@ -195,20 +191,20 @@ class CertificateChainValidationTest {
             issuer = "CN=Intermediate,C=GB,ST=London"
         ).leaf().build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf, intermediate), leafKp)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(coseSign1, root)
-        }
-        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+        assertVerificationFailure(
+            listOf(leaf, intermediate),
+            leafKp,
+            root,
+            VerificationError.UNTRUSTED_CERTIFICATE
+        )
     }
 
     // AKI/SKI mismatch
     @Test
     fun `AKI-SKI mismatch throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val unrelatedKp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val unrelatedKp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val root = CertBuilder(
             subject = "CN=Root,C=GB,ST=London",
@@ -225,20 +221,20 @@ class CertificateChainValidationTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().withAki(unrelatedKp).build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf), leafKp)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(coseSign1, root)
-        }
-        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+        assertVerificationFailure(
+            listOf(leaf),
+            leafKp,
+            root,
+            VerificationError.UNTRUSTED_CERTIFICATE
+        )
     }
 
     // Invalid BasicConstraints
     @Test
     fun `intermediate without CA flag throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val intermediateKp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val intermediateKp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val root = CertBuilder(
             subject = "CN=Root,C=GB,ST=London",
@@ -262,20 +258,20 @@ class CertificateChainValidationTest {
             issuer = "CN=Intermediate,C=GB,ST=London"
         ).leaf().build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(listOf(leaf, intermediate), leafKp)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(coseSign1, root)
-        }
-        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
+        assertVerificationFailure(
+            listOf(leaf, intermediate),
+            leafKp,
+            root,
+            VerificationError.UNTRUSTED_CERTIFICATE
+        )
     }
 
     @Test
     fun `pathLenConstraint violation throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = CertTestHelpers.generateKeyPair()
-        val inter1Kp = CertTestHelpers.generateKeyPair()
-        val inter2Kp = CertTestHelpers.generateKeyPair()
-        val leafKp = CertTestHelpers.generateKeyPair()
+        val rootKp = generateKeyPair()
+        val inter1Kp = generateKeyPair()
+        val inter2Kp = generateKeyPair()
+        val leafKp = generateKeyPair()
 
         val root = CertBuilder(
             subject = "CN=Root,C=GB,ST=London",
@@ -307,14 +303,11 @@ class CertificateChainValidationTest {
             issuer = "CN=Inter2,C=GB,ST=London"
         ).leaf().build()
 
-        val coseSign1 = CertTestHelpers.buildCoseSign1WithChain(
+        assertVerificationFailure(
             listOf(leaf, inter2, inter1),
-            leafKp
+            leafKp,
+            root,
+            VerificationError.UNTRUSTED_CERTIFICATE
         )
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(coseSign1, root)
-        }
-        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
     }
 }
