@@ -189,6 +189,16 @@ object TestCertificateGenerator {
             keyUsageBits = intArrayOf(KEY_CERT_SIGN, CRL_SIGN)
         }
 
+        fun caKeyCertSignOnly() = apply {
+            isCa = true
+            keyUsageBits = intArrayOf(KEY_CERT_SIGN)
+        }
+
+        fun caWithExtraKeyUsageBits() = apply {
+            isCa = true
+            keyUsageBits = intArrayOf(KEY_CERT_SIGN, CRL_SIGN, DIGITAL_SIGNATURE)
+        }
+
         fun withAki(keyPair: KeyPair) = apply {
             akiKeyPair = keyPair
         }

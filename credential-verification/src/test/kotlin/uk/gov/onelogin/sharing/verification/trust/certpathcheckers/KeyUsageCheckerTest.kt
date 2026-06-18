@@ -22,6 +22,60 @@ class KeyUsageCheckerTest : TrustVerificationTest {
     )
 
     @Test
+    fun `check throws when CA has keyCertSign but missing cRLSign`() {
+        val leafKp = generateKeyPair()
+        val caKp = generateKeyPair()
+
+        val leaf = TestCertificateGenerator.CertBuilder(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = leafKp,
+            issuerKeyPair = caKp,
+            issuer = "CN=CA,C=GB,ST=London"
+        ).leaf().build()
+
+        val ca = TestCertificateGenerator.CertBuilder(
+            subject = "CN=CA,C=GB,ST=London",
+            keyPair = caKp,
+            issuerKeyPair = caKp,
+            issuer = "CN=CA,C=GB,ST=London"
+        ).caKeyCertSignOnly().build()
+
+        val checker = KeyUsageChecker(leaf)
+        checker.init(false)
+
+        assertThrows(CertPathValidatorException::class.java) {
+            checker.check(ca, mutableSetOf())
+        }
+    }
+
+    @Test
+    fun `check throws when CA has keyCertSign and cRLSign plus extra bits`() {
+        val leafKp = generateKeyPair()
+        val caKp = generateKeyPair()
+
+        val leaf = TestCertificateGenerator.CertBuilder(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = leafKp,
+            issuerKeyPair = caKp,
+            issuer = "CN=CA,C=GB,ST=London"
+        ).leaf().build()
+
+        val ca = TestCertificateGenerator.CertBuilder(
+            subject = "CN=CA,C=GB,ST=London",
+            keyPair = caKp,
+            issuerKeyPair = caKp,
+            issuer = "CN=CA,C=GB,ST=London"
+        ).caWithExtraKeyUsageBits().build()
+
+        val checker = KeyUsageChecker(leaf)
+        checker.init(false)
+
+        assertThrows(CertPathValidatorException::class.java) {
+            checker.check(ca, mutableSetOf())
+        }
+    }
+
+    @Test
     fun `check throws when CA has wrong KeyUsage bits`() {
         val leafKp = generateKeyPair()
         val caKp = generateKeyPair()
