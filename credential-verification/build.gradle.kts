@@ -54,7 +54,6 @@ dependencies {
         libs.io.github.classgraph,
         libs.junit,
         libs.mockk,
-        libs.org.bouncycastle.bcpkix,
         libs.org.hamcrest,
         projects.exchangeFormat
     ).forEach(::testImplementation)
