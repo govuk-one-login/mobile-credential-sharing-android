@@ -6,6 +6,8 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
+import kotlin.jvm.java
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
@@ -77,9 +79,12 @@ class VerifyMsoFieldsUseCaseImpl : VerifyMsoFieldsUseCase {
 
     private fun decodeElementValue(itemBytes: ByteArray, identifier: String): String? = try {
         val inner = unwrapTag24(itemBytes)
-        val item = cborMapper.readValue(inner, IssuerSignedItemDto::class.java)
+        val item = cborMapper.readValue(
+            inner,
+            DeviceResponseDto.IssuerSignedItemDTO::class.java
+        )
         if (item.elementIdentifier == identifier) {
-            item.elementValue?.toString()
+            item.elementValue.toString()
         } else {
             null
         }

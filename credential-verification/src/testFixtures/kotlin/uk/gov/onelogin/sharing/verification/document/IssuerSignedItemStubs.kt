@@ -2,12 +2,13 @@ package uk.gov.onelogin.sharing.verification.document
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import uk.gov.onelogin.sharing.verification.document.IssuerSignedItemDto.Companion.KEY_DIGEST_ID
-import uk.gov.onelogin.sharing.verification.document.IssuerSignedItemDto.Companion.KEY_ELEMENT_IDENTIFIER
-import uk.gov.onelogin.sharing.verification.document.IssuerSignedItemDto.Companion.KEY_ELEMENT_VALUE
-import uk.gov.onelogin.sharing.verification.document.IssuerSignedItemDto.Companion.KEY_RANDOM
 
 object IssuerSignedItemStubs {
+
+    private const val KEY_DIGEST_ID = "digestID"
+    private const val KEY_RANDOM = "random"
+    private const val KEY_ELEMENT_IDENTIFIER = "elementIdentifier"
+    private const val KEY_ELEMENT_VALUE = "elementValue"
 
     private val cborMapper = ObjectMapper(CBORFactory())
 
