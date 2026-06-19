@@ -19,6 +19,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
+import uk.gov.onelogin.sharing.verification.trust.chain.CertificateChainValidatorImpl
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
@@ -30,7 +31,7 @@ class TrustVerifierImplTest {
         CoseSignatureVerifier(
             CoseHeaderValidator(logger)
         ),
-        logger
+        CertificateChainValidatorImpl(logger)
     )
     private val cborMapper = ObjectMapper(CBORFactory())
 

@@ -2,29 +2,24 @@ package uk.gov.onelogin.sharing.verification.trust
 
 import dev.zacsweers.metro.ContributesBinding
 import java.io.ByteArrayInputStream
-import java.security.cert.CertPathValidator
 import java.security.cert.CertificateFactory
-import java.security.cert.PKIXParameters
-import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
 import kotlin.time.ExperimentalTime
 import kotlin.time.toKotlinInstant
-import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
-import uk.gov.onelogin.sharing.verification.trust.certpathcheckers.BasicConstraintsChecker
-import uk.gov.onelogin.sharing.verification.trust.certpathcheckers.KeyUsageChecker
+import uk.gov.onelogin.sharing.verification.trust.chain.CertificateChainValidator
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
 @ContributesBinding(CredentialVerificationScope::class)
 class TrustVerifierImpl internal constructor(
     private val coseSign1Decoder: CoseSign1Decoder,
     private val signatureVerifier: CoseSignatureVerifier,
-    private val logger: Logger
+    private val certificateChainValidator: CertificateChainValidator
 ) : TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
@@ -40,7 +35,7 @@ class TrustVerifierImpl internal constructor(
         val ordered = orderCertificates(certs)
         val leaf = ordered.first()
 
-        validateCertificateChain(ordered, trustedRoot)
+        certificateChainValidator.verify(ordered, trustedRoot)
 
         val publicKey = try {
             leaf.publicKey as ECPublicKey
@@ -86,31 +81,5 @@ class TrustVerifierImpl internal constructor(
             payload,
             VerificationError.INVALID_DEVICE_SIGNATURE
         )
-    }
-
-    private fun validateCertificateChain(
-        certificates: List<X509Certificate>,
-        trustedRoot: X509Certificate
-    ) {
-        try {
-            val certFactory = CertificateFactory.getInstance("X.509")
-            val certPath = certFactory.generateCertPath(certificates)
-
-            val trustAnchor = TrustAnchor(trustedRoot, null)
-            val params = PKIXParameters(setOf(trustAnchor)).apply {
-                isRevocationEnabled = false
-                addCertPathChecker(KeyUsageChecker(certificates.first()))
-                addCertPathChecker(BasicConstraintsChecker(certificates.first()))
-            }
-
-            CertPathValidator.getInstance("PKIX").validate(certPath, params)
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            logger.error(LOG_TAG, "Certificate chain validation failed", e)
-            throw VerificationResult.Failure(VerificationError.UNTRUSTED_CERTIFICATE)
-        }
-    }
-
-    companion object {
-        private val LOG_TAG = TrustVerifierImpl::class.java.simpleName
     }
 }

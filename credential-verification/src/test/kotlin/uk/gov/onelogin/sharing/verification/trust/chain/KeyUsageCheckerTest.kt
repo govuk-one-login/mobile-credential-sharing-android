@@ -1,25 +1,18 @@
-package uk.gov.onelogin.sharing.verification.trust.certpathcheckers
+package uk.gov.onelogin.sharing.verification.trust.chain
 
 import java.security.cert.CertPathValidatorException
+import java.security.cert.X509Certificate
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
-import uk.gov.onelogin.sharing.verification.trust.CoseSign1Decoder
-import uk.gov.onelogin.sharing.verification.trust.TrustVerificationTest
-import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
-import uk.gov.onelogin.sharing.verification.trust.TrustVerifierImpl
-import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
-import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
-class KeyUsageCheckerTest : TrustVerificationTest {
-    private val logger = SystemLogger()
-    override val verifier: TrustVerifier = TrustVerifierImpl(
-        CoseSign1Decoder(logger),
-        CoseSignatureVerifier(CoseHeaderValidator(logger)),
-        logger
-    )
+class KeyUsageCheckerTest {
+    private val validator: CertificateChainValidator = CertificateChainValidatorImpl(SystemLogger())
 
     @Test
     fun `check throws when CA has keyCertSign but missing cRLSign`() {
@@ -53,51 +46,48 @@ class KeyUsageCheckerTest : TrustVerificationTest {
 
     @Test
     fun `leaf without KeyUsage extension throws UNTRUSTED_CERTIFICATE`() {
-        assertVerificationFailure(
+        assertValidationFailure(
             listOf(CertificateStubs.leafNoKeyUsage),
-            CertificateStubs.leafKeyPair,
-            CertificateStubs.rootCa,
-            VerificationError.UNTRUSTED_CERTIFICATE
+            CertificateStubs.rootCa
         )
     }
 
     @Test
     fun `leaf with keyCertSign instead of digitalSignature throws UNTRUSTED_CERTIFICATE`() {
-        assertVerificationFailure(
+        assertValidationFailure(
             listOf(CertificateStubs.leafWithCaKeyUsage),
-            CertificateStubs.leafKeyPair,
-            CertificateStubs.rootCa,
-            VerificationError.UNTRUSTED_CERTIFICATE
+            CertificateStubs.rootCa
         )
     }
 
     @Test
     fun `leaf with non-critical KeyUsage throws UNTRUSTED_CERTIFICATE`() {
-        assertVerificationFailure(
+        assertValidationFailure(
             listOf(CertificateStubs.leafWithNonCriticalKeyUsage),
-            CertificateStubs.leafKeyPair,
-            CertificateStubs.rootCa,
-            VerificationError.UNTRUSTED_CERTIFICATE
+            CertificateStubs.rootCa
         )
     }
 
     @Test
     fun `CA intermediate without KeyUsage throws UNTRUSTED_CERTIFICATE`() {
-        assertVerificationFailure(
+        assertValidationFailure(
             listOf(CertificateStubs.leaf, CertificateStubs.caWithoutKeyUsage),
-            CertificateStubs.leafKeyPair,
-            CertificateStubs.rootCa,
-            VerificationError.UNTRUSTED_CERTIFICATE
+            CertificateStubs.rootCa
         )
     }
 
     @Test
     fun `leaf with extra bits set alongside digitalSignature throws UNTRUSTED_CERTIFICATE`() {
-        assertVerificationFailure(
+        assertValidationFailure(
             listOf(CertificateStubs.leafWithExtraBits),
-            CertificateStubs.leafKeyPair,
-            CertificateStubs.rootCa,
-            VerificationError.UNTRUSTED_CERTIFICATE
+            CertificateStubs.rootCa
         )
+    }
+
+    private fun assertValidationFailure(chain: List<X509Certificate>, root: X509Certificate) {
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            validator.verify(chain, root)
+        }
+        assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
     }
 }

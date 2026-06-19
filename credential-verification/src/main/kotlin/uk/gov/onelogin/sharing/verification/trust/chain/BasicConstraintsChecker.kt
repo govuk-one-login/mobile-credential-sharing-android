@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.verification.trust.certpathcheckers
+package uk.gov.onelogin.sharing.verification.trust.chain
 
 import java.security.cert.CertPathValidatorException
 import java.security.cert.Certificate
