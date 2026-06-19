@@ -18,7 +18,7 @@ class Iso18013DocumentVerifier(
     private val trustVerifier: TrustVerifier,
     private val deviceAuthVerifier: DeviceAuthVerifier,
     private val msoDecoder: MsoDecoder,
-    private val verifyMsoFields: VerifyMsoFieldsUseCase
+    private val verifyMsoFields: MsoFieldVerifier
 ) : DocumentVerifier {
 
     override fun verifyDocument(

@@ -18,9 +18,9 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthR
 @Inject
 @ContributesBinding(
     scope = CredentialVerificationScope::class,
-    binding = binding<VerifyMsoFieldsUseCase>()
+    binding = binding<MsoFieldVerifier>()
 )
-class VerifyMsoFieldsUseCaseImpl : VerifyMsoFieldsUseCase {
+class MsoFieldVerifierImpl : MsoFieldVerifier {
 
     private val cborMapper = ObjectMapper(CBORFactory())
 

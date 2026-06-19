@@ -67,7 +67,7 @@ class Iso18013DocumentVerifierTest {
             trustVerifier,
             DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
             MsoDecoder(),
-            VerifyMsoFieldsUseCaseImpl()
+            MsoFieldVerifierImpl()
         )
     }
 
@@ -88,7 +88,7 @@ class Iso18013DocumentVerifierTest {
                     "${TrustVerifier::class.java.simpleName}, " +
                     "${DeviceAuthVerifier::class.java.simpleName}, " +
                     "${MsoDecoder::class.java.simpleName}, " +
-                    "${VerifyMsoFieldsUseCase::class.java.simpleName})"
+                    "${MsoFieldVerifier::class.java.simpleName})"
             )
         )
     }

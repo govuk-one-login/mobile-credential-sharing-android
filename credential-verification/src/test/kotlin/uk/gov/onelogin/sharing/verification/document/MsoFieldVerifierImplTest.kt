@@ -23,9 +23,9 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthR
 
 @OptIn(ExperimentalTime::class)
 @RunWith(TestParameterInjector::class)
-class VerifyMsoFieldsUseCaseImplTest {
+class MsoFieldVerifierImplTest {
 
-    private val useCase = VerifyMsoFieldsUseCaseImpl()
+    private val useCase = MsoFieldVerifierImpl()
     private val validityPeriod = mockk<CertificateValidityPeriod>(relaxed = true)
 
     private val defaultIssuerAuthResult = IssuerAuthResult(

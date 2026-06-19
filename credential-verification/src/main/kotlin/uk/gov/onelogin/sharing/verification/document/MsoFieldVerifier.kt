@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthR
  *
  * @throws VerificationResult.Failure
  */
-fun interface VerifyMsoFieldsUseCase {
+fun interface MsoFieldVerifier {
     fun verify(
         document: VerifiableDocument,
         mso: MobileSecurityObject,
