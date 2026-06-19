@@ -4,7 +4,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator.CertBuilder
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
@@ -24,21 +23,21 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val intermediateKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val intermediate = CertBuilder(
+        val intermediate = TestCertificateGenerator(
             subject = "CN=Intermediate,C=GB,ST=London",
             keyPair = intermediateKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = intermediateKp,
@@ -57,14 +56,14 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val rootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,
@@ -84,14 +83,14 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val untrustedRootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val trustedRoot = CertBuilder(
+        val trustedRoot = TestCertificateGenerator(
             subject = "CN=Trusted,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Trusted,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = untrustedRootKp,
@@ -112,14 +111,14 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val rootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,
@@ -139,14 +138,14 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val rootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,
@@ -169,7 +168,7 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val intermediateKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
@@ -177,14 +176,14 @@ class CertificateChainValidationTest : TrustVerificationTest {
         ).ca().build()
 
         // Intermediate claims Root as issuer but is signed by wrongKp
-        val intermediate = CertBuilder(
+        val intermediate = TestCertificateGenerator(
             subject = "CN=Intermediate,C=GB,ST=London",
             keyPair = intermediateKp,
             issuerKeyPair = wrongKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = intermediateKp,
@@ -206,7 +205,7 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val unrelatedKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
@@ -214,7 +213,7 @@ class CertificateChainValidationTest : TrustVerificationTest {
         ).ca().build()
 
         // Leaf is validly signed by root, but AKI points to an unrelated key
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,
@@ -236,7 +235,7 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val intermediateKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
@@ -244,14 +243,14 @@ class CertificateChainValidationTest : TrustVerificationTest {
         ).ca().build()
 
         // Intermediate without CA=true (end-entity profile)
-        val intermediate = CertBuilder(
+        val intermediate = TestCertificateGenerator(
             subject = "CN=Intermediate,C=GB,ST=London",
             keyPair = intermediateKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = intermediateKp,
@@ -273,7 +272,7 @@ class CertificateChainValidationTest : TrustVerificationTest {
         val inter2Kp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
@@ -281,7 +280,7 @@ class CertificateChainValidationTest : TrustVerificationTest {
         ).ca().build()
 
         // inter1 has pathLen=0 meaning no further CAs can exist below it
-        val inter1 = CertBuilder(
+        val inter1 = TestCertificateGenerator(
             subject = "CN=Inter1,C=GB,ST=London",
             keyPair = inter1Kp,
             issuerKeyPair = rootKp,
@@ -289,14 +288,14 @@ class CertificateChainValidationTest : TrustVerificationTest {
         ).ca(pathLen = 0).build()
 
         // inter2 violates inter1's pathLen constraint
-        val inter2 = CertBuilder(
+        val inter2 = TestCertificateGenerator(
             subject = "CN=Inter2,C=GB,ST=London",
             keyPair = inter2Kp,
             issuerKeyPair = inter1Kp,
             issuer = "CN=Inter1,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = inter2Kp,

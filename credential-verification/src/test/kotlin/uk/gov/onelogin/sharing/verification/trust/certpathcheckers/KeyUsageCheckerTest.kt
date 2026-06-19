@@ -26,14 +26,14 @@ class KeyUsageCheckerTest : TrustVerificationTest {
         val leafKp = generateKeyPair()
         val caKp = generateKeyPair()
 
-        val leaf = TestCertificateGenerator.CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = caKp,
             issuer = "CN=CA,C=GB,ST=London"
         ).leaf().build()
 
-        val ca = TestCertificateGenerator.CertBuilder(
+        val ca = TestCertificateGenerator(
             subject = "CN=CA,C=GB,ST=London",
             keyPair = caKp,
             issuerKeyPair = caKp,
@@ -53,14 +53,14 @@ class KeyUsageCheckerTest : TrustVerificationTest {
         val leafKp = generateKeyPair()
         val caKp = generateKeyPair()
 
-        val leaf = TestCertificateGenerator.CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = caKp,
             issuer = "CN=CA,C=GB,ST=London"
         ).leaf().build()
 
-        val ca = TestCertificateGenerator.CertBuilder(
+        val ca = TestCertificateGenerator(
             subject = "CN=CA,C=GB,ST=London",
             keyPair = caKp,
             issuerKeyPair = caKp,
@@ -80,14 +80,14 @@ class KeyUsageCheckerTest : TrustVerificationTest {
         val leafKp = generateKeyPair()
         val caKp = generateKeyPair()
 
-        val leaf = TestCertificateGenerator.CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = caKp,
             issuer = "CN=CA,C=GB,ST=London"
         ).leaf().build()
 
-        val ca = TestCertificateGenerator.CertBuilder(
+        val ca = TestCertificateGenerator(
             subject = "CN=CA,C=GB,ST=London",
             keyPair = caKp,
             issuerKeyPair = caKp,
@@ -107,14 +107,14 @@ class KeyUsageCheckerTest : TrustVerificationTest {
         val rootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = TestCertificateGenerator.CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = TestCertificateGenerator.CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,
@@ -134,14 +134,14 @@ class KeyUsageCheckerTest : TrustVerificationTest {
         val rootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = TestCertificateGenerator.CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = TestCertificateGenerator.CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,
@@ -161,14 +161,14 @@ class KeyUsageCheckerTest : TrustVerificationTest {
         val rootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = TestCertificateGenerator.CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = TestCertificateGenerator.CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,
@@ -189,21 +189,21 @@ class KeyUsageCheckerTest : TrustVerificationTest {
         val intermediateKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = TestCertificateGenerator.CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val intermediate = TestCertificateGenerator.CertBuilder(
+        val intermediate = TestCertificateGenerator(
             subject = "CN=Intermediate,C=GB,ST=London",
             keyPair = intermediateKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).caWithoutKeyUsage().build()
 
-        val leaf = TestCertificateGenerator.CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = intermediateKp,
@@ -223,14 +223,14 @@ class KeyUsageCheckerTest : TrustVerificationTest {
         val rootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = TestCertificateGenerator.CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = TestCertificateGenerator.CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,

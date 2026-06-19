@@ -6,7 +6,7 @@ import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.trust.CoseSign1Decoder
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator.CertBuilder
+import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
 import uk.gov.onelogin.sharing.verification.trust.TrustVerificationTest
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifierImpl
@@ -26,14 +26,14 @@ class BasicConstraintsCheckerTest : TrustVerificationTest {
         val leafKp = generateKeyPair()
         val caKp = generateKeyPair()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = caKp,
             issuer = "CN=CA,C=GB,ST=London"
         ).leaf().build()
 
-        val ca = CertBuilder(
+        val ca = TestCertificateGenerator(
             subject = "CN=CA,C=GB,ST=London",
             keyPair = caKp,
             issuerKeyPair = caKp,
@@ -53,14 +53,14 @@ class BasicConstraintsCheckerTest : TrustVerificationTest {
         val leafKp = generateKeyPair()
         val caKp = generateKeyPair()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = caKp,
             issuer = "CN=CA,C=GB,ST=London"
         ).leaf().build()
 
-        val ca = CertBuilder(
+        val ca = TestCertificateGenerator(
             subject = "CN=CA,C=GB,ST=London",
             keyPair = caKp,
             issuerKeyPair = caKp,
@@ -81,21 +81,21 @@ class BasicConstraintsCheckerTest : TrustVerificationTest {
         val intermediateKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val intermediate = CertBuilder(
+        val intermediate = TestCertificateGenerator(
             subject = "CN=Intermediate,C=GB,ST=London",
             keyPair = intermediateKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).caNotCriticalBasicConstraints().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = intermediateKp,
@@ -115,14 +115,14 @@ class BasicConstraintsCheckerTest : TrustVerificationTest {
         val rootKp = generateKeyPair()
         val leafKp = generateKeyPair()
 
-        val root = CertBuilder(
+        val root = TestCertificateGenerator(
             subject = "CN=Root,C=GB,ST=London",
             keyPair = rootKp,
             issuerKeyPair = rootKp,
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().build()
 
-        val leaf = CertBuilder(
+        val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = leafKp,
             issuerKeyPair = rootKp,

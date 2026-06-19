@@ -22,7 +22,6 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator.CertBuilder
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
@@ -41,14 +40,14 @@ class TrustVerifierImplTest {
     private val rootKp = generateKeyPair()
     private val leafKp = generateKeyPair()
 
-    private val rootCert = CertBuilder(
+    private val rootCert = TestCertificateGenerator(
         subject = "CN=Test Root CA,C=GB,ST=London",
         keyPair = rootKp,
         issuerKeyPair = rootKp,
         issuer = "CN=Test Root CA,C=GB,ST=London"
     ).ca().build()
 
-    private val leafCert = CertBuilder(
+    private val leafCert = TestCertificateGenerator(
         subject = "CN=Test DS,C=GB,ST=London",
         keyPair = leafKp,
         issuerKeyPair = rootKp,
@@ -141,7 +140,7 @@ class TrustVerifierImplTest {
     @Test
     fun `unanchored chain throws UNTRUSTED_CERTIFICATE`() {
         val untrustedRootKp = generateKeyPair()
-        val untrustedRoot = CertBuilder(
+        val untrustedRoot = TestCertificateGenerator(
             subject = "CN=Untrusted,C=GB,ST=London",
             keyPair = untrustedRootKp,
             issuerKeyPair = untrustedRootKp,
