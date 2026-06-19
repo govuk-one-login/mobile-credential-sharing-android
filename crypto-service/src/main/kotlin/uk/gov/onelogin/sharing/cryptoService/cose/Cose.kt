@@ -1,5 +1,8 @@
 package uk.gov.onelogin.sharing.cryptoService.cose
 
+import uk.gov.onelogin.sharing.cryptoService.cose.Cose.ECKeyType.EC2
+import uk.gov.onelogin.sharing.cryptoService.cose.Cose.ECKeyType.OKP
+
 /**
  * A container for COSE constants, specifically the integer labels used in COSE_Key objects
  * as defined by the IANA COSE registry and RFC 9052.
@@ -10,6 +13,7 @@ package uk.gov.onelogin.sharing.cryptoService.cose
  * @see <a href="https://www.iana.org/assignments/cose/cose.xhtml#key-type-parameters">
  *     IANA COSE Key Type Parameters Registry</a>
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc9052">RFC 9052</a>
+ * @see [uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto]
  */
 object Cose {
     /**
@@ -63,4 +67,85 @@ object Cose {
      * The value associated with this key is a byte string representing the y-coordinate.
      */
     const val EC_Y_COORDINATE_LABEL: Long = -3
+
+    enum class ECKeyType(val id: UInt) {
+        OKP(1u),
+        EC2(2u),
+        RSA(3u),
+        SYMMETRIC(4u),
+        HSS_LMS(5u),
+        WALNUT_DSA(6u)
+    }
+
+    /**
+     * The type of elliptic curve (EC).
+     *
+     * @param curveId The COSE Key identifier of the curve.
+     * @param expectedKeyType The COSE Key type associated with the curve.
+     *
+     * @see <a href="https://www.iana.org/assignments/cose/cose.xhtml#elliptic-curves">Cose curve types</a>
+     */
+    enum class ECType(
+        val curveId: UInt,
+        expectedKeyType: ECKeyType,
+        expectedXLength: Int,
+    ) {
+        P256(
+            curveId = 1u,
+            expectedKeyType = EC2,
+            expectedXLength = 256,
+        ),
+        P384(
+            curveId = 2u,
+            expectedKeyType = EC2,
+            expectedXLength = 384
+        ),
+        P521(
+            curveId = 3u,
+            expectedKeyType = EC2,
+            expectedXLength = 521
+        ),
+        X25519(
+            curveId = 4u,
+            expectedKeyType = OKP,
+            expectedXLength = 256
+        ),
+        X448(
+            curveId = 5u,
+            expectedKeyType = OKP,
+            expectedXLength = 448
+        ),
+        Ed25519(
+            curveId = 6u,
+            expectedKeyType = OKP,
+            expectedXLength = 256
+        ),
+        Ed448(
+            curveId = 7u,
+            expectedKeyType = OKP,
+            expectedXLength = 448
+        ),
+        BRAINPOOL_P256(
+            curveId = 256u,
+            expectedKeyType = EC2,
+            expectedXLength = 256,
+        ),
+        BRAINPOOL_P320(
+            257u,
+            EC2,
+            expectedXLength = 320
+        ),
+        BRAINPOOL_P384(
+            curveId = 258u, expectedKeyType = EC2,
+            expectedXLength = 384
+        ),
+        BRAINPOOL_P512(
+            259u,
+            EC2,
+            expectedXLength = 512
+        );
+
+        val keyTypeId: UInt = expectedKeyType.id
+        val expectedXByteLength: Int = expectedXLength / 8
+    }
 }

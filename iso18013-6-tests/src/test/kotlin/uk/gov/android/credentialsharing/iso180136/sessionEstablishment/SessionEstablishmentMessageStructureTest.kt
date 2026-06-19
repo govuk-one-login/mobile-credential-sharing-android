@@ -1,5 +1,6 @@
 package uk.gov.android.credentialsharing.iso180136.sessionEstablishment
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.BYTE_OBJECT_INDEFINITE
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.BYTE_STRING_INDEFINITE
@@ -9,6 +10,8 @@ import com.google.testing.junit.testparameterinjector.KotlinTestParameters.named
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import junit.framework.TestCase.assertTrue
+import kotlin.test.Ignore
 import kotlin.test.Test
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.containsString
@@ -20,9 +23,13 @@ import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
+import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.cryptoService.cose.Cose.ECKeyType
+import uk.gov.onelogin.sharing.cryptoService.cose.Cose.ECType
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto.Companion.CURVE_KEY
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto.Companion.KEY_TYPE_KEY
@@ -114,7 +121,7 @@ class SessionEstablishmentMessageStructureTest {
             "Indefinite byte arrays" to containsString(
                 (PREFIX_TYPE_BYTES + SUFFIX_INDEFINITE).toHexString()
             )
-        )
+        ),
     ) {
 
         assertThat(
@@ -132,7 +139,7 @@ class SessionEstablishmentMessageStructureTest {
         @TestParameter propertyName: String = testValues(
             E_READER_KEY_KEY,
             DATA_KEY
-        )
+        ),
     ) {
         val values = mapper.readTree(result).findValues(propertyName)
         assertThat(
@@ -227,7 +234,7 @@ class SessionEstablishmentMessageStructureTest {
             "Indefinite byte arrays" to containsString(
                 (PREFIX_TYPE_BYTES + SUFFIX_INDEFINITE).toHexString()
             )
-        )
+        ),
     ) {
 
         assertThat(
@@ -242,12 +249,12 @@ class SessionEstablishmentMessageStructureTest {
      */
     @Test
     fun `eReaderKey - There are no duplicate fields`(
-        @TestParameter propertyName: Long = testValues(
-            KEY_TYPE_KEY,
-            CURVE_KEY,
-            X_KEY,
-            Y_KEY
-        )
+        @TestParameter propertyName: Long = namedTestValues(
+            "Key type" to KEY_TYPE_KEY,
+            "Curve" to CURVE_KEY,
+            "X" to X_KEY,
+            "Y" to Y_KEY
+        ),
     ) {
         val values = mapper.readTree(
             sessionEstablishmentDto.eReaderKey.encoded
@@ -256,5 +263,257 @@ class SessionEstablishmentMessageStructureTest {
             values,
             hasSize(1)
         )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_01
+     */
+    @Test
+    fun `'eReaderKey' - Encoded data is an object with 4 properties`() {
+        assertThat(
+            coseKeyHexString,
+            startsWith(HexFormatter(CBORConstants.PREFIX_TYPE_OBJECT + 4))
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_02
+     */
+    @Test
+    fun `'eReaderKey' - Encoded data has the correct data structure`(
+        @TestParameter inputs: Pair<Long, (JsonNode) -> Boolean> = namedTestValues(
+            "Key type" to (
+                    KEY_TYPE_KEY to JsonNode::isInt
+                    ),
+            "Curve" to (
+                    CURVE_KEY to JsonNode::isInt
+                    ),
+            "X" to (
+                    X_KEY to JsonNode::isBinary
+                    ),
+            "Y" to (
+                    Y_KEY to JsonNode::isBinary
+                    )
+        ),
+    ) {
+        val (property, assertion) = inputs
+        val rootNode = mapper.readTree(sessionEstablishmentDto.eReaderKey.encoded)
+
+        assertTrue(assertion(rootNode[property.toString()]))
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_03
+     *
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    fun `'eReaderKey' - Only accepts valid key types`(
+        @TestParameter type: ECKeyType = testValues(
+            ECKeyType.EC2,
+            ECKeyType.OKP,
+        ),
+    ) {
+        sessionEstablishmentDto.copy(
+            eReaderKey = EmbeddedCbor(
+                mapper.writeValueAsBytes(
+                    coseKeyDto.copy(
+                        keyType = type.id.toLong()
+                    )
+                )
+            )
+        )
+
+        assertThat(
+            sessionEstablishmentDto,
+            not(nullValue())
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_03
+     *
+     * This currently fails due to the [CoseKeyDto.keyType] property being a [Long] instead of a
+     * [UInt].
+     *
+     * @see CoseKeyDto.keyType
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.keyType
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    @Ignore("Fails conformance test due to lack of input validation")
+    fun `'eReaderKey' - Refuses invalid key types`(
+        @TestParameter type: ECKeyType = testValues(
+            ECKeyType.RSA,
+            ECKeyType.SYMMETRIC,
+            ECKeyType.HSS_LMS,
+            ECKeyType.WALNUT_DSA,
+        ),
+    ) {
+        assertThrows(Exception::class.java) {
+            sessionEstablishmentDto.copy(
+                eReaderKey = EmbeddedCbor(
+                    mapper.writeValueAsBytes(
+                        coseKeyDto.copy(
+                            keyType = type.id.toLong()
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_04
+     *
+     * @see CoseKeyDto.keyType
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.keyType
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    fun `'eReaderKey' - The curve value dictates the key type`(
+        @TestParameter curveType: ECType,
+    ) {
+        sessionEstablishmentDto = sessionEstablishmentDto.copy(
+            eReaderKey = EmbeddedCbor(
+                mapper.writeValueAsBytes(
+                    coseKeyDto.copy(
+                        curve = curveType.curveId.toLong(),
+                        keyType = curveType.keyTypeId.toLong()
+                    )
+                )
+            )
+        )
+
+        assertThat(
+            sessionEstablishmentDto,
+            not(nullValue())
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_04
+     *
+     * This currently fails due to no validation between the [CoseKeyDto.keyType] and the
+     * [CoseKeyDto.curve] properties.
+     *
+     * @see CoseKeyDto.keyType
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.keyType
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    @Ignore("Fails conformance test due to lack of input validation")
+    fun `'eReaderKey' - OKP curves fail with EC2 key type`(
+        @TestParameter curveType: ECType = testValues(
+            ECType.X25519,
+            ECType.X448,
+            ECType.Ed25519,
+            ECType.Ed448,
+        ),
+    ) {
+        assertThrows(Exception::class.java) {
+            sessionEstablishmentDto = sessionEstablishmentDto.copy(
+                eReaderKey = EmbeddedCbor(
+                    mapper.writeValueAsBytes(
+                        coseKeyDto.copy(
+                            curve = curveType.curveId.toLong(),
+                            keyType = ECKeyType.EC2.id.toLong()
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_04
+     *
+     * This currently fails due to no validation between the [CoseKeyDto.keyType] and the
+     * [CoseKeyDto.curve] properties.
+     *
+     * @see CoseKeyDto.keyType
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.keyType
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    @Ignore("Fails conformance test due to lack of input validation")
+    fun `'eReaderKey' - EC2 curves fail with OKP key type`(
+        @TestParameter curveType: ECType = testValues(
+            ECType.P256,
+            ECType.P384,
+            ECType.P521,
+            ECType.BRAINPOOL_P256,
+            ECType.BRAINPOOL_P320,
+            ECType.BRAINPOOL_P384,
+            ECType.BRAINPOOL_P512,
+        ),
+    ) {
+        assertThrows(Exception::class.java) {
+            sessionEstablishmentDto = sessionEstablishmentDto.copy(
+                eReaderKey = EmbeddedCbor(
+                    mapper.writeValueAsBytes(
+                        coseKeyDto.copy(
+                            curve = curveType.curveId.toLong(),
+                            keyType = ECKeyType.OKP.id.toLong()
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_05
+     *
+     * @see CoseKeyDto.x
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.x
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    fun `'eReaderKey' - Verify x length matches selected EC curve`(
+        @TestParameter type: ECType
+    ) {
+        assertThat(
+            coseKeyDto.copy(
+                keyType = type.keyTypeId.toLong(),
+                curve = type.curveId.toLong(),
+                x = ByteArray(size = type.expectedXByteLength)
+            ).x.size,
+            equalTo(type.expectedXByteLength)
+        )
+    }
+
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_05
+     *
+     * This currently fails due to no validation between the curve type and the length of
+     * [CoseKeyDto.x].
+     *
+     * @see CoseKeyDto.x
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.x
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    @Ignore("Fails conformance test due to lack of input validation")
+    fun `'eReaderKey' - Refuses invalid x coordinate lengths`(
+        @TestParameter type: ECType
+    ) {
+        assertThrows(Exception::class.java) {
+            coseKeyDto.copy(
+                keyType = type.keyTypeId.toLong(),
+                curve = type.curveId.toLong(),
+                x = ByteArray(size = type.expectedXByteLength - 8)
+            )
+        }
     }
 }
