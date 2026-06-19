@@ -6,11 +6,8 @@ import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import io.mockk.mockk
 import java.io.ByteArrayInputStream
-import java.security.KeyPair
-import java.security.KeyPairGenerator
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
-import java.security.spec.ECGenParameterSpec
 import java.util.Base64
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
@@ -37,26 +34,9 @@ class TrustVerifierImplTest {
     )
     private val cborMapper = ObjectMapper(CBORFactory())
 
-    private val rootKp = generateKeyPair()
-    private val leafKp = generateKeyPair()
-
-    private val rootCert = TestCertificateGenerator(
-        subject = "CN=Test Root CA,C=GB,ST=London",
-        keyPair = rootKp,
-        issuerKeyPair = rootKp,
-        issuer = "CN=Test Root CA,C=GB,ST=London"
-    ).ca().build()
-
-    private val leafCert = TestCertificateGenerator(
-        subject = "CN=Test DS,C=GB,ST=London",
-        keyPair = leafKp,
-        issuerKeyPair = rootKp,
-        issuer = "CN=Test Root CA,C=GB,ST=London"
-    ).leaf().build()
-
     private val validIssuerAuth: ByteArray = CoseSign1Builder.build(
-        chain = listOf(leafCert),
-        leafKeyPair = leafKp,
+        chain = listOf(CertificateStubs.leafSignedByRoot),
+        leafKeyPair = CertificateStubs.leafKeyPair,
         payload = MsoBuilder.build()
     )
 
@@ -101,7 +81,7 @@ class TrustVerifierImplTest {
 
     @Test
     fun `valid IssuerAuth returns leaf validity period, MSO payload, and subject attributes`() {
-        val result = verifier.verifyCOSESign1(validIssuerAuth, rootCert)
+        val result = verifier.verifyCOSESign1(validIssuerAuth, CertificateStubs.rootCa)
 
         assertNotNull(result.certificateValidityPeriod)
         assertNotNull(result.msoPayload)
@@ -132,23 +112,15 @@ class TrustVerifierImplTest {
         val tamperedBytes = cborMapper.writeValueAsBytes(tampered)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(tamperedBytes, rootCert)
+            verifier.verifyCOSESign1(tamperedBytes, CertificateStubs.rootCa)
         }
         assertThat(exception, hasError(VerificationError.INVALID_ISSUER_SIGNATURE))
     }
 
     @Test
     fun `unanchored chain throws UNTRUSTED_CERTIFICATE`() {
-        val untrustedRootKp = generateKeyPair()
-        val untrustedRoot = TestCertificateGenerator(
-            subject = "CN=Untrusted,C=GB,ST=London",
-            keyPair = untrustedRootKp,
-            issuerKeyPair = untrustedRootKp,
-            issuer = "CN=Untrusted,C=GB,ST=London"
-        ).ca().build()
-
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verifyCOSESign1(validIssuerAuth, untrustedRoot)
+            verifier.verifyCOSESign1(validIssuerAuth, CertificateStubs.untrustedRoot)
         }
         assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
     }
@@ -165,12 +137,6 @@ class TrustVerifierImplTest {
             verifier.verifyCOSESign1(coseWithRsaCert, rsaCert)
         }
         assertThat(exception, hasError(VerificationError.UNTRUSTED_CERTIFICATE))
-    }
-
-    private fun generateKeyPair(): KeyPair {
-        val gen = KeyPairGenerator.getInstance("EC")
-        gen.initialize(ECGenParameterSpec("secp256r1"))
-        return gen.generateKeyPair()
     }
 
     private fun extractIssuerAuth(): ByteArray {

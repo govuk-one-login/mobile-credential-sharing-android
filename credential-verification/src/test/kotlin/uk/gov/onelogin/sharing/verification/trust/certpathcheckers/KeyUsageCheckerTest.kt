@@ -5,8 +5,8 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
 import uk.gov.onelogin.sharing.verification.trust.CoseSign1Decoder
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
 import uk.gov.onelogin.sharing.verification.trust.TrustVerificationTest
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifierImpl
@@ -23,224 +23,80 @@ class KeyUsageCheckerTest : TrustVerificationTest {
 
     @Test
     fun `check throws when CA has keyCertSign but missing cRLSign`() {
-        val leafKp = generateKeyPair()
-        val caKp = generateKeyPair()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).leaf().build()
-
-        val ca = TestCertificateGenerator(
-            subject = "CN=CA,C=GB,ST=London",
-            keyPair = caKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).caKeyCertSignOnly().build()
-
-        val checker = KeyUsageChecker(leaf)
+        val checker = KeyUsageChecker(CertificateStubs.leaf)
         checker.init(false)
 
         assertThrows(CertPathValidatorException::class.java) {
-            checker.check(ca, mutableSetOf())
+            checker.check(CertificateStubs.caKeyCertSignOnly, mutableSetOf())
         }
     }
 
     @Test
     fun `check throws when CA has keyCertSign and cRLSign plus extra bits`() {
-        val leafKp = generateKeyPair()
-        val caKp = generateKeyPair()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).leaf().build()
-
-        val ca = TestCertificateGenerator(
-            subject = "CN=CA,C=GB,ST=London",
-            keyPair = caKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).caWithExtraKeyUsageBits().build()
-
-        val checker = KeyUsageChecker(leaf)
+        val checker = KeyUsageChecker(CertificateStubs.leaf)
         checker.init(false)
 
         assertThrows(CertPathValidatorException::class.java) {
-            checker.check(ca, mutableSetOf())
+            checker.check(CertificateStubs.caWithExtraKeyUsageBits, mutableSetOf())
         }
     }
 
     @Test
     fun `check throws when CA has wrong KeyUsage bits`() {
-        val leafKp = generateKeyPair()
-        val caKp = generateKeyPair()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).leaf().build()
-
-        val ca = TestCertificateGenerator(
-            subject = "CN=CA,C=GB,ST=London",
-            keyPair = caKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).caWithLeafKeyUsage().build()
-
-        val checker = KeyUsageChecker(leaf)
+        val checker = KeyUsageChecker(CertificateStubs.leaf)
         checker.init(false)
 
         assertThrows(CertPathValidatorException::class.java) {
-            checker.check(ca, mutableSetOf())
+            checker.check(CertificateStubs.caWithLeafKeyUsage, mutableSetOf())
         }
     }
 
     @Test
     fun `leaf without KeyUsage extension throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = TestCertificateGenerator(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).noKeyUsage().build()
-
         assertVerificationFailure(
-            listOf(leaf),
-            leafKp,
-            root,
+            listOf(CertificateStubs.leafNoKeyUsage),
+            CertificateStubs.leafKeyPair,
+            CertificateStubs.rootCa,
             VerificationError.UNTRUSTED_CERTIFICATE
         )
     }
 
     @Test
     fun `leaf with keyCertSign instead of digitalSignature throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = TestCertificateGenerator(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).caKeyUsage().build()
-
         assertVerificationFailure(
-            listOf(leaf),
-            leafKp,
-            root,
+            listOf(CertificateStubs.leafWithCaKeyUsage),
+            CertificateStubs.leafKeyPair,
+            CertificateStubs.rootCa,
             VerificationError.UNTRUSTED_CERTIFICATE
         )
     }
 
     @Test
     fun `leaf with non-critical KeyUsage throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = TestCertificateGenerator(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).leafWithNonCriticalKeyUsage().build()
-
         assertVerificationFailure(
-            listOf(leaf),
-            leafKp,
-            root,
+            listOf(CertificateStubs.leafWithNonCriticalKeyUsage),
+            CertificateStubs.leafKeyPair,
+            CertificateStubs.rootCa,
             VerificationError.UNTRUSTED_CERTIFICATE
         )
     }
 
     @Test
     fun `CA intermediate without KeyUsage throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val intermediateKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = TestCertificateGenerator(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val intermediate = TestCertificateGenerator(
-            subject = "CN=Intermediate,C=GB,ST=London",
-            keyPair = intermediateKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).caWithoutKeyUsage().build()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = intermediateKp,
-            issuer = "CN=Intermediate,C=GB,ST=London"
-        ).leaf().build()
-
         assertVerificationFailure(
-            listOf(leaf, intermediate),
-            leafKp,
-            root,
+            listOf(CertificateStubs.leaf, CertificateStubs.caWithoutKeyUsage),
+            CertificateStubs.leafKeyPair,
+            CertificateStubs.rootCa,
             VerificationError.UNTRUSTED_CERTIFICATE
         )
     }
 
     @Test
     fun `leaf with extra bits set alongside digitalSignature throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = TestCertificateGenerator(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).leafWithExtraBits().build()
-
         assertVerificationFailure(
-            listOf(leaf),
-            leafKp,
-            root,
+            listOf(CertificateStubs.leafWithExtraBits),
+            CertificateStubs.leafKeyPair,
+            CertificateStubs.rootCa,
             VerificationError.UNTRUSTED_CERTIFICATE
         )
     }

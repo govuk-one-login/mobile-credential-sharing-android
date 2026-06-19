@@ -5,8 +5,8 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
+import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
 import uk.gov.onelogin.sharing.verification.trust.CoseSign1Decoder
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
 import uk.gov.onelogin.sharing.verification.trust.TrustVerificationTest
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifierImpl
@@ -23,116 +23,40 @@ class BasicConstraintsCheckerTest : TrustVerificationTest {
 
     @Test
     fun `check throws when CA missing BasicConstraints extension`() {
-        val leafKp = generateKeyPair()
-        val caKp = generateKeyPair()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).leaf().build()
-
-        val ca = TestCertificateGenerator(
-            subject = "CN=CA,C=GB,ST=London",
-            keyPair = caKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).caWithoutBasicConstraints().build()
-
-        val checker = BasicConstraintsChecker(leaf)
+        val checker = BasicConstraintsChecker(CertificateStubs.leaf)
         checker.init(false)
 
         assertThrows(CertPathValidatorException::class.java) {
-            checker.check(ca, mutableSetOf())
+            checker.check(CertificateStubs.caWithoutBasicConstraints, mutableSetOf())
         }
     }
 
     @Test
     fun `check throws when CA has BasicConstraints but cA flag is false`() {
-        val leafKp = generateKeyPair()
-        val caKp = generateKeyPair()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).leaf().build()
-
-        val ca = TestCertificateGenerator(
-            subject = "CN=CA,C=GB,ST=London",
-            keyPair = caKp,
-            issuerKeyPair = caKp,
-            issuer = "CN=CA,C=GB,ST=London"
-        ).caWithCaFlagFalse().build()
-
-        val checker = BasicConstraintsChecker(leaf)
+        val checker = BasicConstraintsChecker(CertificateStubs.leaf)
         checker.init(false)
 
         assertThrows(CertPathValidatorException::class.java) {
-            checker.check(ca, mutableSetOf())
+            checker.check(CertificateStubs.caWithCaFlagFalse, mutableSetOf())
         }
     }
 
     @Test
     fun `intermediate with non-critical BasicConstraints throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val intermediateKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = TestCertificateGenerator(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val intermediate = TestCertificateGenerator(
-            subject = "CN=Intermediate,C=GB,ST=London",
-            keyPair = intermediateKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).caNotCriticalBasicConstraints().build()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = intermediateKp,
-            issuer = "CN=Intermediate,C=GB,ST=London"
-        ).leaf().build()
-
         assertVerificationFailure(
-            listOf(leaf, intermediate),
-            leafKp,
-            root,
+            listOf(CertificateStubs.leaf, CertificateStubs.caNotCriticalBasicConstraints),
+            CertificateStubs.leafKeyPair,
+            CertificateStubs.rootCa,
             VerificationError.UNTRUSTED_CERTIFICATE
         )
     }
 
     @Test
     fun `leaf with BasicConstraints extension present throws UNTRUSTED_CERTIFICATE`() {
-        val rootKp = generateKeyPair()
-        val leafKp = generateKeyPair()
-
-        val root = TestCertificateGenerator(
-            subject = "CN=Root,C=GB,ST=London",
-            keyPair = rootKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).ca().build()
-
-        val leaf = TestCertificateGenerator(
-            subject = "CN=Leaf,C=GB,ST=London",
-            keyPair = leafKp,
-            issuerKeyPair = rootKp,
-            issuer = "CN=Root,C=GB,ST=London"
-        ).leafWithBasicConstraints().build()
-
         assertVerificationFailure(
-            listOf(leaf),
-            leafKp,
-            root,
+            listOf(CertificateStubs.leafWithBasicConstraints),
+            CertificateStubs.leafKeyPair,
+            CertificateStubs.rootCa,
             VerificationError.UNTRUSTED_CERTIFICATE
         )
     }
