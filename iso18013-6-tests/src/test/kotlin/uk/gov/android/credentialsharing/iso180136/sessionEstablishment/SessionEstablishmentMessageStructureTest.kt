@@ -8,25 +8,42 @@ import com.fasterxml.jackson.dataformat.cbor.CBORConstants.PREFIX_TYPE_BYTES
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.SUFFIX_INDEFINITE
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValues
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValuesIn
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import java.math.BigInteger
+import java.security.AlgorithmParameters
+import java.security.KeyFactory
+import java.security.KeyPairGenerator
+import java.security.Security
+import java.security.interfaces.ECPublicKey
+import java.security.spec.ECFieldFp
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.ECParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.ECPublicKeySpec
 import junit.framework.TestCase.assertTrue
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.fail
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.hasProperty
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.cryptoService.cose.Cose.ECKeyType
 import uk.gov.onelogin.sharing.cryptoService.cose.Cose.ECType
+import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.Companion.padEcCoordinatesTo32Bytes
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
@@ -410,11 +427,8 @@ class SessionEstablishmentMessageStructureTest {
     @Test
     @Ignore("Fails conformance test due to lack of input validation")
     fun `'eReaderKey' - OKP curves fail with EC2 key type`(
-        @TestParameter curveType: ECType = testValues(
-            ECType.X25519,
-            ECType.X448,
-            ECType.Ed25519,
-            ECType.Ed448,
+        @TestParameter curveType: ECType = testValuesIn(
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.OKP }
         ),
     ) {
         assertThrows(Exception::class.java) {
@@ -445,14 +459,8 @@ class SessionEstablishmentMessageStructureTest {
     @Test
     @Ignore("Fails conformance test due to lack of input validation")
     fun `'eReaderKey' - EC2 curves fail with OKP key type`(
-        @TestParameter curveType: ECType = testValues(
-            ECType.P256,
-            ECType.P384,
-            ECType.P521,
-            ECType.BRAINPOOL_P256,
-            ECType.BRAINPOOL_P320,
-            ECType.BRAINPOOL_P384,
-            ECType.BRAINPOOL_P512,
+        @TestParameter curveType: ECType = testValuesIn(
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
         ),
     ) {
         assertThrows(Exception::class.java) {
@@ -485,9 +493,9 @@ class SessionEstablishmentMessageStructureTest {
             coseKeyDto.copy(
                 keyType = type.keyTypeId.toLong(),
                 curve = type.curveId.toLong(),
-                x = ByteArray(size = type.expectedXByteLength)
+                x = ByteArray(size = type.expectedCoordinateByteLength)
             ).x.size,
-            equalTo(type.expectedXByteLength)
+            equalTo(type.expectedCoordinateByteLength)
         )
     }
 
@@ -512,8 +520,182 @@ class SessionEstablishmentMessageStructureTest {
             coseKeyDto.copy(
                 keyType = type.keyTypeId.toLong(),
                 curve = type.curveId.toLong(),
-                x = ByteArray(size = type.expectedXByteLength - 8)
+                x = ByteArray(size = type.expectedCoordinateByteLength - 8)
             )
+        }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_06
+     *
+     * @see CoseKeyDto.y
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.y
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    fun `'eReaderKey' - EC2 keys also have a 'y' coordinate value`(
+        @TestParameter type: ECType = testValuesIn(
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+        )
+    ) {
+        assertThat(
+            coseKeyDto.copy(
+                keyType = type.keyTypeId.toLong(),
+                curve = type.curveId.toLong(),
+            ),
+            hasProperty("y")
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_06
+     *
+     * This currently fails due to MVP not including OKP as valid COSE keys.
+     *
+     * @see CoseKeyDto.y
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.y
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    @Ignore("Fails conformance test due to not handling OKP key structure")
+    fun `'eReaderKey' - OKP keys don't have a 'y' coordinate value`(
+        @TestParameter type: ECType = testValuesIn(
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.OKP }
+        )
+    ) {
+        assertThat(
+            coseKeyDto.copy(
+                keyType = type.keyTypeId.toLong(),
+                curve = type.curveId.toLong()
+            ),
+            not(hasProperty("y"))
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_07
+     *
+     * @see CoseKeyDto.y
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.y
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    fun `'eReaderKey' - Verify Y length matches selected EC curve`(
+        @TestParameter type: ECType = testValuesIn(
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+        )
+    ) {
+        assertThat(
+            coseKeyDto.copy(
+                keyType = type.keyTypeId.toLong(),
+                curve = type.curveId.toLong(),
+                y = ByteArray(size = type.expectedCoordinateByteLength)
+            ).y.size,
+            equalTo(type.expectedCoordinateByteLength)
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_SE_06
+     * sub-scenario: Common_COSEKey_07
+     *
+     * This currently fails due to MVP not handling compressed COSE keys.
+     *
+     * @see CoseKeyDto.y
+     * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.y
+     * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
+     */
+    @Test
+    @Ignore("Fails conformance test due to only handling uncompressed COSE keys")
+    fun `'eReaderKey' - Compressed keys have a Y property as a boolean`(
+        @TestParameter type: ECType = testValuesIn(
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+        )
+    ) {
+        assertThat(
+            coseKeyDto.copy(
+                keyType = type.keyTypeId.toLong(),
+                curve = type.curveId.toLong(),
+            ),
+            hasProperty(
+                "y",
+                instanceOf<Boolean>(Boolean::class.java)
+            )
+        )
+    }
+
+    @Test
+    fun `'eReaderKey' - uncompressed coordinates are valid`(
+        @TestParameter type: ECType = testValuesIn(
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+        )
+    ) {
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME)
+        Security.addProvider(BouncyCastleProvider());
+
+        // Get standard curve domain parameters
+        val parameters = AlgorithmParameters.getInstance(
+            "EC",
+            BouncyCastleProvider.PROVIDER_NAME
+        )
+        val generatorSpec = ECGenParameterSpec(type.parameterSpecName)
+        parameters.init(generatorSpec)
+        val ecParameters = parameters.getParameterSpec(ECParameterSpec::class.java)
+
+        val keyPairGenerator = KeyPairGenerator.getInstance(
+            "EC",
+            BouncyCastleProvider.PROVIDER_NAME
+        )
+        keyPairGenerator.initialize(generatorSpec)
+        val publicKey = keyPairGenerator.generateKeyPair().public as ECPublicKey
+
+        val xCoordinate = padEcCoordinatesTo32Bytes(publicKey.w.affineX)
+        val yCoordinate = padEcCoordinatesTo32Bytes(publicKey.w.affineY)
+
+        coseKeyDto.copy(
+            keyType = type.keyTypeId.toLong(),
+            curve = type.curveId.toLong(),
+            x = xCoordinate,
+            y = yCoordinate,
+        ).let {
+            assertTrue(
+                isCOSEPointOnCurve(
+                    xBytes = it.x,
+                    yBytes = it.y,
+                    ecParameters = ecParameters
+                )
+            )
+        }
+    }
+
+    private fun isCOSEPointOnCurve(
+        xBytes: ByteArray,
+        yBytes: ByteArray,
+        ecParameters: ECParameterSpec
+    ): Boolean {
+        val x = BigInteger(1, xBytes)
+        val y = BigInteger(1, yBytes)
+
+        return try {
+            // 1. Verify point coordinates are within the field modulus
+            val p = (ecParameters.curve.field as ECFieldFp).p
+            if (x < BigInteger.ZERO || x >= p || y < BigInteger.ZERO || y >= p) {
+                return false
+            }
+
+            // 2. Verify mathematically using the curve equation
+            val point = ECPoint(x, y)
+            val pubSpec = ECPublicKeySpec(point, ecParameters)
+            val kf = KeyFactory.getInstance("EC")
+
+            // KeyFactory.generatePublic will throw InvalidKeySpecException if the point is invalid
+            kf.generatePublic(pubSpec)
+            true
+        } catch (e: Exception) {
+            fail("Caught exception: $e")
         }
     }
 }

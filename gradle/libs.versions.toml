@@ -30,6 +30,7 @@ ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
 metro = "1.1.1"  # https://github.com/ZacSweers/Metro/releases
 mockk = "1.14.9" # https://github.com/mockk/mockk/releases
+org-bouncycastle = "1.84" # https://www.bouncycastle.org/download/bouncy-castle-java/#release-notes
 org-hamcrest = "3.0" # https://github.com/hamcrest/JavaHamcrest/releases
 robolectric = "4.16.1" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.60.0" # https://github.com/takahirom/roborazzi/releases
@@ -105,6 +106,8 @@ metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.re
 metro-runtime = { module = "dev.zacsweers.metro:runtime", version.ref = "metro" }
 metro-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+org-bouncycastle-bcprov-jdk18on = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "org-bouncycastle" }
+org-bouncycastle-bctls-jdk18on = { module = "org.bouncycastle:bctls-jdk18on", version.ref = "org-bouncycastle" }
 org-hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "org-hamcrest" }
 org-jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }

@@ -87,65 +87,78 @@ object Cose {
      */
     enum class ECType(
         val curveId: UInt,
-        expectedKeyType: ECKeyType,
-        expectedXLength: Int,
+        val expectedKeyType: ECKeyType,
+        val parameterSpecName: String,
+        expectedUncompressedCoordinateLength: Int,
     ) {
         P256(
             curveId = 1u,
             expectedKeyType = EC2,
-            expectedXLength = 256,
+            expectedUncompressedCoordinateLength = 256,
+            parameterSpecName = "secp256r1"
         ),
         P384(
             curveId = 2u,
             expectedKeyType = EC2,
-            expectedXLength = 384
+            expectedUncompressedCoordinateLength = 384,
+            parameterSpecName = "secp384r1"
         ),
         P521(
             curveId = 3u,
             expectedKeyType = EC2,
-            expectedXLength = 521
+            expectedUncompressedCoordinateLength = 521,
+            parameterSpecName = "secp521r1"
         ),
         X25519(
             curveId = 4u,
             expectedKeyType = OKP,
-            expectedXLength = 256
+            expectedUncompressedCoordinateLength = 256,
+            parameterSpecName = "X25519"
         ),
         X448(
             curveId = 5u,
             expectedKeyType = OKP,
-            expectedXLength = 448
+            expectedUncompressedCoordinateLength = 448,
+            parameterSpecName = "X448"
         ),
         Ed25519(
             curveId = 6u,
             expectedKeyType = OKP,
-            expectedXLength = 256
+            expectedUncompressedCoordinateLength = 256,
+            parameterSpecName = "Ed25519"
         ),
         Ed448(
             curveId = 7u,
             expectedKeyType = OKP,
-            expectedXLength = 448
+            expectedUncompressedCoordinateLength = 448,
+            parameterSpecName = "Ed448"
         ),
         BRAINPOOL_P256(
             curveId = 256u,
             expectedKeyType = EC2,
-            expectedXLength = 256,
+            expectedUncompressedCoordinateLength = 256,
+            parameterSpecName = "brainpoolP256r1"
         ),
         BRAINPOOL_P320(
-            257u,
-            EC2,
-            expectedXLength = 320
+            curveId = 257u,
+            expectedKeyType = EC2,
+            expectedUncompressedCoordinateLength = 320,
+            parameterSpecName = "brainpoolP320r1"
         ),
         BRAINPOOL_P384(
-            curveId = 258u, expectedKeyType = EC2,
-            expectedXLength = 384
+            curveId = 258u,
+            expectedKeyType = EC2,
+            expectedUncompressedCoordinateLength = 384,
+            parameterSpecName = "brainpoolP384r1"
         ),
         BRAINPOOL_P512(
-            259u,
-            EC2,
-            expectedXLength = 512
+            curveId = 259u,
+            expectedKeyType = EC2,
+            expectedUncompressedCoordinateLength = 512,
+            parameterSpecName = "brainpoolP512r1"
         );
 
         val keyTypeId: UInt = expectedKeyType.id
-        val expectedXByteLength: Int = expectedXLength / 8
+        val expectedCoordinateByteLength: Int = expectedUncompressedCoordinateLength / 8
     }
 }

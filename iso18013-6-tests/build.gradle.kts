@@ -25,6 +25,8 @@ dependencies {
         libs.jackson.kotlin,
         libs.junit,
         libs.kotlin.test,
+        libs.org.bouncycastle.bcprov.jdk18on,
+        libs.org.bouncycastle.bctls.jdk18on,
         projects.bluetooth,
         projects.core,
         projects.cryptoService,

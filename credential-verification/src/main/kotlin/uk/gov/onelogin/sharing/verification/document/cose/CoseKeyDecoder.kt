@@ -22,7 +22,15 @@ class CoseKeyDecoder {
         private const val LABEL_CRV = -1L
         private const val LABEL_X = -2L
         private const val LABEL_Y = -3L
+
+        /**
+         * Use the `ECKeyType` enum instead
+         */
         private const val KTY_EC2 = 2L
+
+        /**
+         * Use the `ECType` enum instead
+         */
         private const val CRV_P256 = 1L
         private val ALLOWED_LABELS = setOf(LABEL_KTY, LABEL_CRV, LABEL_X, LABEL_Y)
     }
