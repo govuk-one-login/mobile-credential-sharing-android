@@ -35,7 +35,8 @@ dependencies {
     ).forEach(::api)
 
     listOf(
-        libs.jackson.cbor
+        libs.jackson.cbor,
+        projects.exchangeFormat
     ).forEach(::implementation)
 
     listOf(

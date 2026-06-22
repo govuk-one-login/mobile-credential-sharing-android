@@ -1,8 +1,6 @@
 package uk.gov.onelogin.sharing.verification.format.document
 
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
-import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.validity.ValidityInfo
 
 /**
@@ -26,30 +24,6 @@ data class MobileSecurityObject(
     val status: ByteArray? = null,
     val version: String = MSO_SCHEMA_VERSION
 ) {
-
-    init {
-        if (MSO_SCHEMA_VERSION != version) {
-            throw VerificationResult.Failure(
-                VerificationError.INVALID_MSO_VERSION
-            )
-        }
-
-        if (MSO_DIGEST_ALGORITHM != digestAlgorithm) {
-            throw VerificationResult.Failure(
-                VerificationError.UNSUPPORTED_DIGEST_ALGORITHM
-            )
-        }
-    }
-
-    fun hasDocType(expected: String): Boolean {
-        if (expected != docType) {
-            throw VerificationResult.Failure(
-                VerificationError.INVALID_DOC_TYPE
-            )
-        }
-
-        return true
-    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -80,7 +54,9 @@ data class MobileSecurityObject(
     }
 
     companion object {
-        private const val MSO_SCHEMA_VERSION = "1.0"
-        private const val MSO_DIGEST_ALGORITHM = "SHA-256"
+        const val MSO_SCHEMA_VERSION = "1.0"
+        const val MSO_DIGEST_ALGORITHM = "SHA-256"
+        const val DOC_TYPE = "org.iso.18013.5.1.mDL"
+        const val NAMESPACE = "org.iso.18013.5.1"
     }
 }

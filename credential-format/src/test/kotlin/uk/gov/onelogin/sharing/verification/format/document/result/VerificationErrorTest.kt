@@ -12,10 +12,10 @@ import uk.gov.onelogin.sharing.verification.format.ClassInfoExt.scanResult
 class VerificationErrorTest {
 
     /**
-     * DCMAW-20245: AC3: [VerificationError] contains exactly the 15 named values
+     * DCMAW-20245: AC3: [VerificationError] contains exactly the 16 named values
      */
     @Test
-    fun `There are 15 instances of VerificationError`() {
+    fun `There are 16 instances of VerificationError`() {
         val expectedPropertyNames = listOf(
             "DIGEST_MISMATCH",
             "DIGEST_MISSING",
@@ -23,6 +23,7 @@ class VerificationErrorTest {
             "INVALID_DEVICE_SIGNATURE",
             "INVALID_DOC_TYPE",
             "INVALID_ISSUER_SIGNATURE",
+            "INVALID_MSO",
             "INVALID_MSO_VERSION",
             "MALFORMED_ISSUER_AUTH",
             "MALFORMED_MSO",

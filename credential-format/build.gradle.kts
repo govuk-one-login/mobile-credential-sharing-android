@@ -11,7 +11,8 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
-        libs.org.hamcrest
+        libs.org.hamcrest,
+        libs.jackson.cbor
     ).forEach(::testFixturesApi)
 
     listOf(
