@@ -18,7 +18,7 @@ class Iso18013DocumentVerifier(
     private val trustVerifier: TrustVerifier,
     private val deviceAuthVerifier: DeviceAuthVerifier,
     private val msoDecoder: MsoDecoder,
-    private val verifyMsoFields: MsoFieldVerifier
+    private val msoFieldVerifier: MsoFieldVerifier
 ) : DocumentVerifier {
 
     override fun verifyDocument(
@@ -31,7 +31,7 @@ class Iso18013DocumentVerifier(
         )
         val mso = msoDecoder.decode(issuerAuthResult.msoPayload)
 
-        verifyMsoFields.verify(document, mso, issuerAuthResult)
+        msoFieldVerifier.verify(document, mso, issuerAuthResult)
         verifyDocumentDigests(document, mso)
         verifyValidityInfo(issuerAuthResult.certificateValidityPeriod, mso)
 
