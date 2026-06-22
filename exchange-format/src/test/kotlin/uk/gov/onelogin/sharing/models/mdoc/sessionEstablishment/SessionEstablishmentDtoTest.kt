@@ -32,6 +32,7 @@ class SessionEstablishmentDtoTest {
     )
 
     @Test
+    @Suppress("EqualsNullCall")
     fun `Equality contract`() {
         assertEquals(equalityContract, equalityContract)
         assertEquals(equalityContract, equalityContract.copy())

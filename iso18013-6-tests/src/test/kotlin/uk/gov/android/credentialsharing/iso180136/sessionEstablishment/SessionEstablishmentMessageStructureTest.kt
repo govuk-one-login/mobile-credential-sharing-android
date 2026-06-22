@@ -673,7 +673,7 @@ class SessionEstablishmentMessageStructureTest {
         return try {
             // 1. Verify point coordinates are within the field modulus
             val p = (ecParameters.curve.field as ECFieldFp).p
-            if (x < BigInteger.ZERO || x >= p || y < BigInteger.ZERO || y >= p) {
+            if (isCoordinateOutOfBounds(x, p) || isCoordinateOutOfBounds(y, p)) {
                 return false
             }
 
@@ -689,4 +689,7 @@ class SessionEstablishmentMessageStructureTest {
             fail("Caught exception: $e")
         }
     }
+
+    private fun isCoordinateOutOfBounds(coordinate: BigInteger, p: BigInteger): Boolean =
+        coordinate < BigInteger.ZERO || coordinate >= p
 }

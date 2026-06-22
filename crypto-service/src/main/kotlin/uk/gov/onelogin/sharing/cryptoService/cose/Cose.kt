@@ -159,6 +159,7 @@ object Cose {
         );
 
         val keyTypeId: UInt = expectedKeyType.id
-        val expectedCoordinateByteLength: Int = expectedUncompressedCoordinateLength / 8
+        val expectedCoordinateByteLength: Int =
+            expectedUncompressedCoordinateLength / ByteHelper.BITS_IN_A_BYTE
     }
 }
