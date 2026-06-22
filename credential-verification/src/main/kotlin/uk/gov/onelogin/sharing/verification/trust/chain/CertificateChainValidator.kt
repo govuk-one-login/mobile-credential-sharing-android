@@ -5,7 +5,7 @@ import java.security.cert.X509Certificate
 /**
  * Validates an X.509 certificate chain.
  */
-interface CertificateChainValidator {
+fun interface CertificateChainValidator {
     /**
      * Verifies that certificates form a valid chain anchored to trustedRoot.
      *
