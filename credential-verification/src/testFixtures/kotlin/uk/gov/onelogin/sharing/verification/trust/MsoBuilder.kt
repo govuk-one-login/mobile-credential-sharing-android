@@ -7,6 +7,9 @@ import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject.Companion.DOC_TYPE
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject.Companion.MSO_DIGEST_ALGORITHM
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject.Companion.MSO_SCHEMA_VERSION
 
 /**
  * Builds minimal MSO (Mobile Security Object) CBOR payloads for testing.
@@ -17,13 +20,13 @@ object MsoBuilder {
     private val cborMapper = ObjectMapper(cborFactory)
 
     fun build(
-        docType: String = "org.iso.18013.5.1.mDL",
+        docType: String = DOC_TYPE,
         validFrom: Date = Date(),
         validUntil: Date = Date(System.currentTimeMillis() + 365L * 86400000L)
     ): ByteArray {
         val mso = cborMapper.createObjectNode()
-        mso.put("version", "1.0")
-        mso.put("digestAlgorithm", "SHA-256")
+        mso.put("version", MSO_SCHEMA_VERSION)
+        mso.put("digestAlgorithm", MSO_DIGEST_ALGORITHM)
         mso.put("docType", docType)
         val validity = cborMapper.createObjectNode()
         validity.put("signed", formatDate(validFrom))
