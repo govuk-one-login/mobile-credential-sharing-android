@@ -38,7 +38,13 @@ enum class VerificationError {
     INVALID_ISSUER_SIGNATURE,
 
     /**
-     * The MSO version field is not "1.0".
+     * An MSO field (issuing_country or issuing_jurisdiction) does not match the corresponding
+     * attribute on the leaf certificate.
+     */
+    INVALID_MSO,
+
+    /**
+     * The MSO version major component is not "1".
      */
     INVALID_MSO_VERSION,
 
