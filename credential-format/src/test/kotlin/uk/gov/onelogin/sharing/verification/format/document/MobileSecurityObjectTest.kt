@@ -8,14 +8,9 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.format.ClassInfoExt.scanResult
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
-import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
-import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
-import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 import uk.gov.onelogin.sharing.verification.format.document.validity.ValidityInfo
 
 @OptIn(ExperimentalTime::class)
@@ -127,43 +122,5 @@ class MobileSecurityObjectTest {
         assertNotEquals(mso.hashCode(), differentDeviceKeyInfo.hashCode())
         assertNotEquals(mso.hashCode(), differentValidityInfo.hashCode())
         assertNotEquals(mso.hashCode(), differentStatus.hashCode())
-    }
-
-    @Test
-    fun `Invalid versions throw Verification failures`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            mso.copy(version = "2.0")
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.INVALID_MSO_VERSION)
-        )
-    }
-
-    @Test
-    fun `Invalid digest algorithms throw Verification failures`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            mso.copy(digestAlgorithm = "NotAnAlgorithm")
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.UNSUPPORTED_DIGEST_ALGORITHM)
-        )
-    }
-
-    @Test
-    fun `Throws a Verification failure when checking against document types`() {
-        assertTrue(mso.hasDocType(mso.docType))
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            mso.hasDocType("invalid document")
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.INVALID_DOC_TYPE)
-        )
     }
 }

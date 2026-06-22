@@ -35,7 +35,8 @@ dependencies {
     ).forEach(::api)
 
     listOf(
-        libs.jackson.cbor
+        libs.jackson.cbor,
+        projects.exchangeFormat
     ).forEach(::implementation)
 
     listOf(
@@ -52,8 +53,7 @@ dependencies {
         libs.junit,
         libs.mockk,
         libs.org.hamcrest,
-        libs.com.google.test.parameter.injector,
-        projects.exchangeFormat
+        libs.com.google.test.parameter.injector
     ).forEach(::testImplementation)
 }
 

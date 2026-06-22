@@ -22,7 +22,6 @@ import uk.gov.onelogin.sharing.verification.document.cose.CoseKeyDecoder
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithInvalidVersion
-import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.encodedMsoWithMismatchedDigests
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.malformedEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObjectStubs.validEncodedMSO
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
@@ -45,7 +44,7 @@ class Iso18013DocumentVerifierTest {
      * passed directly to [Iso18013DocumentVerifier.verifyDocument].
      */
     private val provisionedDocument: VerifiableDocument = SharingVerifiableDocument(
-        docType = "unit test",
+        docType = MobileSecurityObject.DOC_TYPE,
         issuerSigned = SharingIssuerSigned(
             issuerAuth = validIssuerAuth,
             nameSpaces = null
@@ -66,7 +65,9 @@ class Iso18013DocumentVerifierTest {
         Iso18013DocumentVerifier(
             mockRootCertificate,
             trustVerifier,
-            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder())
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
+            MsoDecoder(),
+            MsoFieldVerifierImpl()
         )
     }
 
@@ -78,18 +79,16 @@ class Iso18013DocumentVerifierTest {
     fun `Ensure constructor constraints`() {
         val constructorInfo = classInfo.constructorInfo
 
-        assertThat(
-            constructorInfo,
-            hasSize(1)
-        )
-
+        assertThat(constructorInfo, hasSize(1))
         assertThat(
             constructorInfo[0].typeDescriptor.toStringWithSimpleNames(),
             equalTo(
                 "void (" +
                     "${X509Certificate::class.java.simpleName}, " +
                     "${TrustVerifier::class.java.simpleName}, " +
-                    "${DeviceAuthVerifier::class.java.simpleName})"
+                    "${DeviceAuthVerifier::class.java.simpleName}, " +
+                    "${MsoDecoder::class.java.simpleName}, " +
+                    "${MsoFieldVerifier::class.java.simpleName})"
             )
         )
     }
@@ -100,12 +99,7 @@ class Iso18013DocumentVerifierTest {
      */
     @Test
     fun `Ensure function count`() {
-        val methodInfo = classInfo.methodInfo
-
-        assertThat(
-            methodInfo,
-            hasSize(5)
-        )
+        assertThat(classInfo.methodInfo, hasSize(3))
     }
 
     /**
@@ -115,11 +109,6 @@ class Iso18013DocumentVerifierTest {
     @Test
     fun `Ensure private function signature`(
         @TestParameter functionsToDescriptors: Pair<String, String> = testValues(
-            "decodeMSO" to "${MobileSecurityObject::class.java.name} (byte[])",
-            "verifyMSOFields" to "void (" +
-                "${VerifiableDocument::class.java.simpleName}, " +
-                "${MobileSecurityObject::class.java.simpleName}" +
-                ")",
             "verifyDocumentDigests" to
                 "void (" +
                 "${VerifiableDocument::class.java.simpleName}, " +
@@ -154,165 +143,60 @@ class Iso18013DocumentVerifierTest {
         )
     ) {
         every {
-            trustVerifier.verifyCOSESign1(
-                eq(validIssuerAuth),
-                eq(mockRootCertificate)
-            )
+            trustVerifier.verifyCOSESign1(eq(validIssuerAuth), eq(mockRootCertificate))
         } throws VerificationResult.Failure(error)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(
-                document = provisionedDocument,
-                sessionTranscriptBytes = sessionTranscriptBytes
-            )
+            documentVerifier.verifyDocument(provisionedDocument, sessionTranscriptBytes)
         }
 
-        assertThat(
-            exception,
-            hasError(error)
-        )
+        assertThat(exception, hasError(error))
     }
 
     /**
-     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] calls
-     * [Iso18013DocumentVerifier.decodeMSO] after verifying trust.
+     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] decodes the MSO after verifying trust.
      */
     @Test
     fun `Fails verification due to MSO decoding error`() {
         stubTrustVerifierSuccess(encodedMSO = malformedEncodedMSO)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(
-                document = provisionedDocument,
-                sessionTranscriptBytes = sessionTranscriptBytes
-            )
+            documentVerifier.verifyDocument(provisionedDocument, sessionTranscriptBytes)
         }
 
-        assertThat(
-            exception,
-            hasError(VerificationError.MALFORMED_MSO)
-        )
-    }
-
-    @Test
-    fun `decodeMSO is stubbed to throw a Failure`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.decodeMSO(validEncodedMSO)
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.MALFORMED_MSO)
-        )
+        assertThat(exception, hasError(VerificationError.MALFORMED_MSO))
     }
 
     /**
      * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] verifies [MobileSecurityObject] fields.
      */
-    @Ignore("Currently untestable via interface functions")
     @Test
-    fun `Fails verification due to invalid MSO fields`() {
+    fun `Fails verification due to invalid MSO version`() {
         stubTrustVerifierSuccess(encodedMSO = encodedMsoWithInvalidVersion)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(
-                document = provisionedDocument,
-                sessionTranscriptBytes = sessionTranscriptBytes
-            )
+            documentVerifier.verifyDocument(provisionedDocument, sessionTranscriptBytes)
         }
 
-        assertThat(
-            exception,
-            hasError(VerificationError.INVALID_MSO_VERSION)
-        )
-    }
-
-    @Test
-    fun `verifyMSOFields is stubbed to throw a Failure`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyMSOFields(provisionedDocument, mockk())
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.INVALID_MSO_VERSION)
-        )
-    }
-
-    /**
-     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] verifies [MobileSecurityObject]
-     * value digests.
-     */
-    @Ignore("Currently untestable via interface functions")
-    @Test
-    fun `Fails verification due to invalid Document Digests`() {
-        stubTrustVerifierSuccess(encodedMSO = encodedMsoWithMismatchedDigests)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(
-                document = provisionedDocument,
-                sessionTranscriptBytes = sessionTranscriptBytes
-            )
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.DIGEST_MISMATCH)
-        )
+        assertThat(exception, hasError(VerificationError.INVALID_MSO_VERSION))
     }
 
     @Test
     fun `verifyDocumentDigests is stubbed to throw a Failure`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocumentDigests(
-                document = provisionedDocument,
-                mso = mockk()
-            )
+            documentVerifier.verifyDocumentDigests(provisionedDocument, mockk())
         }
 
-        assertThat(
-            exception,
-            hasError(VerificationError.DIGEST_MISMATCH)
-        )
-    }
-
-    /**
-     * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] verifies [CertificateValidityPeriod]
-     * against the [MobileSecurityObject].
-     */
-    @Ignore("Currently untestable via interface functions")
-    @Test
-    fun `Fails verification due to expired validity info`() {
-        stubTrustVerifierSuccess(
-            validityPeriod = CertificateValidityPeriodStubs.expired()
-        )
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(
-                document = provisionedDocument,
-                sessionTranscriptBytes = sessionTranscriptBytes
-            )
-        }
-
-        assertThat(
-            exception,
-            hasError(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE)
-        )
+        assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
     }
 
     @Test
     fun `verifyValidityInfo is stubbed to throw a Failure`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyValidityInfo(
-                validityPeriod = CertificateValidityPeriodStubs.expired(),
-                mso = mockk()
-            )
+            documentVerifier.verifyValidityInfo(CertificateValidityPeriodStubs.expired(), mockk())
         }
 
-        assertThat(
-            exception,
-            hasError(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE)
-        )
+        assertThat(exception, hasError(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE))
     }
 
     /**
@@ -325,16 +209,10 @@ class Iso18013DocumentVerifierTest {
         stubTrustVerifierSuccess()
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(
-                document = presentedDocument,
-                sessionTranscriptBytes = sessionTranscriptBytes
-            )
+            documentVerifier.verifyDocument(presentedDocument, sessionTranscriptBytes)
         }
 
-        assertThat(
-            exception,
-            hasError(VerificationError.INVALID_DEVICE_SIGNATURE)
-        )
+        assertThat(exception, hasError(VerificationError.INVALID_DEVICE_SIGNATURE))
     }
 
     /**
@@ -349,16 +227,10 @@ class Iso18013DocumentVerifierTest {
         stubTrustVerifierSuccess()
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(
-                document = presentedDocument,
-                sessionTranscriptBytes = null
-            )
+            documentVerifier.verifyDocument(presentedDocument, null)
         }
 
-        assertThat(
-            exception,
-            hasError(VerificationError.INVALID_DEVICE_SIGNATURE)
-        )
+        assertThat(exception, hasError(VerificationError.INVALID_DEVICE_SIGNATURE))
     }
 
     private fun stubTrustVerifierSuccess(
