@@ -18,7 +18,8 @@ class Iso18013DocumentVerifier(
     private val trustVerifier: TrustVerifier,
     private val deviceAuthVerifier: DeviceAuthVerifier,
     private val msoDecoder: MsoDecoder,
-    private val msoFieldVerifier: MsoFieldVerifier
+    private val msoFieldVerifier: MsoFieldVerifier,
+    private val validityInfoVerifier: ValidityInfoVerifier
 ) : DocumentVerifier {
 
     override fun verifyDocument(
@@ -32,8 +33,12 @@ class Iso18013DocumentVerifier(
         val mso = msoDecoder.decode(issuerAuthResult.msoPayload)
 
         msoFieldVerifier.verify(document, mso, issuerAuthResult)
+        validityInfoVerifier.verify(
+            issuerAuthResult.certificateValidityPeriod,
+            mso.validityInfo
+        )
+
         verifyDocumentDigests(document, mso)
-        verifyValidityInfo(issuerAuthResult.certificateValidityPeriod, mso)
 
         if (document is VerifiableDocument.WithPresentation) {
             if (sessionTranscriptBytes == null) {
@@ -57,12 +62,4 @@ class Iso18013DocumentVerifier(
         document: VerifiableDocument,
         mso: MobileSecurityObject
     ): Unit = throw VerificationResult.Failure(VerificationError.DIGEST_MISMATCH)
-
-    /**
-     * @throws VerificationResult.Failure
-     */
-    internal fun verifyValidityInfo(
-        validityPeriod: CertificateValidityPeriod,
-        mso: MobileSecurityObject
-    ): Unit = throw VerificationResult.Failure(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE)
 }

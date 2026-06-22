@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.every
 import io.mockk.mockk
 import java.security.cert.X509Certificate
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
@@ -67,7 +68,8 @@ class Iso18013DocumentVerifierTest {
             trustVerifier,
             DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
             MsoDecoder(),
-            MsoFieldVerifierImpl()
+            MsoFieldVerifierImpl(),
+            ValidityInfoVerifierImpl(Clock.System)
         )
     }
 
@@ -88,7 +90,8 @@ class Iso18013DocumentVerifierTest {
                     "${TrustVerifier::class.java.simpleName}, " +
                     "${DeviceAuthVerifier::class.java.simpleName}, " +
                     "${MsoDecoder::class.java.simpleName}, " +
-                    "${MsoFieldVerifier::class.java.simpleName})"
+                    "${MsoFieldVerifier::class.java.simpleName}, " +
+                    "${ValidityInfoVerifier::class.java.simpleName})"
             )
         )
     }
@@ -188,15 +191,6 @@ class Iso18013DocumentVerifierTest {
         }
 
         assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
-    }
-
-    @Test
-    fun `verifyValidityInfo is stubbed to throw a Failure`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyValidityInfo(CertificateValidityPeriodStubs.expired(), mockk())
-        }
-
-        assertThat(exception, hasError(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE))
     }
 
     /**
