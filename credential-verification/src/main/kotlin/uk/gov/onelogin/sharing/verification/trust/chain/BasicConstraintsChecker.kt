@@ -17,21 +17,31 @@ internal class BasicConstraintsChecker(private val leafCertificate: X509Certific
     override fun getSupportedExtensions(): Set<String> = setOf(BASIC_CONSTRAINTS_OID)
 
     override fun check(cert: Certificate, unresolvedCritExts: MutableCollection<String>?) {
-        val x509 = cert as X509Certificate
+        when (val x509 = cert as X509Certificate) {
+            leafCertificate -> {
+                if (x509.getExtensionValue(BASIC_CONSTRAINTS_OID) != null) {
+                    throw CertPathValidatorException(
+                        "Leaf must not have BasicConstraints extension"
+                    )
+                }
+            }
 
-        if (x509 == leafCertificate) {
-            if (x509.getExtensionValue(BASIC_CONSTRAINTS_OID) != null) {
-                throw CertPathValidatorException("Leaf must not have BasicConstraints extension")
-            }
-        } else {
-            if (x509.getExtensionValue(BASIC_CONSTRAINTS_OID) == null) {
-                throw CertPathValidatorException("CA missing BasicConstraints extension")
-            }
-            if (!x509.criticalExtensionOIDs.contains(BASIC_CONSTRAINTS_OID)) {
-                throw CertPathValidatorException("BasicConstraints not marked critical on CA")
-            }
-            if (x509.basicConstraints < 0) {
-                throw CertPathValidatorException("BasicConstraints cA flag not set")
+            else -> {
+                when {
+                    x509.getExtensionValue(BASIC_CONSTRAINTS_OID) == null -> {
+                        throw CertPathValidatorException("CA missing BasicConstraints extension")
+                    }
+
+                    !x509.criticalExtensionOIDs.contains(BASIC_CONSTRAINTS_OID) -> {
+                        throw CertPathValidatorException(
+                            "BasicConstraints not marked critical on CA"
+                        )
+                    }
+
+                    x509.basicConstraints < 0 -> {
+                        throw CertPathValidatorException("BasicConstraints cA flag not set")
+                    }
+                }
             }
         }
 
