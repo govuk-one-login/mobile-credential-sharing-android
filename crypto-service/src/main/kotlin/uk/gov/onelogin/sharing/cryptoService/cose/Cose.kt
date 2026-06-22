@@ -89,7 +89,7 @@ object Cose {
         val curveId: UInt,
         val expectedKeyType: ECKeyType,
         val parameterSpecName: String,
-        expectedUncompressedCoordinateLength: Int,
+        expectedUncompressedCoordinateLength: Int
     ) {
         P256(
             curveId = 1u,

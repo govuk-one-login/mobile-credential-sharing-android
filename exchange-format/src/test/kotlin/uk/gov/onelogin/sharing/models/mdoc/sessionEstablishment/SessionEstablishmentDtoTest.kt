@@ -78,7 +78,7 @@ class SessionEstablishmentDtoTest {
 
         assertThat(
             result,
-            equalTo(validSessionEstablishmentDto),
+            equalTo(validSessionEstablishmentDto)
         )
     }
 }

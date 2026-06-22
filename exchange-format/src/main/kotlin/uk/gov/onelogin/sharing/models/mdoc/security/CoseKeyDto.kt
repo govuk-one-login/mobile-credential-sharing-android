@@ -38,24 +38,22 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
     }
 
     class Deserializer : StdDeserializer<CoseKeyDto>(CoseKeyDto::class.java) {
-        override fun deserialize(
-            parser: JsonParser,
-            context: DeserializationContext?,
-        ): CoseKeyDto = (parser as CBORParser).use { parser ->
-            val rootNode = CborMapper.default.readTree<JsonNode>(parser)
+        override fun deserialize(parser: JsonParser, context: DeserializationContext?): CoseKeyDto =
+            (parser as CBORParser).use { parser ->
+                val rootNode = CborMapper.default.readTree<JsonNode>(parser)
 
-            val keyType: Long = rootNode[KEY_TYPE_KEY.toString()].numberValue().toLong()
-            val curve = rootNode[CURVE_KEY.toString()].numberValue().toLong()
-            val x = rootNode[X_KEY.toString()].binaryValue()
-            val y = rootNode[Y_KEY.toString()].binaryValue()
+                val keyType: Long = rootNode[KEY_TYPE_KEY.toString()].numberValue().toLong()
+                val curve = rootNode[CURVE_KEY.toString()].numberValue().toLong()
+                val x = rootNode[X_KEY.toString()].binaryValue()
+                val y = rootNode[Y_KEY.toString()].binaryValue()
 
-            CoseKeyDto(
-                keyType = keyType,
-                curve = curve,
-                x = x,
-                y = y
-            )
-        }
+                CoseKeyDto(
+                    keyType = keyType,
+                    curve = curve,
+                    x = x,
+                    y = y
+                )
+            }
     }
 
     companion object {

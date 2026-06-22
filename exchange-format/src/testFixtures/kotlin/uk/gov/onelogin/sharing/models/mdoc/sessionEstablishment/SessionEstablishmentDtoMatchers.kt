@@ -7,29 +7,23 @@ import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 
 object SessionEstablishmentDtoMatchers {
-    fun hasData(
-        expected: ByteArray
-    ) = hasData(equalTo(expected))
+    fun hasData(expected: ByteArray) = hasData(equalTo(expected))
 
-    fun hasData(
-        matcher: Matcher<in ByteArray>
-    ): Matcher<in SessionEstablishmentDto> = SessionEstablishmentDtoMatcher(matcher) {
-        it?.data
-    }
+    fun hasData(matcher: Matcher<in ByteArray>): Matcher<in SessionEstablishmentDto> =
+        SessionEstablishmentDtoMatcher(matcher) {
+            it?.data
+        }
 
-    fun hasEReaderKey(
-        expected: EmbeddedCbor
-    ) = hasEReaderKey(equalTo(expected))
+    fun hasEReaderKey(expected: EmbeddedCbor) = hasEReaderKey(equalTo(expected))
 
-    fun hasEReaderKey(
-        matcher: Matcher<in EmbeddedCbor>
-    ): Matcher<in SessionEstablishmentDto> = SessionEstablishmentDtoMatcher(matcher) {
-        it?.eReaderKey
-    }
+    fun hasEReaderKey(matcher: Matcher<in EmbeddedCbor>): Matcher<in SessionEstablishmentDto> =
+        SessionEstablishmentDtoMatcher(matcher) {
+            it?.eReaderKey
+        }
 
     private class SessionEstablishmentDtoMatcher<Type>(
         private val matcher: Matcher<in Type>,
-        private val transformer: (SessionEstablishmentDto?) -> Type?,
+        private val transformer: (SessionEstablishmentDto?) -> Type?
     ) : TypeSafeMatcher<SessionEstablishmentDto>() {
         override fun describeTo(description: Description?) = matcher.describeTo(description)
         override fun describeMismatchSafely(

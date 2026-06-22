@@ -16,9 +16,7 @@ data class EmbeddedCbor(val encoded: ByteArray) : CborEncodable {
         return encoded.contentEquals(other.encoded)
     }
 
-    override fun hashCode(): Int {
-        return encoded.contentHashCode()
-    }
+    override fun hashCode(): Int = encoded.contentHashCode()
 }
 
 class EmbeddedCborSerializer : StdSerializer<EmbeddedCbor>(EmbeddedCbor::class.java) {

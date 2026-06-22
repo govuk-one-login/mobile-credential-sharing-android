@@ -138,9 +138,8 @@ class SessionEstablishmentMessageStructureTest {
             "Indefinite byte arrays" to containsString(
                 (PREFIX_TYPE_BYTES + SUFFIX_INDEFINITE).toHexString()
             )
-        ),
+        )
     ) {
-
         assertThat(
             resultHexString.chunked(2),
             not(contains(assertion))
@@ -156,7 +155,7 @@ class SessionEstablishmentMessageStructureTest {
         @TestParameter propertyName: String = testValues(
             E_READER_KEY_KEY,
             DATA_KEY
-        ),
+        )
     ) {
         val values = mapper.readTree(result).findValues(propertyName)
         assertThat(
@@ -185,12 +184,12 @@ class SessionEstablishmentMessageStructureTest {
         val embeddedCborPaddingStart = "d818584b"
 
         val expectedEReaderPrefix = eReaderKeyPrefix +
-                embeddedCborPaddingStart +
-                HexFormatter(CBORConstants.PREFIX_TYPE_OBJECT + 4)
+            embeddedCborPaddingStart +
+            HexFormatter(CBORConstants.PREFIX_TYPE_OBJECT + 4)
 
         assertThat(
             resultHexString,
-            containsString(expectedEReaderPrefix),
+            containsString(expectedEReaderPrefix)
         )
     }
 
@@ -251,9 +250,8 @@ class SessionEstablishmentMessageStructureTest {
             "Indefinite byte arrays" to containsString(
                 (PREFIX_TYPE_BYTES + SUFFIX_INDEFINITE).toHexString()
             )
-        ),
+        )
     ) {
-
         assertThat(
             coseKeyHexString.chunked(2),
             not(contains(assertion))
@@ -271,7 +269,7 @@ class SessionEstablishmentMessageStructureTest {
             "Curve" to CURVE_KEY,
             "X" to X_KEY,
             "Y" to Y_KEY
-        ),
+        )
     ) {
         val values = mapper.readTree(
             sessionEstablishmentDto.eReaderKey.encoded
@@ -302,18 +300,18 @@ class SessionEstablishmentMessageStructureTest {
     fun `'eReaderKey' - Encoded data has the correct data structure`(
         @TestParameter inputs: Pair<Long, (JsonNode) -> Boolean> = namedTestValues(
             "Key type" to (
-                    KEY_TYPE_KEY to JsonNode::isInt
-                    ),
+                KEY_TYPE_KEY to JsonNode::isInt
+                ),
             "Curve" to (
-                    CURVE_KEY to JsonNode::isInt
-                    ),
+                CURVE_KEY to JsonNode::isInt
+                ),
             "X" to (
-                    X_KEY to JsonNode::isBinary
-                    ),
+                X_KEY to JsonNode::isBinary
+                ),
             "Y" to (
-                    Y_KEY to JsonNode::isBinary
-                    )
-        ),
+                Y_KEY to JsonNode::isBinary
+                )
+        )
     ) {
         val (property, assertion) = inputs
         val rootNode = mapper.readTree(sessionEstablishmentDto.eReaderKey.encoded)
@@ -331,8 +329,8 @@ class SessionEstablishmentMessageStructureTest {
     fun `'eReaderKey' - Only accepts valid key types`(
         @TestParameter type: ECKeyType = testValues(
             ECKeyType.EC2,
-            ECKeyType.OKP,
-        ),
+            ECKeyType.OKP
+        )
     ) {
         sessionEstablishmentDto.copy(
             eReaderKey = EmbeddedCbor(
@@ -368,8 +366,8 @@ class SessionEstablishmentMessageStructureTest {
             ECKeyType.RSA,
             ECKeyType.SYMMETRIC,
             ECKeyType.HSS_LMS,
-            ECKeyType.WALNUT_DSA,
-        ),
+            ECKeyType.WALNUT_DSA
+        )
     ) {
         assertThrows(Exception::class.java) {
             sessionEstablishmentDto.copy(
@@ -393,9 +391,7 @@ class SessionEstablishmentMessageStructureTest {
      * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
      */
     @Test
-    fun `'eReaderKey' - The curve value dictates the key type`(
-        @TestParameter curveType: ECType,
-    ) {
+    fun `'eReaderKey' - The curve value dictates the key type`(@TestParameter curveType: ECType) {
         sessionEstablishmentDto = sessionEstablishmentDto.copy(
             eReaderKey = EmbeddedCbor(
                 mapper.writeValueAsBytes(
@@ -429,7 +425,7 @@ class SessionEstablishmentMessageStructureTest {
     fun `'eReaderKey' - OKP curves fail with EC2 key type`(
         @TestParameter curveType: ECType = testValuesIn(
             ECType.entries.filter { it.expectedKeyType == ECKeyType.OKP }
-        ),
+        )
     ) {
         assertThrows(Exception::class.java) {
             sessionEstablishmentDto = sessionEstablishmentDto.copy(
@@ -461,7 +457,7 @@ class SessionEstablishmentMessageStructureTest {
     fun `'eReaderKey' - EC2 curves fail with OKP key type`(
         @TestParameter curveType: ECType = testValuesIn(
             ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
-        ),
+        )
     ) {
         assertThrows(Exception::class.java) {
             sessionEstablishmentDto = sessionEstablishmentDto.copy(
@@ -486,9 +482,7 @@ class SessionEstablishmentMessageStructureTest {
      * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
      */
     @Test
-    fun `'eReaderKey' - Verify x length matches selected EC curve`(
-        @TestParameter type: ECType
-    ) {
+    fun `'eReaderKey' - Verify x length matches selected EC curve`(@TestParameter type: ECType) {
         assertThat(
             coseKeyDto.copy(
                 keyType = type.keyTypeId.toLong(),
@@ -498,7 +492,6 @@ class SessionEstablishmentMessageStructureTest {
             equalTo(type.expectedCoordinateByteLength)
         )
     }
-
 
     /**
      * Scenario ID: mDLR_MS_SE_06
@@ -513,9 +506,7 @@ class SessionEstablishmentMessageStructureTest {
      */
     @Test
     @Ignore("Fails conformance test due to lack of input validation")
-    fun `'eReaderKey' - Refuses invalid x coordinate lengths`(
-        @TestParameter type: ECType
-    ) {
+    fun `'eReaderKey' - Refuses invalid x coordinate lengths`(@TestParameter type: ECType) {
         assertThrows(Exception::class.java) {
             coseKeyDto.copy(
                 keyType = type.keyTypeId.toLong(),
@@ -542,7 +533,7 @@ class SessionEstablishmentMessageStructureTest {
         assertThat(
             coseKeyDto.copy(
                 keyType = type.keyTypeId.toLong(),
-                curve = type.curveId.toLong(),
+                curve = type.curveId.toLong()
             ),
             hasProperty("y")
         )
@@ -618,7 +609,7 @@ class SessionEstablishmentMessageStructureTest {
         assertThat(
             coseKeyDto.copy(
                 keyType = type.keyTypeId.toLong(),
-                curve = type.curveId.toLong(),
+                curve = type.curveId.toLong()
             ),
             hasProperty(
                 "y",
@@ -634,7 +625,7 @@ class SessionEstablishmentMessageStructureTest {
         )
     ) {
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME)
-        Security.addProvider(BouncyCastleProvider());
+        Security.addProvider(BouncyCastleProvider())
 
         // Get standard curve domain parameters
         val parameters = AlgorithmParameters.getInstance(
@@ -659,7 +650,7 @@ class SessionEstablishmentMessageStructureTest {
             keyType = type.keyTypeId.toLong(),
             curve = type.curveId.toLong(),
             x = xCoordinate,
-            y = yCoordinate,
+            y = yCoordinate
         ).let {
             assertTrue(
                 isCOSEPointOnCurve(
