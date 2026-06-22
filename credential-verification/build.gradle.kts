@@ -45,15 +45,18 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
-        libs.jackson.cbor
+        libs.jackson.cbor,
+        libs.junit,
+        libs.org.bouncycastle.bcpkix
     ).forEach(::testFixturesImplementation)
 
     listOf(
+        libs.com.google.test.parameter.injector,
         libs.io.github.classgraph,
         libs.junit,
         libs.mockk,
         libs.org.hamcrest,
-        libs.com.google.test.parameter.injector
+        projects.exchangeFormat
     ).forEach(::testImplementation)
 }
 

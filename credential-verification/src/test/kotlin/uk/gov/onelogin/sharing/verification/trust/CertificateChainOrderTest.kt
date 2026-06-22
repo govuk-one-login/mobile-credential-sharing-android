@@ -3,8 +3,8 @@ package uk.gov.onelogin.sharing.verification.trust
 import io.mockk.every
 import io.mockk.mockk
 import java.security.cert.X509Certificate
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.CoreMatchers
+import org.hamcrest.MatcherAssert
 import org.junit.Test
 
 class CertificateChainOrderTest {
@@ -13,8 +13,8 @@ class CertificateChainOrderTest {
     fun `single cert returns it unchanged`() {
         val cert = mockk<X509Certificate>(relaxed = true)
         val result = orderCertificates(listOf(cert))
-        assertThat(result.size, equalTo(1))
-        assertThat(result[0], equalTo(cert))
+        MatcherAssert.assertThat(result.size, CoreMatchers.equalTo(1))
+        MatcherAssert.assertThat(result[0], CoreMatchers.equalTo(cert))
     }
 
     @Test
@@ -25,7 +25,7 @@ class CertificateChainOrderTest {
 
         val result = orderCertificates(listOf(root, leaf, intermediate))
 
-        assertThat(result, equalTo(listOf(leaf, intermediate, root)))
+        MatcherAssert.assertThat(result, CoreMatchers.equalTo(listOf(leaf, intermediate, root)))
     }
 
     @Test
@@ -35,7 +35,7 @@ class CertificateChainOrderTest {
 
         val result = orderCertificates(listOf(leaf, root))
 
-        assertThat(result, equalTo(listOf(leaf, root)))
+        MatcherAssert.assertThat(result, CoreMatchers.equalTo(listOf(leaf, root)))
     }
 
     @Test
@@ -45,7 +45,7 @@ class CertificateChainOrderTest {
 
         val result = orderCertificates(listOf(cert1, cert2))
 
-        assertThat(result.first(), equalTo(cert1))
+        MatcherAssert.assertThat(result.first(), CoreMatchers.equalTo(cert1))
     }
 
     private fun certWithSkiAndAki(ski: String?, aki: String?): X509Certificate {

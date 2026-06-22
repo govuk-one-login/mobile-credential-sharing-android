@@ -12,12 +12,14 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationE
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
+import uk.gov.onelogin.sharing.verification.trust.chain.CertificateChainValidator
 import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
 @ContributesBinding(CredentialVerificationScope::class)
 class TrustVerifierImpl internal constructor(
     private val coseSign1Decoder: CoseSign1Decoder,
-    private val signatureVerifier: CoseSignatureVerifier
+    private val signatureVerifier: CoseSignatureVerifier,
+    private val certificateChainValidator: CertificateChainValidator
 ) : TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
@@ -33,7 +35,7 @@ class TrustVerifierImpl internal constructor(
         val ordered = orderCertificates(certs)
         val leaf = ordered.first()
 
-        verifyChainAnchoring(ordered, trustedRoot)
+        certificateChainValidator.verify(ordered, trustedRoot)
 
         val publicKey = try {
             leaf.publicKey as ECPublicKey
@@ -79,14 +81,5 @@ class TrustVerifierImpl internal constructor(
             payload,
             VerificationError.INVALID_DEVICE_SIGNATURE
         )
-    }
-
-    private fun verifyChainAnchoring(ordered: List<X509Certificate>, trustedRoot: X509Certificate) {
-        val topCert = ordered.last()
-        try {
-            topCert.verify(trustedRoot.publicKey)
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            throw VerificationResult.Failure(VerificationError.UNTRUSTED_CERTIFICATE)
-        }
     }
 }
