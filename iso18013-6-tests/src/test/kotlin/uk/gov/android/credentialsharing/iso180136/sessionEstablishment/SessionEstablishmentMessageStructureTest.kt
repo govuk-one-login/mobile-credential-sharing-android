@@ -41,12 +41,12 @@ import org.hamcrest.Matchers.hasProperty
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.cryptoService.cose.Cose.ECKeyType
-import uk.gov.onelogin.sharing.cryptoService.cose.Cose.ECType
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.Companion.padEcCoordinatesTo32Bytes
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cose.ECKeyType
+import uk.gov.onelogin.sharing.models.mdoc.cose.ECType
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto.Companion.CURVE_KEY
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto.Companion.KEY_TYPE_KEY
@@ -328,7 +328,7 @@ class SessionEstablishmentMessageStructureTest {
     @Test
     fun `'eReaderKey' - Only accepts valid key types`(
         @TestParameter type: ECKeyType = testValues(
-            ECKeyType.EC2,
+            ECKeyType.EC,
             ECKeyType.OKP
         )
     ) {
@@ -433,7 +433,7 @@ class SessionEstablishmentMessageStructureTest {
                     mapper.writeValueAsBytes(
                         coseKeyDto.copy(
                             curve = curveType.curveId.toLong(),
-                            keyType = ECKeyType.EC2.id.toLong()
+                            keyType = ECKeyType.EC.id.toLong()
                         )
                     )
                 )
@@ -456,7 +456,7 @@ class SessionEstablishmentMessageStructureTest {
     @Ignore("Fails conformance test due to lack of input validation")
     fun `'eReaderKey' - EC2 curves fail with OKP key type`(
         @TestParameter curveType: ECType = testValuesIn(
-            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC }
         )
     ) {
         assertThrows(Exception::class.java) {
@@ -527,7 +527,7 @@ class SessionEstablishmentMessageStructureTest {
     @Test
     fun `'eReaderKey' - EC2 keys also have a 'y' coordinate value`(
         @TestParameter type: ECType = testValuesIn(
-            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC }
         )
     ) {
         assertThat(
@@ -576,7 +576,7 @@ class SessionEstablishmentMessageStructureTest {
     @Test
     fun `'eReaderKey' - Verify Y length matches selected EC curve`(
         @TestParameter type: ECType = testValuesIn(
-            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC }
         )
     ) {
         assertThat(
@@ -603,7 +603,7 @@ class SessionEstablishmentMessageStructureTest {
     @Ignore("Fails conformance test due to only handling uncompressed COSE keys")
     fun `'eReaderKey' - Compressed keys have a Y property as a boolean`(
         @TestParameter type: ECType = testValuesIn(
-            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC }
         )
     ) {
         assertThat(
@@ -621,7 +621,7 @@ class SessionEstablishmentMessageStructureTest {
     @Test
     fun `'eReaderKey' - uncompressed coordinates are valid`(
         @TestParameter type: ECType = testValuesIn(
-            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC2 }
+            ECType.entries.filter { it.expectedKeyType == ECKeyType.EC }
         )
     ) {
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME)

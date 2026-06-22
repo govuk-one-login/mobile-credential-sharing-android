@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment
 
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDtoStubs.validCoseKeyDtoBytes
 
 object SessionEstablishmentStubs {
     private const val DATA_LOCATION =
@@ -10,11 +11,6 @@ object SessionEstablishmentStubs {
         .getResourceAsStream(
             "$DATA_LOCATION/sessionEstablishmentExample.txt"
         )!!.bufferedReader().readLines().joinToString("").hexToByteArray()
-
-    val validSessionEstablishmentEReaderKey: ByteArray = (
-        "a40102200121582060e3392385041f51403051f2415531cb56dd3f999c71687013aac6768bc8187" +
-            "e225820e58deb8fdbe907f7dd5368245551a34796f7d2215c440c339bb0f7b67beccdfa"
-        ).hexToByteArray()
 
     val validSessionEstablishmentData: ByteArray = (
         "52ada2acbeb6c390f2ca0bc659b484678eb94dd45074386aadece23777b44606e42e2846bc" +
@@ -41,7 +37,7 @@ object SessionEstablishmentStubs {
         ).hexToByteArray()
 
     val validSessionEstablishmentDto = SessionEstablishmentDto(
-        eReaderKey = EmbeddedCbor(validSessionEstablishmentEReaderKey),
+        eReaderKey = EmbeddedCbor(validCoseKeyDtoBytes),
         data = validSessionEstablishmentData
     )
 }
