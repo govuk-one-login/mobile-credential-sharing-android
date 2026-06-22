@@ -210,7 +210,7 @@ class SessionEstablishmentMessageStructureTest {
      * sub-scenario: Common_CBOR_01
      */
     @Test
-    fun `eReaderKey - Deserialization creates valid CBOR`() {
+    fun `'eReaderKey' - Deserialization creates valid CBOR`() {
         val bytes = mapper.writeValueAsBytes(coseKeyDto)
         assertThat(
             resultHexString,
@@ -223,7 +223,7 @@ class SessionEstablishmentMessageStructureTest {
      * sub-scenario: Common_CBOR_02
      */
     @Test
-    fun `eReaderKey - There are no indefinite length objects`(
+    fun `'eReaderKey' - There are no indefinite length objects`(
         @TestParameter assertion: Matcher<in String> = namedTestValues(
             "Indefinite length byte strings" to containsString(
                 BYTE_STRING_INDEFINITE.toHexString()
@@ -248,7 +248,7 @@ class SessionEstablishmentMessageStructureTest {
      * sub-scenario: Common_CBOR_03
      */
     @Test
-    fun `eReaderKey - There are no duplicate fields`(
+    fun `'eReaderKey' - There are no duplicate fields`(
         @TestParameter propertyName: Long = namedTestValues(
             "Key type" to KEY_TYPE_KEY,
             "Curve" to CURVE_KEY,
