@@ -1,23 +1,24 @@
 {
-  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.1.0/schemas/schema.json",
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.11.0/schemas/schema.json",
   "services": [
     {
-      "service-tag": "mobile-credential-sharing-android",
-      "quality-gates": [
+      "serviceTag": "mobile-credential-sharing-android",
+      "promotionType": "securePipelines",
+      "checks": [
         {
-          "check-types": [
+          "checkTypes": [
             "code style and linting"
           ],
           "config": {
             "file": ".github/workflows/pull-request.yml",
             "name": "Linting",
-            "path": "jobs.linting"
+            "path": "$.jobs.linting"
           },
           "phase": "pre-merge",
           "provider": "GitHub"
         },
         {
-          "check-types": [
+          "checkTypes": [
             "code quality",
             "contract",
             "integration",
@@ -27,122 +28,114 @@
           "config": {
             "file": ".github/workflows/pull-request.yml",
             "name": "Test suites",
-            "path": "jobs.testing"
+            "path": "$.jobs.testing"
           },
           "phase": "pre-merge",
           "provider": "GitHub"
         },
         {
-          "check-types": [
+          "checkTypes": [
             "code style and linting"
           ],
           "config": {
             "file": ".github/workflows/linting.yml",
-            "name": "Verify conventional commit standards",
-            "path": "jobs.conventional_commits"
+            "path": "$.jobs.conventional_commits"
           },
           "phase": "pre-merge",
           "provider": "GitHub"
         },
         {
-          "check-types": [
+          "checkTypes": [
             "code style and linting"
           ],
+          "phase": "pre-merge",
+          "provider": "GitHub",
           "config": {
             "file": ".github/workflows/linting.yml",
-            "name": "Prose linting",
-            "path": "jobs.prose_linting"
-          },
-          "phase": "pre-merge",
-          "provider": "GitHub"
+            "path": "$.jobs.prose_linting"
+          }
         },
         {
-          "check-types": [
+          "checkTypes": [
             "code style and linting"
           ],
+          "phase": "pre-merge",
+          "provider": "GitHub",
           "config": {
             "file": ".github/workflows/linting.yml",
-            "name": "Android linting",
-            "path": "jobs.android_linting"
-          },
-          "phase": "pre-merge",
-          "provider": "GitHub"
+            "path": "$.jobs.android_linting"
+          }
         },
         {
-          "check-types": [
+          "checkTypes": [
             "code style and linting"
           ],
+          "phase": "pre-merge",
+          "provider": "GitHub",
           "config": {
             "file": ".github/workflows/linting.yml",
-            "name": "Kotlin linting",
-            "path": "jobs.kotlin_linting"
-          },
-          "phase": "pre-merge",
-          "provider": "GitHub"
+            "path": "$.jobs.kotlin_linting"
+          }
         },
         {
-          "check-types": [
+          "checkTypes": [
             "contract",
             "unit test coverage"
           ],
           "config": {
             "file": ".github/workflows/testing.yml",
             "name": "Contract (ISO-18013-6) tests",
-            "path": "jobs.contract-debug-tests"
+            "path": "$.jobs.contract-debug-tests"
           },
           "phase": "pre-merge",
           "provider": "GitHub"
         },
         {
-          "check-types": [
+          "checkTypes": [
             "unit",
             "unit test coverage"
           ],
+          "phase": "pre-merge",
+          "provider": "GitHub",
           "config": {
             "file": ".github/workflows/testing.yml",
-            "name": "Unit tests",
-            "path": "jobs.unit_tests"
-          },
-          "phase": "pre-merge",
-          "provider": "GitHub"
+            "path": "$.jobs.unit_tests"
+          }
         },
         {
-          "check-types": [
+          "checkTypes": [
             "unit",
             "integration",
             "unit test coverage"
           ],
+          "phase": "pre-merge",
+          "provider": "GitHub",
           "config": {
             "file": ".github/workflows/testing.yml",
-            "name": "Instrumentation tests",
-            "path": "jobs.instrumentation_tests"
-          },
-          "phase": "pre-merge",
-          "provider": "GitHub"
+            "path": "$.jobs.instrumentation_tests"
+          }
         },
         {
-          "check-types": [
-            "code quality",
+          "checkTypes": [
+            "code style and linting",
             "unit test coverage",
             "vulnerability detection"
           ],
+          "phase": "pre-merge",
+          "provider": "GitHub",
           "config": {
             "file": ".github/workflows/testing.yml",
-            "name": "SonarCloud Scan",
-            "path": "jobs.sonar_scan"
-          },
-          "phase": "pre-merge",
-          "provider": "GitHub"
+            "path": "$.jobs.sonar_scan"
+          }
         },
         {
-          "check-types": [],
+          "checkTypes": [],
+          "phase": "build",
+          "provider": "GitHub",
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
-            "name": "Android validation and publish to play store",
-            "path": "jobs.bump_and_publish"
-          },
-          "phase": "build",
-          "provider": "GitHub"
+            "path": "$.jobs.bump_and_publish"
+          }
         }
       ]
     }
