@@ -106,6 +106,7 @@ metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.re
 metro-runtime = { module = "dev.zacsweers.metro:runtime", version.ref = "metro" }
 metro-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+# Don't use bouncycastle in production code (api / implementation dependencies)
 org-bouncycastle-bcprov-jdk18on = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "org-bouncycastle" }
 org-bouncycastle-bctls-jdk18on = { module = "org.bouncycastle:bctls-jdk18on", version.ref = "org-bouncycastle" }
 org-hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "org-hamcrest" }
