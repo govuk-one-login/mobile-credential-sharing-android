@@ -1,0 +1,1 @@
+-keep class * extends com.fasterxml.jackson.databind.ser.std.StdSerializer { <init>(); }
