@@ -249,17 +249,6 @@ class DeviceResponseDto {
         private companion object {
             const val DEVICE_RESPONSE_REQUIRED_FIELDS = 2 // version + status
             const val DOCUMENT_REQUIRED_FIELDS = 3 // docType + issuerSigned + deviceSigned
-            const val KEY_VERSION = "version"
-            const val KEY_STATUS = "status"
-            const val KEY_DOCUMENTS = "documents"
-            const val KEY_DOCUMENT_ERRORS = "documentErrors"
-            const val KEY_DOC_TYPE = "docType"
-            const val KEY_ISSUER_SIGNED = "issuerSigned"
-            const val KEY_DEVICE_SIGNED = "deviceSigned"
-            const val KEY_NAME_SPACES = "nameSpaces"
-            const val KEY_ISSUER_AUTH = "issuerAuth"
-            const val KEY_DEVICE_AUTH = "deviceAuth"
-            const val KEY_DEVICE_SIGNATURE = "deviceSignature"
         }
     }
 
@@ -351,18 +340,19 @@ class DeviceResponseDto {
                 )
             )
         }
+    }
 
-        private companion object {
-            const val KEY_VERSION = "version"
-            const val KEY_STATUS = "status"
-            const val KEY_DOCUMENTS = "documents"
-            const val KEY_DOC_TYPE = "docType"
-            const val KEY_ISSUER_SIGNED = "issuerSigned"
-            const val KEY_DEVICE_SIGNED = "deviceSigned"
-            const val KEY_NAME_SPACES = "nameSpaces"
-            const val KEY_ISSUER_AUTH = "issuerAuth"
-            const val KEY_DEVICE_AUTH = "deviceAuth"
-            const val KEY_DEVICE_SIGNATURE = "deviceSignature"
-        }
+    private companion object {
+        const val KEY_VERSION = "version"
+        const val KEY_STATUS = "status"
+        const val KEY_DOCUMENTS = "documents"
+        const val KEY_DOCUMENT_ERRORS = "documentErrors"
+        const val KEY_DOC_TYPE = "docType"
+        const val KEY_ISSUER_SIGNED = "issuerSigned"
+        const val KEY_DEVICE_SIGNED = "deviceSigned"
+        const val KEY_NAME_SPACES = "nameSpaces"
+        const val KEY_ISSUER_AUTH = "issuerAuth"
+        const val KEY_DEVICE_AUTH = "deviceAuth"
+        const val KEY_DEVICE_SIGNATURE = "deviceSignature"
     }
 }
