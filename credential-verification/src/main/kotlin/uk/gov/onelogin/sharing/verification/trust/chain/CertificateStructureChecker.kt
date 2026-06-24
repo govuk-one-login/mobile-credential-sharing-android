@@ -82,7 +82,8 @@ internal class CertificateStructureChecker(
     private fun computeSkiHash(cert: X509Certificate): String {
         val bits = extractSubjectPublicKeyBits(cert.publicKey.encoded)
             ?: throw CertPathValidatorException("Cannot extract subject public key bits")
-        return MessageDigest.getInstance("SHA-1").digest(bits).toHexString()
+
+        return MessageDigest.getInstance(SKI_HASH_ALGORITHM).digest(bits).toHexString()
     }
 
     private fun verifyAuthorityKeyIdentifier(cert: X509Certificate) {
@@ -138,6 +139,7 @@ internal class CertificateStructureChecker(
 
         const val OID_SKI = "2.5.29.14"
         const val OID_AKI = "2.5.29.35"
+        private const val SKI_HASH_ALGORITHM = "SHA-1"
 
         val ALLOWED_CRITICAL_OIDS = setOf(
             "2.5.29.19", // BasicConstraints
