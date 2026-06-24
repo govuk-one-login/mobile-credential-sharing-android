@@ -13,6 +13,17 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 
+/**
+ * ```
+ * DeviceRequest = {
+ *    "version" : Version,
+ *    "docRequests" : [+ DocRequest],
+ *    ? "deviceRequestInfo" : DeviceRequestInfoBytes,
+ *    ? "readerAuthAll" : [+ReaderAuthAll],
+ *    * tstr => RFU
+ * }
+ * ```
+ */
 @JsonSerialize(using = DeviceRequestDto.Serializer::class)
 @JsonDeserialize(using = DeviceRequestDto.Deserializer::class)
 data class DeviceRequestDto(
@@ -25,6 +36,28 @@ data class DeviceRequestDto(
 ) : CborEncodable {
     init {
         require(version.isNotEmpty()) { "DeviceRequest: version must not be empty" }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DeviceRequestDto
+
+        if (version != other.version) return false
+        if (docRequest != other.docRequest) return false
+        if (!deviceRequestInfo.contentEquals(other.deviceRequestInfo)) return false
+        if (!readerAuthAll.contentEquals(other.readerAuthAll)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = version.hashCode()
+        result = 31 * result + docRequest.hashCode()
+        result = 31 * result + (deviceRequestInfo?.contentHashCode() ?: 0)
+        result = 31 * result + (readerAuthAll?.contentHashCode() ?: 0)
+        return result
     }
 
     class Serializer : StdSerializer<DeviceRequestDto>(DeviceRequestDto::class.java) {
@@ -60,6 +93,8 @@ data class DeviceRequestDto(
         private const val FIELD_COUNT = 2
         const val VERSION_KEY = "version"
         const val DOC_REQUESTS_KEY = "docRequests"
+        const val DEVICE_REQUEST_INFO_KEY: String = "deviceRequestInfo"
+        const val READER_AUTH_ALL_KEY: String = "readerAuthAll"
     }
 
     fun toDomain(): DeviceRequest = DeviceRequest(

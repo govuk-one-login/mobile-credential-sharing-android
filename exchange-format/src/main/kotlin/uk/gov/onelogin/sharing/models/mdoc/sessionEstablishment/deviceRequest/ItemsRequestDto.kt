@@ -18,6 +18,27 @@ data class ItemsRequestDto(
     @JsonIgnore
     val requestInfo: ByteArray? = null
 ) : CborEncodable {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ItemsRequestDto
+
+        if (docType != other.docType) return false
+        if (nameSpaces != other.nameSpaces) return false
+        if (!requestInfo.contentEquals(other.requestInfo)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = docType.hashCode()
+        result = 31 * result + nameSpaces.hashCode()
+        result = 31 * result + (requestInfo?.contentHashCode() ?: 0)
+        return result
+    }
+
     init {
         require(docType.isNotEmpty()) { "ItemsRequest: docType must not be empty" }
         require(nameSpaces.isNotEmpty()) { "ItemsRequest: nameSpaces must not be empty" }

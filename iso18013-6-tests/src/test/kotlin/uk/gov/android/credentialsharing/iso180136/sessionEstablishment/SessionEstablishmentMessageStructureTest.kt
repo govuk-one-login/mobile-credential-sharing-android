@@ -42,7 +42,6 @@ import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.Companion.padEcCoordinatesTo32Bytes
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.cose.ECKeyType
@@ -57,6 +56,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablish
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto.Companion.E_READER_KEY_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentStubs.validSessionEstablishmentDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentStubs.validSessionEstablishmentDtoBytes
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 
 /**
  * ISO/IEC TS 18013-6:2025 conformance tests for Session Establishment.
@@ -74,8 +74,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablish
  */
 @RunWith(TestParameterInjector::class)
 class SessionEstablishmentMessageStructureTest {
-    private val mapper = CborMapper.default
-
     private var sessionEstablishmentDto = validSessionEstablishmentDto
     private val result by lazy {
         mapper.writeValueAsBytes(sessionEstablishmentDto)
