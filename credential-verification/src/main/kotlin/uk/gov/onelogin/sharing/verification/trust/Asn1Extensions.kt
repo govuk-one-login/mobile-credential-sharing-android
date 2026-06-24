@@ -37,6 +37,7 @@ internal fun X509Certificate.authorityKeyIdentifierHex(): String? {
  * Extracts the raw public key bit string from a SubjectPublicKeyInfo DER structure.
  * SubjectPublicKeyInfo ::= SEQUENCE { AlgorithmIdentifier, BIT STRING }
  */
+@Suppress("ReturnCount")
 internal fun extractSubjectPublicKeyBits(spki: ByteArray): ByteArray? {
     if (spki.size < MIN_ASN1_SIZE) return null
     if (spki[0].toInt() and BYTE_MASK != TAG_SEQUENCE) return null

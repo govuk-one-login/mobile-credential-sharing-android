@@ -27,41 +27,39 @@ class DisallowedCriticalExtProvider : TestParameterValuesProvider() {
         require(oids.none { it in ALLOWED_CRITICAL_OIDS })
     }
 
-    override fun provideValues(context: Context?): List<StructureCase> =
-        disallowedOids.map { oid ->
-            StructureCase(
-                description = "critical extension $oid not in ALLOWED_CRITICAL_OIDS",
-                chain = listOf(
-                    TestCertificateGenerator(
-                        subject = LEAF_DN,
-                        keyPair = CertificateStubs.leafKeyPair,
-                        issuerKeyPair = CertificateStubs.rootKeyPair,
-                        issuer = ROOT_DN
-                    ).leaf().withExtension(oid, true, byteArrayOf(0x01)).build()
-                ),
-                root = CertificateStubs.rootCa
-            )
-        }
+    override fun provideValues(context: Context?): List<StructureCase> = disallowedOids.map { oid ->
+        StructureCase(
+            description = "critical extension $oid not in ALLOWED_CRITICAL_OIDS",
+            chain = listOf(
+                TestCertificateGenerator(
+                    subject = LEAF_DN,
+                    keyPair = CertificateStubs.leafKeyPair,
+                    issuerKeyPair = CertificateStubs.rootKeyPair,
+                    issuer = ROOT_DN
+                ).leaf().withExtension(oid, true, byteArrayOf(0x01)).build()
+            ),
+            root = CertificateStubs.rootCa
+        )
+    }
 }
 
 class ForbiddenExtensionProvider : TestParameterValuesProvider() {
     private val minimalSequence = byteArrayOf(0x30, 0x00)
 
-    override fun provideValues(context: Context?): List<StructureCase> =
-        FORBIDDEN_OIDS.map { oid ->
-            StructureCase(
-                description = "Forbidden OID $oid present",
-                chain = listOf(
-                    TestCertificateGenerator(
-                        subject = LEAF_DN,
-                        keyPair = CertificateStubs.leafKeyPair,
-                        issuerKeyPair = CertificateStubs.rootKeyPair,
-                        issuer = ROOT_DN
-                    ).leaf().withExtension(oid, false, minimalSequence).build()
-                ),
-                root = CertificateStubs.rootCa
-            )
-        }
+    override fun provideValues(context: Context?): List<StructureCase> = FORBIDDEN_OIDS.map { oid ->
+        StructureCase(
+            description = "Forbidden OID $oid present",
+            chain = listOf(
+                TestCertificateGenerator(
+                    subject = LEAF_DN,
+                    keyPair = CertificateStubs.leafKeyPair,
+                    issuerKeyPair = CertificateStubs.rootKeyPair,
+                    issuer = ROOT_DN
+                ).leaf().withExtension(oid, false, minimalSequence).build()
+            ),
+            root = CertificateStubs.rootCa
+        )
+    }
 }
 
 class InvalidSerialProvider : TestParameterValuesProvider() {
@@ -74,7 +72,14 @@ class InvalidSerialProvider : TestParameterValuesProvider() {
                     keyPair = CertificateStubs.leafKeyPair,
                     issuerKeyPair = CertificateStubs.rootKeyPair,
                     issuer = ROOT_DN
-                ).leaf().withSerial(BigInteger(1, ByteArray(MIN_SERIAL_OCTETS - 1) { 0x7F })).build()
+                ).leaf().withSerial(
+                    BigInteger(
+                        1,
+                        ByteArray(MIN_SERIAL_OCTETS - 1) {
+                            0x7F
+                        }
+                    )
+                ).build()
             ),
             root = CertificateStubs.rootCa
         ),
@@ -86,7 +91,14 @@ class InvalidSerialProvider : TestParameterValuesProvider() {
                     keyPair = CertificateStubs.leafKeyPair,
                     issuerKeyPair = CertificateStubs.rootKeyPair,
                     issuer = ROOT_DN
-                ).leaf().withSerial(BigInteger(1, ByteArray(MAX_SERIAL_OCTETS + 1) { 0x7F })).build()
+                ).leaf().withSerial(
+                    BigInteger(
+                        1,
+                        ByteArray(MAX_SERIAL_OCTETS + 1) {
+                            0x7F
+                        }
+                    )
+                ).build()
             ),
             root = CertificateStubs.rootCa
         ),

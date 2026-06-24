@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.verification.trust.extractSubjectPublicKeyBits
 import uk.gov.onelogin.sharing.verification.trust.subjectKeyIdentifierHex
 import uk.gov.onelogin.sharing.verification.trust.toHexString
 
+@Suppress("TooManyFunctions")
 internal class CertificateStructureChecker(
     private val orderedChain: List<X509Certificate>,
     private val trustedRoot: X509Certificate
@@ -23,7 +24,6 @@ internal class CertificateStructureChecker(
         val x509 = cert as X509Certificate
         verifyCriticalExtensions(x509)
         verifyForbiddenExtensions(x509)
-        verifyDuplicateExtensions(x509)
         verifySerialNumber(x509)
         verifySubjectKeyIdentifier(x509)
         verifyAuthorityKeyIdentifier(x509)
@@ -31,12 +31,14 @@ internal class CertificateStructureChecker(
     }
 
     private fun verifyCriticalExtensions(cert: X509Certificate) {
-        val critical = cert.criticalExtensionOIDs ?: return
+        val critical = cert.criticalExtensionOIDs ?: emptySet()
+        val nonCritical = cert.nonCriticalExtensionOIDs ?: emptySet()
+        if (critical.any { it in nonCritical }) {
+            throw CertPathValidatorException("Duplicate extension OID detected")
+        }
         for (oid in critical) {
             if (oid !in ALLOWED_CRITICAL_OIDS) {
-                throw CertPathValidatorException(
-                    "Disallowed critical extension: $oid"
-                )
+                throw CertPathValidatorException("Disallowed critical extension: $oid")
             }
         }
     }
@@ -46,14 +48,6 @@ internal class CertificateStructureChecker(
         val nonCritical = cert.nonCriticalExtensionOIDs.orEmpty()
         FORBIDDEN_OIDS.firstOrNull { it in critical || it in nonCritical }?.let {
             throw CertPathValidatorException("Forbidden extension present: $it")
-        }
-    }
-
-    private fun verifyDuplicateExtensions(cert: X509Certificate) {
-        val critical = cert.criticalExtensionOIDs ?: emptySet()
-        val nonCritical = cert.nonCriticalExtensionOIDs ?: emptySet()
-        if (critical.any { it in nonCritical }) {
-            throw CertPathValidatorException("Duplicate extension OID detected")
         }
     }
 
@@ -79,23 +73,23 @@ internal class CertificateStructureChecker(
         requireNonCriticalExtension(cert, OID_SKI, "SubjectKeyIdentifier")
         val skiHex = cert.subjectKeyIdentifierHex()
             ?: throw CertPathValidatorException("SubjectKeyIdentifier absent")
-        val bits = extractSubjectPublicKeyBits(cert.publicKey.encoded)
-            ?: throw CertPathValidatorException("Cannot extract subject public key bits")
-        val expectedHex = MessageDigest.getInstance("SHA-1").digest(bits).toHexString()
+        val expectedHex = computeSkiHash(cert)
         if (skiHex != expectedHex) {
             throw CertPathValidatorException("SubjectKeyIdentifier does not match public key hash")
         }
+    }
+
+    private fun computeSkiHash(cert: X509Certificate): String {
+        val bits = extractSubjectPublicKeyBits(cert.publicKey.encoded)
+            ?: throw CertPathValidatorException("Cannot extract subject public key bits")
+        return MessageDigest.getInstance("SHA-1").digest(bits).toHexString()
     }
 
     private fun verifyAuthorityKeyIdentifier(cert: X509Certificate) {
         requireNonCriticalExtension(cert, OID_AKI, "AuthorityKeyIdentifier")
     }
 
-    private fun requireNonCriticalExtension(
-        cert: X509Certificate,
-        oid: String,
-        name: String
-    ) {
+    private fun requireNonCriticalExtension(cert: X509Certificate, oid: String, name: String) {
         if (oid in (cert.criticalExtensionOIDs ?: emptySet())) {
             throw CertPathValidatorException("$name must not be critical")
         }
@@ -105,21 +99,22 @@ internal class CertificateStructureChecker(
     }
 
     private fun verifyAlgorithmStrength(cert: X509Certificate) {
-        val issuer = issuerOf(cert)
-        val issuerKey = issuer.publicKey as? ECPublicKey
-            ?: throw CertPathValidatorException("Issuer public key is not EC")
         val certStrength = SIG_ALGORITHM_STRENGTH[cert.sigAlgOID]
             ?: throw CertPathValidatorException("Disallowed signing algorithm: ${cert.sigAlgOID}")
+        val minStrength = requiredStrength(cert)
+        if (certStrength < minStrength) {
+            throw CertPathValidatorException("Algorithm strength insufficient")
+        }
+    }
+
+    private fun requiredStrength(cert: X509Certificate): Int {
+        val issuerKey = issuerOf(cert).publicKey as? ECPublicKey
+            ?: throw CertPathValidatorException("Issuer public key is not EC")
         val curveSize = issuerKey.params.order.bitLength()
-        val minStrength = when {
+        return when {
             curveSize <= CURVE_256 -> STRENGTH_SHA256
             curveSize <= CURVE_384 -> STRENGTH_SHA384
             else -> STRENGTH_SHA512
-        }
-        if (certStrength < minStrength) {
-            throw CertPathValidatorException(
-                "Algorithm strength insufficient for issuer's ${curveSize}-bit curve"
-            )
         }
     }
 
@@ -147,7 +142,7 @@ internal class CertificateStructureChecker(
         val ALLOWED_CRITICAL_OIDS = setOf(
             "2.5.29.19", // BasicConstraints
             "2.5.29.15", // KeyUsage
-            "2.5.29.37"  // ExtendedKeyUsage
+            "2.5.29.37" // ExtendedKeyUsage
         )
 
         val FORBIDDEN_OIDS = setOf(
@@ -155,13 +150,13 @@ internal class CertificateStructureChecker(
             "2.5.29.30", // NameConstraints
             "2.5.29.36", // PolicyConstraints
             "2.5.29.54", // InhibitAnyPolicy
-            "2.5.29.46"  // FreshestCRL
+            "2.5.29.46" // FreshestCRL
         )
 
         val SIG_ALGORITHM_STRENGTH = mapOf(
-            "1.2.840.10045.4.3.2" to STRENGTH_SHA256,
-            "1.2.840.10045.4.3.3" to STRENGTH_SHA384,
-            "1.2.840.10045.4.3.4" to STRENGTH_SHA512
+            "1.2.840.10045.4.3.2" to STRENGTH_SHA256, // SHA256withECDSA
+            "1.2.840.10045.4.3.3" to STRENGTH_SHA384, // SHA384withECDSA
+            "1.2.840.10045.4.3.4" to STRENGTH_SHA512 // SHA512withECDSA
         )
     }
 }

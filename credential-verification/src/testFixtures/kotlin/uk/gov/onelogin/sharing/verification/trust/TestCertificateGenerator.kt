@@ -223,14 +223,16 @@ class TestCertificateGenerator(
         private const val CRL_SIGN = 6
         private const val VALID_SERIAL_OCTETS = 9
 
-        private fun generateValidSerial(): BigInteger =
-            BigInteger(1, ByteArray(VALID_SERIAL_OCTETS).also { bytes ->
+        private fun generateValidSerial(): BigInteger = BigInteger(
+            1,
+            ByteArray(VALID_SERIAL_OCTETS).also { bytes ->
                 val value = serial++
                 for (i in bytes.indices.reversed()) {
                     bytes[i] = (value shr ((bytes.size - 1 - i) * 8)).toByte()
                 }
                 if (bytes[0] == 0.toByte()) bytes[0] = 0x01
-            })
+            }
+        )
 
         private fun keyUsageFlag(bit: Int): Int = when (bit) {
             0 -> KeyUsage.digitalSignature
