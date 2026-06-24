@@ -1,8 +1,18 @@
 package uk.gov.onelogin.sharing.models.mdoc.security
 
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDtoMatchers.hasCurveType
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDtoMatchers.hasKeyType
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDtoMatchers.hasX
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDtoMatchers.hasY
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDtoStubs.validCoseKeyDto
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDtoStubs.validCoseKeyDtoBytes
 
 class CoseKeyDtoTest {
 
@@ -41,5 +51,29 @@ class CoseKeyDtoTest {
         val dto1 = CoseKeyDto(keyType = 2L, curve = 1L, x = x, y = y)
         val dto2 = CoseKeyDto(keyType = 2L, curve = -1L, x = x, y = y)
         assertNotEquals(dto1.hashCode(), dto2.hashCode())
+    }
+
+    @Test
+    fun `Successfully serializes a DTO`() {
+        assertThat(
+            CborMapper.default.readValue(
+                validCoseKeyDtoBytes,
+                CoseKeyDto::class.java
+            ),
+            allOf(
+                hasKeyType(validCoseKeyDto.keyType),
+                hasCurveType(validCoseKeyDto.curve),
+                hasX(validCoseKeyDto.x),
+                hasY(validCoseKeyDto.y)
+            )
+        )
+    }
+
+    @Test
+    fun `Successfully deserializes a DTO`() {
+        assertThat(
+            CborMapper.default.writeValueAsBytes(validCoseKeyDto).toHexString(),
+            equalTo(validCoseKeyDtoBytes.toHexString())
+        )
     }
 }

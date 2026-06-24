@@ -24,10 +24,12 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
+        libs.com.google.test.parameter.injector,
         libs.junit,
         libs.kotlin.test,
-        libs.org.hamcrest,
-        libs.com.google.test.parameter.injector
+        libs.org.bouncycastle.bcprov.jdk18on,
+        libs.org.bouncycastle.bctls.jdk18on,
+        libs.org.hamcrest
     ).forEach(::testImplementation)
 
     listOf(

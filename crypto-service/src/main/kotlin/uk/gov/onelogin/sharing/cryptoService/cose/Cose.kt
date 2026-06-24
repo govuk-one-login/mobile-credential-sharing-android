@@ -10,6 +10,7 @@ package uk.gov.onelogin.sharing.cryptoService.cose
  * @see <a href="https://www.iana.org/assignments/cose/cose.xhtml#key-type-parameters">
  *     IANA COSE Key Type Parameters Registry</a>
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc9052">RFC 9052</a>
+ * @see [uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto]
  */
 object Cose {
     /**

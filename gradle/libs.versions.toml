@@ -9,6 +9,7 @@ androidx-test-espresso = "3.7.0" # https://developer.android.com/jetpack/android
 androidx-test-orchestrator = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/test#orchestrator-1.6.1
 androidx-test-rules = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#rules-1.7.0
 androidx-test-runner = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test#runner-1.7.0
+bouncycastle = "1.84" # https://www.bouncycastle.org/download/bouncy-castle-java/#release-notes
 com-google-test-parameter-injector = "1.22" # https://github.com/google/TestParameterInjector
 com-google-guava-android = "33.6.0-android" # https://github.com/google/guava/releases
 compose-lint-rules = "0.5.8" # https://github.com/mrmans0n/compose-rules/releases/
@@ -106,6 +107,9 @@ metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.re
 metro-runtime = { module = "dev.zacsweers.metro:runtime", version.ref = "metro" }
 metro-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+# Don't use bouncycastle in production code (api / implementation dependencies)
+org-bouncycastle-bcprov-jdk18on = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+org-bouncycastle-bctls-jdk18on = { module = "org.bouncycastle:bctls-jdk18on", version.ref = "bouncycastle" }
 org-hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "org-hamcrest" }
 org-bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "org-bouncycastle" }
 org-jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }

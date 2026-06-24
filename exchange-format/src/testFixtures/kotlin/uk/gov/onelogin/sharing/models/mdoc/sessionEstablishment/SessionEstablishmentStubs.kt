@@ -1,0 +1,43 @@
+package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment
+
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDtoStubs.validCoseKeyDtoBytes
+
+object SessionEstablishmentStubs {
+    private const val DATA_LOCATION =
+        "uk/gov/onelogin/sharing/models/mdoc/sessionEstablishment"
+
+    val validSessionEstablishmentDtoBytes: ByteArray = this::class.java.classLoader!!
+        .getResourceAsStream(
+            "$DATA_LOCATION/sessionEstablishmentExample.txt"
+        )!!.bufferedReader().readLines().joinToString("").hexToByteArray()
+
+    val validSessionEstablishmentData: ByteArray = (
+        "52ada2acbeb6c390f2ca0bc659b484678eb94dd45074386aadece23777b44606e42e2846bc" +
+            "2e2ee3c1e867b1d1685e41354a021abb0fda36f09cf5d5c51b561d3be41c9347ae71cf2b" +
+            "49de9dec7b44046ab02247931b210c9157840c1514a6027b08810716adf6196634497931" +
+            "4ac3ae9f40e66e015c1254a684108bd093e8772ec333fb663fd6803af02ea10bdbe83a99" +
+            "9f75b55a180f872139fb57ac04acd58ca15eca150cde1c3b849401188b7a30ce887dd7b7" +
+            "1b12eda2fc6ec6e5235a6c9498351fcd301f2292a4ebba7555285cee84ead96ef1677b0a" +
+            "f8239f6a7a52af4b8809b1d52ab21a162ca31ade21c57bd1d9970a2832aac41c7d52d1c4" +
+            "fee4ee64030a218df51363be701792fa6c515c489bd39dcad6fba48f1d6eb19e9c769531" +
+            "a3bf9998a32c01841305f23844ca3db6a1ff0d0d917343d62fc72ad58eab01a3198116f1" +
+            "9606609f94e35eacb78d23c59c67852a361915fe87848cdba5630c99fab71aeff72d131c" +
+            "f442654f7708ec48216416f2d996cf6cf91012b771b88907b1d1629dfa794343e653c312" +
+            "07482e2f6621cd4b5dcf3b3c328625c33fe98be99c5f264a264315be41bafdc726f8bcde" +
+            "5920de0a71884d860af44c1ff1b3d78b2e8d720d85dae53fea2b3fa1806162a4be02d039" +
+            "567c5eb2419c2ad879af48fcb7df55ca94f1b00f62187fa2329c8227aae0130ec052ca3e" +
+            "2102e57e72911b328cfdcfbaaf6b9364660f613415382644c30c0bd4e222c5cf94ba5a73" +
+            "679c53d5ced95ca50787c2289a0c17358393c1e0f2272361002fb9b160606888a59ef7a2" +
+            "c389f68b7cb424572db026b17cf2bdcafcb67c8292d92b50050356900a62a82b16f85475" +
+            "9052b00f0f4673a46229f43257e8e8325401b3fecc8c6d2258baf7f7c2fbbafab3a1b6ad" +
+            "ed4eceac1eafd5b61118df93bc0a622b03504fde47cebb224e983db12677e316c22aae04" +
+            "2d6ce4adae0d8b0f40437b8e1afa0859c9501beb63974496859a60f11069b1965b4ffac5" +
+            "779a96191f89eac7caa688b9e67c"
+        ).hexToByteArray()
+
+    val validSessionEstablishmentDto = SessionEstablishmentDto(
+        eReaderKey = EmbeddedCbor(validCoseKeyDtoBytes),
+        data = validSessionEstablishmentData
+    )
+}

@@ -15,10 +15,38 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.CborErrors
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
 
+/**
+ * ```
+ * SessionEstablishment = {
+ * "eReaderKey" : EReaderKeyBytes,
+ * "data" : bstr ; Encrypted mdoc request
+ * * tstr => RFU
+ * }
+ * ```
+ */
 @JsonSerialize(using = SessionEstablishmentDto.Serializer::class)
 @JsonDeserialize(using = SessionEstablishmentDto.Deserializer::class)
 data class SessionEstablishmentDto(val eReaderKey: EmbeddedCbor, val data: ByteArray) :
     CborEncodable {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SessionEstablishmentDto
+
+        if (eReaderKey != other.eReaderKey) return false
+        if (!data.contentEquals(other.data)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = eReaderKey.hashCode()
+        result = 31 * result + data.contentHashCode()
+        return result
+    }
+
     class Serializer : StdSerializer<SessionEstablishmentDto>(SessionEstablishmentDto::class.java) {
         override fun serialize(
             value: SessionEstablishmentDto,
