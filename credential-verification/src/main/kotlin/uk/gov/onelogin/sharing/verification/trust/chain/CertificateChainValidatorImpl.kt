@@ -25,6 +25,7 @@ class CertificateChainValidatorImpl internal constructor(private val logger: Log
                 isRevocationEnabled = false
                 addCertPathChecker(KeyUsageChecker(certificates.first()))
                 addCertPathChecker(BasicConstraintsChecker(certificates.first()))
+                addCertPathChecker(CertificateStructureChecker(certificates, trustedRoot))
             }
 
             CertPathValidator.getInstance("PKIX").validate(certPath, params)

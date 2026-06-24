@@ -32,6 +32,11 @@ class TestCertificateGenerator(
     private var basicConstraintsCritical = true
     private var keyUsageCritical = true
     private var akiKeyPair: KeyPair? = null
+    private var serialNumber: BigInteger? = null
+    private var sigAlgorithm: String = "SHA256withECDSA"
+    private var includeAki = true
+    private var includeSki = true
+    private var extraExtensions: List<ExtensionSpec> = emptyList()
 
     fun ca(pathLen: Int = -1) = apply {
         isCa = true
@@ -130,13 +135,35 @@ class TestCertificateGenerator(
         akiKeyPair = keyPair
     }
 
+    fun withSerial(serial: BigInteger) = apply {
+        serialNumber = serial
+    }
+
+    fun withSignatureAlgorithm(algorithm: String) = apply {
+        sigAlgorithm = algorithm
+    }
+
+    fun withoutAki() = apply {
+        includeAki = false
+    }
+
+    fun withoutSki() = apply {
+        includeSki = false
+    }
+
+    fun withExtension(oid: String, critical: Boolean, value: ByteArray) = apply {
+        extraExtensions = extraExtensions + ExtensionSpec(oid, critical, value)
+    }
+
     fun build(): X509Certificate {
         val signingKey = issuerKeyPair
-        val signer = JcaContentSignerBuilder("SHA256withECDSA").build(signingKey.private)
+        val signer = JcaContentSignerBuilder(sigAlgorithm).build(signingKey.private)
+
+        val serial = serialNumber ?: generateValidSerial()
 
         val builder = JcaX509v3CertificateBuilder(
             X500Name(issuer),
-            BigInteger.valueOf(serial++),
+            serial,
             notBefore,
             notAfter,
             X500Name(subject),
@@ -161,16 +188,28 @@ class TestCertificateGenerator(
         }
 
         val extUtils = JcaX509ExtensionUtils()
-        builder.addExtension(
-            Extension.subjectKeyIdentifier,
-            false,
-            extUtils.createSubjectKeyIdentifier(keyPair.public)
-        )
-        builder.addExtension(
-            Extension.authorityKeyIdentifier,
-            false,
-            extUtils.createAuthorityKeyIdentifier((akiKeyPair ?: issuerKeyPair).public)
-        )
+        if (includeSki) {
+            builder.addExtension(
+                Extension.subjectKeyIdentifier,
+                false,
+                extUtils.createSubjectKeyIdentifier(keyPair.public)
+            )
+        }
+        if (includeAki) {
+            builder.addExtension(
+                Extension.authorityKeyIdentifier,
+                false,
+                extUtils.createAuthorityKeyIdentifier((akiKeyPair ?: issuerKeyPair).public)
+            )
+        }
+
+        for (ext in extraExtensions) {
+            builder.addExtension(
+                org.bouncycastle.asn1.ASN1ObjectIdentifier(ext.oid),
+                ext.critical,
+                org.bouncycastle.asn1.DEROctetString(ext.value)
+            )
+        }
 
         val holder = builder.build(signer)
         return JcaX509CertificateConverter().getCertificate(holder)
@@ -182,6 +221,16 @@ class TestCertificateGenerator(
         private const val KEY_ENCIPHERMENT = 2
         private const val KEY_CERT_SIGN = 5
         private const val CRL_SIGN = 6
+        private const val VALID_SERIAL_OCTETS = 9
+
+        private fun generateValidSerial(): BigInteger =
+            BigInteger(1, ByteArray(VALID_SERIAL_OCTETS).also { bytes ->
+                val value = serial++
+                for (i in bytes.indices.reversed()) {
+                    bytes[i] = (value shr ((bytes.size - 1 - i) * 8)).toByte()
+                }
+                if (bytes[0] == 0.toByte()) bytes[0] = 0x01
+            })
 
         private fun keyUsageFlag(bit: Int): Int = when (bit) {
             0 -> KeyUsage.digitalSignature
@@ -197,3 +246,5 @@ class TestCertificateGenerator(
         }
     }
 }
+
+data class ExtensionSpec(val oid: String, val critical: Boolean, val value: ByteArray)

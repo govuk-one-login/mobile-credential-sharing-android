@@ -8,6 +8,7 @@ private const val OID_AUTHORITY_KEY_IDENTIFIER = "2.5.29.35"
 // ASN.1 DER tag identifiers
 private const val TAG_OCTET_STRING = 0x04
 private const val TAG_SEQUENCE = 0x30
+private const val TAG_BIT_STRING = 0x03
 private const val TAG_CONTEXT_SPECIFIC_0 = 0x80
 
 // ASN.1 DER length encoding
@@ -31,6 +32,33 @@ internal fun X509Certificate.authorityKeyIdentifierHex(): String? {
     val keyId = parseAkiKeyIdentifier(outer) ?: return null
     return keyId.toHexString()
 }
+
+/**
+ * Extracts the raw public key bit string from a SubjectPublicKeyInfo DER structure.
+ * SubjectPublicKeyInfo ::= SEQUENCE { AlgorithmIdentifier, BIT STRING }
+ */
+internal fun extractSubjectPublicKeyBits(spki: ByteArray): ByteArray? {
+    if (spki.size < MIN_ASN1_SIZE) return null
+    if (spki[0].toInt() and BYTE_MASK != TAG_SEQUENCE) return null
+    var offset = 1
+    val seqLen = asn1Length(spki, offset) ?: return null
+    offset = seqLen.offset
+    if (offset >= spki.size || spki[offset].toInt() and BYTE_MASK != TAG_SEQUENCE) return null
+    offset++
+
+    val algLen = asn1Length(spki, offset) ?: return null
+    offset = algLen.offset + algLen.length
+
+    if (offset >= spki.size || spki[offset].toInt() and BYTE_MASK != TAG_BIT_STRING) return null
+    offset++
+    val bitStringLen = asn1Length(spki, offset) ?: return null
+    offset = bitStringLen.offset
+
+    offset++
+    return spki.copyOfRange(offset, offset + bitStringLen.length - 1)
+}
+
+internal fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it) }
 
 private fun parseAsn1OctetString(data: ByteArray): ByteArray? {
     if (data.size < MIN_ASN1_SIZE) return null
@@ -66,5 +94,3 @@ private fun asn1Length(data: ByteArray, startIndex: Int): Asn1Length? {
 }
 
 private data class Asn1Length(val length: Int, val offset: Int)
-
-private fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it) }
