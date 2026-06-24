@@ -1,15 +1,20 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
+import java.io.OutputStream
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.RawCbor
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
@@ -24,19 +29,12 @@ class DeviceResponseDto {
      * }
      * ```
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonSerialize(using = DeviceResponseSerializer::class)
     @JsonDeserialize(using = DeviceResponseDeserializer::class)
     data class DeviceResponseDTO(
-        @JsonProperty("version")
         val version: String = "1.0",
-
-        @JsonProperty("documents")
         val documents: List<DocumentDTO>? = null,
-
-        @JsonProperty("documentErrors")
         val documentErrors: Map<String, UInt>? = null,
-
-        @JsonProperty("status")
         val status: UInt
     ) : CborEncodable {
         init {
@@ -64,18 +62,10 @@ class DeviceResponseDto {
      * }
      * ```
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     data class DocumentDTO(
-        @JsonProperty("docType")
         val docType: String,
-
-        @JsonProperty("issuerSigned")
         val issuerSigned: IssuerSignedDTO,
-
-        @JsonProperty("deviceSigned")
         val deviceSigned: DeviceSignedDTO,
-
-        @JsonProperty("errors")
         val errors: Map<String, Int>? = null
     ) {
         fun toDomain(): VerifiableDocument.WithPresentation =
@@ -98,10 +88,7 @@ class DeviceResponseDto {
      * ```
      */
     data class IssuerSignedDTO(
-        @JsonProperty("nameSpaces")
         val nameSpaces: Map<String, List<EmbeddedCbor>>? = null,
-
-        @JsonProperty("issuerAuth")
         val issuerAuth: RawCbor
     ) {
         fun toDomain(): SharingIssuerSigned = SharingIssuerSigned(
@@ -112,19 +99,33 @@ class DeviceResponseDto {
         )
     }
 
+    @JsonDeserialize(using = IssuerSignedItemDeserializer::class)
     data class IssuerSignedItemDTO(
-        @JsonProperty("digestID")
         val digestId: Long,
-
-        @JsonProperty("random")
         val random: ByteArray,
-
-        @JsonProperty("elementIdentifier")
         val elementIdentifier: String,
-
-        @JsonProperty("elementValue")
         val elementValue: Any
     )
+
+    class IssuerSignedItemDeserializer :
+        StdDeserializer<IssuerSignedItemDTO>(IssuerSignedItemDTO::class.java) {
+        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): IssuerSignedItemDTO {
+            val root = p.codec.readTree<JsonNode>(p)
+            return IssuerSignedItemDTO(
+                digestId = root["digestID"].longValue(),
+                random = root["random"].binaryValue(),
+                elementIdentifier = root["elementIdentifier"].asText(),
+                elementValue = root["elementValue"].let { node ->
+                    when {
+                        node.isTextual -> node.asText()
+                        node.isBoolean -> node.booleanValue()
+                        node.isNumber -> node.numberValue()
+                        else -> node.toString()
+                    }
+                }
+            )
+        }
+    }
 
     /**
      * ```
@@ -136,13 +137,7 @@ class DeviceResponseDto {
      * DeviceNameSpacesBytes = #6.24(bstr .cbor DeviceNameSpaces)
      * ```
      */
-    data class DeviceSignedDTO(
-        @JsonProperty("nameSpaces")
-        val nameSpaces: EmbeddedCbor,
-
-        @JsonProperty("deviceAuth")
-        val deviceAuth: DeviceAuthDTO
-    ) {
+    data class DeviceSignedDTO(val nameSpaces: EmbeddedCbor, val deviceAuth: DeviceAuthDTO) {
         init {
             val nameSpacesMap = CborMapper.default.readValue(
                 nameSpaces.encoded,
@@ -155,10 +150,118 @@ class DeviceResponseDto {
         }
     }
 
-    data class DeviceAuthDTO(
-        @JsonProperty("deviceSignature")
-        val deviceSignature: RawCbor
-    )
+    data class DeviceAuthDTO(val deviceSignature: RawCbor)
+
+    class DeviceResponseSerializer :
+        StdSerializer<DeviceResponseDTO>(DeviceResponseDTO::class.java) {
+
+        override fun serialize(
+            value: DeviceResponseDTO,
+            gen: JsonGenerator,
+            provider: SerializerProvider
+        ) {
+            val cborGen = gen as CBORGenerator
+            val fieldCount = DEVICE_RESPONSE_REQUIRED_FIELDS +
+                (if (value.documents != null) 1 else 0) +
+                (if (value.documentErrors != null) 1 else 0)
+            cborGen.writeStartObject(fieldCount)
+            cborGen.writeFieldName(KEY_VERSION)
+            cborGen.writeString(value.version)
+            if (value.documents != null) {
+                cborGen.writeFieldName(KEY_DOCUMENTS)
+                cborGen.writeStartArray(value.documents, value.documents.size)
+                value.documents.forEach { doc -> serializeDocument(doc, cborGen) }
+                cborGen.writeEndArray()
+            }
+            if (value.documentErrors != null) {
+                cborGen.writeFieldName(KEY_DOCUMENT_ERRORS)
+                cborGen.writeStartObject(value.documentErrors.size)
+                value.documentErrors.forEach { (k, v) ->
+                    cborGen.writeFieldName(k)
+                    cborGen.writeNumber(v.toInt())
+                }
+                cborGen.writeEndObject()
+            }
+            cborGen.writeFieldName(KEY_STATUS)
+            cborGen.writeNumber(value.status.toInt())
+            cborGen.writeEndObject()
+        }
+
+        private fun serializeDocument(doc: DocumentDTO, gen: CBORGenerator) {
+            val fieldCount = DOCUMENT_REQUIRED_FIELDS + (if (doc.errors != null) 1 else 0)
+            gen.writeStartObject(fieldCount)
+            gen.writeFieldName(KEY_DOC_TYPE)
+            gen.writeString(doc.docType)
+            gen.writeFieldName(KEY_ISSUER_SIGNED)
+            serializeIssuerSigned(doc.issuerSigned, gen)
+            gen.writeFieldName(KEY_DEVICE_SIGNED)
+            serializeDeviceSigned(doc.deviceSigned, gen)
+            if (doc.errors != null) {
+                gen.writeFieldName("errors")
+                gen.writeStartObject(doc.errors.size)
+                doc.errors.forEach { (k, v) ->
+                    gen.writeFieldName(k)
+                    gen.writeNumber(v)
+                }
+                gen.writeEndObject()
+            }
+            gen.writeEndObject()
+        }
+
+        private fun serializeIssuerSigned(issuerSigned: IssuerSignedDTO, gen: CBORGenerator) {
+            gen.writeStartObject()
+            if (issuerSigned.nameSpaces != null) {
+                gen.writeFieldName(KEY_NAME_SPACES)
+                gen.writeStartObject(issuerSigned.nameSpaces.size)
+                issuerSigned.nameSpaces.forEach { (ns, items) ->
+                    gen.writeFieldName(ns)
+                    gen.writeStartArray(items, items.size)
+                    items.forEach { item ->
+                        gen.writeTag(EMBEDDED_CBOR_TAG)
+                        gen.writeBinary(item.encoded)
+                    }
+                    gen.writeEndArray()
+                }
+                gen.writeEndObject()
+            }
+            gen.writeFieldName(KEY_ISSUER_AUTH)
+            gen.flush()
+            (gen.outputTarget as OutputStream).write(issuerSigned.issuerAuth.encoded)
+            gen.writeEndObject()
+        }
+
+        private fun serializeDeviceSigned(deviceSigned: DeviceSignedDTO, gen: CBORGenerator) {
+            gen.writeStartObject()
+            gen.writeFieldName(KEY_NAME_SPACES)
+            gen.writeTag(EMBEDDED_CBOR_TAG)
+            gen.writeBinary(deviceSigned.nameSpaces.encoded)
+            gen.writeFieldName(KEY_DEVICE_AUTH)
+            gen.writeStartObject()
+            gen.writeFieldName(KEY_DEVICE_SIGNATURE)
+            gen.flush()
+            (gen.outputTarget as OutputStream).write(
+                deviceSigned.deviceAuth.deviceSignature.encoded
+            )
+            gen.writeEndObject()
+            gen.writeEndObject()
+        }
+
+        private companion object {
+            const val DEVICE_RESPONSE_REQUIRED_FIELDS = 2 // version + status
+            const val DOCUMENT_REQUIRED_FIELDS = 3 // docType + issuerSigned + deviceSigned
+            const val KEY_VERSION = "version"
+            const val KEY_STATUS = "status"
+            const val KEY_DOCUMENTS = "documents"
+            const val KEY_DOCUMENT_ERRORS = "documentErrors"
+            const val KEY_DOC_TYPE = "docType"
+            const val KEY_ISSUER_SIGNED = "issuerSigned"
+            const val KEY_DEVICE_SIGNED = "deviceSigned"
+            const val KEY_NAME_SPACES = "nameSpaces"
+            const val KEY_ISSUER_AUTH = "issuerAuth"
+            const val KEY_DEVICE_AUTH = "deviceAuth"
+            const val KEY_DEVICE_SIGNATURE = "deviceSignature"
+        }
+    }
 
     /**
      * Deserializes a CBOR byte array into [DeviceResponse].
