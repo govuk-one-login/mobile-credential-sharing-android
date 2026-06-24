@@ -24,6 +24,7 @@ import org.hamcrest.Matchers
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto.Companion.DEVICE_REQUEST_INFO_KEY
@@ -35,7 +36,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto.Companion.ITEMS_REQUEST_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto.Companion.READER_AUTH_KEY
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 
 /**
  * ISO/IEC TS 18013-6:2025 conformance tests for Session Establishment.
@@ -95,7 +95,7 @@ class DeviceRequestStructureTest {
             "Indefinite byte arrays" to containsString(
                 (PREFIX_TYPE_BYTES + SUFFIX_INDEFINITE).toHexString()
             )
-        ),
+        )
     ) {
         assertThat(
             deviceRequestHexString.chunked(2),
@@ -111,8 +111,8 @@ class DeviceRequestStructureTest {
     fun `There are no duplicate fields`(
         @TestParameter propertyName: String = testValues(
             VERSION_KEY,
-            DOC_REQUESTS_KEY,
-        ),
+            DOC_REQUESTS_KEY
+        )
     ) {
         val values = mapper.readTree(deviceRequestBytes).findValues(propertyName)
         assertThat(
@@ -134,7 +134,7 @@ class DeviceRequestStructureTest {
         @TestParameter propertyName: String = testValues(
             DEVICE_REQUEST_INFO_KEY,
             READER_AUTH_ALL_KEY
-        ),
+        )
     ) {
         val values = mapper.readTree(deviceRequestBytes).findValues(propertyName)
         assertThat(
@@ -161,12 +161,12 @@ class DeviceRequestStructureTest {
     fun `CBOR has the applicable properties`(
         @TestParameter input: Pair<String, (JsonNode) -> Boolean> = namedTestValues(
             "Version" to (
-                    VERSION_KEY to JsonNode::isTextual
-                    ),
+                VERSION_KEY to JsonNode::isTextual
+                ),
             "Document request" to (
-                    DOC_REQUESTS_KEY to JsonNode::isArray
-                    )
-        ),
+                DOC_REQUESTS_KEY to JsonNode::isArray
+                )
+        )
     ) {
         val (property, assertion) = input
         val rootNode = mapper.readTree(deviceRequestBytes)
@@ -204,7 +204,7 @@ class DeviceRequestStructureTest {
             "Major version 2" to "2.0",
             "Minor version 1" to "1.1",
             "Semantic versioning" to "1.0.0"
-        ),
+        )
     ) {
         assertThrows(IllegalArgumentException::class.java) {
             deviceRequest = deviceRequest.copy(
@@ -294,7 +294,7 @@ class DeviceRequestStructureTest {
     @Test
     fun `Document request items are encoded CBOR data items`() {
         val prefix = ITEMS_REQUEST_KEY.toByteArray().toHexString() +
-                "d818584e"
+            "d818584e"
 
         assertThat(
             deviceRequestHexString,

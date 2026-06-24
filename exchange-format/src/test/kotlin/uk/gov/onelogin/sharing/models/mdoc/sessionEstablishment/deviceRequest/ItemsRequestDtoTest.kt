@@ -14,7 +14,7 @@ class ItemsRequestDtoTest {
         docType = "Unit test",
         nameSpaces = mapOf(
             "unit" to mapOf("test" to true)
-        ),
+        )
     )
 
     private val differentDocType = dto.copy(

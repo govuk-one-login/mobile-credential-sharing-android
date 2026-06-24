@@ -7,19 +7,14 @@ import org.hamcrest.TypeSafeMatcher
 
 object DeviceRequestDtoMatchers {
 
-    fun hasDeviceRequestInfo(
-        expected: ByteArray
-    ) = hasDeviceRequestInfo(equalTo(expected))
+    fun hasDeviceRequestInfo(expected: ByteArray) = hasDeviceRequestInfo(equalTo(expected))
 
-    fun hasDeviceRequestInfo(
-        matcher: Matcher<in ByteArray>
-    ): Matcher<in DeviceRequestDto> = DeviceRequestDtoMatcher(matcher) {
-        it?.deviceRequestInfo
-    }
+    fun hasDeviceRequestInfo(matcher: Matcher<in ByteArray>): Matcher<in DeviceRequestDto> =
+        DeviceRequestDtoMatcher(matcher) {
+            it?.deviceRequestInfo
+        }
 
-    fun hasDocumentRequests(
-        expected: List<DocRequestDto>
-    ) = hasDocumentRequests(equalTo(expected))
+    fun hasDocumentRequests(expected: List<DocRequestDto>) = hasDocumentRequests(equalTo(expected))
 
     fun hasDocumentRequests(
         matcher: Matcher<in List<DocRequestDto>>
@@ -27,25 +22,19 @@ object DeviceRequestDtoMatchers {
         it?.docRequest
     }
 
-    fun hasReaderAuthAll(
-        expected: ByteArray
-    ) = hasReaderAuthAll(equalTo(expected))
+    fun hasReaderAuthAll(expected: ByteArray) = hasReaderAuthAll(equalTo(expected))
 
-    fun hasReaderAuthAll(
-        matcher: Matcher<in ByteArray>
-    ): Matcher<in DeviceRequestDto> = DeviceRequestDtoMatcher(matcher) {
-        it?.readerAuthAll
-    }
+    fun hasReaderAuthAll(matcher: Matcher<in ByteArray>): Matcher<in DeviceRequestDto> =
+        DeviceRequestDtoMatcher(matcher) {
+            it?.readerAuthAll
+        }
 
-    fun hasVersion(
-        expected: String
-    ) = hasVersion(equalTo(expected))
+    fun hasVersion(expected: String) = hasVersion(equalTo(expected))
 
-    fun hasVersion(
-        matcher: Matcher<in String>
-    ): Matcher<in DeviceRequestDto> = DeviceRequestDtoMatcher(matcher) {
-        it?.version
-    }
+    fun hasVersion(matcher: Matcher<in String>): Matcher<in DeviceRequestDto> =
+        DeviceRequestDtoMatcher(matcher) {
+            it?.version
+        }
 
     private class DeviceRequestDtoMatcher<Type>(
         private val matcher: Matcher<in Type>,
@@ -60,5 +49,4 @@ object DeviceRequestDtoMatchers {
             transformer(item)
         )
     }
-
 }

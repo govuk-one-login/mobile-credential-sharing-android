@@ -7,6 +7,7 @@ import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasSize
 import org.junit.Test
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as cborMapper
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementCborBuilder
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementCborBuilder.BLE_TYPE
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementCborBuilder.BLE_VERSION
@@ -15,7 +16,6 @@ import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDto
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDtoMatchers.hasDeviceRetrievalMethods
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDtoMatchers.hasSecurity
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDtoMatchers.hasVersion
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as cborMapper
 
 /**
  * ISO/IEC TS 18013-6:2025 conformance tests for Device Engagement mdoc reader.

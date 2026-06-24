@@ -15,7 +15,7 @@ class DocRequestDtoTest {
             docType = "Unit test",
             nameSpaces = mapOf(
                 "unit" to mapOf("test" to true)
-            ),
+            )
         )
     )
 
