@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 
 class DeviceRequestDtoTest {
 
-    private val dto = deviceRequestStub.toDto()
+    private val dto = deviceRequestStub
     private val encoded = dto.toCbor()
 
     @Test

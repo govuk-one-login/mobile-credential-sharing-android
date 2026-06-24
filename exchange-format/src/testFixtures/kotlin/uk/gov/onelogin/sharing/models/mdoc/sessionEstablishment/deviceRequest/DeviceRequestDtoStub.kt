@@ -6,15 +6,17 @@ object DeviceRequestDtoStub {
     const val CBOR_TAG_24_BYTE_0 = 0xD8
     const val CBOR_TAG_24_BYTE_1 = 0x18
 
-    val deviceRequestStub = DeviceRequest(
+    val deviceRequestStub = DeviceRequestDto(
         version = "1.0",
-        docRequests = listOf(
-            DocRequest(
-                ItemsRequest(
+        docRequest = listOf(
+            DocRequestDto(
+                ItemsRequestDto(
                     docType = MDL_DOC_TYPE,
                     nameSpaces = mapOf(MDL_NAMESPACE to mapOf("age_over_18" to false))
                 )
             )
-        )
+        ),
+        deviceRequestInfo = byteArrayOf(0, 1),
+        readerAuthAll = byteArrayOf(1, 2)
     )
 }
