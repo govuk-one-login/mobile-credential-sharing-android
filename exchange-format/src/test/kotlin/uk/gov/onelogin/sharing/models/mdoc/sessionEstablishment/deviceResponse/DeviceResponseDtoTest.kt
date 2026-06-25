@@ -440,5 +440,35 @@ class DeviceResponseDtoTest {
         assertEquals(10, decoded["documentErrors"][docType].asInt())
     }
 
+    @Test
+    fun `IssuerSignedItemDeserializer deserializes elementValue`(
+        @TestParameter elementType: ElementValueType
+    ) {
+        val encoded = mapper.writeValueAsBytes(issuerSignedItemMap(elementType.input))
+        val result = mapper.readValue(
+            encoded,
+            DeviceResponseDto.IssuerSignedItemDTO::class.java
+        )
+
+        assertEquals(1L, result.digestId)
+        assertEquals("family_name", result.elementIdentifier)
+        assertEquals(elementType.expected, result.elementValue)
+    }
+
+    @Suppress("unused")
+    enum class ElementValueType(val input: Any, val expected: Any) {
+        TEXT("Smith", "Smith"),
+        BOOLEAN(true, true),
+        NUMBER(42, 42),
+        COMPLEX(mapOf("nested" to "value"), "{\"nested\":\"value\"}")
+    }
+
+    private fun issuerSignedItemMap(elementValue: Any): Map<String, Any> = mapOf(
+        "digestID" to 1L,
+        "random" to byteArrayOf(0x01, 0x02, 0x03),
+        "elementIdentifier" to "family_name",
+        "elementValue" to elementValue
+    )
+
     private fun generateBytesTag(elementSize: Int) = hexFormatter(PREFIX_TYPE_BYTES + elementSize)
 }
