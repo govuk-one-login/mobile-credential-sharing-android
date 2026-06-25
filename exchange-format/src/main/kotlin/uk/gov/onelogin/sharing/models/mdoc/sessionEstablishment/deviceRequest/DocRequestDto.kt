@@ -15,6 +15,15 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
 
+/**
+ * ```
+ * DocRequest = {
+ *     "itemsRequest" : ItemsRequestBytes,
+ *     ? "readerAuth" : ReaderAuth,
+ *     * tstr => RFU
+ * }
+ * ```
+ */
 @JsonSerialize(using = DocRequestDto.Serializer::class)
 @JsonDeserialize(using = DocRequestDto.Deserializer::class)
 data class DocRequestDto(
@@ -22,6 +31,25 @@ data class DocRequestDto(
     @JsonIgnore
     val readerAuth: ByteArray? = null
 ) : CborEncodable {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DocRequestDto
+
+        if (itemsRequest != other.itemsRequest) return false
+        if (!readerAuth.contentEquals(other.readerAuth)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = itemsRequest.hashCode()
+        result = 31 * result + (readerAuth?.contentHashCode() ?: 0)
+        return result
+    }
+
     class Serializer : StdSerializer<DocRequestDto>(DocRequestDto::class.java) {
         override fun serialize(
             value: DocRequestDto,
@@ -50,6 +78,7 @@ data class DocRequestDto(
     companion object {
         private const val FIELD_COUNT = 1
         const val ITEMS_REQUEST_KEY = "itemsRequest"
+        const val READER_AUTH_KEY: String = "readerAuth"
     }
 }
 

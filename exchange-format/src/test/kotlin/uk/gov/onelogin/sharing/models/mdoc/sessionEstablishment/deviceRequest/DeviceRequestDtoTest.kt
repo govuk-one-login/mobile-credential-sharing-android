@@ -1,8 +1,10 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import org.junit.Test
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDtoStub.CBOR_TAG_24_BYTE_0
@@ -13,8 +15,28 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 
 class DeviceRequestDtoTest {
 
-    private val dto = deviceRequestStub.toDto()
+    private val dto = deviceRequestStub
     private val encoded = dto.toCbor()
+
+    private val differentDeviceRequestInfo = dto.copy(
+        deviceRequestInfo = byteArrayOf(1, 2)
+    )
+
+    private val differentDocRequest = dto.copy(
+        docRequest = listOf(
+            dto.docRequest[0].copy(
+                readerAuth = byteArrayOf(2, 3)
+            )
+        )
+    )
+
+    private val differentReaderAuth = dto.copy(
+        readerAuthAll = byteArrayOf(3, 4)
+    )
+
+    private val differentVersion = dto.copy(
+        version = "2.0"
+    )
 
     @Test
     fun `DeviceRequestDto preserves version`() {
@@ -103,5 +125,30 @@ class DeviceRequestDtoTest {
         val innerBytes = parser.binaryValue
         val itemsRequest = CborMapper.default.readValue(innerBytes, ItemsRequestDto::class.java)
         assertEquals(mapOf("age_over_18" to false), itemsRequest.nameSpaces[MDL_NAMESPACE])
+    }
+
+    @Suppress("EqualsNullCall")
+    @Test
+    fun `Equality contract`() {
+        assertEquals(dto, dto)
+        assertEquals(dto, dto.copy())
+
+        assertFalse(dto.equals(null))
+        assertFalse(dto.equals("different type"))
+        assertNotEquals(dto, differentDeviceRequestInfo)
+        assertNotEquals(dto, differentDocRequest)
+        assertNotEquals(dto, differentReaderAuth)
+        assertNotEquals(dto, differentVersion)
+    }
+
+    @Test
+    fun `Hashcode contract`() {
+        assertEquals(dto.hashCode(), dto.hashCode())
+        assertEquals(dto.hashCode(), dto.copy().hashCode())
+
+        assertNotEquals(dto.hashCode(), differentDeviceRequestInfo.hashCode())
+        assertNotEquals(dto.hashCode(), differentDocRequest.hashCode())
+        assertNotEquals(dto.hashCode(), differentReaderAuth.hashCode())
+        assertNotEquals(dto.hashCode(), differentVersion.hashCode())
     }
 }

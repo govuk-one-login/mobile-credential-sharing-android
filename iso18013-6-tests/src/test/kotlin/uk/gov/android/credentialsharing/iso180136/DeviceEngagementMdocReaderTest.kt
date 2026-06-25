@@ -7,7 +7,7 @@ import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasSize
 import org.junit.Test
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as cborMapper
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementCborBuilder
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementCborBuilder.BLE_TYPE
 import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementCborBuilder.BLE_VERSION
@@ -31,8 +31,6 @@ import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDtoMatchers
  * }
  */
 class DeviceEngagementMdocReaderTest {
-    private val cborMapper = CborMapper.default
-
     /**
      * mDLR_MS_DE_01 - Device Engagement mdoc reader
      *
