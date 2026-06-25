@@ -39,6 +39,12 @@ class ValidityInfoVerifierImplTest {
     }
 
     @Test
+    fun `verify does not throw when validUntil equals now`() {
+        val info = validityInfo().copy(validUntil = now)
+        verifier.verify(validityPeriod, info)
+    }
+
+    @Test
     fun `verify throws MALFORMED_MSO when validUntil equals validFrom`() {
         val info = validityInfo().copy(validUntil = validityInfo().validFrom)
         val exception = assertThrows(VerificationResult.Failure::class.java) {
