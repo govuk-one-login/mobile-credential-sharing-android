@@ -179,6 +179,23 @@ class Iso18013DocumentVerifierTest {
         assertThat(exception, hasError(VerificationError.INVALID_MSO_VERSION))
     }
 
+    /**
+     * DCMAW-20265: [DocumentVerifier.verifyDocument] calls [ValidityInfoVerifier.verify]
+     * and propagates validity failures.
+     */
+    @Test
+    fun `fails verification due to expired certificates`() {
+        stubTrustVerifierSuccess(
+            validityPeriod = CertificateValidityPeriodStubs.expired()
+        )
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            documentVerifier.verifyDocument(provisionedDocument, sessionTranscriptBytes)
+        }
+
+        assertThat(exception, hasError(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE))
+    }
+
     @Test
     fun `verifyDocumentDigests is stubbed to throw a Failure`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
