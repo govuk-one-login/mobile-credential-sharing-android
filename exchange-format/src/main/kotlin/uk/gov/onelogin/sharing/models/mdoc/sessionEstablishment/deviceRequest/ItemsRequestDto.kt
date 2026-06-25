@@ -7,13 +7,15 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.node.BinaryNode
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 
+@JsonDeserialize(using = ItemsRequestDto.Deserializer::class)
 data class ItemsRequestDto(
-    @JsonProperty("docType")
+    @JsonProperty(KEY_DOC_TYPE)
     val docType: String,
-    @JsonProperty("nameSpaces")
+    @JsonProperty(KEY_NAMESPACES)
     val nameSpaces: Map<String, Map<String, Boolean>>,
     @JsonIgnore
     val requestInfo: ByteArray? = null
@@ -58,9 +60,10 @@ data class ItemsRequestDto(
             )
         }
     }
-}
 
-fun ItemsRequest.toDto(): ItemsRequestDto = ItemsRequestDto(
-    docType = docType,
-    nameSpaces = nameSpaces
-)
+    companion object {
+        const val KEY_DOC_TYPE: String = "docType"
+        const val KEY_NAMESPACES: String = "nameSpaces"
+        const val KEY_REQUEST_INFO: String = "requestInfo"
+    }
+}

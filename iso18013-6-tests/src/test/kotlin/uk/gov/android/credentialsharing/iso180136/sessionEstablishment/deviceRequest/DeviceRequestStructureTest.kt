@@ -24,7 +24,6 @@ import org.hamcrest.Matchers
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto.Companion.DEVICE_REQUEST_INFO_KEY
@@ -36,6 +35,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto.Companion.ITEMS_REQUEST_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto.Companion.READER_AUTH_KEY
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 
 /**
  * ISO/IEC TS 18013-6:2025 conformance tests for Session Establishment.
@@ -60,6 +60,10 @@ class DeviceRequestStructureTest {
 
     private val deviceRequestHexString by lazy {
         deviceRequestBytes.toHexString()
+    }
+
+    private val docRequestNodes by lazy {
+        mapper.readTree(deviceRequestBytes).withArrayProperty(DOC_REQUESTS_KEY)
     }
 
     /**
@@ -234,11 +238,9 @@ class DeviceRequestStructureTest {
      */
     @Test
     fun `Every document request is an object`() {
-        val result = mapper.readTree(deviceRequestBytes).withArrayProperty(DOC_REQUESTS_KEY)
+        assertTrue(docRequestNodes.all(JsonNode::isObject))
 
-        assertTrue(result.all(JsonNode::isObject))
-
-        val requests = result.map {
+        val requests = docRequestNodes.map {
             mapper.treeToValue(it, DocRequestDto::class.java)
         }
 
@@ -253,10 +255,8 @@ class DeviceRequestStructureTest {
      */
     @Test
     fun `Each document request item has an 'itemsRequest' property`() {
-        val result = mapper.readTree(deviceRequestBytes).withArrayProperty(DOC_REQUESTS_KEY)
-
         assertTrue(
-            result.all {
+            docRequestNodes.all {
                 it.has(ITEMS_REQUEST_KEY)
             }
         )
@@ -279,10 +279,8 @@ class DeviceRequestStructureTest {
             )
         )
 
-        val result = mapper.readTree(deviceRequestBytes).withArrayProperty(DOC_REQUESTS_KEY)
-
         assertTrue(
-            result.any {
+            docRequestNodes.any {
                 it.has(READER_AUTH_KEY)
             }
         )
