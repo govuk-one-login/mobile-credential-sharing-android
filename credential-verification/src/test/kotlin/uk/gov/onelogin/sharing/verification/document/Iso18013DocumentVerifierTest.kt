@@ -102,7 +102,7 @@ class Iso18013DocumentVerifierTest {
      */
     @Test
     fun `Ensure function count`() {
-        assertThat(classInfo.methodInfo, hasSize(3))
+        assertThat(classInfo.methodInfo, hasSize(2))
     }
 
     /**
@@ -115,11 +115,6 @@ class Iso18013DocumentVerifierTest {
             "verifyDocumentDigests" to
                 "void (" +
                 "${VerifiableDocument::class.java.simpleName}, " +
-                "${MobileSecurityObject::class.java.simpleName}" +
-                ")",
-            "verifyValidityInfo" to
-                "void (" +
-                "${CertificateValidityPeriod::class.java.simpleName}, " +
                 "${MobileSecurityObject::class.java.simpleName}" +
                 ")"
         )
