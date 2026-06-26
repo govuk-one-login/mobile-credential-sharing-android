@@ -1,1 +1,4 @@
--keep class * extends com.fasterxml.jackson.databind.ser.std.StdSerializer { <init>(); }
+-keep @com.fasterxml.jackson.databind.annotation.JsonSerialize class * { *; }
+-keep @com.fasterxml.jackson.databind.annotation.JsonDeserialize class * { *; }
+-keep class * extends com.fasterxml.jackson.databind.ser.std.StdSerializer { <init>(...); }
+-keep class * extends com.fasterxml.jackson.databind.deser.std.StdDeserializer { <init>(...); }

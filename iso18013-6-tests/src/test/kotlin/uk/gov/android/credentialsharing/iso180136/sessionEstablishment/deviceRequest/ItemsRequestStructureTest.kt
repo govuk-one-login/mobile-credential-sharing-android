@@ -8,6 +8,7 @@ import com.google.testing.junit.testparameterinjector.KotlinTestParameters.named
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import junit.framework.TestCase.assertTrue
 import kotlin.test.Ignore
 import kotlin.test.Test
 import org.hamcrest.CoreMatchers.containsString
@@ -127,7 +128,9 @@ class ItemsRequestStructureTest {
         deviceRequest = deviceRequest.copy(
             docRequest = listOf(
                 deviceRequest.docRequest[0].copy(
-                    readerAuth = byteArrayOf(1, 2)
+                    itemsRequest = deviceRequest.docRequest[0].itemsRequest.copy(
+                        requestInfo = byteArrayOf(1, 2)
+                    )
                 )
             )
         )
@@ -138,5 +141,17 @@ class ItemsRequestStructureTest {
                 hasSize(1)
             )
         }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_09
+     */
+    @Test
+    fun `The underlying ItemsRequest objects are maps`() {
+        assertTrue(
+            itemRequestNodes.all {
+                it.isObject
+            }
+        )
     }
 }

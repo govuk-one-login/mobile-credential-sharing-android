@@ -45,6 +45,7 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        libs.com.google.test.parameter.injector,
         libs.jackson.cbor,
         libs.junit,
         libs.org.bouncycastle.bcpkix

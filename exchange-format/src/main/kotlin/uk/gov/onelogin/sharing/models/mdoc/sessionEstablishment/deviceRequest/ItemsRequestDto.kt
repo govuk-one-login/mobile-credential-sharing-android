@@ -1,21 +1,22 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.node.BinaryNode
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 
 @JsonDeserialize(using = ItemsRequestDto.Deserializer::class)
+@JsonSerialize(using = ItemsRequestDto.Serializer::class)
 data class ItemsRequestDto(
-    @JsonProperty(KEY_DOC_TYPE)
     val docType: String,
-    @JsonProperty(KEY_NAMESPACES)
     val nameSpaces: Map<String, Map<String, Boolean>>,
     @JsonIgnore
     val requestInfo: ByteArray? = null
@@ -49,15 +50,53 @@ data class ItemsRequestDto(
     fun toDomain(): ItemsRequest = ItemsRequest(docType = docType, nameSpaces = nameSpaces)
 
     /**
-     * Unwraps Tag 24-encoded bstr and re-deserializes the inner bytes as [ItemsRequestDto].
+     * Deserializes [ItemsRequestDto] from a CBOR map with "docType" and "nameSpaces" fields.
      */
-    class Deserializer : JsonDeserializer<ItemsRequestDto>() {
+    class Deserializer : StdDeserializer<ItemsRequestDto>(ItemsRequestDto::class.java) {
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): ItemsRequestDto {
-            val binaryNode = p.codec.readTree<JsonNode>(p) as BinaryNode
-            return (p.codec as ObjectMapper).readValue(
-                binaryNode.binaryValue(),
-                ItemsRequestDto::class.java
-            )
+            val root = p.codec.readTree<JsonNode>(p)
+            val docType = root[KEY_DOC_TYPE]?.asText()
+                ?: throw IllegalArgumentException("Missing docType in ItemsRequest")
+            val nameSpacesNode = root[KEY_NAMESPACES]
+                ?: throw IllegalArgumentException("Missing nameSpaces in ItemsRequest")
+
+            val nameSpaces = mutableMapOf<String, Map<String, Boolean>>()
+            nameSpacesNode.properties().forEach { (ns, elements) ->
+                val elementMap = mutableMapOf<String, Boolean>()
+                elements.properties().forEach { (key, value) ->
+                    elementMap[key] = value.booleanValue()
+                }
+                nameSpaces[ns] = elementMap
+            }
+            return ItemsRequestDto(docType = docType, nameSpaces = nameSpaces)
+        }
+    }
+
+    class Serializer : StdSerializer<ItemsRequestDto>(ItemsRequestDto::class.java) {
+        override fun serialize(
+            value: ItemsRequestDto,
+            gen: JsonGenerator,
+            provider: SerializerProvider?
+        ) {
+            (gen as CBORGenerator).writeStartObject(2)
+            gen.writeFieldName(KEY_DOC_TYPE)
+            gen.writeString(value.docType)
+
+            gen.writeFieldName(KEY_NAMESPACES)
+            gen.writeStartObject(value.nameSpaces.size)
+            value.nameSpaces.forEach { (nameSpace, namespaceFlags) ->
+                gen.writeFieldName(nameSpace)
+
+                gen.writeStartObject(namespaceFlags.size)
+                namespaceFlags.forEach { (k, v) ->
+                    gen.writeFieldName(k)
+                    gen.writeBoolean(v)
+                }
+
+                gen.writeEndObject()
+            }
+            gen.writeEndObject()
+            gen.writeEndObject()
         }
     }
 

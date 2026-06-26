@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.every
 import io.mockk.mockk
 import java.security.cert.X509Certificate
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
@@ -67,7 +68,8 @@ class Iso18013DocumentVerifierTest {
             trustVerifier,
             DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
             MsoDecoder(),
-            MsoFieldVerifierImpl()
+            MsoFieldVerifierImpl(),
+            ValidityInfoVerifierImpl(Clock.System)
         )
     }
 
@@ -88,7 +90,8 @@ class Iso18013DocumentVerifierTest {
                     "${TrustVerifier::class.java.simpleName}, " +
                     "${DeviceAuthVerifier::class.java.simpleName}, " +
                     "${MsoDecoder::class.java.simpleName}, " +
-                    "${MsoFieldVerifier::class.java.simpleName})"
+                    "${MsoFieldVerifier::class.java.simpleName}, " +
+                    "${ValidityInfoVerifier::class.java.simpleName})"
             )
         )
     }
@@ -99,7 +102,7 @@ class Iso18013DocumentVerifierTest {
      */
     @Test
     fun `Ensure function count`() {
-        assertThat(classInfo.methodInfo, hasSize(3))
+        assertThat(classInfo.methodInfo, hasSize(2))
     }
 
     /**
@@ -112,11 +115,6 @@ class Iso18013DocumentVerifierTest {
             "verifyDocumentDigests" to
                 "void (" +
                 "${VerifiableDocument::class.java.simpleName}, " +
-                "${MobileSecurityObject::class.java.simpleName}" +
-                ")",
-            "verifyValidityInfo" to
-                "void (" +
-                "${CertificateValidityPeriod::class.java.simpleName}, " +
                 "${MobileSecurityObject::class.java.simpleName}" +
                 ")"
         )
@@ -181,6 +179,23 @@ class Iso18013DocumentVerifierTest {
         assertThat(exception, hasError(VerificationError.INVALID_MSO_VERSION))
     }
 
+    /**
+     * DCMAW-20265: [DocumentVerifier.verifyDocument] calls [ValidityInfoVerifier.verify]
+     * and propagates validity failures.
+     */
+    @Test
+    fun `fails verification due to expired certificates`() {
+        stubTrustVerifierSuccess(
+            validityPeriod = CertificateValidityPeriodStubs.expired()
+        )
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            documentVerifier.verifyDocument(provisionedDocument, sessionTranscriptBytes)
+        }
+
+        assertThat(exception, hasError(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE))
+    }
+
     @Test
     fun `verifyDocumentDigests is stubbed to throw a Failure`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
@@ -188,15 +203,6 @@ class Iso18013DocumentVerifierTest {
         }
 
         assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
-    }
-
-    @Test
-    fun `verifyValidityInfo is stubbed to throw a Failure`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyValidityInfo(CertificateValidityPeriodStubs.expired(), mockk())
-        }
-
-        assertThat(exception, hasError(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE))
     }
 
     /**
