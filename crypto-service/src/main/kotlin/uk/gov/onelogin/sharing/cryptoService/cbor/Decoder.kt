@@ -72,10 +72,10 @@ fun decodeDeviceEngagement(cborBase64Url: String, logger: Logger): DeviceEngagem
     deviceEngagement
 } catch (e: JsonProcessingException) {
     // We need to send error status code 10 to the reader in the event of CBOR decoding errors
-    logger.debug(TAG, "Failed to deserialize CBOR: ${e.message}")
+    logger.error(TAG, "Failed to deserialize CBOR: ${e.message}", e)
     null
 } catch (e: IllegalArgumentException) {
-    logger.debug(TAG, "Illegal parameters found: ${e.message}")
+    logger.error(TAG, "Illegal parameters found: ${e.message}", e)
     null
 }
 

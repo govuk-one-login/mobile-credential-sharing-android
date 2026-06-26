@@ -1,19 +1,16 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.BinaryNode
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 
+@JsonDeserialize(using = ItemsRequestDto.Deserializer::class)
 data class ItemsRequestDto(
-    @JsonProperty("docType")
     val docType: String,
-    @JsonProperty("nameSpaces")
     val nameSpaces: Map<String, Map<String, Boolean>>,
     @JsonIgnore
     val requestInfo: ByteArray? = null
@@ -47,15 +44,24 @@ data class ItemsRequestDto(
     fun toDomain(): ItemsRequest = ItemsRequest(docType = docType, nameSpaces = nameSpaces)
 
     /**
-     * Unwraps Tag 24-encoded bstr and re-deserializes the inner bytes as [ItemsRequestDto].
+     * Deserializes [ItemsRequestDto] from a CBOR map with "docType" and "nameSpaces" fields.
      */
-    class Deserializer : JsonDeserializer<ItemsRequestDto>() {
+    class Deserializer : StdDeserializer<ItemsRequestDto>(ItemsRequestDto::class.java) {
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): ItemsRequestDto {
-            val binaryNode = p.codec.readTree<JsonNode>(p) as BinaryNode
-            return (p.codec as ObjectMapper).readValue(
-                binaryNode.binaryValue(),
-                ItemsRequestDto::class.java
-            )
+            val root = p.codec.readTree<JsonNode>(p)
+            val docType = root["docType"]?.asText()
+                ?: throw IllegalArgumentException("Missing docType in ItemsRequest")
+            val nameSpacesNode = root["nameSpaces"]
+                ?: throw IllegalArgumentException("Missing nameSpaces in ItemsRequest")
+            val nameSpaces = mutableMapOf<String, Map<String, Boolean>>()
+            nameSpacesNode.properties().forEach { (ns, elements) ->
+                val elementMap = mutableMapOf<String, Boolean>()
+                elements.properties().forEach { (key, value) ->
+                    elementMap[key] = value.booleanValue()
+                }
+                nameSpaces[ns] = elementMap
+            }
+            return ItemsRequestDto(docType = docType, nameSpaces = nameSpaces)
         }
     }
 }

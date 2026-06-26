@@ -214,5 +214,261 @@ class DeviceResponseDtoTest {
         )
     }
 
+    @Test
+    fun `toDomain maps DeviceResponseDTO to DeviceResponse`() {
+        val issuerSignedItemData = byteArrayOf(0x01, 0x02)
+        val deviceSignatureData = byteArrayOf(0x03, 0x04)
+
+        val document = DeviceResponseDto.DocumentDTO(
+            docType = docType,
+            issuerSigned = DeviceResponseDto.IssuerSignedDTO(
+                nameSpaces = mapOf(
+                    "org.iso.18013.5.1" to listOf(EmbeddedCbor(issuerSignedItemData))
+                ),
+                issuerAuth = RawCbor(byteArrayOf(0x03, 0x04))
+            ),
+            deviceSigned = DeviceResponseDto.DeviceSignedDTO(
+                nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                    deviceSignature = RawCbor(deviceSignatureData)
+                )
+            )
+        )
+
+        val dto = DeviceResponseDto.DeviceResponseDTO(
+            version = "1.0",
+            documents = listOf(document),
+            status = 0u
+        )
+
+        val domain = dto.toDomain()
+
+        assertEquals("1.0", domain.version)
+        assertEquals(Status.OK, domain.status)
+
+        val documents = domain.documents!!
+        assertEquals(1, documents.size)
+        assertEquals(docType, documents.first().docType)
+
+        val issuerSigned = documents.first().issuerSigned
+        val nameSpaces = issuerSigned.nameSpaces!!
+        assertEquals(1, nameSpaces["org.iso.18013.5.1"]!!.size)
+        assertThat(nameSpaces["org.iso.18013.5.1"]!![0], equalTo(issuerSignedItemData))
+        assertThat(issuerSigned.issuerAuth, equalTo(byteArrayOf(0x03, 0x04)))
+
+        val deviceSigned = documents.first().deviceSigned
+        assertThat(deviceSigned.deviceNameSpacesBytes, equalTo(deviceNameSpacesData))
+        assertThat(deviceSigned.deviceSignature, equalTo(deviceSignatureData))
+    }
+
+    @Test
+    fun `toDomain maps null documents`() {
+        val dto = DeviceResponseDto.DeviceResponseDTO(status = 10u)
+
+        val domain = dto.toDomain()
+
+        assertEquals(Status.GENERAL_ERROR, domain.status)
+        assertNull(domain.documents)
+    }
+
+    @Test
+    fun `serialisation and deserialisation preserves DeviceResponseDTO`() {
+        val issuerSignedItemData = byteArrayOf(0x01, 0x02)
+
+        // issuerAuth and deviceSignature must be valid CBOR for deserialisation
+        val issuerAuthBytes = mapper.writeValueAsBytes(listOf<Any>())
+        val deviceSignatureBytes = mapper.writeValueAsBytes(listOf<Any>())
+
+        val original = DeviceResponseDto.DeviceResponseDTO(
+            version = "1.0",
+            documents = listOf(
+                DeviceResponseDto.DocumentDTO(
+                    docType = docType,
+                    issuerSigned = DeviceResponseDto.IssuerSignedDTO(
+                        nameSpaces = mapOf(
+                            "org.iso.18013.5.1" to listOf(EmbeddedCbor(issuerSignedItemData))
+                        ),
+                        issuerAuth = RawCbor(issuerAuthBytes)
+                    ),
+                    deviceSigned = DeviceResponseDto.DeviceSignedDTO(
+                        nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                        deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                            deviceSignature = RawCbor(deviceSignatureBytes)
+                        )
+                    )
+                )
+            ),
+            status = 0u
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val decoded = mapper.readValue(
+            encoded,
+            DeviceResponseDto.DeviceResponseDTO::class.java
+        )
+
+        assertEquals(original.version, decoded.version)
+        assertEquals(original.status, decoded.status)
+
+        val originalDocs = original.documents!!
+        val decodedDocs = decoded.documents!!
+        assertEquals(originalDocs.size, decodedDocs.size)
+        assertEquals(originalDocs[0].docType, decodedDocs[0].docType)
+        assertThat(
+            decodedDocs[0].issuerSigned.nameSpaces!!["org.iso.18013.5.1"]!![0].encoded,
+            equalTo(issuerSignedItemData)
+        )
+        assertThat(
+            decodedDocs[0].deviceSigned.nameSpaces.encoded,
+            equalTo(deviceNameSpacesData)
+        )
+    }
+
+    @Test
+    fun `round trip with null documents omits documents field`() {
+        val original = DeviceResponseDto.DeviceResponseDTO(
+            status = 0u,
+            documents = null
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val decoded = mapper.readValue(
+            encoded,
+            DeviceResponseDto.DeviceResponseDTO::class.java
+        )
+
+        assertEquals(original.version, decoded.version)
+        assertEquals(original.status, decoded.status)
+        assertNull(decoded.documents)
+    }
+
+    @Test
+    fun `round trip with documentErrors preserves error map`() {
+        val original = DeviceResponseDto.DeviceResponseDTO(
+            status = 0u,
+            documentErrors = mapOf(docType to 10u)
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val decoded = mapper.readTree(encoded)
+
+        assertEquals(10, decoded["documentErrors"][docType].asInt())
+    }
+
+    @Test
+    fun `round trip with null issuerSigned nameSpaces omits nameSpaces field`() {
+        val issuerAuthBytes = mapper.writeValueAsBytes(listOf<Any>())
+        val deviceSignatureBytes = mapper.writeValueAsBytes(listOf<Any>())
+
+        val original = DeviceResponseDto.DeviceResponseDTO(
+            documents = listOf(
+                DeviceResponseDto.DocumentDTO(
+                    docType = docType,
+                    issuerSigned = DeviceResponseDto.IssuerSignedDTO(
+                        nameSpaces = null,
+                        issuerAuth = RawCbor(issuerAuthBytes)
+                    ),
+                    deviceSigned = DeviceResponseDto.DeviceSignedDTO(
+                        nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                        deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                            deviceSignature = RawCbor(deviceSignatureBytes)
+                        )
+                    )
+                )
+            ),
+            status = 0u
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val decoded = mapper.readValue(
+            encoded,
+            DeviceResponseDto.DeviceResponseDTO::class.java
+        )
+
+        val docs = decoded.documents!!
+        assertNull(docs[0].issuerSigned.nameSpaces)
+        assertEquals(docType, docs[0].docType)
+    }
+
+    @Test
+    fun `round trip with DocumentDTO errors preserves errors map`() {
+        val issuerAuthBytes = mapper.writeValueAsBytes(listOf<Any>())
+        val deviceSignatureBytes = mapper.writeValueAsBytes(listOf<Any>())
+
+        val original = DeviceResponseDto.DeviceResponseDTO(
+            documents = listOf(
+                DeviceResponseDto.DocumentDTO(
+                    docType = docType,
+                    issuerSigned = DeviceResponseDto.IssuerSignedDTO(
+                        nameSpaces = null,
+                        issuerAuth = RawCbor(issuerAuthBytes)
+                    ),
+                    deviceSigned = DeviceResponseDto.DeviceSignedDTO(
+                        nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                        deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                            deviceSignature = RawCbor(deviceSignatureBytes)
+                        )
+                    ),
+                    errors = mapOf("org.iso.18013.5.1" to 1)
+                )
+            ),
+            status = 0u
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val decoded = mapper.readTree(encoded)
+
+        assertEquals(1, decoded["documents"][0]["errors"]["org.iso.18013.5.1"].asInt())
+    }
+
+    @Test
+    fun `documentErrors field serializes to CBOR correctly`() {
+        val deviceResponse = DeviceResponseDto.DeviceResponseDTO(
+            status = 0u,
+            documentErrors = mapOf(docType to 10u)
+        )
+
+        val encoded = mapper.writeValueAsBytes(deviceResponse)
+        val encodedString = encoded.joinToString("", transform = hexFormatter)
+
+        assertContains(
+            charSequence = encodedString,
+            other = "6e646f63756d656e744572726f7273" // "documentErrors" UTF-8 in hex
+        )
+
+        val decoded = mapper.readTree(encoded)
+        assertEquals(10, decoded["documentErrors"][docType].asInt())
+    }
+
+    @Test
+    fun `IssuerSignedItemDeserializer deserializes elementValue`(
+        @TestParameter elementType: ElementValueType
+    ) {
+        val encoded = mapper.writeValueAsBytes(issuerSignedItemMap(elementType.input))
+        val result = mapper.readValue(
+            encoded,
+            DeviceResponseDto.IssuerSignedItemDTO::class.java
+        )
+
+        assertEquals(1L, result.digestId)
+        assertEquals("family_name", result.elementIdentifier)
+        assertEquals(elementType.expected, result.elementValue)
+    }
+
+    @Suppress("unused")
+    enum class ElementValueType(val input: Any, val expected: Any) {
+        TEXT("Smith", "Smith"),
+        BOOLEAN(true, true),
+        NUMBER(42, 42),
+        COMPLEX(mapOf("nested" to "value"), "{\"nested\":\"value\"}")
+    }
+
+    private fun issuerSignedItemMap(elementValue: Any): Map<String, Any> = mapOf(
+        "digestID" to 1L,
+        "random" to byteArrayOf(0x01, 0x02, 0x03),
+        "elementIdentifier" to "family_name",
+        "elementValue" to elementValue
+    )
+
     private fun generateBytesTag(elementSize: Int) = hexFormatter(PREFIX_TYPE_BYTES + elementSize)
 }
