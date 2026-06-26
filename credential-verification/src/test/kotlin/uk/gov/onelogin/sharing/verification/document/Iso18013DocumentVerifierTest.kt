@@ -38,7 +38,6 @@ import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 @RunWith(TestParameterInjector::class)
 class Iso18013DocumentVerifierTest {
     private val classInfo = scanResult.getClassInfo(Iso18013DocumentVerifier::class.java.name)
-    private val privateFunctionSuffix = $$"$credential_verification_debug"
 
     /**
      * DCMAW-20269: AC1: A Sharing SDK document can be wrapped in [SharingVerifiableDocument] and
@@ -69,7 +68,8 @@ class Iso18013DocumentVerifierTest {
             DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
             MsoDecoder(),
             MsoFieldVerifierImpl(),
-            ValidityInfoVerifierImpl(Clock.System)
+            ValidityInfoVerifierImpl(Clock.System),
+            DigestVerifierImpl()
         )
     }
 
@@ -91,7 +91,8 @@ class Iso18013DocumentVerifierTest {
                     "${DeviceAuthVerifier::class.java.simpleName}, " +
                     "${MsoDecoder::class.java.simpleName}, " +
                     "${MsoFieldVerifier::class.java.simpleName}, " +
-                    "${ValidityInfoVerifier::class.java.simpleName})"
+                    "${ValidityInfoVerifier::class.java.simpleName}, " +
+                    "${DigestVerifier::class.java.simpleName})"
             )
         )
     }
@@ -102,30 +103,7 @@ class Iso18013DocumentVerifierTest {
      */
     @Test
     fun `Ensure function count`() {
-        assertThat(classInfo.methodInfo, hasSize(2))
-    }
-
-    /**
-     * DCMAW-20246: AC3: 'Private' methods exist on [Iso18013DocumentVerifier] with the correct
-     * signatures
-     */
-    @Test
-    fun `Ensure private function signature`(
-        @TestParameter functionsToDescriptors: Pair<String, String> = testValues(
-            "verifyDocumentDigests" to
-                "void (" +
-                "${VerifiableDocument::class.java.simpleName}, " +
-                "${MobileSecurityObject::class.java.simpleName}" +
-                ")"
-        )
-    ) {
-        val (name, expectedDescriptor) = functionsToDescriptors
-        val methodInfo = classInfo.methodInfo.getSingleMethod("$name$privateFunctionSuffix")
-
-        assertThat(
-            methodInfo.typeDescriptor.toStringWithSimpleNames(),
-            equalTo(expectedDescriptor)
-        )
+        assertThat(classInfo.methodInfo, hasSize(1))
     }
 
     /**
@@ -194,15 +172,6 @@ class Iso18013DocumentVerifierTest {
         }
 
         assertThat(exception, hasError(VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE))
-    }
-
-    @Test
-    fun `verifyDocumentDigests is stubbed to throw a Failure`() {
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocumentDigests(provisionedDocument, mockk())
-        }
-
-        assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
     }
 
     /**
