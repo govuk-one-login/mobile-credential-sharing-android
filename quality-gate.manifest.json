@@ -3,7 +3,7 @@
   "services": [
     {
       "serviceTag": "mobile-credential-sharing-android",
-      "promotionType": "securePipelines",
+      "promotionType": "library",
       "checks": [
         {
           "checkTypes": [
@@ -130,7 +130,7 @@
         },
         {
           "checkTypes": [],
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
