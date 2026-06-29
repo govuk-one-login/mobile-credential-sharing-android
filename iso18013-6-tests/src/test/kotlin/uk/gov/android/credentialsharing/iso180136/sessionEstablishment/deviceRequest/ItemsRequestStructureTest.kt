@@ -33,6 +33,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto.Companion.KEY_NAMESPACES
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto.Companion.KEY_REQUEST_INFO
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 
 @RunWith(TestParameterInjector::class)
@@ -254,7 +255,7 @@ class ItemsRequestStructureTest {
             "Whitespace document type" to DocumentType.Custom(" \t")
         ),
     ) {
-        assertThrows(Exception::class.java) {
+        assertThrows(IllegalArgumentException::class.java) {
             deviceRequest = deviceRequest.copy(
                 docRequest = listOf(
                     deviceRequest.docRequest[0].copy(
@@ -267,6 +268,163 @@ class ItemsRequestStructureTest {
         }
     }
 
+    /**
+     * Scenario ID: mDLR_MS_DR_12
+     */
+    @Test
+    fun `Item requests must define at least one namespace`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            updateNamespaces(emptyMap())
+        }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_12
+     */
+    @Test
+    fun `Valid Item request namespaces`(
+        @TestParameter namespace: String = namedTestValues(
+            "ISO-180136 Core namespace" to DocumentType.Mdl.NAMESPACE,
+            "Domestic namespace: Great Britain" to "org.iso.18013.5.1.GB"
+        )
+    ) {
+        updateNamespaces(mapOf(namespace to mapOf(MdlAttribute.Portrait.value to false)))
+
+        assertThat(
+            deviceRequestHexString,
+            containsString(namespace.toByteArray().toHexString())
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_12
+     *
+     * Fails conformance test due to no input validation against the keys of
+     * [ItemsRequestDto.nameSpaces].
+     */
+    @Test
+    @Ignore("Fails conformance test due to lack of input validation")
+    fun `Invalid Item request namespaces throw an exception`(
+        @TestParameter attribute: String = namedTestValues(
+            "Unknown namespace" to "ISO.spec.test",
+            "Empty namespace" to "",
+            "Whitespace namespace" to " \t"
+        ),
+    ) {
+        assertThrows(IllegalArgumentException::class.java) {
+            updateNamespaces(
+                mapOf(attribute to mapOf(MdlAttribute.Portrait.value to true))
+            )
+        }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_13
+     *
+     * Fails conformance test due to [ItemsRequestDto.nameSpaces] validation. Specifically, there's
+     * no validation against the `Map<String, Boolean>` values of [ItemsRequestDto.nameSpaces].
+     */
+    @Test
+    @Ignore("Fails conformance test due to lack of input validation")
+    fun `Item requests must define at least one attribute`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            updateNamespaceAttributes(emptyMap())
+        }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_13
+     */
+    @Test
+    fun `Valid Item request attributes`(
+        @TestParameter attribute: String = testValues(
+            "administrative_number",
+            "age_birth_year",
+            "biometric_template_face",
+            "biometric_template_finger",
+            "biometric_template_iris",
+            "eye_colour",
+            "family_name_national_character",
+            "hair_colour",
+            "height",
+            "issuing_jurisdiction",
+            MdlAttribute.AgeOver(18).value,
+            MdlAttribute.AgeOver(21).value,
+            MdlAttribute.BirthDate.value,
+            MdlAttribute.BirthPlace.value,
+            MdlAttribute.DocumentNumber.value,
+            MdlAttribute.DrivingPrivileges.value,
+            MdlAttribute.ExpiryDate.value,
+            MdlAttribute.FamilyName.value,
+            MdlAttribute.GivenName.value,
+            MdlAttribute.IssueDate.value,
+            MdlAttribute.IssuingAuthority.value,
+            MdlAttribute.IssuingCountry.value,
+            MdlAttribute.Portrait.value,
+            MdlAttribute.ResidentAddress.value,
+            MdlAttribute.ResidentCity.value,
+            MdlAttribute.ResidentPostalCode.value,
+            MdlAttribute.UnDistinguishingSign.value,
+            "nationality",
+            "portrait_capture_date",
+            "resident_country",
+            "resident_postal_code",
+            "resident_state",
+            "sex",
+            "signature_usual_mark",
+            "weight"
+        ),
+    ) {
+        updateNamespaceAttributes(mapOf(attribute to true))
+
+        assertThat(
+            deviceRequestHexString,
+            containsString(attribute.toByteArray().toHexString())
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_13
+     *
+     * Fails conformance test due to [ItemsRequestDto.nameSpaces] validation. Specifically, there's
+     * no validation against the `Map<String, Boolean>` values of [ItemsRequestDto.nameSpaces].
+     */
+    @Test
+    @Ignore("Fails conformance test due to lack of input validation")
+    fun `Invalid Item request attributes throw an exception`(
+        @TestParameter attribute: MdlAttribute = namedTestValues(
+            "Unknown attribute" to MdlAttribute.Custom("ISO.spec.test"),
+            "Empty attribute" to MdlAttribute.Custom(""),
+            "Whitespace attribute" to MdlAttribute.Custom(" \t")
+        ),
+    ) {
+        assertThrows(IllegalArgumentException::class.java) {
+            updateNamespaceAttributes(
+                mapOf(attribute.value to true)
+            )
+        }
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_14
+     */
+    @Test
+    fun `Intent to retain is CBOR encoded`(
+        @TestParameter input: Pair<Boolean, String> = testValues(
+            false to "f4",
+            true to "f5"
+        )
+    ) {
+        val (intentToRetain, encodedIntent) = input
+        val attribute = MdlAttribute.Portrait.value
+        updateNamespaceAttributes(mapOf(attribute to intentToRetain))
+
+        assertThat(
+            deviceRequestHexString,
+            containsString(attribute.toByteArray().toHexString() + encodedIntent)
+        )
+    }
+
     private fun updateWithRequestInfo(
         requestInfo: ByteArray = byteArrayOf(1, 2),
     ) {
@@ -275,6 +433,36 @@ class ItemsRequestStructureTest {
                 deviceRequest.docRequest[0].copy(
                     itemsRequest = deviceRequest.docRequest[0].itemsRequest.copy(
                         requestInfo = requestInfo
+                    )
+                )
+            )
+        )
+    }
+
+    private fun updateNamespaces(
+        data: Map<String, Map<String, Boolean>>,
+    ) {
+        deviceRequest = deviceRequest.copy(
+            docRequest = listOf(
+                deviceRequest.docRequest[0].copy(
+                    itemsRequest = deviceRequest.docRequest[0].itemsRequest.copy(
+                        nameSpaces = data
+                    )
+                )
+            )
+        )
+    }
+
+    private fun updateNamespaceAttributes(
+        data: Map<String, Boolean>,
+    ) {
+        deviceRequest = deviceRequest.copy(
+            docRequest = listOf(
+                deviceRequest.docRequest[0].copy(
+                    itemsRequest = deviceRequest.docRequest[0].itemsRequest.copy(
+                        nameSpaces = mapOf(
+                            DocumentType.Mdl.NAMESPACE to data
+                        )
                     )
                 )
             )
