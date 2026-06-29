@@ -12,7 +12,6 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
@@ -178,13 +177,23 @@ class Iso18013DocumentVerifierTest {
      * DCMAW-20246: AC4: [DocumentVerifier.verifyDocument] verifies device authentication
      * with [VerifiableDocument.WithPresentation].
      */
-    @Ignore("Currently untestable via interface functions")
     @Test
-    fun `Fails verification due to presented document failing device auth`() {
+    fun `fails verification due to presented document failing device auth`() {
+        val mockValidityInfoVerifier: ValidityInfoVerifier = mockk(relaxed = true)
+        val mockDigestVerifier: DigestVerifier = mockk(relaxed = true)
+        val verifier = Iso18013DocumentVerifier(
+            mockRootCertificate,
+            trustVerifier,
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
+            MsoDecoder(),
+            MsoFieldVerifierImpl(),
+            mockValidityInfoVerifier,
+            mockDigestVerifier
+        )
         stubTrustVerifierSuccess()
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(presentedDocument, sessionTranscriptBytes)
+            verifier.verifyDocument(presentedDocument, sessionTranscriptBytes)
         }
 
         assertThat(exception, hasError(VerificationError.INVALID_DEVICE_SIGNATURE))
@@ -196,16 +205,82 @@ class Iso18013DocumentVerifierTest {
      * [VerificationError.INVALID_DEVICE_SIGNATURE] - DeviceAuth is mandatory for presentation
      * documents and cannot be silently skipped.
      */
-    @Ignore("Currently untestable via interface functions")
     @Test
-    fun `Fails verification due to null transcript with a presented Document`() {
+    fun `fails verification due to null transcript with presented`() {
+        val mockValidityInfoVerifier: ValidityInfoVerifier = mockk(relaxed = true)
+        val mockDigestVerifier: DigestVerifier = mockk(relaxed = true)
+        val verifier = Iso18013DocumentVerifier(
+            mockRootCertificate,
+            trustVerifier,
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
+            MsoDecoder(),
+            MsoFieldVerifierImpl(),
+            mockValidityInfoVerifier,
+            mockDigestVerifier
+        )
         stubTrustVerifierSuccess()
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            documentVerifier.verifyDocument(presentedDocument, null)
+            verifier.verifyDocument(presentedDocument, null)
         }
 
         assertThat(exception, hasError(VerificationError.INVALID_DEVICE_SIGNATURE))
+    }
+
+    /**
+     * Verifies the full success path for a provisioned document (no device auth required).
+     */
+    @Test
+    fun `successfully verifies a provisioned document`() {
+        val mockValidityInfoVerifier: ValidityInfoVerifier = mockk(relaxed = true)
+        val mockDigestVerifier: DigestVerifier = mockk(relaxed = true)
+        val verifier = Iso18013DocumentVerifier(
+            mockRootCertificate,
+            trustVerifier,
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
+            MsoDecoder(),
+            MsoFieldVerifierImpl(),
+            mockValidityInfoVerifier,
+            mockDigestVerifier
+        )
+        stubTrustVerifierSuccess()
+
+        val result = verifier.verifyDocument(provisionedDocument, sessionTranscriptBytes)
+
+        assertThat(result, equalTo(VerificationResult.Success))
+    }
+
+    /**
+     * [DocumentVerifier.verifyDocument] calls [DigestVerifier.verify] and propagates
+     * digest verification failures.
+     */
+    @Test
+    fun `fails verification due to DigestVerifier failing`(
+        @TestParameter error: VerificationError = testValues(
+            VerificationError.DIGEST_MISMATCH,
+            VerificationError.DIGEST_MISSING
+        )
+    ) {
+        val mockDigestVerifier: DigestVerifier = mockk {
+            every { verify(any(), any()) } throws VerificationResult.Failure(error)
+        }
+        val mockValidityInfoVerifier: ValidityInfoVerifier = mockk(relaxed = true)
+        val verifier = Iso18013DocumentVerifier(
+            mockRootCertificate,
+            trustVerifier,
+            DeviceAuthVerifier(trustVerifier, CoseKeyDecoder(), DeviceAuthenticationEncoder()),
+            MsoDecoder(),
+            MsoFieldVerifierImpl(),
+            mockValidityInfoVerifier,
+            mockDigestVerifier
+        )
+        stubTrustVerifierSuccess()
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            verifier.verifyDocument(provisionedDocument, sessionTranscriptBytes)
+        }
+
+        assertThat(exception, hasError(error))
     }
 
     private fun stubTrustVerifierSuccess(
