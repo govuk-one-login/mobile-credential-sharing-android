@@ -292,7 +292,7 @@ class DeviceRequestStructureTest {
     @Test
     fun `Document request items are encoded CBOR data items`() {
         val prefix = ITEMS_REQUEST_KEY.toByteArray().toHexString() +
-            "d818584e"
+            "d818584b"
 
         assertThat(
             deviceRequestHexString,
