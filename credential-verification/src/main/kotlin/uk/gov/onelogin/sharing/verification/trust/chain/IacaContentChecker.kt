@@ -32,7 +32,7 @@ internal class IacaContentChecker(
 
     private fun verifyExtendedKeyUsage(leaf: X509Certificate) {
         val isCritical = OID_EKU in (leaf.criticalExtensionOIDs ?: emptySet())
-        val ekuOids = leaf.extendedKeyUsage
+        val ekuOids = leaf.extendedKeyUsage?.toSet()
         val isValid = isCritical &&
             ekuOids != null &&
             OID_MDL_DS in ekuOids &&
