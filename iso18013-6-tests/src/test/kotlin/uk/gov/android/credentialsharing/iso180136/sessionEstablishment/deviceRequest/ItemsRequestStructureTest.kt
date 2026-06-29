@@ -26,6 +26,7 @@ import org.hamcrest.Matchers.lessThanOrEqualTo
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto.Companion.DOC_REQUESTS_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDtoStub.deviceRequestStub
@@ -36,7 +37,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto.Companion.KEY_REQUEST_INFO
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 
 @RunWith(TestParameterInjector::class)
 class ItemsRequestStructureTest {
@@ -93,7 +93,7 @@ class ItemsRequestStructureTest {
             "Indefinite byte arrays" to containsString(
                 (PREFIX_TYPE_BYTES + SUFFIX_INDEFINITE).toHexString()
             )
-        ),
+        )
     ) {
         assertThat(
             deviceRequestHexString.chunked(2),
@@ -109,8 +109,8 @@ class ItemsRequestStructureTest {
     fun `There are no duplicate fields`(
         @TestParameter propertyName: String = testValues(
             KEY_DOC_TYPE,
-            KEY_NAMESPACES,
-        ),
+            KEY_NAMESPACES
+        )
     ) {
         itemRequestNodes.forEach { itemRequest ->
             assertThat(
@@ -131,8 +131,8 @@ class ItemsRequestStructureTest {
     @Ignore("Fails conformance test due to incomplete (de)serializer implementation")
     fun `There are no duplicate fields - Ignored fields`(
         @TestParameter propertyName: String = testValues(
-            KEY_REQUEST_INFO,
-        ),
+            KEY_REQUEST_INFO
+        )
     ) {
         updateWithRequestInfo()
 
@@ -181,8 +181,8 @@ class ItemsRequestStructureTest {
     fun `Item request properties are of the correct type`(
         @TestParameter input: Pair<String, (JsonNode) -> Boolean> = namedTestValues(
             "Document type" to (KEY_DOC_TYPE to JsonNode::isTextual),
-            "Namespaces" to (KEY_NAMESPACES to JsonNode::isObject),
-        ),
+            "Namespaces" to (KEY_NAMESPACES to JsonNode::isObject)
+        )
     ) {
         val (property, assertion) = input
 
@@ -204,7 +204,7 @@ class ItemsRequestStructureTest {
     fun `Item request properties are of the correct type - Ignored fields`(
         @TestParameter input: Pair<String, (JsonNode) -> Boolean> = namedTestValues(
             "Request info" to (KEY_REQUEST_INFO to JsonNode::isBinary)
-        ),
+        )
     ) {
         val (property, assertion) = input
 
@@ -223,8 +223,8 @@ class ItemsRequestStructureTest {
     @Test
     fun `Item requests enforce valid document types`(
         @TestParameter type: DocumentType = namedTestValues(
-            "Mobile Driving Licence" to DocumentType.Mdl,
-        ),
+            "Mobile Driving Licence" to DocumentType.Mdl
+        )
     ) {
         deviceRequest = deviceRequest.copy(
             docRequest = listOf(
@@ -255,7 +255,7 @@ class ItemsRequestStructureTest {
             "Unknown document type" to DocumentType.Custom("ISO.spec.test"),
             "Empty document type" to DocumentType.Custom(""),
             "Whitespace document type" to DocumentType.Custom(" \t")
-        ),
+        )
     ) {
         assertThrows(IllegalArgumentException::class.java) {
             deviceRequest = deviceRequest.copy(
@@ -288,7 +288,7 @@ class ItemsRequestStructureTest {
         @TestParameter namespace: String = namedTestValues(
             "ISO-180136 Core namespace" to DocumentType.Mdl.NAMESPACE,
             "Domestic namespace: Great Britain" to "org.iso.18013.5.1.GB"
-        ),
+        )
     ) {
         updateNamespaces(mapOf(namespace to mapOf(MdlAttribute.Portrait.value to false)))
 
@@ -311,7 +311,7 @@ class ItemsRequestStructureTest {
             "Unknown namespace" to "ISO.spec.test",
             "Empty namespace" to "",
             "Whitespace namespace" to " \t"
-        ),
+        )
     ) {
         assertThrows(IllegalArgumentException::class.java) {
             updateNamespaces(
@@ -375,7 +375,7 @@ class ItemsRequestStructureTest {
             "sex",
             "signature_usual_mark",
             "weight"
-        ),
+        )
     ) {
         updateNamespaceAttributes(mapOf(attribute to true))
 
@@ -398,7 +398,7 @@ class ItemsRequestStructureTest {
             "Unknown attribute" to MdlAttribute.Custom("ISO.spec.test"),
             "Empty attribute" to MdlAttribute.Custom(""),
             "Whitespace attribute" to MdlAttribute.Custom(" \t")
-        ),
+        )
     ) {
         assertThrows(IllegalArgumentException::class.java) {
             updateNamespaceAttributes(
@@ -415,7 +415,7 @@ class ItemsRequestStructureTest {
         @TestParameter input: Pair<Boolean, String> = testValues(
             false to "f4",
             true to "f5"
-        ),
+        )
     ) {
         val (intentToRetain, encodedIntent) = input
         val attribute = MdlAttribute.Portrait.value
@@ -457,9 +457,7 @@ class ItemsRequestStructureTest {
         )
     }
 
-    private fun updateWithRequestInfo(
-        requestInfo: ByteArray = byteArrayOf(1, 2),
-    ) {
+    private fun updateWithRequestInfo(requestInfo: ByteArray = byteArrayOf(1, 2)) {
         deviceRequest = deviceRequest.copy(
             docRequest = listOf(
                 deviceRequest.docRequest[0].copy(
@@ -471,9 +469,7 @@ class ItemsRequestStructureTest {
         )
     }
 
-    private fun updateNamespaces(
-        data: Map<String, Map<String, Boolean>>,
-    ) {
+    private fun updateNamespaces(data: Map<String, Map<String, Boolean>>) {
         deviceRequest = deviceRequest.copy(
             docRequest = listOf(
                 deviceRequest.docRequest[0].copy(
@@ -485,9 +481,7 @@ class ItemsRequestStructureTest {
         )
     }
 
-    private fun updateNamespaceAttributes(
-        data: Map<String, Boolean>,
-    ) {
+    private fun updateNamespaceAttributes(data: Map<String, Boolean>) {
         deviceRequest = deviceRequest.copy(
             docRequest = listOf(
                 deviceRequest.docRequest[0].copy(

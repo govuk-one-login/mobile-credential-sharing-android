@@ -24,6 +24,7 @@ import org.hamcrest.Matchers
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto.Companion.DEVICE_REQUEST_INFO_KEY
@@ -35,7 +36,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto.Companion.ITEMS_REQUEST_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto.Companion.READER_AUTH_KEY
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 
 /**
  * ISO/IEC TS 18013-6:2025 conformance tests for Session Establishment.
