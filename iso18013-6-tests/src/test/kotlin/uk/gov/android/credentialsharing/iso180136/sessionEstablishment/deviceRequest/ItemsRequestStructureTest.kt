@@ -22,6 +22,7 @@ import org.hamcrest.Matchers
 import org.hamcrest.Matchers.greaterThanOrEqualTo
 import org.hamcrest.Matchers.lessThanOrEqualTo
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
+import org.junit.Assert.assertThrows
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto.Companion.DOC_REQUESTS_KEY
@@ -31,6 +32,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto.Companion.KEY_DOC_TYPE
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto.Companion.KEY_NAMESPACES
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto.Companion.KEY_REQUEST_INFO
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper.default as mapper
 
 @RunWith(TestParameterInjector::class)
@@ -177,13 +179,15 @@ class ItemsRequestStructureTest {
         @TestParameter input: Pair<String, (JsonNode) -> Boolean> = namedTestValues(
             "Document type" to (KEY_DOC_TYPE to JsonNode::isTextual),
             "Namespaces" to (KEY_NAMESPACES to JsonNode::isObject),
-        )
+        ),
     ) {
         val (property, assertion) = input
 
-        itemRequestNodes.all { node ->
-            assertion(node[property])
-        }
+        assertTrue(
+            itemRequestNodes.all { node ->
+                assertion(node[property])
+            }
+        )
     }
 
     /**
@@ -197,19 +201,74 @@ class ItemsRequestStructureTest {
     fun `Item request properties are of the correct type - Ignored fields`(
         @TestParameter input: Pair<String, (JsonNode) -> Boolean> = namedTestValues(
             "Request info" to (KEY_REQUEST_INFO to JsonNode::isBinary)
-        )
+        ),
     ) {
         val (property, assertion) = input
 
         updateWithRequestInfo()
 
-        itemRequestNodes.all { node ->
-            assertion(node[property])
+        assertTrue(
+            itemRequestNodes.all { node ->
+                assertion(node[property])
+            }
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_11
+     */
+    @Test
+    fun `Item requests enforce valid document types`(
+        @TestParameter type: DocumentType = namedTestValues(
+            "Mobile Driving Licence" to DocumentType.Mdl,
+        ),
+    ) {
+        deviceRequest = deviceRequest.copy(
+            docRequest = listOf(
+                deviceRequest.docRequest[0].copy(
+                    itemsRequest = deviceRequest.docRequest[0].itemsRequest.copy(
+                        docType = type.value
+                    )
+                )
+            )
+        )
+
+        assertThat(
+            deviceRequestHexString,
+            containsString(type.value.toByteArray().toHexString())
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_11
+     *
+     * Fails conformance test due to [ItemsRequestDto.docType] validation. Specifically, there's no
+     * guard against unknown document types.
+     */
+    @Test
+    @Ignore("Fails conformance test due to lack of input validation")
+    fun `Invalid item request document types throw exceptions`(
+        @TestParameter type: DocumentType = namedTestValues(
+            "Unknown document type" to DocumentType.Custom("ISO.spec.test"),
+            "Empty document type" to DocumentType.Custom(""),
+            "Whitespace document type" to DocumentType.Custom(" \t")
+        ),
+    ) {
+        assertThrows(Exception::class.java) {
+            deviceRequest = deviceRequest.copy(
+                docRequest = listOf(
+                    deviceRequest.docRequest[0].copy(
+                        itemsRequest = deviceRequest.docRequest[0].itemsRequest.copy(
+                            docType = type.value
+                        )
+                    )
+                )
+            )
         }
     }
 
     private fun updateWithRequestInfo(
-        requestInfo: ByteArray = byteArrayOf(1, 2)
+        requestInfo: ByteArray = byteArrayOf(1, 2),
     ) {
         deviceRequest = deviceRequest.copy(
             docRequest = listOf(
