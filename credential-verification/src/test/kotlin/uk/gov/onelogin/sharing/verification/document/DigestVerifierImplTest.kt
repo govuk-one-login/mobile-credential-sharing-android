@@ -2,10 +2,13 @@ package uk.gov.onelogin.sharing.verification.document
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameters
 import java.security.MessageDigest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocument
 import uk.gov.onelogin.sharing.verification.document.IssuerSignedItemStubs.issuerSignedItemBytes
@@ -15,9 +18,9 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationE
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
 
+@RunWith(TestParameterInjector::class)
 class DigestVerifierImplTest {
 
-    private val cborMapper = ObjectMapper(CBORFactory())
     private val verifier = DigestVerifierImpl()
 
     @Test
@@ -41,100 +44,6 @@ class DigestVerifierImplTest {
     }
 
     @Test
-    fun `verify throws DIGEST_MISMATCH when hash does not match`() {
-        val itemBytes = issuerSignedItemBytes("given_name", "Alice")
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verify(
-                documentWithItems(NAMESPACE to listOf(itemBytes)),
-                MobileSecurityObjectStub.create(
-                    valueDigests = mapOf(
-                        NAMESPACE to mapOf(
-                            0 to ByteArray(32) {
-                                0xFF.toByte()
-                            }
-                        )
-                    )
-                )
-            )
-        }
-        assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
-    }
-
-    @Test
-    fun `verify throws DIGEST_MISSING when digestId not found in MSO`() {
-        val itemBytes = issuerSignedItemBytes("age_over_18", "true", digestId = 5)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verify(
-                documentWithItems(NAMESPACE to listOf(itemBytes)),
-                MobileSecurityObjectStub.create(
-                    valueDigests = mapOf(NAMESPACE to mapOf(0 to ByteArray(32)))
-                )
-            )
-        }
-        assertThat(exception, hasError(VerificationError.DIGEST_MISSING))
-    }
-
-    @Test
-    fun `verify throws DIGEST_MISSING when namespace not in MSO`() {
-        val itemBytes = issuerSignedItemBytes("family_name", "Smith")
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verify(
-                documentWithItems(NAMESPACE to listOf(itemBytes)),
-                MobileSecurityObjectStub.create()
-            )
-        }
-        assertThat(exception, hasError(VerificationError.DIGEST_MISSING))
-    }
-
-    @Test
-    fun `verify throws DIGEST_MISMATCH for invalid Tag 24 encoding`() {
-        val invalidBytes = cborMapper.writeValueAsBytes("not a binary node")
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verify(
-                documentWithItems(NAMESPACE to listOf(invalidBytes)),
-                MobileSecurityObjectStub.create(
-                    valueDigests = mapOf(NAMESPACE to mapOf(0 to ByteArray(32)))
-                )
-            )
-        }
-        assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
-    }
-
-    @Test
-    fun `verify throws DIGEST_MISMATCH for negative digestId`() {
-        val itemBytes = issuerSignedItemBytes("family_name", "X", digestId = -1)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verify(
-                documentWithItems(NAMESPACE to listOf(itemBytes)),
-                MobileSecurityObjectStub.create(
-                    valueDigests = mapOf(NAMESPACE to mapOf(-1 to ByteArray(32)))
-                )
-            )
-        }
-        assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
-    }
-
-    @Test
-    fun `verify throws DIGEST_MISMATCH for digestId at max boundary`() {
-        val itemBytes = issuerSignedItemBytes("x", "y", digestId = 2_147_483_648L)
-
-        val exception = assertThrows(VerificationResult.Failure::class.java) {
-            verifier.verify(
-                documentWithItems(NAMESPACE to listOf(itemBytes)),
-                MobileSecurityObjectStub.create(
-                    valueDigests = mapOf(NAMESPACE to mapOf(0 to ByteArray(32)))
-                )
-            )
-        }
-        assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
-    }
-
-    @Test
     fun `verify succeeds with multiple namespaces and items`() {
         val item1 = issuerSignedItemBytes("family_name", "Smith", digestId = 0)
         val item2 = issuerSignedItemBytes("given_name", "John", digestId = 1)
@@ -152,6 +61,38 @@ class DigestVerifierImplTest {
         )
     }
 
+    @Test
+    @TestParameters("{case: HASH_DOES_NOT_MATCH}")
+    @TestParameters("{case: INVALID_TAG24_ENCODING}")
+    @TestParameters("{case: NEGATIVE_DIGEST_ID}")
+    @TestParameters("{case: DIGEST_ID_AT_MAX_BOUNDARY}")
+    fun `verify throws DIGEST_MISMATCH`(case: String) {
+        val (itemBytes, msoDigests) = digestMismatchCases.getValue(case)
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            verifier.verify(
+                documentWithItems(NAMESPACE to listOf(itemBytes)),
+                MobileSecurityObjectStub.create(valueDigests = msoDigests)
+            )
+        }
+        assertThat(exception, hasError(VerificationError.DIGEST_MISMATCH))
+    }
+
+    @Test
+    @TestParameters("{case: ID_NOT_FOUND}")
+    @TestParameters("{case: NAMESPACE_NOT_IN_MSO}")
+    fun `verify throws DIGEST_MISSING`(case: String) {
+        val (itemBytes, msoDigests) = digestMissingCases.getValue(case)
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            verifier.verify(
+                documentWithItems(NAMESPACE to listOf(itemBytes)),
+                MobileSecurityObjectStub.create(valueDigests = msoDigests)
+            )
+        }
+        assertThat(exception, hasError(VerificationError.DIGEST_MISSING))
+    }
+
     private fun sha256(data: ByteArray): ByteArray =
         MessageDigest.getInstance("SHA-256").digest(data)
 
@@ -167,5 +108,40 @@ class DigestVerifierImplTest {
 
     private companion object {
         const val NAMESPACE = MobileSecurityObject.NAMESPACE
+
+        data class DigestCase(
+            val itemBytes: ByteArray,
+            val msoDigests: Map<String, Map<Int, ByteArray>>
+        )
+
+        val digestMismatchCases = mapOf(
+            "HASH_DOES_NOT_MATCH" to DigestCase(
+                itemBytes = issuerSignedItemBytes("given_name", "Alice"),
+                msoDigests = mapOf(NAMESPACE to mapOf(0 to ByteArray(32) { 0xFF.toByte() }))
+            ),
+            "INVALID_TAG24_ENCODING" to DigestCase(
+                itemBytes = ObjectMapper(CBORFactory()).writeValueAsBytes("not a binary node"),
+                msoDigests = mapOf(NAMESPACE to mapOf(0 to ByteArray(32)))
+            ),
+            "NEGATIVE_DIGEST_ID" to DigestCase(
+                itemBytes = issuerSignedItemBytes("family_name", "X", digestId = -1),
+                msoDigests = mapOf(NAMESPACE to mapOf(-1 to ByteArray(32)))
+            ),
+            "DIGEST_ID_AT_MAX_BOUNDARY" to DigestCase(
+                itemBytes = issuerSignedItemBytes("x", "y", digestId = 2_147_483_648L),
+                msoDigests = mapOf(NAMESPACE to mapOf(0 to ByteArray(32)))
+            )
+        )
+
+        val digestMissingCases = mapOf(
+            "ID_NOT_FOUND" to DigestCase(
+                itemBytes = issuerSignedItemBytes("age_over_18", "true", digestId = 5),
+                msoDigests = mapOf(NAMESPACE to mapOf(0 to ByteArray(32)))
+            ),
+            "NAMESPACE_NOT_IN_MSO" to DigestCase(
+                itemBytes = issuerSignedItemBytes("family_name", "Smith"),
+                msoDigests = emptyMap()
+            )
+        )
     }
 }

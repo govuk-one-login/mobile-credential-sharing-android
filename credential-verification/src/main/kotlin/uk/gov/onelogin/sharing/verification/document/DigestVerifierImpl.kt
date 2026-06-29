@@ -49,8 +49,8 @@ class DigestVerifierImpl : DigestVerifier {
             innerBytes,
             DeviceResponseDto.IssuerSignedItemDTO::class.java
         )
-        val id = item.digestId
-        if (id !in 0..<MAX_DIGEST_ID) {
+        val id = item.digestId.toUInt()
+        if (id >= MAX_DIGEST_ID) {
             throw VerificationResult.Failure(VerificationError.DIGEST_MISMATCH)
         }
         return id.toInt()
@@ -63,6 +63,6 @@ class DigestVerifierImpl : DigestVerifier {
     }
 
     private companion object {
-        const val MAX_DIGEST_ID = 2_147_483_648L // 2^31
+        const val MAX_DIGEST_ID = 2_147_483_648u // 2^31
     }
 }
