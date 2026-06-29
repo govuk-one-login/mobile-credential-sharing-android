@@ -3,7 +3,7 @@
   "services": [
     {
       "serviceTag": "mobile-credential-sharing-android",
-      "promotionType": "securePipelines",
+      "promotionType": "library",
       "checks": [
         {
           "checkTypes": ["code style and linting"],
@@ -122,7 +122,7 @@
             "name": "Bump semantic version of the code base",
             "path": "$.jobs.bump-version"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -132,7 +132,7 @@
             "name": "Upload code base artefacts to GitHub packages",
             "path": "$.jobs.publish-libraries"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -142,7 +142,7 @@
             "name": "Upload test app artefacts to the Google Play Store",
             "path": "$.jobs.publish-to-google-play"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -152,7 +152,7 @@
             "name": "Upload code base artefacts to GitHub packages",
             "path": "$.jobs.publish-libraries"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -162,7 +162,7 @@
             "name": "Upload test app artefacts to the Google Play Store",
             "path": "$.jobs.publish-to-google-play"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -172,7 +172,7 @@
             "name": "Bump semantic version of the code base",
             "path": "$.jobs.bump-version"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -182,7 +182,7 @@
             "name": "Publish Gradle dependency graph results to GitHub dependabot",
             "path": "$.jobs.dependency-graph"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -192,7 +192,7 @@
             "name": "Lint code base",
             "path": "$.jobs.linting"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -202,7 +202,7 @@
             "name": "Uploads code base artefacts to GitHub packages / Google Play Store",
             "path": "$.jobs.publishing"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         },
         {
@@ -218,7 +218,7 @@
             "name": "Test code base",
             "path": "$.jobs.testing"
           },
-          "phase": "build",
+          "phase": "pre-release",
           "provider": "GitHub"
         }
       ]
