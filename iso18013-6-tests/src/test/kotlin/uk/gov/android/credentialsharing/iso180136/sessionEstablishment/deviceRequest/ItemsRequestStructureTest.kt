@@ -5,10 +5,12 @@ import com.fasterxml.jackson.dataformat.cbor.CBORConstants.BYTE_OBJECT_INDEFINIT
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.BYTE_STRING_INDEFINITE
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.PREFIX_TYPE_BYTES
 import com.fasterxml.jackson.dataformat.cbor.CBORConstants.SUFFIX_INDEFINITE
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import java.io.ByteArrayOutputStream
 import junit.framework.TestCase.assertTrue
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -286,7 +288,7 @@ class ItemsRequestStructureTest {
         @TestParameter namespace: String = namedTestValues(
             "ISO-180136 Core namespace" to DocumentType.Mdl.NAMESPACE,
             "Domestic namespace: Great Britain" to "org.iso.18013.5.1.GB"
-        )
+        ),
     ) {
         updateNamespaces(mapOf(namespace to mapOf(MdlAttribute.Portrait.value to false)))
 
@@ -413,7 +415,7 @@ class ItemsRequestStructureTest {
         @TestParameter input: Pair<Boolean, String> = testValues(
             false to "f4",
             true to "f5"
-        )
+        ),
     ) {
         val (intentToRetain, encodedIntent) = input
         val attribute = MdlAttribute.Portrait.value
@@ -422,6 +424,36 @@ class ItemsRequestStructureTest {
         assertThat(
             deviceRequestHexString,
             containsString(attribute.toByteArray().toHexString() + encodedIntent)
+        )
+    }
+
+    /**
+     * Scenario ID: mDLR_MS_DR_15
+     *
+     * Fails conformance test due to [ItemsRequestDto.Serializer] and
+     * [ItemsRequestDto.Deserializer] ignoring the [ItemsRequestDto.requestInfo] property of type
+     * `DocRequestInfo`. Resolving this requires the creation of the `DocRequestInfo` data
+     * structure.
+     */
+    @Test
+    @Ignore("Fails conformance test due to incomplete (de)serializer implementation")
+    fun `Document request info contains additional information`() {
+        val requestInfoBytes = ByteArrayOutputStream().also { output ->
+            CBORFactory().createGenerator(output).use { gen ->
+                gen.writeStartObject(1)
+                gen.writeBooleanField("uniqueDocSetRequired", true)
+            }
+        }.toByteArray()
+        updateWithRequestInfo(requestInfoBytes)
+
+        val dto = mapper.readValue(
+            deviceRequestBytes,
+            DeviceRequestDto::class.java
+        )
+
+        assertThat(
+            dto.docRequest[0].itemsRequest.requestInfo?.toHexString(),
+            containsString("uniqueDocSetRequired".toByteArray().toHexString())
         )
     }
 
