@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 
@@ -60,7 +60,7 @@ class ItemsRequestDtoTest {
         val serialized = CborMapper.default.writeValueAsBytes(dto)
         val result = CborMapper.default.readValue(serialized, ItemsRequestDto::class.java)
 
-        MatcherAssert.assertThat(
+        assertThat(
             result,
             equalTo(dto)
         )

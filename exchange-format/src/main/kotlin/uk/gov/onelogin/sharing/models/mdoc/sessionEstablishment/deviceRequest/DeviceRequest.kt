@@ -9,4 +9,9 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest
  * @property docRequests A list of [DocRequest] objects, each specifying
  * a different document being requested and the specific data elements required.
  */
-data class DeviceRequest(val version: String, val docRequests: List<DocRequest>)
+data class DeviceRequest(val version: String, val docRequests: List<DocRequest>) {
+    fun toDto(): DeviceRequestDto = DeviceRequestDto(
+        version = version,
+        docRequest = docRequests.map { it.toDto() }
+    )
+}

@@ -62,6 +62,10 @@ class DeviceRequestStructureTest {
         deviceRequestBytes.toHexString()
     }
 
+    private val docRequestNodes by lazy {
+        mapper.readTree(deviceRequestBytes).withArrayProperty(DOC_REQUESTS_KEY)
+    }
+
     /**
      * Scenario ID: mDLR_MS_DR_01
      * sub-scenario: Common_CBOR_01
@@ -234,11 +238,9 @@ class DeviceRequestStructureTest {
      */
     @Test
     fun `Every document request is an object`() {
-        val result = mapper.readTree(deviceRequestBytes).withArrayProperty(DOC_REQUESTS_KEY)
+        assertTrue(docRequestNodes.all(JsonNode::isObject))
 
-        assertTrue(result.all(JsonNode::isObject))
-
-        val requests = result.map {
+        val requests = docRequestNodes.map {
             mapper.treeToValue(it, DocRequestDto::class.java)
         }
 
@@ -253,10 +255,8 @@ class DeviceRequestStructureTest {
      */
     @Test
     fun `Each document request item has an 'itemsRequest' property`() {
-        val result = mapper.readTree(deviceRequestBytes).withArrayProperty(DOC_REQUESTS_KEY)
-
         assertTrue(
-            result.all {
+            docRequestNodes.all {
                 it.has(ITEMS_REQUEST_KEY)
             }
         )
@@ -279,10 +279,8 @@ class DeviceRequestStructureTest {
             )
         )
 
-        val result = mapper.readTree(deviceRequestBytes).withArrayProperty(DOC_REQUESTS_KEY)
-
         assertTrue(
-            result.any {
+            docRequestNodes.any {
                 it.has(READER_AUTH_KEY)
             }
         )
@@ -294,7 +292,7 @@ class DeviceRequestStructureTest {
     @Test
     fun `Document request items are encoded CBOR data items`() {
         val prefix = ITEMS_REQUEST_KEY.toByteArray().toHexString() +
-            "d818584e"
+            "d818584b"
 
         assertThat(
             deviceRequestHexString,

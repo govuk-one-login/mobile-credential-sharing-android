@@ -36,7 +36,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablish
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
