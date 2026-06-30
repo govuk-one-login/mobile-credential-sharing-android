@@ -9,6 +9,34 @@
             "code style and linting"
           ],
           "config": {
+            "file": ".github/workflows/pull-request.yml",
+            "name": "Linting",
+            "path": "jobs.linting"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code quality",
+            "contract",
+            "integration",
+            "unit",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/pull-request.yml",
+            "name": "Test suites",
+            "path": "jobs.testing"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code style and linting"
+          ],
+          "config": {
             "file": ".github/workflows/linting.yml",
             "name": "Verify conventional commit standards",
             "path": "jobs.conventional_commits"
@@ -54,6 +82,19 @@
         },
         {
           "check-types": [
+            "contract",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/testing.yml",
+            "name": "Contract (ISO-18013-6) tests",
+            "path": "jobs.contract-debug-tests"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
             "unit",
             "unit test coverage"
           ],
@@ -68,6 +109,7 @@
         {
           "check-types": [
             "unit",
+            "integration",
             "unit test coverage"
           ],
           "config": {
@@ -80,7 +122,7 @@
         },
         {
           "check-types": [
-            "code style and linting",
+            "code quality",
             "unit test coverage",
             "vulnerability detection"
           ],
