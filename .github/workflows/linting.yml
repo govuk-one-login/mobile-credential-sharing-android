@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: linting-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
   GITHUB_ACTOR: ${{ github.actor }}
