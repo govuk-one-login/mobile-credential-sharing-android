@@ -6,8 +6,9 @@ set -o errexit
 SCRIPT_FOLDER=$(dirname "${0}")
 
 # Run the various testing suites
-"${SCRIPT_FOLDER}"/unit "${@}"
-"${SCRIPT_FOLDER}"/instrumentation "${@}"
+"${SCRIPT_FOLDER}"/unit/debug "${@}"
+"${SCRIPT_FOLDER}"/contract/debug "${@}"
+"${SCRIPT_FOLDER}"/instrumentation/debug "${@}"
 
 # Combine test coverage data from the various testing suites
 ./gradlew combineDebugJacocoReports "${@}"

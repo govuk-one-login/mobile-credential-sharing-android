@@ -19,6 +19,36 @@ permissions:
   packages: read
 
 jobs:
+  contract-debug-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        if: ${{ github.event_name != 'workflow_call' }}
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/android-setup
+        with:
+          install-vale: 'false'
+
+      - name: Run contract tests (debug)
+        run: |
+          ./scripts/test/contract/debug
+
+      - name: Upload contract test coverage report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: contract-debug-test-coverage
+          path: |
+            **/build/outputs/unit_test_code_coverage/**/*.exec
+            **/build/reports/coverage/test/debug/*.xml
+            **/build/reports/jacoco/**/*.xml
+
   unit_tests:
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +67,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          ./scripts/test/unit
+          ./scripts/test/unit/debug
 
       - name: Upload unit test coverage report
         if: always()
@@ -68,7 +98,7 @@ jobs:
 
       - name: Run instrumentation tests
         run: |
-          ./scripts/test/instrumentation --no-configuration-cache
+          ./scripts/test/instrumentation/debug --no-configuration-cache
 
       - name: Upload instrumentation test coverage report
         if: always()
