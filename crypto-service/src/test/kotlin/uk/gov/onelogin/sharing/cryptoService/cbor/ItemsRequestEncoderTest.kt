@@ -10,7 +10,6 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.over18
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.over21Request
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.toDto
 
 class ItemsRequestEncoderTest {
 

@@ -81,7 +81,3 @@ data class DocRequestDto(
         const val READER_AUTH_KEY: String = "readerAuth"
     }
 }
-
-fun DocRequest.toDto(): DocRequestDto = DocRequestDto(
-    itemsRequest = itemsRequest.toDto()
-)

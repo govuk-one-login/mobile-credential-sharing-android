@@ -104,8 +104,3 @@ data class DeviceRequestDto(
         }
     )
 }
-
-fun DeviceRequest.toDto(): DeviceRequestDto = DeviceRequestDto(
-    version = version,
-    docRequest = docRequests.map { it.toDto() }
-)
