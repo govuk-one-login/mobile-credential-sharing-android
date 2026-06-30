@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Exit immediately if a simple command exits with a non-zero status
+# see also: the 'set' command within the 'Shell Builtin Commands' section of `man bash`
+set -o errexit
+
+# Run the gradle managed devices instrumentation test task.
+# See `gradle-managed-devices.gradle.kts` for it's configuration.
+# Unfortunately, gradle managed devices don't create specific coverage tasks for each device
+# profile...
+
+if [[ -z "${WORKER_COUNT}" ]]; then
+  WORKER_COUNT=3
+fi
+
+./gradlew cleanManagedDevices
+
+# The `"${@}" appends additional input to the command, like so:
+# `./scripts/test/instrumentation --debug` -> adds `--debug` to the command.
+./gradlew \
+    aospAtdApi34Pixel9ReleaseAndroidTest \
+    --exclude-task :iso18013-6-tests:aospAtdApi34Pixel9ReleaseAndroidTest \
+    --max-workers="${WORKER_COUNT}" \
+    "${@}"
