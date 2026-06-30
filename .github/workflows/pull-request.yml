@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: pr-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
   GITHUB_ACTOR: ${{ github.actor }}
@@ -20,9 +20,9 @@ permissions:
 
 jobs:
   linting:
-    name: "Linting"
+    name: "Workflow / Linting"
     uses: ./.github/workflows/linting.yml
 
   testing:
-    name: "Test suites"
+    name: "Workflow / Test suites"
     uses: ./.github/workflows/testing.yml
