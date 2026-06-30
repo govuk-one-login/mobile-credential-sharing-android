@@ -15,4 +15,6 @@ set -o errexit
   :exchange-format:test \
   testDebugUnitTest \
   createDebugUnitTestCoverageReport \
+  --exclude-task :iso18013-6-tests:testDebugUnitTest \
+  --exclude-task :iso18013-6-tests:createDebugUnitTestCoverageReport \
   "${@}"

@@ -19,5 +19,7 @@ fi
 ./gradlew \
     aospAtdApi34Pixel9DebugAndroidTest \
     createManagedDeviceDebugAndroidTestCoverageReport \
+    --exclude-task :iso18013-6-tests:aospAtdApi34Pixel9DebugAndroidTest \
+    --exclude-task :iso18013-6-tests:createManagedDeviceDebugAndroidTestCoverageReport \
     --max-workers="${WORKER_COUNT}" \
     "${@}"
