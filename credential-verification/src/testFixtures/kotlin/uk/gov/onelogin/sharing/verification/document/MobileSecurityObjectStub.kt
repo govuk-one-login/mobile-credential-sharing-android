@@ -13,17 +13,19 @@ object MobileSecurityObjectStub {
         docType: String = MobileSecurityObject.DOC_TYPE,
         digestAlgorithm: String = MobileSecurityObject.MSO_DIGEST_ALGORITHM,
         version: String = MobileSecurityObject.MSO_SCHEMA_VERSION,
-        valueDigests: Map<String, Map<Int, ByteArray>> = emptyMap()
+        valueDigests: Map<String, Map<Int, ByteArray>> = emptyMap(),
+        deviceKeyInfo: DeviceKeyInfo = DeviceKeyInfo(deviceKey = byteArrayOf()),
+        validityInfo: ValidityInfo = ValidityInfo(
+            signed = Instant.fromEpochSeconds(0),
+            validFrom = Instant.fromEpochSeconds(0),
+            validUntil = Instant.fromEpochSeconds(0)
+        )
     ) = MobileSecurityObject(
         docType = docType,
         digestAlgorithm = digestAlgorithm,
         version = version,
         valueDigests = valueDigests,
-        deviceKeyInfo = DeviceKeyInfo(deviceKey = byteArrayOf()),
-        validityInfo = ValidityInfo(
-            signed = Instant.fromEpochSeconds(0),
-            validFrom = Instant.fromEpochSeconds(0),
-            validUntil = Instant.fromEpochSeconds(0)
-        )
+        deviceKeyInfo = deviceKeyInfo,
+        validityInfo = validityInfo
     )
 }

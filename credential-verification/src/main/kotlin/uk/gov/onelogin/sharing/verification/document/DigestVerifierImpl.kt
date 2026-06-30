@@ -1,12 +1,11 @@
 package uk.gov.onelogin.sharing.verification.document
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.BinaryNode
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import java.security.MessageDigest
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
@@ -21,8 +20,6 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
     binding = binding<DigestVerifier>()
 )
 class DigestVerifierImpl : DigestVerifier {
-
-    private val cborMapper = ObjectMapper(CBORFactory())
 
     override fun verify(document: VerifiableDocument, mso: MobileSecurityObject) {
         val nameSpaces = document.issuerSigned.nameSpaces ?: return
@@ -45,7 +42,7 @@ class DigestVerifierImpl : DigestVerifier {
 
     private fun extractDigestId(itemBytes: ByteArray): Int {
         val innerBytes = unwrapTag24(itemBytes)
-        val item = cborMapper.readValue(
+        val item = CborMapper.default.readValue(
             innerBytes,
             DeviceResponseDto.IssuerSignedItemDTO::class.java
         )
@@ -57,7 +54,7 @@ class DigestVerifierImpl : DigestVerifier {
     }
 
     private fun unwrapTag24(data: ByteArray): ByteArray {
-        val root = cborMapper.readTree(data)
+        val root = CborMapper.default.readTree(data)
         return (root as? BinaryNode)?.binaryValue()
             ?: throw VerificationResult.Failure(VerificationError.DIGEST_MISMATCH)
     }
