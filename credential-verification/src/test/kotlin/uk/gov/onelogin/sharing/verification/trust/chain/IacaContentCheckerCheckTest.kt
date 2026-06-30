@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.verification.trust.chain
 
+import io.mockk.mockk
 import java.security.cert.CertPathValidatorException
+import java.security.cert.Certificate
 import java.util.Date
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -198,6 +200,15 @@ class IacaContentCheckerCheckTest {
         val leaf = validLeaf().withoutIssuerAltName().build()
         assertThrows(CertPathValidatorException::class.java) {
             checkerFor(leaf).check(leaf, mutableSetOf())
+        }
+    }
+
+    @Test
+    fun `check throws ClassCastException for non-X509 certificate`() {
+        val nonX509 = mockk<Certificate>()
+        val checker = checkerFor(validLeaf().build())
+        assertThrows(ClassCastException::class.java) {
+            checker.check(nonX509, mutableSetOf())
         }
     }
 }
