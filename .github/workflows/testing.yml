@@ -23,7 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        if: ${{ github.event_name != 'workflow_call' }}
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           lfs: 'true'
@@ -53,7 +52,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        if: ${{ github.event_name != 'workflow_call' }}
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           lfs: 'true'
@@ -83,7 +81,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        if: ${{ github.event_name != 'workflow_call' }}
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           lfs: 'true'
@@ -114,7 +111,6 @@ jobs:
     needs: [unit_tests, instrumentation_tests]
     steps:
       - name: Checkout code
-        if: ${{ github.event_name != 'workflow_call' }}
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           lfs: 'true'

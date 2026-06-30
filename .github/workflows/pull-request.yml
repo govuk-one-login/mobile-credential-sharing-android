@@ -21,28 +21,8 @@ permissions:
 jobs:
   linting:
     name: "Linting"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          lfs: 'true'
-          submodules: 'true'
-          fetch-depth: 0
-
-      - name: Linting workflow
-        uses: ./.github/workflows/linting.yml
+    uses: ./.github/workflows/linting.yml
 
   testing:
     name: "Test suites"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          lfs: 'true'
-          submodules: 'true'
-          fetch-depth: 0
-
-      - name: Testing workflow
-        uses: ./.github/workflows/testing.yml
+    uses: ./.github/workflows/testing.yml
