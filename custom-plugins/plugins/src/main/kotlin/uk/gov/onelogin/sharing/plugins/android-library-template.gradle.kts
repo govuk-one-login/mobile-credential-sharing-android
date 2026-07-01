@@ -36,6 +36,7 @@ val debugImplementation by configurations
 val implementation by configurations
 val testFixturesApi by configurations
 val testFixturesImplementation by configurations
+val testReleaseImplementation by configurations
 val testImplementation by configurations
 
 
@@ -71,6 +72,7 @@ dependencies {
         "debug-tooling",
     ).map { libs.findBundle(it).get() }.forEach {
         debugImplementation(it)
+        testReleaseImplementation(it)
     }
 
     listOf(

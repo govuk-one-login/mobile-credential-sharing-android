@@ -14,7 +14,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.S
 import uk.gov.onelogin.sharing.verification.document.IssuerSignedItemStubs.issuerSignedItemBytes
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
-import uk.gov.onelogin.sharing.verification.format.document.device.DeviceKeyInfo
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
@@ -25,7 +24,7 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthR
 @RunWith(TestParameterInjector::class)
 class MsoFieldVerifierImplTest {
 
-    private val useCase = MsoFieldVerifierImpl()
+    private val msoFieldVerifier = MsoFieldVerifierImpl()
     private val validityPeriod = mockk<CertificateValidityPeriod>(relaxed = true)
 
     private val defaultIssuerAuthResult = IssuerAuthResult(
@@ -37,7 +36,11 @@ class MsoFieldVerifierImplTest {
 
     @Test
     fun `verify does not throw for valid fields`() {
-        useCase.verify(validDocument(), validMso(), defaultIssuerAuthResult)
+        msoFieldVerifier.verify(
+            validDocument(),
+            MobileSecurityObjectStub.create(),
+            defaultIssuerAuthResult
+        )
     }
 
     @Test
@@ -49,14 +52,22 @@ class MsoFieldVerifierImplTest {
                 )
             )
         )
-        useCase.verify(document, validMso(), defaultIssuerAuthResult)
+        msoFieldVerifier.verify(
+            document,
+            MobileSecurityObjectStub.create(),
+            defaultIssuerAuthResult
+        )
     }
 
     @Test
     fun `verify accepts version with non-zero minor`(
         @TestParameter version: String = testValues("1.1", "1.99")
     ) {
-        useCase.verify(validDocument(), validMso(version = version), defaultIssuerAuthResult)
+        msoFieldVerifier.verify(
+            validDocument(),
+            MobileSecurityObjectStub.create(version = version),
+            defaultIssuerAuthResult
+        )
     }
 
     @Test
@@ -64,7 +75,11 @@ class MsoFieldVerifierImplTest {
         @TestParameter version: String = testValues("2.0", "0.1", "3.5")
     ) {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            useCase.verify(validDocument(), validMso(version = version), defaultIssuerAuthResult)
+            msoFieldVerifier.verify(
+                validDocument(),
+                MobileSecurityObjectStub.create(version = version),
+                defaultIssuerAuthResult
+            )
         }
         assertThat(exception, hasError(VerificationError.INVALID_MSO_VERSION))
     }
@@ -72,9 +87,9 @@ class MsoFieldVerifierImplTest {
     @Test
     fun `verify throws INVALID_DOC_TYPE when mso docType is not mDL`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            useCase.verify(
+            msoFieldVerifier.verify(
                 validDocument(),
-                validMso(docType = "some.other.type"),
+                MobileSecurityObjectStub.create(docType = "some.other.type"),
                 defaultIssuerAuthResult
             )
         }
@@ -88,7 +103,11 @@ class MsoFieldVerifierImplTest {
             issuerSigned = SharingIssuerSigned(issuerAuth = byteArrayOf(), nameSpaces = null)
         )
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            useCase.verify(document, validMso(), defaultIssuerAuthResult)
+            msoFieldVerifier.verify(
+                document,
+                MobileSecurityObjectStub.create(),
+                defaultIssuerAuthResult
+            )
         }
         assertThat(exception, hasError(VerificationError.INVALID_DOC_TYPE))
     }
@@ -96,9 +115,9 @@ class MsoFieldVerifierImplTest {
     @Test
     fun `verify throws UNSUPPORTED_DIGEST_ALGORITHM for non-SHA-256`() {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            useCase.verify(
+            msoFieldVerifier.verify(
                 validDocument(),
-                validMso(digestAlgorithm = "SHA-512"),
+                MobileSecurityObjectStub.create(digestAlgorithm = "SHA-512"),
                 defaultIssuerAuthResult
             )
         }
@@ -115,7 +134,11 @@ class MsoFieldVerifierImplTest {
             )
         )
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            useCase.verify(document, validMso(), defaultIssuerAuthResult)
+            msoFieldVerifier.verify(
+                document,
+                MobileSecurityObjectStub.create(),
+                defaultIssuerAuthResult
+            )
         }
         assertThat(exception, hasError(VerificationError.INVALID_MSO))
     }
@@ -130,7 +153,7 @@ class MsoFieldVerifierImplTest {
             )
         )
         val issuerAuth = defaultIssuerAuthResult.copy(subjectState = null)
-        useCase.verify(document, validMso(), issuerAuth)
+        msoFieldVerifier.verify(document, MobileSecurityObjectStub.create(), issuerAuth)
     }
 
     @Test
@@ -144,23 +167,10 @@ class MsoFieldVerifierImplTest {
         )
         val issuerAuth = defaultIssuerAuthResult.copy(subjectState = "NY")
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            useCase.verify(document, validMso(), issuerAuth)
+            msoFieldVerifier.verify(document, MobileSecurityObjectStub.create(), issuerAuth)
         }
         assertThat(exception, hasError(VerificationError.INVALID_MSO))
     }
-
-    private fun validMso(
-        version: String = "1.0",
-        docType: String = MobileSecurityObject.DOC_TYPE,
-        digestAlgorithm: String = MobileSecurityObject.MSO_DIGEST_ALGORITHM
-    ) = MobileSecurityObject(
-        version = version,
-        docType = docType,
-        digestAlgorithm = digestAlgorithm,
-        valueDigests = emptyMap(),
-        deviceKeyInfo = DeviceKeyInfo(deviceKey = byteArrayOf()),
-        validityInfo = mockk()
-    )
 
     private fun validDocument(): VerifiableDocument = SharingVerifiableDocument(
         docType = MobileSecurityObject.DOC_TYPE,

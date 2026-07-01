@@ -17,7 +17,7 @@ fi
 # The `"${@}" appends additional input to the command, like so:
 # `./scripts/test/instrumentation --debug` -> adds `--debug` to the command.
 ./gradlew \
-    aospAtdApi34Pixel9DebugAndroidTest \
-    createManagedDeviceDebugAndroidTestCoverageReport \
+    aospAtdApi34Pixel9ReleaseAndroidTest \
+    --exclude-task :iso18013-6-tests:aospAtdApi34Pixel9ReleaseAndroidTest \
     --max-workers="${WORKER_COUNT}" \
     "${@}"

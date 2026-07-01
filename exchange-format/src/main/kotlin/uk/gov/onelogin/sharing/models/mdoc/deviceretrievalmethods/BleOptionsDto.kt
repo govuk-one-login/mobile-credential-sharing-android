@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
@@ -39,7 +39,7 @@ data class BleOptionsDto(
         }
     }
 
-    class Deserializer : JsonDeserializer<BleOptionsDto>() {
+    class Deserializer : StdDeserializer<BleOptionsDto>(BleOptionsDto::class.java) {
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): BleOptionsDto {
             val root = p.codec.readTree<JsonNode>(p)
             return BleOptionsDto(

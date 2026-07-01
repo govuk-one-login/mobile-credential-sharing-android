@@ -5,7 +5,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertThrows
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 
 class ItemsRequestDtoTest {
@@ -59,9 +60,70 @@ class ItemsRequestDtoTest {
         val serialized = CborMapper.default.writeValueAsBytes(dto)
         val result = CborMapper.default.readValue(serialized, ItemsRequestDto::class.java)
 
-        MatcherAssert.assertThat(
+        assertThat(
             result,
             equalTo(dto)
         )
+    }
+
+    @Test
+    fun `toDomain maps to ItemsRequest`() {
+        val domain = dto.toDomain()
+
+        assertEquals("Unit test", domain.docType)
+        assertEquals(mapOf("unit" to mapOf("test" to true)), domain.nameSpaces)
+    }
+
+    @Test
+    fun `toDto maps ItemsRequest back to DTO`() {
+        val domain = ItemsRequest(
+            docType = "org.iso.18013.5.1.mDL",
+            nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("age_over_18" to false))
+        )
+
+        val result = domain.toDto()
+
+        assertEquals(domain.docType, result.docType)
+        assertEquals(domain.nameSpaces, result.nameSpaces)
+    }
+
+    @Test
+    fun `empty docType throws IllegalArgumentException`() {
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            ItemsRequestDto(
+                docType = "",
+                nameSpaces = mapOf("ns" to mapOf("el" to true))
+            )
+        }
+
+        assertEquals("ItemsRequest: docType must not be empty", exception.message)
+    }
+
+    @Test
+    fun `empty nameSpaces throws IllegalArgumentException`() {
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            ItemsRequestDto(
+                docType = "org.iso.18013.5.1.mDL",
+                nameSpaces = emptyMap()
+            )
+        }
+
+        assertEquals("ItemsRequest: nameSpaces must not be empty", exception.message)
+    }
+
+    @Test
+    fun `round-trip with multiple nameSpaces preserves all entries`() {
+        val multiNamespaces = ItemsRequestDto(
+            docType = "org.iso.18013.5.1.mDL",
+            nameSpaces = mapOf(
+                "org.iso.18013.5.1" to mapOf("family_name" to true, "age_over_18" to false),
+                "org.iso.18013.5.1.aamva" to mapOf("DHS_compliance" to true)
+            )
+        )
+
+        val serialized = CborMapper.default.writeValueAsBytes(multiNamespaces)
+        val result = CborMapper.default.readValue(serialized, ItemsRequestDto::class.java)
+
+        assertEquals(multiNamespaces, result)
     }
 }

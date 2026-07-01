@@ -10,4 +10,9 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest
  * - The **Inner Key** (String) is the Data Element Identifier (e.g., "family_name").
  * - The **Boolean Value** if the reader requires the specified field.
  */
-data class ItemsRequest(val docType: String, val nameSpaces: Map<String, Map<String, Boolean>>)
+data class ItemsRequest(val docType: String, val nameSpaces: Map<String, Map<String, Boolean>>) {
+    fun toDto(): ItemsRequestDto = ItemsRequestDto(
+        docType = docType,
+        nameSpaces = nameSpaces
+    )
+}
