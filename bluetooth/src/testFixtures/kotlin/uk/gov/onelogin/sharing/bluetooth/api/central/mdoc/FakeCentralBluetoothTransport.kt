@@ -12,6 +12,7 @@ class FakeCentralBluetoothTransport(
 
     var scanAndConnectCalls = 0
     var stopCalls = 0
+    var sendEndCalls = 0
     var lastServiceUuid: UUID? = null
     var sendMessageToReturn: Boolean = true
     var lastSentData: ByteArray? = null
@@ -19,6 +20,10 @@ class FakeCentralBluetoothTransport(
     override suspend fun start(serviceUuid: UUID) {
         scanAndConnectCalls++
         lastServiceUuid = serviceUuid
+    }
+
+    override suspend fun sendEnd() {
+        sendEndCalls++
     }
 
     override suspend fun stop() {

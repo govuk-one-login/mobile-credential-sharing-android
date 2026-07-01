@@ -38,6 +38,8 @@ class DeferredVerifierCryptoService(
     override fun deserializeSessionData(input: ByteArray): SessionData =
         sessionDataDeserializer(input)
 
+    override fun buildTerminationSessionData(): ByteArray = byteArrayOf()
+
     override fun decryptDeviceResponse(
         deviceResponseBytes: ByteArray,
         skDevice: ByteArray,

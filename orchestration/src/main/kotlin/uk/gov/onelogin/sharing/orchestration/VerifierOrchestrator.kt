@@ -286,9 +286,6 @@ class VerifierOrchestrator(
     private fun handleCentralBluetoothStateMessage(state: CentralBluetoothState.Message) {
         val sessionData = runCatching {
             verifierCryptoService.deserializeSessionData(state.value).apply {
-                check(hasOkStatus()) {
-                    "Received SessionData error status: ${status?.code}"
-                }
                 check(hasData()) {
                     "Received empty SessionData payload"
                 }
@@ -300,6 +297,10 @@ class VerifierOrchestrator(
                 throwable
             )
         }.getOrNull() ?: return
+
+        val holderTerminated = sessionData.status?.let {
+            it == uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus.SESSION_TERMINATION
+        } ?: false
 
         logger.debug(logTag, "Deserialized SessionData from bluetooth central Message")
 
@@ -327,9 +328,12 @@ class VerifierOrchestrator(
                 )
             }
 
-            evaluateDeviceResponse(deviceResponse)
+            evaluateDeviceResponse(deviceResponse, holderTerminated)
         }.onFailure { _ ->
-            stopCentralTransport()
+            appCoroutineScope.launch {
+                terminateSession(bleOpen = !holderTerminated, holderSentStatus20 = holderTerminated)
+            }
+            logger.error(logTag, "Error decrypting DeviceResponse")
             safeTransitionTo(
                 VerifierSessionState.Complete.Failed(
                     SessionError(
@@ -341,30 +345,49 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun evaluateDeviceResponse(deviceResponse: DeviceResponse) {
+    private fun evaluateDeviceResponse(
+        deviceResponse: DeviceResponse,
+        holderTerminated: Boolean
+    ) {
         val status = deviceResponse.status
 
         if (status != DeviceResponseStatus.OK) {
-            failWith(
-                "DeviceRequest processing error: status ${status.code}",
-                SessionErrorReason.DeviceRequestProcessingError(status.code)
+            appCoroutineScope.launch {
+                terminateSession(bleOpen = !holderTerminated, holderSentStatus20 = holderTerminated)
+            }
+            logger.error(logTag, "DeviceRequest processing error: status ${status.code}")
+            safeTransitionTo(
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "DeviceRequest processing error: status ${status.code}",
+                        reason = SessionErrorReason.DeviceRequestProcessingError(status.code)
+                    )
+                )
             )
             return
         }
 
         val documents = deviceResponse.documents
         if (documents.isNullOrEmpty()) {
-            failWith(
-                "Document not returned: status ${status.code}",
-                SessionErrorReason.DocumentNotReturned
+            appCoroutineScope.launch {
+                terminateSession(bleOpen = !holderTerminated, holderSentStatus20 = holderTerminated)
+            }
+            logger.error(logTag, "Document not returned: status ${status.code}")
+            safeTransitionTo(
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "Document not returned: status ${status.code}",
+                        reason = SessionErrorReason.DocumentNotReturned
+                    )
+                )
             )
             return
         }
 
-        verifyDocuments(deviceResponse)
+        verifyDocuments(deviceResponse, holderTerminated)
     }
 
-    private fun verifyDocuments(deviceResponse: DeviceResponse) {
+    private fun verifyDocuments(deviceResponse: DeviceResponse, holderTerminated: Boolean) {
         try {
             deviceResponse.documents!!.forEach { document ->
                 documentVerifier.verifyDocument(
@@ -372,18 +395,48 @@ class VerifierOrchestrator(
                     sessionFlow.value.cryptoContext?.sessionTranscriptBytes
                 )
             }
+            appCoroutineScope.launch {
+                terminateSession(bleOpen = !holderTerminated, holderSentStatus20 = holderTerminated)
+            }
             safeTransitionTo(
                 VerifierSessionState.Complete.Success(deviceResponse)
             )
         } catch (exception: VerificationResult.Failure) {
-            failWith(
+            appCoroutineScope.launch {
+                terminateSession(bleOpen = !holderTerminated, holderSentStatus20 = holderTerminated)
+            }
+            logger.error(
+                logTag,
                 "Failed to verify provided documents (${exception.error})",
-                SessionErrorReason.UnverifiableDocument(exception.error),
                 exception
             )
-        } finally {
-            stopCentralTransport()
+            safeTransitionTo(
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "Failed to verify provided documents (${exception.error})",
+                        reason = SessionErrorReason.UnverifiableDocument(exception.error)
+                    )
+                )
+            )
         }
+    }
+
+    private suspend fun terminateSession(bleOpen: Boolean, holderSentStatus20: Boolean) {
+        if (!bleOpen) return
+
+        val context = sessionFlow.value.cryptoContext
+
+        if (!holderSentStatus20 && context != null) {
+            val terminationBytes = verifierCryptoService.buildTerminationSessionData()
+            centralBluetoothTransport.sendMessage(
+                serviceUuid = context.serviceUuid,
+                data = terminationBytes
+            )
+            kotlinx.coroutines.delay(TERMINATION_DELAY_MS)
+        }
+
+        centralBluetoothTransport.sendEnd()
+        centralBluetoothTransport.stop()
     }
 
     private suspend fun handleConnectionStateStarted() {
@@ -478,5 +531,9 @@ class VerifierOrchestrator(
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
             logger.error(logTag, logMessage, loggedException)
         }
+    }
+
+    private companion object {
+        const val TERMINATION_DELAY_MS = 500L
     }
 }

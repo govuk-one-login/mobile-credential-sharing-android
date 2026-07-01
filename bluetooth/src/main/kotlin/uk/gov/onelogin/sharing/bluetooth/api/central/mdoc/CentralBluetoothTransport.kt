@@ -13,6 +13,12 @@ interface CentralBluetoothTransport :
     MessageSender,
     BluetoothTransport<CentralBluetoothState> {
     /**
+     * Sends the GATT End (0x02) command to the holder without disconnecting.
+     * Used as part of the ISO 18013-5 §8.3.3.1.3 session termination protocol.
+     */
+    suspend fun sendEnd()
+
+    /**
      * Stops the BLE session, optionally sending a session end command first.
      */
     suspend fun stop()

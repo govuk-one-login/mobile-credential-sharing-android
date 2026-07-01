@@ -93,6 +93,12 @@ class AndroidCentralBluetoothTransport(
         scanJob = prepareScanJob(serviceUuid)
     }
 
+    override suspend fun sendEnd(): Unit = withContext(
+        ioDispatcher + "$logTag.SendEnd".asCoroutineName()
+    ) {
+        notifySessionEnd()
+    }
+
     override suspend fun stop(): Unit = withContext(
         ioDispatcher + "$logTag.Stop".asCoroutineName()
     ) {
