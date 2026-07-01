@@ -69,6 +69,13 @@ class DeviceResponseDecoderImplTest {
         documentErrors = documentErrors
     )
 
+    private fun wrapTag24(content: ByteArray): ByteArray = ByteArrayOutputStream().also { out ->
+        CBORFactory().createGenerator(out).use { gen ->
+            gen.writeTag(24)
+            gen.writeBinary(content)
+        }
+    }.toByteArray()
+
     @Test
     fun `decodes successful DeviceResponse with documents`() {
         val original = createDeviceResponse(
@@ -93,7 +100,7 @@ class DeviceResponseDecoderImplTest {
 
         val items = decoded.documents!!.first().issuerSigned.nameSpaces!![namespace]!!
         assertEquals(1, items.size)
-        assertArrayEquals(itemBytes1, items[0])
+        assertArrayEquals(wrapTag24(itemBytes1), items[0])
     }
 
     @Test

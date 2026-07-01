@@ -46,11 +46,21 @@ class DeviceResponseDto {
             }
         }
 
-        fun toDomain(): DeviceResponse = DeviceResponse(
-            statusCode = status,
-            documents = documents?.map { it.toDomain() },
-            version = version
-        )
+        /**
+         * Maps to domain preserving original Tag 24-encoded IssuerSignedItemBytes
+         *
+         * @param sourceBytes The raw CBOR bytes from which this DTO was deserialized.
+         */
+        fun toDomain(sourceBytes: ByteArray): DeviceResponse {
+            val rawNameSpaces = IssuerSignedItemBytesExtractor.extract(sourceBytes)
+            return DeviceResponse(
+                statusCode = status,
+                documents = documents?.mapIndexed { index, doc ->
+                    doc.toDomain(rawNameSpaces.getOrElse(index) { emptyMap() })
+                },
+                version = version
+            )
+        }
     }
 
     /**
@@ -68,15 +78,16 @@ class DeviceResponseDto {
         val deviceSigned: DeviceSignedDTO,
         val errors: Map<String, Int>? = null
     ) {
-        fun toDomain(): VerifiableDocument.WithPresentation =
-            SharingVerifiableDocumentWithPresentation(
-                docType = docType,
-                issuerSigned = issuerSigned.toDomain(),
-                deviceSigned = SharingDeviceSigned(
-                    deviceNameSpacesBytes = deviceSigned.nameSpaces.encoded,
-                    deviceSignature = deviceSigned.deviceAuth.deviceSignature.encoded
-                )
+        fun toDomain(
+            rawNameSpaces: Map<String, List<ByteArray>>
+        ): VerifiableDocument.WithPresentation = SharingVerifiableDocumentWithPresentation(
+            docType = docType,
+            issuerSigned = issuerSigned.toDomain(rawNameSpaces),
+            deviceSigned = SharingDeviceSigned(
+                deviceNameSpacesBytes = deviceSigned.nameSpaces.encoded,
+                deviceSignature = deviceSigned.deviceAuth.deviceSignature.encoded
             )
+        )
     }
 
     /**
@@ -91,12 +102,11 @@ class DeviceResponseDto {
         val nameSpaces: Map<String, List<EmbeddedCbor>>? = null,
         val issuerAuth: RawCbor
     ) {
-        fun toDomain(): SharingIssuerSigned = SharingIssuerSigned(
-            nameSpaces = nameSpaces?.mapValues { entry ->
-                entry.value.map { it.encoded }
-            },
-            issuerAuth = issuerAuth.encoded
-        )
+        fun toDomain(rawNameSpaces: Map<String, List<ByteArray>>): SharingIssuerSigned =
+            SharingIssuerSigned(
+                nameSpaces = rawNameSpaces.ifEmpty { null },
+                issuerAuth = issuerAuth.encoded
+            )
     }
 
     @JsonDeserialize(using = IssuerSignedItemDeserializer::class)

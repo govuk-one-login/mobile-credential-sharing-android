@@ -217,31 +217,34 @@ class DeviceResponseDtoTest {
     @Test
     fun `toDomain maps DeviceResponseDTO to DeviceResponse`() {
         val issuerSignedItemData = byteArrayOf(0x01, 0x02)
-        val deviceSignatureData = byteArrayOf(0x03, 0x04)
-
-        val document = DeviceResponseDto.DocumentDTO(
-            docType = docType,
-            issuerSigned = DeviceResponseDto.IssuerSignedDTO(
-                nameSpaces = mapOf(
-                    "org.iso.18013.5.1" to listOf(EmbeddedCbor(issuerSignedItemData))
-                ),
-                issuerAuth = RawCbor(byteArrayOf(0x03, 0x04))
-            ),
-            deviceSigned = DeviceResponseDto.DeviceSignedDTO(
-                nameSpaces = EmbeddedCbor(deviceNameSpacesData),
-                deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-                    deviceSignature = RawCbor(deviceSignatureData)
-                )
-            )
-        )
+        val issuerAuthBytes = mapper.writeValueAsBytes(listOf<Any>())
+        val deviceSignatureData = mapper.writeValueAsBytes(listOf<Any>())
 
         val dto = DeviceResponseDto.DeviceResponseDTO(
             version = "1.0",
-            documents = listOf(document),
+            documents = listOf(
+                DeviceResponseDto.DocumentDTO(
+                    docType = docType,
+                    issuerSigned = DeviceResponseDto.IssuerSignedDTO(
+                        nameSpaces = mapOf(
+                            "org.iso.18013.5.1" to listOf(EmbeddedCbor(issuerSignedItemData))
+                        ),
+                        issuerAuth = RawCbor(issuerAuthBytes)
+                    ),
+                    deviceSigned = DeviceResponseDto.DeviceSignedDTO(
+                        nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                        deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                            deviceSignature = RawCbor(deviceSignatureData)
+                        )
+                    )
+                )
+            ),
             status = 0u
         )
 
-        val domain = dto.toDomain()
+        val encoded = mapper.writeValueAsBytes(dto)
+        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
+        val domain = decoded.toDomain(encoded)
 
         assertEquals("1.0", domain.version)
         assertEquals(Status.OK, domain.status)
@@ -253,8 +256,8 @@ class DeviceResponseDtoTest {
         val issuerSigned = documents.first().issuerSigned
         val nameSpaces = issuerSigned.nameSpaces!!
         assertEquals(1, nameSpaces["org.iso.18013.5.1"]!!.size)
-        assertThat(nameSpaces["org.iso.18013.5.1"]!![0], equalTo(issuerSignedItemData))
-        assertThat(issuerSigned.issuerAuth, equalTo(byteArrayOf(0x03, 0x04)))
+        assertThat(nameSpaces["org.iso.18013.5.1"]!![0], equalTo(wrapTag24(issuerSignedItemData)))
+        assertThat(issuerSigned.issuerAuth, equalTo(issuerAuthBytes))
 
         val deviceSigned = documents.first().deviceSigned
         assertThat(deviceSigned.deviceNameSpacesBytes, equalTo(deviceNameSpacesData))
@@ -265,7 +268,9 @@ class DeviceResponseDtoTest {
     fun `toDomain maps null documents`() {
         val dto = DeviceResponseDto.DeviceResponseDTO(status = 10u)
 
-        val domain = dto.toDomain()
+        val encoded = mapper.writeValueAsBytes(dto)
+        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
+        val domain = decoded.toDomain(encoded)
 
         assertEquals(Status.GENERAL_ERROR, domain.status)
         assertNull(domain.documents)
@@ -469,6 +474,47 @@ class DeviceResponseDtoTest {
         "elementIdentifier" to "family_name",
         "elementValue" to elementValue
     )
+
+    /**
+     * ISO 18013-5 8.3: For any cryptographic
+     * operation, an mdoc, mdoc reader or issuing authority infrastructure shall use these
+     * bytestrings as they were sent or received, without attempting to re-create them from the
+     * underlying maps.
+     *
+     * IssuerSignedItemBytes = #6.24(bstr .cbor IssuerSignedItem)
+     *
+     * After deserialization, the domain model's nameSpaces ByteArrays must include the
+     * Tag 24 envelope so that digest verification can hash the complete IssuerSignedItemBytes.
+     */
+    @Test
+    fun `deserialized IssuerSigned nameSpaces preserves Tag 24 encoded IssuerSignedItemBytes`() {
+        val innerItemBytes = byteArrayOf(0xA4.toByte(), 0x01, 0x02, 0x03, 0x04)
+        val issuerSignedItemBytes = wrapTag24(innerItemBytes)
+
+        val original = DeviceResponseDtoStub.deviceResponseDto(
+            nameSpaces = mapOf(
+                "org.iso.18013.5.1" to listOf(EmbeddedCbor(innerItemBytes))
+            )
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
+        val itemBytes = decoded.toDomain(encoded).documents!!.first()
+            .issuerSigned.nameSpaces!!["org.iso.18013.5.1"]!![0]
+
+        assertThat(
+            "Domain bytes must be full IssuerSignedItemBytes with Tag 24 prefix (0xD8 0x18)",
+            itemBytes,
+            equalTo(issuerSignedItemBytes)
+        )
+    }
+
+    private fun wrapTag24(content: ByteArray): ByteArray = ByteArrayOutputStream().also { out ->
+        CBORFactory().createGenerator(out).use { gen ->
+            gen.writeTag(24)
+            gen.writeBinary(content)
+        }
+    }.toByteArray()
 
     private fun generateBytesTag(elementSize: Int) = hexFormatter(PREFIX_TYPE_BYTES + elementSize)
 }
