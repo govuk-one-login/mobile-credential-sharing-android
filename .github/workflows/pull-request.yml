@@ -20,11 +20,11 @@ permissions:
 
 jobs:
   linting:
-    name: "Workflow / Linting"
+    name: "Workflow: Linting"
     uses: ./.github/workflows/linting.yml
     secrets: inherit
 
   testing:
-    name: "Workflow / Test suites"
+    name: "Workflow: Test suites"
     uses: ./.github/workflows/testing.yml
     secrets: inherit

@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   conventional_commits:
+    name: "Conventional commits"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,6 +40,7 @@ jobs:
         shell: bash
 
   prose_linting:
+    name: "Prose"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -55,6 +57,7 @@ jobs:
         run: ./scripts/lint/vale/run
 
   android_linting:
+    name: "Android"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -74,6 +77,7 @@ jobs:
           ./scripts/lint/android
 
   kotlin_linting:
+    name: "Kotlin"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
