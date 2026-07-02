@@ -260,7 +260,7 @@ class DeviceResponseDtoTest {
         assertThat(issuerSigned.issuerAuth, equalTo(issuerAuthBytes))
 
         val deviceSigned = documents.first().deviceSigned
-        assertThat(deviceSigned.deviceNameSpacesBytes, equalTo(deviceNameSpacesData))
+        assertThat(deviceSigned.deviceNameSpacesBytes, equalTo(wrapTag24(deviceNameSpacesData)))
         assertThat(deviceSigned.deviceSignature, equalTo(deviceSignatureData))
     }
 
@@ -506,6 +506,69 @@ class DeviceResponseDtoTest {
             "Domain bytes must be full IssuerSignedItemBytes with Tag 24 prefix (0xD8 0x18)",
             itemBytes,
             equalTo(issuerSignedItemBytes)
+        )
+    }
+
+    /**
+     * ISO 18013-5 §9.1.3: The deviceSignature COSE_Sign1 protected header uses integer map keys
+     * (e.g., key 1 = algorithm). Jackson re-encoding converts these to string keys, corrupting
+     * the Sig_structure and causing signature verification to fail.
+     *
+     * This test verifies that toDomain preserves the original deviceSignature bytes using
+     * offset-based extraction, not Jackson re-encoding.
+     */
+    @Test
+    fun `toDomain preserves deviceSignature raw bytes with integer map keys`() {
+        // Build a COSE_Sign1 array with integer key in protected header: {1: -7}
+        val protectedHeader = ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartObject(1)
+                gen.writeFieldId(1)
+                gen.writeNumber(-7L)
+                gen.writeEndObject()
+            }
+        }.toByteArray()
+
+        val coseSign1 = ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartArray(null, 4)
+                gen.writeBinary(protectedHeader)
+                gen.writeStartObject(0)
+                gen.writeEndObject()
+                gen.writeNull()
+                gen.writeBinary(byteArrayOf(0x01, 0x02, 0x03))
+                gen.writeEndArray()
+            }
+        }.toByteArray()
+
+        val original = DeviceResponseDto.DeviceResponseDTO(
+            version = "1.0",
+            documents = listOf(
+                DeviceResponseDto.DocumentDTO(
+                    docType = docType,
+                    issuerSigned = DeviceResponseDto.IssuerSignedDTO(
+                        nameSpaces = null,
+                        issuerAuth = RawCbor(mapper.writeValueAsBytes(listOf<Any>()))
+                    ),
+                    deviceSigned = DeviceResponseDto.DeviceSignedDTO(
+                        nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                        deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                            deviceSignature = RawCbor(coseSign1)
+                        )
+                    )
+                )
+            ),
+            status = 0u
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
+        val domain = decoded.toDomain(encoded)
+
+        assertThat(
+            "deviceSignature must preserve original COSE_Sign1 bytes with integer map keys",
+            domain.documents!!.first().deviceSigned.deviceSignature,
+            equalTo(coseSign1)
         )
     }
 

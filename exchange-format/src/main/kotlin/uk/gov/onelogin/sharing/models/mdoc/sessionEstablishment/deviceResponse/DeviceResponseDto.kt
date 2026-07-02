@@ -47,16 +47,20 @@ class DeviceResponseDto {
         }
 
         /**
-         * Maps to domain preserving original Tag 24-encoded IssuerSignedItemBytes
+         * Maps to domain preserving original Tag 24-encoded bytes via
+         * offset-based extraction from [sourceBytes], per ISO 18013-5 §8.3.
          *
          * @param sourceBytes The raw CBOR bytes from which this DTO was deserialized.
          */
         fun toDomain(sourceBytes: ByteArray): DeviceResponse {
-            val rawNameSpaces = IssuerSignedItemBytesExtractor.extract(sourceBytes)
+            val rawBytes = RawBytesExtractor.extract(sourceBytes)
             return DeviceResponse(
                 statusCode = status,
                 documents = documents?.mapIndexed { index, doc ->
-                    doc.toDomain(rawNameSpaces.getOrElse(index) { emptyMap() })
+                    val docRawBytes = rawBytes.getOrElse(index) {
+                        RawBytesExtractor.DocumentRawBytes()
+                    }
+                    doc.toDomain(docRawBytes)
                 },
                 version = version
             )
@@ -78,14 +82,16 @@ class DeviceResponseDto {
         val deviceSigned: DeviceSignedDTO,
         val errors: Map<String, Int>? = null
     ) {
-        fun toDomain(
-            rawNameSpaces: Map<String, List<ByteArray>>
+        internal fun toDomain(
+            rawBytes: RawBytesExtractor.DocumentRawBytes
         ): VerifiableDocument.WithPresentation = SharingVerifiableDocumentWithPresentation(
             docType = docType,
-            issuerSigned = issuerSigned.toDomain(rawNameSpaces),
+            issuerSigned = issuerSigned.toDomain(rawBytes.issuerSignedItemBytes),
             deviceSigned = SharingDeviceSigned(
-                deviceNameSpacesBytes = deviceSigned.nameSpaces.encoded,
-                deviceSignature = deviceSigned.deviceAuth.deviceSignature.encoded
+                deviceNameSpacesBytes = rawBytes.deviceNameSpacesBytes
+                    ?: deviceSigned.nameSpaces.encoded,
+                deviceSignature = rawBytes.deviceSignatureBytes
+                    ?: deviceSigned.deviceAuth.deviceSignature.encoded
             )
         )
     }

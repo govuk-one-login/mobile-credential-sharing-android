@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verification.document
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import dev.zacsweers.metro.Inject
 import java.io.ByteArrayOutputStream
 
@@ -12,11 +13,13 @@ class DeviceAuthenticationEncoder {
         docType: String,
         deviceNameSpacesBytes: ByteArray
     ): ByteArray {
+        val sessionTranscript = unwrapTag24(sessionTranscriptBytes)
+
         val innerArray = ByteArrayOutputStream().also { out ->
             out.write(CBOR_ARRAY_4)
             CBORFactory().createGenerator(out)
                 .use { gen -> gen.writeString(DEVICE_AUTHENTICATION_LABEL) }
-            out.write(sessionTranscriptBytes)
+            out.write(sessionTranscript)
             CBORFactory().createGenerator(out).use { gen -> gen.writeString(docType) }
             out.write(deviceNameSpacesBytes)
         }.toByteArray()
@@ -29,9 +32,33 @@ class DeviceAuthenticationEncoder {
         }.toByteArray()
     }
 
+    /**
+     * Unwraps a CBOR Tag 24 envelope if present, returning the inner bstr content.
+     *
+     * ISO 18013-5 §12.6.1 defines:
+     *   SessionTranscriptBytes = #6.24(bstr .cbor SessionTranscript)
+     *
+     * DeviceAuthentication (§12.4.4) requires the raw SessionTranscript (the array),
+     * not SessionTranscriptBytes (the Tag 24-wrapped version).
+     *
+     * If the input is not Tag 24-wrapped, it is returned as-is (assumed to be raw).
+     */
+    private fun unwrapTag24(bytes: ByteArray): ByteArray {
+        if (bytes.size < 3 || bytes[0] != TAG_24_MARKER || bytes[1] != TAG_24_VALUE) {
+            return bytes
+        }
+        val parser = CBORFactory().createParser(bytes) as CBORParser
+        return parser.use { p ->
+            p.nextToken()
+            p.binaryValue
+        }
+    }
+
     private companion object {
         const val CBOR_ARRAY_4 = 0x84
         const val TAG_24 = 24
+        const val TAG_24_MARKER = 0xD8.toByte()
+        const val TAG_24_VALUE = 0x18.toByte()
         const val DEVICE_AUTHENTICATION_LABEL = "DeviceAuthentication"
     }
 }
