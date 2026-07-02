@@ -475,17 +475,6 @@ class DeviceResponseDtoTest {
         "elementValue" to elementValue
     )
 
-    /**
-     * ISO 18013-5 8.3: For any cryptographic
-     * operation, an mdoc, mdoc reader or issuing authority infrastructure shall use these
-     * bytestrings as they were sent or received, without attempting to re-create them from the
-     * underlying maps.
-     *
-     * IssuerSignedItemBytes = #6.24(bstr .cbor IssuerSignedItem)
-     *
-     * After deserialization, the domain model's nameSpaces ByteArrays must include the
-     * Tag 24 envelope so that digest verification can hash the complete IssuerSignedItemBytes.
-     */
     @Test
     fun `deserialized IssuerSigned nameSpaces preserves Tag 24 encoded IssuerSignedItemBytes`() {
         val innerItemBytes = byteArrayOf(0xA4.toByte(), 0x01, 0x02, 0x03, 0x04)
@@ -509,56 +498,31 @@ class DeviceResponseDtoTest {
         )
     }
 
-    /**
-     * ISO 18013-5 §9.1.3: The deviceSignature COSE_Sign1 protected header uses integer map keys
-     * (e.g., key 1 = algorithm). Jackson re-encoding converts these to string keys, corrupting
-     * the Sig_structure and causing signature verification to fail.
-     *
-     * This test verifies that toDomain preserves the original deviceSignature bytes using
-     * offset-based extraction, not Jackson re-encoding.
-     */
+    @Test
+    fun `toDomain preserves issuerAuth raw bytes with integer map keys`() {
+        val coseSign1 = DeviceResponseDtoStub.coseSign1WithIntegerKeys
+
+        val original = DeviceResponseDtoStub.deviceResponseDto(
+            issuerAuth = coseSign1
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
+        val domain = decoded.toDomain(encoded)
+
+        assertThat(
+            "issuerAuth must preserve original COSE_Sign1 bytes with integer map keys",
+            domain.documents!!.first().issuerSigned.issuerAuth,
+            equalTo(coseSign1)
+        )
+    }
+
     @Test
     fun `toDomain preserves deviceSignature raw bytes with integer map keys`() {
-        // Build a COSE_Sign1 array with integer key in protected header: {1: -7}
-        val protectedHeader = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartObject(1)
-                gen.writeFieldId(1)
-                gen.writeNumber(-7L)
-                gen.writeEndObject()
-            }
-        }.toByteArray()
+        val coseSign1 = DeviceResponseDtoStub.coseSign1WithIntegerKeys
 
-        val coseSign1 = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeStartArray(null, 4)
-                gen.writeBinary(protectedHeader)
-                gen.writeStartObject(0)
-                gen.writeEndObject()
-                gen.writeNull()
-                gen.writeBinary(byteArrayOf(0x01, 0x02, 0x03))
-                gen.writeEndArray()
-            }
-        }.toByteArray()
-
-        val original = DeviceResponseDto.DeviceResponseDTO(
-            version = "1.0",
-            documents = listOf(
-                DeviceResponseDto.DocumentDTO(
-                    docType = docType,
-                    issuerSigned = DeviceResponseDto.IssuerSignedDTO(
-                        nameSpaces = null,
-                        issuerAuth = RawCbor(mapper.writeValueAsBytes(listOf<Any>()))
-                    ),
-                    deviceSigned = DeviceResponseDto.DeviceSignedDTO(
-                        nameSpaces = EmbeddedCbor(deviceNameSpacesData),
-                        deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-                            deviceSignature = RawCbor(coseSign1)
-                        )
-                    )
-                )
-            ),
-            status = 0u
+        val original = DeviceResponseDtoStub.deviceResponseDto(
+            deviceSignature = coseSign1
         )
 
         val encoded = mapper.writeValueAsBytes(original)

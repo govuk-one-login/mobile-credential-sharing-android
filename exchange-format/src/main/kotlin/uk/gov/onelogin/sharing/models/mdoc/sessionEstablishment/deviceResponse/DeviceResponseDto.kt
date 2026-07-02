@@ -47,18 +47,17 @@ class DeviceResponseDto {
         }
 
         /**
-         * Maps to domain preserving original Tag 24-encoded bytes via
-         * offset-based extraction from [sourceBytes], per ISO 18013-5 §8.3.
+         * Maps to domain preserving original Tag 24-encoded bytes
          *
          * @param sourceBytes The raw CBOR bytes from which this DTO was deserialized.
          */
         fun toDomain(sourceBytes: ByteArray): DeviceResponse {
-            val rawBytes = RawBytesExtractor.extract(sourceBytes)
+            val rawBytes = DeviceResponseCborExtractor.extract(sourceBytes)
             return DeviceResponse(
                 statusCode = status,
                 documents = documents?.mapIndexed { index, doc ->
                     val docRawBytes = rawBytes.getOrElse(index) {
-                        RawBytesExtractor.DocumentRawBytes()
+                        DeviceResponseCborExtractor.DocumentRawBytes()
                     }
                     doc.toDomain(docRawBytes)
                 },
@@ -83,10 +82,13 @@ class DeviceResponseDto {
         val errors: Map<String, Int>? = null
     ) {
         internal fun toDomain(
-            rawBytes: RawBytesExtractor.DocumentRawBytes
+            rawBytes: DeviceResponseCborExtractor.DocumentRawBytes
         ): VerifiableDocument.WithPresentation = SharingVerifiableDocumentWithPresentation(
             docType = docType,
-            issuerSigned = issuerSigned.toDomain(rawBytes.issuerSignedItemBytes),
+            issuerSigned = issuerSigned.toDomain(
+                rawNameSpaces = rawBytes.issuerSignedItemBytes,
+                rawIssuerAuth = rawBytes.issuerAuthBytes
+            ),
             deviceSigned = SharingDeviceSigned(
                 deviceNameSpacesBytes = rawBytes.deviceNameSpacesBytes
                     ?: deviceSigned.nameSpaces.encoded,
@@ -108,11 +110,13 @@ class DeviceResponseDto {
         val nameSpaces: Map<String, List<EmbeddedCbor>>? = null,
         val issuerAuth: RawCbor
     ) {
-        fun toDomain(rawNameSpaces: Map<String, List<ByteArray>>): SharingIssuerSigned =
-            SharingIssuerSigned(
-                nameSpaces = rawNameSpaces.ifEmpty { null },
-                issuerAuth = issuerAuth.encoded
-            )
+        fun toDomain(
+            rawNameSpaces: Map<String, List<ByteArray>>,
+            rawIssuerAuth: ByteArray? = null
+        ): SharingIssuerSigned = SharingIssuerSigned(
+            nameSpaces = rawNameSpaces.ifEmpty { null },
+            issuerAuth = rawIssuerAuth ?: issuerAuth.encoded
+        )
     }
 
     @JsonDeserialize(using = IssuerSignedItemDeserializer::class)

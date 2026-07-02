@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import java.io.ByteArrayOutputStream
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.emptyDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.sessionTranscriptBytes
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject.Companion.DOC_TYPE
 
 class DeviceAuthenticationEncoderTest {
     private val cborMapper = ObjectMapper(CBORFactory())
@@ -35,27 +35,21 @@ class DeviceAuthenticationEncoderTest {
         assertThat(inner[3].isBinary, equalTo(true))
     }
 
-    /**
-     * ISO 18013-5 §12.4.4: DeviceAuthentication contains SessionTranscript (the raw array),
-     * not SessionTranscriptBytes (Tag 24 wrapped). The encoder must unwrap Tag 24 when the
-     * verifier passes SessionTranscriptBytes.
-     */
     @Test
     fun `unwraps Tag 24 from sessionTranscriptBytes before encoding`() {
-        val docType = "org.iso.18013.5.1.mDL"
-        val tag24Wrapped = ByteArrayOutputStream().also { out ->
-            CBORFactory().createGenerator(out).use { gen ->
-                gen.writeTag(24)
-                gen.writeBinary(sessionTranscriptBytes)
-            }
-        }.toByteArray()
+        val docType = DOC_TYPE
+        val tag24Wrapped = CoseSign1Stubs.wrapInTag24(sessionTranscriptBytes)
 
         val resultFromRaw = encoder.encode(
             sessionTranscriptBytes,
             docType,
             emptyDeviceNameSpacesBytes
         )
-        val resultFromWrapped = encoder.encode(tag24Wrapped, docType, emptyDeviceNameSpacesBytes)
+        val resultFromWrapped = encoder.encode(
+            tag24Wrapped,
+            docType,
+            emptyDeviceNameSpacesBytes
+        )
 
         assertThat(
             "Tag 24-wrapped input must produce same output as raw input",

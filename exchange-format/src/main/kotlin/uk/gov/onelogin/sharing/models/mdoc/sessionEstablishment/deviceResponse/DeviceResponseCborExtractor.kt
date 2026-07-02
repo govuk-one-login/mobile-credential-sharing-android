@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
 import com.fasterxml.jackson.core.JsonToken
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 
 /**
  * Extracts raw CBOR bytes from a `DeviceResponse`
@@ -11,13 +11,14 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser
  * received. This extractor captures Tag 24-wrapped items directly from the source bytes
  * without decoding or re-encoding.
  */
-internal object RawBytesExtractor {
+internal object DeviceResponseCborExtractor {
 
     /**
      * Per-document extraction result containing the raw bytes that must be preserved.
      */
     data class DocumentRawBytes(
         val issuerSignedItemBytes: Map<String, List<ByteArray>> = emptyMap(),
+        val issuerAuthBytes: ByteArray? = null,
         val deviceNameSpacesBytes: ByteArray? = null,
         val deviceSignatureBytes: ByteArray? = null
     )
@@ -27,7 +28,7 @@ internal object RawBytesExtractor {
      * @return Raw bytes per document, indexed by document order.
      */
     fun extract(source: ByteArray): List<DocumentRawBytes> {
-        val parser = CBORFactory().createParser(source) as CBORParser
+        val parser = CborMapper.default.factory.createParser(source) as CBORParser
         return parser.use { parseDocuments(it, source) }
     }
 
@@ -51,7 +52,7 @@ internal object RawBytesExtractor {
     }
 
     private fun extractDocument(parser: CBORParser, source: ByteArray): DocumentRawBytes {
-        var issuerNameSpaces: Map<String, List<ByteArray>> = emptyMap()
+        var issuerSignedRawBytes: IssuerSignedRawBytes? = null
         var deviceSignedRawBytes: DeviceSignedRawBytes? = null
 
         while (parser.nextToken() != JsonToken.END_OBJECT) {
@@ -60,8 +61,8 @@ internal object RawBytesExtractor {
 
             when (fieldName) {
                 KEY_ISSUER_SIGNED ->
-                    issuerNameSpaces =
-                        extractIssuerSignedNameSpaces(parser, source)
+                    issuerSignedRawBytes =
+                        extractIssuerSignedBytes(parser, source)
 
                 KEY_DEVICE_SIGNED -> deviceSignedRawBytes = extractDeviceSignedBytes(parser, source)
 
@@ -69,34 +70,51 @@ internal object RawBytesExtractor {
             }
         }
         return DocumentRawBytes(
-            issuerSignedItemBytes = issuerNameSpaces,
+            issuerSignedItemBytes = issuerSignedRawBytes?.nameSpaces ?: emptyMap(),
+            issuerAuthBytes = issuerSignedRawBytes?.issuerAuthBytes,
             deviceNameSpacesBytes = deviceSignedRawBytes?.nameSpacesBytes,
             deviceSignatureBytes = deviceSignedRawBytes?.signatureBytes
         )
     }
+
+    private data class IssuerSignedRawBytes(
+        val nameSpaces: Map<String, List<ByteArray>> = emptyMap(),
+        val issuerAuthBytes: ByteArray? = null
+    )
 
     private data class DeviceSignedRawBytes(
         val nameSpacesBytes: ByteArray? = null,
         val signatureBytes: ByteArray? = null
     )
 
-    private fun extractIssuerSignedNameSpaces(
+    private fun extractIssuerSignedBytes(
         parser: CBORParser,
         source: ByteArray
-    ): Map<String, List<ByteArray>> {
+    ): IssuerSignedRawBytes {
         var nameSpaces: Map<String, List<ByteArray>> = emptyMap()
+        var issuerAuthBytes: ByteArray? = null
 
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             val fieldName = parser.currentName()
             parser.nextToken()
 
-            if (fieldName == KEY_NAME_SPACES) {
-                nameSpaces = extractNameSpaces(parser, source)
-            } else {
-                parser.skipChildren()
+            when (fieldName) {
+                KEY_NAME_SPACES -> nameSpaces = extractNameSpaces(parser, source)
+
+                KEY_ISSUER_AUTH -> {
+                    val startOffset = parser.currentTokenLocation().byteOffset.toInt()
+                    parser.skipChildren()
+                    val endOffset = parser.currentLocation().byteOffset.toInt()
+                    issuerAuthBytes = source.copyOfRange(startOffset, endOffset)
+                }
+
+                else -> parser.skipChildren()
             }
         }
-        return nameSpaces
+        return IssuerSignedRawBytes(
+            nameSpaces = nameSpaces,
+            issuerAuthBytes = issuerAuthBytes
+        )
     }
 
     private fun extractDeviceSignedBytes(
@@ -176,6 +194,7 @@ internal object RawBytesExtractor {
     private const val KEY_ISSUER_SIGNED = "issuerSigned"
     private const val KEY_DEVICE_SIGNED = "deviceSigned"
     private const val KEY_NAME_SPACES = "nameSpaces"
+    private const val KEY_ISSUER_AUTH = "issuerAuth"
     private const val KEY_DEVICE_AUTH = "deviceAuth"
     private const val KEY_DEVICE_SIGNATURE = "deviceSignature"
 }

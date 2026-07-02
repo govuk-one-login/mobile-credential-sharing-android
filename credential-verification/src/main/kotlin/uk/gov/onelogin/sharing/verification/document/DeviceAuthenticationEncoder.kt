@@ -35,16 +35,15 @@ class DeviceAuthenticationEncoder {
     /**
      * Unwraps a CBOR Tag 24 envelope if present, returning the inner bstr content.
      *
-     * ISO 18013-5 §12.6.1 defines:
-     *   SessionTranscriptBytes = #6.24(bstr .cbor SessionTranscript)
+     * SessionTranscriptBytes = #6.24(bstr .cbor SessionTranscript)
      *
-     * DeviceAuthentication (§12.4.4) requires the raw SessionTranscript (the array),
-     * not SessionTranscriptBytes (the Tag 24-wrapped version).
-     *
-     * If the input is not Tag 24-wrapped, it is returned as-is (assumed to be raw).
+     * @return raw SessionTranscript array
      */
     private fun unwrapTag24(bytes: ByteArray): ByteArray {
-        if (bytes.size < 3 || bytes[0] != TAG_24_MARKER || bytes[1] != TAG_24_VALUE) {
+        if (bytes.size < MIN_TAG_24_SIZE ||
+            bytes[0] != TAG_24_MARKER ||
+            bytes[1] != TAG_24_VALUE
+        ) {
             return bytes
         }
         val parser = CBORFactory().createParser(bytes) as CBORParser
@@ -59,6 +58,7 @@ class DeviceAuthenticationEncoder {
         const val TAG_24 = 24
         const val TAG_24_MARKER = 0xD8.toByte()
         const val TAG_24_VALUE = 0x18.toByte()
+        const val MIN_TAG_24_SIZE = 3
         const val DEVICE_AUTHENTICATION_LABEL = "DeviceAuthentication"
     }
 }
