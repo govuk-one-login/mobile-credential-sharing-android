@@ -53,13 +53,14 @@ class DeviceResponseDto {
          */
         fun toDomain(sourceBytes: ByteArray): DeviceResponse {
             val rawBytes = DeviceResponseCborExtractor.extract(sourceBytes)
+            check(rawBytes.size == (documents?.size ?: 0)) {
+                "Extractor document count (${rawBytes.size}) != " +
+                    "DTO document count (${documents?.size ?: 0})"
+            }
             return DeviceResponse(
                 statusCode = status,
                 documents = documents?.mapIndexed { index, doc ->
-                    val docRawBytes = rawBytes.getOrElse(index) {
-                        DeviceResponseCborExtractor.DocumentRawBytes()
-                    }
-                    doc.toDomain(docRawBytes)
+                    doc.toDomain(rawBytes[index])
                 },
                 version = version
             )
@@ -275,10 +276,11 @@ class DeviceResponseDto {
     /**
      * Deserializes a CBOR byte array into [DeviceResponse].
      *
-     * Preserves Tag 24 items within `issuerSigned.nameSpaces` as raw byte arrays
+     * Preserves Tag 24 items within `issuerSigned.nameSpaces` as raw byte arrays.
      *
      * The `issuerAuth` and `deviceSignature` fields are re-encoded from the parsed tree
-     * to capture the raw COSE structure.
+     * for DTO use. During `toDomain()`, these are replaced by exact original bytes from
+     * [DeviceResponseCborExtractor].
      */
     class DeviceResponseDeserializer :
         StdDeserializer<DeviceResponseDTO>(DeviceResponseDTO::class.java) {

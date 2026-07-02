@@ -10,6 +10,8 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
  * ISO 18013-5 8.3 requires that structures with a "Bytes" suffix are preserved exactly as
  * received. This extractor captures Tag 24-wrapped items directly from the source bytes
  * without decoding or re-encoding.
+ *
+ * @see [docs/cbor-byte-preservation.md)
  */
 internal object DeviceResponseCborExtractor {
 
@@ -21,6 +23,16 @@ internal object DeviceResponseCborExtractor {
         val issuerAuthBytes: ByteArray? = null,
         val deviceNameSpacesBytes: ByteArray? = null,
         val deviceSignatureBytes: ByteArray? = null
+    )
+
+    private data class IssuerSignedRawBytes(
+        val nameSpaces: Map<String, List<ByteArray>> = emptyMap(),
+        val issuerAuthBytes: ByteArray? = null
+    )
+
+    private data class DeviceSignedRawBytes(
+        val nameSpacesBytes: ByteArray? = null,
+        val signatureBytes: ByteArray? = null
     )
 
     /**
@@ -76,16 +88,6 @@ internal object DeviceResponseCborExtractor {
             deviceSignatureBytes = deviceSignedRawBytes?.signatureBytes
         )
     }
-
-    private data class IssuerSignedRawBytes(
-        val nameSpaces: Map<String, List<ByteArray>> = emptyMap(),
-        val issuerAuthBytes: ByteArray? = null
-    )
-
-    private data class DeviceSignedRawBytes(
-        val nameSpacesBytes: ByteArray? = null,
-        val signatureBytes: ByteArray? = null
-    )
 
     private fun extractIssuerSignedBytes(
         parser: CBORParser,

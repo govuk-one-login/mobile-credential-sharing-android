@@ -476,62 +476,41 @@ class DeviceResponseDtoTest {
     )
 
     @Test
-    fun `deserialized IssuerSigned nameSpaces preserves Tag 24 encoded IssuerSignedItemBytes`() {
+    fun `toDomain preserves raw bytes`() {
+        val coseSign1 = DeviceResponseDtoStub.coseSign1WithIntegerKeys
         val innerItemBytes = byteArrayOf(0xA4.toByte(), 0x01, 0x02, 0x03, 0x04)
-        val issuerSignedItemBytes = wrapTag24(innerItemBytes)
 
         val original = DeviceResponseDtoStub.deviceResponseDto(
             nameSpaces = mapOf(
                 "org.iso.18013.5.1" to listOf(EmbeddedCbor(innerItemBytes))
-            )
-        )
-
-        val encoded = mapper.writeValueAsBytes(original)
-        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
-        val itemBytes = decoded.toDomain(encoded).documents!!.first()
-            .issuerSigned.nameSpaces!!["org.iso.18013.5.1"]!![0]
-
-        assertThat(
-            "Domain bytes must be full IssuerSignedItemBytes with Tag 24 prefix (0xD8 0x18)",
-            itemBytes,
-            equalTo(issuerSignedItemBytes)
-        )
-    }
-
-    @Test
-    fun `toDomain preserves issuerAuth raw bytes with integer map keys`() {
-        val coseSign1 = DeviceResponseDtoStub.coseSign1WithIntegerKeys
-
-        val original = DeviceResponseDtoStub.deviceResponseDto(
-            issuerAuth = coseSign1
-        )
-
-        val encoded = mapper.writeValueAsBytes(original)
-        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
-        val domain = decoded.toDomain(encoded)
-
-        assertThat(
-            "issuerAuth must preserve original COSE_Sign1 bytes with integer map keys",
-            domain.documents!!.first().issuerSigned.issuerAuth,
-            equalTo(coseSign1)
-        )
-    }
-
-    @Test
-    fun `toDomain preserves deviceSignature raw bytes with integer map keys`() {
-        val coseSign1 = DeviceResponseDtoStub.coseSign1WithIntegerKeys
-
-        val original = DeviceResponseDtoStub.deviceResponseDto(
+            ),
+            issuerAuth = coseSign1,
             deviceSignature = coseSign1
         )
 
         val encoded = mapper.writeValueAsBytes(original)
         val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
         val domain = decoded.toDomain(encoded)
+        val document = domain.documents!!.first()
 
         assertThat(
+            "IssuerSignedItemBytes must include Tag 24 prefix (0xD8 0x18)",
+            document.issuerSigned.nameSpaces!!["org.iso.18013.5.1"]!![0],
+            equalTo(wrapTag24(innerItemBytes))
+        )
+        assertThat(
+            "issuerAuth must preserve original COSE_Sign1 bytes with integer map keys",
+            document.issuerSigned.issuerAuth,
+            equalTo(coseSign1)
+        )
+        assertThat(
+            "deviceNameSpacesBytes must include Tag 24 prefix",
+            document.deviceSigned.deviceNameSpacesBytes[0],
+            equalTo(0xD8.toByte())
+        )
+        assertThat(
             "deviceSignature must preserve original COSE_Sign1 bytes with integer map keys",
-            domain.documents!!.first().deviceSigned.deviceSignature,
+            document.deviceSigned.deviceSignature,
             equalTo(coseSign1)
         )
     }
