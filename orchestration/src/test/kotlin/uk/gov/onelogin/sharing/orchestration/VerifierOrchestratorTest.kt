@@ -146,7 +146,8 @@ class VerifierOrchestratorTest {
         barcodeParser = FakeQrParser(),
         verifierCryptoService = cryptoService,
         documentVerifier = documentVerifier,
-        sessionTerminator = SessionTerminator(centralBluetoothTransport, cryptoService)
+        sessionTerminator = SessionTerminator(centralBluetoothTransport,
+            cryptoService, logger)
     )
 
     @Before
