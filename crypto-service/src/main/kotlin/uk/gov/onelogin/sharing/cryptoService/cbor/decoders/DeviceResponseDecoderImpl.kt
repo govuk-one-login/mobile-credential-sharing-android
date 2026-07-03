@@ -15,11 +15,11 @@ class DeviceResponseDecoderImpl(private val logger: Logger) : DeviceResponseDeco
         val dto = CborMapper.default.readValue(
             bytes,
             DeviceResponseDto.DeviceResponseDTO::class.java
-        )
+        ).copy(rawBytes = bytes)
 
         logger.debug(logTag, "DeviceResponse decoded successfully")
 
-        dto.toDomain(bytes)
+        dto.toDomain()
     } catch (e: IllegalArgumentException) {
         logger.error(logTag, LOG_CBOR_VALIDATION_ERROR, e)
         throw DeviceResponseDecodingException(e.message ?: LOG_CBOR_VALIDATION_ERROR, e)

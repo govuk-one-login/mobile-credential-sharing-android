@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -35,7 +36,9 @@ class DeviceResponseDto {
         val version: String = "1.0",
         val documents: List<DocumentDTO>? = null,
         val documentErrors: Map<String, UInt>? = null,
-        val status: UInt
+        val status: UInt,
+        @JsonIgnore
+        val rawBytes: ByteArray? = null
     ) : CborEncodable {
         init {
             require(version.startsWith("1.")) {
@@ -46,21 +49,49 @@ class DeviceResponseDto {
             }
         }
 
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as DeviceResponseDTO
+
+            if (version != other.version) return false
+            if (documents != other.documents) return false
+            if (documentErrors != other.documentErrors) return false
+            if (status != other.status) return false
+            if (!rawBytes.contentEquals(other.rawBytes)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = version.hashCode()
+            result = 31 * result + (documents?.hashCode() ?: 0)
+            result = 31 * result + (documentErrors?.hashCode() ?: 0)
+            result = 31 * result + status.hashCode()
+            result = 31 * result + (rawBytes?.contentHashCode() ?: 0)
+            return result
+        }
+
         /**
-         * Maps to domain preserving original Tag 24-encoded bytes
+         * Maps to domain preserving original Tag 24-encoded bytes.
          *
-         * @param sourceBytes The raw CBOR bytes from which this DTO was deserialized.
+         * Requires [rawBytes] to be set with the original CBOR bytes from which
+         * this DTO was deserialized.
          */
-        fun toDomain(sourceBytes: ByteArray): DeviceResponse {
-            val rawBytes = DeviceResponseCborExtractor.extract(sourceBytes)
-            check(rawBytes.size == (documents?.size ?: 0)) {
-                "Extractor document count (${rawBytes.size}) != " +
+        fun toDomain(): DeviceResponse {
+            val sourceBytes = requireNotNull(rawBytes) {
+                "rawBytes must be set before calling toDomain()"
+            }
+            val extractedBytes = DeviceResponseCborExtractor.extract(sourceBytes)
+            check(extractedBytes.size == (documents?.size ?: 0)) {
+                "Extractor document count (${extractedBytes.size}) != " +
                     "DTO document count (${documents?.size ?: 0})"
             }
             return DeviceResponse(
                 statusCode = status,
                 documents = documents?.mapIndexed { index, doc ->
-                    doc.toDomain(rawBytes[index])
+                    doc.toDomain(extractedBytes[index])
                 },
                 version = version
             )
