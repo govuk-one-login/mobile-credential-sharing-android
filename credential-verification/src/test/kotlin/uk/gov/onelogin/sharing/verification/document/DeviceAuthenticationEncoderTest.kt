@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.emptyDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.sessionTranscriptBytes
@@ -19,7 +20,11 @@ class DeviceAuthenticationEncoderTest {
     fun `encodes DeviceAuthenticationBytes as Tag 24 wrapping correct CBOR structure`() {
         val docType = "org.iso.18013.5.1.mDL"
 
-        val result = encoder.encode(sessionTranscriptBytes, docType, emptyDeviceNameSpacesBytes)
+        val result = encoder.encode(
+            CoseSign1Stubs.wrapInTag24(sessionTranscriptBytes),
+            docType,
+            emptyDeviceNameSpacesBytes
+        )
 
         val outerNode = cborMapper.readTree(result)
         assertThat(outerNode.isBinary, equalTo(true))
@@ -36,25 +41,13 @@ class DeviceAuthenticationEncoderTest {
     }
 
     @Test
-    fun `unwraps Tag 24 from sessionTranscriptBytes before encoding`() {
-        val docType = DOC_TYPE
-        val tag24Wrapped = CoseSign1Stubs.wrapInTag24(sessionTranscriptBytes)
-
-        val resultFromRaw = encoder.encode(
-            sessionTranscriptBytes,
-            docType,
-            emptyDeviceNameSpacesBytes
-        )
-        val resultFromWrapped = encoder.encode(
-            tag24Wrapped,
-            docType,
-            emptyDeviceNameSpacesBytes
-        )
-
-        assertThat(
-            "Tag 24-wrapped input must produce same output as raw input",
-            resultFromWrapped,
-            equalTo(resultFromRaw)
-        )
+    fun `encode throws when sessionTranscriptBytes is not Tag 24 wrapped`() {
+        assertThrows(Exception::class.java) {
+            encoder.encode(
+                sessionTranscriptBytes,
+                DOC_TYPE,
+                emptyDeviceNameSpacesBytes
+            )
+        }
     }
 }
