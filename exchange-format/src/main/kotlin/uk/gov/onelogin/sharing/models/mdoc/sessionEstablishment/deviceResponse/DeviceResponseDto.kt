@@ -81,7 +81,7 @@ class DeviceResponseDto {
          */
         fun toDomain(): DeviceResponse {
             val sourceBytes = requireNotNull(rawBytes) {
-                "rawBytes must be set before calling toDomain()"
+                RAW_BYTES_MISSING_ERROR
             }
             val extractedBytes = DeviceResponseCborExtractor.extract(sourceBytes)
             check(extractedBytes.size == (documents?.size ?: 0)) {
@@ -151,7 +151,7 @@ class DeviceResponseDto {
     ) {
         fun toDomain(): SharingIssuerSigned {
             val raw = requireNotNull(rawBytes) {
-                "rawBytes must be set before calling toDomain()"
+                RAW_BYTES_MISSING_ERROR
             }
             return SharingIssuerSigned(
                 nameSpaces = raw.nameSpaces.ifEmpty { null },
@@ -217,7 +217,7 @@ class DeviceResponseDto {
 
         fun toDomain(): SharingDeviceSigned {
             val raw = requireNotNull(rawBytes) {
-                "rawBytes must be set before calling toDomain()"
+                RAW_BYTES_MISSING_ERROR
             }
             return SharingDeviceSigned(
                 deviceNameSpacesBytes = raw.nameSpacesBytes ?: nameSpaces.encoded,
@@ -431,5 +431,7 @@ class DeviceResponseDto {
         const val KEY_ISSUER_AUTH = "issuerAuth"
         const val KEY_DEVICE_AUTH = "deviceAuth"
         const val KEY_DEVICE_SIGNATURE = "deviceSignature"
+
+        const val RAW_BYTES_MISSING_ERROR = "rawBytes must be set before calling toDomain()"
     }
 }
