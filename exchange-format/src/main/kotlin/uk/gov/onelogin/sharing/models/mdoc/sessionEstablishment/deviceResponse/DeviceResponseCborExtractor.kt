@@ -12,6 +12,22 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto.Companion.KEY_NAME_SPACES
 
 /**
+ * Raw bytes extracted from the IssuerSigned.
+ */
+data class IssuerSignedRawBytes(
+    val nameSpaces: Map<String, List<ByteArray>> = emptyMap(),
+    val issuerAuthBytes: ByteArray? = null
+)
+
+/**
+ * Raw bytes extracted from the DeviceSigned.
+ */
+data class DeviceSignedRawBytes(
+    val nameSpacesBytes: ByteArray? = null,
+    val signatureBytes: ByteArray? = null
+)
+
+/**
  * Extracts raw CBOR bytes from a `DeviceResponse`
  *
  * ISO 18013-5 8.3 requires that structures with a "Bytes" suffix are preserved exactly as
@@ -26,20 +42,8 @@ internal object DeviceResponseCborExtractor {
      * Per-document extraction result containing the raw bytes that must be preserved.
      */
     data class DocumentRawBytes(
-        val issuerSignedItemBytes: Map<String, List<ByteArray>> = emptyMap(),
-        val issuerAuthBytes: ByteArray? = null,
-        val deviceNameSpacesBytes: ByteArray? = null,
-        val deviceSignatureBytes: ByteArray? = null
-    )
-
-    private data class IssuerSignedRawBytes(
-        val nameSpaces: Map<String, List<ByteArray>> = emptyMap(),
-        val issuerAuthBytes: ByteArray? = null
-    )
-
-    private data class DeviceSignedRawBytes(
-        val nameSpacesBytes: ByteArray? = null,
-        val signatureBytes: ByteArray? = null
+        val issuerSigned: IssuerSignedRawBytes = IssuerSignedRawBytes(),
+        val deviceSigned: DeviceSignedRawBytes = DeviceSignedRawBytes()
     )
 
     /**
@@ -89,10 +93,8 @@ internal object DeviceResponseCborExtractor {
             }
         }
         return DocumentRawBytes(
-            issuerSignedItemBytes = issuerSignedRawBytes?.nameSpaces ?: emptyMap(),
-            issuerAuthBytes = issuerSignedRawBytes?.issuerAuthBytes,
-            deviceNameSpacesBytes = deviceSignedRawBytes?.nameSpacesBytes,
-            deviceSignatureBytes = deviceSignedRawBytes?.signatureBytes
+            issuerSigned = issuerSignedRawBytes ?: IssuerSignedRawBytes(),
+            deviceSigned = deviceSignedRawBytes ?: DeviceSignedRawBytes()
         )
     }
 

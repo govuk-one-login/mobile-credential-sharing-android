@@ -91,7 +91,11 @@ class DeviceResponseDto {
             return DeviceResponse(
                 statusCode = status,
                 documents = documents?.mapIndexed { index, doc ->
-                    doc.toDomain(extractedBytes[index])
+                    val raw = extractedBytes[index]
+                    doc.copy(
+                        issuerSigned = doc.issuerSigned.copy(rawBytes = raw.issuerSigned),
+                        deviceSigned = doc.deviceSigned.copy(rawBytes = raw.deviceSigned)
+                    ).toDomain()
                 },
                 version = version
             )
@@ -123,21 +127,12 @@ class DeviceResponseDto {
         val deviceSigned: DeviceSignedDTO,
         val errors: Map<String, Int>? = null
     ) {
-        internal fun toDomain(
-            rawBytes: DeviceResponseCborExtractor.DocumentRawBytes
-        ): VerifiableDocument.WithPresentation = SharingVerifiableDocumentWithPresentation(
-            docType = docType,
-            issuerSigned = issuerSigned.toDomain(
-                rawNameSpaces = rawBytes.issuerSignedItemBytes,
-                rawIssuerAuth = rawBytes.issuerAuthBytes
-            ),
-            deviceSigned = SharingDeviceSigned(
-                deviceNameSpacesBytes = rawBytes.deviceNameSpacesBytes
-                    ?: deviceSigned.nameSpaces.encoded,
-                deviceSignature = rawBytes.deviceSignatureBytes
-                    ?: deviceSigned.deviceAuth.deviceSignature.encoded
+        fun toDomain(): VerifiableDocument.WithPresentation =
+            SharingVerifiableDocumentWithPresentation(
+                docType = docType,
+                issuerSigned = issuerSigned.toDomain(),
+                deviceSigned = deviceSigned.toDomain()
             )
-        )
     }
 
     /**
@@ -150,15 +145,19 @@ class DeviceResponseDto {
      */
     data class IssuerSignedDTO(
         val nameSpaces: Map<String, List<EmbeddedCbor>>? = null,
-        val issuerAuth: RawCbor
+        val issuerAuth: RawCbor,
+        @JsonIgnore
+        val rawBytes: IssuerSignedRawBytes? = null
     ) {
-        fun toDomain(
-            rawNameSpaces: Map<String, List<ByteArray>>,
-            rawIssuerAuth: ByteArray? = null
-        ): SharingIssuerSigned = SharingIssuerSigned(
-            nameSpaces = rawNameSpaces.ifEmpty { null },
-            issuerAuth = rawIssuerAuth ?: issuerAuth.encoded
-        )
+        fun toDomain(): SharingIssuerSigned {
+            val raw = requireNotNull(rawBytes) {
+                "rawBytes must be set before calling toDomain()"
+            }
+            return SharingIssuerSigned(
+                nameSpaces = raw.nameSpaces.ifEmpty { null },
+                issuerAuth = raw.issuerAuthBytes ?: issuerAuth.encoded
+            )
+        }
     }
 
     @JsonDeserialize(using = IssuerSignedItemDeserializer::class)
@@ -199,7 +198,12 @@ class DeviceResponseDto {
      * DeviceNameSpacesBytes = #6.24(bstr .cbor DeviceNameSpaces)
      * ```
      */
-    data class DeviceSignedDTO(val nameSpaces: EmbeddedCbor, val deviceAuth: DeviceAuthDTO) {
+    data class DeviceSignedDTO(
+        val nameSpaces: EmbeddedCbor,
+        val deviceAuth: DeviceAuthDTO,
+        @JsonIgnore
+        val rawBytes: DeviceSignedRawBytes? = null
+    ) {
         init {
             val nameSpacesMap = CborMapper.default.readValue(
                 nameSpaces.encoded,
@@ -209,6 +213,16 @@ class DeviceResponseDto {
             require(nameSpacesMap.isEmpty()) {
                 "Received unexpected data in 'nameSpaces' property: $nameSpacesMap"
             }
+        }
+
+        fun toDomain(): SharingDeviceSigned {
+            val raw = requireNotNull(rawBytes) {
+                "rawBytes must be set before calling toDomain()"
+            }
+            return SharingDeviceSigned(
+                deviceNameSpacesBytes = raw.nameSpacesBytes ?: nameSpaces.encoded,
+                deviceSignature = raw.signatureBytes ?: deviceAuth.deviceSignature.encoded
+            )
         }
     }
 
