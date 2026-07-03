@@ -35,12 +35,21 @@ parser offsets — never decoding and re-encoding the cryptographically signific
 
 ### What it extracts
 
+The extractor returns a `DocumentRawBytes` per document, containing two nested structures:
+
+**`IssuerSignedRawBytes`**
+
 | Field | ISO reference | Purpose |
 |---|---|---|
-| `issuerSignedItemBytes` | §9.1.2.4 | Digest verification over IssuerSignedItem |
-| `issuerAuthBytes` | §9.1.2 | Issuer signature verification (COSE_Sign1) |
-| `deviceNameSpacesBytes` | §9.1.3 | DeviceAuthentication construction |
-| `deviceSignatureBytes` | §9.1.3 | Device signature verification (COSE_Sign1) |
+| `nameSpaces` | 9.1.2.4 | Per-namespace list of Tag 24-wrapped IssuerSignedItem bytes for digest verification |
+| `issuerAuthBytes` | 9.1.2 | Issuer signature verification (COSE_Sign1) |
+
+**`DeviceSignedRawBytes`**
+
+| Field | ISO reference | Purpose |
+|---|---|---|
+| `nameSpacesBytes` | 9.1.3 | Tag 24-wrapped DeviceNameSpaces for DeviceAuthentication construction |
+| `signatureBytes` | 9.1.3 | Device signature verification (COSE_Sign1) |
 
 ### How it works
 
@@ -52,21 +61,6 @@ parser offsets — never decoding and re-encoding the cryptographically signific
 4. During `toDomain()`, these preserved bytes are preferred over any re-encoded values from the
    Jackson tree.
 
-### Flow
-
-```
-DeviceResponse CBOR bytes
-        │
-        ├──► Jackson deserializer ──► DeviceResponseDTO (structural access)
-        │
-        └──► DeviceResponseCborExtractor ──► DocumentRawBytes (byte-level preservation)
-                                                      │
-                                                      ▼
-                                              toDomain(sourceBytes)
-                                                      │
-                                                      ▼
-                                              Domain model with original bytes
-```
 
 ## Serialization (DeviceResponseSerializer)
 
