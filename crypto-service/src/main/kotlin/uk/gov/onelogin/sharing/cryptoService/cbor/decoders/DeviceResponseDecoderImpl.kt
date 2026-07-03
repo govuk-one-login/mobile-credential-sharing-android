@@ -4,7 +4,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto
 
@@ -12,10 +11,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 class DeviceResponseDecoderImpl(private val logger: Logger) : DeviceResponseDecoder {
 
     override fun decode(bytes: ByteArray): DeviceResponse = try {
-        val dto = CborMapper.default.readValue(
-            bytes,
-            DeviceResponseDto.DeviceResponseDTO::class.java
-        ).copy(rawBytes = bytes)
+        val dto = DeviceResponseDto.DeviceResponseDTO.decode(bytes)
 
         logger.debug(logTag, "DeviceResponse decoded successfully")
 

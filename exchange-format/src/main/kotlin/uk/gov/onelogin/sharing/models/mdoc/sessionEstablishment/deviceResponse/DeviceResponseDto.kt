@@ -96,6 +96,16 @@ class DeviceResponseDto {
                 version = version
             )
         }
+
+        companion object {
+            /**
+             * Decodes a CBOR byte array into a [DeviceResponseDTO] with [rawBytes] populated.
+             */
+            fun decode(bytes: ByteArray): DeviceResponseDTO = CborMapper.default.readValue(
+                bytes,
+                DeviceResponseDTO::class.java
+            ).copy(rawBytes = bytes)
+        }
     }
 
     /**

@@ -243,8 +243,7 @@ class DeviceResponseDtoTest {
         )
 
         val encoded = mapper.writeValueAsBytes(dto)
-        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
-        val domain = decoded.copy(rawBytes = encoded).toDomain()
+        val domain = DeviceResponseDto.DeviceResponseDTO.decode(encoded).toDomain()
 
         assertEquals("1.0", domain.version)
         assertEquals(Status.OK, domain.status)
@@ -269,8 +268,7 @@ class DeviceResponseDtoTest {
         val dto = DeviceResponseDto.DeviceResponseDTO(status = 10u)
 
         val encoded = mapper.writeValueAsBytes(dto)
-        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
-        val domain = decoded.copy(rawBytes = encoded).toDomain()
+        val domain = DeviceResponseDto.DeviceResponseDTO.decode(encoded).toDomain()
 
         assertEquals(Status.GENERAL_ERROR, domain.status)
         assertNull(domain.documents)
@@ -489,8 +487,7 @@ class DeviceResponseDtoTest {
         )
 
         val encoded = mapper.writeValueAsBytes(original)
-        val decoded = mapper.readValue(encoded, DeviceResponseDto.DeviceResponseDTO::class.java)
-        val domain = decoded.copy(rawBytes = encoded).toDomain()
+        val domain = DeviceResponseDto.DeviceResponseDTO.decode(encoded).toDomain()
         val document = domain.documents!!.first()
 
         assertThat(
