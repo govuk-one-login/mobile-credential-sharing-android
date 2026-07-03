@@ -4,7 +4,8 @@ enum class Status(val code: UInt) {
     OK(0u),
     GENERAL_ERROR(10u),
     CBOR_DECODING_ERROR(11u),
-    CBOR_VALIDATION_ERROR(12u);
+    CBOR_VALIDATION_ERROR(12u),
+    SESSION_TERMINATION(20u);
 
     companion object {
         val applicableCodes = Status.entries.map(Status::code)
