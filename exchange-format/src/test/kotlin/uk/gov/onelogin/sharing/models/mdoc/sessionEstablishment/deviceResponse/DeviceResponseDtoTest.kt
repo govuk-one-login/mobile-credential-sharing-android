@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertContains
+import kotlin.test.assertNotEquals
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
@@ -510,6 +511,67 @@ class DeviceResponseDtoTest {
             document.deviceSigned.deviceSignature,
             equalTo(coseSign1)
         )
+    }
+
+    @Test
+    fun `toDomain throws when rawBytes is null`() {
+        val issuerAuthBytes = mapper.writeValueAsBytes(listOf<Any>())
+        val deviceSignatureBytes = mapper.writeValueAsBytes(listOf<Any>())
+
+        assertThrows(IllegalArgumentException::class.java) {
+            DeviceResponseDto.DeviceResponseDTO(status = 0u, rawBytes = null).toDomain()
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            DeviceResponseDto.IssuerSignedDTO(
+                nameSpaces = null,
+                issuerAuth = RawCbor(issuerAuthBytes),
+                rawBytes = null
+            ).toDomain()
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            DeviceResponseDto.DeviceSignedDTO(
+                nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                    deviceSignature = RawCbor(deviceSignatureBytes)
+                ),
+                rawBytes = null
+            ).toDomain()
+        }
+    }
+
+    @Test
+    fun `equals returns true for identical DeviceResponseDTOs`() {
+        val dto1 = DeviceResponseDto.DeviceResponseDTO(
+            version = "1.0",
+            documents = null,
+            status = 0u,
+            rawBytes = byteArrayOf(0x01, 0x02)
+        )
+        val dto2 = DeviceResponseDto.DeviceResponseDTO(
+            version = "1.0",
+            documents = null,
+            status = 0u,
+            rawBytes = byteArrayOf(0x01, 0x02)
+        )
+
+        assertEquals(dto1, dto2)
+        assertEquals(dto1.hashCode(), dto2.hashCode())
+    }
+
+    @Test
+    fun `equals returns false when rawBytes differ`() {
+        val dto1 = DeviceResponseDto.DeviceResponseDTO(
+            status = 0u,
+            rawBytes = byteArrayOf(0x01, 0x02)
+        )
+        val dto2 = DeviceResponseDto.DeviceResponseDTO(
+            status = 0u,
+            rawBytes = byteArrayOf(0x03, 0x04)
+        )
+
+        assertNotEquals(dto1, dto2)
     }
 
     private fun wrapTag24(content: ByteArray): ByteArray = ByteArrayOutputStream().also { out ->
