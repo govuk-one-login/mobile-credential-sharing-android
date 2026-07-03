@@ -405,7 +405,7 @@ class DeviceResponseDto {
         }
     }
 
-    private companion object {
+    internal companion object {
         const val KEY_VERSION = "version"
         const val KEY_STATUS = "status"
         const val KEY_DOCUMENTS = "documents"

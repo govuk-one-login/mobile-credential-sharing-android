@@ -3,6 +3,13 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto.Companion.KEY_DEVICE_AUTH
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto.Companion.KEY_DEVICE_SIGNATURE
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto.Companion.KEY_DEVICE_SIGNED
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto.Companion.KEY_DOCUMENTS
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto.Companion.KEY_ISSUER_AUTH
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto.Companion.KEY_ISSUER_SIGNED
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto.Companion.KEY_NAME_SPACES
 
 /**
  * Extracts raw CBOR bytes from a `DeviceResponse`
@@ -191,12 +198,4 @@ internal object DeviceResponseCborExtractor {
         }
         return result
     }
-
-    private const val KEY_DOCUMENTS = "documents"
-    private const val KEY_ISSUER_SIGNED = "issuerSigned"
-    private const val KEY_DEVICE_SIGNED = "deviceSigned"
-    private const val KEY_NAME_SPACES = "nameSpaces"
-    private const val KEY_ISSUER_AUTH = "issuerAuth"
-    private const val KEY_DEVICE_AUTH = "deviceAuth"
-    private const val KEY_DEVICE_SIGNATURE = "deviceSignature"
 }
