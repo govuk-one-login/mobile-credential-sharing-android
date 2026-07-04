@@ -76,8 +76,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.PresentingEngagement(""),
             HolderSessionState.ProcessingEstablishment,
             HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution,
-            HolderSessionStateStubs.successStub
+            HolderSessionState.AwaitingVerifierResolution
         ).map {
             HolderSessionState.ProcessingEstablishment to it
         }

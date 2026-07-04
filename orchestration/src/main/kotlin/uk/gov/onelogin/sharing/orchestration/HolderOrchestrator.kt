@@ -6,9 +6,11 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -221,7 +223,7 @@ class HolderOrchestrator(
                         encryptCounter = context.encryptCounter
                     )
 
-                    peripheralBluetoothTransport.sendMessage(
+                    val sent = peripheralBluetoothTransport.sendMessage(
                         serviceUuid = context.sessionUuid,
                         data = sessionDataBytes
                     )
@@ -230,7 +232,9 @@ class HolderOrchestrator(
                         it.copy(encryptCounter = it.encryptCounter + 1u)
                     }
 
-                    safeTransitionTo(HolderSessionState.Complete.Success)
+                    if (sent) {
+                        safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
+                    }
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
                 }
@@ -245,7 +249,7 @@ class HolderOrchestrator(
         val context = currentContext
         try {
             assert(state is HolderSessionState.AwaitingUserConsent) {
-                "confirmConsent called in an invalid state: $state"
+                "denyConsent called in an invalid state: $state"
             }
             check(state is HolderSessionState.AwaitingUserConsent)
             safeTransitionTo(HolderSessionState.ProcessingResponse)
@@ -262,12 +266,17 @@ class HolderOrchestrator(
             )
 
             appCoroutineScope.launch {
-                peripheralBluetoothTransport.sendMessage(
+                val sent = peripheralBluetoothTransport.sendMessage(
                     serviceUuid = context.sessionUuid,
                     data = sessionDataBytes
                 )
 
-                safeTransitionTo(HolderSessionState.Complete.Cancelled)
+                if (sent) {
+                    delay(TERMINATION_DELAY.milliseconds)
+                    peripheralBluetoothTransport.notifySessionEnd(context.sessionUuid)
+                }
+
+                safeTransitionTo(HolderSessionState.Complete.Success)
             }
         } catch (e: IllegalStateException) {
             sendTerminationAndFail(e)
@@ -451,28 +460,31 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleNoMatchTermination(exception: Exception) {
+    private suspend fun handleNoMatchTermination(exception: Exception) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         val context = currentContext
         val skDevice = context.skDevice
 
-        skDevice?.let {
-            holderCryptoService.buildErrorSessionData(
+        if (skDevice != null) {
+            val sessionDataBytes = holderCryptoService.buildErrorSessionData(
                 deviceResponseStatus = Status.OK,
                 sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
-                skDevice = it,
+                skDevice = skDevice,
                 encryptCounter = context.encryptCounter
             )
+
+            val sent = peripheralBluetoothTransport.sendMessage(
+                serviceUuid = context.sessionUuid,
+                data = sessionDataBytes
+            )
+
+            if (sent) {
+                delay(TERMINATION_DELAY.milliseconds)
+                peripheralBluetoothTransport.notifySessionEnd(context.sessionUuid)
+            }
         }
 
-        safeTransitionTo(
-            HolderSessionState.Complete.Failed(
-                SessionError(
-                    message = exception.message ?: UNKNOWN_ERROR,
-                    exception = exception
-                )
-            )
-        )
+        safeTransitionTo(HolderSessionState.Complete.Success)
     }
 
     private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
@@ -558,5 +570,6 @@ class HolderOrchestrator(
 
     private companion object {
         const val UNKNOWN_ERROR = "Unknown error"
+        const val TERMINATION_DELAY = 500L
     }
 }

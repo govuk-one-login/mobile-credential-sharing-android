@@ -53,8 +53,9 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
     PresentingEngagement::class to setOf(
         ProcessingEstablishment::class
     ) + fullErrorHandling,
-    ProcessingEstablishment::class to singleton(
-        AwaitingUserConsent::class
+    ProcessingEstablishment::class to setOf(
+        AwaitingUserConsent::class,
+        Success::class
     ) + fullErrorHandling,
     AwaitingUserConsent::class to singleton(
         ProcessingResponse::class

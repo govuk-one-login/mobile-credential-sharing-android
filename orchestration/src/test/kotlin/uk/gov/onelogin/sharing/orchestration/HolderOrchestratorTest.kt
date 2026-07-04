@@ -52,6 +52,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHo
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingUserConsent
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingVerifierResolution
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
@@ -649,7 +650,7 @@ class HolderOrchestratorTest {
             2u,
             sessionFactory.getCurrentSession().sessionContext.encryptCounter
         )
-        assertThat(orchestrator.holderSessionState.value, isSuccessful())
+        assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
     }
 
     @Test
@@ -740,7 +741,7 @@ class HolderOrchestratorTest {
         )
         advanceUntilIdle()
 
-        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
         assert(case.errorMessage in logger)
         assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
         assertEquals(
@@ -772,7 +773,7 @@ class HolderOrchestratorTest {
         )
         advanceUntilIdle()
 
-        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
         assert("no matching attributes" in logger)
         assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
         assertEquals(
@@ -783,7 +784,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `deny consent sends termination and transitions to Cancelled`() = runTest {
+    fun `deny consent sends termination and transitions to Success`() = runTest {
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(
@@ -805,7 +806,7 @@ class HolderOrchestratorTest {
         orchestrator.denyConsent()
         advanceUntilIdle()
 
-        assertThat(orchestrator.holderSessionState.value, isCancelled())
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
         assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
         assertEquals(
             SessionDataStatus.SESSION_TERMINATION,

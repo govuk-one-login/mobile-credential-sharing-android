@@ -70,7 +70,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels whilst connecting with Verifier device" to userCancellation,
             "Connection with verifier device cannot be established" to userJourneyFailure,
             "Receives Verifier device's data transfer request" to
-                HolderSessionState.AwaitingUserConsent(deviceRequestStub)
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub),
+            "No matching attributes terminates successfully" to successStub
         ).map { (testName, transition) ->
             Triple(
                 testName,
