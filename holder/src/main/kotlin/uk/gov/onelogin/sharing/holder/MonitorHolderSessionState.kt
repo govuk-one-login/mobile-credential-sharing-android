@@ -120,6 +120,7 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
+        HolderSessionState.AwaitingVerifierResolution,
         HolderSessionState.Complete.Cancelled,
         is HolderSessionState.Complete.Success
         -> {

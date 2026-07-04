@@ -4,6 +4,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterValuesProvide
 import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingVerifierResolution
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
@@ -22,7 +23,8 @@ class TransitionableHolderSessionStates : TestParameterValuesProvider() {
             PresentingEngagement::class,
             ProcessingEstablishment::class,
             AwaitingUserConsent::class,
-            ProcessingResponse::class
+            ProcessingResponse::class,
+            AwaitingVerifierResolution::class
         )
     }
 }

@@ -69,6 +69,12 @@ sealed class HolderSessionState : Completable {
     data object ProcessingResponse : HolderSessionState()
 
     /**
+     * State for when the Holder has sent the DeviceResponse to the Verifier and is
+     * awaiting the Verifier to close the session.
+     */
+    data object AwaitingVerifierResolution : HolderSessionState()
+
+    /**
      * State for when a User has finished a digital credential verification journey.
      */
     sealed class Complete(val reason: String) : HolderSessionState() {
