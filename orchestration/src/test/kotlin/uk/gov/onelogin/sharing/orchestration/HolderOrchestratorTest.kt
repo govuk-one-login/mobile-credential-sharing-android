@@ -332,7 +332,7 @@ class HolderOrchestratorTest {
     @Test
     fun `ignores BLE state changes when session is already complete`() = runTest {
         initialStates = mutableListOf(
-            HolderSessionState.Complete.Success
+            HolderSessionState.Complete.Success()
         )
 
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()

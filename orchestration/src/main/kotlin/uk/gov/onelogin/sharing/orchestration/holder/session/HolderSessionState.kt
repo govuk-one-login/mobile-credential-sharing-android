@@ -82,7 +82,22 @@ sealed class HolderSessionState : Completable {
          * The User has completed a digital credential verification journey without un-resolvable
          * errors occurring.
          */
-        data object Success : Complete("Successful journey")
+        data class Success(val successReason: SuccessReason = SuccessReason.Approved) :
+            Complete("Successful journey")
+
+        /**
+         * Describes why the journey completed successfully.
+         */
+        enum class SuccessReason {
+            /** The user approved and the DeviceResponse was sent. */
+            Approved,
+
+            /** The user denied the request. */
+            Denied,
+
+            /** No matching document type, namespace, or attributes were found. */
+            UnfulfillableRequest
+        }
 
         /**
          * The User cannot complete a digital credential verification journey due to encountering

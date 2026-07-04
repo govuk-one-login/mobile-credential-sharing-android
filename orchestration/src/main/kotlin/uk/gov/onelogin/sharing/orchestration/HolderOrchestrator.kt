@@ -276,7 +276,11 @@ class HolderOrchestrator(
                     peripheralBluetoothTransport.notifySessionEnd(context.sessionUuid)
                 }
 
-                safeTransitionTo(HolderSessionState.Complete.Success)
+                safeTransitionTo(
+                    HolderSessionState.Complete.Success(
+                        HolderSessionState.Complete.SuccessReason.Denied
+                    )
+                )
             }
         } catch (e: IllegalStateException) {
             sendTerminationAndFail(e)
@@ -484,7 +488,11 @@ class HolderOrchestrator(
             }
         }
 
-        safeTransitionTo(HolderSessionState.Complete.Success)
+        safeTransitionTo(
+            HolderSessionState.Complete.Success(
+                HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
+            )
+        )
     }
 
     private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
