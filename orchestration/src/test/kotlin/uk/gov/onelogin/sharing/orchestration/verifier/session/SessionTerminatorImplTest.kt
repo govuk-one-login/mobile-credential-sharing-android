@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SessionTerminatorTest {
+class SessionTerminatorImplTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -27,13 +27,13 @@ class SessionTerminatorTest {
     private val fakeCryptoService = FakeVerifierCryptoService()
     private val logger = SystemLogger()
 
-    private lateinit var terminator: SessionTerminator
+    private lateinit var terminator: SessionTerminatorImpl
 
     private val serviceUuid: UUID = UUID.randomUUID()
 
     @Before
     fun setUp() {
-        terminator = SessionTerminator(fakeTransport, fakeCryptoService, logger)
+        terminator = SessionTerminatorImpl(fakeTransport, fakeCryptoService, logger)
     }
 
     @Test
@@ -73,7 +73,7 @@ class SessionTerminatorTest {
                 assertEquals(TerminationState.SENDING_TERMINATION, awaitItem())
                 assertEquals(TerminationState.AWAITING_DELAY, awaitItem())
 
-                advanceTimeBy((SessionTerminator.TERMINATION_DELAY_MS + 1).milliseconds)
+                advanceTimeBy((SessionTerminatorImpl.TERMINATION_DELAY_MS + 1).milliseconds)
 
                 assertEquals(TerminationState.SENDING_GATT_END, awaitItem())
                 assertEquals(TerminationState.STOPPING, awaitItem())
@@ -94,7 +94,7 @@ class SessionTerminatorTest {
             )
         }
 
-        advanceTimeBy((SessionTerminator.TERMINATION_DELAY_MS - 1).milliseconds)
+        advanceTimeBy((SessionTerminatorImpl.TERMINATION_DELAY_MS - 1).milliseconds)
         assertEquals(0, fakeTransport.sendEndCalls)
         advanceTimeBy(2.milliseconds)
         job.join()

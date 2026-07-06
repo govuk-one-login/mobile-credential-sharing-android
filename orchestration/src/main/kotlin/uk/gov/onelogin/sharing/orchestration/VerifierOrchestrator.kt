@@ -71,7 +71,6 @@ class VerifierOrchestrator(
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
-    private val isBleConnected = MutableStateFlow(false)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val verifierSessionState: StateFlow<VerifierSessionState> = sessionFlow.flatMapLatest {
@@ -221,8 +220,7 @@ class VerifierOrchestrator(
             state = VerifierSessionState.Complete.Cancelled,
             exceptionWrapper = ::OrchestratorCannotCancelException
         )
-
-        stopCentralTransport()
+        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
     }
 
     override fun reset() {
@@ -236,10 +234,6 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun stopCentralTransport() {
-        appCoroutineScope.launch { centralBluetoothTransport.stop() }
-    }
-
     private suspend fun handleCentralBluetoothState(state: CentralBluetoothState) {
         if (sessionFlow.value.isComplete()) return
 
@@ -249,7 +243,6 @@ class VerifierOrchestrator(
             is CentralBluetoothState.ConnectionStateStarted -> handleConnectionStateStarted()
 
             is CentralBluetoothState.Disconnected -> {
-                isBleConnected.value = false
                 if (state.isSessionEnd) return
 
                 failWith(
@@ -266,7 +259,6 @@ class VerifierOrchestrator(
             }
 
             is CentralBluetoothState.Error -> {
-                isBleConnected.value = false
                 failWith(
                     "Bluetooth error: ${state.reason}",
                     SessionErrorReason.InvalidBluetoothState(
@@ -276,14 +268,14 @@ class VerifierOrchestrator(
             }
 
             is CentralBluetoothState.CentralBluetoothEnded -> {
-                isBleConnected.value = false
-                stopCentralTransport()
+                appCoroutineScope.launch {
+                    terminateSession(centralBluetoothTransport.isBleOpen, false)
+                }
             }
 
             is CentralBluetoothState.Message -> handleCentralBluetoothStateMessage(state)
 
-            is CentralBluetoothState.Connected -> isBleConnected.value = true
-
+            is CentralBluetoothState.Connected,
             CentralBluetoothState.Connecting,
             is CentralBluetoothState.Idle,
             is CentralBluetoothState.Scanning
@@ -340,7 +332,7 @@ class VerifierOrchestrator(
         }.onFailure { _ ->
             appCoroutineScope.launch {
                 terminateSession(
-                    bleOpen = isBleConnected.value,
+                    bleOpen = centralBluetoothTransport.isBleOpen,
                     holderRequestedTermination
                 )
             }
@@ -367,7 +359,7 @@ class VerifierOrchestrator(
         ) {
             appCoroutineScope.launch {
                 terminateSession(
-                    bleOpen = isBleConnected.value,
+                    bleOpen = centralBluetoothTransport.isBleOpen,
                     receivedTermination = receivedTerminationFromHolder
                 )
             }
@@ -387,7 +379,7 @@ class VerifierOrchestrator(
         if (documents.isNullOrEmpty()) {
             appCoroutineScope.launch {
                 terminateSession(
-                    bleOpen = isBleConnected.value,
+                    bleOpen = centralBluetoothTransport.isBleOpen,
                     receivedTermination = receivedTerminationFromHolder
                 )
             }
@@ -419,7 +411,7 @@ class VerifierOrchestrator(
             }
             appCoroutineScope.launch {
                 terminateSession(
-                    bleOpen = isBleConnected.value,
+                    bleOpen = centralBluetoothTransport.isBleOpen,
                     receivedTermination = receivedTerminationStatus
                 )
             }
@@ -429,7 +421,7 @@ class VerifierOrchestrator(
         } catch (exception: VerificationResult.Failure) {
             appCoroutineScope.launch {
                 terminateSession(
-                    bleOpen = isBleConnected.value,
+                    bleOpen = centralBluetoothTransport.isBleOpen,
                     receivedTermination = receivedTerminationStatus
                 )
             }
@@ -520,7 +512,7 @@ class VerifierOrchestrator(
 
     private fun failWith(message: String, reason: SessionErrorReason) {
         logger.error(logTag, message)
-        stopCentralTransport()
+        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(
                 SessionError(message = message, reason = reason)
@@ -530,7 +522,7 @@ class VerifierOrchestrator(
 
     private fun failWith(message: String, reason: SessionErrorReason, throwable: Throwable) {
         logger.error(logTag, message, throwable)
-        stopCentralTransport()
+        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(
                 SessionError(message = message, reason = reason)

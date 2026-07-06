@@ -93,6 +93,11 @@ class AndroidCentralBluetoothTransport(
         scanJob = prepareScanJob(serviceUuid)
     }
 
+    override val isBleOpen: Boolean
+        get() = _state.value is CentralBluetoothState.Connected ||
+            _state.value is CentralBluetoothState.ConnectionStateStarted ||
+            _state.value is CentralBluetoothState.Message
+
     override suspend fun sendEnd(): Unit = withContext(
         ioDispatcher + "$logTag.SendEnd".asCoroutineName()
     ) {
@@ -103,7 +108,6 @@ class AndroidCentralBluetoothTransport(
         ioDispatcher + "$logTag.Stop".asCoroutineName()
     ) {
         cancelCurrentJobs()
-        notifySessionEnd()
         gattClientManager.disconnect()
         bluetoothStateMonitor.stop()
     }

@@ -12,6 +12,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 interface CentralBluetoothTransport :
     MessageSender,
     BluetoothTransport<CentralBluetoothState> {
+
+    val isBleOpen: Boolean
+
     /**
      * Sends the GATT End (0x02) command to the holder without disconnecting.
      * Used as part of the ISO 18013-5 §8.3.3.1.3 session termination protocol.
