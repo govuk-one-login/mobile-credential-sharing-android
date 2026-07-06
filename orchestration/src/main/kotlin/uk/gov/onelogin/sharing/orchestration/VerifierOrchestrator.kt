@@ -354,7 +354,7 @@ class VerifierOrchestrator(
     ) {
         val status = deviceResponse.status
 
-        if (status != DeviceResponseStatus.SESSION_TERMINATION &&
+        if (!receivedTerminationFromHolder &&
             status != DeviceResponseStatus.OK
         ) {
             appCoroutineScope.launch {
