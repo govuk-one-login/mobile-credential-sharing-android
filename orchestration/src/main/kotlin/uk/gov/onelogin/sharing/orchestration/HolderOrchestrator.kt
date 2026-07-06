@@ -382,7 +382,11 @@ class HolderOrchestrator(
             PeripheralBluetoothState.Idle -> Unit
 
             is PeripheralBluetoothState.Ended -> {
-                safeTransitionTo(HolderSessionState.Complete.Cancelled)
+                if (sessionFlow.value.currentState.value !is
+                        HolderSessionState.ProcessingResponse
+                ) {
+                    safeTransitionTo(HolderSessionState.Complete.Cancelled)
+                }
 
                 if (state.status == SessionEndStates.SUCCESS) {
                     logger.debug(logTag, "Mdoc - Ending session")
