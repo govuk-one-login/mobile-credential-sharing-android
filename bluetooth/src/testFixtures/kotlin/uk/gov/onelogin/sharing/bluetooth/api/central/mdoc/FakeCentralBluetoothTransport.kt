@@ -9,9 +9,10 @@ class FakeCentralBluetoothTransport(
 ) : CentralBluetoothTransport {
     private val _state = MutableStateFlow(initialState)
     override val state: StateFlow<CentralBluetoothState> = _state
-
+    override var isBleOpen: Boolean = false
     var scanAndConnectCalls = 0
     var stopCalls = 0
+    var sendEndCalls = 0
     var lastServiceUuid: UUID? = null
     var sendMessageToReturn: Boolean = true
     var lastSentData: ByteArray? = null
@@ -19,6 +20,10 @@ class FakeCentralBluetoothTransport(
     override suspend fun start(serviceUuid: UUID) {
         scanAndConnectCalls++
         lastServiceUuid = serviceUuid
+    }
+
+    override suspend fun sendEnd() {
+        sendEndCalls++
     }
 
     override suspend fun stop() {
@@ -31,6 +36,16 @@ class FakeCentralBluetoothTransport(
     }
 
     fun emitState(state: CentralBluetoothState) {
+        when (state) {
+            is CentralBluetoothState.Connected,
+            is CentralBluetoothState.ConnectionStateStarted -> isBleOpen = true
+
+            is CentralBluetoothState.Disconnected,
+            is CentralBluetoothState.Error,
+            is CentralBluetoothState.CentralBluetoothEnded -> isBleOpen = false
+
+            else -> {}
+        }
         _state.value = state
     }
 }

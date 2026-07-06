@@ -52,6 +52,12 @@ interface VerifierCryptoService {
     fun deserializeSessionData(input: ByteArray): SessionData
 
     /**
+     * Builds a SessionData message containing only a termination status code (20).
+     * Used to signal session end to the holder per ISO 18013-5 §8.3.3.1.3.
+     */
+    fun buildTerminationSessionData(): ByteArray
+
+    /**
      * Decrypts [deviceResponseBytes] using AES-256-GCM with the [skDevice] session key
      * and decodes the plaintext into a [DeviceResponse] domain model.
      *

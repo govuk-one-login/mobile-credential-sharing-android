@@ -32,6 +32,8 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto.Companion.toDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
@@ -157,6 +159,11 @@ class VerifierCryptoServiceImpl(
     override fun deserializeSessionData(input: ByteArray): SessionData =
         CborMapper.default.readValue(input, SessionDataDto::class.java)
             .toDomain()
+
+    override fun buildTerminationSessionData(): ByteArray =
+        SessionData(status = SessionDataStatus.SESSION_TERMINATION)
+            .toDto()
+            .toCbor()
 
     override fun decryptDeviceResponse(
         deviceResponseBytes: ByteArray,

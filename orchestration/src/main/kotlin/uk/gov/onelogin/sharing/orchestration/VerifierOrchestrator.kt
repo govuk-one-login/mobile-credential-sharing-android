@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus.SESSION_TERMINATION
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status as DeviceResponseStatus
@@ -43,6 +44,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
+import uk.gov.onelogin.sharing.orchestration.verifier.session.SessionTerminator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
@@ -64,7 +66,8 @@ class VerifierOrchestrator(
     private val barcodeParser: QrParser,
     private val centralBluetoothTransport: CentralBluetoothTransport,
     private val verifierCryptoService: VerifierCryptoService,
-    private val documentVerifier: DocumentVerifier
+    private val documentVerifier: DocumentVerifier,
+    private val sessionTerminator: SessionTerminator
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -217,8 +220,7 @@ class VerifierOrchestrator(
             state = VerifierSessionState.Complete.Cancelled,
             exceptionWrapper = ::OrchestratorCannotCancelException
         )
-
-        stopCentralTransport()
+        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
     }
 
     override fun reset() {
@@ -230,10 +232,6 @@ class VerifierOrchestrator(
                 )
             }
         }
-    }
-
-    private fun stopCentralTransport() {
-        appCoroutineScope.launch { centralBluetoothTransport.stop() }
     }
 
     private suspend fun handleCentralBluetoothState(state: CentralBluetoothState) {
@@ -270,7 +268,9 @@ class VerifierOrchestrator(
             }
 
             is CentralBluetoothState.CentralBluetoothEnded -> {
-                stopCentralTransport()
+                appCoroutineScope.launch {
+                    terminateSession(centralBluetoothTransport.isBleOpen, false)
+                }
             }
 
             is CentralBluetoothState.Message -> handleCentralBluetoothStateMessage(state)
@@ -286,9 +286,6 @@ class VerifierOrchestrator(
     private fun handleCentralBluetoothStateMessage(state: CentralBluetoothState.Message) {
         val sessionData = runCatching {
             verifierCryptoService.deserializeSessionData(state.value).apply {
-                check(hasOkStatus()) {
-                    "Received SessionData error status: ${status?.code}"
-                }
                 check(hasData()) {
                     "Received empty SessionData payload"
                 }
@@ -300,6 +297,10 @@ class VerifierOrchestrator(
                 throwable
             )
         }.getOrNull() ?: return
+
+        val holderRequestedTermination = sessionData.status?.let {
+            it == SESSION_TERMINATION
+        } ?: false
 
         logger.debug(logTag, "Deserialized SessionData from bluetooth central Message")
 
@@ -327,9 +328,15 @@ class VerifierOrchestrator(
                 )
             }
 
-            evaluateDeviceResponse(deviceResponse)
+            evaluateDeviceResponse(deviceResponse, holderRequestedTermination)
         }.onFailure { _ ->
-            stopCentralTransport()
+            appCoroutineScope.launch {
+                terminateSession(
+                    bleOpen = centralBluetoothTransport.isBleOpen,
+                    holderRequestedTermination
+                )
+            }
+            logger.error(logTag, "Error decrypting DeviceResponse")
             safeTransitionTo(
                 VerifierSessionState.Complete.Failed(
                     SessionError(
@@ -341,30 +348,60 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun evaluateDeviceResponse(deviceResponse: DeviceResponse) {
+    private fun evaluateDeviceResponse(
+        deviceResponse: DeviceResponse,
+        receivedTerminationFromHolder: Boolean
+    ) {
         val status = deviceResponse.status
 
-        if (status != DeviceResponseStatus.OK) {
-            failWith(
-                "DeviceRequest processing error: status ${status.code}",
-                SessionErrorReason.DeviceRequestProcessingError(status.code)
+        if (!receivedTerminationFromHolder &&
+            status != DeviceResponseStatus.OK
+        ) {
+            appCoroutineScope.launch {
+                terminateSession(
+                    bleOpen = centralBluetoothTransport.isBleOpen,
+                    receivedTermination = receivedTerminationFromHolder
+                )
+            }
+            logger.error(logTag, "DeviceRequest processing error: status ${status.code}")
+            safeTransitionTo(
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "DeviceRequest processing error: status ${status.code}",
+                        reason = SessionErrorReason.DeviceRequestProcessingError(status.code)
+                    )
+                )
             )
             return
         }
 
         val documents = deviceResponse.documents
         if (documents.isNullOrEmpty()) {
-            failWith(
-                "Document not returned: status ${status.code}",
-                SessionErrorReason.DocumentNotReturned
+            appCoroutineScope.launch {
+                terminateSession(
+                    bleOpen = centralBluetoothTransport.isBleOpen,
+                    receivedTermination = receivedTerminationFromHolder
+                )
+            }
+            logger.error(logTag, "Document not returned: status ${status.code}")
+            safeTransitionTo(
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "Document not returned: status ${status.code}",
+                        reason = SessionErrorReason.DocumentNotReturned
+                    )
+                )
             )
             return
         }
 
-        verifyDocuments(deviceResponse)
+        verifyDocuments(deviceResponse, receivedTerminationFromHolder)
     }
 
-    private fun verifyDocuments(deviceResponse: DeviceResponse) {
+    private fun verifyDocuments(
+        deviceResponse: DeviceResponse,
+        receivedTerminationStatus: Boolean
+    ) {
         try {
             deviceResponse.documents!!.forEach { document ->
                 documentVerifier.verifyDocument(
@@ -372,18 +409,45 @@ class VerifierOrchestrator(
                     sessionFlow.value.cryptoContext?.sessionTranscriptBytes
                 )
             }
+            appCoroutineScope.launch {
+                terminateSession(
+                    bleOpen = centralBluetoothTransport.isBleOpen,
+                    receivedTermination = receivedTerminationStatus
+                )
+            }
             safeTransitionTo(
                 VerifierSessionState.Complete.Success(deviceResponse)
             )
         } catch (exception: VerificationResult.Failure) {
-            failWith(
+            appCoroutineScope.launch {
+                terminateSession(
+                    bleOpen = centralBluetoothTransport.isBleOpen,
+                    receivedTermination = receivedTerminationStatus
+                )
+            }
+            logger.error(
+                logTag,
                 "Failed to verify provided documents (${exception.error})",
-                SessionErrorReason.UnverifiableDocument(exception.error),
                 exception
             )
-        } finally {
-            stopCentralTransport()
+            safeTransitionTo(
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "Failed to verify provided documents (${exception.error})",
+                        reason = SessionErrorReason.UnverifiableDocument(exception.error)
+                    )
+                )
+            )
         }
+    }
+
+    private suspend fun terminateSession(bleOpen: Boolean, receivedTermination: Boolean) {
+        val context = sessionFlow.value.cryptoContext
+        sessionTerminator.terminate(
+            serviceUuid = context?.serviceUuid,
+            bleOpen = bleOpen,
+            holderRequestedTermination = receivedTermination
+        )
     }
 
     private suspend fun handleConnectionStateStarted() {
@@ -448,7 +512,7 @@ class VerifierOrchestrator(
 
     private fun failWith(message: String, reason: SessionErrorReason) {
         logger.error(logTag, message)
-        stopCentralTransport()
+        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(
                 SessionError(message = message, reason = reason)
@@ -458,7 +522,7 @@ class VerifierOrchestrator(
 
     private fun failWith(message: String, reason: SessionErrorReason, throwable: Throwable) {
         logger.error(logTag, message, throwable)
-        stopCentralTransport()
+        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(
                 SessionError(message = message, reason = reason)
