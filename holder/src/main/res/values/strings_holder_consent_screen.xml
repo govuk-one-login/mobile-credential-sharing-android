@@ -5,6 +5,5 @@
     <string name="holder_consent_deny">Deny</string>
     <string name="holder_consent_intent_to_retain">Intent to retain: %1$s</string>
     <string name="holder_consent_deny_dialog_title">Are you sure you want to deny this request?</string>
-    <string name="holder_consent_deny_dialog_confirm">Deny</string>
     <string name="holder_consent_deny_dialog_dismiss">Cancel</string>
 </resources>

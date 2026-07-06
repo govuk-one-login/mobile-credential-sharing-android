@@ -146,7 +146,7 @@ private fun DenyConfirmationDialog(onConfirmDeny: () -> Unit, onDismiss: () -> U
         },
         confirmButton = {
             TextButton(onClick = onConfirmDeny) {
-                Text(text = stringResource(R.string.holder_consent_deny_dialog_confirm))
+                Text(text = stringResource(R.string.holder_consent_deny))
             }
         },
         dismissButton = {
