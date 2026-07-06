@@ -132,6 +132,55 @@ class HolderConsentScreenTest {
     }
 
     @Test
+    fun `Deny button shows confirmation dialog`() = runTest(dispatcherRule.testDispatcher) {
+        holderState.update {
+            HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+        }
+
+        composeTestRule.setContent { Render() }
+
+        composeTestRule.clickDenyButton()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.assertDenyDialogIsDisplayed()
+    }
+
+    @Test
+    fun `Deny dialog confirm button calls denyConsent`() = runTest(dispatcherRule.testDispatcher) {
+        holderState.update {
+            HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+        }
+
+        composeTestRule.setContent { Render() }
+
+        composeTestRule.clickDenyButton()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.clickDenyDialogConfirm()
+        composeTestRule.waitForIdle()
+
+        assertEquals(1, orchestrator.cancelCount)
+    }
+
+    @Test
+    fun `Deny dialog dismiss button hides dialog`() = runTest(dispatcherRule.testDispatcher) {
+        holderState.update {
+            HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+        }
+
+        composeTestRule.setContent { Render() }
+
+        composeTestRule.clickDenyButton()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.clickDenyDialogDismiss()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.assertDenyDialogIsNotDisplayed()
+        composeTestRule.assertTitleIsDisplayed()
+    }
+
+    @Test
     fun `Back button is disabled and screen remains visible`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {

@@ -13,6 +13,7 @@ import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
@@ -118,6 +119,18 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     UnrecoverableHolderErrorRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<UnrecoverableHolderErrorRoute>()
+                )
+            },
+            Triple(
+                "'Complete.Success(UnfulfillableRequest)' -> HolderSuccessRoute",
+                HolderSessionState.Complete.Success(
+                    HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
+                )
+            ) {
+                instanceOf<HolderSuccessRoute>(
+                    HolderSuccessRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<HolderSuccessRoute>()
                 )
             }
         )
