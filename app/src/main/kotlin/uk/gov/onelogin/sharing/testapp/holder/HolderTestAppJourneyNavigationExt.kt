@@ -103,10 +103,7 @@ object HolderTestAppJourneyNavigationExt {
                     LaunchedEffect(presenter.orchestrator) {
                         presenter.orchestrator.holderSessionState.collect { state ->
                             if (state is HolderSessionState.Complete.Success &&
-                                (
-                                    state.successReason == SuccessReason.Denied ||
-                                        state.successReason == SuccessReason.UnfulfillableRequest
-                                    )
+                                state.successReason == SuccessReason.Denied
                             ) {
                                 presenter.orchestrator.reset()
                                 navController.popBackStack()

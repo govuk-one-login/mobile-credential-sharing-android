@@ -486,17 +486,21 @@ class HolderOrchestrator(
                 data = sessionDataBytes
             )
 
+            safeTransitionTo(
+                HolderSessionState.Complete.Success(
+                    HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
+                )
+            )
+
             if (sent) {
                 delay(TERMINATION_DELAY.milliseconds)
                 peripheralBluetoothTransport.notifySessionEnd(context.sessionUuid)
             }
-        }
-
-        safeTransitionTo(
-            HolderSessionState.Complete.Success(
-                HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
+        } else {
+            sendTerminationAndFail(
+                IllegalStateException("Missing skDevice during no-match termination")
             )
-        )
+        }
     }
 
     private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
