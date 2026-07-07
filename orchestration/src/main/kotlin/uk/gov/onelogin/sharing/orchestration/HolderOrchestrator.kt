@@ -234,6 +234,11 @@ class HolderOrchestrator(
 
                     if (sent) {
                         safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
+                    } else {
+                        failWith(
+                            message = "Failed to send DeviceResponse",
+                            reason = SessionErrorReason.CannotSendMessage
+                        )
                     }
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
