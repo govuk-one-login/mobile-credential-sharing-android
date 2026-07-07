@@ -115,7 +115,7 @@ val androidVersionName: String by extra {
     }.standardOutput.asText.map(String::trim)
         .getOrElse("0.0.1")
 }
-val javaVersion: JavaVersion by extra(JavaVersion.VERSION_21)
+val javaVersion: JavaVersion by extra(JavaVersion.VERSION_24)
 
 /**
  * Prefix used within the namespaces of gradle submodules.

@@ -53,8 +53,8 @@ interface LanguageVersionExtension {
                 "languageVersions",
                 LanguageVersionExtension::class.java
             ).apply {
-                this.javaVersion.convention(JavaVersion.VERSION_21)
-                this.kotlinVersion.convention(KotlinVersion.KOTLIN_2_2)
+                this.javaVersion.convention(JavaVersion.VERSION_24)
+                this.kotlinVersion.convention(KotlinVersion.KOTLIN_2_3)
             }
     }
 }
