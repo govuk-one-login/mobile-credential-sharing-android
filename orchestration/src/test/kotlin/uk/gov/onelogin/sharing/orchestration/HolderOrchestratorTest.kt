@@ -44,8 +44,10 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.NoMatchTerminatio
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
@@ -126,7 +128,8 @@ class HolderOrchestratorTest {
             logger = logger
         ),
         credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler,
-        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase()
+        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
+        holderSessionTerminator: HolderSessionTerminator = FakeHolderSessionTerminator()
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -136,7 +139,8 @@ class HolderOrchestratorTest {
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
         holderCryptoService = holderCryptoService,
         credentialRequestHandler = credentialRequestHandler,
-        confirmConsentUseCase = confirmConsentUseCase
+        confirmConsentUseCase = confirmConsentUseCase,
+        holderSessionTerminator = holderSessionTerminator
     )
 
     @Test

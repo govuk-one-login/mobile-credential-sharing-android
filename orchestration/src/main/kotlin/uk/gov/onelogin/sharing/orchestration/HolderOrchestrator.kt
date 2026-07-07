@@ -6,11 +6,9 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +49,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCas
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
@@ -71,7 +70,8 @@ class HolderOrchestrator(
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
     private val confirmConsentUseCase: ConfirmConsentUseCase,
-    private val credentialRequestHandler: CredentialRequestHandler
+    private val credentialRequestHandler: CredentialRequestHandler,
+    private val holderSessionTerminator: HolderSessionTerminator
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -277,8 +277,7 @@ class HolderOrchestrator(
                 )
 
                 if (sent) {
-                    delay(TERMINATION_DELAY.milliseconds)
-                    peripheralBluetoothTransport.notifySessionEnd(context.sessionUuid)
+                    holderSessionTerminator.terminate(context.sessionUuid)
                 }
 
                 safeTransitionTo(
@@ -505,8 +504,7 @@ class HolderOrchestrator(
             )
 
             if (sent) {
-                delay(TERMINATION_DELAY.milliseconds)
-                peripheralBluetoothTransport.notifySessionEnd(context.sessionUuid)
+                holderSessionTerminator.terminate(context.sessionUuid)
             }
         } else {
             sendTerminationAndFail(
@@ -598,6 +596,5 @@ class HolderOrchestrator(
 
     private companion object {
         const val UNKNOWN_ERROR = "Unknown error"
-        const val TERMINATION_DELAY = 500L
     }
 }
