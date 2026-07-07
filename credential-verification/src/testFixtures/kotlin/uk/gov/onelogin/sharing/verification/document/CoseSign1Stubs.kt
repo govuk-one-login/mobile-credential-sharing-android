@@ -20,12 +20,7 @@ object CoseSign1Stubs {
                 gen.writeEndObject()
             }
         }.toByteArray()
-        ByteArrayOutputStream().also { out ->
-            cborFactory.createGenerator(out).use { gen ->
-                gen.writeTag(24)
-                gen.writeBinary(emptyMap)
-            }
-        }.toByteArray()
+        wrapInTag24(emptyMap)
     }
 
     val sessionTranscriptBytes: ByteArray = ByteArrayOutputStream().also { out ->
@@ -35,6 +30,13 @@ object CoseSign1Stubs {
             gen.writeNull()
             gen.writeNull()
             gen.writeEndArray()
+        }
+    }.toByteArray()
+
+    fun wrapInTag24(content: ByteArray): ByteArray = ByteArrayOutputStream().also { out ->
+        cborFactory.createGenerator(out).use { gen ->
+            gen.writeTag(24)
+            gen.writeBinary(content)
         }
     }.toByteArray()
 

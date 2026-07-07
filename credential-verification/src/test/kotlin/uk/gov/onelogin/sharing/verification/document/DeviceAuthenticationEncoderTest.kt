@@ -9,6 +9,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.emptyDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.sessionTranscriptBytes
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject.Companion.DOC_TYPE
 
 class DeviceAuthenticationEncoderTest {
     private val cborMapper = ObjectMapper(CBORFactory())
@@ -32,5 +33,28 @@ class DeviceAuthenticationEncoderTest {
         assertThat(inner[1].size(), equalTo(3))
         assertThat(inner[2].asText(), equalTo(docType))
         assertThat(inner[3].isBinary, equalTo(true))
+    }
+
+    @Test
+    fun `unwraps Tag 24 from sessionTranscriptBytes before encoding`() {
+        val docType = DOC_TYPE
+        val tag24Wrapped = CoseSign1Stubs.wrapInTag24(sessionTranscriptBytes)
+
+        val resultFromRaw = encoder.encode(
+            sessionTranscriptBytes,
+            docType,
+            emptyDeviceNameSpacesBytes
+        )
+        val resultFromWrapped = encoder.encode(
+            tag24Wrapped,
+            docType,
+            emptyDeviceNameSpacesBytes
+        )
+
+        assertThat(
+            "Tag 24-wrapped input must produce same output as raw input",
+            resultFromWrapped,
+            equalTo(resultFromRaw)
+        )
     }
 }

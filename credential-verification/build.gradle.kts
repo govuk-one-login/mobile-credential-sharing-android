@@ -48,7 +48,7 @@ dependencies {
         libs.com.google.test.parameter.injector,
         libs.jackson.cbor,
         libs.junit,
-        libs.org.bouncycastle.bcpkix
+        libs.org.bouncycastle.bcpkix.jdk18on
     ).forEach(::testFixturesImplementation)
 
     listOf(
