@@ -442,6 +442,34 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `transitions to Success when session ends with SUCCESS in AwaitingVerifierResolution`() =
+        runTest {
+            initialStates[0] = HolderSessionState.AwaitingVerifierResolution
+            val sessionFactory = createSessionFactory()
+            val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = peripheralBluetoothTransport,
+                sessionFactory = sessionFactory
+            )
+
+            backgroundScope.launch {
+                orchestrator.holderSessionState.collect {}
+            }
+            orchestrator.start()
+
+            peripheralBluetoothTransport.emitState(
+                PeripheralBluetoothState.Ended(SessionEndStates.SUCCESS)
+            )
+
+            assertThat(
+                orchestrator.holderSessionState.value,
+                isSuccessful()
+            )
+
+            assert("Mdoc - Ending session" in logger)
+        }
+
+    @Test
     fun `shows error when fails to end session`() = runTest {
         val sessionFactory = createSessionFactory()
         val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
