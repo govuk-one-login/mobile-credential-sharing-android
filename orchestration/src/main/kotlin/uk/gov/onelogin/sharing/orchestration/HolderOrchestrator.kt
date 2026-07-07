@@ -387,13 +387,11 @@ class HolderOrchestrator(
             PeripheralBluetoothState.Idle -> Unit
 
             is PeripheralBluetoothState.Ended -> {
-                when {
-                    sessionFlow.value.currentState.value is
-                        HolderSessionState.ProcessingResponse -> Unit
+                when (sessionFlow.value.currentState.value) {
+                    is HolderSessionState.ProcessingResponse -> Unit
 
-                    sessionFlow.value.currentState.value is
-                        HolderSessionState.AwaitingVerifierResolution &&
-                        state.status == SessionEndStates.SUCCESS -> {
+                    is HolderSessionState.AwaitingVerifierResolution
+                    if (state.status == SessionEndStates.SUCCESS) -> {
                         safeTransitionTo(HolderSessionState.Complete.Success())
                     }
 
