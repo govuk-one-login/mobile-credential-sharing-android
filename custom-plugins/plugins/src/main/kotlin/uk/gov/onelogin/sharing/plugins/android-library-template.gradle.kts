@@ -9,7 +9,6 @@ val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 listOf(
     "android-library",
-    "kotlin-android",
     "kotlin-compose",
     "kotlin-parcelize",
     "kotlin-serialization",

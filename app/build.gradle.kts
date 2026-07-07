@@ -4,7 +4,6 @@ import uk.gov.onelogin.sharing.plugins.Filters.licenseFilters
 plugins {
     listOf(
         libs.plugins.android.application,
-        libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
         libs.plugins.kotlin.parcelize,
         libs.plugins.kotlin.serialization,

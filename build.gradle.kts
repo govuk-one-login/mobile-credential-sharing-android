@@ -133,7 +133,6 @@ plugins {
         libs.plugins.android.application,
         libs.plugins.android.library,
         libs.plugins.kotlin.jvm,
-        libs.plugins.kotlin.android,
         libs.plugins.kotlin.compose,
         libs.plugins.kotlin.ksp,
         libs.plugins.hilt.plugin,

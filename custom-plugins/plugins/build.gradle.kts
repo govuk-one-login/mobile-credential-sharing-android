@@ -7,7 +7,6 @@ plugins {
 
     // list of 3rd party plugins required by the custom plugins
     listOf(
-        libs.plugins.kotlin.android,
         libs.plugins.roborazzi,
     ).forEach { dependency ->
         alias(dependency) apply false
