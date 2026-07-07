@@ -55,6 +55,8 @@ import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 
+private const val INVALID_SESSION_DATA = "Received invalid SessionData instance"
+
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions")
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
@@ -293,13 +295,13 @@ class VerifierOrchestrator(
 
         when {
             isMalformedSessionData(sessionData) ->
-                handleInvalidSessionData("Received invalid SessionData instance")
+                handleInvalidSessionData(INVALID_SESSION_DATA)
 
             isUnexpectedStatusWithData(sessionData) ->
                 handleUnexpectedStatusWithData(status!!)
 
             data == null && !holderRequestedTermination ->
-                handleInvalidSessionData("Received invalid SessionData instance")
+                handleInvalidSessionData(INVALID_SESSION_DATA)
 
             data == null ->
                 handleTerminationWithoutData()
@@ -314,7 +316,7 @@ class VerifierOrchestrator(
     private fun parseSessionData(message: ByteArray): SessionData? = runCatching {
         verifierCryptoService.deserializeSessionData(message)
     }.onFailure { throwable ->
-        handleInvalidSessionData("Received invalid SessionData instance", throwable)
+        handleInvalidSessionData(INVALID_SESSION_DATA, throwable)
     }.getOrNull()
 
     private fun handleInvalidSessionData(message: String, throwable: Throwable? = null) {
@@ -356,7 +358,7 @@ class VerifierOrchestrator(
         appCoroutineScope.launch {
             terminateSession(centralBluetoothTransport.isBleOpen, true)
         }
-        handleInvalidSessionData("Received invalid SessionData instance")
+        handleInvalidSessionData(INVALID_SESSION_DATA)
     }
 
     private fun decryptAndProcessResponse(data: ByteArray, holderRequestedTermination: Boolean) {
