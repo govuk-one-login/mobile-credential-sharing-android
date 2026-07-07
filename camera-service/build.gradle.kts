@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.LibraryExtension
+
 plugins {
     listOf(
         libs.plugins.templates.android.library
@@ -8,7 +10,7 @@ val androidCompileSdk: Int by rootProject.extra
 val androidMinSdk: Int by rootProject.extra
 val namespacePrefix: String by rootProject.extra
 
-android {
+configure<LibraryExtension> {
     namespace = "$namespacePrefix.cameraService"
     compileSdk = androidCompileSdk
 

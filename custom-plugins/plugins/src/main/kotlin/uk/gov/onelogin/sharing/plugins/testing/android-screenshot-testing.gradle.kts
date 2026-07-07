@@ -1,7 +1,10 @@
 package uk.gov.onelogin.sharing.plugins.testing
 
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.TestedExtension
-import com.android.build.gradle.BaseExtension
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidApp
+import uk.gov.onelogin.sharing.plugins.PluginManagerExtensions.isAndroidLibrary
 
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
@@ -26,14 +29,20 @@ dependencies {
     }
 }
 
-/**
- * Configure the android plugin based on configuring
- * [Robolectric](https://robolectric.org/getting-started/#building-with-gradle-kotlin).
- */
-configure<BaseExtension> {
-    testOptions {
-        unitTests {
-            isIncludeAndroidResources = true
+if (pluginManager.isAndroidApp()) {
+    configure<ApplicationExtension> {
+        testOptions {
+            unitTests {
+                isIncludeAndroidResources = true
+            }
+        }
+    }
+} else if (pluginManager.isAndroidLibrary()) {
+    configure<LibraryExtension> {
+        testOptions {
+            unitTests {
+                isIncludeAndroidResources = true
+            }
         }
     }
 }

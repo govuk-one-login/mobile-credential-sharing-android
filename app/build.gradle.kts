@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.ApplicationExtension
 import uk.gov.onelogin.sharing.plugins.Filters.licenseFilters
 
 plugins {
@@ -30,7 +31,7 @@ val namespacePrefix: String by rootProject.extra
 
 private val appId = "$namespacePrefix.testapp"
 
-android {
+configure<ApplicationExtension> {
     namespace = appId
     compileSdk = androidCompileSdk
 
