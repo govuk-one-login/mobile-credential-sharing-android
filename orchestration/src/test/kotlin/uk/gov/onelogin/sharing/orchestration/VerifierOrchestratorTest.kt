@@ -1224,6 +1224,38 @@ class VerifierOrchestratorTest {
         assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 
+    @Test
+    fun `SessionData with data and non-20 code goes to Failed without sending termination`() =
+        runTest {
+            fakeCryptoService.sessionData = SessionData(
+                data = fakeCryptoService.sessionData.data,
+                status = SessionDataStatus.ERROR_SESSION_ENCRYPTION
+            )
+
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
+            orchestrator.processQrCode(VALID_MDOC_URI)
+
+            centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(
+                    SERVER_2_CLIENT_UUID,
+                    CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+                )
+            )
+
+            advanceUntilIdle()
+
+            assertThat(orchestrator.verifierSessionState.value, isFailed())
+            assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
+            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+
+            val context = sessionFactory.getCurrentSession().cryptoContext
+            assertEquals(1u, context?.decryptCounter)
+        }
+
     class ErrorStatusProvider : TestParameterValuesProvider() {
         override fun provideValues(context: Context?): List<Status> = listOf(
             Status.GENERAL_ERROR,

@@ -25,6 +25,8 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
+import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus.SESSION_TERMINATION
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
@@ -282,28 +284,82 @@ class VerifierOrchestrator(
             -> Unit
         }
     }
-
     private fun handleCentralBluetoothStateMessage(state: CentralBluetoothState.Message) {
-        val sessionData = runCatching {
-            verifierCryptoService.deserializeSessionData(state.value).apply {
-                check(hasData()) {
-                    "Received empty SessionData payload"
-                }
+        val sessionData = parseSessionData(state.value) ?: return
+
+        val status = sessionData.status
+        val data = sessionData.data
+        val holderRequestedTermination = status == SESSION_TERMINATION
+
+        when {
+            isMalformedSessionData(sessionData) ->
+                handleInvalidSessionData("Received invalid SessionData instance")
+
+            isUnexpectedStatusWithData(sessionData) ->
+                handleUnexpectedStatusWithData(status!!)
+
+            data == null && !holderRequestedTermination ->
+                handleInvalidSessionData("Received invalid SessionData instance")
+
+            data == null ->
+                handleTerminationWithoutData()
+
+            else -> {
+                logger.debug(logTag, "Deserialized SessionData from bluetooth central Message")
+                decryptAndProcessResponse(data, holderRequestedTermination)
             }
-        }.onFailure { throwable ->
-            failWith(
-                "Received invalid SessionData instance",
-                SessionErrorReason.InvalidSessionDataPayload,
-                throwable
+        }
+    }
+
+    private fun parseSessionData(message: ByteArray): SessionData? = runCatching {
+        verifierCryptoService.deserializeSessionData(message)
+    }.onFailure { throwable ->
+        handleInvalidSessionData("Received invalid SessionData instance", throwable)
+    }.getOrNull()
+
+    private fun handleInvalidSessionData(message: String, throwable: Throwable? = null) {
+        if (throwable != null) {
+            failWith(message, SessionErrorReason.InvalidSessionDataPayload, throwable)
+        } else {
+            failWith(message, SessionErrorReason.InvalidSessionDataPayload)
+        }
+    }
+
+    private fun isMalformedSessionData(sessionData: SessionData): Boolean =
+        sessionData.data == null && sessionData.status == null
+
+    private fun isUnexpectedStatusWithData(sessionData: SessionData): Boolean =
+        sessionData.data != null && sessionData.status != null &&
+            sessionData.status != SESSION_TERMINATION &&
+            sessionData.status != SessionDataStatus.OK
+
+    private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
+        logger.error(logTag, "Received SessionData with data and error status: $status")
+        appCoroutineScope.launch {
+            terminateSession(
+                bleOpen = centralBluetoothTransport.isBleOpen,
+                receivedTermination = true
             )
-        }.getOrNull() ?: return
+        }
+        safeTransitionTo(
+            VerifierSessionState.Complete.Failed(
+                SessionError(
+                    message = "Received SessionData with data and error status: $status",
+                    reason = SessionErrorReason.InvalidSessionDataPayload
+                )
+            )
+        )
+    }
 
-        val holderRequestedTermination = sessionData.status?.let {
-            it == SESSION_TERMINATION
-        } ?: false
+    private fun handleTerminationWithoutData() {
+        logger.debug(logTag, "Received SessionData termination from holder")
+        appCoroutineScope.launch {
+            terminateSession(centralBluetoothTransport.isBleOpen, true)
+        }
+        handleInvalidSessionData("Received invalid SessionData instance")
+    }
 
-        logger.debug(logTag, "Deserialized SessionData from bluetooth central Message")
-
+    private fun decryptAndProcessResponse(data: ByteArray, holderRequestedTermination: Boolean) {
         safeTransitionTo(VerifierSessionState.Verifying)
 
         val context = sessionFlow.value.cryptoContext ?: return failWith(
@@ -313,39 +369,46 @@ class VerifierOrchestrator(
 
         runCatching {
             verifierCryptoService.decryptDeviceResponse(
-                deviceResponseBytes = sessionData.data!!,
+                deviceResponseBytes = data,
                 skDevice = context.skDevice,
                 decryptCounter = context.decryptCounter
             )
         }.onSuccess { deviceResponse ->
-            sessionFlow.value.updateCryptoContext {
-                context.copy(decryptCounter = context.decryptCounter + 1u)
-            }.also {
-                val updatedContext = sessionFlow.value.cryptoContext ?: return@onSuccess
-                logger.debug(
-                    logTag,
-                    "Decrypt counter incremented to: ${updatedContext.decryptCounter}"
-                )
-            }
-
+            updateDecryptCounter(context)
             evaluateDeviceResponse(deviceResponse, holderRequestedTermination)
-        }.onFailure { _ ->
-            appCoroutineScope.launch {
-                terminateSession(
-                    bleOpen = centralBluetoothTransport.isBleOpen,
-                    holderRequestedTermination
-                )
-            }
-            logger.error(logTag, "Error decrypting DeviceResponse")
-            safeTransitionTo(
-                VerifierSessionState.Complete.Failed(
-                    SessionError(
-                        message = "Error decrypting DeviceResponse",
-                        reason = SessionErrorReason.CannotDecryptDeviceResponse
-                    )
-                )
+        }.onFailure { e ->
+            handleDecryptionFailure(holderRequestedTermination, e)
+        }
+    }
+
+    private fun updateDecryptCounter(context: VerifierCryptoContext) {
+        sessionFlow.value.updateCryptoContext {
+            context.copy(decryptCounter = context.decryptCounter + 1u)
+        }.also {
+            val updatedContext = sessionFlow.value.cryptoContext ?: return
+            logger.debug(
+                logTag,
+                "Decrypt counter incremented to: ${updatedContext.decryptCounter}"
             )
         }
+    }
+
+    private fun handleDecryptionFailure(holderRequestedTermination: Boolean, throwable: Throwable) {
+        appCoroutineScope.launch {
+            terminateSession(
+                bleOpen = centralBluetoothTransport.isBleOpen,
+                holderRequestedTermination
+            )
+        }
+        logger.error(logTag, "Error decrypting DeviceResponse", throwable)
+        safeTransitionTo(
+            VerifierSessionState.Complete.Failed(
+                SessionError(
+                    message = "Error decrypting DeviceResponse",
+                    reason = SessionErrorReason.CannotDecryptDeviceResponse
+                )
+            )
+        )
     }
 
     private fun evaluateDeviceResponse(

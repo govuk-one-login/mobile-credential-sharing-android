@@ -203,4 +203,54 @@ class SessionTerminatorImplTest {
 
             assertEquals(TerminationState.TERMINATED, terminator.state.value)
         }
+
+    @Test
+    fun `does not enter AWAITING_DELAY state when termination message fails to send`() = runTest {
+        fakeTransport.sendMessageToReturn = false
+
+        terminator.state.test {
+            assertEquals(TerminationState.IDLE, awaitItem())
+
+            val job = launch {
+                terminator.terminate(
+                    serviceUuid = serviceUuid,
+                    bleOpen = true,
+                    holderRequestedTermination = false
+                )
+            }
+
+            assertEquals(TerminationState.SENDING_TERMINATION, awaitItem())
+
+            assertEquals(TerminationState.SENDING_GATT_END, awaitItem())
+            assertEquals(TerminationState.STOPPING, awaitItem())
+            assertEquals(TerminationState.TERMINATED, awaitItem())
+
+            job.join()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `waits for sendMessage to complete before entering AWAITING_DELAY`() = runTest {
+        terminator.state.test {
+            assertEquals(TerminationState.IDLE, awaitItem())
+
+            val job = launch {
+                terminator.terminate(
+                    serviceUuid = serviceUuid,
+                    bleOpen = true,
+                    holderRequestedTermination = false
+                )
+            }
+
+            assertEquals(TerminationState.SENDING_TERMINATION, awaitItem())
+            assertEquals(TerminationState.AWAITING_DELAY, awaitItem())
+
+            advanceTimeBy(SessionTerminatorImpl.TERMINATION_DELAY_MS.milliseconds)
+
+            assertEquals(TerminationState.SENDING_GATT_END, awaitItem())
+            job.join()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }
