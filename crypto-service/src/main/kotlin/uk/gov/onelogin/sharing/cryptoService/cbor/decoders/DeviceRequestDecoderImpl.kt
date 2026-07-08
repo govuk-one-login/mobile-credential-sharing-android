@@ -20,9 +20,9 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         )
 
         if (deviceRequestDto.docRequest.isEmpty()) {
-            val errorMessage = "empty DocRequest: status code 20"
+            val errorMessage = "empty DocRequest: status code 12"
             logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            throw DeviceRequestValidationException(errorMessage)
         }
 
         logger.debug(
@@ -43,6 +43,8 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
                 }
             )
         }
+    } catch (e: DeviceRequestValidationException) {
+        throw e
     } catch (e: DeviceRequestDecodingException) {
         throw e
     } catch (e: JsonProcessingException) {
