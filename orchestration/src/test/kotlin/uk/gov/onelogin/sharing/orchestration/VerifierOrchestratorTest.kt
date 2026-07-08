@@ -804,7 +804,7 @@ class VerifierOrchestratorTest {
         advanceUntilIdle()
 
         val failedState =
-            orchestrator.verifierSessionState.value as VerifierSessionState.Complete.Failed
+            orchestrator.verifierSessionState.value as Failed
         val reason = failedState.error.reason as SessionErrorReason.DeviceRequestProcessingError
         assertEquals(errorStatus.code, reason.statusCode)
         assertEquals(1, centralBluetoothTransport.stopCalls)
@@ -1222,6 +1222,113 @@ class VerifierOrchestratorTest {
         assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
         assertEquals(0, centralBluetoothTransport.sendEndCalls)
         assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `SessionData with data and non-20 code goes to Failed without sending termination`() =
+        runTest {
+            fakeCryptoService.sessionData = SessionData(
+                data = fakeCryptoService.sessionData.data,
+                status = SessionDataStatus.ERROR_SESSION_ENCRYPTION
+            )
+
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
+            orchestrator.processQrCode(VALID_MDOC_URI)
+
+            centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(
+                    SERVER_2_CLIENT_UUID,
+                    CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+                )
+            )
+
+            advanceUntilIdle()
+
+            assertThat(orchestrator.verifierSessionState.value, isFailed())
+            assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
+            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+
+            val context = sessionFactory.getCurrentSession().cryptoContext
+            assertEquals(1u, context?.decryptCounter)
+        }
+
+    @Test
+    fun `receiving malformed or non-SessionData in Connecting triggers status 20 and GATT End`() =
+        runTest {
+            initialStates[0] = VerifierSessionState.Connecting
+            val orchestrator = createOrchestrator()
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+
+            fakeCryptoService.establishSession(VALID_MDOC_URI) { context ->
+                sessionFactory.getCurrentSession().updateCryptoContext { context }
+                context
+            }
+
+            centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+            advanceUntilIdle()
+
+            fakeCryptoService.sessionData = SessionData(data = null, status = null)
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(
+                    SERVER_2_CLIENT_UUID,
+                    CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+                )
+            )
+            advanceUntilIdle()
+            assertThat(orchestrator.verifierSessionState.value, isFailed())
+            assertEquals(1, fakeCryptoService.buildTerminationSessionDataCalls)
+            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+        }
+
+    @Test
+    fun `SessionData with data and non-20 status in Connecting sends only GATT End`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+        advanceUntilIdle()
+
+        fakeCryptoService.sessionData = SessionData(
+            data = byteArrayOf(0x01),
+            status = SessionDataStatus.ERROR_CBOR_DECODING
+        )
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+            )
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.verifierSessionState.value, isFailed())
+        assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
+        assertEquals(1, centralBluetoothTransport.sendEndCalls)
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `messages arriving while in Verifying state are ignored`() = runTest {
+        initialStates[0] = VerifierSessionState.Verifying
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(SERVER_2_CLIENT_UUID, byteArrayOf(0x01))
+        )
+        advanceUntilIdle()
+
+        assertTrue {
+            "Ignoring unexpected message while verifying" in logger
+        }
+
+        assertEquals(VerifierSessionState.Verifying, orchestrator.verifierSessionState.value)
+        assertEquals(0, centralBluetoothTransport.sendEndCalls)
+        assertEquals(0, centralBluetoothTransport.stopCalls)
     }
 
     class ErrorStatusProvider : TestParameterValuesProvider() {

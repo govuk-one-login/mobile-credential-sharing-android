@@ -52,13 +52,15 @@ class SessionTerminatorImpl(
             logger.debug(logTag, "Sending termination session data")
 
             val terminationBytes = verifierCryptoService.buildTerminationSessionData()
-            centralBluetoothTransport.sendMessage(
+            val sent = centralBluetoothTransport.sendMessage(
                 serviceUuid = serviceUuid,
                 data = terminationBytes
             )
 
-            _state.value = TerminationState.AWAITING_DELAY
-            delay(TERMINATION_DELAY_MS.milliseconds)
+            if (sent) {
+                _state.value = TerminationState.AWAITING_DELAY
+                delay(TERMINATION_DELAY_MS.milliseconds)
+            }
         }
 
         _state.value = TerminationState.SENDING_GATT_END
