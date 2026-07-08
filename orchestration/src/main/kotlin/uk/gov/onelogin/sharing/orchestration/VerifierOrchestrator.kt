@@ -277,7 +277,13 @@ class VerifierOrchestrator(
                 }
             }
 
-            is CentralBluetoothState.Message -> handleCentralBluetoothStateMessage(state)
+            is CentralBluetoothState.Message -> {
+                if (sessionFlow.value.currentState.value is VerifierSessionState.Verifying) {
+                    logger.debug(logTag, "Ignoring unexpected message while verifying")
+                } else {
+                    handleCentralBluetoothStateMessage(state)
+                }
+            }
 
             is CentralBluetoothState.Connected,
             CentralBluetoothState.Connecting,
@@ -286,6 +292,7 @@ class VerifierOrchestrator(
             -> Unit
         }
     }
+
     private fun handleCentralBluetoothStateMessage(state: CentralBluetoothState.Message) {
         val sessionData = parseSessionData(state.value) ?: return
 
@@ -354,11 +361,19 @@ class VerifierOrchestrator(
     }
 
     private fun handleTerminationWithoutData() {
+        logger.error(logTag, INVALID_SESSION_DATA)
         logger.debug(logTag, "Received SessionData termination from holder")
         appCoroutineScope.launch {
             terminateSession(centralBluetoothTransport.isBleOpen, true)
         }
-        handleInvalidSessionData(INVALID_SESSION_DATA)
+        safeTransitionTo(
+            VerifierSessionState.Complete.Failed(
+                SessionError(
+                    message = INVALID_SESSION_DATA,
+                    reason = SessionErrorReason.InvalidSessionDataPayload
+                )
+            )
+        )
     }
 
     private fun decryptAndProcessResponse(data: ByteArray, holderRequestedTermination: Boolean) {
