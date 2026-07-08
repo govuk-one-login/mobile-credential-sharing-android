@@ -8,6 +8,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoderImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromHexStringFile
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
@@ -55,12 +56,12 @@ class DeviceRequestDecoderImplTest {
     }
 
     @Test
-    fun `when docrequests array is empty, decoding fails and status code 20 thrown ac4`() {
-        assertFailsWith<DeviceRequestDecodingException> {
+    fun `when docrequests array is empty, validation fails and status code 12 thrown ac4`() {
+        assertFailsWith<DeviceRequestValidationException> {
             deviceRequestDecoderImpl.deviceRequestDecoder(emptyDocRequest)
         }
 
-        assert(logger.contains("empty DocRequest: status code 20"))
+        assert(logger.contains("empty DocRequest: status code 12"))
     }
 
     private fun assertDeviceRequestParsedCorrectly(deviceRequest: DeviceRequest) {
