@@ -51,7 +51,7 @@ class DeviceRequestEncoderTest {
         val decoded = decoder.deviceRequestDecoder(deviceRequestStub.toDto().toCbor())
 
         assertEquals(
-            mapOf("age_over_18" to false),
+            mapOf("portrait" to false, "age_over_18" to false),
             decoded.docRequests.first().itemsRequest.nameSpaces[MDL_NAMESPACE]
         )
     }
