@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
+import kotlinx.coroutines.CompletableDeferred
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
@@ -22,7 +23,8 @@ class FakeConfirmConsentUseCase(
                 deviceNameSpacesBytes = byteArrayOf(),
                 deviceSignature = byteArrayOf()
             )
-        )
+        ),
+    private val gate: CompletableDeferred<Unit>? = null
 ) : ConfirmConsentUseCase {
 
     override suspend fun execute(
@@ -31,6 +33,7 @@ class FakeConfirmConsentUseCase(
         validatedCredential: ValidatedCredential,
         filteredIssuerSigned: IssuerSigned
     ): VerifiableDocument.WithPresentation {
+        gate?.await()
         exception?.let { throw DeviceSignatureException("Sign failed", it) }
         return documentToReturn
     }
