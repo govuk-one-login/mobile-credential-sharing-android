@@ -15,29 +15,33 @@ class InboundMessageClassifierImpl(private val logger: Logger) : InboundMessageC
         val tree = try {
             CborMapper.default.readTree(rawBytes)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            logger.debug(logTag, "Inbound message is not valid CBOR")
+            logger.debug(logTag, "Inbound message is not valid CBOR: ${e.message}")
             return InboundMessageType.Unknown
         }
 
-        // SessionEstablishment has eReaderKey + data
-        if (tree.has(SessionEstablishmentDto.E_READER_KEY_KEY) &&
-            tree.has(SessionEstablishmentDto.DATA_KEY)
-        ) {
-            logger.debug(logTag, "Classified inbound message as SessionEstablishment")
-            return InboundMessageType.SessionEstablishment
-        }
+        return when {
+            tree.has(SessionEstablishmentDto.E_READER_KEY_KEY) &&
+                tree.has(SessionEstablishmentDto.DATA_KEY) -> {
+                logger.debug(logTag, "Classified inbound message as SessionEstablishment")
+                InboundMessageType.SessionEstablishment
+            }
 
-        // Status-only SessionData has status but no data
-        if (!tree.has(KEY_DATA) && tree.has(KEY_STATUS)) {
-            val statusCode = tree[KEY_STATUS].asInt().toUInt()
-            SessionDataStatus.from(statusCode)?.let { status ->
-                logger.debug(logTag, "Classified inbound message as status-only: $status")
-                return InboundMessageType.StatusOnly(status)
+            !tree.has(KEY_DATA) && tree.has(KEY_STATUS) -> {
+                val statusCode = tree[KEY_STATUS].asInt().toUInt()
+                SessionDataStatus.from(statusCode)?.let { status ->
+                    logger.debug(logTag, "Classified inbound message as status-only: $status")
+                    InboundMessageType.StatusOnly(status)
+                } ?: run {
+                    logger.debug(logTag, "Inbound message does not match any known type")
+                    InboundMessageType.Unknown
+                }
+            }
+
+            else -> {
+                logger.debug(logTag, "Inbound message does not match any known type")
+                InboundMessageType.Unknown
             }
         }
-
-        logger.debug(logTag, "Inbound message does not match any known type")
-        return InboundMessageType.Unknown
     }
 
     private companion object {

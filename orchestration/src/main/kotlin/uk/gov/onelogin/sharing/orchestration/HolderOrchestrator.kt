@@ -61,7 +61,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 
 @Keep
-@Suppress("LongParameterList", "TooManyFunctions")
+@Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
 @SingleIn(AppScope::class)
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
@@ -393,29 +393,7 @@ class HolderOrchestrator(
 
             PeripheralBluetoothState.Idle -> Unit
 
-            is PeripheralBluetoothState.Ended -> {
-                when (sessionFlow.value.currentState.value) {
-                    is HolderSessionState.ProcessingResponse -> Unit
-
-                    is HolderSessionState.AwaitingVerifierResolution
-                    if (state.status == SessionEndStates.SUCCESS) -> {
-                        safeTransitionTo(HolderSessionState.Complete.Success())
-                    }
-
-                    else -> {
-                        safeTransitionTo(HolderSessionState.Complete.Cancelled)
-                    }
-                }
-
-                if (state.status == SessionEndStates.SUCCESS) {
-                    logger.debug(logTag, "Mdoc - Ending session")
-                } else {
-                    logger.error(
-                        logTag,
-                        "Mdoc - Error while ending session: ${state.status}"
-                    )
-                }
-            }
+            is PeripheralBluetoothState.Ended -> handleSessionEnded(state)
 
             is PeripheralBluetoothState.MessageReceived -> {
                 when (val type = inboundMessageClassifier.getMessageType(state.message)) {
@@ -438,32 +416,32 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleSessionEstablishment(message: ByteArray) {
-        val currentState = holderSessionState.value
+    private fun handleSessionEnded(state: PeripheralBluetoothState.Ended) {
+        when (sessionFlow.value.currentState.value) {
+            is HolderSessionState.ProcessingResponse -> Unit
 
-        // Non-status messages are only valid in ProcessingEstablishment
-        if (currentState !is HolderSessionState.ProcessingEstablishment) {
+            is HolderSessionState.AwaitingVerifierResolution
+            if (state.status == SessionEndStates.SUCCESS) -> {
+                safeTransitionTo(HolderSessionState.Complete.Success())
+            }
+
+            else -> {
+                safeTransitionTo(HolderSessionState.Complete.Cancelled)
+            }
+        }
+
+        if (state.status == SessionEndStates.SUCCESS) {
+            logger.debug(logTag, "Mdoc - Ending session")
+        } else {
             logger.error(
                 logTag,
-                "Sequencing violation: message received in state $currentState"
+                "Mdoc - Error while ending session: ${state.status}"
             )
-            appCoroutineScope.launch {
-                sendTerminationAndFail(
-                    IllegalStateException(
-                        "Sequencing violation: message received in state $currentState"
-                    )
-                )
-            }
-            return
         }
+    }
 
-        val keypair = currentContext.keyPair?.private
-        if (keypair !is ECPrivateKey) {
-            appCoroutineScope.launch {
-                sendTerminationAndFail(IllegalStateException("Invalid or missing keypair"))
-            }
-            return
-        }
+    private fun handleSessionEstablishment(message: ByteArray) {
+        val keypair = validateSessionEstablishmentPreconditions() ?: return
 
         try {
             val deviceRequest = decryptDeviceRequestUseCase.execute(
@@ -510,6 +488,39 @@ class HolderOrchestrator(
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             appCoroutineScope.launch {
                 sendTerminationAndFail(e)
+            }
+        }
+    }
+
+    /**
+     * Validates that the session is in the correct state and has a valid keypair.
+     * Returns the [ECPrivateKey] if preconditions are met, or `null` if termination was triggered.
+     */
+    private fun validateSessionEstablishmentPreconditions(): ECPrivateKey? {
+        val currentState = holderSessionState.value
+
+        if (currentState !is HolderSessionState.ProcessingEstablishment) {
+            logger.error(
+                logTag,
+                "Sequencing violation: message received in state $currentState"
+            )
+            appCoroutineScope.launch {
+                sendTerminationAndFail(
+                    IllegalStateException(
+                        "Sequencing violation: message received in state $currentState"
+                    )
+                )
+            }
+            return null
+        }
+
+        return (currentContext.keyPair?.private as? ECPrivateKey).also { keypair ->
+            if (keypair == null) {
+                appCoroutineScope.launch {
+                    sendTerminationAndFail(
+                        IllegalStateException("Invalid or missing keypair")
+                    )
+                }
             }
         }
     }

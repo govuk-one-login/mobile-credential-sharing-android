@@ -60,12 +60,12 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHo
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingUserConsent
-import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingVerifierResolution
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isNotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingEstablishment
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isSuccessful
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
@@ -948,9 +948,11 @@ class HolderOrchestratorTest {
     @Test
     fun `sequencing violation in processingResponse sends status 20 and terminates`() = runTest {
         val consentGate = kotlinx.coroutines.CompletableDeferred<Unit>()
-        with(TerminationTestFixture(
-            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
-        )) {
+        with(
+            TerminationTestFixture(
+                confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+            )
+        ) {
             startAndDeliver()
             assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
@@ -1152,4 +1154,3 @@ class HolderOrchestratorTest {
         }
     }
 }
-
