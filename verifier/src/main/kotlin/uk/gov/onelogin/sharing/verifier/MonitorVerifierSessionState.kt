@@ -171,7 +171,8 @@ private fun handleSessionFailure(
         is SessionErrorReason.DeviceRequestProcessingError,
         is SessionErrorReason.UnverifiableDocument,
         is SessionErrorReason.InvalidBluetoothState,
-        SessionErrorReason.DocumentNotReturned
+        SessionErrorReason.DocumentNotReturned,
+        SessionErrorReason.PeerTermination
         ->
             navController.navigateToUnrecoverableVerifierError {
                 popUpTo<VerifierRoutes> {

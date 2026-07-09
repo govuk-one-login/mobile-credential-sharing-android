@@ -51,6 +51,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
+import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageClassifier
+import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
@@ -72,7 +74,8 @@ class HolderOrchestrator(
     private val prerequisiteGate: PrerequisiteGate,
     private val confirmConsentUseCase: ConfirmConsentUseCase,
     private val credentialRequestHandler: CredentialRequestHandler,
-    private val holderSessionTerminator: HolderSessionTerminator
+    private val holderSessionTerminator: HolderSessionTerminator,
+    private val inboundMessageClassifier: InboundMessageClassifier
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -415,13 +418,30 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.MessageReceived -> {
-                handleMessageReceived(state.message)
+                when (val type = inboundMessageClassifier.getMessageType(state.message)) {
+                    is InboundMessageType.SessionEstablishment ->
+                        handleSessionEstablishment(state.message)
+
+                    is InboundMessageType.StatusOnly ->
+                        handlePeerTermination(type.status)
+
+                    is InboundMessageType.Unknown -> {
+                        logger.error(logTag, UNRECOGNISED_MESSAGE)
+                        appCoroutineScope.launch {
+                            sendTerminationAndFail(
+                                IllegalStateException(UNRECOGNISED_MESSAGE)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 
-    private fun handleMessageReceived(message: ByteArray) {
+    private fun handleSessionEstablishment(message: ByteArray) {
         val currentState = holderSessionState.value
+
+        // Non-status messages are only valid in ProcessingEstablishment
         if (currentState !is HolderSessionState.ProcessingEstablishment) {
             logger.error(
                 logTag,
@@ -722,6 +742,30 @@ class HolderOrchestrator(
         }
     }
 
+    private fun handlePeerTermination(status: SessionDataStatus) {
+        val currentState = holderSessionState.value
+        logger.debug(logTag, "Peer termination received (status: $status) in state: $currentState")
+
+        when (currentState) {
+            is HolderSessionState.AwaitingVerifierResolution -> {
+                stopAdvertising(sendEndCommand = false)
+                safeTransitionTo(HolderSessionState.Complete.Success())
+            }
+
+            else -> {
+                stopAdvertising(sendEndCommand = false)
+                safeTransitionTo(
+                    HolderSessionState.Complete.Failed(
+                        SessionError(
+                            message = "Peer terminated session (status: $status)",
+                            reason = SessionErrorReason.PeerTermination
+                        )
+                    )
+                )
+            }
+        }
+    }
+
     private fun deviceRequestContainsPortrait(deviceRequest: DeviceRequest): Boolean =
         deviceRequest.docRequests.any { docRequest ->
             docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
@@ -735,5 +779,7 @@ class HolderOrchestrator(
         const val PORTRAIT_ATTRIBUTE = "portrait"
         const val PORTRAIT_POLICY_VIOLATION =
             "Policy violation: DeviceRequest does not request portrait attribute"
+        const val UNRECOGNISED_MESSAGE =
+            "Sequencing violation: inbound message is not a recognised type"
     }
 }
