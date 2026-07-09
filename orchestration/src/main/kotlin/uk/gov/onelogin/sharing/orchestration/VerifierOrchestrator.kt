@@ -7,6 +7,7 @@ import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -54,6 +55,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val INVALID_SESSION_DATA = "Received invalid SessionData instance"
 
@@ -384,23 +386,24 @@ class VerifierOrchestrator(
 
     private fun decryptAndProcessResponse(data: ByteArray, holderRequestedTermination: Boolean) {
         safeTransitionTo(VerifierSessionState.Verifying)
-
-        val context = sessionFlow.value.cryptoContext ?: return failWith(
-            "Missing crypto context when decrypting DeviceResponse",
-            SessionErrorReason.MissingCryptoContext
-        )
-
-        runCatching {
-            verifierCryptoService.decryptDeviceResponse(
-                deviceResponseBytes = data,
-                skDevice = context.skDevice,
-                decryptCounter = context.decryptCounter
+        appCoroutineScope.launch {
+            val context = sessionFlow.value.cryptoContext ?: return@launch failWith(
+                "Missing crypto context when decrypting DeviceResponse",
+                SessionErrorReason.MissingCryptoContext
             )
-        }.onSuccess { deviceResponse ->
-            updateDecryptCounter(context)
-            evaluateDeviceResponse(deviceResponse, holderRequestedTermination)
-        }.onFailure { e ->
-            handleDecryptionFailure(holderRequestedTermination, e)
+
+            runCatching {
+                verifierCryptoService.decryptDeviceResponse(
+                    deviceResponseBytes = data,
+                    skDevice = context.skDevice,
+                    decryptCounter = context.decryptCounter
+                )
+            }.onSuccess { deviceResponse ->
+                updateDecryptCounter(context)
+                evaluateDeviceResponse(deviceResponse, holderRequestedTermination)
+            }.onFailure { e ->
+                handleDecryptionFailure(holderRequestedTermination, e)
+            }
         }
     }
 
