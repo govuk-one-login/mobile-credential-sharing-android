@@ -59,6 +59,11 @@ sealed class SessionErrorReason {
     data class DeviceRequestProcessingError(val statusCode: UInt) : SessionErrorReason()
 
     /**
+     * The peer sent a status-only SessionData indicating session termination.
+     */
+    data object PeerTermination : SessionErrorReason()
+
+    /**
      * The Holder returned a successful status (0) but the documents array is empty or missing.
      */
     data object DocumentNotReturned : SessionErrorReason()

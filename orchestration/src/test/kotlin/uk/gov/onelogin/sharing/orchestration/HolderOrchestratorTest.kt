@@ -47,9 +47,12 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredenti
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderSessionTerminator
+import uk.gov.onelogin.sharing.orchestration.holder.session.FakeInboundMessageClassifier
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
+import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageClassifier
+import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
@@ -131,7 +134,8 @@ class HolderOrchestratorTest {
         ),
         credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler,
         confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
-        holderSessionTerminator: HolderSessionTerminator = FakeHolderSessionTerminator()
+        holderSessionTerminator: HolderSessionTerminator = FakeHolderSessionTerminator(),
+        inboundMessageClassifier: InboundMessageClassifier = FakeInboundMessageClassifier()
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -142,7 +146,8 @@ class HolderOrchestratorTest {
         holderCryptoService = holderCryptoService,
         credentialRequestHandler = credentialRequestHandler,
         confirmConsentUseCase = confirmConsentUseCase,
-        holderSessionTerminator = holderSessionTerminator
+        holderSessionTerminator = holderSessionTerminator,
+        inboundMessageClassifier = inboundMessageClassifier
     )
 
     @Test
@@ -1141,6 +1146,104 @@ class HolderOrchestratorTest {
 
         assertThat(orchestrator.holderSessionState.value, isFailed())
         assertEquals(0, fakeTerminator.terminateCalls)
+    }
+
+    @Test
+    fun `status-only SessionData in processingEstablishment is peer termination`() = runTest {
+        val fakeClassifier = FakeInboundMessageClassifier().apply {
+            typeToReturn =
+                InboundMessageType.StatusOnly(SessionDataStatus.SESSION_TERMINATION)
+        }
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val fakeTerminator = FakeHolderSessionTerminator()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            sessionFactory = sessionFactory,
+            holderSessionTerminator = fakeTerminator,
+            inboundMessageClassifier = fakeClassifier
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+
+        // Send a status-only SessionData while in ProcessingEstablishment
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // Should be treated as peer termination (failed), not sequencing violation
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        // No outbound termination should be sent for a peer-initiated termination
+        assertEquals(0, fakeTerminator.terminateCalls)
+        assert(
+            logger.any { it.message.contains("Peer termination received") }
+        )
+    }
+
+    @Test
+    fun `status-only SessionData in awaitingUserConsent is peer termination`() = runTest {
+        val fakeClassifier = FakeInboundMessageClassifier()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            sessionFactory = sessionFactory,
+            inboundMessageClassifier = fakeClassifier
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        // First message is normal (SessionEstablishment) to get to AwaitingUserConsent
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Now switch classifier to return StatusOnly for the next message
+        fakeClassifier.typeToReturn =
+            InboundMessageType.StatusOnly(SessionDataStatus.SESSION_TERMINATION)
+
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(4, 5, 6))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assert(
+            logger.any { it.message.contains("Peer termination received") }
+        )
+    }
+
+    @Test
+    fun `status-only SessionData in awaitingVerifierResolution transitions to success`() = runTest {
+        initialStates[0] = HolderSessionState.AwaitingVerifierResolution
+        val fakeClassifier = FakeInboundMessageClassifier().apply {
+            typeToReturn =
+                InboundMessageType.StatusOnly(SessionDataStatus.SESSION_TERMINATION)
+        }
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            sessionFactory = sessionFactory,
+            inboundMessageClassifier = fakeClassifier
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
     }
 
     // endregion
