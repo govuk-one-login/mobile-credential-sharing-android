@@ -60,6 +60,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.data.UncancellableHo
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.hasMissingPreflightPrerequisites
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.inPresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingUserConsent
+import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isAwaitingVerifierResolution
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isCancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isFailed
@@ -859,33 +860,20 @@ class HolderOrchestratorTest {
 
     @Test
     fun `deny consent sends termination and transitions to Success`() = runTest {
-        val fakeCryptoService = FakeHolderCryptoService()
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        with(TerminationTestFixture()) {
+            startAndDeliver()
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
+            orchestrator.denyConsent()
+            advanceUntilIdle()
 
-        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
-
-        orchestrator.denyConsent()
-        advanceUntilIdle()
-
-        assertThat(orchestrator.holderSessionState.value, isSuccessful())
-        assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
-        assertEquals(
-            SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastErrorSessionDataStatus
-        )
+            assertThat(orchestrator.holderSessionState.value, isSuccessful())
+            assertEquals(Status.OK, cryptoService.lastErrorDeviceResponseStatus)
+            assertEquals(
+                SessionDataStatus.SESSION_TERMINATION,
+                cryptoService.lastErrorSessionDataStatus
+            )
+        }
     }
 
     @Test
@@ -915,141 +903,107 @@ class HolderOrchestratorTest {
     @Test
     fun `sequencing violation in processingEstablishment sends status 20 and terminates`() =
         runTest {
-            val fakeCryptoService = FakeHolderCryptoService()
-            val peripheralTransport = FakePeripheralBluetoothTransport()
-            val fakeTerminator = FakeHolderSessionTerminator()
-            val sessionFactory = createSessionFactory()
-            val orchestrator = createOrchestrator(
-                peripheralBluetoothTransport = peripheralTransport,
-                holderCryptoService = fakeCryptoService,
-                sessionFactory = sessionFactory,
-                holderSessionTerminator = fakeTerminator
-            )
-            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-            orchestrator.start()
-            advanceUntilIdle()
+            with(TerminationTestFixture()) {
+                startAndDeliver()
+                assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-            peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-            peripheralTransport.emitState(
-                PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-            )
-            advanceUntilIdle()
+                // Second message is a sequencing violation (now in AwaitingUserConsent)
+                transport.emitState(
+                    PeripheralBluetoothState.MessageReceived(byteArrayOf(4, 5, 6))
+                )
+                advanceUntilIdle()
 
+                assertThat(orchestrator.holderSessionState.value, isFailed())
+                assertEquals(
+                    SessionDataStatus.SESSION_TERMINATION,
+                    cryptoService.lastBuildTerminationStatus
+                )
+                assertEquals(1, terminator.terminateCalls)
+                assert(
+                    logger.any { it.message.startsWith("Sequencing violation") }
+                )
+            }
+        }
+
+    @Test
+    fun `sequencing violation in awaitingUserConsent sends status 20 and terminates`() = runTest {
+        with(TerminationTestFixture()) {
+            startAndDeliver()
             assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-            // Second message is a sequencing violation (now in AwaitingUserConsent)
-            peripheralTransport.emitState(
+            transport.emitState(
                 PeripheralBluetoothState.MessageReceived(byteArrayOf(4, 5, 6))
             )
             advanceUntilIdle()
 
             assertThat(orchestrator.holderSessionState.value, isFailed())
+            assertEquals(1, terminator.terminateCalls)
             assertEquals(
                 SessionDataStatus.SESSION_TERMINATION,
-                fakeCryptoService.lastBuildTerminationStatus
-            )
-            assertEquals(1, fakeTerminator.terminateCalls)
-            assert(
-                logger.any { it.message.startsWith("Sequencing violation") }
+                cryptoService.lastBuildTerminationStatus
             )
         }
+    }
 
     @Test
-    fun `sequencing violation in awaitingUserConsent sends status 20 and terminates`() = runTest {
-        val fakeCryptoService = FakeHolderCryptoService()
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val fakeTerminator = FakeHolderSessionTerminator()
-        val sessionFactory = createSessionFactory()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService,
-            sessionFactory = sessionFactory,
-            holderSessionTerminator = fakeTerminator
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+    fun `sequencing violation in processingResponse sends status 20 and terminates`() = runTest {
+        val consentGate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        with(TerminationTestFixture(
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )) {
+            startAndDeliver()
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
+            orchestrator.confirmConsent()
+            advanceUntilIdle()
+            assertThat(orchestrator.holderSessionState.value, isProcessingResponse())
 
-        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+            // Message arrives while in ProcessingResponse — sequencing violation
+            transport.emitState(
+                PeripheralBluetoothState.MessageReceived(byteArrayOf(4, 5, 6))
+            )
+            advanceUntilIdle()
 
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(4, 5, 6))
-        )
-        advanceUntilIdle()
-
-        assertThat(orchestrator.holderSessionState.value, isFailed())
-        assertEquals(1, fakeTerminator.terminateCalls)
-        assertEquals(
-            SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastBuildTerminationStatus
-        )
+            assertThat(orchestrator.holderSessionState.value, isFailed())
+            assertEquals(1, terminator.terminateCalls)
+            assertEquals(
+                SessionDataStatus.SESSION_TERMINATION,
+                cryptoService.lastBuildTerminationStatus
+            )
+        }
     }
 
     @Test
     fun `SessionEstablishment decryption failure sends status 20 and terminates`() = runTest {
         fakeDecryptDeviceRequestUseCase.exception =
             RuntimeException("Decryption failed")
-        val fakeCryptoService = FakeHolderCryptoService()
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val fakeTerminator = FakeHolderSessionTerminator()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService,
-            holderSessionTerminator = fakeTerminator
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        with(TerminationTestFixture()) {
+            startAndDeliver()
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
-
-        assertThat(orchestrator.holderSessionState.value, isFailed())
-        assertEquals(
-            SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastBuildTerminationStatus
-        )
-        assertEquals(1, fakeTerminator.terminateCalls)
+            assertThat(orchestrator.holderSessionState.value, isFailed())
+            assertEquals(
+                SessionDataStatus.SESSION_TERMINATION,
+                cryptoService.lastBuildTerminationStatus
+            )
+            assertEquals(1, terminator.terminateCalls)
+        }
     }
 
     @Test
     fun `DeviceRequest decode failure sends status 11 over BLE and terminates`() = runTest {
         fakeDecryptDeviceRequestUseCase.exceptionAfterKeyDerivation =
             DeviceRequestDecodingException("CBOR decoding error")
-        val fakeCryptoService = FakeHolderCryptoService()
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val fakeTerminator = FakeHolderSessionTerminator()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService,
-            holderSessionTerminator = fakeTerminator
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        with(TerminationTestFixture()) {
+            startAndDeliver()
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
-
-        assertThat(orchestrator.holderSessionState.value, isFailed())
-        assertEquals(Status.CBOR_DECODING_ERROR, fakeCryptoService.lastErrorDeviceResponseStatus)
-        assertEquals(
-            SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastErrorSessionDataStatus
-        )
-        assertEquals(1, fakeTerminator.terminateCalls)
+            assertThat(orchestrator.holderSessionState.value, isFailed())
+            assertEquals(Status.CBOR_DECODING_ERROR, cryptoService.lastErrorDeviceResponseStatus)
+            assertEquals(
+                SessionDataStatus.SESSION_TERMINATION,
+                cryptoService.lastErrorSessionDataStatus
+            )
+            assertEquals(1, terminator.terminateCalls)
+        }
     }
 
     @Test
@@ -1057,34 +1011,20 @@ class HolderOrchestratorTest {
         runTest {
             fakeDecryptDeviceRequestUseCase.exceptionAfterKeyDerivation =
                 DeviceRequestValidationException("empty DocRequest")
-            val fakeCryptoService = FakeHolderCryptoService()
-            val peripheralTransport = FakePeripheralBluetoothTransport()
-            val fakeTerminator = FakeHolderSessionTerminator()
-            val orchestrator = createOrchestrator(
-                peripheralBluetoothTransport = peripheralTransport,
-                holderCryptoService = fakeCryptoService,
-                holderSessionTerminator = fakeTerminator
-            )
-            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-            orchestrator.start()
-            advanceUntilIdle()
+            with(TerminationTestFixture()) {
+                startAndDeliver()
 
-            peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-            peripheralTransport.emitState(
-                PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-            )
-            advanceUntilIdle()
-
-            assertThat(orchestrator.holderSessionState.value, isFailed())
-            assertEquals(
-                Status.CBOR_VALIDATION_ERROR,
-                fakeCryptoService.lastErrorDeviceResponseStatus
-            )
-            assertEquals(
-                SessionDataStatus.SESSION_TERMINATION,
-                fakeCryptoService.lastErrorSessionDataStatus
-            )
-            assertEquals(1, fakeTerminator.terminateCalls)
+                assertThat(orchestrator.holderSessionState.value, isFailed())
+                assertEquals(
+                    Status.CBOR_VALIDATION_ERROR,
+                    cryptoService.lastErrorDeviceResponseStatus
+                )
+                assertEquals(
+                    SessionDataStatus.SESSION_TERMINATION,
+                    cryptoService.lastErrorSessionDataStatus
+                )
+                assertEquals(1, terminator.terminateCalls)
+            }
         }
 
     @Test
@@ -1093,59 +1033,31 @@ class HolderOrchestratorTest {
         fakeDecryptDeviceRequestUseCase.deviceRequestToReturn = deviceRequest(
             mapOf("age_over_18" to false)
         )
-        val fakeCryptoService = FakeHolderCryptoService()
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val fakeTerminator = FakeHolderSessionTerminator()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService,
-            holderSessionTerminator = fakeTerminator
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        with(TerminationTestFixture()) {
+            startAndDeliver()
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
-
-        assertThat(orchestrator.holderSessionState.value, isFailed())
-        assertEquals(Status.GENERAL_ERROR, fakeCryptoService.lastErrorDeviceResponseStatus)
-        assertEquals(
-            SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastErrorSessionDataStatus
-        )
-        assertEquals(1, fakeTerminator.terminateCalls)
-        assert("Policy violation: DeviceRequest does not request portrait attribute" in logger)
+            assertThat(orchestrator.holderSessionState.value, isFailed())
+            assertEquals(Status.GENERAL_ERROR, cryptoService.lastErrorDeviceResponseStatus)
+            assertEquals(
+                SessionDataStatus.SESSION_TERMINATION,
+                cryptoService.lastErrorSessionDataStatus
+            )
+            assertEquals(1, terminator.terminateCalls)
+            assert("Policy violation: DeviceRequest does not request portrait attribute" in logger)
+        }
     }
 
     @Test
     fun `AC3 - sendTerminationAndFail skips terminate when BLE send fails`() = runTest {
         fakeDecryptDeviceRequestUseCase.exception =
             RuntimeException("Decryption failed")
-        val fakeCryptoService = FakeHolderCryptoService()
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        peripheralTransport.sendMessageResult = false
-        val fakeTerminator = FakeHolderSessionTerminator()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            holderCryptoService = fakeCryptoService,
-            holderSessionTerminator = fakeTerminator
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        with(TerminationTestFixture()) {
+            transport.sendMessageResult = false
+            startAndDeliver()
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
-
-        assertThat(orchestrator.holderSessionState.value, isFailed())
-        assertEquals(0, fakeTerminator.terminateCalls)
+            assertThat(orchestrator.holderSessionState.value, isFailed())
+            assertEquals(0, terminator.terminateCalls)
+        }
     }
 
     @Test
@@ -1154,71 +1066,40 @@ class HolderOrchestratorTest {
             typeToReturn =
                 InboundMessageType.StatusOnly(SessionDataStatus.SESSION_TERMINATION)
         }
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val fakeTerminator = FakeHolderSessionTerminator()
-        val sessionFactory = createSessionFactory()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            sessionFactory = sessionFactory,
-            holderSessionTerminator = fakeTerminator,
-            inboundMessageClassifier = fakeClassifier
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        with(TerminationTestFixture(inboundMessageClassifier = fakeClassifier)) {
+            startAndDeliver()
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-
-        // Send a status-only SessionData while in ProcessingEstablishment
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
-
-        // Should be treated as peer termination (failed), not sequencing violation
-        assertThat(orchestrator.holderSessionState.value, isFailed())
-        // No outbound termination should be sent for a peer-initiated termination
-        assertEquals(0, fakeTerminator.terminateCalls)
-        assert(
-            logger.any { it.message.contains("Peer termination received") }
-        )
+            // Should be treated as peer termination (failed), not sequencing violation
+            assertThat(orchestrator.holderSessionState.value, isFailed())
+            // No outbound termination should be sent for a peer-initiated termination
+            assertEquals(0, terminator.terminateCalls)
+            assert(
+                logger.any { it.message.contains("Peer termination received") }
+            )
+        }
     }
 
     @Test
     fun `status-only SessionData in awaitingUserConsent is peer termination`() = runTest {
         val fakeClassifier = FakeInboundMessageClassifier()
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val sessionFactory = createSessionFactory()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            sessionFactory = sessionFactory,
-            inboundMessageClassifier = fakeClassifier
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        with(TerminationTestFixture(inboundMessageClassifier = fakeClassifier)) {
+            startAndDeliver()
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        // First message is normal (SessionEstablishment) to get to AwaitingUserConsent
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
-        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+            // Now switch classifier to return StatusOnly for the next message
+            fakeClassifier.typeToReturn =
+                InboundMessageType.StatusOnly(SessionDataStatus.SESSION_TERMINATION)
 
-        // Now switch classifier to return StatusOnly for the next message
-        fakeClassifier.typeToReturn =
-            InboundMessageType.StatusOnly(SessionDataStatus.SESSION_TERMINATION)
+            transport.emitState(
+                PeripheralBluetoothState.MessageReceived(byteArrayOf(4, 5, 6))
+            )
+            advanceUntilIdle()
 
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(4, 5, 6))
-        )
-        advanceUntilIdle()
-
-        assertThat(orchestrator.holderSessionState.value, isFailed())
-        assert(
-            logger.any { it.message.contains("Peer termination received") }
-        )
+            assertThat(orchestrator.holderSessionState.value, isFailed())
+            assert(
+                logger.any { it.message.contains("Peer termination received") }
+            )
+        }
     }
 
     @Test
@@ -1246,5 +1127,29 @@ class HolderOrchestratorTest {
         assertThat(orchestrator.holderSessionState.value, isSuccessful())
     }
 
-    // endregion
+    private inner class TerminationTestFixture(
+        val cryptoService: FakeHolderCryptoService = FakeHolderCryptoService(),
+        val transport: FakePeripheralBluetoothTransport = FakePeripheralBluetoothTransport(),
+        val terminator: FakeHolderSessionTerminator = FakeHolderSessionTerminator(),
+        confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
+        inboundMessageClassifier: InboundMessageClassifier = FakeInboundMessageClassifier()
+    ) {
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            holderCryptoService = cryptoService,
+            holderSessionTerminator = terminator,
+            confirmConsentUseCase = confirmConsentUseCase,
+            inboundMessageClassifier = inboundMessageClassifier
+        )
+
+        fun TestScope.startAndDeliver(bytes: ByteArray = byteArrayOf(1, 2, 3)) {
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+            transport.emitState(PeripheralBluetoothState.MessageReceived(bytes))
+            advanceUntilIdle()
+        }
+    }
 }
+
