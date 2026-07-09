@@ -56,6 +56,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
@@ -345,19 +347,6 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.Disconnected -> {
-                @RequiresImplementation(
-                    details = [
-                        ImplementationDetail(
-                            ticket = "DCMAW-16898",
-                            description = "We may need to handle explicit bluetooth " +
-                                "disconnection states to handle common error codes " +
-                                "8, 19, 22 and 133. The function below will handle " +
-                                "treat all disconnect states the same when connected " +
-                                "to a device"
-                        )
-                    ]
-                )
-
                 if (state.isSessionEnd) {
                     logger.debug(
                         logTag,
@@ -395,22 +384,25 @@ class HolderOrchestrator(
 
             is PeripheralBluetoothState.Ended -> handleSessionEnded(state)
 
-            is PeripheralBluetoothState.MessageReceived -> {
-                when (val type = inboundMessageClassifier.getMessageType(state.message)) {
-                    is InboundMessageType.SessionEstablishment ->
-                        handleSessionEstablishment(state.message)
+            is PeripheralBluetoothState.MessageReceived ->
+                handleMessageReceived(state.message)
+        }
+    }
 
-                    is InboundMessageType.StatusOnly ->
-                        handlePeerTermination(type.status)
+    private fun handleMessageReceived(message: ByteArray) {
+        when (val type = inboundMessageClassifier.getMessageType(message)) {
+            is InboundMessageType.SessionEstablishment ->
+                handleSessionEstablishment(message)
 
-                    is InboundMessageType.Unknown -> {
-                        logger.error(logTag, UNRECOGNISED_MESSAGE)
-                        appCoroutineScope.launch {
-                            sendTerminationAndFail(
-                                IllegalStateException(UNRECOGNISED_MESSAGE)
-                            )
-                        }
-                    }
+            is InboundMessageType.StatusOnly ->
+                handlePeerTermination(type.status)
+
+            is InboundMessageType.Unknown -> {
+                logger.error(logTag, UNRECOGNISED_MESSAGE)
+                appCoroutineScope.launch {
+                    sendTerminationAndFail(
+                        IllegalStateException(UNRECOGNISED_MESSAGE)
+                    )
                 }
             }
         }
@@ -780,14 +772,13 @@ class HolderOrchestrator(
     private fun deviceRequestContainsPortrait(deviceRequest: DeviceRequest): Boolean =
         deviceRequest.docRequests.any { docRequest ->
             docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
-                namespace == MDL_NAMESPACE && elements.containsKey(PORTRAIT_ATTRIBUTE)
+                namespace == DocumentType.Mdl.NAMESPACE &&
+                    elements.containsKey(MdlAttribute.Portrait.value)
             }
         }
 
     private companion object {
         const val UNKNOWN_ERROR = "Unknown error"
-        const val MDL_NAMESPACE = "org.iso.18013.5.1"
-        const val PORTRAIT_ATTRIBUTE = "portrait"
         const val PORTRAIT_POLICY_VIOLATION =
             "Policy violation: DeviceRequest does not request portrait attribute"
         const val UNRECOGNISED_MESSAGE =

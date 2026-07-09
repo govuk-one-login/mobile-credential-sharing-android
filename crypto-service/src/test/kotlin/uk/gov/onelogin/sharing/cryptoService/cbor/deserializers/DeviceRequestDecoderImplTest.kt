@@ -52,7 +52,7 @@ class DeviceRequestDecoderImplTest {
             deviceRequestDecoderImpl.deviceRequestDecoder(INVALID_CBOR.toByteArray())
         }
 
-        assert(logger.contains("session termination: status code 11"))
+        assert(logger.any { it.message.startsWith("DeviceRequest CBOR decoding failed") })
     }
 
     @Test
@@ -61,7 +61,7 @@ class DeviceRequestDecoderImplTest {
             deviceRequestDecoderImpl.deviceRequestDecoder(emptyDocRequest)
         }
 
-        assert(logger.contains("empty DocRequest: status code 12"))
+        assert(logger.contains("DeviceRequest contains empty DocRequests"))
     }
 
     private fun assertDeviceRequestParsedCorrectly(deviceRequest: DeviceRequest) {

@@ -926,6 +926,24 @@ class HolderOrchestratorTest {
         }
 
     @Test
+    fun `unrecognised message in processingEstablishment sends status 20 and terminates`() =
+        runTest {
+            val fakeClassifier = FakeInboundMessageClassifier().apply {
+                typeToReturn = InboundMessageType.Unknown
+            }
+            with(TerminationTestFixture(inboundMessageClassifier = fakeClassifier)) {
+                startAndDeliver()
+
+                assertThat(orchestrator.holderSessionState.value, isFailed())
+                assertEquals(1, terminator.terminateCalls)
+                assertEquals(
+                    SessionDataStatus.SESSION_TERMINATION,
+                    cryptoService.lastBuildTerminationStatus
+                )
+            }
+        }
+
+    @Test
     fun `sequencing violation in awaitingUserConsent sends status 20 and terminates`() = runTest {
         with(TerminationTestFixture()) {
             startAndDeliver()
@@ -1009,28 +1027,27 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `AC5 - DeviceRequest validation failure sends status 12 over BLE and terminates`() =
-        runTest {
-            fakeDecryptDeviceRequestUseCase.exceptionAfterKeyDerivation =
-                DeviceRequestValidationException("empty DocRequest")
-            with(TerminationTestFixture()) {
-                startAndDeliver()
+    fun `DeviceRequest validation failure sends status 12 over BLE and terminates`() = runTest {
+        fakeDecryptDeviceRequestUseCase.exceptionAfterKeyDerivation =
+            DeviceRequestValidationException("empty DocRequest")
+        with(TerminationTestFixture()) {
+            startAndDeliver()
 
-                assertThat(orchestrator.holderSessionState.value, isFailed())
-                assertEquals(
-                    Status.CBOR_VALIDATION_ERROR,
-                    cryptoService.lastErrorDeviceResponseStatus
-                )
-                assertEquals(
-                    SessionDataStatus.SESSION_TERMINATION,
-                    cryptoService.lastErrorSessionDataStatus
-                )
-                assertEquals(1, terminator.terminateCalls)
-            }
+            assertThat(orchestrator.holderSessionState.value, isFailed())
+            assertEquals(
+                Status.CBOR_VALIDATION_ERROR,
+                cryptoService.lastErrorDeviceResponseStatus
+            )
+            assertEquals(
+                SessionDataStatus.SESSION_TERMINATION,
+                cryptoService.lastErrorSessionDataStatus
+            )
+            assertEquals(1, terminator.terminateCalls)
         }
+    }
 
     @Test
-    fun `AC6 - missing portrait attribute sends status 10 over BLE and terminates`() = runTest {
+    fun `missing portrait attribute sends status 10 over BLE and terminates`() = runTest {
         // Return a DeviceRequest without portrait
         fakeDecryptDeviceRequestUseCase.deviceRequestToReturn = deviceRequest(
             mapOf("age_over_18" to false)
@@ -1050,7 +1067,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `AC3 - sendTerminationAndFail skips terminate when BLE send fails`() = runTest {
+    fun `sendTerminationAndFail skips terminate when BLE send fails`() = runTest {
         fakeDecryptDeviceRequestUseCase.exception =
             RuntimeException("Decryption failed")
         with(TerminationTestFixture()) {
@@ -1088,7 +1105,6 @@ class HolderOrchestratorTest {
             startAndDeliver()
             assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-            // Now switch classifier to return StatusOnly for the next message
             fakeClassifier.typeToReturn =
                 InboundMessageType.StatusOnly(SessionDataStatus.SESSION_TERMINATION)
 
