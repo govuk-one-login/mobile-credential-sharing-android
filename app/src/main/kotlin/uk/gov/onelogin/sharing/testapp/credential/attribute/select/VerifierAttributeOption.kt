@@ -25,5 +25,13 @@ enum class VerifierAttributeOption(val displayName: String, val attributeGroup: 
                 MdlAttribute.AgeOver(AGE_18) to false
             )
         )
+    ),
+    UNFULFILLABLE(
+        displayName = "Unfulfillable (eye colour)",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Custom("eye_colour") to false
+            )
+        )
     )
 }

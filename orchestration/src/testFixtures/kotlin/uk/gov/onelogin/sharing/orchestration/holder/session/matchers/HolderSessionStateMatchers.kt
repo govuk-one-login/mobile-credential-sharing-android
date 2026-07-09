@@ -68,6 +68,10 @@ object HolderSessionStateMatchers {
         HolderSessionState.AwaitingUserConsent::class.java
     )
 
+    fun isAwaitingVerifierResolution(): Matcher<in HolderSessionState> = instanceOf(
+        HolderSessionState.AwaitingVerifierResolution::class.java
+    )
+
     fun isSuccessful(): Matcher<in HolderSessionState> = instanceOf(
         HolderSessionState.Complete.Success::class.java
     )

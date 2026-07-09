@@ -34,15 +34,23 @@ class HolderCryptoServiceImpl(
         encryptCounter: UInt
     ): ByteArray {
         val encryptedPayload = encryptDeviceResponse(
-            deviceResponse = DeviceResponse(
-                status = deviceResponseStatus
-            ),
+            deviceResponse = DeviceResponse(status = deviceResponseStatus).also {
+                logger.debug(
+                    logTag,
+                    "Building DeviceResponse: status=${it.status.code}, " +
+                        "documentCount=${it.documentCount}"
+                )
+            },
             skDevice = skDevice,
             encryptCounter = encryptCounter
         )
+
         return SessionData(data = encryptedPayload, status = sessionDataStatus)
             .toDto()
             .toCbor()
+            .also {
+                logger.debug(logTag, "SessionData built with status=${sessionDataStatus.code}")
+            }
     }
 
     override fun buildDeviceResponse(
@@ -51,13 +59,20 @@ class HolderCryptoServiceImpl(
         encryptCounter: UInt
     ): ByteArray {
         val encryptedPayload = encryptDeviceResponse(
-            deviceResponse = DeviceResponse(
-                documents = documents
-            ),
+            deviceResponse = DeviceResponse(documents = documents).also {
+                logger.debug(
+                    logTag,
+                    "Building DeviceResponse: status=${it.status.code}, " +
+                        "documentCount=${it.documentCount}"
+                )
+            },
             skDevice = skDevice,
             encryptCounter = encryptCounter
         )
-        return SessionData(data = encryptedPayload).toDto().toCbor()
+
+        return SessionData(data = encryptedPayload).toDto().toCbor().also {
+            logger.debug(logTag, "SessionData built with no status key")
+        }
     }
 
     private fun encryptDeviceResponse(

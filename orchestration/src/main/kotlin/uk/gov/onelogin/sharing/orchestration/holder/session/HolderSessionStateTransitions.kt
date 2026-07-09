@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 import java.util.Collections.singleton
 import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingVerifierResolution
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Success
@@ -52,13 +53,18 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
     PresentingEngagement::class to setOf(
         ProcessingEstablishment::class
     ) + fullErrorHandling,
-    ProcessingEstablishment::class to singleton(
-        AwaitingUserConsent::class
+    ProcessingEstablishment::class to setOf(
+        AwaitingUserConsent::class,
+        Success::class
     ) + fullErrorHandling,
     AwaitingUserConsent::class to singleton(
         ProcessingResponse::class
     ) + fullErrorHandling,
-    ProcessingResponse::class to singleton(
+    ProcessingResponse::class to setOf(
+        AwaitingVerifierResolution::class,
+        Success::class
+    ) + fullErrorHandling,
+    AwaitingVerifierResolution::class to singleton(
         Success::class
     ) + fullErrorHandling
 )

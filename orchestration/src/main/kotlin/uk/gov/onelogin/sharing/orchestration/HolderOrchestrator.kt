@@ -49,6 +49,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCas
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
@@ -69,7 +70,8 @@ class HolderOrchestrator(
     private val holderCryptoService: HolderCryptoService,
     private val prerequisiteGate: PrerequisiteGate,
     private val confirmConsentUseCase: ConfirmConsentUseCase,
-    private val credentialRequestHandler: CredentialRequestHandler
+    private val credentialRequestHandler: CredentialRequestHandler,
+    private val holderSessionTerminator: HolderSessionTerminator
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -221,7 +223,7 @@ class HolderOrchestrator(
                         encryptCounter = context.encryptCounter
                     )
 
-                    peripheralBluetoothTransport.sendMessage(
+                    val sent = peripheralBluetoothTransport.sendMessage(
                         serviceUuid = context.sessionUuid,
                         data = sessionDataBytes
                     )
@@ -230,7 +232,14 @@ class HolderOrchestrator(
                         it.copy(encryptCounter = it.encryptCounter + 1u)
                     }
 
-                    safeTransitionTo(HolderSessionState.Complete.Success)
+                    if (sent) {
+                        safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
+                    } else {
+                        failWith(
+                            message = "Failed to send DeviceResponse",
+                            reason = SessionErrorReason.CannotSendMessage
+                        )
+                    }
                 } catch (e: DeviceSignatureException) {
                     sendTerminationAndFail(e)
                 }
@@ -245,7 +254,7 @@ class HolderOrchestrator(
         val context = currentContext
         try {
             assert(state is HolderSessionState.AwaitingUserConsent) {
-                "confirmConsent called in an invalid state: $state"
+                "denyConsent called in an invalid state: $state"
             }
             check(state is HolderSessionState.AwaitingUserConsent)
             safeTransitionTo(HolderSessionState.ProcessingResponse)
@@ -262,12 +271,20 @@ class HolderOrchestrator(
             )
 
             appCoroutineScope.launch {
-                peripheralBluetoothTransport.sendMessage(
+                val sent = peripheralBluetoothTransport.sendMessage(
                     serviceUuid = context.sessionUuid,
                     data = sessionDataBytes
                 )
 
-                safeTransitionTo(HolderSessionState.Complete.Cancelled)
+                if (sent) {
+                    holderSessionTerminator.terminate(context.sessionUuid)
+                }
+
+                safeTransitionTo(
+                    HolderSessionState.Complete.Success(
+                        HolderSessionState.Complete.SuccessReason.Denied
+                    )
+                )
             }
         } catch (e: IllegalStateException) {
             sendTerminationAndFail(e)
@@ -369,7 +386,18 @@ class HolderOrchestrator(
             PeripheralBluetoothState.Idle -> Unit
 
             is PeripheralBluetoothState.Ended -> {
-                safeTransitionTo(HolderSessionState.Complete.Cancelled)
+                when (sessionFlow.value.currentState.value) {
+                    is HolderSessionState.ProcessingResponse -> Unit
+
+                    is HolderSessionState.AwaitingVerifierResolution
+                    if (state.status == SessionEndStates.SUCCESS) -> {
+                        safeTransitionTo(HolderSessionState.Complete.Success())
+                    }
+
+                    else -> {
+                        safeTransitionTo(HolderSessionState.Complete.Cancelled)
+                    }
+                }
 
                 if (state.status == SessionEndStates.SUCCESS) {
                     logger.debug(logTag, "Mdoc - Ending session")
@@ -451,28 +479,38 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleNoMatchTermination(exception: Exception) {
+    private suspend fun handleNoMatchTermination(exception: Exception) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         val context = currentContext
         val skDevice = context.skDevice
 
-        skDevice?.let {
-            holderCryptoService.buildErrorSessionData(
+        if (skDevice != null) {
+            val sessionDataBytes = holderCryptoService.buildErrorSessionData(
                 deviceResponseStatus = Status.OK,
                 sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
-                skDevice = it,
+                skDevice = skDevice,
                 encryptCounter = context.encryptCounter
             )
-        }
 
-        safeTransitionTo(
-            HolderSessionState.Complete.Failed(
-                SessionError(
-                    message = exception.message ?: UNKNOWN_ERROR,
-                    exception = exception
+            val sent = peripheralBluetoothTransport.sendMessage(
+                serviceUuid = context.sessionUuid,
+                data = sessionDataBytes
+            )
+
+            safeTransitionTo(
+                HolderSessionState.Complete.Success(
+                    HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
                 )
             )
-        )
+
+            if (sent) {
+                holderSessionTerminator.terminate(context.sessionUuid)
+            }
+        } else {
+            sendTerminationAndFail(
+                IllegalStateException("Missing skDevice during no-match termination")
+            )
+        }
     }
 
     private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
