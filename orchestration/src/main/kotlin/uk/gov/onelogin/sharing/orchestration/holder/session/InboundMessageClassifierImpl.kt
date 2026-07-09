@@ -9,6 +9,16 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 
+/**
+ * MVP scope constraint (Holder perspective): The only valid inbound messages from
+ * the Verifier to the Holder are:
+ * SessionEstablishment — exactly once, containing the initial DeviceRequest.
+ * SessionData without a data payload — status-only termination.
+ *
+ * @see
+ *   <a href="https://govukverify.atlassian.net/wiki/spaces/DCMAW/pages/6707577055">
+ *   Session Termination - Behaviour</a>
+ */
 @ContributesBinding(scope = AppScope::class, binding = binding<InboundMessageClassifier>())
 class InboundMessageClassifierImpl(private val logger: Logger) : InboundMessageClassifier {
     override fun getMessageType(rawBytes: ByteArray): InboundMessageType {
