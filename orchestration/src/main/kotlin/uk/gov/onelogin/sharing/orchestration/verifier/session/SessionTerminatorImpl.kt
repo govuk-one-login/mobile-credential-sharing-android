@@ -27,8 +27,6 @@ class SessionTerminatorImpl(
     private val verifierCryptoService: VerifierCryptoService,
     private val logger: Logger
 ) : SessionTerminator {
-    private val _state = MutableStateFlow(TerminationState.IDLE)
-    override val state: StateFlow<TerminationState> = _state
 
     /**
      * Executes the termination protocol.
@@ -42,36 +40,28 @@ class SessionTerminatorImpl(
         bleOpen: Boolean,
         holderRequestedTermination: Boolean
     ) {
-        if (!bleOpen) {
-            _state.value = TerminationState.TERMINATED
-            return
-        }
+        if (bleOpen) {
+            if (!holderRequestedTermination && serviceUuid != null) {
+                logger.debug(logTag, "Sending termination session data")
 
-        if (!holderRequestedTermination && serviceUuid != null) {
-            _state.value = TerminationState.SENDING_TERMINATION
-            logger.debug(logTag, "Sending termination session data")
+                val terminationBytes = verifierCryptoService.buildTerminationSessionData()
+                val sent = centralBluetoothTransport.sendMessage(
+                    serviceUuid = serviceUuid,
+                    data = terminationBytes
+                )
 
-            val terminationBytes = verifierCryptoService.buildTerminationSessionData()
-            val sent = centralBluetoothTransport.sendMessage(
-                serviceUuid = serviceUuid,
-                data = terminationBytes
-            )
-
-            if (sent) {
-                _state.value = TerminationState.AWAITING_DELAY
-                delay(TERMINATION_DELAY_MS.milliseconds)
+                if (sent) {
+                    delay(TERMINATION_DELAY_MS.milliseconds)
+                }
             }
+
+            logger.debug(logTag, "Sending GATT END command")
+            centralBluetoothTransport.sendEnd()
         }
 
-        _state.value = TerminationState.SENDING_GATT_END
-        logger.debug(logTag, "Sending GATT END command")
-        centralBluetoothTransport.sendEnd()
-
-        _state.value = TerminationState.STOPPING
         logger.debug(logTag, "Stopping BLE connection")
         centralBluetoothTransport.stop()
 
-        _state.value = TerminationState.TERMINATED
         logger.debug(logTag, "Session terminated")
     }
 
