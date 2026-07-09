@@ -294,28 +294,26 @@ class VerifierOrchestrator(
     }
 
     private fun handleCentralBluetoothStateMessage(state: CentralBluetoothState.Message) {
-        val sessionData = parseSessionData(state.value) ?: return
+        parseSessionData(state.value)?.let { sessionData ->
+            val status = sessionData.status
+            val data = sessionData.data
 
-        val status = sessionData.status
-        val data = sessionData.data
-        val holderRequestedTermination = status == SESSION_TERMINATION
+            val statusInitiatedTermination = status != null
 
-        when {
-            isMalformedSessionData(sessionData) ->
-                handleInvalidSessionData(INVALID_SESSION_DATA)
+            when {
+                isMalformedSessionData(sessionData) ->
+                    handleInvalidSessionData(INVALID_SESSION_DATA)
 
-            isUnexpectedStatusWithData(sessionData) ->
-                handleUnexpectedStatusWithData(status!!)
+                isUnexpectedStatusWithData(sessionData) ->
+                    handleUnexpectedStatusWithData(status!!)
 
-            data == null && !holderRequestedTermination ->
-                handleInvalidSessionData(INVALID_SESSION_DATA)
+                data == null ->
+                    handleTerminationWithoutData(statusInitiatedTermination)
 
-            data == null ->
-                handleTerminationWithoutData()
-
-            else -> {
-                logger.debug(logTag, "Deserialized SessionData from bluetooth central Message")
-                decryptAndProcessResponse(data, holderRequestedTermination)
+                else -> {
+                    logger.debug(logTag, "Deserialized SessionData from bluetooth central Message")
+                    decryptAndProcessResponse(data, status == SESSION_TERMINATION)
+                }
             }
         }
     }
@@ -360,12 +358,20 @@ class VerifierOrchestrator(
         )
     }
 
-    private fun handleTerminationWithoutData() {
+    private fun handleTerminationWithoutData(terminationAlreadyReceived: Boolean) {
         logger.error(logTag, INVALID_SESSION_DATA)
-        logger.debug(logTag, "Received SessionData termination from holder")
+        logger.debug(
+            logTag,
+            "Received status-only SessionData. Termination received: $terminationAlreadyReceived"
+        )
+
         appCoroutineScope.launch {
-            terminateSession(centralBluetoothTransport.isBleOpen, true)
+            terminateSession(
+                bleOpen = centralBluetoothTransport.isBleOpen,
+                receivedTermination = terminationAlreadyReceived
+            )
         }
+
         safeTransitionTo(
             VerifierSessionState.Complete.Failed(
                 SessionError(

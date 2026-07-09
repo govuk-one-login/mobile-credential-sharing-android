@@ -52,12 +52,12 @@ import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.OrchestratorStubs.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
+import uk.gov.onelogin.sharing.orchestration.session.FakeSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnverifiableDocument
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
-import uk.gov.onelogin.sharing.orchestration.verifier.session.FakeSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.nameRetainAndAgeOver18Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.photoAndAgeOver21Config
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
@@ -1329,6 +1329,119 @@ class VerifierOrchestratorTest {
         assertEquals(VerifierSessionState.Verifying, orchestrator.verifierSessionState.value)
         assertEquals(0, centralBluetoothTransport.sendEndCalls)
         assertEquals(0, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `status-only SessionData in Connecting with BLE open sends GATT End but no status 20`() =
+        runTest {
+            initialStates[0] = VerifierSessionState.Connecting
+            val orchestrator = createOrchestrator()
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+
+            fakeCryptoService.establishSession(VALID_MDOC_URI) { context ->
+                sessionFactory.getCurrentSession().updateCryptoContext { context }
+                context
+            }
+
+            centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+            advanceUntilIdle()
+
+            fakeCryptoService.sessionData =
+                SessionData(data = null, status = SessionDataStatus.ERROR_SESSION_ENCRYPTION)
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(
+                    SERVER_2_CLIENT_UUID,
+                    CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+                )
+            )
+            advanceUntilIdle()
+
+            assertThat(orchestrator.verifierSessionState.value, isFailed())
+            assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
+            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+        }
+
+    @Test
+    fun `status-only SessionData in Connecting with BLE closed skips GATT End`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Disconnected(
+                "address",
+                isSessionEnd = true
+            )
+        )
+        advanceUntilIdle()
+
+        fakeCryptoService.sessionData =
+            SessionData(data = null, status = SessionDataStatus.SESSION_TERMINATION)
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+            )
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.verifierSessionState.value, isFailed())
+        assertEquals(0, centralBluetoothTransport.sendEndCalls)
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `late data during successful validation is ignored and session reaches Success`() =
+        runTest {
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
+            orchestrator.processQrCode(VALID_MDOC_URI)
+            centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(
+                    SERVER_2_CLIENT_UUID,
+                    CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+                )
+            )
+
+            centralBluetoothTransport.emitState(
+                CentralBluetoothState.Message(SERVER_2_CLIENT_UUID, byteArrayOf(0x99.toByte()))
+            )
+
+            advanceUntilIdle()
+            assertThat(orchestrator.verifierSessionState.value, isSuccess())
+            assertEquals(1u, fakeCryptoService.lastDecryptCounter)
+        }
+
+    @Test
+    fun `late data during failing validation is ignored and session reaches Failed`() = runTest {
+        documentVerifier = DocumentVerifier { _, _ ->
+            throw VerificationResult.Failure(VerificationError.INVALID_ISSUER_SIGNATURE)
+        }
+
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+            )
+        )
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(SERVER_2_CLIENT_UUID, byteArrayOf(0x99.toByte()))
+        )
+
+        advanceUntilIdle()
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(hasReason(isUnverifiableDocument(VerificationError.INVALID_ISSUER_SIGNATURE)))
+        )
     }
 
     class ErrorStatusProvider : TestParameterValuesProvider() {

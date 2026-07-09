@@ -1,18 +1,14 @@
-package uk.gov.onelogin.sharing.orchestration.verifier.session
+package uk.gov.onelogin.sharing.orchestration.session
 
 import java.util.UUID
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
+import uk.gov.onelogin.sharing.orchestration.verifier.session.SessionTerminator
 
 class FakeSessionTerminator(
     private val transport: CentralBluetoothTransport? = null,
     private val cryptoService: VerifierCryptoService? = null
 ) : SessionTerminator {
-
-    private val _state = MutableStateFlow(TerminationState.IDLE)
-    override val state: StateFlow<TerminationState> = _state
 
     var terminateCalls = 0
     var lastServiceUuid: UUID? = null
@@ -36,12 +32,9 @@ class FakeSessionTerminator(
                 buildTerminationSessionDataCalls++
                 cryptoService?.buildTerminationSessionData()
             }
-
             transport?.sendEnd()
         }
 
         transport?.stop()
-
-        _state.value = TerminationState.TERMINATED
     }
 }

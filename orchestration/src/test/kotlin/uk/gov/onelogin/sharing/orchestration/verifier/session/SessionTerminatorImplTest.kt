@@ -1,12 +1,13 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
-import app.cash.turbine.test
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Before
@@ -53,35 +54,6 @@ class SessionTerminatorImplTest {
 
             assertEquals(1, fakeTransport.sendEndCalls)
             assertEquals(1, fakeTransport.stopCalls)
-            assertEquals(TerminationState.TERMINATED, terminator.state.value)
-        }
-
-    @Test
-    fun `state machine emits correct sequence when BLE open and holder did not send status 20`() =
-        runTest {
-            terminator.state.test {
-                assertEquals(TerminationState.IDLE, awaitItem())
-
-                val job = launch {
-                    terminator.terminate(
-                        serviceUuid = serviceUuid,
-                        bleOpen = true,
-                        holderRequestedTermination = false
-                    )
-                }
-
-                assertEquals(TerminationState.SENDING_TERMINATION, awaitItem())
-                assertEquals(TerminationState.AWAITING_DELAY, awaitItem())
-
-                advanceTimeBy((SessionTerminatorImpl.TERMINATION_DELAY_MS + 1).milliseconds)
-
-                assertEquals(TerminationState.SENDING_GATT_END, awaitItem())
-                assertEquals(TerminationState.STOPPING, awaitItem())
-                assertEquals(TerminationState.TERMINATED, awaitItem())
-
-                job.join()
-                cancelAndIgnoreRemainingEvents()
-            }
         }
 
     @Test
@@ -113,30 +85,6 @@ class SessionTerminatorImplTest {
             assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
             assertEquals(1, fakeTransport.sendEndCalls)
             assertEquals(1, fakeTransport.stopCalls)
-            assertEquals(TerminationState.TERMINATED, terminator.state.value)
-        }
-
-    @Test
-    fun `state machine jumps directly to SENDING_END when holder sent status 20 and BLE open`() =
-        runTest {
-            terminator.state.test {
-                assertEquals(TerminationState.IDLE, awaitItem())
-
-                val job = launch {
-                    terminator.terminate(
-                        serviceUuid = serviceUuid,
-                        bleOpen = true,
-                        holderRequestedTermination = true
-                    )
-                }
-
-                assertEquals(TerminationState.SENDING_GATT_END, awaitItem())
-                assertEquals(TerminationState.STOPPING, awaitItem())
-                assertEquals(TerminationState.TERMINATED, awaitItem())
-
-                job.join()
-                cancelAndIgnoreRemainingEvents()
-            }
         }
 
     @Test
@@ -149,29 +97,7 @@ class SessionTerminatorImplTest {
 
         assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
         assertEquals(0, fakeTransport.sendEndCalls)
-        assertEquals(0, fakeTransport.stopCalls)
-
-        assertEquals(TerminationState.TERMINATED, terminator.state.value)
-    }
-
-    @Test
-    fun `state machine transitions directly to TERMINATED when BLE closed`() = runTest {
-        terminator.state.test {
-            assertEquals(TerminationState.IDLE, awaitItem())
-
-            val job = launch {
-                terminator.terminate(
-                    serviceUuid = serviceUuid,
-                    bleOpen = false,
-                    holderRequestedTermination = true
-                )
-            }
-
-            assertEquals(TerminationState.TERMINATED, awaitItem())
-
-            job.join()
-            cancelAndIgnoreRemainingEvents()
-        }
+        assertEquals(1, fakeTransport.stopCalls)
     }
 
     @Test
@@ -184,8 +110,7 @@ class SessionTerminatorImplTest {
 
         assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
         assertEquals(0, fakeTransport.sendEndCalls)
-        assertEquals(0, fakeTransport.stopCalls)
-        assertEquals(TerminationState.TERMINATED, terminator.state.value)
+        assertEquals(1, fakeTransport.stopCalls)
     }
 
     @Test
@@ -200,57 +125,23 @@ class SessionTerminatorImplTest {
             assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
             assertEquals(1, fakeTransport.sendEndCalls)
             assertEquals(1, fakeTransport.stopCalls)
-
-            assertEquals(TerminationState.TERMINATED, terminator.state.value)
         }
 
     @Test
-    fun `does not enter AWAITING_DELAY state when termination message fails to send`() = runTest {
+    fun `skips delay when termination message fails to send`() = runTest {
         fakeTransport.sendMessageToReturn = false
 
-        terminator.state.test {
-            assertEquals(TerminationState.IDLE, awaitItem())
+        val startTime = currentTime
 
-            val job = launch {
-                terminator.terminate(
-                    serviceUuid = serviceUuid,
-                    bleOpen = true,
-                    holderRequestedTermination = false
-                )
-            }
+        terminator.terminate(
+            serviceUuid = serviceUuid,
+            bleOpen = true,
+            holderRequestedTermination = false
+        )
 
-            assertEquals(TerminationState.SENDING_TERMINATION, awaitItem())
-
-            assertEquals(TerminationState.SENDING_GATT_END, awaitItem())
-            assertEquals(TerminationState.STOPPING, awaitItem())
-            assertEquals(TerminationState.TERMINATED, awaitItem())
-
-            job.join()
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `waits for sendMessage to complete before entering AWAITING_DELAY`() = runTest {
-        terminator.state.test {
-            assertEquals(TerminationState.IDLE, awaitItem())
-
-            val job = launch {
-                terminator.terminate(
-                    serviceUuid = serviceUuid,
-                    bleOpen = true,
-                    holderRequestedTermination = false
-                )
-            }
-
-            assertEquals(TerminationState.SENDING_TERMINATION, awaitItem())
-            assertEquals(TerminationState.AWAITING_DELAY, awaitItem())
-
-            advanceTimeBy(SessionTerminatorImpl.TERMINATION_DELAY_MS.milliseconds)
-
-            assertEquals(TerminationState.SENDING_GATT_END, awaitItem())
-            job.join()
-            cancelAndIgnoreRemainingEvents()
-        }
+        val endTime = currentTime
+        assertEquals(0L, endTime - startTime)
+        assertEquals(1, fakeTransport.sendEndCalls)
+        assertFalse(fakeTransport.sendMessageToReturn)
     }
 }
