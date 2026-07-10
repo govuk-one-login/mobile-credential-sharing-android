@@ -27,8 +27,8 @@ class FakeSessionTerminator(
         lastBleOpen = bleOpen
         lastHolderRequestedTermination = holderRequestedTermination
 
-        if (bleOpen) {
-            if (!holderRequestedTermination && serviceUuid != null) {
+        if (bleOpen && !holderRequestedTermination) {
+            if (serviceUuid != null) {
                 buildTerminationSessionDataCalls++
                 cryptoService?.buildTerminationSessionData()
             }

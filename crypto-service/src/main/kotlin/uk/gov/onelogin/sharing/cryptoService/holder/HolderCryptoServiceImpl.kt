@@ -70,7 +70,7 @@ class HolderCryptoServiceImpl(
             encryptCounter = encryptCounter
         )
 
-        return SessionData(data = encryptedPayload).toDto().toCbor().also {
+        return SessionData(data = encryptedPayload, status = SessionDataStatus.SESSION_TERMINATION).toDto().toCbor().also {
             logger.debug(logTag, "SessionData built with no status key")
         }
     }

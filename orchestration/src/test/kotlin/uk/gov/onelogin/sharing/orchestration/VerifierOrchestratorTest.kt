@@ -1116,7 +1116,7 @@ class VerifierOrchestratorTest {
 
             assertThat(orchestrator.verifierSessionState.value, isSuccess())
             assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
-            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+            assertEquals(0, centralBluetoothTransport.sendEndCalls)
             assertEquals(1, centralBluetoothTransport.stopCalls)
         }
 
@@ -1151,7 +1151,7 @@ class VerifierOrchestratorTest {
             )
         )
         assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
-        assertEquals(1, centralBluetoothTransport.sendEndCalls)
+        assertEquals(0, centralBluetoothTransport.sendEndCalls)
         assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 
@@ -1249,7 +1249,7 @@ class VerifierOrchestratorTest {
 
             assertThat(orchestrator.verifierSessionState.value, isFailed())
             assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
-            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+            assertEquals(0, centralBluetoothTransport.sendEndCalls)
             assertEquals(1, centralBluetoothTransport.stopCalls)
 
             val context = sessionFactory.getCurrentSession().cryptoContext
@@ -1286,7 +1286,7 @@ class VerifierOrchestratorTest {
         }
 
     @Test
-    fun `SessionData with data and non-20 status in Connecting sends only GATT End`() = runTest {
+    fun `SessionData with data and non-20 status in Connecting skips GATT End`() = runTest {
         initialStates[0] = VerifierSessionState.Connecting
         val orchestrator = createOrchestrator()
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
@@ -1307,7 +1307,7 @@ class VerifierOrchestratorTest {
 
         assertThat(orchestrator.verifierSessionState.value, isFailed())
         assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
-        assertEquals(1, centralBluetoothTransport.sendEndCalls)
+        assertEquals(0, centralBluetoothTransport.sendEndCalls)
         assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 
@@ -1358,7 +1358,7 @@ class VerifierOrchestratorTest {
 
             assertThat(orchestrator.verifierSessionState.value, isFailed())
             assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
-            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+            assertEquals(0, centralBluetoothTransport.sendEndCalls)
             assertEquals(1, centralBluetoothTransport.stopCalls)
         }
 

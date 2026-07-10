@@ -74,7 +74,7 @@ class SessionTerminatorImplTest {
     }
 
     @Test
-    fun `BLE open, holder sent status 20, skips termination message, sends GATT End then stops`() =
+    fun `BLE open, holder sent status 20, skips termination message and GATT End then stops`() =
         runTest {
             terminator.terminate(
                 serviceUuid = serviceUuid,
@@ -83,7 +83,7 @@ class SessionTerminatorImplTest {
             )
 
             assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
-            assertEquals(1, fakeTransport.sendEndCalls)
+            assertEquals(0, fakeTransport.sendEndCalls)
             assertEquals(1, fakeTransport.stopCalls)
         }
 
