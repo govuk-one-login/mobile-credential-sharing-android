@@ -415,6 +415,9 @@ class HolderOrchestrator(
             is HolderSessionState.AwaitingVerifierResolution
             if (state.status == SessionEndStates.SUCCESS) -> {
                 safeTransitionTo(HolderSessionState.Complete.Success())
+                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                stopAdvertising(sendEndCommand = false)
+                logger.debug(logTag, "Holder session terminated")
             }
 
             else -> {
@@ -751,11 +754,14 @@ class HolderOrchestrator(
 
         when (currentState) {
             is HolderSessionState.AwaitingVerifierResolution -> {
-                stopAdvertising(sendEndCommand = false)
                 safeTransitionTo(HolderSessionState.Complete.Success())
+                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                stopAdvertising(sendEndCommand = false)
+                logger.debug(logTag, "Holder session terminated")
             }
 
             else -> {
+                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
                 stopAdvertising(sendEndCommand = false)
                 safeTransitionTo(
                     HolderSessionState.Complete.Failed(
@@ -783,5 +789,6 @@ class HolderOrchestrator(
             "Policy violation: DeviceRequest does not request portrait attribute"
         const val UNRECOGNISED_MESSAGE =
             "Sequencing violation: inbound message is not a recognised type"
+        const val STOPPING_BLE_ADVERTISING = "Stopping BLE advertising"
     }
 }

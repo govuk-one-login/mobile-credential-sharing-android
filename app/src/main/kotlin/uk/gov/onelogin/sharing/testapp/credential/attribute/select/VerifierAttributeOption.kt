@@ -7,7 +7,7 @@ private const val AGE_18 = 18
 private const val AGE_21 = 21
 
 enum class VerifierAttributeOption(val displayName: String, val attributeGroup: AttributeGroup) {
-    PHOTO_AND_AGE_OVER_21(
+    PORTRAIT_AND_AGE_OVER_21(
         displayName = "Portrait and Age Over 21",
         attributeGroup = AttributeGroup(
             mapOf(
@@ -16,7 +16,7 @@ enum class VerifierAttributeOption(val displayName: String, val attributeGroup: 
             )
         )
     ),
-    PHOTO_NAME_RETAIN_AND_AGE_OVER_18(
+    PORTRAIT_NAME_RETAIN_AND_AGE_OVER_18(
         displayName = "Portrait and Name (Retain) and Age Over 18",
         attributeGroup = AttributeGroup(
             mapOf(
