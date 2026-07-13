@@ -40,8 +40,8 @@ class SessionTerminatorImpl(
         bleOpen: Boolean,
         holderRequestedTermination: Boolean
     ) {
-        if (bleOpen) {
-            if (!holderRequestedTermination && serviceUuid != null) {
+        if (bleOpen && !holderRequestedTermination) {
+            if (serviceUuid != null) {
                 logger.debug(logTag, "Sending termination session data")
 
                 val terminationBytes = verifierCryptoService.buildTerminationSessionData()

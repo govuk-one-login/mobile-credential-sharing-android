@@ -5,10 +5,8 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -300,7 +298,7 @@ class VerifierOrchestrator(
             val status = sessionData.status
             val data = sessionData.data
 
-            val statusInitiatedTermination = status != null
+            val isTerminalStatus = status != null && status != SessionDataStatus.OK
 
             when {
                 isMalformedSessionData(sessionData) ->
@@ -310,7 +308,7 @@ class VerifierOrchestrator(
                     handleUnexpectedStatusWithData(status!!)
 
                 data == null ->
-                    handleTerminationWithoutData(statusInitiatedTermination)
+                    handleTerminationWithoutData(isTerminalStatus)
 
                 else -> {
                     logger.debug(logTag, "Deserialized SessionData from bluetooth central Message")
