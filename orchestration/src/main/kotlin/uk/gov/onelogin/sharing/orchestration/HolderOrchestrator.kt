@@ -754,7 +754,18 @@ class HolderOrchestrator(
 
         when (currentState) {
             is HolderSessionState.AwaitingVerifierResolution -> {
-                safeTransitionTo(HolderSessionState.Complete.Success())
+                if (status == SessionDataStatus.SESSION_TERMINATION) {
+                    safeTransitionTo(HolderSessionState.Complete.Success())
+                } else {
+                    safeTransitionTo(
+                        HolderSessionState.Complete.Failed(
+                            SessionError(
+                                message = "Status error: unexpected status ${status.code}",
+                                reason = SessionErrorReason.StatusError(status.code)
+                            )
+                        )
+                    )
+                }
                 logger.debug(logTag, STOPPING_BLE_ADVERTISING)
                 stopAdvertising(sendEndCommand = false)
                 logger.debug(logTag, "Holder session terminated")

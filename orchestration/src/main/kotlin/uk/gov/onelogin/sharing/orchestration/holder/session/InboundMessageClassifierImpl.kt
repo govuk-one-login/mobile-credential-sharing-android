@@ -39,7 +39,11 @@ class InboundMessageClassifierImpl(private val logger: Logger) : InboundMessageC
             !tree.has(KEY_DATA) && tree.has(KEY_STATUS) -> {
                 val statusCode = tree[KEY_STATUS].asInt().toUInt()
                 SessionDataStatus.from(statusCode)?.let { status ->
-                    logger.debug(logTag, "Classified inbound message as status-only: $status")
+                    logger.debug(
+                        logTag,
+                        "Classified inbound message " +
+                            "as status-only: $status ($statusCode)"
+                    )
                     InboundMessageType.StatusOnly(status)
                 } ?: run {
                     logger.debug(logTag, "Inbound message does not match any known type")
