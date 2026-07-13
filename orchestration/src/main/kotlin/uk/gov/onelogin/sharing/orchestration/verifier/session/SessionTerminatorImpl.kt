@@ -40,7 +40,6 @@ class SessionTerminatorImpl(
         bleOpen: Boolean,
         holderRequestedTermination: Boolean
     ) {
-
         if (bleOpen && !holderRequestedTermination) {
             if (serviceUuid != null) {
                 logger.debug(logTag, "Sending termination session data")
