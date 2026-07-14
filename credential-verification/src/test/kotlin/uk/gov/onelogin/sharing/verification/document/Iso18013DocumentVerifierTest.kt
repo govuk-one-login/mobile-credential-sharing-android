@@ -55,7 +55,7 @@ class Iso18013DocumentVerifierTest {
             issuerSigned = provisionedDocument.issuerSigned,
             deviceSigned = mockk(relaxed = true)
         )
-    private val sessionTranscriptBytes: ByteArray = byteArrayOf(1, 2)
+    private val sessionTranscriptBytes: ByteArray = CoseSign1Stubs.wrapInTag24(byteArrayOf(1, 2))
     private val mockRootCertificate: X509Certificate = mockk(relaxed = true)
     private val trustVerifier: TrustVerifier = mockk(relaxed = true)
     private val validityPeriod: CertificateValidityPeriod = mockk(relaxed = true)
