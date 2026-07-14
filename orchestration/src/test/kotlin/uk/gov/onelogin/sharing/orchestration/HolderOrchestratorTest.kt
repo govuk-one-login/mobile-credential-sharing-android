@@ -823,6 +823,9 @@ class HolderOrchestratorTest {
             SessionDataStatus.SESSION_TERMINATION,
             fakeCryptoService.lastErrorSessionDataStatus
         )
+        assert(
+            "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.TerminatingSession}" in logger
+        )
         assertEquals(0, peripheralTransport.stopCalls)
     }
 
@@ -872,6 +875,10 @@ class HolderOrchestratorTest {
             assertEquals(
                 SessionDataStatus.SESSION_TERMINATION,
                 cryptoService.lastErrorSessionDataStatus
+            )
+            assertEquals(1, terminator.terminateCalls)
+            assert(
+                "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.TerminatingSession}" in logger
             )
         }
     }
