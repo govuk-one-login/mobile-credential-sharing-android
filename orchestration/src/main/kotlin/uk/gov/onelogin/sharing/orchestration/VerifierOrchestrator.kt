@@ -43,6 +43,7 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancel
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason.*
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
@@ -241,17 +242,25 @@ class VerifierOrchestrator(
     private suspend fun handleCentralBluetoothState(state: CentralBluetoothState) {
         if (sessionFlow.value.isComplete()) return
 
-        logger.debug(logTag, "BLE state = $state")
+        val currentState = sessionFlow.value.currentState.value
+        logger.debug(logTag, "BLE state = $state, current internal state = $currentState")
 
         when (state) {
             is CentralBluetoothState.ConnectionStateStarted -> handleConnectionStateStarted()
 
             is CentralBluetoothState.Disconnected -> {
+
+                if (currentState is VerifierSessionState.Verifying) {
+                    logger.debug(logTag, "Ignoring disconnect while verifying")
+                    return
+                }
+
                 if (state.isSessionEnd) return
+
 
                 failWith(
                     "Device ${state.address} disconnected unexpectedly",
-                    SessionErrorReason.InvalidBluetoothState(
+                    InvalidBluetoothState(
                         BluetoothDisconnectedException(
                             "Bluetooth disconnected unexpectedly",
                             IllegalStateException(
@@ -263,22 +272,48 @@ class VerifierOrchestrator(
             }
 
             is CentralBluetoothState.Error -> {
+
+                if (currentState is VerifierSessionState.Verifying) {
+                    logger.debug(
+                        logTag,
+                        "Ignoring transport error while verifying: ${state.reason}"
+                    )
+                    return
+                }
+
                 failWith(
                     "Bluetooth error: ${state.reason}",
-                    SessionErrorReason.InvalidBluetoothState(
+                    InvalidBluetoothState(
                         IllegalStateException("Bluetooth error: ${state.reason}")
                     )
                 )
             }
 
+
             is CentralBluetoothState.CentralBluetoothEnded -> {
-                appCoroutineScope.launch {
-                    terminateSession(centralBluetoothTransport.isBleOpen, false)
+
+                if (currentState is VerifierSessionState.Verifying) {
+                    logger.debug(logTag, "Ignoring GATT End while verifying")
+                    return
+                }
+
+                if (currentState is VerifierSessionState.Connecting) {
+                    failWith(
+                        "GATT End received while connecting",
+                        InvalidBluetoothState(
+                            IllegalStateException("GATT end received while connecting")
+                        )
+                    )
+                } else {
+                    appCoroutineScope.launch {
+                        terminateSession(centralBluetoothTransport.isBleOpen, false)
+                    }
                 }
             }
 
             is CentralBluetoothState.Message -> {
-                if (sessionFlow.value.currentState.value is VerifierSessionState.Verifying) {
+
+                if (currentState is VerifierSessionState.Verifying) {
                     logger.debug(logTag, "Ignoring unexpected message while verifying")
                 } else {
                     handleCentralBluetoothStateMessage(state)
@@ -337,8 +372,8 @@ class VerifierOrchestrator(
 
     private fun isUnexpectedStatusWithData(sessionData: SessionData): Boolean =
         sessionData.data != null && sessionData.status != null &&
-            sessionData.status != SESSION_TERMINATION &&
-            sessionData.status != SessionDataStatus.OK
+                sessionData.status != SESSION_TERMINATION &&
+                sessionData.status != SessionDataStatus.OK
 
     private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
         logger.error(logTag, "Received SessionData with data and error status: $status")
