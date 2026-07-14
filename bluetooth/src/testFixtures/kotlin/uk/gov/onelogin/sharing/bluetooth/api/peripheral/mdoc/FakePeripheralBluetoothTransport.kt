@@ -12,6 +12,7 @@ class FakePeripheralBluetoothTransport(
 
     var startCalls = 0
     var stopCalls = 0
+    var lastStopSendEndCommand: Boolean? = null
     var lastUuid: UUID? = null
 
     override suspend fun start(serviceUuid: UUID) {
@@ -21,6 +22,7 @@ class FakePeripheralBluetoothTransport(
 
     override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean) {
         stopCalls++
+        lastStopSendEndCommand = sendEndCommand
     }
 
     fun emitState(state: PeripheralBluetoothState) {
@@ -32,7 +34,10 @@ class FakePeripheralBluetoothTransport(
     }
 
     var sendMessageResult: Boolean = true
+    var sendMessageCalls: Int = 0
 
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean =
-        sendMessageResult
+    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+        sendMessageCalls++
+        return sendMessageResult
+    }
 }

@@ -1121,28 +1121,90 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `status-only SessionData in awaitingVerifierResolution transitions to success`() = runTest {
-        initialStates[0] = HolderSessionState.AwaitingVerifierResolution
-        val fakeClassifier = FakeInboundMessageClassifier().apply {
-            typeToReturn =
-                InboundMessageType.StatusOnly(SessionDataStatus.SESSION_TERMINATION)
+    fun `status 20 SessionData in awaitingVerifierResolution transitions to success`() = runTest {
+        with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+            deliverMessage()
+
+            assertThat(orchestrator.holderSessionState.value, isSuccessful())
         }
-        val peripheralTransport = FakePeripheralBluetoothTransport()
-        val sessionFactory = createSessionFactory()
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = peripheralTransport,
-            sessionFactory = sessionFactory,
-            inboundMessageClassifier = fakeClassifier
-        )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
+    }
 
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
+    @Test
+    fun `non-20 status SessionData in awaitingVerifierResolution transitions to failed`() =
+        runTest {
+            with(PeerTerminationFixture(SessionDataStatus.ERROR_SESSION_ENCRYPTION)) {
+                deliverMessage()
 
-        assertThat(orchestrator.holderSessionState.value, isSuccessful())
+                assertThat(orchestrator.holderSessionState.value, isFailed())
+                val failedState =
+                    orchestrator.holderSessionState.value as HolderSessionState.Complete.Failed
+                assertThat(
+                    failedState.sessionReason,
+                    instanceOf(SessionErrorReason.StatusError::class.java)
+                )
+                assertEquals(
+                    SessionDataStatus.ERROR_SESSION_ENCRYPTION.code,
+                    (failedState.sessionReason as SessionErrorReason.StatusError).statusCode
+                )
+            }
+        }
+
+    @Test
+    fun `SessionData then GATT End in awaitingVerifierResolution ignores second signal`() =
+        runTest {
+            with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+                deliverMessage()
+                assertThat(orchestrator.holderSessionState.value, isSuccessful())
+
+                // Second signal: GATT End — should be ignored
+                transport.emitState(
+                    PeripheralBluetoothState.Ended(SessionEndStates.SUCCESS)
+                )
+                advanceUntilIdle()
+
+                assertThat(orchestrator.holderSessionState.value, isSuccessful())
+            }
+        }
+
+    @Test
+    fun `no outbound signal sent on peer termination in awaitingVerifierResolution`() = runTest {
+        with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+            deliverMessage()
+
+            assertThat(orchestrator.holderSessionState.value, isSuccessful())
+            assertEquals(0, terminator.terminateCalls)
+            assertEquals(0, transport.sendMessageCalls)
+            assertEquals(false, transport.lastStopSendEndCommand)
+        }
+    }
+
+    private inner class PeerTerminationFixture(
+        status: SessionDataStatus,
+        initialState: HolderSessionState = HolderSessionState.AwaitingVerifierResolution
+    ) {
+        val transport = FakePeripheralBluetoothTransport()
+        val terminator = FakeHolderSessionTerminator()
+        val orchestrator: HolderOrchestrator
+
+        init {
+            initialStates[0] = initialState
+            val fakeClassifier = FakeInboundMessageClassifier().apply {
+                typeToReturn = InboundMessageType.StatusOnly(status)
+            }
+            orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                sessionFactory = createSessionFactory(),
+                inboundMessageClassifier = fakeClassifier,
+                holderSessionTerminator = terminator
+            )
+        }
+
+        fun TestScope.deliverMessage(bytes: ByteArray = byteArrayOf(1, 2, 3)) {
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            transport.emitState(PeripheralBluetoothState.MessageReceived(bytes))
+            advanceUntilIdle()
+        }
     }
 
     private inner class TerminationTestFixture(

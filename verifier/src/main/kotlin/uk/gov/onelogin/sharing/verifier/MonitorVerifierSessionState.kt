@@ -171,6 +171,7 @@ private fun handleSessionFailure(
         is SessionErrorReason.DeviceRequestProcessingError,
         is SessionErrorReason.UnverifiableDocument,
         is SessionErrorReason.InvalidBluetoothState,
+        is SessionErrorReason.StatusError,
         SessionErrorReason.DocumentNotReturned,
         SessionErrorReason.PeerTermination
         ->

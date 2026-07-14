@@ -64,6 +64,12 @@ sealed class SessionErrorReason {
     data object PeerTermination : SessionErrorReason()
 
     /**
+     * The peer sent a SessionData with a non-20 status code.
+     * [statusCode] is the received status value.
+     */
+    data class StatusError(val statusCode: UInt) : SessionErrorReason()
+
+    /**
      * The Holder returned a successful status (0) but the documents array is empty or missing.
      */
     data object DocumentNotReturned : SessionErrorReason()
