@@ -285,6 +285,7 @@ class HolderOrchestrator(
                 )
 
                 if (sent) {
+                    safeTransitionTo(HolderSessionState.TerminatingSession)
                     holderSessionTerminator.terminate(context.sessionUuid)
                 }
 
@@ -410,7 +411,8 @@ class HolderOrchestrator(
 
     private fun handleSessionEnded(state: PeripheralBluetoothState.Ended) {
         when (sessionFlow.value.currentState.value) {
-            is HolderSessionState.ProcessingResponse -> Unit
+            is HolderSessionState.ProcessingResponse,
+            is HolderSessionState.TerminatingSession -> Unit
 
             is HolderSessionState.AwaitingVerifierResolution
             if (state.status == SessionEndStates.SUCCESS) -> {
@@ -562,15 +564,16 @@ class HolderOrchestrator(
                 data = sessionDataBytes
             )
 
+            if (sent) {
+                safeTransitionTo(HolderSessionState.TerminatingSession)
+                holderSessionTerminator.terminate(context.sessionUuid)
+            }
+
             safeTransitionTo(
                 HolderSessionState.Complete.Success(
                     HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
                 )
             )
-
-            if (sent) {
-                holderSessionTerminator.terminate(context.sessionUuid)
-            }
         } else {
             sendTerminationAndFail(
                 IllegalStateException("Missing skDevice during no-match termination")

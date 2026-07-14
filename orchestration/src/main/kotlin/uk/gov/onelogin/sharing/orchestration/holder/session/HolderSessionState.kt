@@ -75,6 +75,14 @@ sealed class HolderSessionState : Completable {
     data object AwaitingVerifierResolution : HolderSessionState()
 
     /**
+     * State for when the Holder has sent a SessionData(status: 20) termination message
+     * and is executing the termination protocol (waiting for send completion, 500ms buffer,
+     * then GATT End). This is a transient state between sending the termination message
+     * and reaching the terminal state.
+     */
+    data object TerminatingSession : HolderSessionState()
+
+    /**
      * State for when a User has finished a digital credential verification journey.
      */
     sealed class Complete(val reason: String) : HolderSessionState() {
