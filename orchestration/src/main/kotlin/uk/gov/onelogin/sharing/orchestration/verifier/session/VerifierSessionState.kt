@@ -42,17 +42,18 @@ sealed class VerifierSessionState : Completable {
     data object ReadyToScan : VerifierSessionState()
 
     /**
-     * State for when the Android-powered device is connecting with another device.
-     *
-     * The digital credential transfers between devices during this state.
-     */
-    data object Connecting : VerifierSessionState()
-
-    /**
-     * State for handling the Session engagement data obtained from a successfully connected holder
-     * device.
+     * State for processing the engagement data from a scanned QR code. Transitions to [Connecting]
+     * once successfully processed.
      */
     data object ProcessingEngagement : VerifierSessionState()
+
+    /**
+     * State for when the Android-powered device is connecting with another device via BlueTooth LE.
+     *
+     * Transfers [uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishment]
+     * data between devices.
+     */
+    data object Connecting : VerifierSessionState()
 
     /**
      * State for validating the successfully handled Session engagement data.
