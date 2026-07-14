@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -50,15 +51,19 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
+import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageClassifier
+import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 
 @Keep
-@Suppress("LongParameterList", "TooManyFunctions")
+@Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
 @SingleIn(AppScope::class)
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
@@ -71,7 +76,8 @@ class HolderOrchestrator(
     private val prerequisiteGate: PrerequisiteGate,
     private val confirmConsentUseCase: ConfirmConsentUseCase,
     private val credentialRequestHandler: CredentialRequestHandler,
-    private val holderSessionTerminator: HolderSessionTerminator
+    private val holderSessionTerminator: HolderSessionTerminator,
+    private val inboundMessageClassifier: InboundMessageClassifier
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -245,7 +251,9 @@ class HolderOrchestrator(
                 }
             }
         } catch (e: IllegalStateException) {
-            sendTerminationAndFail(e)
+            appCoroutineScope.launch {
+                sendTerminationAndFail(e)
+            }
         }
     }
 
@@ -287,7 +295,9 @@ class HolderOrchestrator(
                 )
             }
         } catch (e: IllegalStateException) {
-            sendTerminationAndFail(e)
+            appCoroutineScope.launch {
+                sendTerminationAndFail(e)
+            }
         }
     }
 
@@ -337,19 +347,6 @@ class HolderOrchestrator(
             }
 
             is PeripheralBluetoothState.Disconnected -> {
-                @RequiresImplementation(
-                    details = [
-                        ImplementationDetail(
-                            ticket = "DCMAW-16898",
-                            description = "We may need to handle explicit bluetooth " +
-                                "disconnection states to handle common error codes " +
-                                "8, 19, 22 and 133. The function below will handle " +
-                                "treat all disconnect states the same when connected " +
-                                "to a device"
-                        )
-                    ]
-                )
-
                 if (state.isSessionEnd) {
                     logger.debug(
                         logTag,
@@ -385,42 +382,61 @@ class HolderOrchestrator(
 
             PeripheralBluetoothState.Idle -> Unit
 
-            is PeripheralBluetoothState.Ended -> {
-                when (sessionFlow.value.currentState.value) {
-                    is HolderSessionState.ProcessingResponse -> Unit
+            is PeripheralBluetoothState.Ended -> handleSessionEnded(state)
 
-                    is HolderSessionState.AwaitingVerifierResolution
-                    if (state.status == SessionEndStates.SUCCESS) -> {
-                        safeTransitionTo(HolderSessionState.Complete.Success())
-                    }
-
-                    else -> {
-                        safeTransitionTo(HolderSessionState.Complete.Cancelled)
-                    }
-                }
-
-                if (state.status == SessionEndStates.SUCCESS) {
-                    logger.debug(logTag, "Mdoc - Ending session")
-                } else {
-                    logger.error(
-                        logTag,
-                        "Mdoc - Error while ending session: ${state.status}"
-                    )
-                }
-            }
-
-            is PeripheralBluetoothState.MessageReceived -> {
+            is PeripheralBluetoothState.MessageReceived ->
                 handleMessageReceived(state.message)
-            }
         }
     }
 
     private fun handleMessageReceived(message: ByteArray) {
-        val keypair = currentContext.keyPair?.private
-        if (keypair !is ECPrivateKey) {
-            sendTerminationAndFail(IllegalStateException("Invalid or missing keypair"))
-            return
+        when (val type = inboundMessageClassifier.getMessageType(message)) {
+            is InboundMessageType.SessionEstablishment ->
+                handleSessionEstablishment(message)
+
+            is InboundMessageType.StatusOnly ->
+                handlePeerTermination(type.status)
+
+            is InboundMessageType.Unknown -> {
+                logger.error(logTag, UNRECOGNISED_MESSAGE)
+                appCoroutineScope.launch {
+                    sendTerminationAndFail(
+                        IllegalStateException(UNRECOGNISED_MESSAGE)
+                    )
+                }
+            }
         }
+    }
+
+    private fun handleSessionEnded(state: PeripheralBluetoothState.Ended) {
+        when (sessionFlow.value.currentState.value) {
+            is HolderSessionState.ProcessingResponse -> Unit
+
+            is HolderSessionState.AwaitingVerifierResolution
+            if (state.status == SessionEndStates.SUCCESS) -> {
+                safeTransitionTo(HolderSessionState.Complete.Success())
+                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                stopAdvertising(sendEndCommand = false)
+                logger.debug(logTag, "Holder session terminated")
+            }
+
+            else -> {
+                safeTransitionTo(HolderSessionState.Complete.Cancelled)
+            }
+        }
+
+        if (state.status == SessionEndStates.SUCCESS) {
+            logger.debug(logTag, "Mdoc - Ending session")
+        } else {
+            logger.error(
+                logTag,
+                "Mdoc - Error while ending session: ${state.status}"
+            )
+        }
+    }
+
+    private fun handleSessionEstablishment(message: ByteArray) {
+        val keypair = validateSessionEstablishmentPreconditions() ?: return
 
         try {
             val deviceRequest = decryptDeviceRequestUseCase.execute(
@@ -444,14 +460,63 @@ class HolderOrchestrator(
                 it.copy(decryptCounter = it.decryptCounter + 1u)
             }
 
+            if (!deviceRequestContainsPortrait(deviceRequest)) {
+                logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                appCoroutineScope.launch {
+                    handlePolicyViolation()
+                }
+                return
+            }
+
             val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
             appCoroutineScope.launch {
                 requestAndValidateCredential(requestedDocType, deviceRequest)
             }
+        } catch (e: DeviceRequestValidationException) {
+            appCoroutineScope.launch {
+                handleDeviceRequestValidationFailure(e)
+            }
         } catch (e: DeviceRequestDecodingException) {
-            handleDeviceRequestFailure(e)
+            appCoroutineScope.launch {
+                handleDeviceRequestFailure(e)
+            }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            sendTerminationAndFail(e)
+            appCoroutineScope.launch {
+                sendTerminationAndFail(e)
+            }
+        }
+    }
+
+    /**
+     * Validates that the session is in the correct state and has a valid keypair.
+     * Returns the [ECPrivateKey] if preconditions are met, or `null` if termination was triggered.
+     */
+    private fun validateSessionEstablishmentPreconditions(): ECPrivateKey? {
+        val currentState = holderSessionState.value
+
+        if (currentState !is HolderSessionState.ProcessingEstablishment) {
+            logger.error(
+                logTag,
+                "Sequencing violation: message received in state $currentState"
+            )
+            appCoroutineScope.launch {
+                sendTerminationAndFail(
+                    IllegalStateException(
+                        "Sequencing violation: message received in state $currentState"
+                    )
+                )
+            }
+            return null
+        }
+
+        return (currentContext.keyPair?.private as? ECPrivateKey).also { keypair ->
+            if (keypair == null) {
+                appCoroutineScope.launch {
+                    sendTerminationAndFail(
+                        IllegalStateException("Invalid or missing keypair")
+                    )
+                }
+            }
         }
     }
 
@@ -513,19 +578,28 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
+    private suspend fun handleDeviceRequestFailure(exception: DeviceRequestDecodingException) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         val context = currentContext
         val skDevice = checkNotNull(context.skDevice) {
             "skDevice must be derived before handling DeviceRequest failure"
         }
 
-        holderCryptoService.buildErrorSessionData(
+        val sessionDataBytes = holderCryptoService.buildErrorSessionData(
             deviceResponseStatus = Status.CBOR_DECODING_ERROR,
             sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
             skDevice = skDevice,
             encryptCounter = context.encryptCounter
         )
+
+        val sent = peripheralBluetoothTransport.sendMessage(
+            serviceUuid = context.sessionUuid,
+            data = sessionDataBytes
+        )
+
+        if (sent) {
+            holderSessionTerminator.terminate(context.sessionUuid)
+        }
 
         safeTransitionTo(
             HolderSessionState.Complete.Failed(
@@ -537,9 +611,89 @@ class HolderOrchestrator(
         )
     }
 
-    private fun sendTerminationAndFail(exception: Exception) {
+    private suspend fun handleDeviceRequestValidationFailure(
+        exception: DeviceRequestValidationException
+    ) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
-        holderCryptoService.buildTerminationSessionData(SessionDataStatus.SESSION_TERMINATION)
+        val context = currentContext
+        val skDevice = checkNotNull(context.skDevice) {
+            "skDevice must be derived before handling DeviceRequest validation failure"
+        }
+
+        val sessionDataBytes = holderCryptoService.buildErrorSessionData(
+            deviceResponseStatus = Status.CBOR_VALIDATION_ERROR,
+            sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+            skDevice = skDevice,
+            encryptCounter = context.encryptCounter
+        )
+
+        val sent = peripheralBluetoothTransport.sendMessage(
+            serviceUuid = context.sessionUuid,
+            data = sessionDataBytes
+        )
+
+        if (sent) {
+            holderSessionTerminator.terminate(context.sessionUuid)
+        }
+
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = exception.message ?: UNKNOWN_ERROR,
+                    exception = exception
+                )
+            )
+        )
+    }
+
+    private suspend fun handlePolicyViolation() {
+        val context = currentContext
+        val skDevice = checkNotNull(context.skDevice) {
+            "skDevice must be derived before handling policy violation"
+        }
+
+        val sessionDataBytes = holderCryptoService.buildErrorSessionData(
+            deviceResponseStatus = Status.GENERAL_ERROR,
+            sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+            skDevice = skDevice,
+            encryptCounter = context.encryptCounter
+        )
+
+        val sent = peripheralBluetoothTransport.sendMessage(
+            serviceUuid = context.sessionUuid,
+            data = sessionDataBytes
+        )
+
+        if (sent) {
+            holderSessionTerminator.terminate(context.sessionUuid)
+        }
+
+        safeTransitionTo(
+            HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = PORTRAIT_POLICY_VIOLATION,
+                    exception = IllegalStateException(PORTRAIT_POLICY_VIOLATION)
+                )
+            )
+        )
+    }
+
+    private suspend fun sendTerminationAndFail(exception: Exception) {
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
+        val context = currentContext
+        val sessionDataBytes = holderCryptoService.buildTerminationSessionData(
+            SessionDataStatus.SESSION_TERMINATION
+        )
+
+        val sent = peripheralBluetoothTransport.sendMessage(
+            serviceUuid = context.sessionUuid,
+            data = sessionDataBytes
+        )
+
+        if (sent) {
+            holderSessionTerminator.terminate(context.sessionUuid)
+        }
+
         safeTransitionTo(
             HolderSessionState.Complete.Failed(
                 SessionError(
@@ -594,7 +748,58 @@ class HolderOrchestrator(
         }
     }
 
+    private fun handlePeerTermination(status: SessionDataStatus) {
+        val currentState = holderSessionState.value
+        logger.debug(logTag, "Peer termination received (status: $status) in state: $currentState")
+
+        when (currentState) {
+            is HolderSessionState.AwaitingVerifierResolution -> {
+                if (status == SessionDataStatus.SESSION_TERMINATION) {
+                    safeTransitionTo(HolderSessionState.Complete.Success())
+                } else {
+                    safeTransitionTo(
+                        HolderSessionState.Complete.Failed(
+                            SessionError(
+                                message = "Status error: unexpected status ${status.code}",
+                                reason = SessionErrorReason.StatusError(status.code)
+                            )
+                        )
+                    )
+                }
+                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                stopAdvertising(sendEndCommand = false)
+                logger.debug(logTag, "Holder session terminated")
+            }
+
+            else -> {
+                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                stopAdvertising(sendEndCommand = false)
+                safeTransitionTo(
+                    HolderSessionState.Complete.Failed(
+                        SessionError(
+                            message = "Peer terminated session (status: $status)",
+                            reason = SessionErrorReason.PeerTermination
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+    private fun deviceRequestContainsPortrait(deviceRequest: DeviceRequest): Boolean =
+        deviceRequest.docRequests.any { docRequest ->
+            docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
+                namespace == DocumentType.Mdl.NAMESPACE &&
+                    elements.containsKey(MdlAttribute.Portrait.value)
+            }
+        }
+
     private companion object {
         const val UNKNOWN_ERROR = "Unknown error"
+        const val PORTRAIT_POLICY_VIOLATION =
+            "Policy violation: DeviceRequest does not request portrait attribute"
+        const val UNRECOGNISED_MESSAGE =
+            "Sequencing violation: inbound message is not a recognised type"
+        const val STOPPING_BLE_ADVERTISING = "Stopping BLE advertising"
     }
 }

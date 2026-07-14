@@ -7,8 +7,8 @@ private const val AGE_18 = 18
 private const val AGE_21 = 21
 
 enum class VerifierAttributeOption(val displayName: String, val attributeGroup: AttributeGroup) {
-    PHOTO_AND_AGE_OVER_21(
-        displayName = "Photo and Age Over 21",
+    PORTRAIT_AND_AGE_OVER_21(
+        displayName = "Portrait and Age Over 21",
         attributeGroup = AttributeGroup(
             mapOf(
                 MdlAttribute.Portrait to false,
@@ -16,21 +16,22 @@ enum class VerifierAttributeOption(val displayName: String, val attributeGroup: 
             )
         )
     ),
-    NAME_RETAIN_AND_AGE_OVER_18(
-        displayName = "Name (Retain) and Age Over 18",
+    PORTRAIT_NAME_RETAIN_AND_AGE_OVER_18(
+        displayName = "Portrait and Name (Retain) and Age Over 18",
         attributeGroup = AttributeGroup(
             mapOf(
+                MdlAttribute.Portrait to true,
                 MdlAttribute.GivenName to true,
                 MdlAttribute.FamilyName to true,
                 MdlAttribute.AgeOver(AGE_18) to false
             )
         )
     ),
-    UNFULFILLABLE(
-        displayName = "Unfulfillable (eye colour)",
+    MISSING_PORTRAIT(
+        displayName = "Name (Missing Portrait)",
         attributeGroup = AttributeGroup(
             mapOf(
-                MdlAttribute.Custom("eye_colour") to false
+                MdlAttribute.GivenName to false
             )
         )
     )

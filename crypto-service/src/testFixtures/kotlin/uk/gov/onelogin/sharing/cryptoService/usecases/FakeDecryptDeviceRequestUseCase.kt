@@ -10,6 +10,7 @@ class FakeDecryptDeviceRequestUseCase : DecryptDeviceRequestUseCase {
     var sessionTranscriptToReturn: ByteArray = byteArrayOf(0x83.toByte(), 0x01, 0x02, 0x03)
     var exception: Exception? = null
     var exceptionAfterKeyDerivation: Exception? = null
+    var deviceRequestToReturn: DeviceRequest = deviceRequestStub
 
     override fun execute(
         sessionEstablishmentBytes: ByteArray,
@@ -23,6 +24,6 @@ class FakeDecryptDeviceRequestUseCase : DecryptDeviceRequestUseCase {
         onDeriveSkDevice(skDeviceToReturn)
         onDeriveSessionTranscript(sessionTranscriptToReturn)
         exceptionAfterKeyDerivation?.let { throw it }
-        return deviceRequestStub
+        return deviceRequestToReturn
     }
 }
