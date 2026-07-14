@@ -76,9 +76,9 @@ sealed class HolderSessionState : Completable {
 
     /**
      * State for when the Holder has sent a SessionData(status: 20) termination message
-     * and is executing the termination protocol (waiting for send completion, 500ms buffer,
-     * then GATT End). This is a transient state between sending the termination message
-     * and reaching the terminal state.
+     * and is executing the termination protocol (waiting for send completion then GATT End).
+     * This is a transient state between sending the termination message and reaching
+     * the terminal state.
      */
     data object TerminatingSession : HolderSessionState()
 

@@ -801,10 +801,12 @@ class HolderOrchestratorTest {
         }
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()
+        val terminator = FakeHolderSessionTerminator()
         val orchestrator = createOrchestrator(
             peripheralBluetoothTransport = peripheralTransport,
             holderCryptoService = fakeCryptoService,
-            credentialRequestHandler = handler
+            credentialRequestHandler = handler,
+            holderSessionTerminator = terminator
         )
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
         orchestrator.start()
@@ -817,6 +819,11 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertThat(orchestrator.holderSessionState.value, isSuccessful())
+        assertEquals(
+            HolderSessionState.Complete.SuccessReason.UnfulfillableRequest,
+            (orchestrator.holderSessionState.value as HolderSessionState.Complete.Success)
+                .successReason
+        )
         assert(case.errorMessage in logger)
         assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
         assertEquals(
@@ -826,6 +833,7 @@ class HolderOrchestratorTest {
         assert(
             "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.TerminatingSession}" in logger
         )
+        assertEquals(1, terminator.terminateCalls)
         assertEquals(0, peripheralTransport.stopCalls)
     }
 
@@ -833,13 +841,15 @@ class HolderOrchestratorTest {
     fun `filter failure triggers no match termination before consent`() = runTest {
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()
+        val terminator = FakeHolderSessionTerminator()
         val failingHandler = FakeCredentialRequestHandler().apply {
             exceptionToThrow = CredentialRequestException("no matching attributes")
         }
         val orchestrator = createOrchestrator(
             peripheralBluetoothTransport = peripheralTransport,
             holderCryptoService = fakeCryptoService,
-            credentialRequestHandler = failingHandler
+            credentialRequestHandler = failingHandler,
+            holderSessionTerminator = terminator
         )
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
         orchestrator.start()
@@ -852,12 +862,18 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertThat(orchestrator.holderSessionState.value, isSuccessful())
+        assertEquals(
+            HolderSessionState.Complete.SuccessReason.UnfulfillableRequest,
+            (orchestrator.holderSessionState.value as HolderSessionState.Complete.Success)
+                .successReason
+        )
         assert("no matching attributes" in logger)
         assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
         assertEquals(
             SessionDataStatus.SESSION_TERMINATION,
             fakeCryptoService.lastErrorSessionDataStatus
         )
+        assertEquals(1, terminator.terminateCalls)
         assertEquals(0, peripheralTransport.stopCalls)
     }
 
