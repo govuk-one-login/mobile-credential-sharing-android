@@ -71,6 +71,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "Connection with verifier device cannot be established" to userJourneyFailure,
             "Receives Verifier device's data transfer request" to
                 HolderSessionState.AwaitingUserConsent(deviceRequestStub),
+            "No matching attributes begins session termination" to
+                HolderSessionState.TerminatingSession,
             "No matching attributes terminates successfully" to successStub
         ).map { (testName, transition) ->
             Triple(
@@ -95,6 +97,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "Failure occurs when validating the Verifier response" to userJourneyFailure,
             "Holder sends response and awaits verifier resolution" to
                 HolderSessionState.AwaitingVerifierResolution,
+            "Holder begins session termination protocol" to
+                HolderSessionState.TerminatingSession,
             "User completes the Holder User journey" to successStub
         ).map { (testName, transition) ->
             Triple(
@@ -116,6 +120,18 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             )
         }
 
+        private val terminatingSessionTransitions = listOf(
+            "User cancels whilst session is terminating" to userCancellation,
+            "Failure occurs during session termination" to userJourneyFailure,
+            "Session termination completes successfully" to successStub
+        ).map { (testName, transition) ->
+            Triple(
+                testName,
+                HolderSessionState.TerminatingSession,
+                transition
+            )
+        }
+
         val inputs: List<Triple<String, HolderSessionState, HolderSessionState>> =
             notStartedTransitions +
                 preflightTransitions +
@@ -124,6 +140,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
                 connectingTransitions +
                 awaitingUserConsentTransitions +
                 processingResponseTransitions +
-                awaitingVerifierResolutionTransitions
+                awaitingVerifierResolutionTransitions +
+                terminatingSessionTransitions
     }
 }
