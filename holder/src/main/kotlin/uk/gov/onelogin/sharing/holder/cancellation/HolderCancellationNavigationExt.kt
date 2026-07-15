@@ -1,0 +1,24 @@
+package uk.gov.onelogin.sharing.holder.cancellation
+
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.compose.dialog
+
+data object HolderCancellationNavigationExt {
+    fun NavController.navigateToHolderCancellationDialog(
+        options: NavOptionsBuilder.() -> Unit = {}
+    ) = navigate(HolderCancellationRoute, options)
+
+    internal fun NavGraphBuilder.configureUserCancellationDialog(
+        controller: NavController,
+        onCancelJourney: () -> Unit = {},
+    ) {
+        dialog<HolderCancellationRoute> {
+            HolderCancellationScreen(
+                onCancelJourney = onCancelJourney,
+                onDismiss = controller::popBackStack
+            )
+        }
+    }
+}

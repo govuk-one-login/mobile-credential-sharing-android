@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.core.Completable
+import uk.gov.onelogin.sharing.core.UserCancellable
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
@@ -10,11 +11,18 @@ import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
  * Represents a digital credential verification journey's state for devices that contain digital
  * credentials.
  */
-sealed class HolderSessionState : Completable {
+sealed class HolderSessionState : Completable, UserCancellable {
     /**
      * @return `true` when the high-level journey is in an end state. Otherwise `false`.
      */
     override fun isComplete(): Boolean = this is Complete
+
+    override fun userCanCancel(): Boolean = this::class in listOf(
+        AwaitingUserConsent::class,
+        AwaitingVerifierResolution::class,
+        ProcessingEstablishment::class,
+        ProcessingResponse::class,
+    )
 
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification

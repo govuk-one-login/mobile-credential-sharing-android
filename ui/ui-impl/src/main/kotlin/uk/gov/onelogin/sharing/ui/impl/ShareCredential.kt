@@ -1,11 +1,14 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -19,6 +22,7 @@ import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
+import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationNavigationExt.navigateToHolderCancellationDialog
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
@@ -60,6 +64,12 @@ internal fun ShareCredential(
     navController: NavHostController = rememberNavController(),
     defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
+    val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
+
+    BackHandler(state.userCanCancel()) {
+        navController.navigateToHolderCancellationDialog()
+    }
+
     MonitorHolderSessionState(
         holderSessionState = holderSessionState,
         navController = navController
@@ -80,7 +90,9 @@ internal fun ShareCredential(
             startDestination = HolderRoutes,
             modifier = modifier
         ) {
-            configureHolderRoutes(navController)
+            configureHolderRoutes(navController) {
+                orchestrator.cancel()
+            }
         }
     }
 }
