@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.ui.impl
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.mockk.mockk

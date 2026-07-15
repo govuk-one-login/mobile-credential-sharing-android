@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.verifier.verify.retry
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow

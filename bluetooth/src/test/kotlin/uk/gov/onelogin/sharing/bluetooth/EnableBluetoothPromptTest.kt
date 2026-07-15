@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth
 import android.app.Activity
 import android.app.Instrumentation
 import android.bluetooth.BluetoothAdapter
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4

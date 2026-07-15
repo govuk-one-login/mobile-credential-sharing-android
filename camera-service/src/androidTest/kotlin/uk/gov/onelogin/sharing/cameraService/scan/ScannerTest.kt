@@ -2,8 +2,9 @@ package uk.gov.onelogin.sharing.cameraService.scan
 
 import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import org.junit.Rule
@@ -21,11 +22,14 @@ class ScannerTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val lifecycleOwner = TestLifecycleOwner()
+
     @Test
     fun cameraViewfinderIsDisplayed() {
         composeTestRule.setContent {
             Scanner(
-                onScanResult = {}
+                onScanResult = {},
+                lifecycleOwner = lifecycleOwner
             )
         }
 

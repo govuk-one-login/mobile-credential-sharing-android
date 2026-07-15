@@ -13,7 +13,7 @@ bouncycastle = "1.84" # https://www.bouncycastle.org/download/bouncy-castle-java
 com-google-test-parameter-injector = "1.22" # https://github.com/google/TestParameterInjector
 com-google-guava-android = "33.6.0-android" # https://github.com/google/guava/releases
 compose-lint-rules = "0.5.8" # https://github.com/mrmans0n/compose-rules/releases/
-composeBom = "2026.03.01" # https://developer.android.com/jetpack/androidx/releases/compose
+composeBom = "2026.05.01" # https://developer.android.com/jetpack/androidx/releases/compose
 coreKtx = "1.18.0" # https://developer.android.com/jetpack/androidx/releases/core#1.17.0
 detekt = "1.23.8" # https://github.com/detekt/detekt/releases
 espressoCore = "3.7.0" # https://developer.android.com/jetpack/androidx/releases/test#3.7.0
@@ -38,7 +38,7 @@ sonarqube = "7.3.0.8198" # https://github.com/SonarSource/sonar-scanner-gradle/r
 spotless = "8.4.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "0.39.15" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
-uk-gov-ui = "16.9.0" # https://github.com/govuk-one-login/mobile-android-ui/tags
+uk-gov-ui = "17.1.1" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
 
 # Minimum safe versions for vulnerable build classpath transitive dependencies
@@ -69,6 +69,7 @@ androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
 androidx-metrics-performance = { module = "androidx.metrics:metrics-performance", version.ref = "androidx-metrics" }

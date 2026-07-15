@@ -53,6 +53,7 @@ dependencies {
     ).forEach(::testImplementation)
 
     listOf(
+        libs.androidx.lifecycle.runtime.testing,
         testFixtures(projects.core)
     ).forEach(::androidTestImplementation)
 }
