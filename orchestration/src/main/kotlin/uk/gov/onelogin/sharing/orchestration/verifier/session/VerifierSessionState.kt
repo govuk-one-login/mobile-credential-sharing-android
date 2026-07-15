@@ -63,6 +63,9 @@ sealed class VerifierSessionState : Completable {
     /**
      * State for when a User has finished a digital credential verification journey.
      */
+
+    data object TerminatingSession : VerifierSessionState()
+
     sealed class Complete(val reason: String) : VerifierSessionState() {
         /**
          * The User has completed a digital credential verification journey without un-resolvable
@@ -88,4 +91,5 @@ sealed class VerifierSessionState : Completable {
          */
         data object Cancelled : Complete("Journey cancelled by User")
     }
+
 }

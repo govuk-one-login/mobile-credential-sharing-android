@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ProcessingEngagement
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ReadyToScan
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.TerminatingSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Verifying
 
 /**
@@ -48,13 +49,16 @@ val validVerifierTransitions: VerifierSessionStateTransitions = mapOf(
     ReadyToScan::class to singleton(
         ProcessingEngagement::class
     ) + fullErrorHandling,
-    ProcessingEngagement::class to singleton(
-        Connecting::class
+    ProcessingEngagement::class to setOf(
+        Connecting::class,
+        TerminatingSession::class
     ) + fullErrorHandling,
-    Connecting::class to singleton(
-        Verifying::class
+    Connecting::class to setOf(
+        Verifying::class,
+        TerminatingSession::class
     ) + fullErrorHandling,
-    Verifying::class to singleton(
-        Success::class
+    Verifying::class to setOf(
+        Success::class,
+        TerminatingSession::class
     ) + fullErrorHandling
 )
