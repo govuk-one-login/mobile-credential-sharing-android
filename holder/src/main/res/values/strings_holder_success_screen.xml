@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_success_unfulfillable_request_title">Unfulfillable request</string>
+</resources>

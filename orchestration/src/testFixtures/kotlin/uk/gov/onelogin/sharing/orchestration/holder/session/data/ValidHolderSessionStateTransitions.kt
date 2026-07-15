@@ -70,7 +70,10 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels whilst connecting with Verifier device" to userCancellation,
             "Connection with verifier device cannot be established" to userJourneyFailure,
             "Receives Verifier device's data transfer request" to
-                HolderSessionState.AwaitingUserConsent(deviceRequestStub)
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub),
+            "No matching attributes begins session termination" to
+                HolderSessionState.TerminatingSession,
+            "No matching attributes terminates successfully" to successStub
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -92,11 +95,39 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val processingResponseTransitions = listOf(
             "User cancels the journey whilst validating the response" to userCancellation,
             "Failure occurs when validating the Verifier response" to userJourneyFailure,
+            "Holder sends response and awaits verifier resolution" to
+                HolderSessionState.AwaitingVerifierResolution,
+            "Holder begins session termination protocol" to
+                HolderSessionState.TerminatingSession,
             "User completes the Holder User journey" to successStub
         ).map { (testName, transition) ->
             Triple(
                 testName,
                 HolderSessionState.ProcessingResponse,
+                transition
+            )
+        }
+
+        private val awaitingVerifierResolutionTransitions = listOf(
+            "User cancels whilst awaiting verifier resolution" to userCancellation,
+            "Failure occurs whilst awaiting verifier resolution" to userJourneyFailure,
+            "Verifier resolves and journey completes" to successStub
+        ).map { (testName, transition) ->
+            Triple(
+                testName,
+                HolderSessionState.AwaitingVerifierResolution,
+                transition
+            )
+        }
+
+        private val terminatingSessionTransitions = listOf(
+            "User cancels whilst session is terminating" to userCancellation,
+            "Failure occurs during session termination" to userJourneyFailure,
+            "Session termination completes successfully" to successStub
+        ).map { (testName, transition) ->
+            Triple(
+                testName,
+                HolderSessionState.TerminatingSession,
                 transition
             )
         }
@@ -108,6 +139,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
                 presentingEngagementTransitions +
                 connectingTransitions +
                 awaitingUserConsentTransitions +
-                processingResponseTransitions
+                processingResponseTransitions +
+                awaitingVerifierResolutionTransitions +
+                terminatingSessionTransitions
     }
 }

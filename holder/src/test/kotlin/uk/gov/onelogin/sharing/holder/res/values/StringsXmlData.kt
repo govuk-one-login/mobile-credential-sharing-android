@@ -44,5 +44,21 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     BLUETOOTH_PERMISSION_DENIED(
         expected = "Bluetooth permissions were denied",
         resourceId = R.string.bluetooth_permission_denied
+    ),
+    HOLDER_AWAITING_RESOLUTION_TITLE(
+        expected = "Details shared",
+        resourceId = R.string.holder_awaiting_resolution_title
+    ),
+    HOLDER_CONSENT_DENY_DIALOG_TITLE(
+        expected = "Are you sure you want to deny this request?",
+        resourceId = R.string.holder_consent_deny_dialog_title
+    ),
+    HOLDER_CONSENT_DENY_DIALOG_DISMISS(
+        expected = "Cancel",
+        resourceId = R.string.holder_consent_deny_dialog_dismiss
+    ),
+    HOLDER_SUCCESS_UNFULFILLABLE_REQUEST_TITLE(
+        expected = "Unfulfillable request",
+        resourceId = R.string.holder_success_unfulfillable_request_title
     )
 }

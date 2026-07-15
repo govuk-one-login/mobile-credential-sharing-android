@@ -2,9 +2,10 @@ package uk.gov.onelogin.sharing.verification.document
 
 import com.fasterxml.jackson.core.StreamReadFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import dev.zacsweers.metro.Inject
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
@@ -17,17 +18,12 @@ class MsoDecoder {
         .build()
 
     fun decode(encodedMso: ByteArray): MobileSecurityObject = try {
-        val innerBytes = unwrapTag24(encodedMso)
+        val innerBytes = CborMapper.default.readValue(encodedMso, EmbeddedCbor::class.java).encoded
         cborMapper.readValue(innerBytes, MsoDto::class.java).toDomain()
     } catch (e: VerificationResult.Failure) {
         throw e
     } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
         throw malformed
-    }
-
-    private fun unwrapTag24(data: ByteArray): ByteArray {
-        val root = cborMapper.readTree(data)
-        return (root as? BinaryNode)?.binaryValue() ?: throw malformed
     }
 
     private val malformed

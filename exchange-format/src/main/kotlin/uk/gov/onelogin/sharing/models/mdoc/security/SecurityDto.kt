@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
@@ -45,14 +44,12 @@ data class SecurityDto(
     }
 
     class Deserializer : StdDeserializer<SecurityDto>(SecurityDto::class.java) {
-        private val cborFactory = CBORFactory()
-
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): SecurityDto {
             val root = p.codec.readTree<JsonNode>(p)
             val cipherSuiteIdentifier = root[0].intValue()
             val eDeviceKeyBytes = root[1].binaryValue()
 
-            val parser = cborFactory.createParser(eDeviceKeyBytes).apply {
+            val parser = CborMapper.default.createParser(eDeviceKeyBytes).apply {
                 codec = CborMapper.default
             }
             // skip Tag 24 and move to next element

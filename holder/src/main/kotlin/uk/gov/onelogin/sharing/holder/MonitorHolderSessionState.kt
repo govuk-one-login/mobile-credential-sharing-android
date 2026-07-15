@@ -15,11 +15,13 @@ import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
 import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluetoothConnectionErrorRoute
+import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.navigateToRetryHolderPrerequisites
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
+import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
@@ -68,6 +70,8 @@ fun MonitorHolderSessionState(
  * @return An anonymous function that calls [NavHostController] extension functions. Invoke the
  * returned value to perform navigation.
  */
+
+@Suppress("LongMethod")
 internal suspend fun convertSessionStateToNavigation(
     context: Context,
     navController: NavHostController,
@@ -111,6 +115,16 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        HolderSessionState.AwaitingVerifierResolution -> {
+            {
+                navController.navigateToAwaitingVerifierResolutionScreen {
+                    popUpTo<HolderRoutes> {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+
         is HolderSessionState.Complete.Failed -> {
             {
                 handleHolderSessionFailure(state, navController, context)
@@ -120,11 +134,28 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
+        HolderSessionState.TerminatingSession,
         HolderSessionState.Complete.Cancelled,
         is HolderSessionState.Complete.Success
         -> {
-            {
-                // do nothing with unrelated / unimplemented states
+            when {
+                state is HolderSessionState.Complete.Success &&
+                    state.successReason ==
+                    HolderSessionState.Complete.SuccessReason.UnfulfillableRequest -> {
+                    {
+                        navController.navigateToHolderSuccessScreen {
+                            popUpTo<HolderRoutes> {
+                                inclusive = true
+                            }
+                        }
+                    }
+                }
+
+                else -> {
+                    {
+                        // do nothing with unrelated / unimplemented states
+                    }
+                }
             }
         }
     }

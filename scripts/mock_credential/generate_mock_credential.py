@@ -9,11 +9,13 @@ Usage:
     python3 scripts/mock_credential/generate_mock_credential.py \
     --issuer-private-key app/src/main/assets/test_private_issuer_key.pem \
     --private-key app/src/main/assets/test_private_key.pem \
-    --x509-certificate app/src/main/assets/test_x509_certificate.pem \
+    --x509-certificate app/src/main/assets/test_x509_certificate.der \
     --output app/src/main/res/raw/mock_credential.txt \
 
 The generated credential uses the device key from the provided PEM file and creates
-a self-signed issuer certificate. The credential is valid for 1 year.
+a 2-cert chain: a self-signed root CA and a leaf certificate signed by the root.
+The root certificate (.der) is the trust anchor for the verifier app.
+The leaf certificate is embedded in the credential's issuerAuth x5chain.
 """
 
 import argparse
@@ -26,7 +28,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from cryptography.x509 import Certificate, CertificateBuilder, Name, NameAttribute
-from cryptography.x509.oid import NameOID
+from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID, ObjectIdentifier
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
@@ -35,6 +37,9 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PORTRAIT_BYTES = base64.b64decode(
     open(os.path.join(SCRIPT_DIR, "portrait.txt")).read().strip()
 )
+
+# ISO 18013-5 OIDs
+OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
 
 SAMPLE_ITEMS = {
     "org.iso.18013.5.1": [
@@ -58,6 +63,20 @@ SAMPLE_ITEMS = {
     ],
 }
 
+ISSUER_NAME = Name([
+    NameAttribute(NameOID.COUNTRY_NAME, "GB"),
+    NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "London"),
+    NameAttribute(NameOID.COMMON_NAME, "mDoc Test Issuer"),
+    NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
+])
+
+LEAF_NAME = Name([
+    NameAttribute(NameOID.COUNTRY_NAME, "GB"),
+    NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "London"),
+    NameAttribute(NameOID.COMMON_NAME, "mDoc Test Leaf"),
+    NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
+])
+
 
 def build_issuer_signed_item(item):
     """Encode an IssuerSignedItem as Tag(24, bstr(encoded_item))."""
@@ -69,6 +88,83 @@ def build_issuer_signed_item(item):
     }
     encoded = cbor2.dumps(item_with_random)
     return cbor2.CBORTag(24, encoded)
+
+
+def generate_root_certificate(issuer_private_key, now, validity_days):
+    """Generate a self-signed root CA certificate."""
+    issuer_pub = issuer_private_key.public_key()
+    return (
+        CertificateBuilder()
+        .subject_name(ISSUER_NAME)
+        .issuer_name(ISSUER_NAME)
+        .public_key(issuer_pub)
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now)
+        .not_valid_after(now + timedelta(days=validity_days))
+        .add_extension(
+            x509.SubjectKeyIdentifier.from_public_key(issuer_pub), critical=False
+        )
+        .add_extension(
+            x509.AuthorityKeyIdentifier.from_issuer_public_key(issuer_pub), critical=False
+        )
+        .add_extension(
+            x509.BasicConstraints(ca=True, path_length=None), critical=True
+        )
+        .add_extension(
+            x509.KeyUsage(
+                key_cert_sign=True, crl_sign=True,
+                digital_signature=False, content_commitment=False,
+                key_encipherment=False, data_encipherment=False,
+                key_agreement=False, encipher_only=False, decipher_only=False
+            ), critical=True
+        )
+        .add_extension(
+            x509.IssuerAlternativeName([
+                x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")
+            ]), critical=False
+        )
+        .sign(issuer_private_key, hashes.SHA256())
+    )
+
+
+def generate_leaf_certificate(leaf_private_key, issuer_private_key, root_cert, now, validity_days):
+    """Generate a leaf certificate signed by the root, with IACA-compliant extensions."""
+    leaf_pub = leaf_private_key.public_key()
+    issuer_pub = issuer_private_key.public_key()
+    leaf_validity = min(validity_days, 457)
+    return (
+        CertificateBuilder()
+        .subject_name(LEAF_NAME)
+        .issuer_name(ISSUER_NAME)
+        .public_key(leaf_pub)
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now)
+        .not_valid_after(now + timedelta(days=leaf_validity))
+        .add_extension(
+            x509.SubjectKeyIdentifier.from_public_key(leaf_pub), critical=False
+        )
+        .add_extension(
+            x509.AuthorityKeyIdentifier.from_issuer_public_key(issuer_pub), critical=False
+        )
+        .add_extension(
+            x509.KeyUsage(
+                digital_signature=True,
+                key_cert_sign=False, crl_sign=False,
+                content_commitment=False, key_encipherment=False,
+                data_encipherment=False, key_agreement=False,
+                encipher_only=False, decipher_only=False
+            ), critical=True
+        )
+        .add_extension(
+            x509.ExtendedKeyUsage([OID_MDL_DS]), critical=True
+        )
+        .add_extension(
+            x509.IssuerAlternativeName([
+                x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")
+            ]), critical=False
+        )
+        .sign(issuer_private_key, hashes.SHA256())
+    )
 
 
 def generate():
@@ -90,21 +186,29 @@ def generate():
 
     issuer_private_key = get_issuer_private_key(args.issuer_private_key)
 
-    issuer_public_key = issuer_private_key.public_key()
     now = datetime.now(timezone.utc)
-    try:
-        cert = get_x509_certificate(args.x509_certificate)
-    except FileNotFoundError as exception:
-        print(f"'{args.x509_certificate}' not found! Creating...")
-        cert = generate_x509_certificate(
-            args.x509_certificate,
-            args.validity_days,
-            issuer_private_key,
-            issuer_public_key,
-            now
-        )
 
-    cert_der = cert.public_bytes(serialization.Encoding.DER)
+    # Generate leaf signing key (separate from issuer root key)
+    leaf_private_key = ec.generate_private_key(ec.SECP256R1())
+
+    # Generate root CA certificate (trust anchor for verifier)
+    root_cert = generate_root_certificate(issuer_private_key, now, args.validity_days)
+    root_cert_der = root_cert.public_bytes(serialization.Encoding.DER)
+    with open(args.x509_certificate, "wb") as f:
+        f.write(root_cert_der)
+    print(f"Generated root certificate: {args.x509_certificate}")
+
+    # Also write PEM version
+    pem_path = args.x509_certificate.replace(".der", ".pem")
+    with open(pem_path, "wb") as f:
+        f.write(root_cert.public_bytes(serialization.Encoding.PEM))
+    print(f"Generated root certificate PEM: {pem_path}")
+
+    # Generate leaf certificate (embedded in x5chain)
+    leaf_cert = generate_leaf_certificate(
+        leaf_private_key, issuer_private_key, root_cert, now, args.validity_days
+    )
+    leaf_cert_der = leaf_cert.public_bytes(serialization.Encoding.DER)
 
     # Build MSO
     device_cose_key = {1: 2, -1: 1, -2: device_x, -3: device_y}
@@ -138,14 +242,15 @@ def generate():
     mso_bytes = cbor2.dumps(mso)
     mso_tagged = cbor2.dumps(cbor2.CBORTag(24, mso_bytes))
 
-    # Sign (COSE_Sign1)
+    # Sign (COSE_Sign1) with the LEAF private key
     body_protected = cbor2.dumps({1: -7})
     sig_structure = cbor2.dumps(["Signature1", body_protected, b"", mso_tagged])
-    signature_der = issuer_private_key.sign(sig_structure, ec.ECDSA(hashes.SHA256()))
+    signature_der = leaf_private_key.sign(sig_structure, ec.ECDSA(hashes.SHA256()))
     r, s = decode_dss_signature(signature_der)
     signature = r.to_bytes(32, "big") + s.to_bytes(32, "big")
 
-    issuer_auth = [body_protected, {33: cert_der}, mso_tagged, signature]
+    # x5chain contains the leaf cert (verifier has root as trust anchor)
+    issuer_auth = [body_protected, {33: leaf_cert_der}, mso_tagged, signature]
 
     # Assemble credential (flat format)
     credential = {"nameSpaces": namespaces, "issuerAuth": issuer_auth}
@@ -160,112 +265,37 @@ def generate():
     print(f"  Valid until: {(now + timedelta(days=args.validity_days)).isoformat()}")
     print(f"  Namespaces: {list(namespaces.keys())}")
     print(f"  Size: {len(credential_bytes)} bytes")
+    print(f"  Chain: root (trust anchor) -> leaf (in x5chain)")
 
 
-def get_x509_certificate(x509_certificate_file_path: str) -> Optional[Certificate]:
-    result = None
-    with open(x509_certificate_file_path, "rb") as x509_certificate_file:
-        result = x509.load_der_x509_certificate(x509_certificate_file.read())
-        print(f"Obtained existing X509 Certificate: {x509_certificate_file_path}")
-    return result
-
-
-def generate_x509_certificate(
-        x509_certificate_file_path,
-        validity_days,
-        issuer_private_key,
-        issuer_pub,
-        now
-) -> Certificate:
-    result = (
-        CertificateBuilder()
-        .subject_name(Name([
-            NameAttribute(NameOID.COUNTRY_NAME, "GB"),
-            NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "London"),
-            NameAttribute(NameOID.COMMON_NAME, "mDoc Test Issuer"),
-            NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
-        ]))
-        .issuer_name(Name([
-            NameAttribute(NameOID.COUNTRY_NAME, "GB"),
-            NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "London"),
-            NameAttribute(NameOID.COMMON_NAME, "mDoc Test Issuer"),
-            NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
-        ]))
-        .public_key(issuer_pub)
-        .serial_number(x509.random_serial_number())
-        .not_valid_before(now)
-        .not_valid_after(now + timedelta(days=validity_days))
-        .add_extension(x509.SubjectKeyIdentifier.from_public_key(issuer_pub), critical=False)
-        .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
-        .sign(issuer_private_key, hashes.SHA256())
-    )
-
-    with open(x509_certificate_file_path, "xb") as f:
-        f.write(
-            result.public_bytes(serialization.Encoding.DER)
-        )
-
-    print(f"Generated X509 Certificate: {x509_certificate_file_path}")
-    return result
-
-def get_issuer_private_key(issuer_private_key_file_path: str) -> ec.EllipticCurve:
+def get_issuer_private_key(issuer_private_key_file_path: str):
     """
-    Obtains an EC private key for use in signing a mock credential.
-
-    :param issuer_private_key_file_path: The file path of the Issuer private EC key to load. If this
-           doesn't exist, the caught exception calls :func:`generate_issuer_private_key` to create
-           a PEM file at this location.
-    :return: The successfully obtains private EC key.
+    Obtains an EC private key for use as the root CA key.
     """
-
     try:
-        with open(issuer_private_key_file_path, "rb") as issuer_private_key_file:
-            issuer_private_key = serialization.load_pem_private_key(
-                issuer_private_key_file.read(),
-                password=None
-            )
+        with open(issuer_private_key_file_path, "rb") as f:
+            key = serialization.load_pem_private_key(f.read(), password=None)
             print(f"Loaded existing issuer private key: {issuer_private_key_file_path}")
-
-    except FileNotFoundError as exception:
-        issuer_private_key = generate_issuer_private_key(issuer_private_key_file_path)
-
-    return issuer_private_key
+            return key
+    except FileNotFoundError:
+        return generate_issuer_private_key(issuer_private_key_file_path)
 
 
-def generate_issuer_private_key(issuer_private_key_file_path: str) -> ec.EllipticCurve:
-    """
-    :param issuer_private_key_file_path: The file path of the Issuer private key to generate.
-    :return: The successfully generated EC private key, used for Issuer signing.
-    """
-
+def generate_issuer_private_key(issuer_private_key_file_path: str):
+    """Generate and save a new EC private key."""
     print(f"'{issuer_private_key_file_path}' not found! Creating...")
-    issuer_private_key = ec.generate_private_key(ec.SECP256R1())
+    key = ec.generate_private_key(ec.SECP256R1())
     with open(issuer_private_key_file_path, "xb") as f:
-        f.write(
-            issuer_private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption()
-            )
-        )
-        print(f"Generated EC private key: {issuer_private_key_file_path}")
-    return issuer_private_key
+        f.write(key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ))
+    print(f"Generated EC private key: {issuer_private_key_file_path}")
+    return key
 
 
 def get_argument_parser() -> argparse.Namespace:
-    """
-    Obtains the command-line arguments necessary to use this script. These are:
-
-    * `--private-key`
-    * `--issuer-private-key`
-    * `--output`
-    * `--validity-days`
-
-    The arguments are optional, with default values that may be overwritten at call-time.
-
-    :return: The parsed arguments that this script requires
-    """
-
     parser = argparse.ArgumentParser(description="Generate a mock credential for the test app")
     parser.add_argument(
         "--private-key",
@@ -274,12 +304,12 @@ def get_argument_parser() -> argparse.Namespace:
     )
     parser.add_argument(
         "--issuer-private-key",
-        help="The private EC key that issued the credential",
+        help="The private EC key for the root CA",
         default="app/src/main/assets/test_private_issuer_key.pem"
     )
     parser.add_argument(
         "--x509-certificate",
-        help="The X509 Certificate file path, in DER format",
+        help="Output path for the root CA certificate (DER format, trust anchor)",
         default="app/src/main/assets/test_x509_certificate.der"
     )
     parser.add_argument(
@@ -291,11 +321,10 @@ def get_argument_parser() -> argparse.Namespace:
         "--validity-days",
         type=int,
         default=365,
-        help="Validity period in days"
+        help="Validity period in days (leaf capped at 457)"
     )
     return parser.parse_args()
 
 
-# Prefer using `pipx install -e .` to install a symlinked `generate-mock-credential` command
 if __name__ == "__main__":
     generate()

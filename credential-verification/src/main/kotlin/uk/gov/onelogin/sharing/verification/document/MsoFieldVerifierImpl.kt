@@ -1,12 +1,13 @@
 package uk.gov.onelogin.sharing.verification.document
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import kotlin.jvm.java
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
@@ -78,7 +79,7 @@ class MsoFieldVerifierImpl : MsoFieldVerifier {
     }
 
     private fun decodeElementValue(itemBytes: ByteArray, identifier: String): String? = try {
-        val inner = unwrapTag24(itemBytes)
+        val inner = CborMapper.default.readValue(itemBytes, EmbeddedCbor::class.java).encoded
         val item = cborMapper.readValue(
             inner,
             DeviceResponseDto.IssuerSignedItemDTO::class.java
@@ -90,11 +91,6 @@ class MsoFieldVerifierImpl : MsoFieldVerifier {
         }
     } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
         null
-    }
-
-    private fun unwrapTag24(data: ByteArray): ByteArray {
-        val root = cborMapper.readTree(data)
-        return (root as? BinaryNode)?.binaryValue() ?: data
     }
 
     private companion object {

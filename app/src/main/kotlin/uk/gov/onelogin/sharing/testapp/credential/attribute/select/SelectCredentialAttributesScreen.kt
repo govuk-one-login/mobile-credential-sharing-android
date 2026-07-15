@@ -44,7 +44,7 @@ internal fun SelectCredentialAttributesScreen(
     }
 
     var selected by rememberSaveable {
-        mutableStateOf(VerifierAttributeOption.PHOTO_AND_AGE_OVER_21)
+        mutableStateOf(VerifierAttributeOption.PORTRAIT_AND_AGE_OVER_21)
     }
 
     Surface(

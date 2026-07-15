@@ -36,12 +36,16 @@ class TestCertificateGenerator(
     private var sigAlgorithm: String = "SHA256withECDSA"
     private var includeAki = true
     private var includeSki = true
+    private var ekuOids: List<String>? = null
+    private var ekuCritical = true
+    private var includeIssuerAltName = true
     private var extraExtensions: List<ExtensionSpec> = emptyList()
 
     fun ca(pathLen: Int = -1) = apply {
         isCa = true
         pathLenConstraint = pathLen
         keyUsageBits = intArrayOf(KEY_CERT_SIGN, CRL_SIGN)
+        includeIssuerAltName = true
     }
 
     fun caNotCriticalBasicConstraints(pathLen: Int = -1) = apply {
@@ -55,11 +59,18 @@ class TestCertificateGenerator(
         isCa = false
         includeBasicConstraints = false
         keyUsageBits = intArrayOf(DIGITAL_SIGNATURE)
+        ekuOids = listOf(OID_MDL_DS)
+        includeIssuerAltName = true
     }
 
     fun expired() = apply {
         notBefore = Date(System.currentTimeMillis() - 2 * 365L * 86400000L)
         notAfter = Date(System.currentTimeMillis() - 365L * 86400000L)
+    }
+
+    fun withValidity(notBefore: Date, notAfter: Date) = apply {
+        this.notBefore = notBefore
+        this.notAfter = notAfter
     }
 
     fun notYetValid() = apply {
@@ -155,6 +166,19 @@ class TestCertificateGenerator(
         extraExtensions = extraExtensions + ExtensionSpec(oid, critical, value)
     }
 
+    fun withEku(oids: List<String>, critical: Boolean = true) = apply {
+        ekuOids = oids
+        ekuCritical = critical
+    }
+
+    fun withoutEku() = apply {
+        ekuOids = null
+    }
+
+    fun withoutIssuerAltName() = apply {
+        includeIssuerAltName = false
+    }
+
     fun build(): X509Certificate {
         val signingKey = issuerKeyPair
         val signer = JcaContentSignerBuilder(sigAlgorithm).build(signingKey.private)
@@ -203,6 +227,28 @@ class TestCertificateGenerator(
             )
         }
 
+        ekuOids?.let { oids ->
+            val ekuVector = org.bouncycastle.asn1.ASN1EncodableVector()
+            oids.forEach {
+                ekuVector.add(org.bouncycastle.asn1.ASN1ObjectIdentifier(it))
+            }
+            builder.addExtension(
+                Extension.extendedKeyUsage,
+                ekuCritical,
+                org.bouncycastle.asn1.DERSequence(ekuVector)
+            )
+        }
+
+        if (includeIssuerAltName) {
+            val issuerAltName = org.bouncycastle.asn1.x509.GeneralNames(
+                org.bouncycastle.asn1.x509.GeneralName(
+                    org.bouncycastle.asn1.x509.GeneralName.uniformResourceIdentifier,
+                    "https://issuer.example.com"
+                )
+            )
+            builder.addExtension(Extension.issuerAlternativeName, false, issuerAltName)
+        }
+
         for (ext in extraExtensions) {
             builder.addExtension(
                 org.bouncycastle.asn1.ASN1ObjectIdentifier(ext.oid),
@@ -222,6 +268,7 @@ class TestCertificateGenerator(
         private const val KEY_CERT_SIGN = 5
         private const val CRL_SIGN = 6
         private const val VALID_SERIAL_OCTETS = 9
+        const val OID_MDL_DS = "1.0.18013.5.1.2"
 
         private fun generateValidSerial(): BigInteger = BigInteger(
             1,

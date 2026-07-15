@@ -4,20 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
-
-data class EmbeddedCbor(val encoded: ByteArray) : CborEncodable {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as EmbeddedCbor
-
-        return encoded.contentEquals(other.encoded)
-    }
-
-    override fun hashCode(): Int = encoded.contentHashCode()
-}
 
 class EmbeddedCborSerializer : StdSerializer<EmbeddedCbor>(EmbeddedCbor::class.java) {
     override fun serialize(value: EmbeddedCbor, gen: JsonGenerator, provider: SerializerProvider) {

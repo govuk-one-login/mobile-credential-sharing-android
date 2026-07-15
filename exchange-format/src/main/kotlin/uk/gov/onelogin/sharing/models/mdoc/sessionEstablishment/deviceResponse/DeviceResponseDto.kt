@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -35,7 +36,9 @@ class DeviceResponseDto {
         val version: String = "1.0",
         val documents: List<DocumentDTO>? = null,
         val documentErrors: Map<String, UInt>? = null,
-        val status: UInt
+        val status: UInt,
+        @JsonIgnore
+        val rawBytes: ByteArray? = null
     ) : CborEncodable {
         init {
             require(version.startsWith("1.")) {
@@ -46,11 +49,67 @@ class DeviceResponseDto {
             }
         }
 
-        fun toDomain(): DeviceResponse = DeviceResponse(
-            statusCode = status,
-            documents = documents?.map { it.toDomain() },
-            version = version
-        )
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as DeviceResponseDTO
+
+            if (version != other.version) return false
+            if (documents != other.documents) return false
+            if (documentErrors != other.documentErrors) return false
+            if (status != other.status) return false
+            if (!rawBytes.contentEquals(other.rawBytes)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = version.hashCode()
+            result = 31 * result + (documents?.hashCode() ?: 0)
+            result = 31 * result + (documentErrors?.hashCode() ?: 0)
+            result = 31 * result + status.hashCode()
+            result = 31 * result + (rawBytes?.contentHashCode() ?: 0)
+            return result
+        }
+
+        /**
+         * Maps to domain preserving original Tag 24-encoded bytes.
+         *
+         * Requires [rawBytes] to be set with the original CBOR bytes from which
+         * this DTO was deserialized.
+         */
+        fun toDomain(): DeviceResponse {
+            val sourceBytes = requireNotNull(rawBytes) {
+                RAW_BYTES_MISSING_ERROR
+            }
+            val extractedBytes = DeviceResponseCborExtractor.extract(sourceBytes)
+            check(extractedBytes.size == (documents?.size ?: 0)) {
+                "Extractor document count (${extractedBytes.size}) != " +
+                    "DTO document count (${documents?.size ?: 0})"
+            }
+            return DeviceResponse(
+                statusCode = status,
+                documents = documents?.mapIndexed { index, doc ->
+                    val raw = extractedBytes[index]
+                    doc.copy(
+                        issuerSigned = doc.issuerSigned.copy(rawBytes = raw.issuerSigned),
+                        deviceSigned = doc.deviceSigned.copy(rawBytes = raw.deviceSigned)
+                    ).toDomain()
+                },
+                version = version
+            )
+        }
+
+        companion object {
+            /**
+             * Decodes a CBOR byte array into a [DeviceResponseDTO] with [rawBytes] populated.
+             */
+            fun decode(bytes: ByteArray): DeviceResponseDTO = CborMapper.default.readValue(
+                bytes,
+                DeviceResponseDTO::class.java
+            ).copy(rawBytes = bytes)
+        }
     }
 
     /**
@@ -72,10 +131,7 @@ class DeviceResponseDto {
             SharingVerifiableDocumentWithPresentation(
                 docType = docType,
                 issuerSigned = issuerSigned.toDomain(),
-                deviceSigned = SharingDeviceSigned(
-                    deviceNameSpacesBytes = deviceSigned.nameSpaces.encoded,
-                    deviceSignature = deviceSigned.deviceAuth.deviceSignature.encoded
-                )
+                deviceSigned = deviceSigned.toDomain()
             )
     }
 
@@ -89,14 +145,19 @@ class DeviceResponseDto {
      */
     data class IssuerSignedDTO(
         val nameSpaces: Map<String, List<EmbeddedCbor>>? = null,
-        val issuerAuth: RawCbor
+        val issuerAuth: RawCbor,
+        @JsonIgnore
+        val rawBytes: IssuerSignedRawBytes? = null
     ) {
-        fun toDomain(): SharingIssuerSigned = SharingIssuerSigned(
-            nameSpaces = nameSpaces?.mapValues { entry ->
-                entry.value.map { it.encoded }
-            },
-            issuerAuth = issuerAuth.encoded
-        )
+        fun toDomain(): SharingIssuerSigned {
+            val raw = requireNotNull(rawBytes) {
+                RAW_BYTES_MISSING_ERROR
+            }
+            return SharingIssuerSigned(
+                nameSpaces = raw.nameSpaces.ifEmpty { null },
+                issuerAuth = raw.issuerAuthBytes ?: issuerAuth.encoded
+            )
+        }
     }
 
     @JsonDeserialize(using = IssuerSignedItemDeserializer::class)
@@ -137,7 +198,12 @@ class DeviceResponseDto {
      * DeviceNameSpacesBytes = #6.24(bstr .cbor DeviceNameSpaces)
      * ```
      */
-    data class DeviceSignedDTO(val nameSpaces: EmbeddedCbor, val deviceAuth: DeviceAuthDTO) {
+    data class DeviceSignedDTO(
+        val nameSpaces: EmbeddedCbor,
+        val deviceAuth: DeviceAuthDTO,
+        @JsonIgnore
+        val rawBytes: DeviceSignedRawBytes? = null
+    ) {
         init {
             val nameSpacesMap = CborMapper.default.readValue(
                 nameSpaces.encoded,
@@ -147,6 +213,16 @@ class DeviceResponseDto {
             require(nameSpacesMap.isEmpty()) {
                 "Received unexpected data in 'nameSpaces' property: $nameSpacesMap"
             }
+        }
+
+        fun toDomain(): SharingDeviceSigned {
+            val raw = requireNotNull(rawBytes) {
+                RAW_BYTES_MISSING_ERROR
+            }
+            return SharingDeviceSigned(
+                deviceNameSpacesBytes = raw.nameSpacesBytes ?: nameSpaces.encoded,
+                deviceSignature = raw.signatureBytes ?: deviceAuth.deviceSignature.encoded
+            )
         }
     }
 
@@ -255,10 +331,11 @@ class DeviceResponseDto {
     /**
      * Deserializes a CBOR byte array into [DeviceResponse].
      *
-     * Preserves Tag 24 items within `issuerSigned.nameSpaces` as raw byte arrays
+     * Preserves Tag 24 items within `issuerSigned.nameSpaces` as raw byte arrays.
      *
      * The `issuerAuth` and `deviceSignature` fields are re-encoded from the parsed tree
-     * to capture the raw COSE structure.
+     * for DTO use. During `toDomain()`, these are replaced by exact original bytes from
+     * [DeviceResponseCborExtractor].
      */
     class DeviceResponseDeserializer :
         StdDeserializer<DeviceResponseDTO>(DeviceResponseDTO::class.java) {
@@ -342,7 +419,7 @@ class DeviceResponseDto {
         }
     }
 
-    private companion object {
+    internal companion object {
         const val KEY_VERSION = "version"
         const val KEY_STATUS = "status"
         const val KEY_DOCUMENTS = "documents"
@@ -354,5 +431,7 @@ class DeviceResponseDto {
         const val KEY_ISSUER_AUTH = "issuerAuth"
         const val KEY_DEVICE_AUTH = "deviceAuth"
         const val KEY_DEVICE_SIGNATURE = "deviceSignature"
+
+        const val RAW_BYTES_MISSING_ERROR = "rawBytes must be set before calling toDomain()"
     }
 }

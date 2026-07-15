@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertContains
+import kotlin.test.assertNotEquals
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
@@ -217,31 +218,33 @@ class DeviceResponseDtoTest {
     @Test
     fun `toDomain maps DeviceResponseDTO to DeviceResponse`() {
         val issuerSignedItemData = byteArrayOf(0x01, 0x02)
-        val deviceSignatureData = byteArrayOf(0x03, 0x04)
-
-        val document = DeviceResponseDto.DocumentDTO(
-            docType = docType,
-            issuerSigned = DeviceResponseDto.IssuerSignedDTO(
-                nameSpaces = mapOf(
-                    "org.iso.18013.5.1" to listOf(EmbeddedCbor(issuerSignedItemData))
-                ),
-                issuerAuth = RawCbor(byteArrayOf(0x03, 0x04))
-            ),
-            deviceSigned = DeviceResponseDto.DeviceSignedDTO(
-                nameSpaces = EmbeddedCbor(deviceNameSpacesData),
-                deviceAuth = DeviceResponseDto.DeviceAuthDTO(
-                    deviceSignature = RawCbor(deviceSignatureData)
-                )
-            )
-        )
+        val issuerAuthBytes = mapper.writeValueAsBytes(listOf<Any>())
+        val deviceSignatureData = mapper.writeValueAsBytes(listOf<Any>())
 
         val dto = DeviceResponseDto.DeviceResponseDTO(
             version = "1.0",
-            documents = listOf(document),
+            documents = listOf(
+                DeviceResponseDto.DocumentDTO(
+                    docType = docType,
+                    issuerSigned = DeviceResponseDto.IssuerSignedDTO(
+                        nameSpaces = mapOf(
+                            "org.iso.18013.5.1" to listOf(EmbeddedCbor(issuerSignedItemData))
+                        ),
+                        issuerAuth = RawCbor(issuerAuthBytes)
+                    ),
+                    deviceSigned = DeviceResponseDto.DeviceSignedDTO(
+                        nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                        deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                            deviceSignature = RawCbor(deviceSignatureData)
+                        )
+                    )
+                )
+            ),
             status = 0u
         )
 
-        val domain = dto.toDomain()
+        val encoded = mapper.writeValueAsBytes(dto)
+        val domain = DeviceResponseDto.DeviceResponseDTO.decode(encoded).toDomain()
 
         assertEquals("1.0", domain.version)
         assertEquals(Status.OK, domain.status)
@@ -253,11 +256,11 @@ class DeviceResponseDtoTest {
         val issuerSigned = documents.first().issuerSigned
         val nameSpaces = issuerSigned.nameSpaces!!
         assertEquals(1, nameSpaces["org.iso.18013.5.1"]!!.size)
-        assertThat(nameSpaces["org.iso.18013.5.1"]!![0], equalTo(issuerSignedItemData))
-        assertThat(issuerSigned.issuerAuth, equalTo(byteArrayOf(0x03, 0x04)))
+        assertThat(nameSpaces["org.iso.18013.5.1"]!![0], equalTo(wrapTag24(issuerSignedItemData)))
+        assertThat(issuerSigned.issuerAuth, equalTo(issuerAuthBytes))
 
         val deviceSigned = documents.first().deviceSigned
-        assertThat(deviceSigned.deviceNameSpacesBytes, equalTo(deviceNameSpacesData))
+        assertThat(deviceSigned.deviceNameSpacesBytes, equalTo(wrapTag24(deviceNameSpacesData)))
         assertThat(deviceSigned.deviceSignature, equalTo(deviceSignatureData))
     }
 
@@ -265,7 +268,8 @@ class DeviceResponseDtoTest {
     fun `toDomain maps null documents`() {
         val dto = DeviceResponseDto.DeviceResponseDTO(status = 10u)
 
-        val domain = dto.toDomain()
+        val encoded = mapper.writeValueAsBytes(dto)
+        val domain = DeviceResponseDto.DeviceResponseDTO.decode(encoded).toDomain()
 
         assertEquals(Status.GENERAL_ERROR, domain.status)
         assertNull(domain.documents)
@@ -469,6 +473,113 @@ class DeviceResponseDtoTest {
         "elementIdentifier" to "family_name",
         "elementValue" to elementValue
     )
+
+    @Test
+    fun `toDomain preserves raw bytes`() {
+        val coseSign1 = DeviceResponseDtoStub.coseSign1WithIntegerKeys
+        val innerItemBytes = byteArrayOf(0xA4.toByte(), 0x01, 0x02, 0x03, 0x04)
+
+        val original = DeviceResponseDtoStub.deviceResponseDto(
+            nameSpaces = mapOf(
+                "org.iso.18013.5.1" to listOf(EmbeddedCbor(innerItemBytes))
+            ),
+            issuerAuth = coseSign1,
+            deviceSignature = coseSign1
+        )
+
+        val encoded = mapper.writeValueAsBytes(original)
+        val domain = DeviceResponseDto.DeviceResponseDTO.decode(encoded).toDomain()
+        val document = domain.documents!!.first()
+
+        assertThat(
+            "IssuerSignedItemBytes must include Tag 24 prefix (0xD8 0x18)",
+            document.issuerSigned.nameSpaces!!["org.iso.18013.5.1"]!![0],
+            equalTo(wrapTag24(innerItemBytes))
+        )
+        assertThat(
+            "issuerAuth must preserve original COSE_Sign1 bytes with integer map keys",
+            document.issuerSigned.issuerAuth,
+            equalTo(coseSign1)
+        )
+        assertThat(
+            "deviceNameSpacesBytes must include Tag 24 prefix",
+            document.deviceSigned.deviceNameSpacesBytes[0],
+            equalTo(0xD8.toByte())
+        )
+        assertThat(
+            "deviceSignature must preserve original COSE_Sign1 bytes with integer map keys",
+            document.deviceSigned.deviceSignature,
+            equalTo(coseSign1)
+        )
+    }
+
+    @Test
+    fun `toDomain throws when rawBytes is null`() {
+        val issuerAuthBytes = mapper.writeValueAsBytes(listOf<Any>())
+        val deviceSignatureBytes = mapper.writeValueAsBytes(listOf<Any>())
+
+        assertThrows(IllegalArgumentException::class.java) {
+            DeviceResponseDto.DeviceResponseDTO(status = 0u, rawBytes = null).toDomain()
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            DeviceResponseDto.IssuerSignedDTO(
+                nameSpaces = null,
+                issuerAuth = RawCbor(issuerAuthBytes),
+                rawBytes = null
+            ).toDomain()
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            DeviceResponseDto.DeviceSignedDTO(
+                nameSpaces = EmbeddedCbor(deviceNameSpacesData),
+                deviceAuth = DeviceResponseDto.DeviceAuthDTO(
+                    deviceSignature = RawCbor(deviceSignatureBytes)
+                ),
+                rawBytes = null
+            ).toDomain()
+        }
+    }
+
+    @Test
+    fun `equals returns true for identical DeviceResponseDTOs`() {
+        val dto1 = DeviceResponseDto.DeviceResponseDTO(
+            version = "1.0",
+            documents = null,
+            status = 0u,
+            rawBytes = byteArrayOf(0x01, 0x02)
+        )
+        val dto2 = DeviceResponseDto.DeviceResponseDTO(
+            version = "1.0",
+            documents = null,
+            status = 0u,
+            rawBytes = byteArrayOf(0x01, 0x02)
+        )
+
+        assertEquals(dto1, dto2)
+        assertEquals(dto1.hashCode(), dto2.hashCode())
+    }
+
+    @Test
+    fun `equals returns false when rawBytes differ`() {
+        val dto1 = DeviceResponseDto.DeviceResponseDTO(
+            status = 0u,
+            rawBytes = byteArrayOf(0x01, 0x02)
+        )
+        val dto2 = DeviceResponseDto.DeviceResponseDTO(
+            status = 0u,
+            rawBytes = byteArrayOf(0x03, 0x04)
+        )
+
+        assertNotEquals(dto1, dto2)
+    }
+
+    private fun wrapTag24(content: ByteArray): ByteArray = ByteArrayOutputStream().also { out ->
+        CBORFactory().createGenerator(out).use { gen ->
+            gen.writeTag(24)
+            gen.writeBinary(content)
+        }
+    }.toByteArray()
 
     private fun generateBytesTag(elementSize: Int) = hexFormatter(PREFIX_TYPE_BYTES + elementSize)
 }
