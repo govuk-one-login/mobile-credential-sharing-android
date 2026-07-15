@@ -17,6 +17,8 @@ class CancellableHolderSessionStates : TestParameterValuesProvider() {
         HolderSessionState.PresentingEngagement(""),
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.AwaitingUserConsent(deviceRequestStub),
-        HolderSessionState.ProcessingResponse
+        HolderSessionState.ProcessingResponse,
+        HolderSessionState.AwaitingVerifierResolution,
+        HolderSessionState.TerminatingSession
     )
 }

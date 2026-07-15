@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.verification.document
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import dev.zacsweers.metro.Inject
 import java.io.ByteArrayOutputStream
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 
 @Inject
 class DeviceAuthenticationEncoder {
@@ -12,11 +14,14 @@ class DeviceAuthenticationEncoder {
         docType: String,
         deviceNameSpacesBytes: ByteArray
     ): ByteArray {
+        val sessionTranscript = CborMapper.default
+            .readValue(sessionTranscriptBytes, EmbeddedCbor::class.java).encoded
+
         val innerArray = ByteArrayOutputStream().also { out ->
             out.write(CBOR_ARRAY_4)
             CBORFactory().createGenerator(out)
                 .use { gen -> gen.writeString(DEVICE_AUTHENTICATION_LABEL) }
-            out.write(sessionTranscriptBytes)
+            out.write(sessionTranscript)
             CBORFactory().createGenerator(out).use { gen -> gen.writeString(docType) }
             out.write(deviceNameSpacesBytes)
         }.toByteArray()

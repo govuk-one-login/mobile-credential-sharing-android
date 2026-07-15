@@ -20,9 +20,9 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         )
 
         if (deviceRequestDto.docRequest.isEmpty()) {
-            val errorMessage = "empty DocRequest: status code 20"
+            val errorMessage = "DeviceRequest contains empty DocRequests"
             logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            throw DeviceRequestValidationException(errorMessage)
         }
 
         logger.debug(
@@ -43,13 +43,15 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
                 }
             )
         }
+    } catch (e: DeviceRequestValidationException) {
+        throw e
     } catch (e: DeviceRequestDecodingException) {
         throw e
     } catch (e: JsonProcessingException) {
-        logger.error(logger.logTag, "session termination: status code 11")
+        logger.error(logger.logTag, "DeviceRequest CBOR decoding failed: ${e.message}")
         throw DeviceRequestDecodingException(e.message ?: "CBOR decoding error", e)
     } catch (e: IllegalArgumentException) {
-        logger.error(logger.logTag, "session termination: status code 11")
+        logger.error(logger.logTag, "DeviceRequest CBOR decoding failed: ${e.message}")
         throw DeviceRequestDecodingException(e.message ?: "CBOR decoding error", e)
     }
 }

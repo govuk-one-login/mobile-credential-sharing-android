@@ -88,6 +88,13 @@ class FakeVerifierCryptoService : VerifierCryptoService {
     var decryptDeviceResponseToReturn: DeviceResponse = DeviceResponseStub.successWithDocuments
     var decryptDeviceResponseException: Exception? = null
     var lastDecryptCounter: UInt? = null
+    var buildTerminationSessionDataCalls = 0
+        private set
+
+    override fun buildTerminationSessionData(): ByteArray {
+        buildTerminationSessionDataCalls++
+        return byteArrayOf(0xA1.toByte(), 0x66, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x14)
+    }
 
     override fun decryptDeviceResponse(
         deviceResponseBytes: ByteArray,

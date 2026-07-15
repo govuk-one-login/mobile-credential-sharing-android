@@ -12,9 +12,9 @@ object IssuerSignedItemStubs {
 
     private val cborMapper = ObjectMapper(CBORFactory())
 
-    fun issuerSignedItemBytes(identifier: String, value: String): ByteArray {
+    fun issuerSignedItemBytes(identifier: String, value: String, digestId: Long = 0): ByteArray {
         val inner = cborMapper.createObjectNode()
-        inner.put(KEY_DIGEST_ID, 0)
+        inner.put(KEY_DIGEST_ID, digestId)
         inner.put(KEY_RANDOM, byteArrayOf(0x01))
         inner.put(KEY_ELEMENT_IDENTIFIER, identifier)
         inner.put(KEY_ELEMENT_VALUE, value)

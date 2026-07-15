@@ -9,7 +9,7 @@ object DeviceRequestStub {
     private const val MDL_NAMESPACE = "org.iso.18013.5.1"
 
     val deviceRequestStub = deviceRequest(
-        mapOf("age_over_18" to false)
+        mapOf("portrait" to false, "age_over_18" to false)
     )
 
     fun deviceRequest(

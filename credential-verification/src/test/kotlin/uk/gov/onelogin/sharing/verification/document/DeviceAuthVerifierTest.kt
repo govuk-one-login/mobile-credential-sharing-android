@@ -34,6 +34,7 @@ class DeviceAuthVerifierTest {
         .apply { initialize(ECGenParameterSpec("secp256r1")) }
         .generateKeyPair()
     private val publicKey = keyPair.public as ECPublicKey
+    private val tag24SessionTranscript = CoseSign1Stubs.wrapInTag24(sessionTranscriptBytes)
 
     private fun buildDocument(
         deviceSignature: ByteArray = validCoseSign1WithNullPayload,
@@ -57,7 +58,7 @@ class DeviceAuthVerifierTest {
 
         deviceAuthVerifier.verify(
             document,
-            sessionTranscriptBytes,
+            tag24SessionTranscript,
             deviceKeyInfo
         )
     }
@@ -70,7 +71,7 @@ class DeviceAuthVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             deviceAuthVerifier.verify(
                 document,
-                sessionTranscriptBytes,
+                tag24SessionTranscript,
                 deviceKeyInfo
             )
         }
@@ -85,7 +86,7 @@ class DeviceAuthVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             deviceAuthVerifier.verify(
                 document,
-                sessionTranscriptBytes,
+                tag24SessionTranscript,
                 deviceKeyInfo
             )
         }
@@ -102,7 +103,7 @@ class DeviceAuthVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             deviceAuthVerifier.verify(
                 document,
-                sessionTranscriptBytes,
+                tag24SessionTranscript,
                 deviceKeyInfo
             )
         }
@@ -119,7 +120,7 @@ class DeviceAuthVerifierTest {
 
         deviceAuthVerifier.verify(
             document,
-            sessionTranscriptBytes,
+            tag24SessionTranscript,
             deviceKeyInfo
         )
     }
@@ -136,7 +137,7 @@ class DeviceAuthVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             deviceAuthVerifier.verify(
                 document,
-                sessionTranscriptBytes,
+                tag24SessionTranscript,
                 deviceKeyInfo
             )
         }
@@ -170,7 +171,7 @@ class DeviceAuthVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             deviceAuthVerifier.verify(
                 document,
-                sessionTranscriptBytes,
+                tag24SessionTranscript,
                 deviceKeyInfo
             )
         }
@@ -188,7 +189,7 @@ class DeviceAuthVerifierTest {
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             deviceAuthVerifier.verify(
                 document,
-                sessionTranscriptBytes,
+                tag24SessionTranscript,
                 deviceKeyInfo
             )
         }

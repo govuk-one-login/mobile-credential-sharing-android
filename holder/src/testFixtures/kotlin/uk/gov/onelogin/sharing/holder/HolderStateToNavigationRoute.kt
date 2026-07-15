@@ -7,11 +7,13 @@ import com.google.testing.junit.testparameterinjector.TestParametersValuesProvid
 import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
+import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
@@ -77,6 +79,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
+                "'AwaitingVerifierResolution' -> AwaitingVerifierResolutionRoute",
+                HolderSessionState.AwaitingVerifierResolution
+            ) {
+                instanceOf<AwaitingVerifierResolutionRoute>(
+                    AwaitingVerifierResolutionRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<AwaitingVerifierResolutionRoute>()
+                )
+            },
+            Triple(
                 "Failure: Bluetooth connection error -> BtConnectionErrorRoute",
                 HolderSessionState.Complete.Failed(
                     SessionError(
@@ -107,6 +119,18 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     UnrecoverableHolderErrorRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<UnrecoverableHolderErrorRoute>()
+                )
+            },
+            Triple(
+                "'Complete.Success(UnfulfillableRequest)' -> HolderSuccessRoute",
+                HolderSessionState.Complete.Success(
+                    HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
+                )
+            ) {
+                instanceOf<HolderSuccessRoute>(
+                    HolderSuccessRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<HolderSuccessRoute>()
                 )
             }
         )

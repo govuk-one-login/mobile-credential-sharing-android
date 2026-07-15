@@ -145,6 +145,10 @@ dependencies {
     ).forEach(::testFixturesImplementation)
 
     listOf(
+        libs.bundles.debug.tooling
+    ).forEach(::testReleaseImplementation)
+
+    listOf(
         platform(libs.androidx.compose.bom),
         libs.bundles.testing.unit,
         libs.metro.runtime,

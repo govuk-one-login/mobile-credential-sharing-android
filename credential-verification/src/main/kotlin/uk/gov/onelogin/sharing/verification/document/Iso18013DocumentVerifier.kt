@@ -5,13 +5,12 @@ package uk.gov.onelogin.sharing.verification.document
 import dev.zacsweers.metro.ContributesBinding
 import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
-import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
-import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 
+@Suppress("LongParameterList")
 @ContributesBinding(CredentialVerificationScope::class)
 class Iso18013DocumentVerifier(
     private val trustedRootCertificate: X509Certificate,
@@ -19,7 +18,8 @@ class Iso18013DocumentVerifier(
     private val deviceAuthVerifier: DeviceAuthVerifier,
     private val msoDecoder: MsoDecoder,
     private val msoFieldVerifier: MsoFieldVerifier,
-    private val validityInfoVerifier: ValidityInfoVerifier
+    private val validityInfoVerifier: ValidityInfoVerifier,
+    private val digestVerifier: DigestVerifier
 ) : DocumentVerifier {
 
     override fun verifyDocument(
@@ -37,8 +37,7 @@ class Iso18013DocumentVerifier(
             issuerAuthResult.certificateValidityPeriod,
             mso.validityInfo
         )
-
-        verifyDocumentDigests(document, mso)
+        digestVerifier.verify(document, mso)
 
         if (document is VerifiableDocument.WithPresentation) {
             if (sessionTranscriptBytes == null) {
@@ -54,12 +53,4 @@ class Iso18013DocumentVerifier(
 
         return VerificationResult.Success
     }
-
-    /**
-     * @throws VerificationResult.Failure
-     */
-    internal fun verifyDocumentDigests(
-        document: VerifiableDocument,
-        mso: MobileSecurityObject
-    ): Unit = throw VerificationResult.Failure(VerificationError.DIGEST_MISMATCH)
 }

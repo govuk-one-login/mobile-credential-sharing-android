@@ -4,12 +4,14 @@ import com.google.testing.junit.testparameterinjector.TestParameterValuesProvide
 import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingVerifierResolution
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.TerminatingSession
 
 class TransitionableHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*>? = inputs
@@ -22,7 +24,9 @@ class TransitionableHolderSessionStates : TestParameterValuesProvider() {
             PresentingEngagement::class,
             ProcessingEstablishment::class,
             AwaitingUserConsent::class,
-            ProcessingResponse::class
+            ProcessingResponse::class,
+            AwaitingVerifierResolution::class,
+            TerminatingSession::class
         )
     }
 }

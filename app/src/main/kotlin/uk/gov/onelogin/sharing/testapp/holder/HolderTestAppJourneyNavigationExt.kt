@@ -10,6 +10,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -27,6 +28,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.testapp.credential.MockCredential
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState
@@ -43,6 +46,7 @@ object HolderTestAppJourneyNavigationExt {
         options
     )
 
+    @Suppress("LongMethod")
     internal fun NavGraphBuilder.configureHolderJourneyWrapper(
         navController: NavController,
         component: (MockCredential) -> CredentialPresenter
@@ -60,7 +64,11 @@ object HolderTestAppJourneyNavigationExt {
                 try {
                     arguments.state.toCredential(context)
                 } catch (e: IllegalArgumentException) {
-                    Log.e(HOLDER_TEST_APP_JOURNEY_NAV_EXT, "Invalid credential configuration", e)
+                    Log.e(
+                        HOLDER_TEST_APP_JOURNEY_NAV_EXT,
+                        "Invalid credential configuration",
+                        e
+                    )
                     null
                 }
             }
@@ -92,6 +100,17 @@ object HolderTestAppJourneyNavigationExt {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 presenter?.let { presenter ->
+                    LaunchedEffect(presenter.orchestrator) {
+                        presenter.orchestrator.holderSessionState.collect { state ->
+                            if (state is HolderSessionState.Complete.Success &&
+                                state.successReason == SuccessReason.Denied
+                            ) {
+                                presenter.orchestrator.reset()
+                                navController.popBackStack()
+                            }
+                        }
+                    }
+
                     HolderTestAppJourneyScreen(
                         component = presenter,
                         modifier = Modifier.fillMaxSize()

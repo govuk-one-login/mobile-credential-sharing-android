@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborDeserializer
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.RawCborSerializer
 
@@ -21,6 +23,7 @@ object CborMapper {
             SimpleModule().apply {
                 addSerializer(EmbeddedCborSerializer())
                 addSerializer(RawCborSerializer())
+                addDeserializer(EmbeddedCbor::class.java, EmbeddedCborDeserializer())
             }
         ).build()
 }

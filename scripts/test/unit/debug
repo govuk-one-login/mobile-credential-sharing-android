@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Exit immediately if a simple command exits with a non-zero status
+# see also: the 'set' command within the 'Shell Builtin Commands' section of `man bash`
+set -o errexit
+
+# Script for running all unit tests within the code base.
+# Skips running the unit tests for the `release` build type.
+
+# The `"${@}" appends additional input to the command, like so:
+# `./scripts/test/unit --debug` -> adds `--debug` to the command.
+./gradlew \
+  :credential-format:jacocoTestReport \
+  :credential-format:test \
+  :exchange-format:jacocoTestReport \
+  :exchange-format:test \
+  testDebugUnitTest \
+  createDebugUnitTestCoverageReport \
+  --exclude-task :iso18013-6-tests:testDebugUnitTest \
+  --exclude-task :iso18013-6-tests:createDebugUnitTestCoverageReport \
+  "${@}"

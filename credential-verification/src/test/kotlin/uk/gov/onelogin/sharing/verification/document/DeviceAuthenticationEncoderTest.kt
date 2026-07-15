@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.emptyDeviceNameSpacesBytes
 import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.sessionTranscriptBytes
+import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject.Companion.DOC_TYPE
 
 class DeviceAuthenticationEncoderTest {
     private val cborMapper = ObjectMapper(CBORFactory())
@@ -18,7 +20,11 @@ class DeviceAuthenticationEncoderTest {
     fun `encodes DeviceAuthenticationBytes as Tag 24 wrapping correct CBOR structure`() {
         val docType = "org.iso.18013.5.1.mDL"
 
-        val result = encoder.encode(sessionTranscriptBytes, docType, emptyDeviceNameSpacesBytes)
+        val result = encoder.encode(
+            CoseSign1Stubs.wrapInTag24(sessionTranscriptBytes),
+            docType,
+            emptyDeviceNameSpacesBytes
+        )
 
         val outerNode = cborMapper.readTree(result)
         assertThat(outerNode.isBinary, equalTo(true))
@@ -32,5 +38,16 @@ class DeviceAuthenticationEncoderTest {
         assertThat(inner[1].size(), equalTo(3))
         assertThat(inner[2].asText(), equalTo(docType))
         assertThat(inner[3].isBinary, equalTo(true))
+    }
+
+    @Test
+    fun `encode throws when sessionTranscriptBytes is not Tag 24 wrapped`() {
+        assertThrows(Exception::class.java) {
+            encoder.encode(
+                sessionTranscriptBytes,
+                DOC_TYPE,
+                emptyDeviceNameSpacesBytes
+            )
+        }
     }
 }

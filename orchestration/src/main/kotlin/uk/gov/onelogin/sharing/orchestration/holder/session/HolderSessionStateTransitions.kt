@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 import java.util.Collections.singleton
 import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingVerifierResolution
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Success
@@ -12,6 +13,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.P
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.TerminatingSession
 
 /**
  * Convenience alias for defining a [Map] of [HolderSessionState] types to a [Set] of
@@ -52,13 +54,23 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
     PresentingEngagement::class to setOf(
         ProcessingEstablishment::class
     ) + fullErrorHandling,
-    ProcessingEstablishment::class to singleton(
-        AwaitingUserConsent::class
+    ProcessingEstablishment::class to setOf(
+        AwaitingUserConsent::class,
+        TerminatingSession::class,
+        Success::class
     ) + fullErrorHandling,
     AwaitingUserConsent::class to singleton(
         ProcessingResponse::class
     ) + fullErrorHandling,
-    ProcessingResponse::class to singleton(
+    ProcessingResponse::class to setOf(
+        AwaitingVerifierResolution::class,
+        TerminatingSession::class,
+        Success::class
+    ) + fullErrorHandling,
+    AwaitingVerifierResolution::class to singleton(
+        Success::class
+    ) + fullErrorHandling,
+    TerminatingSession::class to singleton(
         Success::class
     ) + fullErrorHandling
 )
