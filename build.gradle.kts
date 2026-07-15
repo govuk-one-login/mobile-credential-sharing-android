@@ -48,6 +48,9 @@ allprojects {
                 "org.apache.httpcomponents" -> if (requested.name == "httpclient") {
                     useVersion(libs.versions.httpclient.get())
                 }
+                "org.jetbrains.kotlin" -> if (requested.name == "kotlin-metadata-jvm") {
+                    useVersion(libs.versions.kotlin.asProvider().get())
+                }
             }
         }
     }

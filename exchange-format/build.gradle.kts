@@ -5,12 +5,6 @@ plugins {
     ).forEach { alias(it) }
 }
 
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.add("-Xannotation-default-target=param-property")
-    }
-}
-
 dependencies {
     listOf(
         projects.credentialFormat,
