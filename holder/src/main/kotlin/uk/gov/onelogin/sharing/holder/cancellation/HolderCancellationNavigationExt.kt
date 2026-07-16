@@ -6,11 +6,11 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.dialog
 
 data object HolderCancellationNavigationExt {
-    fun NavController.navigateToHolderCancellationDialog(
+    fun NavController.navigateToHolderUserCancellationDialog(
         options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(HolderCancellationRoute, options)
 
-    internal fun NavGraphBuilder.configureUserCancellationDialog(
+    internal fun NavGraphBuilder.configureHolderUserCancellationDialog(
         controller: NavController,
         onCancelJourney: () -> Unit = {},
     ) {

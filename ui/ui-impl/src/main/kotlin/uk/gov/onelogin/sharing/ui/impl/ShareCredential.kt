@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
-import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationNavigationExt.navigateToHolderCancellationDialog
+import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationNavigationExt.navigateToHolderUserCancellationDialog
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
@@ -67,7 +67,7 @@ internal fun ShareCredential(
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
     BackHandler(state.userCanCancel()) {
-        navController.navigateToHolderCancellationDialog()
+        navController.navigateToHolderUserCancellationDialog()
     }
 
     MonitorHolderSessionState(
