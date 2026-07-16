@@ -39,11 +39,13 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedP
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
-import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
-import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason.*
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason.CannotDecryptDeviceResponse
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason.InvalidBluetoothState
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason.InvalidSessionDataPayload
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason.UnverifiableDocument
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
@@ -221,11 +223,14 @@ class VerifierOrchestrator(
     override fun cancel() {
         if (sessionFlow.value.isComplete()) return
 
-        safeTransitionTo(
-            state = VerifierSessionState.Complete.Cancelled,
-            exceptionWrapper = ::OrchestratorCannotCancelException
-        )
-        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
+        appCoroutineScope.launch {
+            safeTransitionTo(VerifierSessionState.TerminatingSession)
+            terminateSession(
+                centralBluetoothTransport.isBleOpen,
+                false,
+                VerifierSessionState.Complete.Cancelled
+            )
+        }
     }
 
     override fun reset() {
@@ -239,92 +244,102 @@ class VerifierOrchestrator(
         }
     }
 
-    private suspend fun handleCentralBluetoothState(state: CentralBluetoothState) {
-        if (sessionFlow.value.isComplete()) return
+    private suspend fun handleCentralBluetoothState(bluetoothState: CentralBluetoothState) {
+        val verifierState = sessionFlow.value.currentState.value
+        if (verifierState.isComplete() ||
+            verifierState is VerifierSessionState.TerminatingSession
+        ) {
+            return
+        }
 
-        val currentState = sessionFlow.value.currentState.value
-        logger.debug(logTag, "BLE state = $state, current internal state = $currentState")
+        logger.debug(logTag, "BLE state = $bluetoothState, current internal state = $verifierState")
 
-        when (state) {
+        when (bluetoothState) {
             is CentralBluetoothState.ConnectionStateStarted -> handleConnectionStateStarted()
 
-            is CentralBluetoothState.Disconnected -> {
+            is CentralBluetoothState.Disconnected -> handleDisconnected(
+                bluetoothState,
+                verifierState
+            )
 
-                if (currentState is VerifierSessionState.Verifying) {
-                    logger.debug(logTag, "Ignoring disconnect while verifying")
-                    return
-                }
+            is CentralBluetoothState.Error -> handleError(bluetoothState, verifierState)
 
-                if (state.isSessionEnd) return
+            is CentralBluetoothState.CentralBluetoothEnded -> handleBluetoothEnded(verifierState)
 
+            is CentralBluetoothState.Message -> handleMessage(bluetoothState, verifierState)
 
+            else -> Unit
+        }
+    }
+
+    private fun handleDisconnected(
+        state: CentralBluetoothState.Disconnected,
+        currentState: VerifierSessionState
+    ) {
+        if (currentState is VerifierSessionState.Verifying) {
+            logger.debug(logTag, "Ignoring disconnect while verifying")
+        } else if (!state.isSessionEnd) {
+            failWith(
+                "Device ${state.address} disconnected unexpectedly",
+                InvalidBluetoothState(
+                    BluetoothDisconnectedException(
+                        "Bluetooth disconnected unexpectedly",
+                        IllegalStateException("Device ${state.address} disconnected unexpectedly")
+                    )
+                )
+            )
+        }
+    }
+
+    private fun handleError(
+        state: CentralBluetoothState.Error,
+        verifierState: VerifierSessionState
+    ) {
+        if (verifierState is VerifierSessionState.Verifying) {
+            logger.debug(logTag, "Ignoring transport error while verifying: ${state.reason}")
+        } else {
+            failWith(
+                "Bluetooth error: ${state.reason}",
+                InvalidBluetoothState(IllegalStateException("Bluetooth error: ${state.reason}"))
+            )
+        }
+    }
+
+    private fun handleBluetoothEnded(currentState: VerifierSessionState) {
+        when (currentState) {
+            is VerifierSessionState.Verifying -> {
+                logger.debug(logTag, "Ignoring GATT End while verifying")
+            }
+
+            is VerifierSessionState.Connecting -> {
                 failWith(
-                    "Device ${state.address} disconnected unexpectedly",
+                    "GATT End received while connecting",
                     InvalidBluetoothState(
-                        BluetoothDisconnectedException(
-                            "Bluetooth disconnected unexpectedly",
-                            IllegalStateException(
-                                "Device ${state.address} disconnected unexpectedly"
-                            )
-                        )
+                        IllegalStateException("GATT end received while connecting")
                     )
                 )
             }
 
-            is CentralBluetoothState.Error -> {
-
-                if (currentState is VerifierSessionState.Verifying) {
-                    logger.debug(
-                        logTag,
-                        "Ignoring transport error while verifying: ${state.reason}"
+            else -> {
+                appCoroutineScope.launch {
+                    terminateSession(
+                        bleOpen = centralBluetoothTransport.isBleOpen,
+                        receivedTermination = false,
+                        finalState = VerifierSessionState.Complete.Cancelled
                     )
-                    return
-                }
-
-                failWith(
-                    "Bluetooth error: ${state.reason}",
-                    InvalidBluetoothState(
-                        IllegalStateException("Bluetooth error: ${state.reason}")
-                    )
-                )
-            }
-
-
-            is CentralBluetoothState.CentralBluetoothEnded -> {
-
-                if (currentState is VerifierSessionState.Verifying) {
-                    logger.debug(logTag, "Ignoring GATT End while verifying")
-                    return
-                }
-
-                if (currentState is VerifierSessionState.Connecting) {
-                    failWith(
-                        "GATT End received while connecting",
-                        InvalidBluetoothState(
-                            IllegalStateException("GATT end received while connecting")
-                        )
-                    )
-                } else {
-                    appCoroutineScope.launch {
-                        terminateSession(centralBluetoothTransport.isBleOpen, false)
-                    }
                 }
             }
+        }
+    }
 
-            is CentralBluetoothState.Message -> {
-
-                if (currentState is VerifierSessionState.Verifying) {
-                    logger.debug(logTag, "Ignoring unexpected message while verifying")
-                } else {
-                    handleCentralBluetoothStateMessage(state)
-                }
-            }
-
-            is CentralBluetoothState.Connected,
-            CentralBluetoothState.Connecting,
-            is CentralBluetoothState.Idle,
-            is CentralBluetoothState.Scanning
-            -> Unit
+    private fun handleMessage(
+        state: CentralBluetoothState.Message,
+        currentState: VerifierSessionState
+    ) {
+        if (currentState is VerifierSessionState.Verifying) {
+            logger.debug(logTag, "Ignoring unexpected message while verifying")
+        } else {
+            handleCentralBluetoothStateMessage(state)
         }
     }
 
@@ -372,25 +387,23 @@ class VerifierOrchestrator(
 
     private fun isUnexpectedStatusWithData(sessionData: SessionData): Boolean =
         sessionData.data != null && sessionData.status != null &&
-                sessionData.status != SESSION_TERMINATION &&
-                sessionData.status != SessionDataStatus.OK
+            sessionData.status != SESSION_TERMINATION &&
+            sessionData.status != SessionDataStatus.OK
 
     private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
         logger.error(logTag, "Received SessionData with data and error status: $status")
         appCoroutineScope.launch {
             terminateSession(
                 bleOpen = centralBluetoothTransport.isBleOpen,
-                receivedTermination = true
-            )
-        }
-        safeTransitionTo(
-            VerifierSessionState.Complete.Failed(
-                SessionError(
-                    message = "Received SessionData with data and error status: $status",
-                    reason = SessionErrorReason.InvalidSessionDataPayload
+                receivedTermination = true,
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "Received SessionData with data and error status: $status",
+                        reason = SessionErrorReason.InvalidSessionDataPayload
+                    )
                 )
             )
-        )
+        }
     }
 
     private fun handleTerminationWithoutData(terminationAlreadyReceived: Boolean) {
@@ -403,18 +416,15 @@ class VerifierOrchestrator(
         appCoroutineScope.launch {
             terminateSession(
                 bleOpen = centralBluetoothTransport.isBleOpen,
-                receivedTermination = terminationAlreadyReceived
-            )
-        }
-
-        safeTransitionTo(
-            VerifierSessionState.Complete.Failed(
-                SessionError(
-                    message = INVALID_SESSION_DATA,
-                    reason = SessionErrorReason.InvalidSessionDataPayload
+                receivedTermination = terminationAlreadyReceived,
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = INVALID_SESSION_DATA,
+                        reason = InvalidSessionDataPayload
+                    )
                 )
             )
-        )
+        }
     }
 
     private fun decryptAndProcessResponse(data: ByteArray, holderRequestedTermination: Boolean) {
@@ -456,18 +466,16 @@ class VerifierOrchestrator(
         appCoroutineScope.launch {
             terminateSession(
                 bleOpen = centralBluetoothTransport.isBleOpen,
-                holderRequestedTermination
+                holderRequestedTermination,
+                VerifierSessionState.Complete.Failed(
+                    SessionError(
+                        message = "Error decrypting DeviceResponse",
+                        reason = CannotDecryptDeviceResponse
+                    )
+                )
             )
         }
         logger.error(logTag, "Error decrypting DeviceResponse", throwable)
-        safeTransitionTo(
-            VerifierSessionState.Complete.Failed(
-                SessionError(
-                    message = "Error decrypting DeviceResponse",
-                    reason = SessionErrorReason.CannotDecryptDeviceResponse
-                )
-            )
-        )
     }
 
     private fun evaluateDeviceResponse(
@@ -480,40 +488,39 @@ class VerifierOrchestrator(
             status != DeviceResponseStatus.OK
         ) {
             appCoroutineScope.launch {
+                safeTransitionTo(VerifierSessionState.TerminatingSession)
                 terminateSession(
                     bleOpen = centralBluetoothTransport.isBleOpen,
-                    receivedTermination = receivedTerminationFromHolder
+                    receivedTermination = receivedTerminationFromHolder,
+                    VerifierSessionState.Complete.Failed(
+                        SessionError(
+                            message = "DeviceRequest processing error: status ${status.code}",
+                            reason = SessionErrorReason.DeviceRequestProcessingError(status.code)
+                        )
+                    )
+
                 )
             }
             logger.error(logTag, "DeviceRequest processing error: status ${status.code}")
-            safeTransitionTo(
-                VerifierSessionState.Complete.Failed(
-                    SessionError(
-                        message = "DeviceRequest processing error: status ${status.code}",
-                        reason = SessionErrorReason.DeviceRequestProcessingError(status.code)
-                    )
-                )
-            )
             return
         }
 
         val documents = deviceResponse.documents
         if (documents.isNullOrEmpty()) {
             appCoroutineScope.launch {
+                safeTransitionTo(VerifierSessionState.TerminatingSession)
                 terminateSession(
                     bleOpen = centralBluetoothTransport.isBleOpen,
-                    receivedTermination = receivedTerminationFromHolder
+                    receivedTermination = receivedTerminationFromHolder,
+                    VerifierSessionState.Complete.Failed(
+                        SessionError(
+                            message = "Document not returned: status ${status.code}",
+                            reason = SessionErrorReason.DocumentNotReturned
+                        )
+                    )
                 )
             }
             logger.error(logTag, "Document not returned: status ${status.code}")
-            safeTransitionTo(
-                VerifierSessionState.Complete.Failed(
-                    SessionError(
-                        message = "Document not returned: status ${status.code}",
-                        reason = SessionErrorReason.DocumentNotReturned
-                    )
-                )
-            )
             return
         }
 
@@ -534,17 +541,21 @@ class VerifierOrchestrator(
             appCoroutineScope.launch {
                 terminateSession(
                     bleOpen = centralBluetoothTransport.isBleOpen,
-                    receivedTermination = receivedTerminationStatus
+                    receivedTermination = receivedTerminationStatus,
+                    finalState = VerifierSessionState.Complete.Success(deviceResponse)
                 )
             }
-            safeTransitionTo(
-                VerifierSessionState.Complete.Success(deviceResponse)
-            )
         } catch (exception: VerificationResult.Failure) {
             appCoroutineScope.launch {
                 terminateSession(
                     bleOpen = centralBluetoothTransport.isBleOpen,
-                    receivedTermination = receivedTerminationStatus
+                    receivedTermination = receivedTerminationStatus,
+                    VerifierSessionState.Complete.Failed(
+                        SessionError(
+                            message = "Failed to verify provided documents (${exception.error})",
+                            reason = UnverifiableDocument(exception.error)
+                        )
+                    )
                 )
             }
             logger.error(
@@ -552,24 +563,25 @@ class VerifierOrchestrator(
                 "Failed to verify provided documents (${exception.error})",
                 exception
             )
-            safeTransitionTo(
-                VerifierSessionState.Complete.Failed(
-                    SessionError(
-                        message = "Failed to verify provided documents (${exception.error})",
-                        reason = SessionErrorReason.UnverifiableDocument(exception.error)
-                    )
-                )
-            )
         }
     }
 
-    private suspend fun terminateSession(bleOpen: Boolean, receivedTermination: Boolean) {
+    private suspend fun terminateSession(
+        bleOpen: Boolean,
+        receivedTermination: Boolean,
+        finalState: VerifierSessionState
+    ) {
+        safeTransitionTo(VerifierSessionState.TerminatingSession)
+
         val context = sessionFlow.value.cryptoContext
+
         sessionTerminator.terminate(
             serviceUuid = context?.serviceUuid,
             bleOpen = bleOpen,
             holderRequestedTermination = receivedTermination
         )
+
+        safeTransitionTo(finalState)
     }
 
     private suspend fun handleConnectionStateStarted() {
@@ -634,22 +646,29 @@ class VerifierOrchestrator(
 
     private fun failWith(message: String, reason: SessionErrorReason) {
         logger.error(logTag, message)
-        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
-        safeTransitionTo(
-            VerifierSessionState.Complete.Failed(
-                SessionError(message = message, reason = reason)
+        appCoroutineScope.launch {
+            terminateSession(
+                centralBluetoothTransport.isBleOpen,
+                false,
+                VerifierSessionState.Complete.Failed(
+                    SessionError(message = message, reason = reason)
+                )
             )
-        )
+        }
     }
 
     private fun failWith(message: String, reason: SessionErrorReason, throwable: Throwable) {
         logger.error(logTag, message, throwable)
-        appCoroutineScope.launch { terminateSession(centralBluetoothTransport.isBleOpen, false) }
-        safeTransitionTo(
-            VerifierSessionState.Complete.Failed(
-                SessionError(message = message, reason = reason)
+        appCoroutineScope.launch {
+            safeTransitionTo(VerifierSessionState.TerminatingSession)
+            terminateSession(
+                centralBluetoothTransport.isBleOpen,
+                false,
+                VerifierSessionState.Complete.Failed(
+                    SessionError(message = message, reason = reason)
+                )
             )
-        )
+        }
     }
 
     private fun safeTransitionTo(

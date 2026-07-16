@@ -8,6 +8,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Preflight
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ProcessingEngagement
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ReadyToScan
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.TerminatingSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Verifying
 
 class TransitionableVerifierSessionStates : TestParameterValuesProvider() {
@@ -20,7 +21,8 @@ class TransitionableVerifierSessionStates : TestParameterValuesProvider() {
             ReadyToScan::class,
             Connecting::class,
             ProcessingEngagement::class,
-            Verifying::class
+            Verifying::class,
+            TerminatingSession::class
         )
     }
 }

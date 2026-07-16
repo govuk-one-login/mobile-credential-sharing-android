@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
 import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 /**

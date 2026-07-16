@@ -91,5 +91,4 @@ sealed class VerifierSessionState : Completable {
          */
         data object Cancelled : Complete("Journey cancelled by User")
     }
-
 }

@@ -7,6 +7,7 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.NotStarted
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ProcessingEngagement
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.ReadyToScan
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.TerminatingSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState.Verifying
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.preflightEmptyPermissions
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionStateStubs.successStub
@@ -73,7 +74,8 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         private val connectingTransitions = listOf(
             "User cancels whilst connecting with Holder device" to userCancellation,
             "Connection with Holder device cannot be established" to userJourneyFailure,
-            "Receives Holder device's data transfer request" to Verifying
+            "Receives Holder device's data transfer request" to Verifying,
+            "Verifier session terminates whilst connecting" to TerminatingSession
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -85,7 +87,8 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
         private val verifyingTransitions = listOf(
             "User cancels the journey whilst validating the credential" to userCancellation,
             "Failure occurs when validating the credential" to userJourneyFailure,
-            "User completes the Verifier User journey" to successStub
+            "User completes the Verifier User journey" to successStub,
+            "Verifier session terminates whilst verifying" to TerminatingSession
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -94,12 +97,21 @@ class ValidVerifierSessionStateTransitions : TestParametersValuesProvider() {
             )
         }
 
+        private val terminatingSessionTransitions = listOf(
+            "Session terminates successfully" to successStub,
+            "Session termination fails" to userJourneyFailure,
+            "Session termination is cancelled" to userCancellation
+        ).map { (testName, transition) ->
+            Triple(testName, TerminatingSession, transition)
+        }
+
         val inputs: List<Triple<String, VerifierSessionState, VerifierSessionState>> =
             notStartedTransitions +
                 preflightTransitions +
                 readyToScanTransitions +
                 processingEngagementTransitions +
                 connectingTransitions +
-                verifyingTransitions
+                verifyingTransitions +
+                terminatingSessionTransitions
     }
 }
