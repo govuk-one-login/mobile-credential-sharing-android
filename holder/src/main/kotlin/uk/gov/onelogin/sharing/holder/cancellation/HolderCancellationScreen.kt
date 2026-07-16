@@ -9,11 +9,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 
 @Composable
 fun HolderCancellationScreen(
@@ -21,6 +24,11 @@ fun HolderCancellationScreen(
     onCancelJourney: () -> Unit = {},
     onDismiss: () -> Unit = {}
 ) {
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("HolderCancellationScreen")
+    }
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(spacingDouble),
