@@ -38,7 +38,7 @@ internal fun HolderTestAppJourneyScreen(
     Surface(modifier = modifier) {
         ShareCredential(
             component = component,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
 
         Box {
