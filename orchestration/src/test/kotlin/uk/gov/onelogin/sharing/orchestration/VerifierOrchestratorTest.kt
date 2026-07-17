@@ -32,6 +32,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
@@ -1441,6 +1442,74 @@ class VerifierOrchestratorTest {
         assertThat(
             orchestrator.verifierSessionState.value,
             isFailed(hasReason(isUnverifiableDocument(VerificationError.INVALID_ISSUER_SIGNATURE)))
+        )
+    }
+
+    @Test
+    fun `GATT End received in Connecting transitions to Failed`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.CentralBluetoothEnded(
+                SessionEndStates.SUCCESS
+            )
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.verifierSessionState.value, isFailed())
+    }
+
+    @Test
+    fun `Disconnect in Verifying state is ignored and session continues`() = runTest {
+        initialStates[0] = VerifierSessionState.Verifying
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+
+        centralBluetoothTransport.emitState(CentralBluetoothState.Disconnected("address", false))
+        advanceUntilIdle()
+
+        assertEquals(VerifierSessionState.Verifying, orchestrator.verifierSessionState.value)
+        assertTrue { "Ignoring disconnect while verifying" in logger }
+    }
+
+    @Test
+    fun `Inbound signals are ignored when session is already in a terminal state`() = runTest {
+        initialStates[0] =
+            VerifierSessionState.Complete.Success(DeviceResponseStub.successWithDocuments)
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Disconnected(
+                "address",
+                false
+            )
+        )
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.CentralBluetoothEnded(
+                SessionEndStates.SUCCESS
+            )
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.verifierSessionState.value, isSuccess())
+        assertEquals(0, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `Inbound signals are suppressed during TerminatingSession state`() = runTest {
+        initialStates[0] = VerifierSessionState.TerminatingSession
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+
+        centralBluetoothTransport.emitState(CentralBluetoothState.Disconnected("address", false))
+        advanceUntilIdle()
+
+        assertEquals(
+            VerifierSessionState.TerminatingSession,
+            orchestrator.verifierSessionState.value
         )
     }
 
