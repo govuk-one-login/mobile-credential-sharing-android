@@ -1,13 +1,9 @@
 package uk.gov.onelogin.sharing.holder.cancellation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
-import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
-import io.mockk.mockk
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
@@ -21,8 +17,6 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 class HolderCancellationScreenTest {
     @get:Rule
     val composeTestRule = HolderCancellationScreenRule()
-
-    private val viewModelFactory: MetroViewModelFactory = mockk(relaxed = true)
 
     @Test
     fun `Validate UI contents`(
@@ -61,13 +55,9 @@ class HolderCancellationScreenTest {
     @Composable
     private fun Render(
         content: @Composable () -> Unit = {
-            CompositionLocalProvider(
-                LocalMetroViewModelFactory provides viewModelFactory
-            ) {
-                HolderCancellationScreen(
-                    onCancelJourney = composeTestRule::incrementCancelJourneyClickCount,
-                )
-            }
+            HolderCancellationScreen(
+                onCancel = composeTestRule::incrementCancelJourneyClickCount,
+            )
         },
     ) {
         GdsTheme { content() }

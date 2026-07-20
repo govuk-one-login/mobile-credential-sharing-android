@@ -26,16 +26,16 @@ internal fun HolderCancellationScreen(
     onCancelJourney: () -> Unit = {},
 ) = HolderCancellationScreen(
     modifier = modifier,
-    onCancelJourney = {
+    onCancel = {
         viewModel.reset()
         onCancelJourney()
     }
 )
 
 @Composable
-private fun HolderCancellationScreen(
+internal fun HolderCancellationScreen(
     modifier: Modifier = Modifier,
-    onCancelJourney: () -> Unit = {},
+    onCancel: () -> Unit = {},
 ) {
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
@@ -50,7 +50,7 @@ private fun HolderCancellationScreen(
         Text("The holder journey is now cancelled")
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = onCancelJourney
+            onClick = onCancel
         ) {
             Text("End journey")
         }

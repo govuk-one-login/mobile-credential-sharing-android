@@ -31,7 +31,7 @@ data object HolderCancellationDialogNavigationExt {
             val scope = rememberCoroutineScope()
             val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
             HolderCancellationDialogContents(
-                Modifier
+                modifier = Modifier
                     .dropShadow(
                         shape = RoundedCornerShape(spacingDouble),
                         shadow = Shadow(
