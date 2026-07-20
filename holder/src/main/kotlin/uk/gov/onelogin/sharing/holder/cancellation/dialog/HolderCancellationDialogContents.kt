@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,10 +13,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 
@@ -48,18 +57,23 @@ internal fun HolderCancellationDialogContents(
     ) {
         Text("Are you sure you want to cancel?")
 
-        Button(
-            onClick = onCancelJourney,
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(spacingSingle)
         ) {
-            Text("Yes")
-        }
-        Button(
-            onClick = onDismiss,
-            modifier =
-                Modifier.fillMaxWidth()
-        ) {
-            Text("No")
+            Button(
+                onClick = onCancelJourney,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Yes")
+            }
+            Button(
+                onClick = onDismiss,
+                modifier =
+                    Modifier.fillMaxWidth()
+            ) {
+                Text("No")
+            }
         }
     }
 }
@@ -70,7 +84,17 @@ internal fun HolderCancellationDialogContentsPreview() {
     GdsTheme {
         HolderCancellationDialogContents(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
+                .dropShadow(
+                    shape = RoundedCornerShape(spacingDouble),
+                    shadow = Shadow(
+                        radius = spacingSingle,
+                        spread = 6.dp,
+                        color = Color(0x40000000),
+                        offset = DpOffset(x = 4.dp, 4.dp)
+                    )
+                )
+                .clip(RoundedCornerShape(spacingDouble))
+                .background(GdsLocalColorScheme.current.dialogBackground)
                 .padding(spacingDouble),
             onCancelJourney = {},
             onDismiss = {}
