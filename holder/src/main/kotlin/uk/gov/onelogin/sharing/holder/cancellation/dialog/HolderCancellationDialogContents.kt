@@ -69,14 +69,14 @@ internal fun HolderCancellationDialogContents(
             GdsButton(
                 text = "Yes",
                 buttonType = ButtonTypeV2.Destructive(),
-                onClick = onDismiss,
+                onClick = onCancelJourney,
                 modifier = Modifier.fillMaxWidth()
             )
 
             GdsButton(
                 text = "No",
                 buttonType = ButtonTypeV2.Secondary(),
-                onClick = onCancelJourney,
+                onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
             )
         }

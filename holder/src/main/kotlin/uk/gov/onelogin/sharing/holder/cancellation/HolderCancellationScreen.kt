@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
@@ -20,6 +21,19 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 
 @Composable
 internal fun HolderCancellationScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HolderCancellationScreenViewModel = metroViewModel(),
+    onCancelJourney: () -> Unit = {},
+) = HolderCancellationScreen(
+    modifier = modifier,
+    onCancelJourney = {
+        viewModel.reset()
+        onCancelJourney()
+    }
+)
+
+@Composable
+private fun HolderCancellationScreen(
     modifier: Modifier = Modifier,
     onCancelJourney: () -> Unit = {},
 ) {
