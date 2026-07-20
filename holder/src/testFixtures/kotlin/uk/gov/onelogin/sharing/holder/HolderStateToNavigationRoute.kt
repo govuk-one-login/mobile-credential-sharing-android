@@ -8,6 +8,7 @@ import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionRoute
+import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
@@ -131,6 +132,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     HolderSuccessRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<HolderSuccessRoute>()
+                )
+            },
+            Triple(
+                "'Complete.Cancelled' -> HolderCancellationScreenRoute",
+                HolderSessionState.Complete.Cancelled
+            ) {
+                instanceOf<HolderCancellationScreenRoute>(
+                    HolderCancellationScreenRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<HolderCancellationScreenRoute>()
                 )
             }
         )

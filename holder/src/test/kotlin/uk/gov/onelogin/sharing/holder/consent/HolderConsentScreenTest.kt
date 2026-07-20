@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
@@ -193,6 +194,7 @@ class HolderConsentScreenTest {
                 val context = LocalContext.current
                 navController = TestNavHostController(context).apply {
                     navigatorProvider.addNavigator(ComposeNavigator())
+                    navigatorProvider.addNavigator(DialogNavigator())
                 }
 
                 NavHost(

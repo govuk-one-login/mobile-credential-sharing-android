@@ -14,7 +14,7 @@ data object HolderCancellationDialogNavigationExt {
         controller: NavController,
     ) {
         dialog<HolderCancellationDialogRoute> {
-            HolderCancellationScreen(
+            HolderCancellationDialogContents(
                 onDismiss = controller::popBackStack
             )
         }

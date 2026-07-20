@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.cancellation.dialog
+package uk.gov.onelogin.sharing.holder.cancellation
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -21,19 +21,19 @@ import org.hamcrest.CoreMatchers.not
 import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Rule
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.configureHolderUserCancellationDialog
-import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.navigateToHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.configureHolderUserCancellationScreen
+import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 
 @RunWith(AndroidJUnit4::class)
-class HolderCancellationDialogNavigationTest {
+class HolderCancellationScreenNavigationTest {
 
     @get:Rule
-    val composeTestRule = HolderCancellationDialogContentsRule()
+    val composeTestRule = HolderCancellationScreenRule()
 
     private lateinit var controller: TestNavHostController
 
     @Test
-    fun `Cancellation dialog exists in the navigation graph`() {
+    fun `Cancellation screen exists in the navigation graph`() {
         composeTestRule.run {
             setContent {
                 controller = TestNavHostController(LocalContext.current).apply {
@@ -48,10 +48,10 @@ class HolderCancellationDialogNavigationTest {
 
             waitUntil {
                 allOf(
-                    instanceOf(HolderCancellationDialogRoute::class.java),
-                    not(nullValue(HolderCancellationDialogRoute::class.java))
+                    instanceOf(HolderCancellationScreenRoute::class.java),
+                    not(nullValue(HolderCancellationScreenRoute::class.java))
                 ).matches(
-                    controller.currentBackStackEntry?.toRoute<HolderCancellationDialogRoute>()
+                    controller.currentBackStackEntry?.toRoute<HolderCancellationScreenRoute>()
                 )
             }
         }
@@ -66,14 +66,14 @@ class HolderCancellationDialogNavigationTest {
             composable("Unit test") {
                 Button(
                     onClick = {
-                        controller.navigateToHolderUserCancellationDialog()
+                        controller.navigateToHolderUserCancellationScreen()
                     }
                 ) {
                     Text("Navigate")
                 }
             }
 
-            configureHolderUserCancellationDialog(controller = controller)
+            configureHolderUserCancellationScreen(controller = controller)
         }
     }
 }

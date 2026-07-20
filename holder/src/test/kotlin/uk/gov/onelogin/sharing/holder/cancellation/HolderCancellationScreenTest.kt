@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.cancellation.dialog
+package uk.gov.onelogin.sharing.holder.cancellation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -14,39 +14,34 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 
 @RunWith(RobolectricTestParameterInjector::class)
-class HolderCancellationDialogScreenTest {
+class HolderCancellationScreenTest {
     @get:Rule
-    val composeTestRule = HolderCancellationDialogContentsRule()
+    val composeTestRule = HolderCancellationScreenRule()
 
     @Test
     fun `Validate UI contents`(
         @TestParameter content: @Composable () -> Unit = namedTestValues(
             "Composable screen" to { Render() },
-            "Preview" to { HolderCancellationDialogContentsPreview() },
+            "Preview" to { HolderCancellationScreenPreview() },
         ),
     ) = runTest {
         composeTestRule.run {
             setContent { content() }
             assertTitleIsDisplayed()
             assertCancelJourneyButtonIsDisplayed()
-            assertDismissDialogButtonIsDisplayed()
         }
     }
 
     @Test
     fun `UI buttons defer to lambdas`(
         @TestParameter input: Pair<
-                HolderCancellationDialogContentsRule.() -> SemanticsNodeInteraction,
-                HolderCancellationDialogContentsRule.(Matcher<in Int>) -> Unit
+                HolderCancellationScreenRule.() -> SemanticsNodeInteraction,
+                HolderCancellationScreenRule.(Matcher<in Int>) -> Unit
                 > = namedTestValues(
             "Cancel journey button" to (
-                    HolderCancellationDialogContentsRule::performCancelJourneyClick to
-                            HolderCancellationDialogContentsRule::assertCancelJourneyClickCount
+                    HolderCancellationScreenRule::performCancelJourneyClick to
+                            HolderCancellationScreenRule::assertCancelJourneyClickCount
                     ),
-            "Dismiss dialog button" to (
-                    HolderCancellationDialogContentsRule::performDismissDialogClick to
-                            HolderCancellationDialogContentsRule::assertDismissDialogClickCount
-                    )
         ),
     ) = runTest {
         val (action, assertion) = input
@@ -60,9 +55,8 @@ class HolderCancellationDialogScreenTest {
     @Composable
     private fun Render(
         content: @Composable () -> Unit = {
-            HolderCancellationDialogContents(
+            HolderCancellationScreen(
                 onCancelJourney = composeTestRule::incrementCancelJourneyClickCount,
-                onDismiss = composeTestRule::incrementDismissDialogClickCount,
             )
         },
     ) {

@@ -4,6 +4,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.annotation.UiThreadTest
 import com.google.testing.junit.testparameterinjector.TestParameters
@@ -72,6 +73,7 @@ class ShareCredentialTest {
             }
             controller = TestNavHostController(LocalContext.current).apply {
                 navigatorProvider.addNavigator(ComposeNavigator())
+                navigatorProvider.addNavigator(DialogNavigator())
             }
 
             ShareCredential(

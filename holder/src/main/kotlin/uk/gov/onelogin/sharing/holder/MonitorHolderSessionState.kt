@@ -16,6 +16,7 @@ import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
 import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
+import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
@@ -146,11 +147,20 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        HolderSessionState.Complete.Cancelled -> {
+            {
+                navController.navigateToHolderUserCancellationScreen {
+                    popUpTo<HolderRoutes> {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
         HolderSessionState.TerminatingSession,
-        HolderSessionState.Complete.Cancelled,
             -> {
             // Do nothing with UI-less states
             {}
