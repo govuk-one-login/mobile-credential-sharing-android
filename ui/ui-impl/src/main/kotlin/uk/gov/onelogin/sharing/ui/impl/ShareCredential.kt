@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
-import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationNavigationExt.navigateToHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationNavigationExt.navigateToHolderUserCancellationDialog
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter

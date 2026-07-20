@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.cancellation
+package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -21,8 +21,8 @@ import org.hamcrest.CoreMatchers.not
 import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Rule
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationNavigationExt.configureHolderUserCancellationDialog
-import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationNavigationExt.navigateToHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationNavigationExt.configureHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationNavigationExt.navigateToHolderUserCancellationDialog
 
 @RunWith(AndroidJUnit4::class)
 class HolderCancellationNavigationTest {

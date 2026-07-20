@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.cancellation
+package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest

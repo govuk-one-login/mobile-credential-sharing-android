@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.cancellation
+package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
