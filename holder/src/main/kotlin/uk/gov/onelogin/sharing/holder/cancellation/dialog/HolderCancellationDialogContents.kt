@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,10 +18,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
+import uk.gov.android.ui.componentsv2.button.GdsButton
+import uk.gov.android.ui.theme.m3.Buttons
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
@@ -61,19 +66,19 @@ internal fun HolderCancellationDialogContents(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(spacingSingle)
         ) {
-            Button(
+            GdsButton(
+                text = "Yes",
+                buttonType = ButtonTypeV2.Destructive(),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            GdsButton(
+                text = "No",
+                buttonType = ButtonTypeV2.Secondary(),
                 onClick = onCancelJourney,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Yes")
-            }
-            Button(
-                onClick = onDismiss,
-                modifier =
-                    Modifier.fillMaxWidth()
-            ) {
-                Text("No")
-            }
+            )
         }
     }
 }

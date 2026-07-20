@@ -20,6 +20,7 @@ sealed class HolderSessionState : Completable, UserCancellable {
     override fun userCanCancel(): Boolean = this::class in listOf(
         AwaitingUserConsent::class,
         AwaitingVerifierResolution::class,
+        PresentingEngagement::class,
         ProcessingEstablishment::class,
         ProcessingResponse::class,
     )
