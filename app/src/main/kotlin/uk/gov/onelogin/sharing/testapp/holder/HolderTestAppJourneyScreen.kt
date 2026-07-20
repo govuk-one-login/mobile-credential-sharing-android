@@ -8,13 +8,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.ShareCredential
 
@@ -27,7 +30,7 @@ import uk.gov.onelogin.sharing.ui.impl.ShareCredential
 internal fun HolderTestAppJourneyScreen(
     component: CredentialPresenter,
     modifier: Modifier = Modifier,
-    onCloseJourney: () -> Unit = {}
+    onCloseJourney: () -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
     val metrics = rememberMetricsStateHolder()
@@ -35,21 +38,28 @@ internal fun HolderTestAppJourneyScreen(
         metrics.putScreenState("HolderTestAppJourneyScreen")
     }
 
+    val sessionState: HolderSessionState by component
+        .orchestrator
+        .holderSessionState
+        .collectAsStateWithLifecycle()
+
     Surface(modifier = modifier) {
         ShareCredential(
             component = component,
             modifier = Modifier.fillMaxSize(),
         )
 
-        Box {
-            IconButton(
-                modifier = Modifier.align(Alignment.TopStart),
-                onClick = { coroutineScope.launch { onCloseJourney() } }
-            ) {
-                Icon(
-                    painter = painterResource(ic_menu_close_clear_cancel),
-                    contentDescription = "Close"
-                )
+        if (!sessionState.isComplete()) {
+            Box {
+                IconButton(
+                    modifier = Modifier.align(Alignment.TopStart),
+                    onClick = { coroutineScope.launch { onCloseJourney() } }
+                ) {
+                    Icon(
+                        painter = painterResource(ic_menu_close_clear_cancel),
+                        contentDescription = "Close"
+                    )
+                }
             }
         }
     }
