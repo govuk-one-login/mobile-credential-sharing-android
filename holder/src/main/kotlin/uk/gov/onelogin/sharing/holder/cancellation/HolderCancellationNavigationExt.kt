@@ -12,11 +12,9 @@ data object HolderCancellationNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderUserCancellationDialog(
         controller: NavController,
-        onCancelJourney: () -> Unit = {},
     ) {
         dialog<HolderCancellationRoute> {
             HolderCancellationScreen(
-                onCancelJourney = onCancelJourney,
                 onDismiss = controller::popBackStack
             )
         }

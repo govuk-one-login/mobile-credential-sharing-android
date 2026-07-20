@@ -90,9 +90,7 @@ internal fun ShareCredential(
             startDestination = HolderRoutes,
             modifier = modifier
         ) {
-            configureHolderRoutes(navController) {
-                orchestrator.cancel()
-            }
+            configureHolderRoutes(navController)
         }
     }
 }

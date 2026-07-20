@@ -25,7 +25,6 @@ data object HolderRoutes {
 
     fun NavGraphBuilder.configureHolderRoutes(
         controller: NavController,
-        onCancelJourney: () -> Unit = {}
     ) {
         navigation<HolderRoutes>(startDestination = HolderPrerequisitesRoute) {
             configureHolderPrerequisitesScreen()
@@ -36,10 +35,7 @@ data object HolderRoutes {
             configureBluetoothConnectionErrorRoute(controller)
             configureAwaitingVerifierResolutionScreen()
             configureHolderSuccessScreen()
-            configureHolderUserCancellationDialog(
-                controller = controller,
-                onCancelJourney = onCancelJourney
-            )
+            configureHolderUserCancellationDialog(controller)
         }
     }
 }

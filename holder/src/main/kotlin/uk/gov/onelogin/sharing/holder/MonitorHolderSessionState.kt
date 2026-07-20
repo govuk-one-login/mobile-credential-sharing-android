@@ -24,6 +24,7 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 /**
@@ -38,7 +39,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 fun MonitorHolderSessionState(
     holderSessionState: StateFlow<HolderSessionState>,
     navController: NavHostController,
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
 ) {
     val coroutineScope = rememberCoroutineScope { Dispatchers.Main }
 
@@ -76,7 +77,7 @@ internal suspend fun convertSessionStateToNavigation(
     context: Context,
     navController: NavHostController,
     state: HolderSessionState,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): () -> Unit = withContext(dispatcher) {
     when (state) {
         HolderSessionState.NotStarted -> {
@@ -131,32 +132,28 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        is HolderSessionState.Complete.Success -> {
+            if (state.successReason == SuccessReason.UnfulfillableRequest) {
+                {
+                    navController.navigateToHolderSuccessScreen {
+                        popUpTo<HolderRoutes> {
+                            inclusive = true
+                        }
+                    }
+                }
+            } else {
+                {}
+            }
+        }
+
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
         HolderSessionState.TerminatingSession,
         HolderSessionState.Complete.Cancelled,
-        is HolderSessionState.Complete.Success
-        -> {
-            when {
-                state is HolderSessionState.Complete.Success &&
-                    state.successReason ==
-                    HolderSessionState.Complete.SuccessReason.UnfulfillableRequest -> {
-                    {
-                        navController.navigateToHolderSuccessScreen {
-                            popUpTo<HolderRoutes> {
-                                inclusive = true
-                            }
-                        }
-                    }
-                }
-
-                else -> {
-                    {
-                        // do nothing with unrelated / unimplemented states
-                    }
-                }
-            }
+            -> {
+            // Do nothing with UI-less states
+            {}
         }
     }
 }
@@ -164,7 +161,7 @@ internal suspend fun convertSessionStateToNavigation(
 private fun handleHolderSessionFailure(
     state: HolderSessionState.Complete.Failed,
     navController: NavHostController,
-    context: Context
+    context: Context,
 ) {
     if ((state.sessionReason as? SessionErrorReason.UnrecoverableThrowable)
             ?.exception is BluetoothDisconnectedException
