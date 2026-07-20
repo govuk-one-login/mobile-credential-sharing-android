@@ -37,7 +37,7 @@ data object HolderRoutes {
             configureAwaitingVerifierResolutionScreen()
             configureHolderSuccessScreen()
             configureHolderUserCancellationDialog(controller)
-            configureHolderUserCancellationScreen(controller)
+            configureHolderUserCancellationScreen()
         }
     }
 }

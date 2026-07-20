@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -80,13 +81,16 @@ internal suspend fun convertSessionStateToNavigation(
     state: HolderSessionState,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): () -> Unit = withContext(dispatcher) {
+    val exitJourneyOptions: NavOptionsBuilder.() -> Unit = {
+        popUpTo<HolderRoutes> {
+            inclusive = true
+        }
+    }
     when (state) {
         HolderSessionState.NotStarted -> {
             {
                 navController.navigateToHolderPrerequisitesScreen {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }
@@ -94,9 +98,7 @@ internal suspend fun convertSessionStateToNavigation(
         is HolderSessionState.Preflight -> {
             {
                 navController.navigateToRetryHolderPrerequisites {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }
@@ -104,9 +106,7 @@ internal suspend fun convertSessionStateToNavigation(
         is HolderSessionState.PresentingEngagement -> {
             {
                 navController.navigateToHolderPresentQrScreen {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }
@@ -120,9 +120,7 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.AwaitingVerifierResolution -> {
             {
                 navController.navigateToAwaitingVerifierResolutionScreen {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }
@@ -137,9 +135,7 @@ internal suspend fun convertSessionStateToNavigation(
             if (state.successReason == SuccessReason.UnfulfillableRequest) {
                 {
                     navController.navigateToHolderSuccessScreen {
-                        popUpTo<HolderRoutes> {
-                            inclusive = true
-                        }
+                        exitJourneyOptions()
                     }
                 }
             } else {
@@ -150,9 +146,7 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.Complete.Cancelled -> {
             {
                 navController.navigateToHolderUserCancellationScreen {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }

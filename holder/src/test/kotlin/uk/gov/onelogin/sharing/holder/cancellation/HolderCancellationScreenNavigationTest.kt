@@ -73,7 +73,7 @@ class HolderCancellationScreenNavigationTest {
                 }
             }
 
-            configureHolderUserCancellationScreen(controller = controller)
+            configureHolderUserCancellationScreen()
         }
     }
 }
