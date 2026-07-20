@@ -30,7 +30,7 @@ import uk.gov.onelogin.sharing.ui.impl.ShareCredential
 internal fun HolderTestAppJourneyScreen(
     component: CredentialPresenter,
     modifier: Modifier = Modifier,
-    onCloseJourney: () -> Unit = {},
+    onCloseJourney: () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     val metrics = rememberMetricsStateHolder()
@@ -46,7 +46,7 @@ internal fun HolderTestAppJourneyScreen(
     Surface(modifier = modifier) {
         ShareCredential(
             component = component,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
         )
 
         if (!sessionState.isComplete()) {

@@ -22,8 +22,8 @@ class HolderCancellationScreenTest {
     fun `Validate UI contents`(
         @TestParameter content: @Composable () -> Unit = namedTestValues(
             "Composable screen" to { Render() },
-            "Preview" to { HolderCancellationScreenPreview() },
-        ),
+            "Preview" to { HolderCancellationScreenPreview() }
+        )
     ) = runTest {
         composeTestRule.run {
             setContent { content() }
@@ -35,14 +35,14 @@ class HolderCancellationScreenTest {
     @Test
     fun `UI buttons defer to lambdas`(
         @TestParameter input: Pair<
-                HolderCancellationScreenRule.() -> SemanticsNodeInteraction,
-                HolderCancellationScreenRule.(Matcher<in Int>) -> Unit
-                > = namedTestValues(
+            HolderCancellationScreenRule.() -> SemanticsNodeInteraction,
+            HolderCancellationScreenRule.(Matcher<in Int>) -> Unit
+            > = namedTestValues(
             "Cancel journey button" to (
-                    HolderCancellationScreenRule::performCancelJourneyClick to
-                            HolderCancellationScreenRule::assertCancelJourneyClickCount
-                    ),
-        ),
+                HolderCancellationScreenRule::performCancelJourneyClick to
+                    HolderCancellationScreenRule::assertCancelJourneyClickCount
+                )
+        )
     ) = runTest {
         val (action, assertion) = input
         composeTestRule.run {
@@ -56,9 +56,9 @@ class HolderCancellationScreenTest {
     private fun Render(
         content: @Composable () -> Unit = {
             HolderCancellationScreen(
-                onCancel = composeTestRule::incrementCancelJourneyClickCount,
+                onCancel = composeTestRule::incrementCancelJourneyClickCount
             )
-        },
+        }
     ) {
         GdsTheme { content() }
     }

@@ -64,7 +64,7 @@ class HolderTestAppJourneyScreenTest {
                     SessionErrorReason.ServiceUuidNotFound
                 )
             ),
-        "Success" to HolderSessionState.Complete.Success(),
+            "Success" to HolderSessionState.Complete.Success()
         )
     ) = runTest {
         initialState = state

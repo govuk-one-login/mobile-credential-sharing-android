@@ -11,7 +11,9 @@ import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
  * Represents a digital credential verification journey's state for devices that contain digital
  * credentials.
  */
-sealed class HolderSessionState : Completable, UserCancellable {
+sealed class HolderSessionState :
+    Completable,
+    UserCancellable {
     /**
      * @return `true` when the high-level journey is in an end state. Otherwise `false`.
      */
@@ -22,7 +24,7 @@ sealed class HolderSessionState : Completable, UserCancellable {
         AwaitingVerifierResolution::class,
         PresentingEngagement::class,
         ProcessingEstablishment::class,
-        ProcessingResponse::class,
+        ProcessingResponse::class
     )
 
     /**

@@ -32,18 +32,18 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 internal fun HolderCancellationDialogContents(
     modifier: Modifier = Modifier,
     viewModel: HolderCancellationDialogViewModel = metroViewModel(),
-    onDismiss: () -> Unit = {},
+    onDismiss: () -> Unit = {}
 ) = HolderCancellationDialogContents(
     modifier = modifier,
     onCancelJourney = viewModel::cancelJourney,
-    onDismiss = onDismiss,
+    onDismiss = onDismiss
 )
 
 @Composable
 internal fun HolderCancellationDialogContents(
     onCancelJourney: () -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {

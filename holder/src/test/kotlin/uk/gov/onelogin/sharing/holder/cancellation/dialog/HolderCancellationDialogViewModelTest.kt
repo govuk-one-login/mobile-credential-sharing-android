@@ -12,7 +12,7 @@ class HolderCancellationDialogViewModelTest {
 
     private val viewModel by lazy {
         HolderCancellationDialogViewModel(
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
 
@@ -30,5 +30,4 @@ class HolderCancellationDialogViewModelTest {
             equalTo(1)
         )
     }
-
 }

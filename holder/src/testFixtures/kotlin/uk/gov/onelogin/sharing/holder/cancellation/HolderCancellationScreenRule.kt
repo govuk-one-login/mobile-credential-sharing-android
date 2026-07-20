@@ -9,9 +9,8 @@ import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import org.hamcrest.Matcher
 
-class HolderCancellationScreenRule(
-    composeTestRule: ComposeContentTestRule = createComposeRule(),
-) : ComposeContentTestRule by composeTestRule {
+class HolderCancellationScreenRule(composeTestRule: ComposeContentTestRule = createComposeRule()) :
+    ComposeContentTestRule by composeTestRule {
     private var cancelJourneyClickCount: Int = 0
 
     fun assertCancelJourneyClickCount(matcher: Matcher<in Int>) = waitUntil {

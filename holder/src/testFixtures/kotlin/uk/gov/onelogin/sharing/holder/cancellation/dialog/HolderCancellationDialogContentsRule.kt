@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performClick
 import org.hamcrest.Matcher
 
 class HolderCancellationDialogContentsRule(
-    composeTestRule: ComposeContentTestRule = createComposeRule(),
+    composeTestRule: ComposeContentTestRule = createComposeRule()
 ) : ComposeContentTestRule by composeTestRule {
     private var cancelJourneyClickCount: Int = 0
     private var dismissDialogClickCount: Int = 0

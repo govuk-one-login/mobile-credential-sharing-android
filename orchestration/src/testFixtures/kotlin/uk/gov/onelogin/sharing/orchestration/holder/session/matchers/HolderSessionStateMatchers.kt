@@ -50,11 +50,10 @@ object HolderSessionStateMatchers {
         )
     )
 
-    fun isFailed(
-        matcher: Matcher<in SessionError>
-    ): Matcher<HolderSessionState> = HolderSessionStateMatcher(matcher) {
-        (it as? HolderSessionState.Complete.Failed)?.error
-    }
+    fun isFailed(matcher: Matcher<in SessionError>): Matcher<HolderSessionState> =
+        HolderSessionStateMatcher(matcher) {
+            (it as? HolderSessionState.Complete.Failed)?.error
+        }
 
     fun isNotStarted(): Matcher<in HolderSessionState> = equalTo(
         HolderSessionState.NotStarted

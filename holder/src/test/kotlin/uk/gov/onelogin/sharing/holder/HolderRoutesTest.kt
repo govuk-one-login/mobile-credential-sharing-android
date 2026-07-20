@@ -81,7 +81,7 @@ class HolderRoutesTest {
             ) {
                 composable("unit test") {
                     Button(
-                        onClick = onClick,
+                        onClick = onClick
                     ) {
                         Text("Navigate")
                     }

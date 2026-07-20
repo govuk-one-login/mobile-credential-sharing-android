@@ -25,7 +25,7 @@ class HolderSessionStateTest {
             AwaitingVerifierResolution,
             ProcessingEstablishment,
             ProcessingResponse
-        ),
+        )
     ) {
         assertTrue {
             state.userCanCancel()

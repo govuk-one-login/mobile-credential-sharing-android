@@ -24,9 +24,7 @@ data object HolderRoutes {
     fun NavController.navigateToHolderJourney(options: NavOptionsBuilder.() -> Unit = {}) =
         navigate(HolderRoutes, options)
 
-    fun NavGraphBuilder.configureHolderRoutes(
-        controller: NavController,
-    ) {
+    fun NavGraphBuilder.configureHolderRoutes(controller: NavController) {
         navigation<HolderRoutes>(startDestination = HolderPrerequisitesRoute) {
             configureHolderPrerequisitesScreen()
             configureUnrecoverableHolderError(controller)

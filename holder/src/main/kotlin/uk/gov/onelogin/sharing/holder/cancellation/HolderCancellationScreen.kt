@@ -23,7 +23,7 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 internal fun HolderCancellationScreen(
     modifier: Modifier = Modifier,
     viewModel: HolderCancellationScreenViewModel = metroViewModel(),
-    onCancelJourney: () -> Unit = {},
+    onCancelJourney: () -> Unit = {}
 ) = HolderCancellationScreen(
     modifier = modifier,
     onCancel = {
@@ -33,10 +33,7 @@ internal fun HolderCancellationScreen(
 )
 
 @Composable
-internal fun HolderCancellationScreen(
-    modifier: Modifier = Modifier,
-    onCancel: () -> Unit = {},
-) {
+internal fun HolderCancellationScreen(modifier: Modifier = Modifier, onCancel: () -> Unit = {}) {
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderCancellationScreen")
@@ -45,7 +42,7 @@ internal fun HolderCancellationScreen(
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("The holder journey is now cancelled")
         Button(

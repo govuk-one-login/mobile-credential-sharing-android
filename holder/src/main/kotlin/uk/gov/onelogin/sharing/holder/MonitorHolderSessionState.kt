@@ -41,7 +41,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 fun MonitorHolderSessionState(
     holderSessionState: StateFlow<HolderSessionState>,
     navController: NavHostController,
-    context: Context = LocalContext.current,
+    context: Context = LocalContext.current
 ) {
     val coroutineScope = rememberCoroutineScope { Dispatchers.Main }
 
@@ -79,7 +79,7 @@ internal suspend fun convertSessionStateToNavigation(
     context: Context,
     navController: NavHostController,
     state: HolderSessionState,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
 ): () -> Unit = withContext(dispatcher) {
     val exitJourneyOptions: NavOptionsBuilder.() -> Unit = {
         popUpTo<HolderRoutes> {
@@ -154,8 +154,8 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
-        HolderSessionState.TerminatingSession,
-            -> {
+        HolderSessionState.TerminatingSession
+        -> {
             // Do nothing with UI-less states
             {}
         }
@@ -165,7 +165,7 @@ internal suspend fun convertSessionStateToNavigation(
 private fun handleHolderSessionFailure(
     state: HolderSessionState.Complete.Failed,
     navController: NavHostController,
-    context: Context,
+    context: Context
 ) {
     if ((state.sessionReason as? SessionErrorReason.UnrecoverableThrowable)
             ?.exception is BluetoothDisconnectedException

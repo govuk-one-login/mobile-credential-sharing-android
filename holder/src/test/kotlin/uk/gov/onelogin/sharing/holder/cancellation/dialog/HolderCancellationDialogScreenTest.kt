@@ -22,8 +22,8 @@ class HolderCancellationDialogScreenTest {
     fun `Validate UI contents`(
         @TestParameter content: @Composable () -> Unit = namedTestValues(
             "Composable screen" to { Render() },
-            "Preview" to { HolderCancellationDialogContentsPreview() },
-        ),
+            "Preview" to { HolderCancellationDialogContentsPreview() }
+        )
     ) = runTest {
         composeTestRule.run {
             setContent { content() }
@@ -36,18 +36,18 @@ class HolderCancellationDialogScreenTest {
     @Test
     fun `UI buttons defer to lambdas`(
         @TestParameter input: Pair<
-                HolderCancellationDialogContentsRule.() -> SemanticsNodeInteraction,
-                HolderCancellationDialogContentsRule.(Matcher<in Int>) -> Unit
-                > = namedTestValues(
+            HolderCancellationDialogContentsRule.() -> SemanticsNodeInteraction,
+            HolderCancellationDialogContentsRule.(Matcher<in Int>) -> Unit
+            > = namedTestValues(
             "Cancel journey button" to (
-                    HolderCancellationDialogContentsRule::performCancelJourneyClick to
-                            HolderCancellationDialogContentsRule::assertCancelJourneyClickCount
-                    ),
+                HolderCancellationDialogContentsRule::performCancelJourneyClick to
+                    HolderCancellationDialogContentsRule::assertCancelJourneyClickCount
+                ),
             "Dismiss dialog button" to (
-                    HolderCancellationDialogContentsRule::performDismissDialogClick to
-                            HolderCancellationDialogContentsRule::assertDismissDialogClickCount
-                    )
-        ),
+                HolderCancellationDialogContentsRule::performDismissDialogClick to
+                    HolderCancellationDialogContentsRule::assertDismissDialogClickCount
+                )
+        )
     ) = runTest {
         val (action, assertion) = input
         composeTestRule.run {
@@ -62,9 +62,9 @@ class HolderCancellationDialogScreenTest {
         content: @Composable () -> Unit = {
             HolderCancellationDialogContents(
                 onCancelJourney = composeTestRule::incrementCancelJourneyClickCount,
-                onDismiss = composeTestRule::incrementDismissDialogClickCount,
+                onDismiss = composeTestRule::incrementDismissDialogClickCount
             )
-        },
+        }
     ) {
         GdsTheme { content() }
     }
