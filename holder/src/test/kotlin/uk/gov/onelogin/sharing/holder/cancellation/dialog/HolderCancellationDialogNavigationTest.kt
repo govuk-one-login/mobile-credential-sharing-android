@@ -73,7 +73,7 @@ class HolderCancellationDialogNavigationTest {
                 }
             }
 
-            configureHolderUserCancellationDialog(controller = controller)
+            configureHolderUserCancellationDialog()
         }
     }
 }

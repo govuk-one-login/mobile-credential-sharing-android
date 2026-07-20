@@ -36,7 +36,7 @@ data object HolderRoutes {
             configureBluetoothConnectionErrorRoute(controller)
             configureAwaitingVerifierResolutionScreen()
             configureHolderSuccessScreen()
-            configureHolderUserCancellationDialog(controller)
+            configureHolderUserCancellationDialog()
             configureHolderUserCancellationScreen()
         }
     }
