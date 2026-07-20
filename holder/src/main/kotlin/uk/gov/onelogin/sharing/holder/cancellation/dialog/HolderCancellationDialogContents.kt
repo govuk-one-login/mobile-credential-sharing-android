@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
+import uk.gov.android.ui.theme.bannerElevation
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
@@ -84,15 +86,6 @@ internal fun HolderCancellationDialogContentsPreview() {
     GdsTheme {
         HolderCancellationDialogContents(
             modifier = Modifier
-                .dropShadow(
-                    shape = RoundedCornerShape(spacingDouble),
-                    shadow = Shadow(
-                        radius = spacingSingle,
-                        spread = 6.dp,
-                        color = Color(0x40000000),
-                        offset = DpOffset(x = 4.dp, 4.dp)
-                    )
-                )
                 .clip(RoundedCornerShape(spacingDouble))
                 .background(GdsLocalColorScheme.current.dialogBackground)
                 .padding(spacingDouble),
