@@ -137,7 +137,8 @@ internal suspend fun convertSessionStateToNavigation(
 
         VerifierSessionState.ProcessingEngagement,
         VerifierSessionState.Verifying,
-        VerifierSessionState.Complete.Cancelled
+        VerifierSessionState.Complete.Cancelled,
+        VerifierSessionState.TerminatingSession
         -> {
             {}
         }
