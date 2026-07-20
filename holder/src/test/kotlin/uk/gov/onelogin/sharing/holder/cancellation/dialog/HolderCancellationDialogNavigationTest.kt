@@ -3,7 +3,9 @@ package uk.gov.onelogin.sharing.holder.cancellation.dialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
@@ -21,14 +23,14 @@ import org.hamcrest.CoreMatchers.not
 import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Rule
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationNavigationExt.configureHolderUserCancellationDialog
-import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationNavigationExt.navigateToHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.configureHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.navigateToHolderUserCancellationDialog
 
 @RunWith(AndroidJUnit4::class)
-class HolderCancellationNavigationTest {
+class HolderCancellationDialogNavigationTest {
 
     @get:Rule
-    val composeTestRule = HolderCancellationScreenRule()
+    val composeTestRule = HolderCancellationDialogScreenRule()
 
     private lateinit var controller: TestNavHostController
 
@@ -48,10 +50,10 @@ class HolderCancellationNavigationTest {
 
             waitUntil {
                 allOf(
-                    instanceOf(HolderCancellationRoute::class.java),
-                    not(nullValue(HolderCancellationRoute::class.java))
+                    instanceOf(HolderCancellationDialogRoute::class.java),
+                    not(nullValue(HolderCancellationDialogRoute::class.java))
                 ).matches(
-                    controller.currentBackStackEntry?.toRoute<HolderCancellationRoute>()
+                    controller.currentBackStackEntry?.toRoute<HolderCancellationDialogRoute>()
                 )
             }
         }
@@ -65,6 +67,7 @@ class HolderCancellationNavigationTest {
         ) {
             composable("Unit test") {
                 Button(
+                    modifier = Modifier.testTag("dummy-button"),
                     onClick = {
                         controller.navigateToHolderUserCancellationDialog()
                     }
@@ -73,10 +76,7 @@ class HolderCancellationNavigationTest {
                 }
             }
 
-            configureHolderUserCancellationDialog(
-                controller = controller,
-                onCancelJourney = composeTestRule::incrementCancelJourneyClickCount
-            )
+            configureHolderUserCancellationDialog(controller = controller)
         }
     }
 }

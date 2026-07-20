@@ -6,12 +6,12 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
-class HolderCancellationViewModelTest {
+class HolderCancellationDialogViewModelTest {
 
     private val orchestrator = FakeOrchestrator()
 
     private val viewModel by lazy {
-        HolderCancellationViewModel(
+        HolderCancellationDialogViewModel(
             orchestrator = orchestrator,
         )
     }

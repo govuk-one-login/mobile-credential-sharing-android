@@ -14,9 +14,9 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 
 @RunWith(RobolectricTestParameterInjector::class)
-class HolderCancellationScreenTest {
+class HolderCancellationDialogScreenTest {
     @get:Rule
-    val composeTestRule = HolderCancellationScreenRule()
+    val composeTestRule = HolderCancellationDialogScreenRule()
 
     @Test
     fun `Validate UI contents`(
@@ -36,16 +36,16 @@ class HolderCancellationScreenTest {
     @Test
     fun `UI buttons defer to lambdas`(
         @TestParameter input: Pair<
-                HolderCancellationScreenRule.() -> SemanticsNodeInteraction,
-                HolderCancellationScreenRule.(Matcher<in Int>) -> Unit
+                HolderCancellationDialogScreenRule.() -> SemanticsNodeInteraction,
+                HolderCancellationDialogScreenRule.(Matcher<in Int>) -> Unit
                 > = namedTestValues(
             "Cancel journey button" to (
-                    HolderCancellationScreenRule::performCancelJourneyClick to
-                            HolderCancellationScreenRule::assertCancelJourneyClickCount
+                    HolderCancellationDialogScreenRule::performCancelJourneyClick to
+                            HolderCancellationDialogScreenRule::assertCancelJourneyClickCount
                     ),
             "Dismiss dialog button" to (
-                    HolderCancellationScreenRule::performDismissDialogClick to
-                            HolderCancellationScreenRule::assertDismissDialogClickCount
+                    HolderCancellationDialogScreenRule::performDismissDialogClick to
+                            HolderCancellationDialogScreenRule::assertDismissDialogClickCount
                     )
         ),
     ) = runTest {

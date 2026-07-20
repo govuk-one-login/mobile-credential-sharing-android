@@ -5,15 +5,15 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.dialog
 
-data object HolderCancellationNavigationExt {
+data object HolderCancellationDialogNavigationExt {
     fun NavController.navigateToHolderUserCancellationDialog(
         options: NavOptionsBuilder.() -> Unit = {}
-    ) = navigate(HolderCancellationRoute, options)
+    ) = navigate(HolderCancellationDialogRoute, options)
 
     internal fun NavGraphBuilder.configureHolderUserCancellationDialog(
         controller: NavController,
     ) {
-        dialog<HolderCancellationRoute> {
+        dialog<HolderCancellationDialogRoute> {
             HolderCancellationScreen(
                 onDismiss = controller::popBackStack
             )

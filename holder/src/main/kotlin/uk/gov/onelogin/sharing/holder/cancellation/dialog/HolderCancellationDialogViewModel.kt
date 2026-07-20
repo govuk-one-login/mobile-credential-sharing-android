@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 @ViewModelKey
-class HolderCancellationViewModel(
+class HolderCancellationDialogViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val ioDispatcher: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {

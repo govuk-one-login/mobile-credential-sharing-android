@@ -22,7 +22,7 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 @Composable
 internal fun HolderCancellationScreen(
     modifier: Modifier = Modifier,
-    viewModel: HolderCancellationViewModel = metroViewModel(),
+    viewModel: HolderCancellationDialogViewModel = metroViewModel(),
     onDismiss: () -> Unit = {},
 ) = HolderCancellationScreen(
     modifier = modifier,

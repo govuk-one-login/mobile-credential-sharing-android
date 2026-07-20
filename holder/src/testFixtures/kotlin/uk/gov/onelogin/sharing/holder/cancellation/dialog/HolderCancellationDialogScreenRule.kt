@@ -9,7 +9,7 @@ import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import org.hamcrest.Matcher
 
-class HolderCancellationScreenRule(
+class HolderCancellationDialogScreenRule(
     composeTestRule: ComposeContentTestRule = createComposeRule(),
 ) : ComposeContentTestRule by composeTestRule {
     private var cancelJourneyClickCount: Int = 0
