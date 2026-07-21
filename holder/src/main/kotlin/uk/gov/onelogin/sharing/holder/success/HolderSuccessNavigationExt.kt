@@ -1,5 +1,9 @@
 package uk.gov.onelogin.sharing.holder.success
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -11,7 +15,11 @@ object HolderSuccessNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderSuccessScreen() {
         composable<HolderSuccessRoute> {
-            HolderSuccessScreen()
+            HolderSuccessScreen(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            )
         }
     }
 }
