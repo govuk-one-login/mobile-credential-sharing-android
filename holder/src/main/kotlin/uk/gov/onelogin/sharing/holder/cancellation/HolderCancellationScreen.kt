@@ -1,7 +1,3 @@
-// Suppresses "compose:lambda-param-in-effect" due to linting being unaware of the provided scope within the
-// `LaunchedEffect`.
-@file:Suppress("ktlint:compose:lambda-param-in-effect")
-
 package uk.gov.onelogin.sharing.holder.cancellation
 
 import androidx.compose.foundation.background
@@ -12,7 +8,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -41,13 +39,15 @@ internal fun HolderCancellationScreen(
 @Composable
 internal fun HolderCancellationScreen(modifier: Modifier = Modifier, onCancel: () -> Unit = {}) {
     val scope: CoroutineScope = rememberCoroutineScope()
+    val currentOnCancel by rememberUpdatedState(onCancel)
+
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderCancellationScreen")
     }
 
     LaunchedEffect(Unit) {
-        scope.launch { onCancel() }
+        scope.launch { currentOnCancel() }
     }
 
     Column(

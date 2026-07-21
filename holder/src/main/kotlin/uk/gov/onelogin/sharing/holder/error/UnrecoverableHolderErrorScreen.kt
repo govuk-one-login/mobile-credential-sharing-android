@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.error
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,9 +15,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
-import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderViewModel.NavigationEvent as ViewModelEvent
 import uk.gov.onelogin.sharing.orchestration.error.UnrecoverableErrorContent
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderViewModel.NavigationEvent as ViewModelEvent
 
 @Composable
 internal fun UnrecoverableHolderErrorScreen(
@@ -32,6 +33,10 @@ internal fun UnrecoverableHolderErrorScreen(
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("UnrecoverableHolderErrorScreen")
+    }
+
+    BackHandler(true) {
+        viewModel.reset()
     }
 
     LaunchedEffect(Unit) {
@@ -57,7 +62,7 @@ internal fun UnrecoverableHolderErrorScreen(
             UnrecoverableErrorContent(
                 it.error,
                 modifier = Modifier.fillMaxSize(),
-                onExitJourney = viewModel::exitJourney
+                onExitJourney = viewModel::reset
             )
         } ?: CircularProgressIndicator()
     }

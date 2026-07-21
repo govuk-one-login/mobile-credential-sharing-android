@@ -86,7 +86,7 @@ class HolderRoutesTest {
                         Text("Navigate")
                     }
                 }
-                configureHolderRoutes(controller)
+                configureHolderRoutes()
             }
         }
     }

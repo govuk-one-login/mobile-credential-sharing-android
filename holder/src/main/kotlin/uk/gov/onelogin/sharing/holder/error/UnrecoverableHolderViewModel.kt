@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -18,16 +19,17 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
 @ViewModelKey
-@ContributesIntoMap(HolderUiScope::class)
+@ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 class UnrecoverableHolderViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : ViewModel() {
+) : ViewModel(), Resettable {
 
     val failureState: StateFlow<HolderSessionState.Complete.Failed?> = orchestrator
         .holderSessionState
@@ -46,9 +48,11 @@ class UnrecoverableHolderViewModel(
     private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()
     val navigationEvent: SharedFlow<NavigationEvent?> = _navigationEvent
 
-    fun exitJourney() = viewModelScope.launch(dispatcher) {
-        orchestrator.reset()
-        _navigationEvent.emit(NavigationEvent.ExitJourney)
+    override fun reset() {
+        viewModelScope.launch(dispatcher) {
+            orchestrator.reset()
+            _navigationEvent.emit(NavigationEvent.ExitJourney)
+        }
     }
 
     sealed interface NavigationEvent {

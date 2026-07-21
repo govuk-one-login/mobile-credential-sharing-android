@@ -72,7 +72,7 @@ class MonitorHolderSessionStateTest {
                 navController = controller,
                 startDestination = HolderRoutes
             ) {
-                configureHolderRoutes(controller)
+                configureHolderRoutes()
             }
         }
     }

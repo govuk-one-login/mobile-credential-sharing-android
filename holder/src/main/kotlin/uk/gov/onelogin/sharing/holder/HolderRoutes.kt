@@ -24,14 +24,14 @@ data object HolderRoutes {
     fun NavController.navigateToHolderJourney(options: NavOptionsBuilder.() -> Unit = {}) =
         navigate(HolderRoutes, options)
 
-    fun NavGraphBuilder.configureHolderRoutes(controller: NavController) {
+    fun NavGraphBuilder.configureHolderRoutes() {
         navigation<HolderRoutes>(startDestination = HolderPrerequisitesRoute) {
             configureHolderPrerequisitesScreen()
-            configureUnrecoverableHolderError(controller)
+            configureUnrecoverableHolderError()
             configureRetryHolderPrerequisites()
             configureHolderPresentQrScreen()
             configureHolderConsentScreen()
-            configureBluetoothConnectionErrorRoute(controller)
+            configureBluetoothConnectionErrorRoute()
             configureAwaitingVerifierResolutionScreen()
             configureHolderSuccessScreen()
             configureHolderUserCancellationDialog()
