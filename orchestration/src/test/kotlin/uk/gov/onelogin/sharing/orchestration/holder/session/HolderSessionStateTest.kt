@@ -48,7 +48,7 @@ class HolderSessionStateTest {
             Preflight(listOf()),
             ReadyToPresent,
             Success(),
-            TerminatingSession,
+            TerminatingSession
         )
     ) {
         assertFalse {
