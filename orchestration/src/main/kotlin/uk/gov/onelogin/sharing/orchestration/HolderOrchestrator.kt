@@ -381,7 +381,6 @@ class HolderOrchestrator(
         }
     }
 
-
     private fun handleMessageReceived(message: ByteArray) {
         when (val type = inboundMessageClassifier.getMessageType(message)) {
             is InboundMessageType.SessionEstablishment ->
@@ -768,10 +767,9 @@ class HolderOrchestrator(
         deviceRequest.docRequests.any { docRequest ->
             docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
                 namespace == DocumentType.Mdl.NAMESPACE &&
-                        elements.containsKey(MdlAttribute.Portrait.value)
+                    elements.containsKey(MdlAttribute.Portrait.value)
             }
         }
-
 
     private fun handleConnectionLoss(address: String? = null) {
         val currentState = holderSessionState.value
@@ -782,7 +780,6 @@ class HolderOrchestrator(
         }
 
         when (currentState) {
-
             is HolderSessionState.ProcessingEstablishment,
             is HolderSessionState.AwaitingUserConsent,
             is HolderSessionState.ProcessingResponse -> {
@@ -799,7 +796,6 @@ class HolderOrchestrator(
                     sendEndCommand = false
                 )
             }
-
 
             is HolderSessionState.AwaitingVerifierResolution -> {
                 safeTransitionTo(HolderSessionState.Complete.Success())
