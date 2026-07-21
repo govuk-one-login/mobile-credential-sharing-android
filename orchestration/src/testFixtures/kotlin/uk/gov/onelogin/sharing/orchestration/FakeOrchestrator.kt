@@ -19,6 +19,7 @@ class FakeOrchestrator(
     val parser: FakeQrParser = FakeQrParser(),
     var startCount: Int = 0,
     var cancelCount: Int = 0,
+    var resetCount: Int = 0,
     private val onConfirmConsent: () -> Unit = {}
 ) : Orchestrator.Holder,
     Orchestrator.Verifier,
@@ -65,5 +66,6 @@ class FakeOrchestrator(
     override fun reset() {
         startCount = 0
         cancelCount = 0
+        resetCount++
     }
 }

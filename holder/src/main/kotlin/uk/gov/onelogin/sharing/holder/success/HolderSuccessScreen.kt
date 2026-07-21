@@ -24,11 +24,15 @@ import uk.gov.onelogin.sharing.holder.R
 @Composable
 internal fun HolderSuccessScreen(
     modifier: Modifier = Modifier,
-    viewModel: HolderSuccessViewModel = metroViewModel()
+    viewModel: HolderSuccessViewModel = metroViewModel(),
+    onExitJourney: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     BackHandler(enabled = true) {
-        scope.launch { viewModel.reset() }
+        scope.launch {
+            viewModel.reset()
+            onExitJourney()
+        }
     }
 
     val metrics = rememberMetricsStateHolder()

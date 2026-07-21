@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.success
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
@@ -15,10 +16,16 @@ object HolderSuccessNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderSuccessScreen() {
         composable<HolderSuccessRoute> {
+            val backPressDispatcher = LocalOnBackPressedDispatcherOwner.current
             HolderSuccessScreen(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(16.dp),
+                onExitJourney = {
+                    backPressDispatcher
+                        ?.onBackPressedDispatcher
+                        ?.onBackPressed()
+                }
             )
         }
     }
