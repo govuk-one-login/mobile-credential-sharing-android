@@ -10,10 +10,16 @@ import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingVerifierResolution
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Failed
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Success
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Preflight
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.PresentingEngagement
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
-import uk.gov.onelogin.sharing.orchestration.session.SessionError
-import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.TerminatingSession
 
 @RunWith(TestParameterInjector::class)
 class HolderSessionStateTest {
@@ -21,9 +27,10 @@ class HolderSessionStateTest {
     @Test
     fun `Certain states are cancellable by the User`(
         @TestParameter state: HolderSessionState = testValues(
-            AwaitingUserConsent(mockk()),
+            AwaitingUserConsent(mockk(relaxed = true)),
             AwaitingVerifierResolution,
             ProcessingEstablishment,
+            PresentingEngagement("unit test"),
             ProcessingResponse
         )
     ) {
@@ -35,19 +42,13 @@ class HolderSessionStateTest {
     @Test
     fun `Certain states cannot be cancelled by the User`(
         @TestParameter state: HolderSessionState = testValues(
-            HolderSessionState.NotStarted,
-            HolderSessionState.Preflight(listOf()),
-            HolderSessionState.ReadyToPresent,
-            HolderSessionState.PresentingEngagement("unit test"),
-            HolderSessionState.TerminatingSession,
-            HolderSessionState.Complete.Success(),
-            HolderSessionState.Complete.Failed(
-                SessionError(
-                    "",
-                    SessionErrorReason.CannotBuildSessionEstablishment
-                )
-            ),
-            HolderSessionState.Complete.Cancelled
+            Cancelled,
+            Failed(mockk(relaxed = true)),
+            NotStarted,
+            Preflight(listOf()),
+            ReadyToPresent,
+            Success(),
+            TerminatingSession,
         )
     ) {
         assertFalse {
