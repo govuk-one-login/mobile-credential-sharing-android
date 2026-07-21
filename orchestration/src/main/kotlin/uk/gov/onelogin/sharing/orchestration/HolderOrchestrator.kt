@@ -326,40 +326,28 @@ class HolderOrchestrator(
     private fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
 
-        if (sessionFlow.value.isComplete()) {
+        val currentState = sessionFlow.value.currentState.value
+        if (currentState.isComplete()) {
             logger.debug(logTag, "Session already complete, ignoring BLE state")
+            return
+        }
+        if (currentState is HolderSessionState.TerminatingSession) {
+            logger.debug(logTag, "Session complete or terminating, ignoring BLE state")
             return
         }
 
         when (state) {
             is PeripheralBluetoothState.Connected -> {
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
-
                 logger.debug(logTag, "Mdoc - Connected: ${state.address}")
             }
 
             is PeripheralBluetoothState.Disconnected -> {
                 if (state.isSessionEnd) {
-                    logger.debug(
-                        logTag,
-                        "BLE session terminated successfully via GATT End command"
-                    )
+                    logger.debug(logTag, "BLE session terminated successfully via GATT End command")
                     stopAdvertising(sendEndCommand = false)
                 } else {
-                    logger.debug(logTag, "Error Mdoc - Disconnected: ${state.address}")
-
-                    val message = "Device ${state.address} disconnected unexpectedly"
-                    failWith(
-                        message = message,
-                        reason = SessionErrorReason.InvalidBluetoothState(
-                            BluetoothDisconnectedException(
-                                "Bluetooth disconnected unexpectedly",
-                                IllegalStateException(
-                                    "Device ${state.address} disconnected unexpectedly"
-                                )
-                            )
-                        )
-                    )
+                    handleConnectionLoss(state.address)
                 }
             }
 
@@ -376,8 +364,7 @@ class HolderOrchestrator(
 
             is PeripheralBluetoothState.Ended -> handleSessionEnded(state)
 
-            is PeripheralBluetoothState.MessageReceived ->
-                handleMessageReceived(state.message)
+            is PeripheralBluetoothState.MessageReceived -> handleMessageReceived(state.message)
         }
     }
 
@@ -401,14 +388,13 @@ class HolderOrchestrator(
     }
 
     private fun handleSessionEnded(state: PeripheralBluetoothState.Ended) {
-        val currentState = holderSessionState.value
-        logger.debug(logTag, "GATT End received with status ${state.status} in state $currentState")
-
-        handleConnectionLoss()
-
-        if (state.status != SessionEndStates.SUCCESS) {
+        if (state.status == SessionEndStates.SUCCESS) {
+            logger.debug(logTag, "Mdoc - Ending session")
+        } else {
             logger.error(logTag, "Mdoc - Error while ending session: ${state.status}")
         }
+
+        handleConnectionLoss(isGattEnd = true)
     }
 
     private fun handleSessionEstablishment(message: ByteArray) {
@@ -533,20 +519,11 @@ class HolderOrchestrator(
                 encryptCounter = context.encryptCounter
             )
 
-            val sent = peripheralBluetoothTransport.sendMessage(
-                serviceUuid = context.sessionUuid,
-                data = sessionDataBytes
-            )
-
-            if (sent) {
-                safeTransitionTo(HolderSessionState.TerminatingSession)
-                holderSessionTerminator.terminate(context.sessionUuid)
-            }
-
-            safeTransitionTo(
-                HolderSessionState.Complete.Success(
+            terminateSession(
+                finalState = HolderSessionState.Complete.Success(
                     HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
-                )
+                ),
+                sessionDataToSend = sessionDataBytes
             )
         } else {
             sendTerminationAndFail(
@@ -657,55 +634,27 @@ class HolderOrchestrator(
 
     private suspend fun sendTerminationAndFail(exception: Exception) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
-        val context = currentContext
         val sessionDataBytes = holderCryptoService.buildTerminationSessionData(
             SessionDataStatus.SESSION_TERMINATION
         )
 
-        val sent = peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
-            data = sessionDataBytes
+        terminateSession(
+            finalState = HolderSessionState.Complete.Failed(
+                SessionError(message = exception.message ?: UNKNOWN_ERROR, exception = exception)
+            ),
+            sessionDataToSend = sessionDataBytes
         )
+    }
 
-        if (sent) {
-            holderSessionTerminator.terminate(context.sessionUuid)
-        }
-
-        safeTransitionTo(
-            HolderSessionState.Complete.Failed(
-                SessionError(
-                    message = exception.message ?: UNKNOWN_ERROR,
-                    exception = exception
+    private fun failWith(message: String, reason: SessionErrorReason) {
+        logger.error(logTag, message)
+        appCoroutineScope.launch {
+            terminateSession(
+                finalState = HolderSessionState.Complete.Failed(
+                    SessionError(message = message, reason = reason)
                 )
             )
-        )
-    }
-
-    private fun failWith(
-        message: String,
-        reason: SessionErrorReason,
-        sendEndCommand: Boolean = true
-    ) {
-        logger.error(logTag, message)
-        stopAdvertising(sendEndCommand)
-        safeTransitionTo(
-            HolderSessionState.Complete.Failed(
-                SessionError(message = message, reason = reason)
-            )
-        )
-    }
-
-    private fun failWith(
-        message: String,
-        error: SessionError,
-        throwable: Throwable,
-        sendEndCommand: Boolean = true
-    ) {
-        logger.error(logTag, message, throwable)
-        stopAdvertising(sendEndCommand)
-        safeTransitionTo(
-            HolderSessionState.Complete.Failed(error)
-        )
+        }
     }
 
     private fun safeTransitionTo(
@@ -771,15 +720,36 @@ class HolderOrchestrator(
             }
         }
 
-    private fun handleConnectionLoss(address: String? = null) {
+    private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {
         val currentState = holderSessionState.value
 
         if (currentState.isComplete() || currentState is HolderSessionState.TerminatingSession) {
-            logger.debug(logTag, "Suppressed connection loss in state $currentState")
             return
         }
 
         when (currentState) {
+            is HolderSessionState.ReadyToPresent,
+            is HolderSessionState.PresentingEngagement -> {
+                val finalState = if (isGattEnd) {
+                    HolderSessionState.Complete.Cancelled
+                } else {
+                    val message = address?.let { "Device $it disconnected unexpectedly" }
+                        ?: "Connection lost unexpectedly"
+                    HolderSessionState.Complete.Failed(
+                        SessionError(
+                            message = message,
+                            reason = SessionErrorReason.InvalidBluetoothState(
+                                BluetoothDisconnectedException(
+                                    "Bluetooth disconnected unexpectedly",
+                                    IllegalStateException(message)
+                                )
+                            )
+                        )
+                    )
+                }
+                appCoroutineScope.launch { terminateSession(finalState) }
+            }
+
             is HolderSessionState.ProcessingEstablishment,
             is HolderSessionState.AwaitingUserConsent,
             is HolderSessionState.ProcessingResponse -> {
@@ -792,19 +762,20 @@ class HolderOrchestrator(
                             "Bluetooth disconnected unexpectedly",
                             IllegalStateException(message)
                         )
-                    ),
-                    sendEndCommand = false
+                    )
                 )
             }
 
             is HolderSessionState.AwaitingVerifierResolution -> {
-                safeTransitionTo(HolderSessionState.Complete.Success())
-                stopAdvertising(sendEndCommand = false)
+                appCoroutineScope.launch {
+                    terminateSession(finalState = HolderSessionState.Complete.Success())
+                }
             }
 
             else -> {
-                safeTransitionTo(HolderSessionState.Complete.Cancelled)
-                stopAdvertising(sendEndCommand = false)
+                appCoroutineScope.launch {
+                    terminateSession(finalState = HolderSessionState.Complete.Cancelled)
+                }
             }
         }
     }
@@ -814,7 +785,7 @@ class HolderOrchestrator(
         sessionDataToSend: ByteArray? = null
     ) {
         val context = currentContext
-        var sent = false
+        var sent = true
 
         if (sessionDataToSend != null) {
             sent = peripheralBluetoothTransport.sendMessage(
@@ -823,9 +794,11 @@ class HolderOrchestrator(
             )
         }
 
-        if (sent || (sessionDataToSend == null)) {
+        if (sent) {
             safeTransitionTo(HolderSessionState.TerminatingSession)
             holderSessionTerminator.terminate(context.sessionUuid)
+        } else {
+            stopAdvertising(sendEndCommand = false)
         }
 
         safeTransitionTo(finalState)

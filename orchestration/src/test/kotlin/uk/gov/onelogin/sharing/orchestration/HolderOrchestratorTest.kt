@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
@@ -68,6 +69,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isSuccessful
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
@@ -367,34 +369,25 @@ class HolderOrchestratorTest {
 
     @Test
     fun `handles device disconnected state change`() = runTest {
-        val sessionFactory = createSessionFactory()
-        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(
-            sessionFactory = sessionFactory,
-            peripheralBluetoothTransport = peripheralBluetoothTransport
-        )
-        backgroundScope.launch {
-            orchestrator.holderSessionState.collect {}
-        }
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
         orchestrator.start()
-
-        peripheralBluetoothTransport.emitState(
-            PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false)
-        )
-
-        assert("Error Mdoc - Disconnected: $DEVICE_ADDRESS" in logger)
-        assertEquals(1, peripheralBluetoothTransport.stopCalls)
+        advanceUntilIdle()
 
         orchestrator.holderSessionState.test {
-            assertThat(
-                expectMostRecentItem(),
-                isFailed(
-                    hasReason(
-                        isInvalidBluetoothState()
-                    )
-                )
-            )
+            advanceUntilIdle()
+            assertThat(awaitItem(), inPresentingEngagement())
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+
+            assertThat(awaitItem(), isProcessingEstablishment())
+            transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
+
+            assertThat(awaitItem(), isFailed(hasReason(isInvalidBluetoothState())))
         }
+
+        assert("Device $DEVICE_ADDRESS disconnected unexpectedly" in logger)
     }
 
     @Test
@@ -442,6 +435,7 @@ class HolderOrchestratorTest {
             orchestrator.holderSessionState.collect {}
         }
         orchestrator.start()
+        advanceUntilIdle()
 
         peripheralBluetoothTransport.emitState(
             PeripheralBluetoothState.Ended(SessionEndStates.SUCCESS)
@@ -470,11 +464,11 @@ class HolderOrchestratorTest {
                 orchestrator.holderSessionState.collect {}
             }
             orchestrator.start()
-
+            advanceUntilIdle()
             peripheralBluetoothTransport.emitState(
                 PeripheralBluetoothState.Ended(SessionEndStates.SUCCESS)
             )
-
+            advanceUntilIdle()
             assertThat(
                 orchestrator.holderSessionState.value,
                 isSuccessful()
@@ -1199,6 +1193,82 @@ class HolderOrchestratorTest {
             assertEquals(0, transport.sendMessageCalls)
             assertEquals(false, transport.lastStopSendEndCommand)
         }
+    }
+
+    @Test
+    fun `connection loss during active processing results in failure`() = runTest {
+        val states = listOf(
+            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub),
+            HolderSessionState.ProcessingResponse
+        )
+
+        states.forEach { state ->
+            initialStates[0] = state
+            val transport = FakePeripheralBluetoothTransport()
+            val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+            transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
+            advanceUntilIdle()
+
+            assertThat("Failed for state $state", orchestrator.holderSessionState.value, isFailed())
+        }
+    }
+
+    @Test
+    fun `connection loss in AwaitingVerifierResolution results in success`() = runTest {
+        initialStates[0] = HolderSessionState.AwaitingVerifierResolution
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
+    }
+
+    @Test
+    fun `connection loss in terminal state is ignored`() = runTest {
+        val terminalStates = listOf(
+            HolderSessionState.Complete.Success(),
+            HolderSessionState.Complete.Failed(SessionError("test", IllegalStateException())),
+            HolderSessionState.Complete.Cancelled
+        )
+
+        terminalStates.forEach { state ->
+            initialStates[0] = state
+            val transport = FakePeripheralBluetoothTransport()
+            val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+            transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
+            advanceUntilIdle()
+
+            assertEquals("State changed from $state", state, orchestrator.holderSessionState.value)
+        }
+    }
+
+    @Test
+    fun `connection loss during terminatingSession is suppressed`() = runTest {
+        initialStates[0] = HolderSessionState.TerminatingSession
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
+        advanceUntilIdle()
+
+        assertThat(
+            orchestrator.holderSessionState.value,
+            equalTo(HolderSessionState.TerminatingSession)
+        )
+        assert("Session complete or terminating, ignoring BLE state" in logger)
     }
 
     private inner class PeerTerminationFixture(
