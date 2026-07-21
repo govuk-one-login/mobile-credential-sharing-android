@@ -265,7 +265,6 @@ class HolderOrchestrator(
                 "denyConsent called in an invalid state: $state"
             }
 
-            // Immediate transition for UI feedback
             safeTransitionTo(HolderSessionState.ProcessingResponse)
 
             val skDevice = checkNotNull(context.skDevice) {
