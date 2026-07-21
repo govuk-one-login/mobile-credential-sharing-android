@@ -825,7 +825,7 @@ class HolderOrchestratorTest {
             fakeCryptoService.lastErrorSessionDataStatus
         )
         assert(
-            "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.TerminatingSession}" in logger
+            "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.SendingTermination}" in logger
         )
         assertEquals(1, terminator.terminateCalls)
         assertEquals(0, peripheralTransport.stopCalls)
@@ -888,7 +888,7 @@ class HolderOrchestratorTest {
             )
             assertEquals(1, terminator.terminateCalls)
             assert(
-                "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.TerminatingSession}" in logger
+                "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.SendingTermination}" in logger
             )
         }
     }
@@ -1255,7 +1255,7 @@ class HolderOrchestratorTest {
 
     @Test
     fun `connection loss during terminatingSession is suppressed`() = runTest {
-        initialStates[0] = HolderSessionState.TerminatingSession
+        initialStates[0] = HolderSessionState.SendingTermination
         val transport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
 
@@ -1266,7 +1266,7 @@ class HolderOrchestratorTest {
 
         assertThat(
             orchestrator.holderSessionState.value,
-            equalTo(HolderSessionState.TerminatingSession)
+            equalTo(HolderSessionState.SendingTermination)
         )
         assert("Session complete or terminating, ignoring BLE state" in logger)
     }

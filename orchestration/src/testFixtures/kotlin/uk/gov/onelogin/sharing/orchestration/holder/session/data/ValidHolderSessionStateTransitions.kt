@@ -72,7 +72,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "Receives Verifier device's data transfer request" to
                 HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             "No matching attributes begins session termination" to
-                HolderSessionState.TerminatingSession,
+                HolderSessionState.SendingTermination,
             "No matching attributes terminates successfully" to successStub
         ).map { (testName, transition) ->
             Triple(
@@ -98,7 +98,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "Holder sends response and awaits verifier resolution" to
                 HolderSessionState.AwaitingVerifierResolution,
             "Holder begins session termination protocol" to
-                HolderSessionState.TerminatingSession,
+                HolderSessionState.SendingTermination,
             "User completes the Holder User journey" to successStub
         ).map { (testName, transition) ->
             Triple(
@@ -127,7 +127,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.TerminatingSession,
+                HolderSessionState.SendingTermination,
                 transition
             )
         }

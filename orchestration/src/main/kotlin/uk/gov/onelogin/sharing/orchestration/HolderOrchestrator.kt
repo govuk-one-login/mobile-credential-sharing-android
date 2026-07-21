@@ -22,8 +22,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
-import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
-import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
@@ -331,7 +329,7 @@ class HolderOrchestrator(
             logger.debug(logTag, "Session already complete, ignoring BLE state")
             return
         }
-        if (currentState is HolderSessionState.TerminatingSession) {
+        if (currentState is HolderSessionState.SendingTermination) {
             logger.debug(logTag, "Session complete or terminating, ignoring BLE state")
             return
         }
@@ -723,7 +721,7 @@ class HolderOrchestrator(
     private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {
         val currentState = holderSessionState.value
 
-        if (currentState.isComplete() || currentState is HolderSessionState.TerminatingSession) {
+        if (currentState.isComplete() || currentState is HolderSessionState.SendingTermination) {
             return
         }
 
@@ -795,7 +793,7 @@ class HolderOrchestrator(
         }
 
         if (sent) {
-            safeTransitionTo(HolderSessionState.TerminatingSession)
+            safeTransitionTo(HolderSessionState.SendingTermination)
             holderSessionTerminator.terminate(context.sessionUuid)
         } else {
             stopAdvertising(sendEndCommand = false)

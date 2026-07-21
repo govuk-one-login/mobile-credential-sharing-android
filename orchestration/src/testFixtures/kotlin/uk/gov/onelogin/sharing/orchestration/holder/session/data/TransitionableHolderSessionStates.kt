@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.P
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.TerminatingSession
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.SendingTermination
 
 class TransitionableHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*>? = inputs
@@ -26,7 +26,7 @@ class TransitionableHolderSessionStates : TestParameterValuesProvider() {
             AwaitingUserConsent::class,
             ProcessingResponse::class,
             AwaitingVerifierResolution::class,
-            TerminatingSession::class
+            SendingTermination::class
         )
     }
 }

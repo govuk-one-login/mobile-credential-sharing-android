@@ -80,7 +80,7 @@ sealed class HolderSessionState : Completable {
      * This is a transient state between sending the termination message and reaching
      * the terminal state.
      */
-    data object TerminatingSession : HolderSessionState()
+    data object SendingTermination : HolderSessionState()
 
     /**
      * State for when a User has finished a digital credential verification journey.
