@@ -8,11 +8,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderViewModel.NavigationEvent as ViewModelEvent
@@ -25,6 +27,7 @@ internal fun UnrecoverableHolderErrorScreen(
     viewModel: UnrecoverableHolderViewModel = metroViewModel(),
     onExitJourney: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     val currentOnExitJourney by rememberUpdatedState(onExitJourney)
     val failureState: HolderSessionState.Complete.Failed? by viewModel
         .failureState
@@ -36,7 +39,10 @@ internal fun UnrecoverableHolderErrorScreen(
     }
 
     BackHandler(true) {
-        viewModel.reset()
+        scope.launch {
+            viewModel.reset()
+            currentOnExitJourney()
+        }
     }
 
     LaunchedEffect(Unit) {
