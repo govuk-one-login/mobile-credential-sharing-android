@@ -4,9 +4,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
+import androidx.navigation.NavController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
@@ -15,10 +17,6 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.Test
-import org.hamcrest.CoreMatchers.allOf
-import org.hamcrest.CoreMatchers.instanceOf
-import org.hamcrest.CoreMatchers.not
-import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Rule
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.configureHolderUserCancellationScreen
@@ -28,9 +26,22 @@ import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavig
 class HolderCancellationScreenNavigationTest {
 
     @get:Rule
-    val composeTestRule = HolderCancellationScreenRule()
+    val composeTestRule = createComposeRule()
 
     private lateinit var controller: TestNavHostController
+
+    private var hasNavigatedToCancellation = false
+
+    private val onDestinationChangedListener = NavController.OnDestinationChangedListener {
+        controller, _, _ ->
+
+        try {
+            controller.currentBackStackEntry?.toRoute<HolderCancellationScreenRoute>()
+            hasNavigatedToCancellation = true
+        } catch (ignored: Exception) {
+
+        }
+    }
 
     @Test
     fun `Cancellation screen exists in the navigation graph`() {
@@ -39,6 +50,7 @@ class HolderCancellationScreenNavigationTest {
                 controller = TestNavHostController(LocalContext.current).apply {
                     navigatorProvider.addNavigator(ComposeNavigator())
                     navigatorProvider.addNavigator(DialogNavigator())
+                    addOnDestinationChangedListener(onDestinationChangedListener)
                 }
 
                 Render()
@@ -46,14 +58,7 @@ class HolderCancellationScreenNavigationTest {
 
             onNodeWithText("Navigate").onParent().performClick()
 
-            waitUntil {
-                allOf(
-                    instanceOf(HolderCancellationScreenRoute::class.java),
-                    not(nullValue(HolderCancellationScreenRoute::class.java))
-                ).matches(
-                    controller.currentBackStackEntry?.toRoute<HolderCancellationScreenRoute>()
-                )
-            }
+            waitUntil { hasNavigatedToCancellation }
         }
     }
 

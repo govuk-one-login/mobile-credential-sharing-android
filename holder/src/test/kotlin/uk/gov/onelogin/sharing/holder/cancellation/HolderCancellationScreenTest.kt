@@ -1,13 +1,12 @@
 package uk.gov.onelogin.sharing.holder.cancellation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.Matcher
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
@@ -16,7 +15,9 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 @RunWith(RobolectricTestParameterInjector::class)
 class HolderCancellationScreenTest {
     @get:Rule
-    val composeTestRule = HolderCancellationScreenRule()
+    val composeTestRule = createComposeRule()
+
+    private var hasResetJourney = false
 
     @Test
     fun `Validate UI contents`(
@@ -27,28 +28,15 @@ class HolderCancellationScreenTest {
     ) = runTest {
         composeTestRule.run {
             setContent { content() }
-            assertTitleIsDisplayed()
-            assertCancelJourneyButtonIsDisplayed()
+            onNodeWithTag("progressIndicator").assertExists()
         }
     }
 
     @Test
-    fun `UI buttons defer to lambdas`(
-        @TestParameter input: Pair<
-            HolderCancellationScreenRule.() -> SemanticsNodeInteraction,
-            HolderCancellationScreenRule.(Matcher<in Int>) -> Unit
-            > = namedTestValues(
-            "Cancel journey button" to (
-                HolderCancellationScreenRule::performCancelJourneyClick to
-                    HolderCancellationScreenRule::assertCancelJourneyClickCount
-                )
-        )
-    ) = runTest {
-        val (action, assertion) = input
+    fun `Calls 'onCancel' when launching the screen`() = runTest {
         composeTestRule.run {
             setContent { Render() }
-            action(this)
-            assertion(this, equalTo(1))
+            waitUntil { hasResetJourney }
         }
     }
 
@@ -56,7 +44,7 @@ class HolderCancellationScreenTest {
     private fun Render(
         content: @Composable () -> Unit = {
             HolderCancellationScreen(
-                onCancel = composeTestRule::incrementCancelJourneyClickCount
+                onCancel = { hasResetJourney = true }
             )
         }
     ) {

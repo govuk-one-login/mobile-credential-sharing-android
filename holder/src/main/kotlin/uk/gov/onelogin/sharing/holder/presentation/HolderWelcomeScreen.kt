@@ -2,15 +2,15 @@
 
 package uk.gov.onelogin.sharing.holder.presentation
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -43,24 +43,24 @@ fun HolderWelcomeScreen(
 }
 
 @Composable
-fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier) {
-    HolderWelcomeText()
+private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         contentState.qrData?.let {
+            HolderWelcomeText()
             QrCodeImage(
                 data = it,
                 size = QR_SIZE
             )
-        }
+        } ?: CircularProgressIndicator()
     }
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true)
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(qrData = "QR Data")
 
