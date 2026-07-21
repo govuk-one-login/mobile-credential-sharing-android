@@ -47,7 +47,7 @@ private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = M
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         contentState.qrData?.let {
             HolderWelcomeText()

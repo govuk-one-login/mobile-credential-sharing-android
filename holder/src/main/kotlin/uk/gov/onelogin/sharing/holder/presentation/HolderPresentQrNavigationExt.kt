@@ -26,7 +26,7 @@ object HolderPresentQrNavigationExt {
                 HolderWelcomeScreen(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(spacingDouble),
+                        .padding(spacingDouble)
                 )
             }
         }

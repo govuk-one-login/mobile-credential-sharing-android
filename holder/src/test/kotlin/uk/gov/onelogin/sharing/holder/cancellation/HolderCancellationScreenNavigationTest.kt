@@ -33,13 +33,15 @@ class HolderCancellationScreenNavigationTest {
     private var hasNavigatedToCancellation = false
 
     private val onDestinationChangedListener = NavController.OnDestinationChangedListener {
-        controller, _, _ ->
+            controller,
+            _,
+            _
+        ->
 
         try {
             controller.currentBackStackEntry?.toRoute<HolderCancellationScreenRoute>()
             hasNavigatedToCancellation = true
         } catch (ignored: Exception) {
-
         }
     }
 
