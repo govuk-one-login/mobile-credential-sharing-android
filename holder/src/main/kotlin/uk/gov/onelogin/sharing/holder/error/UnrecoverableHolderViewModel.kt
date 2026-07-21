@@ -29,7 +29,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 class UnrecoverableHolderViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : ViewModel(), Resettable {
+) : ViewModel(),
+    Resettable {
 
     val failureState: StateFlow<HolderSessionState.Complete.Failed?> = orchestrator
         .holderSessionState

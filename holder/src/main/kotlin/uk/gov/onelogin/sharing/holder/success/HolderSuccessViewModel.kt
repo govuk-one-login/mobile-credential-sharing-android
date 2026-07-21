@@ -19,9 +19,9 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 class HolderSuccessViewModel(
     val orchestrator: Orchestrator.Holder,
     val dispatcher: CoroutineContext = Dispatchers.IO
-) : ViewModel(), Resettable {
+) : ViewModel(),
+    Resettable {
     override fun reset() {
         viewModelScope.launch { orchestrator.reset() }
     }
 }
-

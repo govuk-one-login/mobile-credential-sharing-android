@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.holder.R
 @Composable
 internal fun HolderSuccessScreen(
     modifier: Modifier = Modifier,
-    viewModel: HolderSuccessViewModel = metroViewModel(),
+    viewModel: HolderSuccessViewModel = metroViewModel()
 ) {
     val scope = rememberCoroutineScope()
     BackHandler(enabled = true) {
@@ -40,9 +40,7 @@ internal fun HolderSuccessScreen(
 }
 
 @Composable
-internal fun HolderSuccessContent(
-    modifier: Modifier = Modifier,
-) {
+internal fun HolderSuccessContent(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -61,6 +59,6 @@ internal fun HolderSuccessScreenPreview() {
     HolderSuccessContent(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
     )
 }
