@@ -54,14 +54,16 @@ All dependency versions are managed centrally in `gradle/libs.versions.toml`. Al
 
 Before starting any task, read the relevant skill from `.agents/skills/`:
 
-| Task | Skill |
-|---|---|
-| Writing or updating tests | `testing-setup` |
-| Camera / QR scanning work | `camerax` |
-| Navigation changes | `navigation-3` |
-| Adaptive / responsive UI | `adaptive` |
-| Edge-to-edge UI | `edge-to-edge` |
-| Intent handling | `android-intent-security` |
-| AGP / build changes | `agp-9-upgrade` |
-| R8 / ProGuard rules | `r8-analyzer` |
-| AppFunctions | `appfunctions` |
+| Task                          | Skill                     |
+|-------------------------------|---------------------------|
+| AGP / build changes           | `agp-9-upgrade`           |
+| Adaptive / responsive UI      | `adaptive`                |
+| Adding new AI agent skills    | `find-skills`             |
+| AppFunctions                  | `appfunctions`            |
+| Camera / QR scanning work     | `camerax`                 |
+| Edge-to-edge UI               | `edge-to-edge`            |
+| GitHub Actions / CI workflows | `github-actions`          |
+| Intent handling               | `android-intent-security` |
+| Navigation changes            | `navigation-3`            |
+| R8 / ProGuard rules           | `r8-analyzer`             |
+| Writing or updating tests     | `testing-setup`           |
