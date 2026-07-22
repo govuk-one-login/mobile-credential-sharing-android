@@ -1,17 +1,26 @@
 package uk.gov.onelogin.sharing.holder.success
 
-import android.content.Context
-import androidx.activity.ComponentActivity
+import android.content.res.Resources
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
-import androidx.test.core.app.ApplicationProvider
-import kotlin.test.assertEquals
+import androidx.navigation.toRoute
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
+import com.google.testing.junit.testparameterinjector.TestParameter
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -19,6 +28,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
 @RunWith(RobolectricTestParameterInjector::class)
 class HolderSuccessScreenTest {
@@ -29,60 +39,100 @@ class HolderSuccessScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val resources =
-        ApplicationProvider.getApplicationContext<Context>().resources
+    private lateinit var controller: TestNavHostController
 
-    @Test
-    fun `Displays unfulfillable request title`() = runTest(dispatcherRule.testDispatcher) {
-        composeTestRule.setContent { HolderSuccessScreen() }
+    private var hasExitedJourney = false
 
-        composeTestRule.onNodeWithText(
-            resources.getString(R.string.holder_success_unfulfillable_request_title)
-        ).assertIsDisplayed()
+    private val orchestrator by lazy {
+        FakeOrchestrator()
+    }
+
+    private val viewModelFactory: MetroViewModelFactory = mockk(relaxed = true)
+
+    private val viewModel by lazy {
+        HolderSuccessViewModel(
+            orchestrator = orchestrator,
+            dispatcher = dispatcherRule.testDispatcher
+        )
     }
 
     @Test
-    fun `Preview renders without errors`() = runTest(dispatcherRule.testDispatcher) {
-        composeTestRule.setContent { HolderSuccessScreenPreview() }
-
-        composeTestRule.onNodeWithText(
-            resources.getString(R.string.holder_success_unfulfillable_request_title)
-        ).assertIsDisplayed()
-    }
-
-    @Test
-    fun `Back button is disabled and screen remains visible`() =
-        runTest(dispatcherRule.testDispatcher) {
-            lateinit var navController: TestNavHostController
-
-            composeTestRule.setContent {
-                val context = LocalContext.current
-                navController = TestNavHostController(context).apply {
-                    navigatorProvider.addNavigator(ComposeNavigator())
-                }
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "previous"
+    fun `Displays unfulfillable request title`(
+        @TestParameter content: @Composable () -> Unit = namedTestValues(
+            "Screen" to {
+                CompositionLocalProvider(
+                    LocalMetroViewModelFactory provides viewModelFactory
                 ) {
-                    composable("previous") {}
-                    composable("success") {
-                        HolderSuccessScreen()
-                    }
+                    HolderSuccessScreen(
+                        viewModel = viewModel
+                    )
+                }
+            },
+            "Preview" to { HolderSuccessScreenPreview() }
+        )
+    ) = runTest(dispatcherRule.testDispatcher) {
+        lateinit var resources: Resources
+        composeTestRule.setContent {
+            resources = LocalResources.current
+            content()
+        }
+
+        composeTestRule.onNodeWithText(
+            resources.getString(R.string.holder_success_unfulfillable_request_title)
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun `Back button resets the journey`() = runTest(dispatcherRule.testDispatcher) {
+        composeTestRule.run {
+            var backPressedDispatcher: OnBackPressedDispatcherOwner? = null
+            setContent {
+                backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+                RenderNavHost()
+            }
+
+            runOnUiThread {
+                controller.navigate(HolderSuccessRoute)
+            }
+
+            waitUntil {
+                controller.currentBackStackEntry?.toRoute<HolderSuccessRoute>() != null
+            }
+
+            waitForIdle()
+
+            runOnUiThread {
+                backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
+            }
+
+            waitUntil { orchestrator.resetCount == 1 }
+            waitUntil { hasExitedJourney }
+        }
+    }
+
+    @Composable
+    private fun RenderNavHost() {
+        val context = LocalContext.current
+        controller = TestNavHostController(context).apply {
+            navigatorProvider.addNavigator(ComposeNavigator())
+            navigatorProvider.addNavigator(DialogNavigator())
+        }
+
+        CompositionLocalProvider(
+            LocalMetroViewModelFactory provides viewModelFactory
+        ) {
+            NavHost(
+                navController = controller,
+                startDestination = "previous"
+            ) {
+                composable("previous") {}
+                composable<HolderSuccessRoute> {
+                    HolderSuccessScreen(
+                        viewModel = viewModel,
+                        onExitJourney = { hasExitedJourney = true }
+                    )
                 }
             }
-
-            composeTestRule.runOnUiThread {
-                navController.navigate("success")
-            }
-            composeTestRule.waitForIdle()
-
-            composeTestRule.runOnUiThread {
-                val activity = navController.context as ComponentActivity
-                activity.onBackPressedDispatcher.onBackPressed()
-            }
-            composeTestRule.waitForIdle()
-
-            assertEquals("success", navController.currentDestination?.route)
         }
+    }
 }

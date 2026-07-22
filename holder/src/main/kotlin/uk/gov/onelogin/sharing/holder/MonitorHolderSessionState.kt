@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
 import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
+import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
@@ -24,6 +26,7 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 /**
@@ -78,13 +81,16 @@ internal suspend fun convertSessionStateToNavigation(
     state: HolderSessionState,
     dispatcher: CoroutineDispatcher = Dispatchers.Default
 ): () -> Unit = withContext(dispatcher) {
+    val exitJourneyOptions: NavOptionsBuilder.() -> Unit = {
+        popUpTo<HolderRoutes> {
+            inclusive = true
+        }
+    }
     when (state) {
         HolderSessionState.NotStarted -> {
             {
                 navController.navigateToHolderPrerequisitesScreen {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }
@@ -92,9 +98,7 @@ internal suspend fun convertSessionStateToNavigation(
         is HolderSessionState.Preflight -> {
             {
                 navController.navigateToRetryHolderPrerequisites {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }
@@ -102,9 +106,7 @@ internal suspend fun convertSessionStateToNavigation(
         is HolderSessionState.PresentingEngagement -> {
             {
                 navController.navigateToHolderPresentQrScreen {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }
@@ -118,9 +120,7 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.AwaitingVerifierResolution -> {
             {
                 navController.navigateToAwaitingVerifierResolutionScreen {
-                    popUpTo<HolderRoutes> {
-                        inclusive = true
-                    }
+                    exitJourneyOptions()
                 }
             }
         }
@@ -131,32 +131,33 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        is HolderSessionState.Complete.Success -> {
+            if (state.successReason == SuccessReason.UnfulfillableRequest) {
+                {
+                    navController.navigateToHolderSuccessScreen {
+                        exitJourneyOptions()
+                    }
+                }
+            } else {
+                {}
+            }
+        }
+
+        HolderSessionState.Complete.Cancelled -> {
+            {
+                navController.navigateToHolderUserCancellationScreen {
+                    exitJourneyOptions()
+                }
+            }
+        }
+
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
-        HolderSessionState.TerminatingSession,
-        HolderSessionState.Complete.Cancelled,
-        is HolderSessionState.Complete.Success
+        HolderSessionState.TerminatingSession
         -> {
-            when {
-                state is HolderSessionState.Complete.Success &&
-                    state.successReason ==
-                    HolderSessionState.Complete.SuccessReason.UnfulfillableRequest -> {
-                    {
-                        navController.navigateToHolderSuccessScreen {
-                            popUpTo<HolderRoutes> {
-                                inclusive = true
-                            }
-                        }
-                    }
-                }
-
-                else -> {
-                    {
-                        // do nothing with unrelated / unimplemented states
-                    }
-                }
-            }
+            // Do nothing with UI-less states
+            {}
         }
     }
 }

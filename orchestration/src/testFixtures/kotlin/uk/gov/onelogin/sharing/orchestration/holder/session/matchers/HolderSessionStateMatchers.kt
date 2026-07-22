@@ -3,8 +3,10 @@ package uk.gov.onelogin.sharing.orchestration.holder.session.matchers
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
+import org.hamcrest.TypeSafeMatcher
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.prerequisites.MissingPrerequisiteMatchers.hasPrerequisite
@@ -30,7 +32,9 @@ object HolderSessionStateMatchers {
 
     fun hasMissingPreflightPrerequisites(
         matcher: Matcher<in List<MissingPrerequisite>>
-    ): Matcher<HolderSessionState> = HasHolderPreflightPrerequisites(matcher)
+    ): Matcher<HolderSessionState> = HolderSessionStateMatcher(matcher) {
+        (it as? HolderSessionState.Preflight)?.missingPrerequisites
+    }
 
     fun isCancelled(): Matcher<in HolderSessionState> = equalTo(
         HolderSessionState.Complete.Cancelled
@@ -46,7 +50,10 @@ object HolderSessionStateMatchers {
         )
     )
 
-    fun isFailed(matcher: Matcher<in SessionError>): Matcher<HolderSessionState> = IsFailed(matcher)
+    fun isFailed(matcher: Matcher<in SessionError>): Matcher<HolderSessionState> =
+        HolderSessionStateMatcher(matcher) {
+            (it as? HolderSessionState.Complete.Failed)?.error
+        }
 
     fun isNotStarted(): Matcher<in HolderSessionState> = equalTo(
         HolderSessionState.NotStarted
@@ -79,4 +86,18 @@ object HolderSessionStateMatchers {
     fun isSuccessful(): Matcher<in HolderSessionState> = instanceOf(
         HolderSessionState.Complete.Success::class.java
     )
+
+    private class HolderSessionStateMatcher<T>(
+        private val matcher: Matcher<in T>,
+        private val transformer: (HolderSessionState?) -> T?
+    ) : TypeSafeMatcher<HolderSessionState>() {
+        override fun describeTo(description: Description?) = matcher.describeTo(description)
+        override fun describeMismatchSafely(
+            item: HolderSessionState?,
+            mismatchDescription: Description?
+        ) = matcher.describeMismatch(transformer(item), mismatchDescription)
+        override fun matchesSafely(item: HolderSessionState?): Boolean = matcher.matches(
+            transformer(item)
+        )
+    }
 }

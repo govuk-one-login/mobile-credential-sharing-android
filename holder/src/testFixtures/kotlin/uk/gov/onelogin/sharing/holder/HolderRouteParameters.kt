@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
+import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
@@ -73,6 +74,13 @@ class HolderRouteParameters : TestParametersValuesProvider() {
             ).matches(
                 currentBackStackEntry?.toRoute<BtConnectionErrorRoute>()
             )
+        },
+        Triple(
+            "Holder cancellation screen",
+            HolderCancellationScreenRoute
+        ) {
+            HolderCancellationScreenRoute::class.java == currentBackStackEntry
+                ?.toRoute<HolderCancellationScreenRoute>()?.javaClass
         }
     )
 

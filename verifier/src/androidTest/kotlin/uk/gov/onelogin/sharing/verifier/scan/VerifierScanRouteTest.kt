@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.verifier.scan
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
@@ -32,6 +33,7 @@ class VerifierScanRouteTest {
         composeTestRule.setContent {
             controller = TestNavHostController(LocalContext.current)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
+            controller.navigatorProvider.addNavigator(DialogNavigator())
 
             NavHost(
                 navController = controller,
@@ -53,6 +55,7 @@ class VerifierScanRouteTest {
         composeTestRule.setContent {
             controller = TestNavHostController(LocalContext.current)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
+            controller.navigatorProvider.addNavigator(DialogNavigator())
 
             NavHost(
                 navController = controller,

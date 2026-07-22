@@ -1,9 +1,11 @@
 package uk.gov.onelogin.sharing.holder.error
 
 import kotlin.test.Test
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
@@ -42,13 +44,16 @@ class UnrecoverableHolderViewModelTest {
         )
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `Exiting the journey resets the orchestrator`() = runTest(
         dispatcherRule.testDispatcher
     ) {
         monitor(viewModel)
 
-        viewModel.exitJourney().join()
+        viewModel.reset()
+
+        advanceUntilIdle()
 
         assertThat(
             orchestrator.startCount,
