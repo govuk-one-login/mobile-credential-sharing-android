@@ -292,12 +292,13 @@ class HolderOrchestrator(
     }
 
     override fun cancel() {
-        safeTransitionTo(
-            state = HolderSessionState.Complete.Cancelled,
-            exceptionWrapper = ::OrchestratorCannotCancelException
-        )
-
-        stopAdvertising(sendEndCommand = true)
+        appCoroutineScope.launch {
+            terminateSession(
+                finalState = HolderSessionState.Complete.Cancelled,
+                sessionDataToSend = null,
+                sendEndCommand = true
+            )
+        }
     }
 
     override fun reset() {
@@ -325,12 +326,20 @@ class HolderOrchestrator(
         logger.debug(logTag, "state = $state")
 
         val currentState = sessionFlow.value.currentState.value
-        if (currentState.isComplete()) {
-            logger.debug(logTag, "Session already complete, ignoring BLE state")
-            return
-        }
-        if (currentState is HolderSessionState.SendingTermination) {
-            logger.debug(logTag, "Session complete or terminating, ignoring BLE state")
+        when {
+            currentState.isComplete() -> {
+                "Session already complete, ignoring BLE state"
+            }
+
+            currentState is HolderSessionState.SendingTermination -> {
+                "Session complete or terminating, ignoring BLE state"
+            }
+
+            else -> {
+                null
+            }
+        }?.let { logMessage ->
+            logger.debug(logTag, logMessage)
             return
         }
 
@@ -650,7 +659,8 @@ class HolderOrchestrator(
             terminateSession(
                 finalState = HolderSessionState.Complete.Failed(
                     SessionError(message = message, reason = reason)
-                )
+                ),
+                sendEndCommand = true
             )
         }
     }
@@ -780,7 +790,8 @@ class HolderOrchestrator(
 
     private suspend fun terminateSession(
         finalState: HolderSessionState,
-        sessionDataToSend: ByteArray? = null
+        sessionDataToSend: ByteArray? = null,
+        sendEndCommand: Boolean = false
     ) {
         val context = currentContext
         var sent = true
@@ -796,7 +807,7 @@ class HolderOrchestrator(
             safeTransitionTo(HolderSessionState.SendingTermination)
             holderSessionTerminator.terminate(context.sessionUuid)
         } else {
-            stopAdvertising(sendEndCommand = false)
+            stopAdvertising(sendEndCommand = sendEndCommand)
         }
 
         safeTransitionTo(finalState)
