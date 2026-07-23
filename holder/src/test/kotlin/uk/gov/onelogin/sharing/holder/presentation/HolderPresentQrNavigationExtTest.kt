@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.holder.presentation
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
@@ -30,6 +31,7 @@ class HolderPresentQrNavigationExtTest {
             val context = LocalContext.current
             controller = TestNavHostController(context).apply {
                 navigatorProvider.addNavigator(ComposeNavigator())
+                navigatorProvider.addNavigator(DialogNavigator())
             }
             NavHost(navController = controller, startDestination = HolderConsentRoute) {
                 composable<HolderConsentRoute> {}

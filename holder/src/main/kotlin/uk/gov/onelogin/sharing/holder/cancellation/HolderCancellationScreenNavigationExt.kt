@@ -1,27 +1,28 @@
-package uk.gov.onelogin.sharing.holder.success
+package uk.gov.onelogin.sharing.holder.cancellation
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import uk.gov.android.ui.theme.spacingDouble
 
-object HolderSuccessNavigationExt {
-    fun NavController.navigateToHolderSuccessScreen(options: NavOptionsBuilder.() -> Unit = {}) =
-        navigate(HolderSuccessRoute, options)
+data object HolderCancellationScreenNavigationExt {
+    fun NavController.navigateToHolderUserCancellationScreen(
+        options: NavOptionsBuilder.() -> Unit = {}
+    ) = navigate(HolderCancellationScreenRoute, options)
 
-    internal fun NavGraphBuilder.configureHolderSuccessScreen() {
-        composable<HolderSuccessRoute> {
+    internal fun NavGraphBuilder.configureHolderUserCancellationScreen() {
+        composable<HolderCancellationScreenRoute> {
             val backPressDispatcher = LocalOnBackPressedDispatcherOwner.current
-            HolderSuccessScreen(
+            HolderCancellationScreen(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                onExitJourney = {
+                    .padding(spacingDouble),
+                onCancelJourney = {
                     backPressDispatcher
                         ?.onBackPressedDispatcher
                         ?.onBackPressed()

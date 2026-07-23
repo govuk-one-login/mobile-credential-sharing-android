@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.error
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,11 +8,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderViewModel.NavigationEvent as ViewModelEvent
@@ -24,6 +27,7 @@ internal fun UnrecoverableHolderErrorScreen(
     viewModel: UnrecoverableHolderViewModel = metroViewModel(),
     onExitJourney: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     val currentOnExitJourney by rememberUpdatedState(onExitJourney)
     val failureState: HolderSessionState.Complete.Failed? by viewModel
         .failureState
@@ -32,6 +36,13 @@ internal fun UnrecoverableHolderErrorScreen(
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("UnrecoverableHolderErrorScreen")
+    }
+
+    BackHandler(true) {
+        scope.launch {
+            viewModel.reset()
+            currentOnExitJourney()
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -57,7 +68,7 @@ internal fun UnrecoverableHolderErrorScreen(
             UnrecoverableErrorContent(
                 it.error,
                 modifier = Modifier.fillMaxSize(),
-                onExitJourney = viewModel::exitJourney
+                onExitJourney = viewModel::reset
             )
         } ?: CircularProgressIndicator()
     }

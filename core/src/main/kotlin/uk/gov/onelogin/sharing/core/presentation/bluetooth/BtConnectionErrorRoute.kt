@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.core.presentation.bluetooth
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.annotation.Keep
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -17,8 +17,9 @@ data class BtConnectionErrorRoute(val title: String) {
 
     companion object {
         @OptIn(ExperimentalPermissionsApi::class)
-        fun NavGraphBuilder.configureBluetoothConnectionErrorRoute(controller: NavController) {
+        fun NavGraphBuilder.configureBluetoothConnectionErrorRoute() {
             composable<BtConnectionErrorRoute> { navBackstackEntry ->
+                val onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
                 val arguments: BtConnectionErrorRoute = navBackstackEntry.toRoute()
                 val scope = rememberCoroutineScope { Dispatchers.Main }
 
@@ -26,7 +27,7 @@ data class BtConnectionErrorRoute(val title: String) {
                     title = arguments.title,
                     onTryAgainClick = {
                         scope.launch {
-                            controller.popBackStack()
+                            onBackPressedDispatcherOwner?.onBackPressedDispatcher?.onBackPressed()
                         }
                     }
                 )

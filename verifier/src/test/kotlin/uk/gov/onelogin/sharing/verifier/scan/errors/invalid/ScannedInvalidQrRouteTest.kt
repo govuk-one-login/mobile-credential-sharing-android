@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.verifier.scan.errors.invalid
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
@@ -40,6 +41,7 @@ class ScannedInvalidQrRouteTest {
         composeTestRule.setContent {
             controller = TestNavHostController(LocalContext.current)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
+            controller.navigatorProvider.addNavigator(DialogNavigator())
 
             NavHost(
                 navController = controller,
@@ -64,6 +66,7 @@ class ScannedInvalidQrRouteTest {
             val context = LocalContext.current
             controller = TestNavHostController(context)
             controller.navigatorProvider.addNavigator(ComposeNavigator())
+            controller.navigatorProvider.addNavigator(DialogNavigator())
 
             NavHost(
                 navController = controller,

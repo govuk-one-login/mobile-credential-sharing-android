@@ -387,8 +387,8 @@ class VerifierOrchestrator(
 
     private fun isUnexpectedStatusWithData(sessionData: SessionData): Boolean =
         sessionData.data != null && sessionData.status != null &&
-            sessionData.status != SESSION_TERMINATION &&
-            sessionData.status != SessionDataStatus.OK
+                sessionData.status != SESSION_TERMINATION &&
+                sessionData.status != SessionDataStatus.OK
 
     private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
         logger.error(logTag, "Received SessionData with data and error status: $status")

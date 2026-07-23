@@ -117,7 +117,6 @@ object HolderTestAppJourneyNavigationExt {
                     ) {
                         scope.launch {
                             presenter.orchestrator.cancel()
-                            navController.popBackStack()
                         }
                     }
                 } ?: CircularProgressIndicator()
