@@ -3,7 +3,7 @@
 Contains various pieces of information designed to help AI agents in collaborating with developers
 throughout the development lifecycle.
 
-This directory is based off of the [dotagents] repository and is compatible with [AgentSkills].
+This directory uses the [dotagents] suggested structure and is compatible with [AgentSkills].
 
 ## Directories
 
