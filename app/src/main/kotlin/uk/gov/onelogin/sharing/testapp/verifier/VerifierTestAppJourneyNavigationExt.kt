@@ -20,7 +20,6 @@ import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest.Companion.VerificationRequestType
@@ -36,7 +35,6 @@ object VerifierTestAppJourneyNavigationExt {
     )
 
     internal fun NavGraphBuilder.configureVerifierJourneyWrapper(
-        navController: NavController,
         requestToVerifier: (Context, VerificationRequest) -> CredentialVerifier
     ) {
         composable<VerifierTestAppJourney>(
@@ -58,12 +56,7 @@ object VerifierTestAppJourneyNavigationExt {
                     VerifierTestAppJourneyScreen(
                         verifier = verifier,
                         modifier = Modifier.fillMaxSize()
-                    ) {
-                        scope.launch {
-                            verifier.orchestrator.cancel()
-                            navController.popBackStack()
-                        }
-                    }
+                    )
                 } ?: CircularProgressIndicator()
             }
         }

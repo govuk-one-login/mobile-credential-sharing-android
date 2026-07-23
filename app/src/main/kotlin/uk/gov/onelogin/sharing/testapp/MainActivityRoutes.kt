@@ -37,7 +37,7 @@ object MainActivityRoutes {
                 )
         }
         configureVerifierAttributesSelection(navController)
-        configureVerifierJourneyWrapper(navController) { context, verificationRequest ->
+        configureVerifierJourneyWrapper { context, verificationRequest ->
             val factory = CertificateFactory.getInstance("X.509")
 
             // Example: Reading from assets
