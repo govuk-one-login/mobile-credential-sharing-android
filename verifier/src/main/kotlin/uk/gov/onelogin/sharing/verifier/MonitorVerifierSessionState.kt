@@ -92,45 +92,31 @@ internal suspend fun convertSessionStateToNavigation(
 
     when (state) {
         VerifierSessionState.NotStarted -> {
-            {
-                navController.navigateToVerifierPrerequisitesScreen(exitJourneyOptions)
-            }
+            { navController.navigateToVerifierPrerequisitesScreen(exitJourneyOptions) }
         }
 
         is VerifierSessionState.Preflight -> {
-            {
-                navController.navigateToRetryVerifierPrerequisites(exitJourneyOptions)
-            }
+            { navController.navigateToRetryVerifierPrerequisites(exitJourneyOptions) }
         }
 
         VerifierSessionState.ReadyToScan -> {
-            {
-                navController.navigateToVerifierScanRoute(exitJourneyOptions)
-            }
+            { navController.navigateToVerifierScanRoute(exitJourneyOptions) }
         }
 
         VerifierSessionState.Connecting -> {
-            {
-                navController.navigateToConnectWithHolderDeviceRoute()
-            }
+            { navController.navigateToConnectWithHolderDeviceRoute() }
         }
 
         is VerifierSessionState.Complete.Failed -> {
-            {
-                handleSessionFailure(state, navController, context, exitJourneyOptions)
-            }
+            { handleSessionFailure(state, navController, context, exitJourneyOptions) }
         }
 
         is VerifierSessionState.Complete.Success -> {
-            {
-                navController.navigateToFinishedVerifierJourney(state.data, exitJourneyOptions)
-            }
+            { navController.navigateToFinishedVerifierJourney(state.data, exitJourneyOptions) }
         }
 
         VerifierSessionState.Complete.Cancelled -> {
-            {
-                navController.navigateToVerifierUserCancellationScreen(exitJourneyOptions)
-            }
+            { navController.navigateToVerifierUserCancellationScreen(exitJourneyOptions) }
         }
 
         VerifierSessionState.ProcessingEngagement,
