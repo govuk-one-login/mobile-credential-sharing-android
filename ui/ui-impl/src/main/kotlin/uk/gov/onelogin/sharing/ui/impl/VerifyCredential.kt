@@ -53,6 +53,9 @@ fun VerifyCredential(component: CredentialVerifier, modifier: Modifier = Modifie
     )
 }
 
+/**
+ * DCMAW-21173: Move close button into this function.
+ */
 @Composable
 internal fun VerifyCredential(
     orchestrator: Orchestrator.Verifier,

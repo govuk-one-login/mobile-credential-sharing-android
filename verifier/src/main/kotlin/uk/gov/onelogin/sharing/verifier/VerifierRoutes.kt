@@ -7,6 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
+import uk.gov.onelogin.sharing.verifier.cancellation.VerifierCancellationScreenNavigationExt.configureVerifierUserCancellationScreen
+import uk.gov.onelogin.sharing.verifier.cancellation.dialog.VerifierCancellationDialogNavigationExt.configureVerifierUserCancellationDialog
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.configureConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.connect.error.BluetoothConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.configureUnrecoverableVerifierError
@@ -50,6 +52,8 @@ data object VerifierRoutes {
             configureConnectWithHolderDeviceRoute()
             configureBluetoothConnectionErrorRoute(controller = navController)
             configureFinishedVerifierJourney(controller = navController)
+            configureVerifierUserCancellationDialog()
+            configureVerifierUserCancellationScreen()
         }
     }
 }
