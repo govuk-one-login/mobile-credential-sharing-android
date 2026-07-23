@@ -25,22 +25,15 @@ class VerifierTestAppJourneyScreenTest {
     }
 
     @Test
-    fun `Tapping the close button overlay ends the journey`() = runTest {
+    fun `Loads the 'VerifyCredential' journey`() = runTest {
         composeTestRule.run {
-            setContent {
-                Render()
-            }
-
-            performCloseJourneyClick()
-            assertHasClosedJourney()
+            setContent { Render() }
+            assertPrerequisitesProgressIndicatorIsDisplayed()
         }
     }
 
     @Composable
     private fun Render() {
-        VerifierTestAppJourneyScreen(
-            verifier = verifier,
-            onCloseJourney = composeTestRule::updateHasClosedJourney
-        )
+        VerifierTestAppJourneyScreen(verifier = verifier)
     }
 }
