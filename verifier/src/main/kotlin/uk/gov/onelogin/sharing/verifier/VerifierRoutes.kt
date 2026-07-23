@@ -45,13 +45,13 @@ data object VerifierRoutes {
     fun NavGraphBuilder.configureVerifierRoutes(navController: NavHostController) {
         navigation<VerifierRoutes>(startDestination = VerifierPrerequisitesRoute) {
             configureVerifierPrerequisitesRoute()
-            configureUnrecoverableVerifierError(navController)
+            configureUnrecoverableVerifierError()
             configureRetryVerifierPrerequisites()
             configureVerifierScannerRoute()
             configureScannedInvalidQrRoute(navController)
             configureConnectWithHolderDeviceRoute()
-            configureBluetoothConnectionErrorRoute(controller = navController)
-            configureFinishedVerifierJourney(controller = navController)
+            configureBluetoothConnectionErrorRoute()
+            configureFinishedVerifierJourney()
             configureVerifierUserCancellationDialog()
             configureVerifierUserCancellationScreen()
         }
