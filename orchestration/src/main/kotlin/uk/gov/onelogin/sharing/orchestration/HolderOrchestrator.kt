@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
 import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
@@ -61,6 +62,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
+import kotlin.time.Duration.Companion.milliseconds
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -77,7 +79,8 @@ class HolderOrchestrator(
     private val confirmConsentUseCase: ConfirmConsentUseCase,
     private val credentialRequestHandler: CredentialRequestHandler,
     private val holderSessionTerminator: HolderSessionTerminator,
-    private val inboundMessageClassifier: InboundMessageClassifier
+    private val inboundMessageClassifier: InboundMessageClassifier,
+    private val sessionTimer: SessionTimer
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -342,6 +345,8 @@ class HolderOrchestrator(
 
         when (state) {
             is PeripheralBluetoothState.Connected -> {
+                sessionTimer.start(300.milliseconds) { cancel() }
+
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
 
                 logger.debug(logTag, "Mdoc - Connected: ${state.address}")
@@ -415,7 +420,7 @@ class HolderOrchestrator(
             is HolderSessionState.TerminatingSession -> Unit
 
             is HolderSessionState.AwaitingVerifierResolution
-            if (state.status == SessionEndStates.SUCCESS) -> {
+                if (state.status == SessionEndStates.SUCCESS) -> {
                 safeTransitionTo(HolderSessionState.Complete.Success())
                 logger.debug(logTag, STOPPING_BLE_ADVERTISING)
                 stopAdvertising(sendEndCommand = false)
@@ -793,7 +798,7 @@ class HolderOrchestrator(
         deviceRequest.docRequests.any { docRequest ->
             docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
                 namespace == DocumentType.Mdl.NAMESPACE &&
-                    elements.containsKey(MdlAttribute.Portrait.value)
+                        elements.containsKey(MdlAttribute.Portrait.value)
             }
         }
 
