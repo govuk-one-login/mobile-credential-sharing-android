@@ -1,7 +1,12 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import io.mockk.mockk
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,7 +27,7 @@ class VerifierSessionStateTest {
      */
     @Test
     fun `Failures can contain Document verification errors`(
-        @TestParameter error: VerificationError
+        @TestParameter error: VerificationError,
     ) {
         val failure = Failed(
             SessionError(
@@ -39,5 +44,35 @@ class VerifierSessionStateTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `Certain states are user cancellable`(
+        @TestParameter state: VerifierSessionState = namedTestValues(
+            "Connecting" to VerifierSessionState.Connecting,
+            "Processing engagement" to VerifierSessionState.ProcessingEngagement,
+            "Verifying" to VerifierSessionState.Verifying,
+        ),
+    ) = runTest {
+        assertTrue {
+            state.userCanCancel()
+        }
+    }
+
+    @Test
+    fun `Certain states aren't user cancellable`(
+        @TestParameter state: VerifierSessionState = namedTestValues(
+            "Cancelled" to VerifierSessionState.Complete.Cancelled,
+            "Failed" to Failed(mockk(relaxed = true)),
+            "Missing prerequisites" to VerifierSessionState.Preflight(emptyList()),
+            "Not started" to VerifierSessionState.NotStarted,
+            "QR Scanner" to VerifierSessionState.ReadyToScan,
+            "Success" to VerifierSessionState.Complete.Success(mockk(relaxed = true)),
+            "Terminating Session" to VerifierSessionState.TerminatingSession,
+        ),
+    ) = runTest {
+        assertFalse {
+            state.userCanCancel()
+        }
     }
 }

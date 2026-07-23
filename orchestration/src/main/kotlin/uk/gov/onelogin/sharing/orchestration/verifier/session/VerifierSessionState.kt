@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
 import uk.gov.onelogin.sharing.core.Completable
+import uk.gov.onelogin.sharing.core.UserCancellable
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
@@ -10,9 +11,15 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
  * Represents a digital credential verification journey's state for validating another device's
  * digital credentials.
  */
-sealed class VerifierSessionState : Completable {
+sealed class VerifierSessionState : Completable, UserCancellable {
 
     override fun isComplete(): Boolean = this is Complete
+
+    override fun userCanCancel(): Boolean = this::class in listOf(
+        Connecting::class,
+        Verifying::class,
+        ProcessingEngagement::class,
+    )
 
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification
