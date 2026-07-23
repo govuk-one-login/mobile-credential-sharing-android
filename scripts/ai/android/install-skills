@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Installs the Android CLI if it's not in the PATH variable.
-# Installs all skills referenced in the file provided in the first input parameter.
-# If no file is provided, all skills are installed.
+# Installs all available skills in an agent-agnostic format within the git root repository.
+#   This infers the '.agents/skills' directory.
 
 source "$(git rev-parse --show-toplevel)/scripts/env"
 
