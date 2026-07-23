@@ -1,6 +1,11 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import android.R.drawable.ic_menu_close_clear_cancel
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -8,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -64,6 +70,7 @@ internal fun ShareCredential(
     navController: NavHostController = rememberNavController(),
     defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
+    val scope = rememberCoroutineScope { defaultDispatcher }
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
     BackHandler(state.userCanCancel()) {
@@ -75,7 +82,6 @@ internal fun ShareCredential(
         navController = navController
     )
 
-    val scope = rememberCoroutineScope { defaultDispatcher }
     LaunchedEffect(Unit) {
         scope.launch {
             orchestrator.start()
@@ -85,12 +91,27 @@ internal fun ShareCredential(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides viewModelFactory
     ) {
-        NavHost(
-            navController = navController,
-            startDestination = HolderRoutes,
-            modifier = modifier
-        ) {
-            configureHolderRoutes()
+        Column(modifier = modifier) {
+            if (!state.isComplete()) {
+                IconButton(
+                    onClick = {
+                        navController.navigateToHolderUserCancellationDialog()
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(ic_menu_close_clear_cancel),
+                        contentDescription = "Close"
+                    )
+                }
+            }
+
+            NavHost(
+                navController = navController,
+                startDestination = HolderRoutes,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                configureHolderRoutes()
+            }
         }
     }
 }

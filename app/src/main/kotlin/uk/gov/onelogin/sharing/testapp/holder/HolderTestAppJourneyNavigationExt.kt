@@ -26,7 +26,6 @@ import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
@@ -114,11 +113,7 @@ object HolderTestAppJourneyNavigationExt {
                     HolderTestAppJourneyScreen(
                         component = presenter,
                         modifier = Modifier.fillMaxSize()
-                    ) {
-                        scope.launch {
-                            presenter.orchestrator.cancel()
-                        }
-                    }
+                    )
                 } ?: CircularProgressIndicator()
             }
         }
