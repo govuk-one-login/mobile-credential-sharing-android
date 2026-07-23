@@ -270,18 +270,18 @@ class HolderOrchestratorTest {
         }
         orchestrator.cancel()
 
-        assert(
-            CANNOT_TRANSITION_TO_STATE.format(
-                state,
-                HolderSessionState.Complete.Cancelled
-            ) in logger
-        )
-        assert(
-            "$TRANSITION_SUCCESSFUL_TO_STATE ${HolderSessionState.Complete.Cancelled}" !in logger
-        )
+        if (!state.isComplete()) {
+            assert(
+                CANNOT_TRANSITION_TO_STATE.format(
+                    state,
+                    HolderSessionState.Complete.Cancelled
+                ) in logger
+            )
+        }
+
         assertThat(
-            sessionFactory,
-            currentSessionState(state)
+            orchestrator.holderSessionState.value,
+            equalTo(state)
         )
     }
 
@@ -1265,6 +1265,52 @@ class HolderOrchestratorTest {
             orchestrator.holderSessionState.value,
             equalTo(HolderSessionState.SendingTermination)
         )
+        assert("Session complete or terminating, ignoring BLE state" in logger)
+    }
+
+    @Test
+    fun `connection loss during outbound message sending is suppressed`() = runTest {
+        val initialState = HolderSessionState.AwaitingUserConsent(deviceRequestStub)
+        initialStates[0] = initialState
+
+        val sessionWithContext = HolderSessionImpl(
+            logger = logger,
+            internalState = MutableStateFlow(initialState),
+            initialContext = holderSessionContextStub.copy(
+                skDevice = byteArrayOf(0x01, 0x02)
+            )
+        )
+        val sessionFactory = FakeSessionFactory(listOf(sessionWithContext))
+
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            sessionFactory = sessionFactory
+        )
+
+        val messageSentDeferred = kotlinx.coroutines.CompletableDeferred<Boolean>()
+        transport.sendMessageResultDeferred = messageSentDeferred
+
+        orchestrator.holderSessionState.test {
+            assertEquals(initialState, awaitItem())
+
+            orchestrator.denyConsent()
+
+            var currentState = awaitItem()
+            if (currentState is HolderSessionState.ProcessingResponse) {
+                currentState = awaitItem()
+            }
+
+            assertEquals(HolderSessionState.SendingTermination, currentState)
+
+            transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
+            messageSentDeferred.complete(true)
+
+            assertThat(awaitItem(), isSuccessful())
+
+            expectNoEvents()
+        }
+
         assert("Session complete or terminating, ignoring BLE state" in logger)
     }
 

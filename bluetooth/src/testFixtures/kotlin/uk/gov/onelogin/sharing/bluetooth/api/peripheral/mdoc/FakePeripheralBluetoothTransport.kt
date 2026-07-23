@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
 import java.util.UUID
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -36,8 +37,10 @@ class FakePeripheralBluetoothTransport(
     var sendMessageResult: Boolean = true
     var sendMessageCalls: Int = 0
 
+    var sendMessageResultDeferred: CompletableDeferred<Boolean>? = null
+
     override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
         sendMessageCalls++
-        return sendMessageResult
+        return sendMessageResultDeferred?.await() ?: sendMessageResult
     }
 }

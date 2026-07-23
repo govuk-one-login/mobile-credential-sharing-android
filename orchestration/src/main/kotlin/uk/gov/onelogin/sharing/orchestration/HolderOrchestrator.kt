@@ -292,6 +292,8 @@ class HolderOrchestrator(
     }
 
     override fun cancel() {
+        if (sessionFlow.value.isComplete()) return
+
         appCoroutineScope.launch {
             terminateSession(
                 finalState = HolderSessionState.Complete.Cancelled,
@@ -327,17 +329,15 @@ class HolderOrchestrator(
 
         val currentState = sessionFlow.value.currentState.value
         when {
-            currentState.isComplete() -> {
-                "Session already complete, ignoring BLE state"
-            }
+            currentState.isComplete() -> "Session already complete, ignoring BLE state"
 
-            currentState is HolderSessionState.SendingTermination -> {
+            currentState is HolderSessionState.SendingTermination ->
                 "Session complete or terminating, ignoring BLE state"
-            }
 
-            else -> {
-                null
-            }
+            currentState is HolderSessionState.NotStarted ->
+                "Session not started, ignoring BLE state"
+
+            else -> null
         }?.let { logMessage ->
             logger.debug(logTag, logMessage)
             return
@@ -673,6 +673,10 @@ class HolderOrchestrator(
         ),
         exceptionWrapper: ((String, Throwable) -> Exception)? = null
     ) {
+        if (sessionFlow.value.currentState.value == state) {
+            return
+        }
+
         try {
             sessionFlow.value.transitionTo(state)
             logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
@@ -794,8 +798,10 @@ class HolderOrchestrator(
         sendEndCommand: Boolean = false
     ) {
         val context = currentContext
-        var sent = true
 
+        safeTransitionTo(HolderSessionState.SendingTermination)
+
+        var sent = true
         if (sessionDataToSend != null) {
             sent = peripheralBluetoothTransport.sendMessage(
                 serviceUuid = context.sessionUuid,
@@ -804,7 +810,6 @@ class HolderOrchestrator(
         }
 
         if (sent) {
-            safeTransitionTo(HolderSessionState.SendingTermination)
             holderSessionTerminator.terminate(context.sessionUuid)
         } else {
             stopAdvertising(sendEndCommand = sendEndCommand)

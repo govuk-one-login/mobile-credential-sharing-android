@@ -42,7 +42,6 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionState.AwaitingVerifierResolution,
-            HolderSessionState.SendingTermination,
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionStateStubs.preflightEmptyPermissions to it
@@ -55,7 +54,6 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionState.AwaitingVerifierResolution,
-            HolderSessionState.SendingTermination,
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.ReadyToPresent to it
@@ -68,7 +66,6 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionState.AwaitingVerifierResolution,
-            HolderSessionState.SendingTermination,
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.PresentingEngagement("") to it
@@ -92,7 +89,6 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.ProcessingEstablishment,
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.AwaitingVerifierResolution,
-            HolderSessionState.SendingTermination,
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.AwaitingUserConsent(deviceRequestStub) to it
@@ -116,8 +112,7 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.ProcessingEstablishment,
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution,
-            HolderSessionState.SendingTermination
+            HolderSessionState.AwaitingVerifierResolution
         ).map {
             HolderSessionState.AwaitingVerifierResolution to it
         }

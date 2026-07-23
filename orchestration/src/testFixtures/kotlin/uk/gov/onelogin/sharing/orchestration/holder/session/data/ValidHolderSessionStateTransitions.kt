@@ -35,7 +35,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User still isn't meeting prerequisites" to preflightEmptyPermissions,
             "User cancels during permission request" to userCancellation,
             "User permanently denies requested permissions" to userJourneyFailure,
-            "User allows all requested permissions" to HolderSessionState.ReadyToPresent
+            "User allows all requested permissions" to HolderSessionState.ReadyToPresent,
+            "Preflight fails and begins termination" to HolderSessionState.SendingTermination
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -47,7 +48,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels whilst generating QR code is shown" to userCancellation,
             "QR generation fails" to userJourneyFailure,
             "Generated QR code gets shown to the User" to
-                HolderSessionState.PresentingEngagement("")
+                HolderSessionState.PresentingEngagement(""),
+            "Ready to present fails and begins termination" to HolderSessionState.SendingTermination
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -58,7 +60,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val presentingEngagementTransitions = listOf(
             "User cancels from the QR code screen" to userCancellation,
             "QR generation fails" to userJourneyFailure,
-            "QR code handshake completes" to HolderSessionState.ProcessingEstablishment
+            "QR code handshake completes" to HolderSessionState.ProcessingEstablishment,
+            "Handshake fails and begins termination" to HolderSessionState.SendingTermination
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -84,7 +87,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val awaitingUserConsentTransitions = listOf(
             "User cancels the data transfer request" to userCancellation,
             "Data transfer disconnects before completion" to userJourneyFailure,
-            "Holder device begins processing the response" to HolderSessionState.ProcessingResponse
+            "Holder device begins processing the response" to HolderSessionState.ProcessingResponse,
+            "Consent fails and begins termination" to HolderSessionState.SendingTermination
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -111,7 +115,9 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val awaitingVerifierResolutionTransitions = listOf(
             "User cancels whilst awaiting verifier resolution" to userCancellation,
             "Failure occurs whilst awaiting verifier resolution" to userJourneyFailure,
-            "Verifier resolves and journey completes" to successStub
+            "Verifier resolves and journey completes" to successStub,
+            "Verifier resolution fails and begins termination" to
+                HolderSessionState.SendingTermination
         ).map { (testName, transition) ->
             Triple(
                 testName,

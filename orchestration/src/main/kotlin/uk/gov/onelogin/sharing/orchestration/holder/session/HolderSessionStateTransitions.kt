@@ -29,7 +29,8 @@ typealias HolderSessionStateTransitions =
  */
 private val fullErrorHandling: Set<KClass<out HolderSessionState>> = setOf(
     Cancelled::class,
-    Failed::class
+    Failed::class,
+    SendingTermination::class
 )
 
 /**
@@ -70,7 +71,9 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
     AwaitingVerifierResolution::class to singleton(
         Success::class
     ) + fullErrorHandling,
-    SendingTermination::class to singleton(
-        Success::class
-    ) + fullErrorHandling
+    SendingTermination::class to setOf(
+        Success::class,
+        Failed::class,
+        Cancelled::class
+    )
 )
