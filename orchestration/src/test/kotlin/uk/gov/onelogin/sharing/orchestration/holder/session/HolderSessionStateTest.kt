@@ -19,7 +19,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.P
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.TerminatingSession
 
 @RunWith(TestParameterInjector::class)
 class HolderSessionStateTest {
@@ -48,7 +47,7 @@ class HolderSessionStateTest {
             Preflight(listOf()),
             ReadyToPresent,
             Success(),
-            TerminatingSession
+            HolderSessionState.SendingTermination
         )
     ) {
         assertFalse {
