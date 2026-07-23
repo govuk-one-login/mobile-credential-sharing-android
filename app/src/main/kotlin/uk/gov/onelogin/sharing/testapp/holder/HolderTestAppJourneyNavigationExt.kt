@@ -14,7 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,7 +25,6 @@ import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
@@ -58,7 +56,6 @@ object HolderTestAppJourneyNavigationExt {
         ) { navBackStackEntry ->
             val arguments: HolderTestAppJourney = navBackStackEntry.toRoute()
             val context = LocalContext.current
-            val scope = rememberCoroutineScope { Dispatchers.Main }
 
             val credential = remember(arguments.state) {
                 try {
@@ -114,11 +111,7 @@ object HolderTestAppJourneyNavigationExt {
                     HolderTestAppJourneyScreen(
                         component = presenter,
                         modifier = Modifier.fillMaxSize()
-                    ) {
-                        scope.launch {
-                            presenter.orchestrator.cancel()
-                        }
-                    }
+                    )
                 } ?: CircularProgressIndicator()
             }
         }
