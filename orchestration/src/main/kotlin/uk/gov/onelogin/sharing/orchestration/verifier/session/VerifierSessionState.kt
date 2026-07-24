@@ -82,12 +82,10 @@ sealed class VerifierSessionState :
          */
         data class Success(val data: DeviceResponse) :
             Complete("Successful journey"),
-            Iterable<VerifiableDocument.WithPresentation> {
+            Iterable<VerifiableDocument.WithPresentation> by data {
             val size: Int = data.documents!!.size
             operator fun get(index: Int): VerifiableDocument.WithPresentation =
                 data.documents!![index]
-
-            override fun iterator(): Iterator<VerifiableDocument.WithPresentation> = data.iterator()
         }
 
         /**
