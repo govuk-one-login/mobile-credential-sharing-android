@@ -1,7 +1,13 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onParent
+import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
@@ -9,12 +15,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlin.test.assertNotNull
-import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.CoreMatchers.not
+import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
+import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
 
 @RunWith(AndroidJUnit4::class)
@@ -26,20 +34,47 @@ class HolderPresentQrNavigationExtTest {
     private lateinit var controller: TestNavHostController
 
     @Test
-    fun `navigateToHolderPresentQrScreen navigates to HolderPresentQrRoute`() = runTest {
-        composeTestRule.setContent {
-            val context = LocalContext.current
-            controller = TestNavHostController(context).apply {
-                navigatorProvider.addNavigator(ComposeNavigator())
-                navigatorProvider.addNavigator(DialogNavigator())
-            }
-            NavHost(navController = controller, startDestination = HolderConsentRoute) {
-                composable<HolderConsentRoute> {}
-                composable<HolderPresentQrRoute> {}
-            }
-            controller.navigateToHolderPresentQrScreen()
-        }
+    fun `Present QR screen exists in the navigation graph`() {
+        composeTestRule.run {
+            setContent {
+                controller = TestNavHostController(LocalContext.current).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                    navigatorProvider.addNavigator(DialogNavigator())
+                }
 
-        assertNotNull(controller.currentBackStackEntry?.toRoute<HolderPresentQrRoute>())
+                Render()
+            }
+
+            onNodeWithText("Navigate").onParent().performClick()
+
+            waitUntil {
+                allOf(
+                    instanceOf(HolderPresentQrRoute::class.java),
+                    not(nullValue(HolderPresentQrRoute::class.java))
+                ).matches(
+                    controller.currentBackStackEntry?.toRoute<HolderPresentQrRoute>()
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun Render() {
+        NavHost(
+            navController = controller,
+            startDestination = "Unit test"
+        ) {
+            composable("Unit test") {
+                Button(
+                    onClick = {
+                        controller.navigateToHolderPresentQrScreen()
+                    }
+                ) {
+                    Text("Navigate")
+                }
+            }
+
+            configureHolderPresentQrScreen()
+        }
     }
 }

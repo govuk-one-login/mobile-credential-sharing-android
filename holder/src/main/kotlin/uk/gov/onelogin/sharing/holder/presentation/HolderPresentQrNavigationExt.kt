@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.holder.presentation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -16,15 +15,11 @@ object HolderPresentQrNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderPresentQrScreen() {
         composable<HolderPresentQrRoute> {
-            Surface(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                HolderWelcomeScreen(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(spacingDouble)
-                )
-            }
+            HolderWelcomeScreen(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(spacingDouble)
+            )
         }
     }
 }
