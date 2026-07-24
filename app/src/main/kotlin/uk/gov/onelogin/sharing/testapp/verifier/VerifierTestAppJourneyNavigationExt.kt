@@ -8,7 +8,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,7 +44,6 @@ object VerifierTestAppJourneyNavigationExt {
             val context = LocalContext.current
             val arguments: VerifierTestAppJourney = navBackStackEntry.toRoute()
             val verifier by produceCredentialVerifier(context, arguments.request, requestToVerifier)
-            val scope = rememberCoroutineScope { Dispatchers.Main }
 
             Column(
                 modifier = Modifier.fillMaxSize(),
