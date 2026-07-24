@@ -1,28 +1,17 @@
-package uk.gov.onelogin.sharing.holder.cancellation.dialog
+package uk.gov.onelogin.sharing.orchestration.cancellation
 
 import androidx.compose.runtime.Composable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
 import org.junit.runner.RunWith
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.cancellation.CancellationDialogContentsRule
 
 @RunWith(AndroidJUnit4::class)
-class HolderCancellationDialogScreenTest {
+class CancellationDialogContentsTest {
     @get:Rule
     val composeTestRule = CancellationDialogContentsRule()
-
-    private val orchestrator by lazy {
-        FakeOrchestrator()
-    }
-    private val viewModel by lazy {
-        HolderCancellationDialogViewModel(orchestrator)
-    }
 
     @Test
     fun `Validate UI contents`() = runTest {
@@ -39,29 +28,24 @@ class HolderCancellationDialogScreenTest {
         composeTestRule.run {
             setContent { Render() }
             performDismissDialogClick()
-            assertDismissDialogClickCount(equalTo(1))
+            assertDismissDialogClickCount(1)
         }
     }
 
     @Test
-    fun `Cancelling the journey defers to the orchestrator`() = runTest {
+    fun `Defers to lambda when cancelling the journey`() = runTest {
         composeTestRule.run {
             setContent { Render() }
             performCancelJourneyClick()
-            waitForIdle()
-
-            assertThat(
-                orchestrator.cancelCount,
-                equalTo(1)
-            )
+            assertCancelJourneyClickCount(1)
         }
     }
 
     @Composable
     private fun Render(
         content: @Composable () -> Unit = {
-            HolderCancellationDialogContents(
-                viewModel = viewModel,
+            CancellationDialogContents(
+                onCancel = composeTestRule::incrementCancelJourneyClickCount,
                 onDismiss = composeTestRule::incrementDismissDialogClickCount
             )
         },

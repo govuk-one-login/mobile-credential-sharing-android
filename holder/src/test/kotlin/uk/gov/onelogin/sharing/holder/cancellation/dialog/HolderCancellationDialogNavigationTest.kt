@@ -23,12 +23,13 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.configureHolderUserCancellationDialog
 import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.navigateToHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.orchestration.cancellation.CancellationDialogContentsRule
 
 @RunWith(AndroidJUnit4::class)
 class HolderCancellationDialogNavigationTest {
 
     @get:Rule
-    val composeTestRule = HolderCancellationDialogContentsRule()
+    val composeTestRule = CancellationDialogContentsRule()
 
     private lateinit var controller: TestNavHostController
 
