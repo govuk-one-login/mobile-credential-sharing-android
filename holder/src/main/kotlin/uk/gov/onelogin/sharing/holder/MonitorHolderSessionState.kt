@@ -154,7 +154,7 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
-        HolderSessionState.TerminatingSession
+        HolderSessionState.SendingTermination
         -> {
             // Do nothing with UI-less states
             {}
