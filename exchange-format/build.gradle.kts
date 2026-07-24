@@ -21,6 +21,7 @@ dependencies {
         libs.com.google.test.parameter.injector,
         libs.junit,
         libs.kotlin.test,
+        libs.mockk,
         libs.org.bouncycastle.bcprov.jdk18on,
         libs.org.bouncycastle.bctls.jdk18on,
         libs.org.hamcrest
