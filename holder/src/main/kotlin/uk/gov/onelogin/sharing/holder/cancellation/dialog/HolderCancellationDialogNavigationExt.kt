@@ -13,7 +13,7 @@ import uk.gov.android.ui.theme.spacingDouble
 
 data object HolderCancellationDialogNavigationExt {
     fun NavController.navigateToHolderUserCancellationDialog(
-        options: NavOptionsBuilder.() -> Unit = {},
+        options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(HolderCancellationDialogRoute, options)
 
     internal fun NavGraphBuilder.configureHolderUserCancellationDialog() {

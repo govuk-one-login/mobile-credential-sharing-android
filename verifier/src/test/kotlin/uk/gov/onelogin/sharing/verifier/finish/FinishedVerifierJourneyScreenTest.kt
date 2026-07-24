@@ -44,7 +44,7 @@ class FinishedVerifierJourneyScreenTest {
         @TestParameter action: (
             OnBackPressedDispatcherOwner?,
             FinishedVerifierJourneyScreenRule
-                ) -> Unit = namedTestValues(
+        ) -> Unit = namedTestValues(
             "Exit journey button" to { _, rule -> rule.performExitJourneyClick() },
             "Back press" to { dispatcher, _ ->
                 dispatcher?.onBackPressedDispatcher?.onBackPressed()

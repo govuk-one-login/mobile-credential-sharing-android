@@ -27,7 +27,7 @@ class VerifierSessionStateTest {
      */
     @Test
     fun `Failures can contain Document verification errors`(
-        @TestParameter error: VerificationError,
+        @TestParameter error: VerificationError
     ) {
         val failure = Failed(
             SessionError(
@@ -51,8 +51,8 @@ class VerifierSessionStateTest {
         @TestParameter state: VerifierSessionState = namedTestValues(
             "Connecting" to VerifierSessionState.Connecting,
             "Processing engagement" to VerifierSessionState.ProcessingEngagement,
-            "Verifying" to VerifierSessionState.Verifying,
-        ),
+            "Verifying" to VerifierSessionState.Verifying
+        )
     ) = runTest {
         assertTrue {
             state.userCanCancel()
@@ -68,8 +68,8 @@ class VerifierSessionStateTest {
             "Not started" to VerifierSessionState.NotStarted,
             "QR Scanner" to VerifierSessionState.ReadyToScan,
             "Success" to VerifierSessionState.Complete.Success(mockk(relaxed = true)),
-            "Terminating Session" to VerifierSessionState.TerminatingSession,
-        ),
+            "Terminating Session" to VerifierSessionState.TerminatingSession
+        )
     ) = runTest {
         assertFalse {
             state.userCanCancel()

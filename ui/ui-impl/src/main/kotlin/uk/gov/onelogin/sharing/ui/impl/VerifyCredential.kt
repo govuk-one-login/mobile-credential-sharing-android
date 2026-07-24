@@ -71,7 +71,7 @@ internal fun VerifyCredential(
     viewModelFactory: MetroViewModelFactory,
     modifier: Modifier = Modifier,
     controller: NavHostController = rememberNavController(),
-    defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
     val state: VerifierSessionState by verifierSessionState.collectAsStateWithLifecycle()
     MonitorVerifierSessionState(

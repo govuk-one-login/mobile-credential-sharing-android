@@ -12,6 +12,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 @Inject
 @ContributesIntoMap(VerifierUiScope::class, binding = binding<ViewModel>())
 @ViewModelKey
-class FinishedVerifierJourneyViewModel(
-    private val orchestrator: Orchestrator.Verifier
-) : ViewModel(), Resettable by orchestrator
+class FinishedVerifierJourneyViewModel(private val orchestrator: Orchestrator.Verifier) :
+    ViewModel(),
+    Resettable by orchestrator

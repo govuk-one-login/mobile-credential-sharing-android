@@ -59,7 +59,7 @@ class VerifierCancellationScreenTest {
         content: @Composable () -> Unit = {
             VerifierCancellationScreen(
                 onCancelJourney = { hasResetJourney = true },
-                viewModel = viewModel,
+                viewModel = viewModel
             )
         }
     ) {

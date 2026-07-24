@@ -11,14 +11,16 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
  * Represents a digital credential verification journey's state for validating another device's
  * digital credentials.
  */
-sealed class VerifierSessionState : Completable, UserCancellable {
+sealed class VerifierSessionState :
+    Completable,
+    UserCancellable {
 
     override fun isComplete(): Boolean = this is Complete
 
     override fun userCanCancel(): Boolean = this::class in listOf(
         Connecting::class,
         Verifying::class,
-        ProcessingEngagement::class,
+        ProcessingEngagement::class
     )
 
     /**
@@ -85,8 +87,7 @@ sealed class VerifierSessionState : Completable, UserCancellable {
             operator fun get(index: Int): VerifiableDocument.WithPresentation =
                 data.documents!![index]
 
-            override fun iterator(): Iterator<VerifiableDocument.WithPresentation> =
-                data.iterator()
+            override fun iterator(): Iterator<VerifiableDocument.WithPresentation> = data.iterator()
         }
 
         /**

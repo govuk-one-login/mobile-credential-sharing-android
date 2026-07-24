@@ -46,7 +46,7 @@ class CancellationScreenTest {
     private fun Render(
         content: @Composable () -> Unit = {
             CancellationScreen(
-                onCancel = { hasResetJourney = true },
+                onCancel = { hasResetJourney = true }
             )
         }
     ) {

@@ -14,7 +14,7 @@ class FinishedVerifierJourneyViewModelTest {
 
     private val viewModel by lazy {
         FinishedVerifierJourneyViewModel(
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
 

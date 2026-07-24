@@ -17,7 +17,7 @@ object HolderPresentQrNavigationExt {
     internal fun NavGraphBuilder.configureHolderPresentQrScreen() {
         composable<HolderPresentQrRoute> {
             Surface(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
             ) {
                 HolderWelcomeScreen(
                     modifier = Modifier

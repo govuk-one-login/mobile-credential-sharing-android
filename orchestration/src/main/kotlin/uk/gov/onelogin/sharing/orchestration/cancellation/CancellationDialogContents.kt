@@ -34,33 +34,32 @@ fun CancellationDialogContents(
         border = BorderStroke(1.dp, Color.Gray),
         modifier = modifier
     ) {
-
-    Column(
-        modifier = Modifier.padding(spacingDouble),
-        verticalArrangement = Arrangement.spacedBy(spacingDouble),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Are you sure you want to cancel?")
-
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(spacingSingle)
+            modifier = Modifier.padding(spacingDouble),
+            verticalArrangement = Arrangement.spacedBy(spacingDouble),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            GdsButton(
-                text = "Yes",
-                buttonType = ButtonTypeV2.Destructive(),
-                onClick = onCancel,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Text("Are you sure you want to cancel?")
 
-            GdsButton(
-                text = "No",
-                buttonType = ButtonTypeV2.Secondary(),
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(spacingSingle)
+            ) {
+                GdsButton(
+                    text = "Yes",
+                    buttonType = ButtonTypeV2.Destructive(),
+                    onClick = onCancel,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                GdsButton(
+                    text = "No",
+                    buttonType = ButtonTypeV2.Secondary(),
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
-    }
     }
 }
 

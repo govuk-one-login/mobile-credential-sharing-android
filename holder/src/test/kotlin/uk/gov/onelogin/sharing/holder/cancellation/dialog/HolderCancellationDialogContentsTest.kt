@@ -64,7 +64,7 @@ class HolderCancellationDialogContentsTest {
                 viewModel = viewModel,
                 onDismiss = composeTestRule::incrementDismissDialogClickCount
             )
-        },
+        }
     ) {
         GdsTheme { content() }
     }

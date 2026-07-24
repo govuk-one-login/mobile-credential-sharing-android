@@ -13,7 +13,7 @@ import uk.gov.android.ui.theme.spacingDouble
 
 data object VerifierCancellationDialogNavigationExt {
     fun NavController.navigateToVerifierUserCancellationDialog(
-        options: NavOptionsBuilder.() -> Unit = {},
+        options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(VerifierCancellationDialogRoute, options)
 
     internal fun NavGraphBuilder.configureVerifierUserCancellationDialog() {

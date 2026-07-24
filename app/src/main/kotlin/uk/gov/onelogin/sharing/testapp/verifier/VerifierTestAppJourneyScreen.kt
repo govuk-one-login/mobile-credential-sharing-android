@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.ui.impl.VerifyCredential
 @Composable
 internal fun VerifierTestAppJourneyScreen(
     verifier: CredentialVerifier,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {

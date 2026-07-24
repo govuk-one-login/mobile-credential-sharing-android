@@ -16,15 +16,13 @@ class CancellationDialogContentsRule(
     private var cancelJourneyClickCount: Int = 0
     private var dismissDialogClickCount: Int = 0
 
-    fun assertCancelJourneyClickCount(expected: Int) =
-        assertCancelJourneyClickCount(equalTo(1))
+    fun assertCancelJourneyClickCount(expected: Int) = assertCancelJourneyClickCount(equalTo(1))
 
     fun assertCancelJourneyClickCount(matcher: Matcher<in Int>) = waitUntil {
         matcher.matches(cancelJourneyClickCount)
     }
 
-    fun assertDismissDialogClickCount(expected: Int) =
-        assertDismissDialogClickCount(equalTo(1))
+    fun assertDismissDialogClickCount(expected: Int) = assertDismissDialogClickCount(equalTo(1))
 
     fun assertDismissDialogClickCount(matcher: Matcher<in Int>) = waitUntil {
         matcher.matches(dismissDialogClickCount)

@@ -46,7 +46,6 @@ class VerifyCredentialTest {
         )
     }
 
-
     @Test
     fun `renders verifier flow`() {
         composeTestRule.setContent {
@@ -62,13 +61,13 @@ class VerifyCredentialTest {
         @TestParameter state: VerifierSessionState = namedTestValues(
             "not started" to VerifierSessionState.NotStarted,
             "missing prerequisites" to VerifierSessionState.Preflight(emptyList()),
-            "Connecting to holder device" to VerifierSessionState.Connecting,
-        ),
+            "Connecting to holder device" to VerifierSessionState.Connecting
+        )
     ) = runTest {
         val verifier = FakeCredentialVerifier(
             appGraph = appGraph,
             orchestrator = FakeOrchestrator(
-                initialVerifierState = MutableStateFlow(state),
+                initialVerifierState = MutableStateFlow(state)
             )
         )
 
@@ -87,13 +86,13 @@ class VerifyCredentialTest {
             "Failed" to VerifierSessionState.Complete.Failed(mockk(relaxed = true)),
             "Success" to VerifierSessionState.Complete.Success(
                 DeviceResponse(documents = emptyList())
-            ),
-        ),
+            )
+        )
     ) = runTest {
         val verifier = FakeCredentialVerifier(
             appGraph = appGraph,
             orchestrator = FakeOrchestrator(
-                initialVerifierState = MutableStateFlow(state),
+                initialVerifierState = MutableStateFlow(state)
             )
         )
 

@@ -48,7 +48,7 @@ class CancellationDialogContentsTest {
                 onCancel = composeTestRule::incrementCancelJourneyClickCount,
                 onDismiss = composeTestRule::incrementDismissDialogClickCount
             )
-        },
+        }
     ) {
         GdsTheme { content() }
     }

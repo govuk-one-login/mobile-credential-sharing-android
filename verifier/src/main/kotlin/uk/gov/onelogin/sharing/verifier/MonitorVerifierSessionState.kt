@@ -133,7 +133,7 @@ private fun handleSessionFailure(
     state: VerifierSessionState.Complete.Failed,
     navController: NavHostController,
     context: Context,
-    options: NavOptionsBuilder.() -> Unit = {},
+    options: NavOptionsBuilder.() -> Unit = {}
 ) {
     when (val sessionErrorReason = state.error.reason) {
         is SessionErrorReason.UnsupportedQrCodeFormat ->
