@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.orchestration
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -24,6 +25,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.sessionTimer.FakeSessionTimer
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequest
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
@@ -106,6 +108,7 @@ class HolderOrchestratorTest {
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
+    private val sessionTimer = FakeSessionTimer()
     private val fakeCredentialRequestHandler = FakeCredentialRequestHandler().apply {
         resultToReturn = ValidatedCredential(
             credentialId = "test-credential-id",
@@ -148,7 +151,8 @@ class HolderOrchestratorTest {
         credentialRequestHandler = credentialRequestHandler,
         confirmConsentUseCase = confirmConsentUseCase,
         holderSessionTerminator = holderSessionTerminator,
-        inboundMessageClassifier = inboundMessageClassifier
+        inboundMessageClassifier = inboundMessageClassifier,
+        sessionTimer = sessionTimer
     )
 
     @Test
@@ -1199,6 +1203,136 @@ class HolderOrchestratorTest {
             assertEquals(0, transport.sendMessageCalls)
             assertEquals(false, transport.lastStopSendEndCommand)
         }
+    }
+
+    @Test
+    fun `timer starts with 300 seconds when device connects`() = runTest {
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        assertEquals(1, sessionTimer.startCalls)
+        kotlin.test.assertEquals(
+            300.seconds,
+            sessionTimer.lastDuration
+        )
+    }
+
+    @Test
+    fun `cancels when timer fires`() = runTest {
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        sessionTimer.onTimeout?.invoke()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isCancelled())
+        assertEquals(1, transport.stopCalls)
+    }
+
+    @Test
+    fun `timer resets when an inbound message is received`() = runTest {
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+        advanceUntilIdle()
+
+        assertEquals(1, sessionTimer.resetCalls)
+    }
+
+    @Test
+    fun `timer resets when DeviceResponse is sent after confirming consent`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val transport = FakePeripheralBluetoothTransport()
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                holderCryptoService = FakeHolderCryptoService()
+            )
+
+            orchestrator.holderSessionState.test {
+                awaitItem()
+
+                orchestrator.start()
+                skipItems(2)
+
+                transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+                awaitItem()
+
+                transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+                awaitItem()
+
+                val resetCallsBeforeOutbound = sessionTimer.resetCalls
+
+                orchestrator.confirmConsent()
+
+                awaitItem()
+                awaitItem()
+
+                assertEquals(
+                    resetCallsBeforeOutbound + 1,
+                    sessionTimer.resetCalls
+                )
+            }
+        }
+
+    @Test
+    fun `timer resets when termination message is sent after denying consent`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val transport = FakePeripheralBluetoothTransport()
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                holderCryptoService = FakeHolderCryptoService()
+            )
+
+            orchestrator.holderSessionState.test {
+                awaitItem()
+
+                orchestrator.start()
+                skipItems(2)
+
+                transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+                awaitItem()
+
+                transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+                awaitItem()
+
+                val resetCallsBeforeOutbound = sessionTimer.resetCalls
+
+                orchestrator.denyConsent()
+
+                awaitItem()
+                awaitItem()
+
+                assertEquals(
+                    resetCallsBeforeOutbound + 1,
+                    sessionTimer.resetCalls
+                )
+            }
+        }
+
+    @Test
+    fun `Timer stops when the session is cancelled`() = runTest {
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+
+        orchestrator.cancel()
+        advanceUntilIdle()
+
+        assertEquals(1, sessionTimer.stopCalls)
     }
 
     private inner class PeerTerminationFixture(

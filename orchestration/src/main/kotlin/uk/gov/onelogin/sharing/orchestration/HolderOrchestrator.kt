@@ -5,7 +5,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import java.security.interfaces.ECPrivateKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -22,8 +21,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
-import uk.gov.onelogin.sharing.core.implementation.ImplementationDetail
-import uk.gov.onelogin.sharing.core.implementation.RequiresImplementation
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
@@ -62,7 +59,8 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
-import kotlin.time.Duration.Companion.milliseconds
+import java.security.interfaces.ECPrivateKey
+import kotlin.time.Duration.Companion.seconds
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -213,9 +211,7 @@ class HolderOrchestrator(
                 "Missing filtered issuer signed"
             }
 
-            val skDevice = checkNotNull(context.skDevice) {
-                "Missing skDevice"
-            }
+            val skDevice = checkNotNull(context.skDevice) { "Missing skDevice" }
 
             appCoroutineScope.launch {
                 try {
@@ -236,6 +232,7 @@ class HolderOrchestrator(
                         serviceUuid = context.sessionUuid,
                         data = sessionDataBytes
                     )
+                    sessionTimer.reset()
 
                     sessionFlow.value.updateSessionContext {
                         it.copy(encryptCounter = it.encryptCounter + 1u)
@@ -286,7 +283,7 @@ class HolderOrchestrator(
                     serviceUuid = context.sessionUuid,
                     data = sessionDataBytes
                 )
-
+                sessionTimer.reset()
                 if (sent) {
                     safeTransitionTo(HolderSessionState.TerminatingSession)
                     holderSessionTerminator.terminate(context.sessionUuid)
@@ -306,6 +303,7 @@ class HolderOrchestrator(
     }
 
     override fun cancel() {
+        sessionTimer.stop()
         safeTransitionTo(
             state = HolderSessionState.Complete.Cancelled,
             exceptionWrapper = ::OrchestratorCannotCancelException
@@ -345,7 +343,7 @@ class HolderOrchestrator(
 
         when (state) {
             is PeripheralBluetoothState.Connected -> {
-                sessionTimer.start(300.milliseconds) { cancel() }
+                sessionTimer.start(300.seconds) { cancel() }
 
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
 
@@ -396,6 +394,7 @@ class HolderOrchestrator(
     }
 
     private fun handleMessageReceived(message: ByteArray) {
+        sessionTimer.reset()
         when (val type = inboundMessageClassifier.getMessageType(message)) {
             is InboundMessageType.SessionEstablishment ->
                 handleSessionEstablishment(message)
@@ -415,12 +414,13 @@ class HolderOrchestrator(
     }
 
     private fun handleSessionEnded(state: PeripheralBluetoothState.Ended) {
+        sessionTimer.stop()
         when (sessionFlow.value.currentState.value) {
             is HolderSessionState.ProcessingResponse,
             is HolderSessionState.TerminatingSession -> Unit
 
             is HolderSessionState.AwaitingVerifierResolution
-                if (state.status == SessionEndStates.SUCCESS) -> {
+            if (state.status == SessionEndStates.SUCCESS) -> {
                 safeTransitionTo(HolderSessionState.Complete.Success())
                 logger.debug(logTag, STOPPING_BLE_ADVERTISING)
                 stopAdvertising(sendEndCommand = false)
@@ -568,6 +568,7 @@ class HolderOrchestrator(
                 serviceUuid = context.sessionUuid,
                 data = sessionDataBytes
             )
+            sessionTimer.reset()
 
             if (sent) {
                 safeTransitionTo(HolderSessionState.TerminatingSession)
@@ -604,6 +605,7 @@ class HolderOrchestrator(
             serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
+        sessionTimer.reset()
 
         if (sent) {
             holderSessionTerminator.terminate(context.sessionUuid)
@@ -639,7 +641,7 @@ class HolderOrchestrator(
             serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
-
+        sessionTimer.reset()
         if (sent) {
             holderSessionTerminator.terminate(context.sessionUuid)
         }
@@ -671,6 +673,7 @@ class HolderOrchestrator(
             serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
+        sessionTimer.reset()
 
         if (sent) {
             holderSessionTerminator.terminate(context.sessionUuid)
@@ -697,6 +700,7 @@ class HolderOrchestrator(
             serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
+        sessionTimer.reset()
 
         if (sent) {
             holderSessionTerminator.terminate(context.sessionUuid)
@@ -798,7 +802,7 @@ class HolderOrchestrator(
         deviceRequest.docRequests.any { docRequest ->
             docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
                 namespace == DocumentType.Mdl.NAMESPACE &&
-                        elements.containsKey(MdlAttribute.Portrait.value)
+                    elements.containsKey(MdlAttribute.Portrait.value)
             }
         }
 
