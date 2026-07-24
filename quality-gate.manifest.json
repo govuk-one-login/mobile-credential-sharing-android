@@ -1,40 +1,64 @@
 {
-  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.14.0/schemas/schema.json",
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.15.0/schemas/schema.json",
   "services": [
     {
       "product": "Android-Mobile-Credential-Sharing",
       "component": "mobile-credential-sharing-android",
       "promotionType": "library",
       "automated": [
-
         {
-          "checkTypes": ["code style and linting"],
           "config": {
             "file": ".github/workflows/pull-request.yml",
             "name": "Linting",
             "path": "$.jobs.linting"
           },
           "phase": "pre-merge",
-          "provider": "GitHub"
+          "provider": "GitHub",
+          "checks": [{ "name": "code style and linting" }]
         },
         {
-          "checkTypes": [
-            "code quality",
-            "contract",
-            "integration",
-            "unit",
-            "unit test coverage"
-          ],
           "config": {
-            "file": ".github/workflows/pull-request.yml",
+            "file": ".github/workflows/testing.yml",
             "name": "Test suites",
-            "path": "$.jobs.testing"
+            "path": "$.jobs.contract-debug-tests.steps[?@.name=='Run contract tests (debug)']"
           },
           "phase": "pre-merge",
-          "provider": "GitHub"
+          "provider": "GitHub",
+          "checks": [
+            {
+              "name": "contract"
+            }
+          ]
         },
         {
-          "checkTypes": ["code style and linting"],
+          "config": {
+            "file": ".github/workflows/testing.yml",
+            "path": "$.jobs.unit_tests.steps[?@.name=='Run unit tests']"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "checks": [{ "name": "code quality" }, { "name": "contract" }]
+        },
+        {
+          "config": {
+            "file": ".github/workflows/testing.yml",
+            "path": "$.jobs.instrumentation_tests.steps[?@.name=='Run instrumentation tests']"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "checks": [{ "name": "integration" }]
+        },
+        {
+          "config": {
+            "file": ".github/workflows/testing.yml",
+            "path": "$.jobs.sonar_scan.steps[?@.name=='Sonar scan']"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "checks": [{ "name": "unit test coverage" }]
+        },
+        {
+          "checks": [{ "name": "code style and linting" }],
           "config": {
             "file": ".github/workflows/linting.yml",
             "name": "Verify conventional commit standards",
@@ -44,7 +68,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": ["code style and linting"],
+          "checks": [{ "name": "code style and linting" }],
           "config": {
             "file": ".github/workflows/linting.yml",
             "name": "Prose linting",
@@ -54,7 +78,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": ["code style and linting"],
+          "checks": [{ "name": "code style and linting" }],
           "config": {
             "file": ".github/workflows/linting.yml",
             "name": "Android linting",
@@ -64,7 +88,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": ["code style and linting"],
+          "checks": [{ "name": "code style and linting" }],
           "config": {
             "file": ".github/workflows/linting.yml",
             "name": "Kotlin linting",
@@ -74,7 +98,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": ["contract", "unit test coverage"],
+          "checks": [{ "name": "contract" }, { "name": "unit test coverage" }],
           "config": {
             "file": ".github/workflows/testing.yml",
             "name": "Contract (ISO-18013-6) tests",
@@ -84,7 +108,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": ["unit", "unit test coverage"],
+          "checks": [{ "name": "unit" }, { "name": "unit test coverage" }],
           "config": {
             "file": ".github/workflows/testing.yml",
             "name": "Unit tests",
@@ -94,7 +118,11 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": ["unit", "integration", "unit test coverage"],
+          "checks": [
+            { "name": "unit" },
+            { "name": "integration" },
+            { "name": "unit test coverage" }
+          ],
           "config": {
             "file": ".github/workflows/testing.yml",
             "name": "Instrumentation tests",
@@ -104,10 +132,10 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [
-            "code quality",
-            "unit test coverage",
-            "vulnerability detection"
+          "checks": [
+            { "name": "code quality" },
+            { "name": "unit test coverage" },
+            { "name": "vulnerability detection" }
           ],
           "config": {
             "file": ".github/workflows/testing.yml",
@@ -118,7 +146,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [],
+          "checks": [],
           "config": {
             "file": ".github/workflows/bump-version.yml",
             "name": "Bump semantic version of the code base",
@@ -128,7 +156,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [],
+          "checks": [],
           "config": {
             "file": ".github/workflows/publish-libraries.yml",
             "name": "Upload code base artefacts to GitHub packages",
@@ -138,7 +166,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [],
+          "checks": [],
           "config": {
             "file": ".github/workflows/publish-to-google-play.yml",
             "name": "Upload test app artefacts to the Google Play Store",
@@ -148,7 +176,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [],
+          "checks": [],
           "config": {
             "file": ".github/workflows/publishing.yml",
             "name": "Upload code base artefacts to GitHub packages",
@@ -158,7 +186,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [],
+          "checks": [],
           "config": {
             "file": ".github/workflows/publishing.yml",
             "name": "Upload test app artefacts to the Google Play Store",
@@ -168,7 +196,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [],
+          "checks": [],
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
             "name": "Bump semantic version of the code base",
@@ -178,7 +206,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [],
+          "checks": [],
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
             "name": "Publish Gradle dependency graph results to GitHub dependabot",
@@ -188,6 +216,7 @@
           "provider": "GitHub"
         },
         {
+          "checks": [],
           "checkTypes": ["code style and linting"],
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
@@ -198,7 +227,7 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [],
+          "checks": [],
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
             "name": "Uploads code base artefacts to GitHub packages / Google Play Store",
@@ -208,12 +237,12 @@
           "provider": "GitHub"
         },
         {
-          "checkTypes": [
-            "code quality",
-            "contract",
-            "integration",
-            "unit",
-            "unit test coverage"
+          "checks": [
+            { "name": "code quality" },
+            { "name": "contract" },
+            { "name": "integration" },
+            { "name": "unit" },
+            { "name": "unit test coverage" }
           ],
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
