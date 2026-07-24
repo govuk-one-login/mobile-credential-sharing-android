@@ -114,7 +114,7 @@ class AndroidGattClientManager(
 
         val state = gatt
             .getService(serviceUuid)
-            .getCharacteristic(STATE_UUID) ?: return handleError(
+            ?.getCharacteristic(STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
             INVALID_SERVICE
         ).let { SessionEndStates.WRITE_TO_SERVER_FAILED }
