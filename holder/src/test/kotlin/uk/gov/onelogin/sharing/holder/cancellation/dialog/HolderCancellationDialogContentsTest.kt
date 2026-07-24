@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.cancellation.CancellationDialogContentsRule
 
 @RunWith(AndroidJUnit4::class)
-class HolderCancellationDialogScreenTest {
+class HolderCancellationDialogContentsTest {
     @get:Rule
     val composeTestRule = CancellationDialogContentsRule()
 
@@ -39,7 +39,7 @@ class HolderCancellationDialogScreenTest {
         composeTestRule.run {
             setContent { Render() }
             performDismissDialogClick()
-            assertDismissDialogClickCount(equalTo(1))
+            assertDismissDialogClickCount(1)
         }
     }
 

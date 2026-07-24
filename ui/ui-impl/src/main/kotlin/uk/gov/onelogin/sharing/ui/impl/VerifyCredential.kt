@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -92,23 +93,25 @@ internal fun VerifyCredential(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides viewModelFactory
     ) {
-        Column(modifier = modifier) {
-            if (!state.isComplete()) {
-                IconButton(
-                    onClick = { controller.navigateToVerifierUserCancellationDialog() }
-                ) {
-                    Icon(
-                        painter = painterResource(ic_menu_close_clear_cancel),
-                        contentDescription = "Close"
-                    )
+        Surface(modifier = modifier) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (!state.isComplete()) {
+                    IconButton(
+                        onClick = { controller.navigateToVerifierUserCancellationDialog() }
+                    ) {
+                        Icon(
+                            painter = painterResource(ic_menu_close_clear_cancel),
+                            contentDescription = "Close"
+                        )
+                    }
                 }
-            }
-            NavHost(
-                navController = controller,
-                startDestination = VerifierRoutes,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                configureVerifierRoutes(controller)
+                NavHost(
+                    navController = controller,
+                    startDestination = VerifierRoutes,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    configureVerifierRoutes(controller)
+                }
             }
         }
     }

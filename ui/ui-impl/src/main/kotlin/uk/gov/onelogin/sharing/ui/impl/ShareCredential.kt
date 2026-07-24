@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -91,26 +92,28 @@ internal fun ShareCredential(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides viewModelFactory
     ) {
-        Column(modifier = modifier) {
-            if (!state.isComplete()) {
-                IconButton(
-                    onClick = {
-                        navController.navigateToHolderUserCancellationDialog()
+        Surface(modifier = modifier) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (!state.isComplete()) {
+                    IconButton(
+                        onClick = {
+                            navController.navigateToHolderUserCancellationDialog()
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(ic_menu_close_clear_cancel),
+                            contentDescription = "Close"
+                        )
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(ic_menu_close_clear_cancel),
-                        contentDescription = "Close"
-                    )
                 }
-            }
 
-            NavHost(
-                navController = navController,
-                startDestination = HolderRoutes,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                configureHolderRoutes()
+                NavHost(
+                    navController = navController,
+                    startDestination = HolderRoutes,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    configureHolderRoutes()
+                }
             }
         }
     }
