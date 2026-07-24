@@ -111,6 +111,7 @@ internal suspend fun convertSessionStateToNavigation(
             { handleSessionFailure(state, navController, context, exitJourneyOptions) }
         }
 
+        // DCMAW-21173: Update success screens to close journey.
         is VerifierSessionState.Complete.Success -> {
             { navController.navigateToFinishedVerifierJourney(state.data, exitJourneyOptions) }
         }
