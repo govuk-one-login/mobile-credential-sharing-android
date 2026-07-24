@@ -3,31 +3,41 @@ package uk.gov.onelogin.sharing.verifier.cancellation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
-import com.google.testing.junit.testparameterinjector.TestParameter
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.Test
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
-@RunWith(RobolectricTestParameterInjector::class)
+@RunWith(AndroidJUnit4::class)
 class VerifierCancellationScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
     private var hasResetJourney = false
 
-    @Test
-    fun `Validate UI contents`(
-        @TestParameter content: @Composable () -> Unit = namedTestValues(
-            "Composable screen" to { Render() },
-            "Preview" to { VerifierCancellationScreenPreview() }
+    private val orchestrator by lazy {
+        FakeOrchestrator(
+            initialVerifierState = MutableStateFlow(VerifierSessionState.Complete.Cancelled)
         )
-    ) = runTest {
+    }
+
+    private val viewModel by lazy {
+        VerifierCancellationScreenViewModel(
+            orchestrator = orchestrator
+        )
+    }
+
+    @Test
+    fun `Validate UI contents`() = runTest {
         composeTestRule.run {
-            setContent { content() }
+            setContent { Render() }
             onNodeWithTag("progressIndicator").assertExists()
         }
     }
@@ -37,6 +47,10 @@ class VerifierCancellationScreenTest {
         composeTestRule.run {
             setContent { Render() }
             waitUntil { hasResetJourney }
+            assertThat(
+                orchestrator.resetCount,
+                equalTo(1)
+            )
         }
     }
 
@@ -44,7 +58,8 @@ class VerifierCancellationScreenTest {
     private fun Render(
         content: @Composable () -> Unit = {
             VerifierCancellationScreen(
-                onCancel = { hasResetJourney = true }
+                onCancelJourney = { hasResetJourney = true },
+                viewModel = viewModel,
             )
         }
     ) {
