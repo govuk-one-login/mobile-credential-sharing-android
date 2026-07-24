@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.14.0/schemas/schema.json",
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.15.0/schemas/schema.json",
   "services": [
     {
       "product": "Android-Mobile-Credential-Sharing",
@@ -7,136 +7,176 @@
       "promotionType": "library",
       "automated": [
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "config": {
             "file": ".github/workflows/pull-request.yml",
             "name": "Linting",
             "path": "$.jobs.linting"
           },
           "phase": "pre-merge",
-          "provider": "GitHub"
+          "provider": "GitHub",
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code quality",
-            "contract",
-            "integration",
-            "unit",
-            "unit test coverage"
-          ],
           "config": {
             "file": ".github/workflows/pull-request.yml",
             "name": "Test suites",
             "path": "$.jobs.testing"
           },
           "phase": "pre-merge",
-          "provider": "GitHub"
+          "provider": "GitHub",
+          "checks": [
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "contract"
+            },
+            {
+              "name": "integration"
+            },
+            {
+              "name": "unit"
+            },
+            {
+              "name": "unit test coverage"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "config": {
             "file": ".github/workflows/linting.yml",
             "path": "$.jobs.conventional_commits"
           },
           "phase": "pre-merge",
-          "provider": "GitHub"
+          "provider": "GitHub",
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/linting.yml",
             "path": "$.jobs.prose_linting"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/linting.yml",
             "path": "$.jobs.android_linting"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/linting.yml",
             "path": "$.jobs.kotlin_linting"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "contract",
-            "unit test coverage"
-          ],
           "config": {
             "file": ".github/workflows/testing.yml",
             "name": "Contract (ISO-18013-6) tests",
             "path": "$.jobs.contract-debug-tests"
           },
           "phase": "pre-merge",
-          "provider": "GitHub"
+          "provider": "GitHub",
+          "checks": [
+            {
+              "name": "contract"
+            },
+            {
+              "name": "unit test coverage"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "unit",
-            "unit test coverage"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/testing.yml",
             "path": "$.jobs.unit_tests"
-          }
+          },
+          "checks": [
+            {
+              "name": "unit"
+            },
+            {
+              "name": "unit test coverage"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "unit",
-            "integration",
-            "unit test coverage"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/testing.yml",
             "path": "$.jobs.instrumentation_tests"
-          }
+          },
+          "checks": [
+            {
+              "name": "unit"
+            },
+            {
+              "name": "integration"
+            },
+            {
+              "name": "unit test coverage"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting",
-            "unit test coverage",
-            "vulnerability detection"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/testing.yml",
             "path": "$.jobs.sonar_scan"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            },
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "vulnerability detection"
+            }
+          ]
         },
         {
-          "checkTypes": [],
           "phase": "pre-release",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
             "path": "$.jobs.bump_and_publish"
-          }
+          },
+          "checks": []
         }
       ]
     }
