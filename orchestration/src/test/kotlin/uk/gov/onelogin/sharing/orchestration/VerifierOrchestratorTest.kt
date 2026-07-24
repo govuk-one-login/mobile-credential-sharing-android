@@ -31,6 +31,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
+import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -489,6 +490,26 @@ class VerifierOrchestratorTest {
             isCancelled()
         )
         assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `cancel does not re-terminate when session is already complete`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+        centralBluetoothTransport.emitState(CentralBluetoothState.Connected(DEVICE_ADDRESS))
+        orchestrator.cancel()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.verifierSessionState.value, isCancelled())
+        assertEquals(1, sessionTerminator.terminateCalls)
+
+        // Simulate a second termination trigger
+        orchestrator.cancel()
+        advanceUntilIdle()
+
+        assertEquals(1, sessionTerminator.terminateCalls)
     }
 
     @Test
