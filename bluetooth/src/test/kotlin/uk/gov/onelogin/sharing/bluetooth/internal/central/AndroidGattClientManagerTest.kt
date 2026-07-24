@@ -712,6 +712,21 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
+    fun `notifySessionEnd returns WRITE_TO_SERVER_FAILED when service is null`() = runTest {
+        every { bluetoothGatt.getService(any()) } returns null
+
+        testEvents {
+            val result = manager.notifySessionEnd()
+            assertEquals(SessionEndStates.WRITE_TO_SERVER_FAILED, result)
+
+            assertEquals(
+                GattClientEvent.Error(ClientError.INVALID_SERVICE),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
     fun `writes session handles error`() = runTest {
         val failingWriter = FakeGattWriter(false)
         manager = createManager(gattWriter = failingWriter)
