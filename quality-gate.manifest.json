@@ -22,27 +22,57 @@
         },
         {
           "config": {
-            "file": ".github/workflows/pull-request.yml",
+            "file": ".github/workflows/testing.yml",
             "name": "Test suites",
-            "path": "$.jobs.testing"
+            "path": "$.jobs.contract-debug-tests.steps[?@.name=='Run contract tests (debug)']"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "checks": [
+            {
+              "name": "contract"
+            }
+          ]
+        },
+        {
+          "config": {
+            "file": ".github/workflows/testing.yml",
+            "path": "$.jobs.unit_tests.steps[?@.name=='Run unit tests']"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "checks": [
+            {
+              "name": "unit"
+            },
+            {
+              "name": "unit test coverage"
+            }
+          ]
+        },
+        {
+          "config": {
+            "file": ".github/workflows/testing.yml",
+            "path": "$.jobs.instrumentation_tests.steps[?@.name=='Run instrumentation tests']"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "checks": [
+            {
+              "name": "integration"
+            }
+          ]
+        },
+        {
+          "config": {
+            "file": ".github/workflows/testing.yml",
+            "path": "$.jobs.sonar_scan.steps[?@.name=='Sonar scan']"
           },
           "phase": "pre-merge",
           "provider": "GitHub",
           "checks": [
             {
               "name": "code quality"
-            },
-            {
-              "name": "contract"
-            },
-            {
-              "name": "integration"
-            },
-            {
-              "name": "unit"
-            },
-            {
-              "name": "unit test coverage"
             }
           ]
         },
@@ -140,13 +170,7 @@
           },
           "checks": [
             {
-              "name": "unit"
-            },
-            {
               "name": "integration"
-            },
-            {
-              "name": "unit test coverage"
             }
           ]
         },
