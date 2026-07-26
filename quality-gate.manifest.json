@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.16.0/schemas/schema.json",
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.17.0/schemas/schema.json",
   "services": [
     {
       "product": "Android-Mobile-Credential-Sharing",
@@ -7,38 +7,28 @@
       "promotionType": "library",
       "automated": [
         {
-          "config": {
-            "file": ".github/workflows/pull-request.yml",
-            "name": "Linting",
-            "path": "$.jobs.linting"
-          },
           "phase": "pre-merge",
           "provider": "GitHub",
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/pull-request.yml",
+          "path": "$.jobs.linting"
         },
         {
-          "config": {
-            "file": ".github/workflows/testing.yml",
-            "name": "Test suites",
-            "path": "$.jobs.contract-debug-tests.steps[?@.name=='Run contract tests (debug)']"
-          },
           "phase": "pre-merge",
           "provider": "GitHub",
           "checks": [
             {
               "name": "contract"
             }
-          ]
+          ],
+          "file": ".github/workflows/testing.yml",
+          "path": "$.jobs.contract-debug-tests.steps[?@.name=='Run contract tests (debug)']"
         },
         {
-          "config": {
-            "file": ".github/workflows/testing.yml",
-            "path": "$.jobs.unit_tests.steps[?@.name=='Run unit tests']"
-          },
           "phase": "pre-merge",
           "provider": "GitHub",
           "checks": [
@@ -48,92 +38,77 @@
             {
               "name": "unit test coverage"
             }
-          ]
+          ],
+          "file": ".github/workflows/testing.yml",
+          "path": "$.jobs.unit_tests.steps[?@.name=='Run unit tests']"
         },
         {
-          "config": {
-            "file": ".github/workflows/testing.yml",
-            "path": "$.jobs.instrumentation_tests.steps[?@.name=='Run instrumentation tests']"
-          },
           "phase": "pre-merge",
           "provider": "GitHub",
           "checks": [
             {
               "name": "integration"
             }
-          ]
+          ],
+          "file": ".github/workflows/testing.yml",
+          "path": "$.jobs.instrumentation_tests.steps[?@.name=='Run instrumentation tests']"
         },
         {
-          "config": {
-            "file": ".github/workflows/testing.yml",
-            "path": "$.jobs.sonar_scan.steps[?@.name=='Sonar scan']"
-          },
           "phase": "pre-merge",
           "provider": "GitHub",
           "checks": [
             {
               "name": "code quality"
             }
-          ]
+          ],
+          "file": ".github/workflows/testing.yml",
+          "path": "$.jobs.sonar_scan.steps[?@.name=='Sonar scan']"
         },
         {
-          "config": {
-            "file": ".github/workflows/linting.yml",
-            "path": "$.jobs.conventional_commits"
-          },
           "phase": "pre-merge",
           "provider": "GitHub",
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/linting.yml",
+          "path": "$.jobs.conventional_commits"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/linting.yml",
-            "path": "$.jobs.prose_linting"
-          },
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/linting.yml",
+          "path": "$.jobs.prose_linting"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/linting.yml",
-            "path": "$.jobs.android_linting"
-          },
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/linting.yml",
+          "path": "$.jobs.android_linting"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/linting.yml",
-            "path": "$.jobs.kotlin_linting"
-          },
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/linting.yml",
+          "path": "$.jobs.kotlin_linting"
         },
         {
-          "config": {
-            "file": ".github/workflows/testing.yml",
-            "name": "Contract (ISO-18013-6) tests",
-            "path": "$.jobs.contract-debug-tests"
-          },
           "phase": "pre-merge",
           "provider": "GitHub",
           "checks": [
@@ -143,15 +118,13 @@
             {
               "name": "unit test coverage"
             }
-          ]
+          ],
+          "file": ".github/workflows/testing.yml",
+          "path": "$.jobs.contract-debug-tests"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/testing.yml",
-            "path": "$.jobs.unit_tests"
-          },
           "checks": [
             {
               "name": "unit"
@@ -159,28 +132,24 @@
             {
               "name": "unit test coverage"
             }
-          ]
+          ],
+          "file": ".github/workflows/testing.yml",
+          "path": "$.jobs.unit_tests"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/testing.yml",
-            "path": "$.jobs.instrumentation_tests"
-          },
           "checks": [
             {
               "name": "integration"
             }
-          ]
+          ],
+          "file": ".github/workflows/testing.yml",
+          "path": "$.jobs.instrumentation_tests"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/testing.yml",
-            "path": "$.jobs.sonar_scan"
-          },
           "checks": [
             {
               "name": "code style and linting"
@@ -191,16 +160,16 @@
             {
               "name": "vulnerability detection"
             }
-          ]
+          ],
+          "file": ".github/workflows/testing.yml",
+          "path": "$.jobs.sonar_scan"
         },
         {
           "phase": "pre-release",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/merge-to-main.yml",
-            "path": "$.jobs.bump_and_publish"
-          },
-          "checks": []
+          "checks": [],
+          "file": ".github/workflows/merge-to-main.yml",
+          "path": "$.jobs.bump_and_publish"
         }
       ]
     }
