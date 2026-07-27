@@ -1,6 +1,6 @@
 [versions]
 activityCompose = "1.13.0" # https://developer.android.com/jetpack/androidx/releases/activity#1.11.0
-agp = "9.2.1" # https://developer.android.com/build/releases/gradle-plugin
+agp = "9.3.1" # https://developer.android.com/build/releases/gradle-plugin
 androidx-browser = "1.10.0" # https://developer.android.com/jetpack/androidx/releases/browser
 androidx-camera = "1.6.1" # https://developer.android.com/jetpack/androidx/releases/camera
 androidx-metrics = "1.0.0" # https://developer.android.com/jetpack/androidx/releases/metrics
