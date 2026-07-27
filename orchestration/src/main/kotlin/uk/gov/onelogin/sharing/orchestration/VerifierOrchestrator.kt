@@ -571,7 +571,11 @@ class VerifierOrchestrator(
         receivedTermination: Boolean,
         finalState: VerifierSessionState
     ) {
-        safeTransitionTo(VerifierSessionState.TerminatingSession)
+        if (sessionFlow.value.isComplete()) return
+
+        if (sessionFlow.value.currentState.value !is VerifierSessionState.TerminatingSession) {
+            safeTransitionTo(VerifierSessionState.TerminatingSession)
+        }
 
         val context = sessionFlow.value.cryptoContext
 
