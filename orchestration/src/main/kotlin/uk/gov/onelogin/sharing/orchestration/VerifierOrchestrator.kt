@@ -5,6 +5,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
@@ -74,7 +76,8 @@ class VerifierOrchestrator(
     private val centralBluetoothTransport: CentralBluetoothTransport,
     private val verifierCryptoService: VerifierCryptoService,
     private val documentVerifier: DocumentVerifier,
-    private val sessionTerminator: SessionTerminator
+    private val sessionTerminator: SessionTerminator,
+    private val sessionTimer: SessionTimer
 ) : Orchestrator.Verifier {
 
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -339,6 +342,7 @@ class VerifierOrchestrator(
         if (currentState is VerifierSessionState.Verifying) {
             logger.debug(logTag, "Ignoring unexpected message while verifying")
         } else {
+            sessionTimer.reset()
             handleCentralBluetoothStateMessage(state)
         }
     }
@@ -589,6 +593,8 @@ class VerifierOrchestrator(
     }
 
     private suspend fun handleConnectionStateStarted() {
+        sessionTimer.start(INACTIVITY_TIMEOUT) { cancel() }
+
         val context = sessionFlow.value.cryptoContext ?: return failWith(
             "Missing crypto context when building DeviceRequest",
             SessionErrorReason.MissingCryptoContext
@@ -638,6 +644,7 @@ class VerifierOrchestrator(
                 serviceUuid = context.serviceUuid,
                 data = sessionEstablishmentBytes
             )
+            sessionTimer.reset()
             if (!sent) error("Failed to send SessionEstablishment message")
         }
     }
@@ -682,10 +689,17 @@ class VerifierOrchestrator(
     ) {
         try {
             sessionFlow.value.transitionTo(state)
+            if (state.isComplete()) {
+                sessionTimer.stop()
+            }
             logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
         } catch (exception: IllegalStateException) {
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
             logger.error(logTag, logMessage, loggedException)
         }
+    }
+
+    private companion object {
+        val INACTIVITY_TIMEOUT = 300.seconds
     }
 }

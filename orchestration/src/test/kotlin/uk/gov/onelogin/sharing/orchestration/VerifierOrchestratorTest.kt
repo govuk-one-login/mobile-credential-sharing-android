@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.sessionTimer.FakeSessionTimer
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.DecryptDeviceResponseException
@@ -132,6 +134,8 @@ class VerifierOrchestratorTest {
     private val sessionTerminator =
         FakeSessionTerminator(centralBluetoothTransport, verifierCryptoService)
 
+    private val sessionTimer = FakeSessionTimer()
+
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
 
     private val orchestrator by lazy {
@@ -151,7 +155,8 @@ class VerifierOrchestratorTest {
         barcodeParser = FakeQrParser(),
         verifierCryptoService = cryptoService,
         documentVerifier = documentVerifier,
-        sessionTerminator = sessionTerminator
+        sessionTerminator = sessionTerminator,
+        sessionTimer = sessionTimer
     )
 
     @Before
@@ -1532,6 +1537,100 @@ class VerifierOrchestratorTest {
             VerifierSessionState.TerminatingSession,
             orchestrator.verifierSessionState.value
         )
+    }
+
+    @Test
+    fun `timer starts with 300 seconds when BLE connection starts`() = runTest {
+        connectBle()
+
+        assertEquals(1, sessionTimer.startCalls)
+        assertEquals(300.seconds, sessionTimer.lastDuration)
+    }
+
+    @Test
+    fun `cancels when timer fires`() = runTest {
+        connectBle()
+
+        sessionTimer.onTimeout?.invoke()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.verifierSessionState.value, isCancelled())
+    }
+
+    @Test
+    fun `timer resets when SessionEstablishment is sent`() = runTest {
+        centralBluetoothTransport.sendMessageToReturn = true
+        connectBle()
+
+        assertEquals(1, sessionTimer.resetCalls)
+    }
+
+    @Test
+    fun `timer resets when an inbound message is received`() = runTest {
+        connectBle()
+        val resetCalls = sessionTimer.resetCalls
+
+        receiveInboundMessage()
+
+        assertEquals(resetCalls + 1, sessionTimer.resetCalls)
+    }
+
+    @Test
+    fun `timer stops when session completes successfully`() = runTest {
+        connectBle()
+
+        receiveInboundMessage()
+
+        assertThat(orchestrator.verifierSessionState.value, isSuccess())
+        assertEquals(1, sessionTimer.stopCalls)
+    }
+
+    @Test
+    fun `timer stops when session is cancelled`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        centralBluetoothTransport.emitState(CentralBluetoothState.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        orchestrator.cancel()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.verifierSessionState.value, isCancelled())
+        assertEquals(1, sessionTimer.stopCalls)
+    }
+
+    @Test
+    fun `timer stops when session fails`() = runTest {
+        initialStates[0] = VerifierSessionState.Connecting
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        centralBluetoothTransport.emitState(CentralBluetoothState.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Error(CentralBluetoothTransportError.SCAN_FAILED)
+        )
+        advanceUntilIdle()
+
+        assertThat(orchestrator.verifierSessionState.value, isFailed())
+        assertEquals(1, sessionTimer.stopCalls)
+    }
+
+    private suspend fun TestScope.connectBle() {
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+        advanceUntilIdle()
+    }
+
+    private fun TestScope.receiveInboundMessage() {
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Message(
+                SERVER_2_CLIENT_UUID,
+                CborMapper.default.writeValueAsBytes(fakeCryptoService.sessionData.toDto())
+            )
+        )
+        advanceUntilIdle()
     }
 
     class ErrorStatusProvider : TestParameterValuesProvider() {
