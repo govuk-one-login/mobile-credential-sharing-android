@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
+import java.util.Collections.emptyListIterator
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
@@ -19,7 +20,7 @@ data class DeviceResponse(
     val documents: List<VerifiableDocument.WithPresentation>? = null,
     val documentErrors: Map<String, Status>? = null,
     val status: Status = Status.OK
-) {
+) : Iterable<VerifiableDocument.WithPresentation> {
     val documentCount: Int = documents?.size ?: 0
 
     constructor(
@@ -33,4 +34,7 @@ data class DeviceResponse(
         status = Status.from(statusCode),
         version = version
     )
+
+    override fun iterator(): Iterator<VerifiableDocument.WithPresentation> =
+        documents?.iterator() ?: emptyListIterator()
 }

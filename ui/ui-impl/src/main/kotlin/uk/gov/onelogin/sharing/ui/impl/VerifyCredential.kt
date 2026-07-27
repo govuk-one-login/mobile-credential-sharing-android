@@ -1,11 +1,21 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import android.R.drawable.ic_menu_close_clear_cancel
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -24,6 +34,7 @@ import uk.gov.onelogin.sharing.ui.impl.di.VerifierUiGraph
 import uk.gov.onelogin.sharing.verifier.MonitorVerifierSessionState
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
+import uk.gov.onelogin.sharing.verifier.cancellation.dialog.VerifierCancellationDialogNavigationExt.navigateToVerifierUserCancellationDialog
 
 /**
  * Composable entry point for the Verifier role (credential verification).
@@ -62,10 +73,15 @@ internal fun VerifyCredential(
     controller: NavHostController = rememberNavController(),
     defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
+    val state: VerifierSessionState by verifierSessionState.collectAsStateWithLifecycle()
     MonitorVerifierSessionState(
         sessionState = verifierSessionState,
         controller = controller
     )
+
+    BackHandler(state.userCanCancel()) {
+        controller.navigateToVerifierUserCancellationDialog()
+    }
 
     val scope = rememberCoroutineScope { defaultDispatcher }
     LaunchedEffect(Unit) {
@@ -77,12 +93,26 @@ internal fun VerifyCredential(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides viewModelFactory
     ) {
-        NavHost(
-            navController = controller,
-            startDestination = VerifierRoutes,
-            modifier = modifier
-        ) {
-            configureVerifierRoutes(controller)
+        Surface(modifier = modifier) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (!state.isComplete()) {
+                    IconButton(
+                        onClick = { controller.navigateToVerifierUserCancellationDialog() }
+                    ) {
+                        Icon(
+                            painter = painterResource(ic_menu_close_clear_cancel),
+                            contentDescription = "Close"
+                        )
+                    }
+                }
+                NavHost(
+                    navController = controller,
+                    startDestination = VerifierRoutes,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    configureVerifierRoutes(controller)
+                }
+            }
         }
     }
 }

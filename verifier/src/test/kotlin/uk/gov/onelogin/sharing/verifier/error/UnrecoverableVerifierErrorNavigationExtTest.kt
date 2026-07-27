@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.presentation
+package uk.gov.onelogin.sharing.verifier.error
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -22,14 +22,14 @@ import org.hamcrest.CoreMatchers.not
 import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Rule
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
+import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.configureUnrecoverableVerifierError
+import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.navigateToUnrecoverableVerifierError
 
 @RunWith(AndroidJUnit4::class)
-class HolderPresentQrNavigationExtTest {
+class UnrecoverableVerifierErrorNavigationExtTest {
 
     @get:Rule
-    val composeTestRule = HolderWelcomeScreenRule(createComposeRule())
+    val composeTestRule = createComposeRule()
 
     private lateinit var controller: TestNavHostController
 
@@ -49,10 +49,10 @@ class HolderPresentQrNavigationExtTest {
 
             waitUntil {
                 allOf(
-                    instanceOf(HolderPresentQrRoute::class.java),
-                    not(nullValue(HolderPresentQrRoute::class.java))
+                    instanceOf(UnrecoverableVerifierErrorRoute::class.java),
+                    not(nullValue(UnrecoverableVerifierErrorRoute::class.java))
                 ).matches(
-                    controller.currentBackStackEntry?.toRoute<HolderPresentQrRoute>()
+                    controller.currentBackStackEntry?.toRoute<UnrecoverableVerifierErrorRoute>()
                 )
             }
         }
@@ -67,14 +67,14 @@ class HolderPresentQrNavigationExtTest {
             composable("Unit test") {
                 Button(
                     onClick = {
-                        controller.navigateToHolderPresentQrScreen()
+                        controller.navigateToUnrecoverableVerifierError()
                     }
                 ) {
                     Text("Navigate")
                 }
             }
 
-            configureHolderPresentQrScreen()
+            configureUnrecoverableVerifierError()
         }
     }
 }

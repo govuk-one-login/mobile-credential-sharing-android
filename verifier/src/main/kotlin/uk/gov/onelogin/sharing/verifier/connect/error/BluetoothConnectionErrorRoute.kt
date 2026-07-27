@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.verifier.connect.error
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.annotation.Keep
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -26,8 +26,9 @@ data class BluetoothConnectionErrorRoute(val title: String) {
          * attempting to decode digital credentials after scanning a QR code.
          */
         @OptIn(ExperimentalPermissionsApi::class)
-        fun NavGraphBuilder.configureBluetoothConnectionErrorRoute(controller: NavController) {
+        fun NavGraphBuilder.configureBluetoothConnectionErrorRoute() {
             composable<BluetoothConnectionErrorRoute> { navBackstackEntry ->
+                val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
                 val arguments: BluetoothConnectionErrorRoute = navBackstackEntry.toRoute()
                 val scope = rememberCoroutineScope { Dispatchers.Main }
 
@@ -35,7 +36,7 @@ data class BluetoothConnectionErrorRoute(val title: String) {
                     title = arguments.title,
                     onTryAgainClick = {
                         scope.launch {
-                            controller.popBackStack()
+                            backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
                         }
                     }
                 )

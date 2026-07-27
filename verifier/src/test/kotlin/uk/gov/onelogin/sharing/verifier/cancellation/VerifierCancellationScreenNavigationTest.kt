@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.presentation
+package uk.gov.onelogin.sharing.verifier.cancellation
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
+import androidx.navigation.NavController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
@@ -16,30 +17,42 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.Test
-import org.hamcrest.CoreMatchers.allOf
-import org.hamcrest.CoreMatchers.instanceOf
-import org.hamcrest.CoreMatchers.not
-import org.hamcrest.CoreMatchers.nullValue
 import org.junit.Rule
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
+import uk.gov.onelogin.sharing.verifier.cancellation.VerifierCancellationScreenNavigationExt.configureVerifierUserCancellationScreen
+import uk.gov.onelogin.sharing.verifier.cancellation.VerifierCancellationScreenNavigationExt.navigateToVerifierUserCancellationScreen
 
 @RunWith(AndroidJUnit4::class)
-class HolderPresentQrNavigationExtTest {
+class VerifierCancellationScreenNavigationTest {
 
     @get:Rule
-    val composeTestRule = HolderWelcomeScreenRule(createComposeRule())
+    val composeTestRule = createComposeRule()
 
     private lateinit var controller: TestNavHostController
 
+    private var hasNavigatedToCancellation = false
+
+    private val onDestinationChangedListener = NavController.OnDestinationChangedListener {
+            controller,
+            _,
+            _
+        ->
+
+        try {
+            controller.currentBackStackEntry?.toRoute<VerifierCancellationScreenRoute>()
+            hasNavigatedToCancellation = true
+        } catch (ignored: Exception) {
+        }
+    }
+
     @Test
-    fun `Present QR screen exists in the navigation graph`() {
+    fun `Cancellation screen exists in the navigation graph`() {
         composeTestRule.run {
             setContent {
                 controller = TestNavHostController(LocalContext.current).apply {
                     navigatorProvider.addNavigator(ComposeNavigator())
                     navigatorProvider.addNavigator(DialogNavigator())
+                    addOnDestinationChangedListener(onDestinationChangedListener)
                 }
 
                 Render()
@@ -47,14 +60,7 @@ class HolderPresentQrNavigationExtTest {
 
             onNodeWithText("Navigate").onParent().performClick()
 
-            waitUntil {
-                allOf(
-                    instanceOf(HolderPresentQrRoute::class.java),
-                    not(nullValue(HolderPresentQrRoute::class.java))
-                ).matches(
-                    controller.currentBackStackEntry?.toRoute<HolderPresentQrRoute>()
-                )
-            }
+            waitUntil { hasNavigatedToCancellation }
         }
     }
 
@@ -67,14 +73,14 @@ class HolderPresentQrNavigationExtTest {
             composable("Unit test") {
                 Button(
                     onClick = {
-                        controller.navigateToHolderPresentQrScreen()
+                        controller.navigateToVerifierUserCancellationScreen()
                     }
                 ) {
                     Text("Navigate")
                 }
             }
 
-            configureHolderPresentQrScreen()
+            configureVerifierUserCancellationScreen()
         }
     }
 }

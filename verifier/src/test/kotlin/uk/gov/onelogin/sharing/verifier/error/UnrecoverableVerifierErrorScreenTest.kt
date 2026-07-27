@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.error
 
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -71,6 +73,29 @@ class UnrecoverableVerifierErrorScreenTest {
             }
 
             onNodeWithRole(Role.Button).performClick()
+
+            assertHasExitedJourney()
+        }
+    }
+
+    @Test
+    fun `Exiting the journey via back press performs a reset`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        composeTestRule.run {
+            var backPressDispatcher: OnBackPressedDispatcherOwner? = null
+            setContent {
+                backPressDispatcher = LocalOnBackPressedDispatcherOwner.current
+                UnrecoverableVerifierErrorScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = viewModel,
+                    onExitJourney = { composeTestRule.updateHasExitedJourney() }
+                )
+            }
+
+            backPressDispatcher?.onBackPressedDispatcher?.onBackPressed()
+
+            waitForIdle()
 
             assertHasExitedJourney()
         }

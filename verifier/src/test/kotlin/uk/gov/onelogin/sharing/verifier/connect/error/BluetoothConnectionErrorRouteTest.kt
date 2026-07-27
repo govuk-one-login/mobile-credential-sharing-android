@@ -41,7 +41,7 @@ class BluetoothConnectionErrorRouteTest {
                     startDestination = ConnectWithHolderDeviceRoute
                 ) {
                     composable<ConnectWithHolderDeviceRoute> {}
-                    configureBluetoothConnectionErrorRoute(controller = controller)
+                    configureBluetoothConnectionErrorRoute()
                 }
             }
 

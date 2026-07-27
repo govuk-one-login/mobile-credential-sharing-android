@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.cancellation.dialog
+package uk.gov.onelogin.sharing.verifier.cancellation.dialog
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -9,7 +9,7 @@ import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import org.hamcrest.Matcher
 
-class HolderCancellationDialogContentsRule(
+class VerifierCancellationDialogContentsRule(
     composeTestRule: ComposeContentTestRule = createComposeRule()
 ) : ComposeContentTestRule by composeTestRule {
     private var cancelJourneyClickCount: Int = 0

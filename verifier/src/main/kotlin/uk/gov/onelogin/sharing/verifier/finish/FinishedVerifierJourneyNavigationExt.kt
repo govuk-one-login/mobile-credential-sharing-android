@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier.finish
 
 import android.os.Bundle
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -23,12 +24,13 @@ object FinishedVerifierJourneyNavigationExt {
         options
     )
 
-    internal fun NavGraphBuilder.configureFinishedVerifierJourney(controller: NavController) {
+    internal fun NavGraphBuilder.configureFinishedVerifierJourney() {
         composable<FinishedVerifierJourneyRoute>(
             typeMap = mapOf(
                 typeOf<DeviceResponse>() to DeviceResponseType
             )
         ) { backStackEntry ->
+            val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
             val scope = rememberCoroutineScope { Dispatchers.Main }
             val args: FinishedVerifierJourneyRoute = backStackEntry.toRoute()
 
@@ -36,7 +38,7 @@ object FinishedVerifierJourneyNavigationExt {
                 response = args.response,
                 onExitJourney = {
                     scope.launch {
-                        controller.popBackStack()
+                        backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
                     }
                 }
             )

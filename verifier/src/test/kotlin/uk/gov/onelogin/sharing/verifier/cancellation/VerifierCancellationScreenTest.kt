@@ -1,8 +1,9 @@
-package uk.gov.onelogin.sharing.holder.cancellation
+package uk.gov.onelogin.sharing.verifier.cancellation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -10,13 +11,12 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 
-@RunWith(RobolectricTestParameterInjector::class)
-class HolderCancellationScreenTest {
+@RunWith(AndroidJUnit4::class)
+class VerifierCancellationScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -24,12 +24,14 @@ class HolderCancellationScreenTest {
 
     private val orchestrator by lazy {
         FakeOrchestrator(
-            initialHolderState = MutableStateFlow(HolderSessionState.Complete.Cancelled)
+            initialVerifierState = MutableStateFlow(VerifierSessionState.Complete.Cancelled)
         )
     }
 
     private val viewModel by lazy {
-        HolderCancellationScreenViewModel(orchestrator)
+        VerifierCancellationScreenViewModel(
+            orchestrator = orchestrator
+        )
     }
 
     @Test
@@ -55,9 +57,9 @@ class HolderCancellationScreenTest {
     @Composable
     private fun Render(
         content: @Composable () -> Unit = {
-            HolderCancellationScreen(
-                viewModel = viewModel,
-                onCancelJourney = { hasResetJourney = true }
+            VerifierCancellationScreen(
+                onCancelJourney = { hasResetJourney = true },
+                viewModel = viewModel
             )
         }
     ) {

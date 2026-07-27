@@ -8,7 +8,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,7 +19,6 @@ import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest.Companion.VerificationRequestType
@@ -36,7 +34,6 @@ object VerifierTestAppJourneyNavigationExt {
     )
 
     internal fun NavGraphBuilder.configureVerifierJourneyWrapper(
-        navController: NavController,
         requestToVerifier: (Context, VerificationRequest) -> CredentialVerifier
     ) {
         composable<VerifierTestAppJourney>(
@@ -47,7 +44,6 @@ object VerifierTestAppJourneyNavigationExt {
             val context = LocalContext.current
             val arguments: VerifierTestAppJourney = navBackStackEntry.toRoute()
             val verifier by produceCredentialVerifier(context, arguments.request, requestToVerifier)
-            val scope = rememberCoroutineScope { Dispatchers.Main }
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -58,12 +54,7 @@ object VerifierTestAppJourneyNavigationExt {
                     VerifierTestAppJourneyScreen(
                         verifier = verifier,
                         modifier = Modifier.fillMaxSize()
-                    ) {
-                        scope.launch {
-                            verifier.orchestrator.cancel()
-                            navController.popBackStack()
-                        }
-                    }
+                    )
                 } ?: CircularProgressIndicator()
             }
         }

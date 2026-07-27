@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.cancellation.dialog
+package uk.gov.onelogin.sharing.verifier.cancellation.dialog
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,14 +9,14 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 import uk.gov.onelogin.sharing.orchestration.cancellation.CancellationDialogContents
 
 @Composable
-internal fun HolderCancellationDialogContents(
+internal fun VerifierCancellationDialogContents(
     modifier: Modifier = Modifier,
-    viewModel: HolderCancellationDialogViewModel = metroViewModel(),
+    viewModel: VerifierCancellationDialogViewModel = metroViewModel(),
     onDismiss: () -> Unit = {}
 ) {
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
-        metrics.putScreenState("HolderCancellationDialog")
+        metrics.putScreenState("VerifierCancellationDialog")
     }
 
     CancellationDialogContents(

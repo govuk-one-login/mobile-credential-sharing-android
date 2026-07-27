@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.cancellation.dialog
+package uk.gov.onelogin.sharing.verifier.cancellation.dialog
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.padding
@@ -11,17 +11,17 @@ import androidx.navigation.compose.dialog
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.spacingDouble
 
-data object HolderCancellationDialogNavigationExt {
-    fun NavController.navigateToHolderUserCancellationDialog(
+data object VerifierCancellationDialogNavigationExt {
+    fun NavController.navigateToVerifierUserCancellationDialog(
         options: NavOptionsBuilder.() -> Unit = {}
-    ) = navigate(HolderCancellationDialogRoute, options)
+    ) = navigate(VerifierCancellationDialogRoute, options)
 
-    internal fun NavGraphBuilder.configureHolderUserCancellationDialog() {
-        dialog<HolderCancellationDialogRoute> {
+    internal fun NavGraphBuilder.configureVerifierUserCancellationDialog() {
+        dialog<VerifierCancellationDialogRoute> {
             val scope = rememberCoroutineScope()
             val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
 
-            HolderCancellationDialogContents(
+            VerifierCancellationDialogContents(
                 modifier = Modifier
                     .padding(spacingDouble),
                 onDismiss = {

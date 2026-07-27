@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +20,7 @@ import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.verifier.cancellation.VerifierCancellationScreenNavigationExt.navigateToVerifierUserCancellationScreen
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToBluetoothConnectionErrorRoute
 import uk.gov.onelogin.sharing.verifier.connect.ConnectWithHolderDeviceNavigationExt.navigateToConnectWithHolderDeviceRoute
 import uk.gov.onelogin.sharing.verifier.error.UnrecoverableVerifierErrorNavigationExt.navigateToUnrecoverableVerifierError
@@ -82,62 +84,44 @@ internal suspend fun convertSessionStateToNavigation(
     state: VerifierSessionState,
     dispatcher: CoroutineDispatcher = Dispatchers.Default
 ): () -> Unit = withContext(dispatcher) {
+    val exitJourneyOptions: NavOptionsBuilder.() -> Unit = {
+        popUpTo<VerifierRoutes> {
+            inclusive = true
+        }
+    }
+
     when (state) {
         VerifierSessionState.NotStarted -> {
-            {
-                navController.navigateToVerifierPrerequisitesScreen {
-                    popUpTo<VerifierRoutes> {
-                        inclusive = true
-                    }
-                }
-            }
+            { navController.navigateToVerifierPrerequisitesScreen(exitJourneyOptions) }
         }
 
         is VerifierSessionState.Preflight -> {
-            {
-                navController.navigateToRetryVerifierPrerequisites {
-                    popUpTo<VerifierRoutes> {
-                        inclusive = true
-                    }
-                }
-            }
+            { navController.navigateToRetryVerifierPrerequisites(exitJourneyOptions) }
         }
 
         VerifierSessionState.ReadyToScan -> {
-            {
-                navController.navigateToVerifierScanRoute {
-                    popUpTo<VerifierRoutes> {
-                        inclusive = true
-                    }
-                }
-            }
+            { navController.navigateToVerifierScanRoute(exitJourneyOptions) }
         }
 
         VerifierSessionState.Connecting -> {
-            {
-                navController.navigateToConnectWithHolderDeviceRoute()
-            }
+            { navController.navigateToConnectWithHolderDeviceRoute() }
         }
 
         is VerifierSessionState.Complete.Failed -> {
-            {
-                handleSessionFailure(state, navController, context)
-            }
+            { handleSessionFailure(state, navController, context, exitJourneyOptions) }
         }
 
+        // DCMAW-21173: Update success screens to close journey.
         is VerifierSessionState.Complete.Success -> {
-            {
-                navController.navigateToFinishedVerifierJourney(state.data) {
-                    popUpTo<VerifierRoutes> {
-                        inclusive = true
-                    }
-                }
-            }
+            { navController.navigateToFinishedVerifierJourney(state.data, exitJourneyOptions) }
+        }
+
+        VerifierSessionState.Complete.Cancelled -> {
+            { navController.navigateToVerifierUserCancellationScreen(exitJourneyOptions) }
         }
 
         VerifierSessionState.ProcessingEngagement,
         VerifierSessionState.Verifying,
-        VerifierSessionState.Complete.Cancelled,
         VerifierSessionState.TerminatingSession
         -> {
             {}
@@ -148,7 +132,8 @@ internal suspend fun convertSessionStateToNavigation(
 private fun handleSessionFailure(
     state: VerifierSessionState.Complete.Failed,
     navController: NavHostController,
-    context: Context
+    context: Context,
+    options: NavOptionsBuilder.() -> Unit = {}
 ) {
     when (val sessionErrorReason = state.error.reason) {
         is SessionErrorReason.UnsupportedQrCodeFormat ->
@@ -176,10 +161,6 @@ private fun handleSessionFailure(
         SessionErrorReason.DocumentNotReturned,
         SessionErrorReason.PeerTermination
         ->
-            navController.navigateToUnrecoverableVerifierError {
-                popUpTo<VerifierRoutes> {
-                    inclusive = true
-                }
-            }
+            navController.navigateToUnrecoverableVerifierError(options)
     }
 }
