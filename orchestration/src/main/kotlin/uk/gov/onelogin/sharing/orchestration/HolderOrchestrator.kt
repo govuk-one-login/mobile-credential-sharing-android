@@ -6,6 +6,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -23,6 +24,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
@@ -75,7 +77,8 @@ class HolderOrchestrator(
     private val confirmConsentUseCase: ConfirmConsentUseCase,
     private val credentialRequestHandler: CredentialRequestHandler,
     private val holderSessionTerminator: HolderSessionTerminator,
-    private val inboundMessageClassifier: InboundMessageClassifier
+    private val inboundMessageClassifier: InboundMessageClassifier,
+    private val sessionTimer: SessionTimer
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -208,9 +211,7 @@ class HolderOrchestrator(
                 "Missing filtered issuer signed"
             }
 
-            val skDevice = checkNotNull(context.skDevice) {
-                "Missing skDevice"
-            }
+            val skDevice = checkNotNull(context.skDevice) { "Missing skDevice" }
 
             appCoroutineScope.launch {
                 try {
@@ -231,6 +232,7 @@ class HolderOrchestrator(
                         serviceUuid = context.sessionUuid,
                         data = sessionDataBytes
                     )
+                    sessionTimer.reset()
 
                     sessionFlow.value.updateSessionContext {
                         it.copy(encryptCounter = it.encryptCounter + 1u)
@@ -293,7 +295,6 @@ class HolderOrchestrator(
 
     override fun cancel() {
         if (sessionFlow.value.isComplete()) return
-
         appCoroutineScope.launch {
             terminateSession(
                 finalState = HolderSessionState.Complete.Cancelled,
@@ -345,6 +346,8 @@ class HolderOrchestrator(
 
         when (state) {
             is PeripheralBluetoothState.Connected -> {
+                sessionTimer.start(300.seconds) { cancel() }
+
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
                 logger.debug(logTag, "Mdoc - Connected: ${state.address}")
             }
@@ -376,6 +379,7 @@ class HolderOrchestrator(
     }
 
     private fun handleMessageReceived(message: ByteArray) {
+        sessionTimer.reset()
         when (val type = inboundMessageClassifier.getMessageType(message)) {
             is InboundMessageType.SessionEstablishment ->
                 handleSessionEstablishment(message)
@@ -553,22 +557,11 @@ class HolderOrchestrator(
             encryptCounter = context.encryptCounter
         )
 
-        val sent = peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
-            data = sessionDataBytes
-        )
-
-        if (sent) {
-            holderSessionTerminator.terminate(context.sessionUuid)
-        }
-
-        safeTransitionTo(
-            HolderSessionState.Complete.Failed(
-                SessionError(
-                    message = exception.message ?: UNKNOWN_ERROR,
-                    exception = exception
-                )
-            )
+        terminateSession(
+            finalState = HolderSessionState.Complete.Failed(
+                SessionError(message = exception.message ?: UNKNOWN_ERROR, exception = exception)
+            ),
+            sessionDataToSend = sessionDataBytes
         )
     }
 
@@ -588,22 +581,11 @@ class HolderOrchestrator(
             encryptCounter = context.encryptCounter
         )
 
-        val sent = peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
-            data = sessionDataBytes
-        )
-
-        if (sent) {
-            holderSessionTerminator.terminate(context.sessionUuid)
-        }
-
-        safeTransitionTo(
-            HolderSessionState.Complete.Failed(
-                SessionError(
-                    message = exception.message ?: UNKNOWN_ERROR,
-                    exception = exception
-                )
-            )
+        terminateSession(
+            finalState = HolderSessionState.Complete.Failed(
+                SessionError(message = exception.message ?: UNKNOWN_ERROR, exception = exception)
+            ),
+            sessionDataToSend = sessionDataBytes
         )
     }
 
@@ -620,22 +602,14 @@ class HolderOrchestrator(
             encryptCounter = context.encryptCounter
         )
 
-        val sent = peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
-            data = sessionDataBytes
-        )
-
-        if (sent) {
-            holderSessionTerminator.terminate(context.sessionUuid)
-        }
-
-        safeTransitionTo(
-            HolderSessionState.Complete.Failed(
+        terminateSession(
+            finalState = HolderSessionState.Complete.Failed(
                 SessionError(
                     message = PORTRAIT_POLICY_VIOLATION,
                     exception = IllegalStateException(PORTRAIT_POLICY_VIOLATION)
                 )
-            )
+            ),
+            sessionDataToSend = sessionDataBytes
         )
     }
 
@@ -679,6 +653,9 @@ class HolderOrchestrator(
 
         try {
             sessionFlow.value.transitionTo(state)
+            if (state.isComplete()) {
+                sessionTimer.stop()
+            }
             logger.debug(logTag, "$TRANSITION_SUCCESSFUL_TO_STATE $state")
         } catch (exception: IllegalStateException) {
             val loggedException = exceptionWrapper?.invoke(logMessage, exception) ?: exception
@@ -798,18 +775,18 @@ class HolderOrchestrator(
         sendEndCommand: Boolean = false
     ) {
         val context = currentContext
-
         safeTransitionTo(HolderSessionState.SendingTermination)
 
-        var sent = true
+        var sent = sessionDataToSend == null
         if (sessionDataToSend != null) {
             sent = peripheralBluetoothTransport.sendMessage(
                 serviceUuid = context.sessionUuid,
                 data = sessionDataToSend
             )
+            sessionTimer.reset()
         }
 
-        if (sent) {
+        if (sent && sessionDataToSend != null) {
             holderSessionTerminator.terminate(context.sessionUuid)
         } else {
             stopAdvertising(sendEndCommand = sendEndCommand)
