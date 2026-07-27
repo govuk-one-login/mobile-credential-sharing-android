@@ -20,7 +20,8 @@ class FakeSessionTerminator(
     override suspend fun terminate(
         serviceUuid: UUID?,
         bleOpen: Boolean,
-        holderRequestedTermination: Boolean
+        holderRequestedTermination: Boolean,
+        sendSessionData: Boolean
     ) {
         terminateCalls++
         lastServiceUuid = serviceUuid
@@ -28,7 +29,7 @@ class FakeSessionTerminator(
         lastHolderRequestedTermination = holderRequestedTermination
 
         if (bleOpen && !holderRequestedTermination) {
-            if (serviceUuid != null) {
+            if (sendSessionData && serviceUuid != null) {
                 buildTerminationSessionDataCalls++
                 cryptoService?.buildTerminationSessionData()
             }

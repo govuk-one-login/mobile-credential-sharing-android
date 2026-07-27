@@ -1558,6 +1558,17 @@ class VerifierOrchestratorTest {
     }
 
     @Test
+    fun `does not send SessionData when timeout occurs`() = runTest {
+        connectBle()
+
+        sessionTerminator.buildTerminationSessionDataCalls = 0
+        sessionTimer.onTimeout?.invoke()
+        advanceUntilIdle()
+
+        assertEquals(0, sessionTerminator.buildTerminationSessionDataCalls)
+    }
+
+    @Test
     fun `timer resets when SessionEstablishment is sent`() = runTest {
         centralBluetoothTransport.sendMessageToReturn = true
         connectBle()

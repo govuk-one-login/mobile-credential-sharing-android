@@ -231,7 +231,8 @@ class VerifierOrchestrator(
             terminateSession(
                 centralBluetoothTransport.isBleOpen,
                 false,
-                VerifierSessionState.Complete.Cancelled
+                VerifierSessionState.Complete.Cancelled,
+                sendSessionData = false
             )
         }
     }
@@ -573,7 +574,8 @@ class VerifierOrchestrator(
     private suspend fun terminateSession(
         bleOpen: Boolean,
         receivedTermination: Boolean,
-        finalState: VerifierSessionState
+        finalState: VerifierSessionState,
+        sendSessionData: Boolean = true
     ) {
         if (sessionFlow.value.isComplete()) return
 
@@ -586,7 +588,8 @@ class VerifierOrchestrator(
         sessionTerminator.terminate(
             serviceUuid = context?.serviceUuid,
             bleOpen = bleOpen,
-            holderRequestedTermination = receivedTermination
+            holderRequestedTermination = receivedTermination,
+            sendSessionData = sendSessionData
         )
 
         safeTransitionTo(finalState)
