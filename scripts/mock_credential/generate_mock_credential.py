@@ -326,13 +326,7 @@ def get_argument_parser() -> IssuerAuthInput:
     )
     args = parser.parse_args()
 
-    return IssuerAuthInput(
-        private_key = args.private_key,
-        issuer_private_key = args.issuer_private_key,
-        x509_certificate = args.x509_certificate,
-        output = args.output,
-        validity_days = args.validity_days
-    )
+    return IssuerAuthInput.from_parser(args)
 
 
 if __name__ == "__main__":
