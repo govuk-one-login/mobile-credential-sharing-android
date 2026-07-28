@@ -6,11 +6,11 @@ T = TypeVar('T', bound='Parent') # type: ignore
 class IssuerAuthInput:
 
     def __init__(self, **kwargs):
-        self.private_key = kwargs["private_key"]
         self.issuer_private_key = kwargs["issuer_private_key"]
-        self.x509_certificate = kwargs["x509_certificate"]
         self.output = kwargs["output"]
+        self.private_key = kwargs["private_key"]
         self.validity_days = kwargs["validity_days"]
+        self.x509_certificate = kwargs["x509_certificate"]
 
     @classmethod
     def from_parser(cls: Type[T], args: Namespace) -> T:
@@ -31,9 +31,9 @@ class IssuerAuthInput:
         """
 
         return cls(
-            private_key = args.private_key,
             issuer_private_key = args.issuer_private_key,
-            x509_certificate = args.x509_certificate,
             output = args.output,
-            validity_days = args.validity_days
+            private_key = args.private_key,
+            validity_days = args.validity_days,
+            x509_certificate = args.x509_certificate,
         )
