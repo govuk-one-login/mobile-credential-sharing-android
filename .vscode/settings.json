@@ -1,0 +1,12 @@
+{
+    "python.testing.pytestArgs": [
+        "scripts/mock_credential"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python-envs.workspaceSearchPaths": [
+        ".venv",
+        "*/.venv",
+        "~/.local/pipx/venvs"
+    ]
+}

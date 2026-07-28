@@ -28,6 +28,11 @@ test = [
 [project.scripts]
 generate-mock-credential = "mock_credential:generate_mock_credential_entry_point"
 
+[pytest]
+testpaths = [
+    "scripts/mock_credential"
+]
+
 [tool.setuptools-git-versioning]
 enabled = true
 
