@@ -12,6 +12,16 @@ class IssuerAuthInput:
         self.validity_days = kwargs["validity_days"]
         self.x509_certificate = kwargs["x509_certificate"]
 
+    def __eq__(self, other):
+        return (
+            isinstance(other, IssuerAuthInput)
+            and (self.issuer_private_key == other.issuer_private_key)
+            and (self.output == other.output)
+            and (self.private_key == other.private_key)
+            and (self.validity_days == other.validity_days)
+            and (self.x509_certificate == other.x509_certificate)
+        )
+
     @classmethod
     def from_parser(cls: Type[T], args: Namespace) -> T:
         """

@@ -11,10 +11,7 @@ class TestIssuerSignedItem:
     ):
         actual = IssuerSignedItem.from_dict(valid_issuer_signed_item_input)
 
-        assert actual.digest_id == valid_issuer_signed_item.digest_id
-        assert actual.element_identifier == valid_issuer_signed_item.element_identifier
-        assert actual.element_value == valid_issuer_signed_item.element_value
-        assert actual.random == valid_issuer_signed_item.random
+        assert actual == valid_issuer_signed_item
 
     @pytest.mark.parametrize(
         "invalid_input",
