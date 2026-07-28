@@ -28,7 +28,9 @@ test = [
 [project.scripts]
 generate-mock-credential = "mock_credential:generate_mock_credential_entry_point"
 
-[pytest]
+[tool.pytest]
+log_cli = true
+log_cli_level = "INFO"
 testpaths = [
     "scripts/mock_credential"
 ]

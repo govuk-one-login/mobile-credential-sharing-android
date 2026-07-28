@@ -1,7 +1,7 @@
 from argparse import ArgumentParser, Namespace
 from typing import TypeVar, Type
 
-T = TypeVar('T', bound='Parent')
+T = TypeVar('T', bound='Parent') # type: ignore
 
 class IssuerAuthInput:
 
