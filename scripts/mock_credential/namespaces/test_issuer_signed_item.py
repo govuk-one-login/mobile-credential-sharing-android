@@ -4,12 +4,17 @@ from typing import AnyStr, Any, Dict
 
 class TestIssuerSignedItem:
 
-    def test_valid_input(self, valid_issuer_signed_item_input, valid_issuer_signed_item):
+    def test_valid_input(
+        self,
+        valid_issuer_signed_item_input,
+        valid_issuer_signed_item
+    ):
         actual = IssuerSignedItem.from_dict(valid_issuer_signed_item_input)
 
         assert actual.digest_id == valid_issuer_signed_item.digest_id
         assert actual.element_identifier == valid_issuer_signed_item.element_identifier
         assert actual.element_value == valid_issuer_signed_item.element_value
+        assert actual.random == valid_issuer_signed_item.random
 
     @pytest.mark.parametrize(
         "invalid_input",
