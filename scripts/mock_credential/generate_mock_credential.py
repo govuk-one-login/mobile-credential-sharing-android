@@ -32,6 +32,7 @@ from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID, ObjectIdentifier
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from mock_credential.issuer import IssuerAuthInput
+from mock_credential.namespaces import IssuerSignedItem
 
 # Sample IssuerSignedItems for a test mDL
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -183,7 +184,11 @@ def generate():
     # Build nameSpaces
     namespaces = {}
     for ns_name, items in SAMPLE_ITEMS.items():
-        namespaces[ns_name] = [build_issuer_signed_item(item) for item in items]
+        namespaces[ns_name] = [
+            IssuerSignedItem.from_dict(item).build_issuer_signed_item()
+            for item
+            in items
+        ]
 
     issuer_private_key = get_issuer_private_key(args.issuer_private_key)
 
