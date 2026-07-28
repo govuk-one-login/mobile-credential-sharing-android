@@ -18,6 +18,11 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+test = [
+    "pytest"
+]
+
 [console_scripts]
 
 [project.scripts]
