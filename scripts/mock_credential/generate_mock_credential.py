@@ -31,6 +31,7 @@ from cryptography.x509 import Certificate, CertificateBuilder, Name, NameAttribu
 from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID, ObjectIdentifier
 from datetime import datetime, timezone, timedelta
 from typing import Optional
+from mock_credential.issuer import IssuerAuthInput
 
 # Sample IssuerSignedItems for a test mDL
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -295,7 +296,7 @@ def generate_issuer_private_key(issuer_private_key_file_path: str):
     return key
 
 
-def get_argument_parser() -> argparse.Namespace:
+def get_argument_parser() -> IssuerAuthInput:
     parser = argparse.ArgumentParser(description="Generate a mock credential for the test app")
     parser.add_argument(
         "--private-key",
@@ -323,7 +324,15 @@ def get_argument_parser() -> argparse.Namespace:
         default=365,
         help="Validity period in days (leaf capped at 457)"
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    return IssuerAuthInput(
+        private_key = args.private_key,
+        issuer_private_key = args.issuer_private_key,
+        x509_certificate = args.x509_certificate,
+        output = args.output,
+        validity_days = args.validity_days
+    )
 
 
 if __name__ == "__main__":
