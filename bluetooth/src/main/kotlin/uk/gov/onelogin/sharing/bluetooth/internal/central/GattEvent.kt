@@ -29,4 +29,6 @@ internal sealed interface GattEvent {
         val descriptor: BluetoothGattDescriptor,
         val status: Int
     ) : GattEvent
+
+    data class ServiceChanged(val gatt: BluetoothGatt) : GattEvent
 }

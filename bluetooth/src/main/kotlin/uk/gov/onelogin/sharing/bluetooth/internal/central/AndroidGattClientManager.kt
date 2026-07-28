@@ -147,6 +147,7 @@ class AndroidGattClientManager(
                 is GattEvent.CharacteristicWrite -> characteristicWritten(event)
                 is GattEvent.CharacteristicChanged -> handleCharacteristicChanged(event)
                 is GattEvent.DescriptorWrite -> descriptorWritten(event)
+                is GattEvent.ServiceChanged -> handleServiceChanged()
             }
         } catch (e: SecurityException) {
             logger.error(logTag, "Security exception", e)
@@ -376,6 +377,14 @@ class AndroidGattClientManager(
 
         logger.debug(logTag, "Wrote value to characteristic: ${event.characteristic.uuid}")
         writeQueue.onWriteComplete(event.characteristic.uuid, true)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleServiceChanged() {
+        handleError(
+            ClientError.SERVICE_CHANGED,
+            "Remote GATT server services changed - session invalidated"
+        )
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
