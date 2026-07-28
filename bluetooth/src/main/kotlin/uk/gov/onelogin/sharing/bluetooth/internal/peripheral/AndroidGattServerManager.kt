@@ -63,9 +63,11 @@ class AndroidGattServerManager(
     }
     private var mtu = MIN_MTU
     private var isSessionEnd = false
+    private var isServiceReady = false
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open(serviceUuid: UUID) {
+        isServiceReady = false
         val gattService = gattServiceFactory(serviceUuid)
 
         if (permissionsChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
@@ -104,6 +106,7 @@ class AndroidGattServerManager(
         gattServer = null
         connectedDevice = null
         isSessionEnd = false
+        isServiceReady = false
         mtu = MIN_MTU
         _events.tryEmit(GattServerEvent.ServiceStopped)
     }
@@ -125,17 +128,41 @@ class AndroidGattServerManager(
         _events.tryEmit(GattServerEvent.MessageReceived(event.byteArray))
     }
 
+    @SuppressLint("MissingPermission")
     private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
         val address = event.device.address
 
         val event = when {
             event.status == BluetoothGatt.GATT_SUCCESS &&
                 event.newState == BluetoothProfile.STATE_CONNECTED -> {
+                // Reject connections that arrive before addService() completes.
+                // This happens when a device from a previous session is still actively connecting
+                // Android routes it to the new GATT server immediately on openGattServer(),
+                // before the service is registered.
+                if (!isServiceReady) {
+                    logger.debug(
+                        logTag,
+                        "Rejecting connection from $address - service not ready"
+                    )
+                    gattServer?.cancelConnection(event.device)
+                    return
+                }
                 connectedDevice = event.device
                 GattServerEvent.Connected(address)
             }
 
             event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
+                // Suppress disconnection events for connections we never accepted.
+                // This occurs when cancelConnection() is called on a device that connected before
+                // the service was ready — Android still fires STATE_DISCONNECTED for the
+                // cancelled connection, which would propagate as a false session failure event.
+                if (connectedDevice == null) {
+                    logger.debug(
+                        logTag,
+                        "Ignoring disconnection from $address - no accepted connection"
+                    )
+                    return
+                }
                 connectedDevice = null
                 GattServerEvent.Disconnected(address, isSessionEnd)
             }
@@ -151,6 +178,7 @@ class AndroidGattServerManager(
     }
 
     private fun handleServiceAdded(event: GattServerCallbackEvent.ServiceAdded) {
+        isServiceReady = true
         _events.tryEmit(
             GattServerEvent.ServiceAdded(
                 event.status,

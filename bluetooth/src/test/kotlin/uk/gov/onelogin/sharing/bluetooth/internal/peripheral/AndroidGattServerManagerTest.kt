@@ -127,6 +127,9 @@ class AndroidGattServerManagerTest {
         manager.open(uuid)
 
         manager.events.test {
+            callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+            awaitItem()
+
             callbackSlot.captured.onConnectionStateChange(
                 device,
                 BluetoothGatt.GATT_SUCCESS,
@@ -143,11 +146,48 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
+    fun `rejects connection when service is not ready`() = runTest {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+        manager.open(uuid)
+
+        manager.events.test {
+            callbackSlot.captured.onConnectionStateChange(
+                device,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothProfile.STATE_CONNECTED
+            )
+
+            expectNoEvents()
+        }
+
+        verify { gattServer.cancelConnection(device) }
+    }
+
+    @Test
+    fun `ignores disconnection when no connection was accepted`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+        manager.open(uuid)
+
+        manager.events.test {
+            callbackSlot.captured.onConnectionStateChange(
+                device,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothProfile.STATE_DISCONNECTED
+            )
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun `emits Disconnected after a successful connect`() = runTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
         manager.open(uuid)
 
         manager.events.test {
+            callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+            awaitItem()
+
             callbackSlot.captured.onConnectionStateChange(
                 device,
                 BluetoothGatt.GATT_SUCCESS,
@@ -396,6 +436,7 @@ class AndroidGattServerManagerTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
         manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
 
         callbackSlot.captured.onConnectionStateChange(
             device,
@@ -431,6 +472,7 @@ class AndroidGattServerManagerTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
         manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
 
         callbackSlot.captured.onConnectionStateChange(
             device,
@@ -520,6 +562,7 @@ class AndroidGattServerManagerTest {
         every { gattServer.getService(uuid) } returns service
 
         manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
         callbackSlot.captured.onConnectionStateChange(
             device,
             BluetoothGatt.GATT_SUCCESS,
@@ -547,6 +590,7 @@ class AndroidGattServerManagerTest {
             every { gattServer.getService(uuid) } returns service
 
             manager.open(uuid)
+            callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
             // Simulate a small value MTU value negotiation so we get multiple chunks
             callbackSlot.captured.onMtuChanged(device, 23)
             callbackSlot.captured.onConnectionStateChange(
@@ -578,6 +622,7 @@ class AndroidGattServerManagerTest {
         every { gattServer.getService(uuid) } returns service
 
         manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
         callbackSlot.captured.onConnectionStateChange(
             device,
             BluetoothGatt.GATT_SUCCESS,
@@ -622,6 +667,7 @@ class AndroidGattServerManagerTest {
         every { gattServer.getService(uuid) } returns service
 
         manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
         callbackSlot.captured.onConnectionStateChange(
             device,
             BluetoothGatt.GATT_SUCCESS,

@@ -121,8 +121,14 @@ class AndroidPeripheralBluetoothTransportTest {
     @Test
     fun `start triggers advertiser start and gatt server open`() =
         runTest(testScope.coroutineContext) {
-            transport.start(uuid)
+            transport.monitoringJob.start()
+            gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
+            advanceUntilIdle()
 
+            transport.start(uuid)
+            advanceUntilIdle()
+
+            assertEquals(PeripheralBluetoothState.Idle, transport.state.value)
             assertEquals(1, advertiser.startCalls)
             assertEquals(uuid, advertiser.lastAdvertiseData?.serviceUuid)
             assertEquals(AdvertiserState.Started, advertiser.state.value)
@@ -162,6 +168,8 @@ class AndroidPeripheralBluetoothTransportTest {
     @Test
     fun `stop calls advertiser stop and gatt server close`() = runTest(testScope.coroutineContext) {
         transport.monitoringJob.start()
+        gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
 
         assertThat(
             transport,
@@ -174,6 +182,7 @@ class AndroidPeripheralBluetoothTransportTest {
         )
         advanceUntilIdle()
 
+        assertEquals(PeripheralBluetoothState.Idle, transport.state.value)
         assertEquals(1, advertiser.stopCalls)
         assertEquals(1, gattServerManager.closeCalls)
         assertEquals(1, bluetoothStateMonitor.stopCalls)
