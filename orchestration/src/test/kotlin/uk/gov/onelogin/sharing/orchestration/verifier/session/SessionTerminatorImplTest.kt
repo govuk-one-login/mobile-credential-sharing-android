@@ -43,7 +43,8 @@ class SessionTerminatorImplTest {
             terminator.terminate(
                 serviceUuid = serviceUuid,
                 bleOpen = true,
-                holderRequestedTermination = false
+                holderRequestedTermination = false,
+                sendSessionData = true
             )
 
             assertEquals(1, fakeCryptoService.buildTerminationSessionDataCalls)
@@ -62,7 +63,8 @@ class SessionTerminatorImplTest {
             terminator.terminate(
                 serviceUuid = serviceUuid,
                 bleOpen = true,
-                holderRequestedTermination = false
+                holderRequestedTermination = false,
+                sendSessionData = true
             )
         }
 
@@ -79,7 +81,8 @@ class SessionTerminatorImplTest {
             terminator.terminate(
                 serviceUuid = serviceUuid,
                 bleOpen = true,
-                holderRequestedTermination = true
+                holderRequestedTermination = true,
+                sendSessionData = true
             )
 
             assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
@@ -92,7 +95,8 @@ class SessionTerminatorImplTest {
         terminator.terminate(
             serviceUuid = serviceUuid,
             bleOpen = false,
-            holderRequestedTermination = true
+            holderRequestedTermination = true,
+            sendSessionData = true
         )
 
         assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
@@ -105,7 +109,8 @@ class SessionTerminatorImplTest {
         terminator.terminate(
             serviceUuid = null,
             bleOpen = false,
-            holderRequestedTermination = true
+            holderRequestedTermination = true,
+            sendSessionData = true
         )
 
         assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
@@ -119,7 +124,8 @@ class SessionTerminatorImplTest {
             terminator.terminate(
                 serviceUuid = null,
                 bleOpen = true,
-                holderRequestedTermination = false
+                holderRequestedTermination = false,
+                sendSessionData = true
             )
 
             assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
@@ -136,12 +142,27 @@ class SessionTerminatorImplTest {
         terminator.terminate(
             serviceUuid = serviceUuid,
             bleOpen = true,
-            holderRequestedTermination = false
+            holderRequestedTermination = false,
+            sendSessionData = true
         )
 
         val endTime = currentTime
         assertEquals(0L, endTime - startTime)
         assertEquals(1, fakeTransport.sendEndCalls)
         assertFalse(fakeTransport.sendMessageToReturn)
+    }
+
+    @Test
+    fun `sendSessionData false skips SessionData and sends GATT End only`() = runTest {
+        terminator.terminate(
+            serviceUuid = serviceUuid,
+            bleOpen = true,
+            holderRequestedTermination = false,
+            sendSessionData = false
+        )
+
+        assertEquals(0, fakeCryptoService.buildTerminationSessionDataCalls)
+        assertEquals(1, fakeTransport.sendEndCalls)
+        assertEquals(1, fakeTransport.stopCalls)
     }
 }

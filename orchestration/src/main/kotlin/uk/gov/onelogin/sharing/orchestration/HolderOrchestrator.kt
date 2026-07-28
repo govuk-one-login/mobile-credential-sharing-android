@@ -346,7 +346,7 @@ class HolderOrchestrator(
 
         when (state) {
             is PeripheralBluetoothState.Connected -> {
-                sessionTimer.start(300.seconds) { cancel() }
+                sessionTimer.start(INACTIVITY_TIMEOUT) { cancel() }
 
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
                 logger.debug(logTag, "Mdoc - Connected: ${state.address}")
@@ -796,6 +796,7 @@ class HolderOrchestrator(
     }
 
     private companion object {
+        val INACTIVITY_TIMEOUT = 300.seconds
         const val UNKNOWN_ERROR = "Unknown error"
         const val PORTRAIT_POLICY_VIOLATION =
             "Policy violation: DeviceRequest does not request portrait attribute"

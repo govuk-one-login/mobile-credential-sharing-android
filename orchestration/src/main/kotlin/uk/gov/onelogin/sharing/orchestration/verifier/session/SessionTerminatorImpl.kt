@@ -34,14 +34,16 @@ class SessionTerminatorImpl(
      * @param serviceUuid The active GATT service UUID for sending messages.
      * @param bleOpen Whether the BLE connection is still active.
      * @param holderRequestedTermination Whether the holder already sent a SessionData with status 20.
+     * @param sendSessionData whether to send SessionData with status 20 before GATT End.
      */
     override suspend fun terminate(
         serviceUuid: UUID?,
         bleOpen: Boolean,
-        holderRequestedTermination: Boolean
+        holderRequestedTermination: Boolean,
+        sendSessionData: Boolean
     ) {
         if (bleOpen && !holderRequestedTermination) {
-            if (serviceUuid != null) {
+            if (sendSessionData && serviceUuid != null) {
                 logger.debug(logTag, "Sending termination session data")
 
                 val terminationBytes = verifierCryptoService.buildTerminationSessionData()
