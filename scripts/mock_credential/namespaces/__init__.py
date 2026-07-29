@@ -2,6 +2,7 @@ import os
 from base64 import b64decode
 from cbor2 import CBORTag
 from .issuer_signed_item import IssuerSignedItem
+from .issuer_signed_namespaces import IssuerSignedNamespaces
 
 # Sample IssuerSignedItems for a test mDL
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,3 +31,5 @@ SAMPLE_ITEMS = {
         {"digestID": 12, "elementIdentifier": "welsh_licence", "elementValue": False},
     ],
 }
+
+SAMPLE_NAMESPACES = IssuerSignedNamespaces.from_dict(SAMPLE_ITEMS)

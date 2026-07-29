@@ -51,19 +51,6 @@ LEAF_NAME = Name([
     NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
 ])
 
-
-def build_issuer_signed_item(item):
-    """Encode an IssuerSignedItem as Tag(24, bstr(encoded_item))."""
-    item_with_random = {
-        "digestID": item["digestID"],
-        "random": hashlib.sha256(str(item["digestID"]).encode()).digest()[:16],
-        "elementIdentifier": item["elementIdentifier"],
-        "elementValue": item["elementValue"],
-    }
-    encoded = cbor2.dumps(item_with_random)
-    return cbor2.CBORTag(24, encoded)
-
-
 def generate_root_certificate(issuer_private_key, now, validity_days):
     """Generate a self-signed root CA certificate."""
     issuer_pub = issuer_private_key.public_key()
