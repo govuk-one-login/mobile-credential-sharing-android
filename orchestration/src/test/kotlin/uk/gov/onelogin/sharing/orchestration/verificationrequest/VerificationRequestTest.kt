@@ -102,4 +102,35 @@ class VerificationRequestTest {
         assertEquals(true, request.attributeGroup.attributes[MdlAttribute.GivenName])
         assertEquals(false, request.attributeGroup.attributes[MdlAttribute.FamilyName])
     }
+
+    @Test
+    fun `raw factory routes GB attributes to correct collection`() {
+        val request = VerificationRequest.raw(
+            documentType = "org.iso.18013.5.1.mDL",
+            requestedElements = mapOf(
+                "given_name" to true,
+                "title" to true
+            )
+        )
+
+        assertTrue(
+            request.attributeGroup.attributes.keys.any {
+                it is MdlAttribute.Custom && it.value == "given_name"
+            }
+        )
+        assertTrue(request.attributeGroup.gbAttributes.containsKey(GbAttribute.Title))
+        assertEquals(1, request.attributeGroup.attributes.size)
+        assertEquals(1, request.attributeGroup.gbAttributes.size)
+    }
+
+    @Test
+    fun `requestedElements returns combined list from both namespaces`() {
+        val attributeGroup = AttributeGroup(
+            attributes = mapOf(MdlAttribute.GivenName to true),
+            gbAttributes = mapOf(GbAttribute.Title to true)
+        )
+        val request = VerificationRequest("docType", attributeGroup)
+
+        assertEquals(listOf("given_name", "title"), request.requestedElements)
+    }
 }

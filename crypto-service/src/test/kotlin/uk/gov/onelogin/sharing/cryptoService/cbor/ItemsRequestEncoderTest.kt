@@ -9,6 +9,7 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NA
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.over18Request
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.over21Request
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto
 
 class ItemsRequestEncoderTest {
@@ -68,5 +69,23 @@ class ItemsRequestEncoderTest {
         org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
             over21Request.copy(nameSpaces = emptyMap()).toDto()
         }
+    }
+
+    @Test
+    fun `toCbor maps both standard and GB namespaces correctly`() {
+        val gbNamespace = "org.iso.18013.5.1.GB"
+        val request = ItemsRequestEncoderStub.nameTitleAndAgeRequest
+        val decoded = roundtrip(request.toDto())
+
+        assertEquals(2, decoded.nameSpaces.size)
+        assertTrue(decoded.nameSpaces.containsKey(MDL_NAMESPACE))
+        assertTrue(decoded.nameSpaces.containsKey(gbNamespace))
+
+        val standardElements = decoded.nameSpaces[MDL_NAMESPACE]!!
+        assertEquals(true, standardElements["given_name"])
+        assertEquals(false, standardElements["age_over_23"])
+
+        val gbElements = decoded.nameSpaces[gbNamespace]!!
+        assertEquals(true, gbElements["title"])
     }
 }
