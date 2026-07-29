@@ -19,3 +19,8 @@ class TestIssuerSignedNamespaces:
     )
     def test_sample_items_contains_entries(self, namespace):
         assert SAMPLE_NAMESPACES[namespace] is not None
+
+    def test_value_digest_generation(self):
+        digests = SAMPLE_NAMESPACES.as_value_digests()
+
+        assert digests is not None

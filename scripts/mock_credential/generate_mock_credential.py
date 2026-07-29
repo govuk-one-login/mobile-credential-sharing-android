@@ -32,7 +32,7 @@ from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID, ObjectIdentifier
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from mock_credential.issuer import IssuerAuthInput
-from mock_credential.namespaces import IssuerSignedItem, SAMPLE_ITEMS
+from mock_credential.namespaces import IssuerSignedItem, SAMPLE_ITEMS, SAMPLE_NAMESPACES
 
 # ISO 18013-5 OIDs
 OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
@@ -178,14 +178,7 @@ def generate():
     # Build MSO
     device_cose_key = {1: 2, -1: 1, -2: device_x, -3: device_y}
 
-    value_digests = {}
-    for ns_name, items in namespaces.items():
-        ns_digests = {}
-        for item in items:
-            item_bytes = cbor2.dumps(item)
-            decoded_item = cbor2.loads(item.value)
-            ns_digests[decoded_item["digestID"]] = hashlib.sha256(item_bytes).digest()
-        value_digests[ns_name] = ns_digests
+    value_digests = SAMPLE_NAMESPACES.as_value_digests()
 
     mso = {
         "version": "1.0",

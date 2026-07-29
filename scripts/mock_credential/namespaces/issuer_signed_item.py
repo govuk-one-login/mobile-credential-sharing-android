@@ -1,4 +1,4 @@
-from cbor2 import dumps, CBORTag
+from cbor2 import dumps, loads, CBORTag
 from hashlib import sha256
 from typing import Dict, Type, TypeVar
 
@@ -33,6 +33,16 @@ class IssuerSignedItem:
         }
         encoded = dumps(item_with_random)
         return CBORTag(24, encoded)
+
+    def load_issuer_signed_item(self):
+        item = self.build_issuer_signed_item()
+        return loads(item.value)
+
+    def as_value_digest(self) -> bytes:
+        item = self.build_issuer_signed_item()
+        item_bytes = dumps(item)
+        return sha256(item_bytes).digest()
+
 
     @classmethod
     def from_dict(cls: Type[T], args: Dict) -> T:
