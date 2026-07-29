@@ -42,6 +42,7 @@ class HolderSuccessScreenTest {
     private lateinit var controller: TestNavHostController
 
     private var hasExitedJourney = false
+    private var hasExitedJourneyCount = 0
 
     private val orchestrator by lazy {
         FakeOrchestrator()
@@ -105,8 +106,15 @@ class HolderSuccessScreenTest {
                 backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
             }
 
-            waitUntil { orchestrator.resetCount == 1 }
-            waitUntil { hasExitedJourney }
+            waitUntil(
+                "Didn't call `orchestrator.reset()` via the view model!"
+            ) { orchestrator.resetCount == 1 }
+            waitUntil(
+                "Didn't call the 'onExitJourney' lambda!"
+            ) { hasExitedJourney }
+            waitUntil(
+                "'onExitJourney' has an unexpected call count!: $hasExitedJourneyCount"
+            ) { hasExitedJourneyCount == 1 }
         }
     }
 
@@ -129,7 +137,10 @@ class HolderSuccessScreenTest {
                 composable<HolderSuccessRoute> {
                     HolderSuccessScreen(
                         viewModel = viewModel,
-                        onExitJourney = { hasExitedJourney = true }
+                        onExitJourney = {
+                            hasExitedJourney = true
+                            hasExitedJourneyCount++
+                        }
                     )
                 }
             }
