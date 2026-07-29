@@ -241,6 +241,33 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
+    fun `rejects connection when service added with failure status`() = runTest {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+        manager.open(uuid)
+
+        manager.events.test {
+            callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_FAILURE, fakeGattService)
+            assertEquals(
+                GattServerEvent.ServiceAdded(
+                    status = BluetoothGatt.GATT_FAILURE,
+                    service = fakeGattService
+                ),
+                awaitItem()
+            )
+
+            callbackSlot.captured.onConnectionStateChange(
+                device,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothProfile.STATE_CONNECTED
+            )
+
+            expectNoEvents()
+        }
+
+        verify { gattServer.cancelConnection(device) }
+    }
+
+    @Test
     fun `emits session state started event`() = runTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
