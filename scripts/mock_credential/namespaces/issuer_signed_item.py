@@ -1,6 +1,6 @@
 from cbor2 import dumps, loads, CBORTag
 from hashlib import sha256
-from typing import Dict, Type, TypeVar
+from typing import AnyStr, Any, Dict, Type, TypeVar
 
 T = TypeVar('T', bound='Parent') # type: ignore
 
@@ -23,7 +23,7 @@ class IssuerSignedItem:
             and (self.random == other.random)
         )
 
-    def build_issuer_signed_item(self):
+    def as_tagged_cbor(self) -> CBORTag:
         """Encode an IssuerSignedItem as Tag(24, bstr(encoded_item))."""
         item_with_random = {
             "digestID": self.digest_id,
@@ -34,12 +34,8 @@ class IssuerSignedItem:
         encoded = dumps(item_with_random)
         return CBORTag(24, encoded)
 
-    def load_issuer_signed_item(self):
-        item = self.build_issuer_signed_item()
-        return loads(item.value)
-
     def as_value_digest(self) -> bytes:
-        item = self.build_issuer_signed_item()
+        item = self.as_tagged_cbor()
         item_bytes = dumps(item)
         return sha256(item_bytes).digest()
 

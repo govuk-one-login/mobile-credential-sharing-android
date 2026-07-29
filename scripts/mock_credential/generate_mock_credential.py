@@ -131,23 +131,8 @@ def generate_leaf_certificate(leaf_private_key, issuer_private_key, root_cert, n
 def generate():
     args = get_argument_parser()
 
-    # Load device private key
-    with open(args.private_key, "rb") as f:
-        device_private_key = serialization.load_pem_private_key(f.read(), password=None)
-
-    device_pub = device_private_key.public_key()
-    device_nums = device_pub.public_numbers()
-    device_x = device_nums.x.to_bytes(32, "big")
-    device_y = device_nums.y.to_bytes(32, "big")
-
     # Build nameSpaces
-    namespaces = {}
-    for ns_name, items in SAMPLE_ITEMS.items():
-        namespaces[ns_name] = [
-            IssuerSignedItem.from_dict(item).build_issuer_signed_item()
-            for item
-            in items
-        ]
+    namespaces = SAMPLE_NAMESPACES.build_issuer_signed_items()
 
     issuer_private_key = get_issuer_private_key(args.issuer_private_key)
 
@@ -176,6 +161,15 @@ def generate():
     leaf_cert_der = leaf_cert.public_bytes(serialization.Encoding.DER)
 
     # Build MSO
+    ## Load device private key
+    with open(args.private_key, "rb") as f:
+        device_private_key = serialization.load_pem_private_key(f.read(), password=None)
+
+    device_pub = device_private_key.public_key()
+    device_nums = device_pub.public_numbers()
+    device_x = device_nums.x.to_bytes(32, "big")
+    device_y = device_nums.y.to_bytes(32, "big")
+
     device_cose_key = {1: 2, -1: 1, -2: device_x, -3: device_y}
 
     value_digests = SAMPLE_NAMESPACES.as_value_digests()
