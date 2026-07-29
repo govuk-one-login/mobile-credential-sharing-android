@@ -32,38 +32,10 @@ from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID, ObjectIdentifier
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from mock_credential.issuer import IssuerAuthInput
-from mock_credential.namespaces import IssuerSignedItem
-
-# Sample IssuerSignedItems for a test mDL
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PORTRAIT_BYTES = base64.b64decode(
-    open(os.path.join(SCRIPT_DIR, "portrait.txt")).read().strip()
-)
+from mock_credential.namespaces import IssuerSignedItem, SAMPLE_ITEMS
 
 # ISO 18013-5 OIDs
 OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
-
-SAMPLE_ITEMS = {
-    "org.iso.18013.5.1": [
-        {"digestID": 1, "elementIdentifier": "family_name", "elementValue": "Doe"},
-        {"digestID": 2, "elementIdentifier": "given_name", "elementValue": "Jane"},
-        {"digestID": 3, "elementIdentifier": "portrait", "elementValue": PORTRAIT_BYTES},
-        {"digestID": 4, "elementIdentifier": "birth_date",
-         "elementValue": cbor2.CBORTag(1004, "2007-01-15")},
-        {"digestID": 5, "elementIdentifier": "issue_date",
-         "elementValue": cbor2.CBORTag(1004, "2024-01-01")},
-        {"digestID": 6, "elementIdentifier": "expiry_date",
-         "elementValue": cbor2.CBORTag(1004, "2034-01-01")},
-        {"digestID": 7, "elementIdentifier": "issuing_country", "elementValue": "GB"},
-        {"digestID": 8, "elementIdentifier": "issuing_authority", "elementValue": "DVLA"},
-        {"digestID": 9, "elementIdentifier": "age_over_18", "elementValue": True},
-        {"digestID": 10, "elementIdentifier": "age_over_21", "elementValue": False},
-        {"digestID": 11, "elementIdentifier": "age_over_25", "elementValue": False},
-    ],
-    "org.iso.18013.5.1.GB": [
-        {"digestID": 12, "elementIdentifier": "welsh_licence", "elementValue": False},
-    ],
-}
 
 ISSUER_NAME = Name([
     NameAttribute(NameOID.COUNTRY_NAME, "GB"),
