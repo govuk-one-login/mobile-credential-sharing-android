@@ -13,6 +13,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
@@ -75,6 +76,7 @@ class UnrecoverableVerifierErrorScreenTest {
             onNodeWithRole(Role.Button).performClick()
 
             assertHasExitedJourney()
+            assertHasExitedJourneyCount(equalTo(1))
         }
     }
 
@@ -98,6 +100,7 @@ class UnrecoverableVerifierErrorScreenTest {
             waitForIdle()
 
             assertHasExitedJourney()
+            assertHasExitedJourneyCount(equalTo(1))
         }
     }
 

@@ -16,10 +16,9 @@ class FinishedVerifierJourneyScreenRule(composeTestRule: ComposeContentTestRule)
 
     fun assertHasExitedJourney() = waitUntil { hasExitedJourney }
 
-    fun assertHasExitedJourneyCount(expectedCount: Matcher<in Int> = greaterThan(0)) =
-        waitUntil(
-            "Unexpected exit journey call count! Actual: $hasExitedJourneyCount"
-        ) { expectedCount.matches(hasExitedJourneyCount) }
+    fun assertHasExitedJourneyCount(expectedCount: Matcher<in Int> = greaterThan(0)) = waitUntil(
+        "Unexpected exit journey call count! Actual: $hasExitedJourneyCount"
+    ) { expectedCount.matches(hasExitedJourneyCount) }
 
     fun assertDocumentIsDisplayed(document: VerifiableDocument) =
         onNodeWithText(document.toString(), substring = true)
