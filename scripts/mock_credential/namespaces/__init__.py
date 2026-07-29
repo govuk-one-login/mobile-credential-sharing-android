@@ -32,4 +32,4 @@ SAMPLE_ITEMS = {
     ],
 }
 
-SAMPLE_NAMESPACES = IssuerSignedNamespaces.from_dict(SAMPLE_ITEMS)
+SAMPLE_NAMESPACES: IssuerSignedNamespaces = IssuerSignedNamespaces.from_dict(SAMPLE_ITEMS)

@@ -30,9 +30,9 @@ from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from cryptography.x509 import Certificate, CertificateBuilder, Name, NameAttribute
 from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID, ObjectIdentifier
 from datetime import datetime, timezone, timedelta
-from typing import Optional
+from typing import Dict, Optional
 from mock_credential.issuer import IssuerAuthInput
-from mock_credential.namespaces import IssuerSignedItem, SAMPLE_ITEMS, SAMPLE_NAMESPACES
+from mock_credential.namespaces import SAMPLE_NAMESPACES
 
 # ISO 18013-5 OIDs
 OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
@@ -51,7 +51,7 @@ LEAF_NAME = Name([
     NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
 ])
 
-def generate_root_certificate(issuer_private_key, now, validity_days):
+def generate_root_certificate(issuer_private_key, now, validity_days) -> Certificate:
     """Generate a self-signed root CA certificate."""
     issuer_pub = issuer_private_key.public_key()
     return (
@@ -130,16 +130,8 @@ def generate_leaf_certificate(leaf_private_key, issuer_private_key, root_cert, n
 
 def generate():
     args = get_argument_parser()
-
-    # Build nameSpaces
-    namespaces = SAMPLE_NAMESPACES.build_issuer_signed_items()
-
     issuer_private_key = get_issuer_private_key(args.issuer_private_key)
-
     now = datetime.now(timezone.utc)
-
-    # Generate leaf signing key (separate from issuer root key)
-    leaf_private_key = ec.generate_private_key(ec.SECP256R1())
 
     # Generate root CA certificate (trust anchor for verifier)
     root_cert = generate_root_certificate(issuer_private_key, now, args.validity_days)
@@ -153,6 +145,9 @@ def generate():
     with open(pem_path, "wb") as f:
         f.write(root_cert.public_bytes(serialization.Encoding.PEM))
     print(f"Generated root certificate PEM: {pem_path}")
+
+    # Generate leaf signing key (separate from issuer root key)
+    leaf_private_key = ec.generate_private_key(ec.SECP256R1())
 
     # Generate leaf certificate (embedded in x5chain)
     leaf_cert = generate_leaf_certificate(
@@ -173,6 +168,7 @@ def generate():
     device_cose_key = {1: 2, -1: 1, -2: device_x, -3: device_y}
 
     value_digests = SAMPLE_NAMESPACES.as_value_digests()
+    namespaces: Dict = SAMPLE_NAMESPACES.build_issuer_signed_items()
 
     mso = {
         "version": "1.0",
@@ -220,7 +216,7 @@ def generate():
     print(f"  Chain: root (trust anchor) -> leaf (in x5chain)")
 
 
-def get_issuer_private_key(issuer_private_key_file_path: str):
+def get_issuer_private_key(issuer_private_key_file_path: str) -> ec.EllipticCurvePrivateKey:
     """
     Obtains an EC private key for use as the root CA key.
     """
