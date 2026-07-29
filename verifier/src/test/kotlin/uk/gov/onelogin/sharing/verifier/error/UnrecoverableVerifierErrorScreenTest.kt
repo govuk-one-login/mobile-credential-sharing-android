@@ -61,7 +61,7 @@ class UnrecoverableVerifierErrorScreenTest {
     }
 
     @Test
-    fun `Exiting the journey resets the orchestrator via the view model`() = runTest(
+    fun `Exiting the journey via CTA performs a reset`() = runTest(
         dispatcherRule.testDispatcher
     ) {
         composeTestRule.run {

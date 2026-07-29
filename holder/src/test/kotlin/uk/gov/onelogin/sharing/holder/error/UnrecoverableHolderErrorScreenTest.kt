@@ -55,7 +55,7 @@ class UnrecoverableHolderErrorScreenTest {
     }
 
     @Test
-    fun `Resets the orchestrator through the view model via CTA`() = runTest(
+    fun `Exiting the journey via CTA performs a reset`() = runTest(
         dispatcherRule.testDispatcher
     ) {
         composeTestRule.run {
@@ -69,7 +69,7 @@ class UnrecoverableHolderErrorScreenTest {
     }
 
     @Test
-    fun `Resets the orchestrator through the view model via back button press`() = runTest(
+    fun `Exiting the journey via back press performs a reset`() = runTest(
         dispatcherRule.testDispatcher
     ) {
         composeTestRule.run {
