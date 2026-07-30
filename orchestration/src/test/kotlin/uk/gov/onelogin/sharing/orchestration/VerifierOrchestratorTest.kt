@@ -1626,6 +1626,25 @@ class VerifierOrchestratorTest {
         assertEquals(1, sessionTimer.stopCalls)
     }
 
+    @Test
+    fun `cancelling from ReadyToScan transitions directly to Cancelled and skips BLE cleanup`() =
+        runTest {
+            initialStates[0] = VerifierSessionState.ReadyToScan
+            backgroundScope.launch {
+                orchestrator.verifierSessionState.collect {}
+            }
+
+            orchestrator.cancel()
+            advanceUntilIdle()
+
+            assertThat(
+                orchestrator.verifierSessionState.value,
+                isCancelled()
+            )
+
+            assertEquals(0, sessionTerminator.terminateCalls)
+        }
+
     private suspend fun TestScope.connectBle() {
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.start()

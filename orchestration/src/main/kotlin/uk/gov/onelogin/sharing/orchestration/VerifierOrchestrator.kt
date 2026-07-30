@@ -227,7 +227,6 @@ class VerifierOrchestrator(
         if (sessionFlow.value.isComplete()) return
 
         appCoroutineScope.launch {
-            safeTransitionTo(VerifierSessionState.TerminatingSession)
             terminateSession(
                 centralBluetoothTransport.isBleOpen,
                 false,
@@ -577,20 +576,27 @@ class VerifierOrchestrator(
         finalState: VerifierSessionState,
         sendSessionData: Boolean = true
     ) {
-        if (sessionFlow.value.isComplete()) return
+        val currentState = sessionFlow.value.currentState.value
+        if (currentState.isComplete()) return
 
-        if (sessionFlow.value.currentState.value !is VerifierSessionState.TerminatingSession) {
-            safeTransitionTo(VerifierSessionState.TerminatingSession)
+        val isSessionStarted = currentState.shouldConfirmCancellation() ||
+            currentState is VerifierSessionState.TerminatingSession ||
+            sessionFlow.value.cryptoContext != null
+
+        if (isSessionStarted) {
+            if (currentState !is VerifierSessionState.TerminatingSession) {
+                safeTransitionTo(VerifierSessionState.TerminatingSession)
+            }
+
+            val context = sessionFlow.value.cryptoContext
+
+            sessionTerminator.terminate(
+                serviceUuid = context?.serviceUuid,
+                bleOpen = bleOpen,
+                holderRequestedTermination = receivedTermination,
+                sendSessionData = sendSessionData
+            )
         }
-
-        val context = sessionFlow.value.cryptoContext
-
-        sessionTerminator.terminate(
-            serviceUuid = context?.serviceUuid,
-            bleOpen = bleOpen,
-            holderRequestedTermination = receivedTermination,
-            sendSessionData = sendSessionData
-        )
 
         safeTransitionTo(finalState)
     }
@@ -652,29 +658,12 @@ class VerifierOrchestrator(
         }
     }
 
-    private fun failWith(message: String, exception: Throwable) = failWith(
-        message = message,
-        reason = SessionErrorReason.UnrecoverableThrowable(exception),
-        throwable = exception
-    )
-
-    private fun failWith(message: String, reason: SessionErrorReason) {
-        logger.error(logTag, message)
-        appCoroutineScope.launch {
-            terminateSession(
-                centralBluetoothTransport.isBleOpen,
-                false,
-                VerifierSessionState.Complete.Failed(
-                    SessionError(message = message, reason = reason)
-                )
-            )
-        }
-    }
+    private fun failWith(message: String, reason: SessionErrorReason) =
+        failWith(message, reason, IllegalStateException(message))
 
     private fun failWith(message: String, reason: SessionErrorReason, throwable: Throwable) {
         logger.error(logTag, message, throwable)
         appCoroutineScope.launch {
-            safeTransitionTo(VerifierSessionState.TerminatingSession)
             terminateSession(
                 centralBluetoothTransport.isBleOpen,
                 false,
