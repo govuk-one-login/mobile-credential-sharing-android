@@ -21,6 +21,8 @@ import dev.zacsweers.metro.createGraphFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import java.security.cert.X509Certificate
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -33,8 +35,6 @@ import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionSta
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
 import uk.gov.onelogin.sharing.ui.impl.di.VerifierUiGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
-import java.security.cert.X509Certificate
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(RobolectricTestParameterInjector::class)
