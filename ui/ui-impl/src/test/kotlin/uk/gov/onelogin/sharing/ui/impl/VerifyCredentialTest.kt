@@ -1,13 +1,28 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
+import androidx.navigation.compose.composable
+import androidx.navigation.testing.TestNavHostController
 import androidx.test.annotation.UiThreadTest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
+import dev.zacsweers.metro.createGraphFactory
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import java.security.cert.X509Certificate
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -18,6 +33,8 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
+import uk.gov.onelogin.sharing.ui.impl.di.VerifierUiGraph
+import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RunWith(RobolectricTestParameterInjector::class)
@@ -100,6 +117,88 @@ class VerifyCredentialTest {
             setContent { VerifyCredential(component = verifier) }
             waitForIdle()
             onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Close button on non-confirmable states cancels orchestrator directly`(
+        @TestParameter state: VerifierSessionState = namedTestValues(
+            "Ready to Scan" to VerifierSessionState.ReadyToScan,
+            "Preflight" to VerifierSessionState.Preflight(emptyList()),
+            "Processing engagement" to VerifierSessionState.ProcessingEngagement
+        )
+    ) = runTest {
+        val orchestrator = FakeOrchestrator(initialVerifierState = MutableStateFlow(state))
+        val uiGraph = createGraphFactory<VerifierUiGraph.Factory>()
+            .create(appGraph, orchestrator)
+
+        mockkObject(VerifierScanRoute)
+        with(VerifierScanRoute) {
+            every {
+                any<androidx.navigation.NavGraphBuilder>().configureVerifierScannerRoute()
+            } answers
+                {
+                    val builder = firstArg<androidx.navigation.NavGraphBuilder>()
+                    builder.composable<VerifierScanRoute> {
+                        Box(
+                            modifier = androidx.compose.ui.Modifier.testTag("cameraViewfinder")
+                        )
+                    }
+                }
+        }
+
+        composeTestRule.run {
+            setContent {
+                val context = LocalContext.current
+                val controller = remember {
+                    TestNavHostController(context).apply {
+                        navigatorProvider.addNavigator(ComposeNavigator())
+                        navigatorProvider.addNavigator(DialogNavigator())
+                    }
+                }
+
+                VerifyCredential(
+                    orchestrator = orchestrator,
+                    verifierSessionState = orchestrator.verifierSessionState,
+                    viewModelFactory = uiGraph.metroViewModelFactory,
+                    controller = controller
+                )
+            }
+
+            waitForIdle()
+
+            onNodeWithContentDescription("Close").performClick()
+
+            assertEquals(1, orchestrator.cancelCount)
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Close button on confirmable states navigates to dialog`(
+        @TestParameter state: VerifierSessionState = namedTestValues(
+            "Connecting" to VerifierSessionState.Connecting,
+            "Verifying" to VerifierSessionState.Verifying
+        )
+    ) = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialVerifierState = MutableStateFlow(state)
+        )
+        val verifier = FakeCredentialVerifier(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.run {
+            setContent {
+                VerifyCredential(component = verifier)
+            }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertExists()
+            composeTestRule.onNodeWithContentDescription("Close").performClick()
+            assertEquals(0, orchestrator.cancelCount)
+            composeTestRule.onNodeWithText("Deny").isDisplayed()
         }
     }
 }

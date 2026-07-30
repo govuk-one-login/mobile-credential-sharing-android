@@ -51,7 +51,9 @@ class VerifierSessionStateTest {
         @TestParameter state: VerifierSessionState = namedTestValues(
             "Connecting" to VerifierSessionState.Connecting,
             "Processing engagement" to VerifierSessionState.ProcessingEngagement,
-            "Verifying" to VerifierSessionState.Verifying
+            "Verifying" to VerifierSessionState.Verifying,
+            "Ready to scan" to VerifierSessionState.ReadyToScan,
+            "Preflight" to VerifierSessionState.Preflight(emptyList())
         )
     ) = runTest {
         assertTrue {
@@ -64,9 +66,7 @@ class VerifierSessionStateTest {
         @TestParameter state: VerifierSessionState = namedTestValues(
             "Cancelled" to VerifierSessionState.Complete.Cancelled,
             "Failed" to Failed(mockk(relaxed = true)),
-            "Missing prerequisites" to VerifierSessionState.Preflight(emptyList()),
             "Not started" to VerifierSessionState.NotStarted,
-            "QR Scanner" to VerifierSessionState.ReadyToScan,
             "Success" to VerifierSessionState.Complete.Success(mockk(relaxed = true)),
             "Terminating Session" to VerifierSessionState.TerminatingSession
         )
@@ -74,5 +74,27 @@ class VerifierSessionStateTest {
         assertFalse {
             state.userCanCancel()
         }
+    }
+
+    @Test
+    fun `Certain states require cancellation confirmation`(
+        @TestParameter state: VerifierSessionState = namedTestValues(
+            "Connecting" to VerifierSessionState.Connecting,
+            "Verifying" to VerifierSessionState.Verifying
+        )
+    ) {
+        assertTrue { state.shouldConfirmCancellation() }
+    }
+
+    @Test
+    fun `Certain states do not require cancellation confirmation`(
+        @TestParameter state: VerifierSessionState = namedTestValues(
+            "Preflight" to VerifierSessionState.Preflight(emptyList()),
+            "Ready to Scan" to VerifierSessionState.ReadyToScan,
+            "Processing engagement" to VerifierSessionState.ProcessingEngagement,
+            "Not Started" to VerifierSessionState.NotStarted
+        )
+    ) {
+        assertFalse { state.shouldConfirmCancellation() }
     }
 }

@@ -18,9 +18,20 @@ sealed class VerifierSessionState :
     override fun isComplete(): Boolean = this is Complete
 
     override fun userCanCancel(): Boolean = this::class in listOf(
+        Preflight::class,
+        ReadyToScan::class,
         Connecting::class,
         Verifying::class,
         ProcessingEngagement::class
+    )
+
+    /**
+     * @return `true` when a User should be asked to confirm whether they want to cancel a
+     * digital credential verification journey. Otherwise `false`.
+     */
+    fun shouldConfirmCancellation(): Boolean = this::class in listOf(
+        Connecting::class,
+        Verifying::class
     )
 
     /**
