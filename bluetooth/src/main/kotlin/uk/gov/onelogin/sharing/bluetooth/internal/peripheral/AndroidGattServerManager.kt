@@ -63,6 +63,8 @@ class AndroidGattServerManager(
     }
     private var mtu = MIN_MTU
     private var isSessionEnd = false
+
+    @Volatile
     private var isServiceReady = false
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

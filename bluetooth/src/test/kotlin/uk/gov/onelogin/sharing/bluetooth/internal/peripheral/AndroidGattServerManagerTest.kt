@@ -164,6 +164,50 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
+    fun `rejects stale connection after close and re-open until service is ready`() = runTest {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+        manager.open(uuid)
+
+        // Phase 1: Normal session — service ready, connection accepted
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        // Phase 2: Session cancelled — close and re-open
+        manager.close()
+        manager.open(uuid)
+
+        // Phase 3: Stale connection arrives before service is ready → rejected
+        manager.events.test {
+            callbackSlot.captured.onConnectionStateChange(
+                device,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothProfile.STATE_CONNECTED
+            )
+            expectNoEvents()
+        }
+        verify { gattServer.cancelConnection(device) }
+
+        // Phase 4: Service registers → new connection now accepted
+        manager.events.test {
+            callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+            awaitItem() // ServiceAdded event
+
+            callbackSlot.captured.onConnectionStateChange(
+                device,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothProfile.STATE_CONNECTED
+            )
+            assertEquals(GattServerEvent.Connected(DEVICE_ADDRESS), awaitItem())
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `ignores disconnection when no connection was accepted`() = runTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
         manager.open(uuid)
