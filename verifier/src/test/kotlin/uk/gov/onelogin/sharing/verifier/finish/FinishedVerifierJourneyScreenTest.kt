@@ -61,6 +61,7 @@ class FinishedVerifierJourneyScreenTest {
             action(backPressedDispatcher, composeTestRule)
 
             assertHasExitedJourney()
+            assertHasExitedJourneyCount(equalTo(1))
             assertThat(
                 orchestrator.resetCount,
                 equalTo(1)

@@ -39,18 +39,13 @@ internal fun UnrecoverableVerifierErrorScreen(
     }
 
     BackHandler(true) {
-        scope.launch {
-            viewModel.exitJourney()
-            currentOnExitJourney()
-        }
+        scope.launch { viewModel.exitJourney() }
     }
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
-                is ViewModelEvent.ExitJourney -> {
-                    currentOnExitJourney()
-                }
+                is ViewModelEvent.ExitJourney -> currentOnExitJourney()
 
                 else -> {
                     // do nothing with null events
