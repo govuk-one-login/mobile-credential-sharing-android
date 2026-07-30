@@ -35,13 +35,18 @@ sealed interface GattServerCallbackEvent {
 
     data class ServiceAdded(val status: Int, val service: BluetoothGattService?) :
         GattServerCallbackEvent
-    data class MessageReceived(val byteArray: ByteArray) : GattServerCallbackEvent {
+    data class MessageReceived(val device: BluetoothDevice, val byteArray: ByteArray) :
+        GattServerCallbackEvent {
         override fun equals(other: Any?): Boolean {
             val other = other as? MessageReceived ?: return false
-            return this.byteArray.contentEquals(other.byteArray)
+            return this.device == other.device && this.byteArray.contentEquals(other.byteArray)
         }
 
-        override fun hashCode(): Int = byteArray.contentHashCode()
+        override fun hashCode(): Int {
+            var result = device.hashCode()
+            result = 31 * result + byteArray.contentHashCode()
+            return result
+        }
     }
 
     data object ConnectionStateStarted : GattServerCallbackEvent

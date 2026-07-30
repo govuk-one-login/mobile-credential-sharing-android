@@ -75,7 +75,7 @@ class GattServerCallback(
                         val fullMessage = previousMessages + newMessage
 
                         gatGattEventEmitter.emit(
-                            GattServerCallbackEvent.MessageReceived(fullMessage)
+                            GattServerCallbackEvent.MessageReceived(device, fullMessage)
                         )
 
                         val fullMessageString = fullMessage

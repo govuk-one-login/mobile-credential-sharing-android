@@ -40,6 +40,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.toDeniedPermission
 
+@Suppress("LargeClass")
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothManager = mockk<BluetoothManager>(relaxed = true)
@@ -560,9 +561,15 @@ class AndroidGattServerManagerTest {
     fun `emits message received event`() = runTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
-        manager.events.test {
-            manager.open(uuid)
+        manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
 
+        manager.events.test {
             CharacteristicWriteRequestStub.writeRequestMessage(
                 bluetoothDevice = device,
                 characteristic = mockk {
@@ -587,6 +594,44 @@ class AndroidGattServerManagerTest {
             )
 
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `ignores message from device that is not the accepted connection`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+        val staleDevice = mockk<BluetoothDevice>().also {
+            every { it.address } returns "11:22:33:44:55:66"
+        }
+
+        manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        manager.events.test {
+            CharacteristicWriteRequestStub.writeRequestMessage(
+                bluetoothDevice = staleDevice,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+                },
+                message = byteArrayOf(LAST_PART, 0x44, 0x55)
+            ).run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    staleDevice,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
+
+            expectNoEvents()
         }
     }
 

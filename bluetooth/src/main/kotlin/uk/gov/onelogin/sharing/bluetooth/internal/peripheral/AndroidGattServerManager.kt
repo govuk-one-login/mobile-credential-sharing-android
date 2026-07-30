@@ -127,6 +127,13 @@ class AndroidGattServerManager(
     }
 
     private fun handleMessageReceived(event: GattServerCallbackEvent.MessageReceived) {
+        if (connectedDevice == null || event.device.address != connectedDevice?.address) {
+            logger.debug(
+                logTag,
+                "Ignoring message from ${event.device.address} - not the accepted device"
+            )
+            return
+        }
         _events.tryEmit(GattServerEvent.MessageReceived(event.byteArray))
     }
 
