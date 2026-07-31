@@ -38,6 +38,10 @@ fun UnrecoverableErrorContent(
     }
 }
 
+/**
+ * Suppresses `CyclomaticComplexMethod` due to the amount of [SessionErrorReason] derivatives.
+ */
+@Suppress("CyclomaticComplexMethod")
 private fun transformReasonToTitle(reason: SessionErrorReason): String = when (reason) {
     SessionErrorReason.CannotBuildSessionEstablishment -> "CannotBuildSessionEstablishment"
     SessionErrorReason.CannotDecryptDeviceResponse -> "CannotDecryptDeviceResponse"
