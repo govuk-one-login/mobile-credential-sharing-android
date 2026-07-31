@@ -22,6 +22,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 
@@ -84,7 +85,12 @@ class ShareCredentialTest {
     fun `Close button doesn't exist for complete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Cancelled" to HolderSessionState.Complete.Cancelled,
-            "Failed" to HolderSessionState.Complete.Failed(mockk(relaxed = true)),
+            "Failed" to HolderSessionState.Complete.Failed(
+                SessionError(
+                    "This is a UI test",
+                    Exception()
+                )
+            ),
             "Success" to HolderSessionState.Complete.Success(
                 HolderSessionState.Complete.SuccessReason.Approved
             )
