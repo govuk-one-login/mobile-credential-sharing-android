@@ -53,6 +53,7 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
                         "expected one of $VALID_KEY_TYPES"
                 }
                 val curve = rootNode[CURVE_KEY.toString()].numberValue().toLong()
+                validateCurveMatchesKeyType(keyType, curve)
                 val x = rootNode[X_KEY.toString()].binaryValue()
                 val y = rootNode[Y_KEY.toString()].binaryValue()
 
@@ -73,6 +74,40 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
         const val CURVE_KEY: Long = -1
         const val X_KEY: Long = -2
         const val Y_KEY: Long = -3
+
+        /**
+         * Curves associated with key type EC2 (kty=2).
+         */
+        private val EC2_CURVES: Set<Long> = setOf(
+            1L,
+            2L,
+            3L, // P-256, P-384, P-521
+            256L,
+            257L,
+            258L,
+            259L // Brainpool P-256, P-320, P-384, P-512
+        )
+
+        /**
+         * Curves associated with key type OKP (kty=1).
+         */
+        private val OKP_CURVES: Set<Long> = setOf(
+            4L,
+            5L,
+            6L,
+            7L // X25519, X448, Ed25519, Ed448
+        )
+
+        private fun validateCurveMatchesKeyType(keyType: Long, curve: Long) {
+            val expectedCurves = when (keyType) {
+                KEY_TYPE_EC2 -> EC2_CURVES
+                KEY_TYPE_OKP -> OKP_CURVES
+                else -> return
+            }
+            require(curve in expectedCurves) {
+                "Curve $curve is not valid for key type $keyType"
+            }
+        }
     }
 
     override fun equals(other: Any?): Boolean {
