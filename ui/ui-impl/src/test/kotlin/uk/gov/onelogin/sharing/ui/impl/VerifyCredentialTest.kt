@@ -16,6 +16,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
 
@@ -83,7 +84,12 @@ class VerifyCredentialTest {
     fun `Close button doesn't exist for complete journeys`(
         @TestParameter state: VerifierSessionState = namedTestValues(
             "Cancelled" to VerifierSessionState.Complete.Cancelled,
-            "Failed" to VerifierSessionState.Complete.Failed(mockk(relaxed = true)),
+            "Failed" to VerifierSessionState.Complete.Failed(
+                SessionError(
+                    "This is a UI test",
+                    Exception()
+                )
+            ),
             "Success" to VerifierSessionState.Complete.Success(
                 DeviceResponse(documents = emptyList())
             )
