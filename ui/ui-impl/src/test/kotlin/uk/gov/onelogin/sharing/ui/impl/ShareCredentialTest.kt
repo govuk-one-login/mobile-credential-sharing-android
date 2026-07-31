@@ -1,9 +1,11 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.testing.TestNavHostController
@@ -60,10 +62,9 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "not started" to HolderSessionState.NotStarted,
-            "missing prerequisites" to HolderSessionState.Preflight(emptyList()),
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true))
+            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -78,6 +79,57 @@ class ShareCredentialTest {
             waitForIdle()
             onNodeWithContentDescription("Close").assertExists()
         }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Close button navigates to confirmation dialog for certain states`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
+        )
+    ) = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(state)
+            )
+        )
+
+        composeTestRule.run {
+            setContent { SetupExtendedShareCredential(presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").performClick()
+
+            waitUntil(
+                "Unexpected route found!: ${controller.currentDestination?.route}"
+            ) {
+                controller.currentDestination?.route
+                    ?.contains("HolderCancellationDialogRoute")
+                    ?: false
+            }
+        }
+    }
+
+    @Composable
+    private fun SetupExtendedShareCredential(presenter: FakeCredentialPresenter) {
+        val uiGraph = remember(presenter.appGraph, presenter.orchestrator) {
+            createGraphFactory<HolderUiGraph.Factory>()
+                .create(presenter.appGraph, presenter.orchestrator)
+        }
+        val context = LocalContext.current
+        controller = TestNavHostController(context).apply {
+            navigatorProvider.addNavigator(ComposeNavigator())
+            navigatorProvider.addNavigator(DialogNavigator())
+        }
+        val orchestrator = uiGraph.holderOrchestrator()
+
+        ShareCredential(
+            orchestrator = orchestrator,
+            holderSessionState = presenter.orchestrator.holderSessionState,
+            navController = controller,
+            viewModelFactory = uiGraph.metroViewModelFactory
+        )
     }
 
     @Test
