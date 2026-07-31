@@ -125,6 +125,11 @@ data class CoseKey(
             val node = cborMapper.readTree(eReaderBytes) as? ObjectNode
                 ?: throw IllegalArgumentException("Invalid COSE key")
 
+            val keyType = node["1"]?.longValue()
+            require(keyType == Cose.KEY_TYPE_EC2) {
+                "Invalid COSE key type: $keyType, expected EC2 (${Cose.KEY_TYPE_EC2})"
+            }
+
             val xBytesRaw = node["-2"]?.binaryValue()
             val yBytesRaw = node["-3"]?.binaryValue()
 
