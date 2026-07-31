@@ -28,4 +28,17 @@ object ItemsRequestEncoderStub {
             )
         )
     )
+
+    val nameTitleAndAgeRequest = ItemsRequest(
+        docType = MDL_DOC_TYPE,
+        nameSpaces = mapOf(
+            MDL_NAMESPACE to mapOf(
+                "given_name" to true,
+                "age_over_23" to false
+            ),
+            "org.iso.18013.5.1.GB" to mapOf(
+                "title" to true
+            )
+        )
+    )
 }
