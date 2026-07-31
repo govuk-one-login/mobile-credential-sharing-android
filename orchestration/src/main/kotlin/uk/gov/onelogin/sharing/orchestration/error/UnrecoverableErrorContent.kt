@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 @Composable
 fun UnrecoverableErrorContent(
@@ -26,7 +27,7 @@ fun UnrecoverableErrorContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacingSingle)
     ) {
-        Text(failureState.reason::class.java.simpleName)
+        Text(transformReasonToTitle(failureState.reason))
         Text(failureState.message)
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -35,4 +36,24 @@ fun UnrecoverableErrorContent(
             Text("Exit journey")
         }
     }
+}
+
+private fun transformReasonToTitle(reason: SessionErrorReason): String = when (reason) {
+    SessionErrorReason.CannotBuildSessionEstablishment -> "CannotBuildSessionEstablishment"
+    SessionErrorReason.CannotDecryptDeviceResponse -> "CannotDecryptDeviceResponse"
+    SessionErrorReason.CannotEncryptDeviceRequest -> "CannotEncryptDeviceRequest"
+    is SessionErrorReason.CannotProcessEngagement -> "CannotProcessEngagement"
+    SessionErrorReason.CannotSendMessage -> "CannotSendMessage"
+    is SessionErrorReason.DeviceRequestProcessingError -> "DeviceRequestProcessingError"
+    SessionErrorReason.DocumentNotReturned -> "DocumentNotReturned"
+    is SessionErrorReason.InvalidBluetoothState -> "InvalidBluetoothState"
+    SessionErrorReason.InvalidSessionDataPayload -> "InvalidSessionDataPayload"
+    SessionErrorReason.MissingCryptoContext -> "MissingCryptoContext"
+    SessionErrorReason.PeerTermination -> "PeerTermination"
+    SessionErrorReason.ServiceUuidNotFound -> "ServiceUuidNotFound"
+    is SessionErrorReason.StatusError -> "StatusError"
+    is SessionErrorReason.UnrecoverablePrerequisite -> "UnrecoverablePrerequisite"
+    is SessionErrorReason.UnrecoverableThrowable -> "UnrecoverableThrowable"
+    is SessionErrorReason.UnsupportedQrCodeFormat -> "UnsupportedQrCodeFormat"
+    is SessionErrorReason.UnverifiableDocument -> "UnverifiableDocument"
 }
