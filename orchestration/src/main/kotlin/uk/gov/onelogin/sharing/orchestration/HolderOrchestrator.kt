@@ -192,6 +192,11 @@ class HolderOrchestrator(
                 handleMdocState(it)
             }
         }
+
+        logger.debug(
+            logTag,
+            "Started bluetooth transport state monitoring"
+        )
     }
 
     override fun confirmConsent() {
@@ -297,8 +302,7 @@ class HolderOrchestrator(
     }
 
     override fun cancel() {
-        transportStateJob?.cancel()
-        transportStateJob = null
+        stopBluetoothTransportStateMonitoring()
 
         if (sessionFlow.value.isComplete()) return
         appCoroutineScope.launch {
@@ -311,8 +315,7 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
-        transportStateJob?.cancel()
-        transportStateJob = null
+        stopBluetoothTransportStateMonitoring()
 
         sessionFlow.update {
             sessionFactory.create().also {
@@ -322,6 +325,15 @@ class HolderOrchestrator(
                 )
             }
         }
+    }
+
+    private fun stopBluetoothTransportStateMonitoring() {
+        transportStateJob?.cancel()
+        transportStateJob = null
+        logger.debug(
+            logTag,
+            "Stopped bluetooth transport state monitoring"
+        )
     }
 
     private fun stopAdvertising(sendEndCommand: Boolean) {

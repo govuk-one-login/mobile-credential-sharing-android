@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -1470,6 +1471,9 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertNotNull(orchestrator.transportStateJob)
+        assertTrue {
+            "Started bluetooth transport state monitoring" in logger
+        }
     }
 
     @Test
@@ -1484,6 +1488,9 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertNull(orchestrator.transportStateJob)
+        assertTrue {
+            "Stopped bluetooth transport state monitoring" in logger
+        }
     }
 
     @Test
@@ -1498,6 +1505,9 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertNull(orchestrator.transportStateJob)
+        assertTrue {
+            "Stopped bluetooth transport state monitoring" in logger
+        }
     }
 
     private inner class PeerTerminationFixture(
