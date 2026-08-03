@@ -13,6 +13,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cose.ECKeyType
 
 @JsonSerialize(using = CoseKeyDto.Serializer::class)
 @JsonDeserialize(using = CoseKeyDto.Deserializer::class)
@@ -66,9 +67,8 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
 
     companion object {
         private const val FIELD_COUNT = 4
-        private const val KEY_TYPE_OKP: Long = 1
-        private const val KEY_TYPE_EC2: Long = 2
-        private val VALID_KEY_TYPES: Set<Long> = setOf(KEY_TYPE_OKP, KEY_TYPE_EC2)
+        private val VALID_KEY_TYPES: Set<Long> =
+            setOf(ECKeyType.OKP.id.toLong(), ECKeyType.EC.id.toLong())
         const val KEY_TYPE_KEY: Long = 1
         const val CURVE_KEY: Long = -1
         const val X_KEY: Long = -2
