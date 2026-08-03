@@ -9,6 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssuerSignedUseCaseImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
@@ -241,5 +242,29 @@ class FilterIssuerSignedUseCaseImplTest {
             useCase.filter(parsedCredential(credentialBytes), request)
         }
         assertTrue(ex.message!!.contains("no matching attributes"))
+    }
+
+    @Test
+    fun `filter throws NoMatchingAttributesException when request exceeds 2 age_over elements`() {
+        val credentialBytes = buildNameSpacesBytes(
+            mapOf(namespace to listOf(buildItemBytes(0, "family_name", "Smith")))
+        )
+
+        val request = DeviceRequestStub.deviceRequest(
+            elements = mapOf(
+                "age_over_15" to false,
+                "age_over_18" to false,
+                "age_over_21" to false
+            )
+        )
+
+        val ex = assertFailsWith<NoMatchingAttributesException> {
+            useCase.filter(parsedCredential(credentialBytes), request)
+        }
+
+        assertEquals(
+            "SessionData termination initiated due to exceeding age_over_NN request limit",
+            ex.message
+        )
     }
 }

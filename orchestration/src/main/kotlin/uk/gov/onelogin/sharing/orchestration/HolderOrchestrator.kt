@@ -523,17 +523,32 @@ class HolderOrchestrator(
         val skDevice = context.skDevice
 
         if (skDevice != null) {
+            val isAgeOverLimit = exception.message == AGE_OVER_NN_POLICY_VIOLATION
+
+            val deviceResponseStatus = if (isAgeOverLimit) Status.GENERAL_ERROR else Status.OK
+
             val sessionDataBytes = holderCryptoService.buildErrorSessionData(
-                deviceResponseStatus = Status.OK,
+                deviceResponseStatus = deviceResponseStatus,
                 sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
                 skDevice = skDevice,
                 encryptCounter = context.encryptCounter
             )
 
-            terminateSession(
-                finalState = HolderSessionState.Complete.Success(
+            val finalState = if (isAgeOverLimit) {
+                HolderSessionState.Complete.Failed(
+                    SessionError(
+                        message = AGE_OVER_NN_POLICY_VIOLATION,
+                        exception = exception
+                    )
+                )
+            } else {
+                HolderSessionState.Complete.Success(
                     HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
-                ),
+                )
+            }
+
+            terminateSession(
+                finalState = finalState,
                 sessionDataToSend = sessionDataBytes
             )
         } else {
@@ -803,5 +818,8 @@ class HolderOrchestrator(
         const val UNRECOGNISED_MESSAGE =
             "Sequencing violation: inbound message is not a recognised type"
         const val STOPPING_BLE_ADVERTISING = "Stopping BLE advertising"
+
+        const val AGE_OVER_NN_POLICY_VIOLATION =
+            "SessionData termination initiated due to exceeding age_over_NN request limit"
     }
 }

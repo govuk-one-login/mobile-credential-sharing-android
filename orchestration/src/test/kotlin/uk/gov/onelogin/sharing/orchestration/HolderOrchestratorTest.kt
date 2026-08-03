@@ -28,6 +28,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.sessionTimer.FakeSessionTimer
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequest
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
@@ -1447,6 +1448,30 @@ class HolderOrchestratorTest {
 
         assertEquals(1, sessionTimer.stopCalls)
     }
+
+    @Test
+    fun `request with more than two age attestations sends status 10 and transitions to failed`() =
+        runTest {
+            val invalidRequest = deviceRequest(
+                elements = mapOf(
+                    "age_over_18" to false,
+                    "age_over_21" to false,
+                    "age_over_25" to false
+                )
+            )
+            fakeDecryptDeviceRequestUseCase.deviceRequestToReturn = invalidRequest
+
+            with(TerminationTestFixture()) {
+                startAndDeliver()
+
+                assertThat(orchestrator.holderSessionState.value, isFailed())
+                assertEquals(Status.GENERAL_ERROR, cryptoService.lastErrorDeviceResponseStatus)
+                assertEquals(
+                    SessionDataStatus.SESSION_TERMINATION,
+                    cryptoService.lastErrorSessionDataStatus
+                )
+            }
+        }
 
     private inner class PeerTerminationFixture(
         status: SessionDataStatus,
