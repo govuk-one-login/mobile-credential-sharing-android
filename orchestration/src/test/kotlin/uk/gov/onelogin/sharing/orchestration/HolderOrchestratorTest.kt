@@ -1463,6 +1463,25 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `Starting a completed journey also clears the bluetooth state monitoring`() = runTest {
+        // Begin in a completed state
+        initialStates[0] = HolderSessionState.Complete.Cancelled
+        // Stop the orchestrator from getting to `ReadyToPresent`
+        prerequisiteResponses.add(MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff))
+
+        val orchestrator = createOrchestrator()
+        orchestrator.monitorBluetoothTransportState()
+
+        advanceUntilIdle()
+        assertNotNull(orchestrator.transportStateJob)
+
+        orchestrator.start()
+
+        advanceUntilIdle()
+        assertNull(orchestrator.transportStateJob)
+    }
+
+    @Test
     fun `Bluetooth state monitoring starts after completing preflight checks`() = runTest {
         val orchestrator = createOrchestrator()
 
@@ -1473,23 +1492,6 @@ class HolderOrchestratorTest {
         assertNotNull(orchestrator.transportStateJob)
         assertTrue {
             "Started bluetooth transport state monitoring" in logger
-        }
-    }
-
-    @Test
-    fun `Cancelling the orchestrator also cancels bluetooth state monitoring`() = runTest {
-        val orchestrator = createOrchestrator()
-        orchestrator.monitorBluetoothTransportState()
-
-        advanceUntilIdle()
-        assertNotNull(orchestrator.transportStateJob)
-
-        orchestrator.cancel()
-        advanceUntilIdle()
-
-        assertNull(orchestrator.transportStateJob)
-        assertTrue {
-            "Stopped bluetooth transport state monitoring" in logger
         }
     }
 

@@ -95,6 +95,7 @@ class HolderOrchestrator(
 
     override fun start() {
         if (sessionFlow.value.isComplete()) {
+            stopBluetoothTransportStateMonitoring()
             sessionFlow.update {
                 sessionFactory.create().also {
                     logger.debug(
