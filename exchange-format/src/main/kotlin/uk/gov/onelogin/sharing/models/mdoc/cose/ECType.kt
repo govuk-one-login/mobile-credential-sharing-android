@@ -97,5 +97,8 @@ enum class ECType(
                 .filter { it.expectedKeyType == ECKeyType.OKP }
                 .map { it.curveId.toLong() }
                 .toSet()
+
+        fun findByCurveId(curveId: Long): ECType? =
+            entries.firstOrNull { it.curveId.toLong() == curveId }
     }
 }

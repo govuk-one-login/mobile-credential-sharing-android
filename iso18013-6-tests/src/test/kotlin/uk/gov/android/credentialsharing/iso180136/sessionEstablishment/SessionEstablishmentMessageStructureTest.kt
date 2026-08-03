@@ -487,14 +487,17 @@ class SessionEstablishmentMessageStructureTest {
      * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
      */
     @Test
-    @Ignore("Fails conformance test due to lack of input validation")
     fun `'eReaderKey' - Refuses invalid x coordinate lengths`(@TestParameter type: ECType) {
-        assertThrows(Exception::class.java) {
+        val invalidCoseKeyBytes = mapper.writeValueAsBytes(
             coseKeyDto.copy(
                 keyType = type.keyTypeId.toLong(),
                 curve = type.curveId.toLong(),
                 x = ByteArray(size = type.expectedCoordinateByteLength - 8)
             )
+        )
+
+        assertThrows(Exception::class.java) {
+            mapper.readValue(invalidCoseKeyBytes, CoseKeyDto::class.java)
         }
     }
 

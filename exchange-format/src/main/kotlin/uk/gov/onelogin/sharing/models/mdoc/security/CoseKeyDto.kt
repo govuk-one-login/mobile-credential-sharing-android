@@ -56,6 +56,7 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
                 val curve = rootNode[CURVE_KEY.toString()].numberValue().toLong()
                 validateCurveMatchesKeyType(keyType, curve)
                 val x = rootNode[X_KEY.toString()].binaryValue()
+                validateCoordinateLength(curve, x)
                 val y = rootNode[Y_KEY.toString()].binaryValue()
 
                 CoseKeyDto(
@@ -84,6 +85,15 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
             }
             require(curve in expectedCurves) {
                 "Curve $curve is not valid for key type $keyType"
+            }
+        }
+
+        private fun validateCoordinateLength(curve: Long, coordinate: ByteArray) {
+            ECType.findByCurveId(curve)?.let { ecType ->
+                require(coordinate.size == ecType.expectedCoordinateByteLength) {
+                    "Invalid coordinate length: ${coordinate.size}, " +
+                        "expected ${ecType.expectedCoordinateByteLength} for curve $curve"
+                }
             }
         }
     }
