@@ -4,12 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertFailsWith
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssuerSignedUseCaseImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
@@ -258,13 +262,10 @@ class FilterIssuerSignedUseCaseImplTest {
             )
         )
 
-        val ex = assertFailsWith<NoMatchingAttributesException> {
+        val ex = assertFailsWith<AgeOverNNRequestLimitException> {
             useCase.filter(parsedCredential(credentialBytes), request)
         }
 
-        assertEquals(
-            "SessionData termination initiated due to exceeding age_over_NN request limit",
-            ex.message
-        )
+        assertThat(ex, hasMessage(equalTo(AgeOverNNRequestLimitException.MESSAGE)))
     }
 }

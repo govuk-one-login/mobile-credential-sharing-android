@@ -27,6 +27,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -523,7 +524,7 @@ class HolderOrchestrator(
         val skDevice = context.skDevice
 
         if (skDevice != null) {
-            val isAgeOverLimit = exception.message == AGE_OVER_NN_POLICY_VIOLATION
+            val isAgeOverLimit = exception.cause is AgeOverNNRequestLimitException
 
             val deviceResponseStatus = if (isAgeOverLimit) Status.GENERAL_ERROR else Status.OK
 
@@ -537,8 +538,8 @@ class HolderOrchestrator(
             val finalState = if (isAgeOverLimit) {
                 HolderSessionState.Complete.Failed(
                     SessionError(
-                        message = AGE_OVER_NN_POLICY_VIOLATION,
-                        exception = exception
+                        message = AgeOverNNRequestLimitException.MESSAGE,
+                        reason = SessionErrorReason.AgeOverNNRequestLimit
                     )
                 )
             } else {
@@ -818,8 +819,5 @@ class HolderOrchestrator(
         const val UNRECOGNISED_MESSAGE =
             "Sequencing violation: inbound message is not a recognised type"
         const val STOPPING_BLE_ADVERTISING = "Stopping BLE advertising"
-
-        const val AGE_OVER_NN_POLICY_VIOLATION =
-            "SessionData termination initiated due to exceeding age_over_NN request limit"
     }
 }

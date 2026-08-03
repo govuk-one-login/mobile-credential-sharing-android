@@ -32,8 +32,8 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
         }
 
         if (ageOverNNCount > 2) {
-            logger.debug(logTag, LOG_AGE_OVER_LIMIT)
-            throw NoMatchingAttributesException(LOG_AGE_OVER_LIMIT)
+            logger.debug(logTag, AgeOverNNRequestLimitException.MESSAGE)
+            throw AgeOverNNRequestLimitException()
         }
 
         val requestedNameSpaces = deviceRequest.docRequests

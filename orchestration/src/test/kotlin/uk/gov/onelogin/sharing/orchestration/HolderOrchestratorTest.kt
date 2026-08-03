@@ -34,6 +34,7 @@ import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
@@ -80,6 +81,7 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorMatchers.hasReason
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isInvalidBluetoothState
 import uk.gov.onelogin.sharing.orchestration.session.matchers.SessionErrorReasonMatchers.isUnrecoverablePrerequisite
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
@@ -1454,6 +1456,7 @@ class HolderOrchestratorTest {
         runTest {
             val invalidRequest = deviceRequest(
                 elements = mapOf(
+                    MdlAttribute.Portrait.value to false,
                     "age_over_18" to false,
                     "age_over_21" to false,
                     "age_over_25" to false
@@ -1461,10 +1464,20 @@ class HolderOrchestratorTest {
             )
             fakeDecryptDeviceRequestUseCase.deviceRequestToReturn = invalidRequest
 
+            fakeCredentialRequestHandler.exceptionToThrow = CredentialRequestException(
+                message = AgeOverNNRequestLimitException.MESSAGE,
+                cause = AgeOverNNRequestLimitException()
+            )
+
             with(TerminationTestFixture()) {
                 startAndDeliver()
+                assertThat(
+                    orchestrator.holderSessionState.value,
+                    isFailed(
+                        hasReason(instanceOf(SessionErrorReason.AgeOverNNRequestLimit::class.java))
+                    )
+                )
 
-                assertThat(orchestrator.holderSessionState.value, isFailed())
                 assertEquals(Status.GENERAL_ERROR, cryptoService.lastErrorDeviceResponseStatus)
                 assertEquals(
                     SessionDataStatus.SESSION_TERMINATION,
