@@ -111,6 +111,34 @@ class ShareCredentialTest {
         }
     }
 
+    @Test
+    @UiThreadTest
+    fun `Close button cancels the journey for certain states`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+        )
+    ) = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(state)
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.run {
+            setContent { SetupExtendedShareCredential(presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").performClick()
+
+            waitUntil(
+                "Tapping close should have cancelled the journey!"
+            ) {
+                orchestrator.cancelCount == 1
+            }
+        }
+    }
+
     @Composable
     private fun SetupExtendedShareCredential(presenter: FakeCredentialPresenter) {
         val uiGraph = remember(presenter.appGraph, presenter.orchestrator) {
