@@ -96,18 +96,14 @@ class ShareCredentialTest {
             )
         )
 
-        composeTestRule.run {
-            setContent { SetupExtendedShareCredential(presenter) }
-            waitForIdle()
-            onNodeWithContentDescription("Close").performClick()
+        performCloseJourneyViaButton(presenter)
 
-            waitUntil(
-                "Unexpected route found!: ${controller.currentDestination?.route}"
-            ) {
-                controller.currentDestination?.route
-                    ?.contains("HolderCancellationDialogRoute")
-                    ?: false
-            }
+        composeTestRule.waitUntil(
+            "Unexpected route found!: ${controller.currentDestination?.route}"
+        ) {
+            controller.currentDestination?.route
+                ?.contains("HolderCancellationDialogRoute")
+                ?: false
         }
     }
 
@@ -115,7 +111,7 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button cancels the journey for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+            "Presenting QR code" to HolderSessionState.PresentingEngagement("")
         )
     ) = runTest {
         val orchestrator = FakeOrchestrator(
@@ -126,38 +122,11 @@ class ShareCredentialTest {
             orchestrator = orchestrator
         )
 
-        composeTestRule.run {
-            setContent { SetupExtendedShareCredential(presenter) }
-            waitForIdle()
-            onNodeWithContentDescription("Close").performClick()
+        performCloseJourneyViaButton(presenter)
 
-            waitUntil(
-                "Tapping close should have cancelled the journey!"
-            ) {
-                orchestrator.cancelCount == 1
-            }
-        }
-    }
-
-    @Composable
-    private fun SetupExtendedShareCredential(presenter: FakeCredentialPresenter) {
-        val uiGraph = remember(presenter.appGraph, presenter.orchestrator) {
-            createGraphFactory<HolderUiGraph.Factory>()
-                .create(presenter.appGraph, presenter.orchestrator)
-        }
-        val context = LocalContext.current
-        controller = TestNavHostController(context).apply {
-            navigatorProvider.addNavigator(ComposeNavigator())
-            navigatorProvider.addNavigator(DialogNavigator())
-        }
-        val orchestrator = uiGraph.holderOrchestrator()
-
-        ShareCredential(
-            orchestrator = orchestrator,
-            holderSessionState = presenter.orchestrator.holderSessionState,
-            navController = controller,
-            viewModelFactory = uiGraph.metroViewModelFactory
-        )
+        composeTestRule.waitUntil(
+            "Tapping close should have cancelled the journey!"
+        ) { orchestrator.cancelCount == 1 }
     }
 
     @Test
@@ -228,5 +197,34 @@ class ShareCredentialTest {
         composeTestRule.waitUntil {
             assertion(controller)
         }
+    }
+
+    private fun performCloseJourneyViaButton(presenter: FakeCredentialPresenter) {
+        composeTestRule.run {
+            setContent { SetupExtendedShareCredential(presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").performClick()
+        }
+    }
+
+    @Composable
+    private fun SetupExtendedShareCredential(presenter: FakeCredentialPresenter) {
+        val uiGraph = remember(presenter.appGraph, presenter.orchestrator) {
+            createGraphFactory<HolderUiGraph.Factory>()
+                .create(presenter.appGraph, presenter.orchestrator)
+        }
+        val context = LocalContext.current
+        controller = TestNavHostController(context).apply {
+            navigatorProvider.addNavigator(ComposeNavigator())
+            navigatorProvider.addNavigator(DialogNavigator())
+        }
+        val orchestrator = uiGraph.holderOrchestrator()
+
+        ShareCredential(
+            orchestrator = orchestrator,
+            holderSessionState = presenter.orchestrator.holderSessionState,
+            navController = controller,
+            viewModelFactory = uiGraph.metroViewModelFactory
+        )
     }
 }
