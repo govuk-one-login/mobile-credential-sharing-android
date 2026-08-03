@@ -22,6 +22,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothStateException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
+import uk.gov.onelogin.sharing.core.coroutines.CoroutineNameExt.asCoroutineName
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
@@ -187,7 +188,9 @@ class HolderOrchestrator(
     internal fun monitorBluetoothTransportState() {
         transportStateJob?.let(Job::cancel)
 
-        transportStateJob = appCoroutineScope.launch {
+        transportStateJob = appCoroutineScope.launch(
+            "$logTag.transportStateJob".asCoroutineName()
+        ) {
             peripheralBluetoothTransport.state.collect {
                 handleMdocState(it)
             }
@@ -302,8 +305,6 @@ class HolderOrchestrator(
     }
 
     override fun cancel() {
-        stopBluetoothTransportStateMonitoring()
-
         if (sessionFlow.value.isComplete()) return
         appCoroutineScope.launch {
             terminateSession(
