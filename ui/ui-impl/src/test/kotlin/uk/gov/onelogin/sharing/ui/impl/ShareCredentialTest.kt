@@ -1,9 +1,11 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.testing.TestNavHostController
@@ -22,6 +24,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 
@@ -59,10 +62,9 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "not started" to HolderSessionState.NotStarted,
-            "missing prerequisites" to HolderSessionState.Preflight(emptyList()),
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true))
+            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -81,10 +83,63 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
+    fun `Close button navigates to confirmation dialog for certain states`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
+        )
+    ) = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(state)
+            )
+        )
+
+        performCloseJourneyViaButton(presenter)
+
+        composeTestRule.waitUntil(
+            "Unexpected route found!: ${controller.currentDestination?.route}"
+        ) {
+            controller.currentDestination?.route
+                ?.contains("HolderCancellationDialogRoute")
+                ?: false
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Close button cancels the journey for certain states`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Presenting QR code" to HolderSessionState.PresentingEngagement("")
+        )
+    ) = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(state)
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        performCloseJourneyViaButton(presenter)
+
+        composeTestRule.waitUntil(
+            "Tapping close should have cancelled the journey!"
+        ) { orchestrator.cancelCount == 1 }
+    }
+
+    @Test
+    @UiThreadTest
     fun `Close button doesn't exist for complete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Cancelled" to HolderSessionState.Complete.Cancelled,
-            "Failed" to HolderSessionState.Complete.Failed(mockk(relaxed = true)),
+            "Failed" to HolderSessionState.Complete.Failed(
+                SessionError(
+                    "This is a UI test",
+                    Exception()
+                )
+            ),
             "Success" to HolderSessionState.Complete.Success(
                 HolderSessionState.Complete.SuccessReason.Approved
             )
@@ -142,5 +197,34 @@ class ShareCredentialTest {
         composeTestRule.waitUntil {
             assertion(controller)
         }
+    }
+
+    private fun performCloseJourneyViaButton(presenter: FakeCredentialPresenter) {
+        composeTestRule.run {
+            setContent { SetupExtendedShareCredential(presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").performClick()
+        }
+    }
+
+    @Composable
+    private fun SetupExtendedShareCredential(presenter: FakeCredentialPresenter) {
+        val uiGraph = remember(presenter.appGraph, presenter.orchestrator) {
+            createGraphFactory<HolderUiGraph.Factory>()
+                .create(presenter.appGraph, presenter.orchestrator)
+        }
+        val context = LocalContext.current
+        controller = TestNavHostController(context).apply {
+            navigatorProvider.addNavigator(ComposeNavigator())
+            navigatorProvider.addNavigator(DialogNavigator())
+        }
+        val orchestrator = uiGraph.holderOrchestrator()
+
+        ShareCredential(
+            orchestrator = orchestrator,
+            holderSessionState = presenter.orchestrator.holderSessionState,
+            navController = controller,
+            viewModelFactory = uiGraph.metroViewModelFactory
+        )
     }
 }

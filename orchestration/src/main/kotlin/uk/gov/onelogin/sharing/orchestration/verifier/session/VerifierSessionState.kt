@@ -25,11 +25,7 @@ sealed class VerifierSessionState :
         ProcessingEngagement::class
     )
 
-    /**
-     * @return `true` when a User should be asked to confirm whether they want to cancel a
-     * digital credential verification journey. Otherwise `false`.
-     */
-    fun shouldConfirmCancellation(): Boolean = this::class in listOf(
+    override fun shouldConfirmCancellation(): Boolean = this::class in listOf(
         Connecting::class,
         Verifying::class
     )

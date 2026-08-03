@@ -75,7 +75,11 @@ internal fun ShareCredential(
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
     BackHandler(state.userCanCancel()) {
-        navController.navigateToHolderUserCancellationDialog()
+        if (state.shouldConfirmCancellation()) {
+            navController.navigateToHolderUserCancellationDialog()
+        } else {
+            orchestrator.cancel()
+        }
     }
 
     MonitorHolderSessionState(
@@ -94,10 +98,14 @@ internal fun ShareCredential(
     ) {
         Surface(modifier = modifier) {
             Column(modifier = Modifier.fillMaxSize()) {
-                if (!state.isComplete()) {
+                if (state.userCanCancel()) {
                     IconButton(
                         onClick = {
-                            navController.navigateToHolderUserCancellationDialog()
+                            if (state.shouldConfirmCancellation()) {
+                                navController.navigateToHolderUserCancellationDialog()
+                            } else {
+                                orchestrator.cancel()
+                            }
                         }
                     ) {
                         Icon(
