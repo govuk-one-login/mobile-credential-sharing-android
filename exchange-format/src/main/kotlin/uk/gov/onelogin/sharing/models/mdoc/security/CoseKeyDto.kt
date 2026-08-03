@@ -14,6 +14,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cose.ECKeyType
+import uk.gov.onelogin.sharing.models.mdoc.cose.ECType
 
 @JsonSerialize(using = CoseKeyDto.Serializer::class)
 @JsonDeserialize(using = CoseKeyDto.Deserializer::class)
@@ -75,33 +76,10 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
         const val X_KEY: Long = -2
         const val Y_KEY: Long = -3
 
-        /**
-         * Curves associated with key type EC2 (kty=2).
-         */
-        private val EC2_CURVES: Set<Long> = setOf(
-            1L,
-            2L,
-            3L, // P-256, P-384, P-521
-            256L,
-            257L,
-            258L,
-            259L // Brainpool P-256, P-320, P-384, P-512
-        )
-
-        /**
-         * Curves associated with key type OKP (kty=1).
-         */
-        private val OKP_CURVES: Set<Long> = setOf(
-            4L,
-            5L,
-            6L,
-            7L // X25519, X448, Ed25519, Ed448
-        )
-
         private fun validateCurveMatchesKeyType(keyType: Long, curve: Long) {
             val expectedCurves = when (keyType) {
-                ECKeyType.EC.id.toLong() -> EC2_CURVES
-                ECKeyType.OKP.id.toLong() -> OKP_CURVES
+                ECKeyType.EC.id.toLong() -> ECType.ec2Curves
+                ECKeyType.OKP.id.toLong() -> ECType.okpCurves
                 else -> return
             }
             require(curve in expectedCurves) {
