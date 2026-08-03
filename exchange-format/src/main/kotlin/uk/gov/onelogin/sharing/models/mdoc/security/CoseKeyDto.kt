@@ -100,8 +100,8 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
 
         private fun validateCurveMatchesKeyType(keyType: Long, curve: Long) {
             val expectedCurves = when (keyType) {
-                KEY_TYPE_EC2 -> EC2_CURVES
-                KEY_TYPE_OKP -> OKP_CURVES
+                ECKeyType.EC.id.toLong() -> EC2_CURVES
+                ECKeyType.OKP.id.toLong() -> OKP_CURVES
                 else -> return
             }
             require(curve in expectedCurves) {
