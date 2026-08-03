@@ -19,13 +19,8 @@ sealed class HolderSessionState :
      */
     override fun isComplete(): Boolean = this is Complete
 
-    override fun userCanCancel(): Boolean = this::class in listOf(
-        AwaitingUserConsent::class,
-        AwaitingVerifierResolution::class,
-        PresentingEngagement::class,
-        ProcessingEstablishment::class,
-        ProcessingResponse::class
-    )
+    override fun userCanCancel(): Boolean = this::class in cancellableStates
+    override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
 
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification
@@ -37,8 +32,8 @@ sealed class HolderSessionState :
      * State for when a User is ensuring all necessary steps to perform a digital credential
      * verification journey are complete.
      *
-     * @param missingPrerequisites The list of [Prerequisite]s required to perform the journey in
-     * it's entirety.
+     * @param missingPrerequisites The list of [MissingPrerequisite]s required to perform the
+     * journey in it's entirety.
      * @param onComplete The behaviour to call after a User action. Usually, this means performing
      * preflight checks again. Defaults to `{}`, meaning no additional behaviour occurs.
      */
@@ -131,5 +126,20 @@ sealed class HolderSessionState :
          * journey.
          */
         data object Cancelled : Complete("Journey cancelled by User")
+    }
+
+    companion object {
+        @JvmStatic
+        private val cancelConfirmationRequired = listOf(
+            AwaitingUserConsent::class,
+            AwaitingVerifierResolution::class,
+            ProcessingEstablishment::class,
+            ProcessingResponse::class
+        )
+
+        @JvmStatic
+        private val cancellableStates = listOf(
+            PresentingEngagement::class
+        ) + cancelConfirmationRequired
     }
 }

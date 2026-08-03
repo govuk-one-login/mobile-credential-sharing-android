@@ -7,7 +7,7 @@ package uk.gov.onelogin.sharing.core
  * Implementations are often (sealed) classes that represent the User's current progress in an
  * app journey.
  */
-fun interface UserCancellable {
+interface UserCancellable {
 
     /**
      * Checks whether Users are capable of cancelling their progress within a given User journey.
@@ -16,4 +16,10 @@ fun interface UserCancellable {
      * Otherwise, return `false`.
      */
     fun userCanCancel(): Boolean
+
+    /**
+     * @return `true` when a User should be asked to confirm whether they want to cancel a
+     * digital credential verification journey. Otherwise `false`.
+     */
+    fun shouldConfirmCancellation(): Boolean
 }
