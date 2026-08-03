@@ -41,7 +41,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedP
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
-import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
@@ -80,7 +79,7 @@ class HolderOrchestrator(
     private val inboundMessageClassifier: InboundMessageClassifier,
     private val sessionTimer: SessionTimer
 ) : Orchestrator.Holder {
-    private var transportStateJob: Job? = null
+    internal var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
     private val currentContext: HolderSessionContext get() = sessionFlow.value.sessionContext
 
@@ -92,14 +91,6 @@ class HolderOrchestrator(
         SharingStarted.Eagerly,
         sessionFlow.value.currentState.value
     )
-
-    init {
-        transportStateJob = appCoroutineScope.launch {
-            peripheralBluetoothTransport.state.collect {
-                handleMdocState(it)
-            }
-        }
-    }
 
     override fun start() {
         if (sessionFlow.value.isComplete()) {
@@ -155,9 +146,11 @@ class HolderOrchestrator(
         }
     }
 
-    private fun handleStartPrerequisiteCheck(prerequisiteCheck: List<MissingPrerequisite>) {
+    internal fun handleStartPrerequisiteCheck(prerequisiteCheck: List<MissingPrerequisite>) {
         if (prerequisiteCheck.isEmpty()) {
             safeTransitionTo(HolderSessionState.ReadyToPresent)
+
+            monitorBluetoothTransportState()
 
             appCoroutineScope.launch {
                 peripheralBluetoothTransport.start(
@@ -188,6 +181,16 @@ class HolderOrchestrator(
                         onComplete = ::performPreflightChecks
                     )
             }.let(::safeTransitionTo)
+        }
+    }
+
+    internal fun monitorBluetoothTransportState() {
+        transportStateJob?.let(Job::cancel)
+
+        transportStateJob = appCoroutineScope.launch {
+            peripheralBluetoothTransport.state.collect {
+                handleMdocState(it)
+            }
         }
     }
 
@@ -294,6 +297,9 @@ class HolderOrchestrator(
     }
 
     override fun cancel() {
+        transportStateJob?.cancel()
+        transportStateJob = null
+
         if (sessionFlow.value.isComplete()) return
         appCoroutineScope.launch {
             terminateSession(
@@ -305,6 +311,9 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
+        transportStateJob?.cancel()
+        transportStateJob = null
+
         sessionFlow.update {
             sessionFactory.create().also {
                 logger.debug(

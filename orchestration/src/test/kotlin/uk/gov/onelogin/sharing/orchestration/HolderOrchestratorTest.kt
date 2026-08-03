@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,7 +74,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isSuccessful
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
-import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
@@ -365,6 +366,8 @@ class HolderOrchestratorTest {
 
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
 
+        orchestrator.monitorBluetoothTransportState()
+
         peripheralBluetoothTransport.emitState(
             PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false)
         )
@@ -469,6 +472,8 @@ class HolderOrchestratorTest {
                 orchestrator.holderSessionState.collect {}
             }
             orchestrator.start()
+            orchestrator.monitorBluetoothTransportState()
+
             advanceUntilIdle()
             peripheralBluetoothTransport.emitState(
                 PeripheralBluetoothState.Ended(SessionEndStates.SUCCESS)
@@ -1214,6 +1219,8 @@ class HolderOrchestratorTest {
 
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
 
+        orchestrator.monitorBluetoothTransportState()
+
         transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
         advanceUntilIdle()
 
@@ -1248,6 +1255,8 @@ class HolderOrchestratorTest {
 
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
 
+        orchestrator.monitorBluetoothTransportState()
+
         transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
         advanceUntilIdle()
 
@@ -1261,6 +1270,8 @@ class HolderOrchestratorTest {
         val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
 
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        orchestrator.monitorBluetoothTransportState()
 
         transport.emitState(PeripheralBluetoothState.Disconnected(DEVICE_ADDRESS, false))
         advanceUntilIdle()
@@ -1291,6 +1302,8 @@ class HolderOrchestratorTest {
             peripheralBluetoothTransport = transport,
             sessionFactory = sessionFactory
         )
+
+        orchestrator.monitorBluetoothTransportState()
 
         val messageSentDeferred = kotlinx.coroutines.CompletableDeferred<Boolean>()
         transport.sendMessageResultDeferred = messageSentDeferred
@@ -1448,6 +1461,45 @@ class HolderOrchestratorTest {
         assertEquals(1, sessionTimer.stopCalls)
     }
 
+    @Test
+    fun `Bluetooth state monitoring starts after completing preflight checks`() = runTest {
+        val orchestrator = createOrchestrator()
+
+        assertNull(orchestrator.transportStateJob)
+        orchestrator.handleStartPrerequisiteCheck(emptyList())
+        advanceUntilIdle()
+
+        assertNotNull(orchestrator.transportStateJob)
+    }
+
+    @Test
+    fun `Cancelling the orchestrator also cancels bluetooth state monitoring`() = runTest {
+        val orchestrator = createOrchestrator()
+        orchestrator.monitorBluetoothTransportState()
+
+        advanceUntilIdle()
+        assertNotNull(orchestrator.transportStateJob)
+
+        orchestrator.cancel()
+        advanceUntilIdle()
+
+        assertNull(orchestrator.transportStateJob)
+    }
+
+    @Test
+    fun `Resetting the orchestrator also cancels bluetooth state monitoring`() = runTest {
+        val orchestrator = createOrchestrator()
+        orchestrator.monitorBluetoothTransportState()
+
+        advanceUntilIdle()
+        assertNotNull(orchestrator.transportStateJob)
+
+        orchestrator.reset()
+        advanceUntilIdle()
+
+        assertNull(orchestrator.transportStateJob)
+    }
+
     private inner class PeerTerminationFixture(
         status: SessionDataStatus,
         initialState: HolderSessionState = HolderSessionState.AwaitingVerifierResolution
@@ -1467,6 +1519,8 @@ class HolderOrchestratorTest {
                 inboundMessageClassifier = fakeClassifier,
                 holderSessionTerminator = terminator
             )
+
+            orchestrator.monitorBluetoothTransportState()
         }
 
         fun TestScope.deliverMessage(bytes: ByteArray = byteArrayOf(1, 2, 3)) {
