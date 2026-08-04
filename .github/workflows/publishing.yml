@@ -1,0 +1,46 @@
+name: "Publish code base"
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: |
+          [Branch | Tag | SHA] of the code base to publish.
+          
+          Used as the reference when checking out the repository.
+        required: true
+        type: string
+
+      version-code:
+        description: "The test app's version code to use when publishing to google play"
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-libraries:
+    name: "Publish wallet sharing libraries"
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    uses: ./.github/workflows/publish-libraries.yml
+    with:
+      ref: ${{ inputs.ref }}
+
+
+  publish-to-google-play:
+    name: "Publish app to Google Play"
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    uses: ./.github/workflows/publish-to-google-play.yml
+    with:
+      ref: ${{ inputs.ref }}
+      version-code: ${{ inputs.version-code }}

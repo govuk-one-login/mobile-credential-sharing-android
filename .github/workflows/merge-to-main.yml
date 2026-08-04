@@ -49,30 +49,16 @@ jobs:
         uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
 
 
-  publish-libraries:
+  publishing:
     if: ${{ jobs.bump-version.outputs.current-version != jobs.bump-version.outputs.new-version }}
-    name: "Publish wallet sharing libraries"
+    name: "Publish code base"
     needs: bump-version
     permissions:
       contents: write
       id-token: write
-      packages: write
+      packages: read
     secrets: inherit
-    uses: ./.github/workflows/publish-libraries.yml
-    with:
-      ref: ${{ jobs.bump-version.outputs.new-version }}
-
-
-  publish-to-google-play:
-    if: ${{ jobs.bump-version.outputs.current-version != jobs.bump-version.outputs.new-version }}
-    name: "Publish app to Google Play"
-    needs: bump-version
-    permissions:
-      contents: write
-      id-token: write
-      packages: write
-    secrets: inherit
-    uses: ./.github/workflows/publish-to-google-play.yml
+    uses: ./.github/workflows/publishing.yml
     with:
       ref: ${{ jobs.bump-version.outputs.new-version }}
       version-code: ${{ jobs.bump-version.outputs.version-code }}

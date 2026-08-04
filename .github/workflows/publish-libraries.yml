@@ -7,8 +7,10 @@ on:
   workflow_call:
     inputs:
       ref:
-        default: ${{ github.ref }}
-        description: '[Branch | Tag | SHA] of the code base to publish'
+        description: |
+          [Branch | Tag | SHA] of the code base to publish.
+
+          Used as the reference when checking out the repository.
         required: true
         type: string
 
