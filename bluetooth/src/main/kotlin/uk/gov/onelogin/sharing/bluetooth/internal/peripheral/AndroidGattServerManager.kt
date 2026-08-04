@@ -55,7 +55,7 @@ class AndroidGattServerManager(
     )
     override val events: SharedFlow<GattServerEvent> = _events
     private var gattServer: BluetoothGattServer? = null
-    private var connectedDevice: BluetoothDevice? = null
+    internal var connectedDevice: BluetoothDevice? = null
 
     @SuppressLint("MissingPermission")
     private val eventEmitter = GattEventEmitter {
@@ -128,14 +128,22 @@ class AndroidGattServerManager(
     private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
         val address = event.device.address
 
-        val event = when {
+        when {
             event.status == BluetoothGatt.GATT_SUCCESS &&
                 event.newState == BluetoothProfile.STATE_CONNECTED -> {
                 connectedDevice = event.device
                 GattServerEvent.Connected(address)
             }
 
-            event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
+            connectedDevice == null && event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
+                logger.debug(
+                    logTag,
+                    "Attempting to disconnect before having a connected device"
+                )
+                null
+            }
+
+            connectedDevice != null && event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
                 connectedDevice = null
                 GattServerEvent.Disconnected(address, isSessionEnd)
             }
@@ -145,9 +153,7 @@ class AndroidGattServerManager(
                 event.status,
                 event.newState
             )
-        }
-
-        _events.tryEmit(event)
+        }?.let(_events::tryEmit)
     }
 
     private fun handleServiceAdded(event: GattServerCallbackEvent.ServiceAdded) {

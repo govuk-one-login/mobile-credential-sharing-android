@@ -20,7 +20,10 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.nullValue
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import uk.gov.logging.testdouble.v2.SystemLogger
@@ -174,6 +177,32 @@ class AndroidGattServerManagerTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `Doesn't emit disconnected events on connection change with no connected device`() =
+        runTest {
+            val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+            manager.open(uuid)
+
+            assertThat(
+                manager.connectedDevice,
+                nullValue(BluetoothDevice::class.java)
+            )
+
+            manager.events.test {
+                callbackSlot.captured.onConnectionStateChange(
+                    device,
+                    BluetoothGatt.GATT_SUCCESS,
+                    BluetoothProfile.STATE_DISCONNECTED
+                )
+
+                expectNoEvents()
+            }
+
+            assertTrue {
+                "Attempting to disconnect before having a connected device" in logger
+            }
+        }
 
     @Test
     fun `emits Service added event`() = runTest {
