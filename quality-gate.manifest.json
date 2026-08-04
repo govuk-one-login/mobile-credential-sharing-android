@@ -137,9 +137,79 @@
         {
           "check-types": [],
           "config": {
+            "file": ".github/workflows/bump-version.yml",
+            "name": "Bump semantic version of the code base",
+            "path": "jobs.bump-version"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [],
+          "config": {
+            "file": ".github/workflows/publish-libraries.yml",
+            "name": "Upload code base artefacts to GitHub packages",
+            "path": "jobs.publish-libraries"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [],
+          "config": {
+            "file": ".github/workflows/publish-to-google-play.yml",
+            "name": "Upload test app artefacts to the Google Play Store",
+            "path": "jobs.publish-to-google-play"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [],
+          "config": {
+            "file": ".github/workflows/publishing.yml",
+            "name": "Upload code base artefacts to GitHub packages",
+            "path": "jobs.publish-libraries"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [],
+          "config": {
+            "file": ".github/workflows/publishing.yml",
+            "name": "Upload test app artefacts to the Google Play Store",
+            "path": "jobs.publish-to-google-play"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [],
+          "config": {
             "file": ".github/workflows/merge-to-main.yml",
-            "name": "Android validation and publish to play store",
-            "path": "jobs.bump_and_publish"
+            "name": "Bump semantic version of the code base",
+            "path": "jobs.bump-version"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [],
+          "config": {
+            "file": ".github/workflows/merge-to-main.yml",
+            "name": "Publish Gradle dependency graph results to GitHub dependabot",
+            "path": "jobs.dependency-graph"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [],
+          "config": {
+            "file": ".github/workflows/merge-to-main.yml",
+            "name": "Uploads code base artefacts to GitHub packages / Google Play Store",
+            "path": "jobs.publishing"
           },
           "phase": "build",
           "provider": "GitHub"
