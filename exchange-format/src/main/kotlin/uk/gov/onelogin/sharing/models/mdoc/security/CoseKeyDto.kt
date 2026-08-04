@@ -13,6 +13,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cose.ECKeyType
 
 @JsonSerialize(using = CoseKeyDto.Serializer::class)
 @JsonDeserialize(using = CoseKeyDto.Deserializer::class)
@@ -24,6 +25,10 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
             gen: JsonGenerator,
             provider: SerializerProvider
         ) {
+            require(value.keyType in VALID_KEY_TYPES) {
+                "Invalid COSE key type: ${value.keyType}, " +
+                    "expected one of $VALID_KEY_TYPES"
+            }
             (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
             gen.writeFieldId(KEY_TYPE_KEY)
             provider.defaultSerializeValue(value.keyType, gen)
@@ -43,6 +48,10 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
                 val rootNode = CborMapper.default.readTree<JsonNode>(parser)
 
                 val keyType: Long = rootNode[KEY_TYPE_KEY.toString()].numberValue().toLong()
+                require(keyType in VALID_KEY_TYPES) {
+                    "Invalid COSE key type: $keyType, " +
+                        "expected one of $VALID_KEY_TYPES"
+                }
                 val curve = rootNode[CURVE_KEY.toString()].numberValue().toLong()
                 val x = rootNode[X_KEY.toString()].binaryValue()
                 val y = rootNode[Y_KEY.toString()].binaryValue()
@@ -58,6 +67,8 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
 
     companion object {
         private const val FIELD_COUNT = 4
+        private val VALID_KEY_TYPES: Set<Long> =
+            setOf(ECKeyType.OKP.id.toLong(), ECKeyType.EC.id.toLong())
         const val KEY_TYPE_KEY: Long = 1
         const val CURVE_KEY: Long = -1
         const val X_KEY: Long = -2

@@ -350,15 +350,11 @@ class SessionEstablishmentMessageStructureTest {
      * Scenario ID: mDLR_MS_SE_06
      * sub-scenario: Common_COSEKey_03
      *
-     * This currently fails due to the [CoseKeyDto.keyType] property being a [Long] instead of a
-     * [UInt].
-     *
      * @see CoseKeyDto.keyType
      * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.keyType
      * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
      */
     @Test
-    @Ignore("Fails conformance test due to lack of input validation")
     fun `'eReaderKey' - Refuses invalid key types`(
         @TestParameter type: ECKeyType = testValues(
             ECKeyType.RSA,
