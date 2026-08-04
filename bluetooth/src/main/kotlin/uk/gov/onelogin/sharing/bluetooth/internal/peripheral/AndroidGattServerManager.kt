@@ -189,16 +189,17 @@ class AndroidGattServerManager(
     private fun handleServiceAdded(event: GattServerCallbackEvent.ServiceAdded) {
         if (event.status == BluetoothGatt.GATT_SUCCESS) {
             isServiceReady = true
+            _events.tryEmit(
+                GattServerEvent.ServiceAdded(
+                    event.service
+                )
+            )
         } else {
             logger.error(logTag, "Failed to add service, status: ${event.status}")
-        }
-
-        _events.tryEmit(
-            GattServerEvent.ServiceAdded(
-                event.status,
-                event.service
+            _events.tryEmit(
+                GattServerEvent.Error(GattServerError.SERVICE_REGISTRATION_FAILED)
             )
-        )
+        }
     }
 
     private fun handleConnectionStateStarted() {

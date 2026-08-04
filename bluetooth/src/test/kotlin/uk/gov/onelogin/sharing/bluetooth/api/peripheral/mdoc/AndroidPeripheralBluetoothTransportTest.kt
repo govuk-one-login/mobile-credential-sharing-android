@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
-import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattService
 import app.cash.turbine.test
 import io.mockk.every
@@ -220,7 +219,6 @@ class AndroidPeripheralBluetoothTransportTest {
             every { service.uuid } returns uuid
 
             val event = GattServerEvent.ServiceAdded(
-                BluetoothGatt.GATT_SUCCESS,
                 service
             )
             transport.state.test {

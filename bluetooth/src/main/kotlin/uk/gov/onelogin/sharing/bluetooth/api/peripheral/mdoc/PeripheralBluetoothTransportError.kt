@@ -7,7 +7,8 @@ enum class PeripheralBluetoothTransportError(val message: String) {
     ADVERTISING_FAILED("Advertising failed"),
     GATT_NOT_AVAILABLE("GATT not available"),
     BLUETOOTH_PERMISSION_MISSING("Bluetooth permission missing"),
-    DESCRIPTOR_WRITE_REQUEST_FAILED("Descriptor write request failed");
+    DESCRIPTOR_WRITE_REQUEST_FAILED("Descriptor write request failed"),
+    SERVICE_REGISTRATION_FAILED("GATT service registration failed");
 
     companion object {
         fun fromGattError(gattServerError: GattServerError): PeripheralBluetoothTransportError =
@@ -16,6 +17,7 @@ enum class PeripheralBluetoothTransportError(val message: String) {
                 GattServerError.GATT_NOT_AVAILABLE -> GATT_NOT_AVAILABLE
                 GattServerError.BLUETOOTH_PERMISSION_MISSING -> BLUETOOTH_PERMISSION_MISSING
                 GattServerError.DESCRIPTOR_WRITE_REQUEST_FAILED -> DESCRIPTOR_WRITE_REQUEST_FAILED
+                GattServerError.SERVICE_REGISTRATION_FAILED -> SERVICE_REGISTRATION_FAILED
             }
     }
 }

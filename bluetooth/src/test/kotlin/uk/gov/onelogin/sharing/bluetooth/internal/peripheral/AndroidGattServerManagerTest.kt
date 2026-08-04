@@ -275,7 +275,6 @@ class AndroidGattServerManagerTest {
 
             assertEquals(
                 GattServerEvent.ServiceAdded(
-                    status = BluetoothGatt.GATT_SUCCESS,
                     service = service
                 ),
                 awaitItem()
@@ -293,10 +292,7 @@ class AndroidGattServerManagerTest {
         manager.events.test {
             callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_FAILURE, fakeGattService)
             assertEquals(
-                GattServerEvent.ServiceAdded(
-                    status = BluetoothGatt.GATT_FAILURE,
-                    service = fakeGattService
-                ),
+                GattServerEvent.Error(GattServerError.SERVICE_REGISTRATION_FAILED),
                 awaitItem()
             )
 
