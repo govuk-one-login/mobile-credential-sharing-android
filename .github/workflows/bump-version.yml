@@ -1,4 +1,4 @@
-# Bumps the semantic version of the code base if necessary
+# Bumps the semantic version of the code base if necessary.
 # If there's a difference between current version and bumped version, uploads a newly created tag
 # and generates a changelog.
 #
@@ -37,6 +37,7 @@ concurrency:
 
 jobs:
   bump-version:
+    name: "Bump version with changelogs"
     permissions:
       contents: write
       id-token: write

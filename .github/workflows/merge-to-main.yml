@@ -16,8 +16,12 @@ env:
 jobs:
   bump-version:
     name: "Bump semantic version"
-    uses: ./.github/workflows/bump-version.yml
+    permissions:
+      contents: write
+      id-token: write
+      packages: read
     secrets: inherit
+    uses: ./.github/workflows/bump-version.yml
     with:
       # Empty to denote a 'production' release.
       pre-release-type: ''
@@ -46,31 +50,17 @@ jobs:
 
   publish-libraries:
     if: ${{ jobs.bump-version.outputs.current-version != jobs.bump-version.outputs.new-version }}
+    name: "Publish wallet sharing libraries"
     needs: bump-version
     permissions:
       contents: write
       id-token: write
       packages: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ jobs.bump-version.outputs.new-version }}
-          lfs: 'true'
-          submodules: 'true'
-          fetch-depth: 0
-          fetch-tags: 'true'
+    secrets: inherit
+    uses: ./.github/workflows/publish-libraries.yml
+    with:
+      ref: ${{ jobs.bump-version.outputs.new-version }}
 
-      - name: Setup
-        uses: ./.github/actions/android-setup
-
-      - name: Publish package
-        uses: ./mobile-android-pipelines/actions/maven-publish
-        with:
-          VERSION_NAME: ${{ steps.versioning.outputs.new_version }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   bump_and_publish:
     if: ${{ jobs.bump-version.outputs.current-version != jobs.bump-version.outputs.new-version }}
