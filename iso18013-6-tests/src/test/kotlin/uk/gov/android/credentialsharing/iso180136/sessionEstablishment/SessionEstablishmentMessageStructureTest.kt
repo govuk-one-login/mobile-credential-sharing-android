@@ -350,15 +350,11 @@ class SessionEstablishmentMessageStructureTest {
      * Scenario ID: mDLR_MS_SE_06
      * sub-scenario: Common_COSEKey_03
      *
-     * This currently fails due to the [CoseKeyDto.keyType] property being a [Long] instead of a
-     * [UInt].
-     *
      * @see CoseKeyDto.keyType
      * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.keyType
      * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
      */
     @Test
-    @Ignore("Fails conformance test due to lack of input validation")
     fun `'eReaderKey' - Refuses invalid key types`(
         @TestParameter type: ECKeyType = testValues(
             ECKeyType.RSA,
@@ -411,31 +407,25 @@ class SessionEstablishmentMessageStructureTest {
      * Scenario ID: mDLR_MS_SE_06
      * sub-scenario: Common_COSEKey_04
      *
-     * This currently fails due to no validation between the [CoseKeyDto.keyType] and the
-     * [CoseKeyDto.curve] properties.
-     *
      * @see CoseKeyDto.keyType
      * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.keyType
      * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
      */
     @Test
-    @Ignore("Fails conformance test due to lack of input validation")
     fun `'eReaderKey' - OKP curves fail with EC2 key type`(
         @TestParameter curveType: ECType = testValuesIn(
             ECType.entries.filter { it.expectedKeyType == ECKeyType.OKP }
         )
     ) {
-        assertThrows(Exception::class.java) {
-            sessionEstablishmentDto = sessionEstablishmentDto.copy(
-                eReaderKey = EmbeddedCbor(
-                    mapper.writeValueAsBytes(
-                        coseKeyDto.copy(
-                            curve = curveType.curveId.toLong(),
-                            keyType = ECKeyType.EC.id.toLong()
-                        )
-                    )
-                )
+        val invalidCoseKeyBytes = mapper.writeValueAsBytes(
+            coseKeyDto.copy(
+                curve = curveType.curveId.toLong(),
+                keyType = ECKeyType.EC.id.toLong()
             )
+        )
+
+        assertThrows(Exception::class.java) {
+            mapper.readValue(invalidCoseKeyBytes, CoseKeyDto::class.java)
         }
     }
 
@@ -443,31 +433,25 @@ class SessionEstablishmentMessageStructureTest {
      * Scenario ID: mDLR_MS_SE_06
      * sub-scenario: Common_COSEKey_04
      *
-     * This currently fails due to no validation between the [CoseKeyDto.keyType] and the
-     * [CoseKeyDto.curve] properties.
-     *
      * @see CoseKeyDto.keyType
      * @see uk.gov.onelogin.sharing.cryptoService.cose.CoseKey.keyType
      * @see <a href=https://datatracker.ietf.org/doc/html/rfc9053#section-10.1>Cose key types</a>
      */
     @Test
-    @Ignore("Fails conformance test due to lack of input validation")
     fun `'eReaderKey' - EC2 curves fail with OKP key type`(
         @TestParameter curveType: ECType = testValuesIn(
             ECType.entries.filter { it.expectedKeyType == ECKeyType.EC }
         )
     ) {
-        assertThrows(Exception::class.java) {
-            sessionEstablishmentDto = sessionEstablishmentDto.copy(
-                eReaderKey = EmbeddedCbor(
-                    mapper.writeValueAsBytes(
-                        coseKeyDto.copy(
-                            curve = curveType.curveId.toLong(),
-                            keyType = ECKeyType.OKP.id.toLong()
-                        )
-                    )
-                )
+        val invalidCoseKeyBytes = mapper.writeValueAsBytes(
+            coseKeyDto.copy(
+                curve = curveType.curveId.toLong(),
+                keyType = ECKeyType.OKP.id.toLong()
             )
+        )
+
+        assertThrows(Exception::class.java) {
+            mapper.readValue(invalidCoseKeyBytes, CoseKeyDto::class.java)
         }
     }
 
