@@ -125,35 +125,83 @@ class AndroidGattServerManager(
         _events.tryEmit(GattServerEvent.MessageReceived(event.byteArray))
     }
 
+//    private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
+//        val address = event.device.address
+//
+//        when {
+//            event.status == BluetoothGatt.GATT_SUCCESS &&
+//                event.newState == BluetoothProfile.STATE_CONNECTED -> {
+//                connectedDevice = event.device
+//                GattServerEvent.Connected(address)
+//            }
+//
+//            connectedDevice == null && event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
+//                logger.debug(
+//                    logTag,
+//                    "Attempting to disconnect before having a connected device"
+//                )
+//                null
+//            }
+//
+//            connectedDevice != null && event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
+//                connectedDevice = null
+//                GattServerEvent.Disconnected(address, isSessionEnd)
+//            }
+//
+//            else -> GattServerEvent.UnsupportedEvent(
+//                event.device.address,
+//                event.status,
+//                event.newState
+//            )
+//        }?.let(_events::tryEmit)
+//    }
+//
     private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
         val address = event.device.address
-
-        when {
-            event.status == BluetoothGatt.GATT_SUCCESS &&
-                event.newState == BluetoothProfile.STATE_CONNECTED -> {
-                connectedDevice = event.device
-                GattServerEvent.Connected(address)
+        when (event.newState) {
+            BluetoothProfile.STATE_CONNECTED -> {
+                if (event.status == BluetoothGatt.GATT_SUCCESS) {
+                    connectedDevice = event.device
+                    "Connected to $address" to GattServerEvent.Connected(address)
+                } else {
+                    "Received Unsuccessful gatt connection" to GattServerEvent.UnsupportedEvent(
+                        address,
+                        event.status,
+                        event.newState
+                    )
+                }
             }
 
-            connectedDevice == null && event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
-                logger.debug(
-                    logTag,
-                    "Attempting to disconnect before having a connected device"
+            BluetoothProfile.STATE_DISCONNECTED -> {
+                if (connectedDevice == null) {
+                    "Attempting to disconnect before having a connected device" to null
+                } else {
+                    "Disconnecting from device" to GattServerEvent.Disconnected(
+                        address,
+                        isSessionEnd
+                    )
+                }
+            }
+
+            BluetoothProfile.STATE_DISCONNECTING -> {
+                "Disconnecting to device: $address" to null
+            }
+
+            BluetoothProfile.STATE_CONNECTING -> {
+                "Connecting to device: $address" to null
+            }
+
+            else -> {
+                "" to GattServerEvent.UnsupportedEvent(
+                    address = address,
+                    status = event.status,
+                    newState = event.newState
                 )
-                null
             }
-
-            connectedDevice != null && event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
-                connectedDevice = null
-                GattServerEvent.Disconnected(address, isSessionEnd)
-            }
-
-            else -> GattServerEvent.UnsupportedEvent(
-                event.device.address,
-                event.status,
-                event.newState
-            )
-        }?.let(_events::tryEmit)
+        }.let { (message, event) ->
+            logger.debug(logTag, message)
+            event?.let(_events::tryEmit)
+        }
     }
 
     private fun handleServiceAdded(event: GattServerCallbackEvent.ServiceAdded) {
