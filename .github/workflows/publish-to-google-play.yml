@@ -1,3 +1,7 @@
+# Publishes the test app's Android Application Bundle (AAB) to the Google Play Store.
+#
+# Takes in a `ref` for checking out the code base.
+# Takes in a `version-code` for Android fingerprinting purposes.
 name: "Publish app to Google Play"
 
 on:

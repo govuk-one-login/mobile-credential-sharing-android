@@ -1,3 +1,7 @@
+# Reusable workflow for encapsulating publishing responsibilities for the code base.
+#
+# Takes in a `ref` for checking out the code base.
+# Takes in a `version-code` for Android fingerprinting purposes.
 name: "Publish code base"
 
 on:
@@ -22,7 +26,7 @@ concurrency:
 
 jobs:
   publish-libraries:
-    name: "Publish wallet sharing libraries"
+    name: "Publish libraries to maven repositories"
     permissions:
       contents: write
       id-token: write
