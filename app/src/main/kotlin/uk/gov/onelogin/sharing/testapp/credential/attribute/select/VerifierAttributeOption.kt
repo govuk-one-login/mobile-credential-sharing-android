@@ -48,5 +48,17 @@ enum class VerifierAttributeOption(val displayName: String, val attributeGroup: 
                 GbAttribute.Title to true
             )
         )
+    ),
+    REQUEST_AGE_OVER_LIMIT(
+        displayName = "Exceed age over NN Limit",
+        attributeGroup = AttributeGroup(
+            attributes = mapOf(
+                MdlAttribute.Portrait to true,
+                MdlAttribute.GivenName to true,
+                MdlAttribute.AgeOver(AGE_23) to false,
+                MdlAttribute.AgeOver(AGE_21) to false,
+                MdlAttribute.AgeOver(AGE_18) to false
+            )
+        )
     )
 }

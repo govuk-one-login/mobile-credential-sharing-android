@@ -84,4 +84,21 @@ enum class ECType(
     val keyTypeId: UInt = expectedKeyType.id
     val expectedCoordinateByteLength: Int =
         expectedUncompressedCoordinateLength / ByteHelper.BITS_IN_A_BYTE
+
+    companion object {
+        val ec2Curves: Set<Long> =
+            entries
+                .filter { it.expectedKeyType == ECKeyType.EC }
+                .map { it.curveId.toLong() }
+                .toSet()
+
+        val okpCurves: Set<Long> =
+            entries
+                .filter { it.expectedKeyType == ECKeyType.OKP }
+                .map { it.curveId.toLong() }
+                .toSet()
+
+        fun findByCurveId(curveId: Long): ECType? =
+            entries.firstOrNull { it.curveId.toLong() == curveId }
+    }
 }
