@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onSibling
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
 import uk.gov.onelogin.sharing.testapp.R
@@ -37,7 +38,7 @@ class SelectCredentialAttributesScreenRule(
     fun performVerifyCredentialClick() = onNodeWithText(
         resources.getString(R.string.verify_credential),
         useUnmergedTree = true
-    ).performClick()
+    ).performScrollTo().performClick()
 
     fun updateConfirmedAttributeGroup(group: AttributeGroup) {
         this.confirmedAttributeGroup = group

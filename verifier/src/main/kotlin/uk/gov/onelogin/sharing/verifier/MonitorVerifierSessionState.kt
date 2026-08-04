@@ -158,6 +158,7 @@ private fun handleSessionFailure(
         is SessionErrorReason.UnverifiableDocument,
         is SessionErrorReason.InvalidBluetoothState,
         is SessionErrorReason.StatusError,
+        is SessionErrorReason.AgeOverNNRequestLimit,
         SessionErrorReason.DocumentNotReturned,
         SessionErrorReason.PeerTermination
         ->

@@ -4,7 +4,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -52,7 +54,10 @@ internal fun SelectCredentialAttributesScreen(
         border = BorderStroke(1.dp, Color.Gray),
         modifier = modifier
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(24.dp).verticalScroll(rememberScrollState())
+        ) {
             Text(
                 text = stringResource(R.string.select_attribute_group),
                 fontSize = 20.sp,
