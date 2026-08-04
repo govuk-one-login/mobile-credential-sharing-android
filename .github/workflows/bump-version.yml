@@ -1,0 +1,77 @@
+# Bumps the semantic version of the code base if necessary
+# If there's a difference between current version and bumped version, uploads a newly created tag
+# and generates a changelog.
+#
+# Takes in an optional `pre-release-type` input to suffix generated tags.
+name: Bump semantic version
+
+on:
+  workflow_call:
+    inputs:
+      pre-release-type:
+        type: string
+        required: false
+        description: |
+          The pre-release version type, for example "alpha".
+    outputs:
+      current-version:
+        description: "The current version name"
+        value: ${{ jobs.bump-version.outputs.current-version }}
+      new-version:
+        description: "The new version name"
+        value: ${{ jobs.bump-version.outputs.new-version }}
+      version-code:
+        description: "The new version code"
+        value: ${{ jobs.bump-version.outputs.version-code }}
+  workflow_dispatch:
+    inputs:
+      pre-release-type:
+        type: string
+        required: false
+        description: |
+          The pre-release version type, for example "alpha".
+
+concurrency:
+  group: bump-version-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bump-version:
+    permissions:
+      contents: write
+      id-token: write
+      packages: read
+    runs-on: ubuntu-latest
+    outputs:
+      new-version: ${{ steps.versioning.outputs.new_version }}
+      current-version: ${{ steps.versioning.outputs.current_version }}
+      version-code: ${{ steps.versioning.outputs.version-code }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/android-setup
+
+      - name: Increment the release version using Conventional Commits
+        id: versioning
+        uses: ./mobile-android-pipelines/actions/increment-version
+        with:
+          pre-release-type: ${{ inputs.pre-release-type }}
+
+      - name: Publish release tags
+        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
+        uses: ./mobile-android-pipelines/actions/publish-release-tag
+
+      - name: Generate Changelog
+        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
+        uses: ./mobile-android-pipelines/actions/generate-and-upload-changelog
+        with:
+          current-version: ${{ steps.versioning.outputs.current_version }}
+          new-version: ${{ steps.versioning.outputs.new_version }}
+          version-prefix: "v"
+

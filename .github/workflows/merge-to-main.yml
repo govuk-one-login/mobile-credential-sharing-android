@@ -15,44 +15,15 @@ env:
 
 jobs:
   bump-version:
-    permissions:
-      contents: write
-      id-token: write
-      packages: read
-    runs-on: ubuntu-latest
-    outputs:
-      new-version: ${{ steps.versioning.outputs.new_version }}
-      current-version: ${{ steps.versioning.outputs.current_version }}
-      version-code: ${{ steps.versioning.outputs.version-code }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          lfs: 'true'
-          submodules: 'true'
-          fetch-depth: 0
-
-      - name: Setup
-        uses: ./.github/actions/android-setup
-
-      - name: Increment the release version using Conventional Commits
-        id: versioning
-        uses: ./mobile-android-pipelines/actions/increment-version
-
-      - name: Publish release tags
-        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
-        uses: ./mobile-android-pipelines/actions/publish-release-tag
-
-      - name: Generate Changelog
-        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
-        uses: ./mobile-android-pipelines/actions/generate-and-upload-changelog
-        with:
-          current-version: ${{ steps.versioning.outputs.current_version }}
-          new-version: ${{ steps.versioning.outputs.new_version }}
-          version-prefix: "v"
-
+    name: "Bump semantic version"
+    uses: ./.github/workflows/bump-version.yml
+    secrets: inherit
+    with:
+      # Empty to denote a 'production' release.
+      pre-release-type: ''
 
   dependency-graph:
+    name: "Submit gradle dependency graph"
     permissions:
       contents: write
       id-token: write
