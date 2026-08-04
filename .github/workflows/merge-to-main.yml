@@ -62,3 +62,9 @@ jobs:
     with:
       ref: ${{ jobs.bump-version.outputs.new-version }}
       version-code: ${{ jobs.bump-version.outputs.version-code }}
+
+
+  testing:
+    name: "Test suites"
+    uses: ./.github/workflows/testing.yml
+    secrets: inherit

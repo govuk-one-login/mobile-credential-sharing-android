@@ -213,6 +213,22 @@
           },
           "phase": "build",
           "provider": "GitHub"
+        },
+        {
+          "check-types": [
+            "code quality",
+            "contract",
+            "integration",
+            "unit",
+            "unit test coverage"
+          ],
+          "config": {
+            "file": ".github/workflows/merge-to-main.yml",
+            "name": "Test suites",
+            "path": "jobs.testing"
+          },
+          "phase": "build",
+          "provider": "GitHub"
         }
       ]
     }
