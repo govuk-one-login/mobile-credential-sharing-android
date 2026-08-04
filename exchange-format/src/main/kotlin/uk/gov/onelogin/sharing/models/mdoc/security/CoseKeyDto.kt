@@ -14,6 +14,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cose.ECKeyType
+import uk.gov.onelogin.sharing.models.mdoc.cose.ECType
 
 @JsonSerialize(using = CoseKeyDto.Serializer::class)
 @JsonDeserialize(using = CoseKeyDto.Deserializer::class)
@@ -53,6 +54,7 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
                         "expected one of $VALID_KEY_TYPES"
                 }
                 val curve = rootNode[CURVE_KEY.toString()].numberValue().toLong()
+                validateCurveMatchesKeyType(keyType, curve)
                 val x = rootNode[X_KEY.toString()].binaryValue()
                 val y = rootNode[Y_KEY.toString()].binaryValue()
 
@@ -73,6 +75,17 @@ data class CoseKeyDto(val keyType: Long, val curve: Long, val x: ByteArray, val 
         const val CURVE_KEY: Long = -1
         const val X_KEY: Long = -2
         const val Y_KEY: Long = -3
+
+        private fun validateCurveMatchesKeyType(keyType: Long, curve: Long) {
+            val expectedCurves = when (keyType) {
+                ECKeyType.EC.id.toLong() -> ECType.ec2Curves
+                ECKeyType.OKP.id.toLong() -> ECType.okpCurves
+                else -> return
+            }
+            require(curve in expectedCurves) {
+                "Curve $curve is not valid for key type $keyType"
+            }
+        }
     }
 
     override fun equals(other: Any?): Boolean {
