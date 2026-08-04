@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.prerequisites.impl.permissions
 
+import android.Manifest
 import android.app.Activity
+import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValuesIn
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -10,6 +12,8 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
@@ -75,6 +79,35 @@ class ActivityPermissionCheckerTest {
             checker.checkPermissions(input.permission),
             contains(hasPermission(input.permission))
         )
+    }
+
+    @Test
+    fun `checkPermissions does not mark permissions in the store`() = runTest {
+        val permission = Manifest.permission.CAMERA
+        every {
+            ActivityCompat.checkSelfPermission(activity, permission)
+        } returns PackageManager.PERMISSION_DENIED
+        every {
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
+        } returns false
+
+        checker.checkPermissions(permission)
+
+        assertFalse(permission in markerStore)
+    }
+
+    @Test
+    fun `markAsRequested marks permissions in the store`() = runTest {
+        val permissions = listOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.BLUETOOTH
+        )
+
+        checker.markAsRequested(permissions)
+
+        permissions.forEach { permission ->
+            assertTrue(permission in markerStore)
+        }
     }
 
     private fun processSetUp(input: PermissionCheckerParameters.Input) {

@@ -6,6 +6,7 @@ import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.internal.shared.CredentialSharingSdkImpl
 
@@ -20,7 +21,10 @@ class CredentialSharingSdkImplTest {
         sdk = CredentialSharingSdkImpl(
             logger = logger,
             applicationContext = mockk(),
-            permissionChecker = { emptyList() }
+            permissionChecker = object : PermissionChecker {
+                override fun checkPermissions(permissions: List<String>) =
+                    emptyList<PermissionChecker.PermissionCheckResult>()
+            }
         )
     }
 

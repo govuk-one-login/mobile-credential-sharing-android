@@ -7,6 +7,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -17,6 +18,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.api.state.CameraState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
 
 @RunWith(AndroidJUnit4::class)
 class ResolveVerifierPrerequisiteActionTest {
@@ -32,11 +34,13 @@ class ResolveVerifierPrerequisiteActionTest {
     }
 
     private val logger = SystemLogger()
+    private val permissionChecker = FakePermissionChecker()
 
     private val resolver by lazy {
         ResolveVerifierPrerequisiteAction(
             logger = logger,
-            orchestrator = orchestrator
+            orchestrator = orchestrator,
+            permissionChecker = permissionChecker
         )
     }
 
@@ -91,5 +95,32 @@ class ResolveVerifierPrerequisiteActionTest {
 
         verify { launcher wasNot Called }
         confirmVerified(launcher)
+    }
+
+    @Test
+    fun `Marks permissions as requested when launching RequestPermissions action`() = runTest {
+        val missingPrerequisite = MissingPrerequisites.Bluetooth(
+            BluetoothState.PermissionUndetermined
+        )
+        initialState = VerifierSessionState.Preflight(
+            listOf(missingPrerequisite)
+        )
+        resolver.resolve(launcher)
+
+        val expectedPermissions =
+            (missingPrerequisite.getAction() as PrerequisiteAction.RequestPermissions).permissions
+        assertTrue(permissionChecker.markedPermissions.containsAll(expectedPermissions))
+    }
+
+    @Test
+    fun `Does not mark permissions when action is not RequestPermissions`() = runTest {
+        initialState = VerifierSessionState.Preflight(
+            listOf(
+                MissingPrerequisites.Bluetooth(BluetoothState.PermissionDeniedPermanently)
+            )
+        )
+        resolver.resolve(launcher)
+
+        assertTrue(permissionChecker.markedPermissions.isEmpty())
     }
 }
