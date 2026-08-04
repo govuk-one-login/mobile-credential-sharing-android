@@ -14,12 +14,16 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  bump_and_publish:
+  bump-version:
     permissions:
       contents: write
       id-token: write
-      packages: write
+      packages: read
     runs-on: ubuntu-latest
+    outputs:
+      new-version: ${{ steps.versioning.outputs.new_version }}
+      current-version: ${{ steps.versioning.outputs.current_version }}
+      version-code: ${{ steps.versioning.outputs.version-code }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -39,17 +43,6 @@ jobs:
         if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
         uses: ./mobile-android-pipelines/actions/publish-release-tag
 
-      - name: Publish package
-        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
-        uses: ./mobile-android-pipelines/actions/maven-publish
-        with:
-          VERSION_NAME: ${{ steps.versioning.outputs.new_version }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
-
       - name: Generate Changelog
         if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
         uses: ./mobile-android-pipelines/actions/generate-and-upload-changelog
@@ -57,6 +50,77 @@ jobs:
           current-version: ${{ steps.versioning.outputs.current_version }}
           new-version: ${{ steps.versioning.outputs.new_version }}
           version-prefix: "v"
+
+
+  dependency-graph:
+    permissions:
+      contents: write
+      id-token: write
+      packages: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+
+      - name: Setup
+        uses: ./.github/actions/android-setup
+
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+
+
+  publish-libraries:
+    if: ${{ jobs.bump-version.outputs.current-version != jobs.bump-version.outputs.new-version }}
+    needs: bump-version
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ jobs.bump-version.outputs.new-version }}
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+          fetch-tags: 'true'
+
+      - name: Setup
+        uses: ./.github/actions/android-setup
+
+      - name: Publish package
+        uses: ./mobile-android-pipelines/actions/maven-publish
+        with:
+          VERSION_NAME: ${{ steps.versioning.outputs.new_version }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  bump_and_publish:
+    if: ${{ jobs.bump-version.outputs.current-version != jobs.bump-version.outputs.new-version }}
+    needs: bump-version
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ jobs.bump-version.outputs.new-version }}
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+          fetch-tags: 'true'
+
+      - name: Setup
+        uses: ./.github/actions/android-setup
 
       - name: Retrieve Secrets
         id: secrets
@@ -74,7 +138,6 @@ jobs:
           service_account: deploy-credential-sharing-and@${{ vars.GCP_PROJECT_ID }}.iam.gserviceaccount.com
 
       - name: Bundle Demo Release
-        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
         id: bundle
         uses: ./mobile-android-pipelines/actions/bundle-release-app
         with:
@@ -86,7 +149,6 @@ jobs:
           version-code: ${{ steps.versioning.outputs.version-code }}
 
       - name: Publish to Play Store
-        if: ${{ steps.versioning.outputs.current_version != steps.versioning.outputs.new_version }}
         uses: ./mobile-android-pipelines/actions/publish-to-play-store
         with:
           aab-paths: ${{ steps.bundle.outputs.aab-paths }}
