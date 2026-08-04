@@ -11,18 +11,9 @@ on:
         description: '[Branch | Tag | SHA] of the code base to publish'
         required: true
         type: string
-  workflow_dispatch:
-    inputs:
-      ref:
-        default: ${{ github.ref }}
-        description: |
-          [Branch | Tag | SHA] of the code base to publish. Defaults to the currently selected
-          branch / tag when not provided.
-        required: false
-        type: string
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: publish-libraries-${{ github.workflow }}-${{ inputs.ref }}
   cancel-in-progress: true
 
 env:
