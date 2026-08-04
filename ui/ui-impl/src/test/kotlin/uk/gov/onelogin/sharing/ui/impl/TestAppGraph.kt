@@ -29,10 +29,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 fun createTestAppGraph(
     applicationContext: Context = ApplicationProvider.getApplicationContext(),
     logger: Logger = SystemLogger(),
-    checker: PermissionChecker = object : PermissionChecker {
-        override fun checkPermissions(permissions: List<String>) =
-            emptyList<PermissionChecker.PermissionCheckResult>()
-    }
+    checker: PermissionChecker = PermissionChecker { emptyList() }
 ): CredentialSharingAppGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()
     .create(
         applicationContext = applicationContext,

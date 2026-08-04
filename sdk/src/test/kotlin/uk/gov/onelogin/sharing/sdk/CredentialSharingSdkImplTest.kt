@@ -21,10 +21,7 @@ class CredentialSharingSdkImplTest {
         sdk = CredentialSharingSdkImpl(
             logger = logger,
             applicationContext = mockk(),
-            permissionChecker = object : PermissionChecker {
-                override fun checkPermissions(permissions: List<String>) =
-                    emptyList<PermissionChecker.PermissionCheckResult>()
-            }
+            permissionChecker = { emptyList() }
         )
     }
 

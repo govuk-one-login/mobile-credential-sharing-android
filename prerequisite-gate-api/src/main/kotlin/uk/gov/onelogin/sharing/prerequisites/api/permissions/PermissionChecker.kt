@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.prerequisites.api.permissions
 
-interface PermissionChecker {
+fun interface PermissionChecker {
     /**
      * @return An empty [List] when all requested [permissions] are granted. Otherwise, a list of
      * [PermissionCheckResult] objects
@@ -18,13 +18,11 @@ interface PermissionChecker {
 
     /**
      * Marks the provided [permissions] as having been requested from the user via a system
-     * permission dialog. This should be called when a permission request is actually launched,
-     * not during evaluation.
-     *
-     * This disambiguates between permissions that haven't been requested yet (undetermined)
-     * and permissions that were requested but permanently denied by the user.
+     * permission dialogue.
      */
-    fun markAsRequested(permissions: List<String>) {}
+    fun markAsRequested(permissions: List<String>) {
+        // Default no-op: implementers that don't track request state can rely on this default
+    }
 
     /**
      * State table representing the results obtained from [PermissionChecker.checkPermissions].
