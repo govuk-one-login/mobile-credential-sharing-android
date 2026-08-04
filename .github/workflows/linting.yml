@@ -1,9 +1,6 @@
 name: "Linting"
 
 on:
-  push:
-    branches:
-      - main
   merge_group:
   workflow_call:
   workflow_dispatch:

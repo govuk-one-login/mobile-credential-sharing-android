@@ -205,6 +205,18 @@
           "provider": "GitHub"
         },
         {
+          "check-types": [
+            "code style and linting"
+          ],
+          "config": {
+            "file": ".github/workflows/merge-to-main.yml",
+            "name": "Lint code base",
+            "path": "jobs.linting"
+          },
+          "phase": "build",
+          "provider": "GitHub"
+        },
+        {
           "check-types": [],
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
@@ -224,7 +236,7 @@
           ],
           "config": {
             "file": ".github/workflows/merge-to-main.yml",
-            "name": "Test suites",
+            "name": "Test code base",
             "path": "jobs.testing"
           },
           "phase": "build",
