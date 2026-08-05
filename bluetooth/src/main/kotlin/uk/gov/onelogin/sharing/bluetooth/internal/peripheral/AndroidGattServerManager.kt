@@ -125,37 +125,6 @@ class AndroidGattServerManager(
         _events.tryEmit(GattServerEvent.MessageReceived(event.byteArray))
     }
 
-//    private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
-//        val address = event.device.address
-//
-//        when {
-//            event.status == BluetoothGatt.GATT_SUCCESS &&
-//                event.newState == BluetoothProfile.STATE_CONNECTED -> {
-//                connectedDevice = event.device
-//                GattServerEvent.Connected(address)
-//            }
-//
-//            connectedDevice == null && event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
-//                logger.debug(
-//                    logTag,
-//                    "Attempting to disconnect before having a connected device"
-//                )
-//                null
-//            }
-//
-//            connectedDevice != null && event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
-//                connectedDevice = null
-//                GattServerEvent.Disconnected(address, isSessionEnd)
-//            }
-//
-//            else -> GattServerEvent.UnsupportedEvent(
-//                event.device.address,
-//                event.status,
-//                event.newState
-//            )
-//        }?.let(_events::tryEmit)
-//    }
-//
     private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
         val address = event.device.address
         when (event.newState) {
@@ -176,7 +145,7 @@ class AndroidGattServerManager(
                 if (connectedDevice == null) {
                     "Attempting to disconnect before having a connected device" to null
                 } else {
-                    "Disconnecting from device" to GattServerEvent.Disconnected(
+                    "Disconnecting from device: $address" to GattServerEvent.Disconnected(
                         address,
                         isSessionEnd
                     )
