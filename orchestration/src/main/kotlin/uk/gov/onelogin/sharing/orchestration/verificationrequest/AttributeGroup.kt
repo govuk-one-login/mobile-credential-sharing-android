@@ -6,4 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Parcelize
 @Serializable
-data class AttributeGroup(val attributes: Map<MdlAttribute, Boolean>) : Parcelable
+data class AttributeGroup(
+    val attributes: Map<MdlAttribute, Boolean>,
+    val gbAttributes: Map<GbAttribute, Boolean> = emptyMap()
+) : Parcelable

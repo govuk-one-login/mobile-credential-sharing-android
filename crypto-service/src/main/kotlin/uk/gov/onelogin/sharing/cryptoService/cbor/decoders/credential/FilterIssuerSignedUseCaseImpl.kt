@@ -25,6 +25,17 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
         validatedCredential: ParsedRawCredential,
         deviceRequest: DeviceRequest
     ): IssuerSigned {
+        val ageOverNNCount = deviceRequest.docRequests.sumOf { docRequest ->
+            docRequest.itemsRequest.nameSpaces.values.sumOf { elements ->
+                elements.keys.count { isAgeOverNN(it) }
+            }
+        }
+
+        if (ageOverNNCount > 2) {
+            logger.debug(logTag, AgeOverNNRequestLimitException.MESSAGE)
+            throw AgeOverNNRequestLimitException()
+        }
+
         val requestedNameSpaces = deviceRequest.docRequests
             .firstOrNull()?.itemsRequest?.nameSpaces
             ?: throw NoMatchingAttributesException(LOG_NO_MATCHING_NAMESPACES)
@@ -165,5 +176,7 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
             "SessionData termination initiated due to no matching NameSpaces"
         const val LOG_NO_MATCHING_ATTRIBUTES =
             "SessionData termination initiated due to no matching attributes"
+        const val LOG_AGE_OVER_LIMIT =
+            "SessionData termination initiated due to exceeding age_over_NN request limit"
     }
 }

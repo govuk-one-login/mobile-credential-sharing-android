@@ -87,4 +87,9 @@ sealed class SessionErrorReason {
      * @see uk.gov.onelogin.sharing.verification.document.DocumentVerifier.verifyDocument
      */
     data class UnverifiableDocument(val error: VerificationError) : SessionErrorReason()
+
+    /**
+     * State for when the Verifier requests more than the allowed number of age attestations.
+     */
+    data object AgeOverNNRequestLimit : SessionErrorReason()
 }

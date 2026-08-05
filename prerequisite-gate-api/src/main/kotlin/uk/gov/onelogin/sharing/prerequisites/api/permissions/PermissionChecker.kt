@@ -17,6 +17,14 @@ fun interface PermissionChecker {
         )
 
     /**
+     * Marks the provided [permissions] as having been requested from the user via a system
+     * permission dialogue.
+     */
+    fun markAsRequested(permissions: List<String>) {
+        // Default no-op: implementers that don't track request state can rely on this default
+    }
+
+    /**
      * State table representing the results obtained from [PermissionChecker.checkPermissions].
      *
      * @param permission The android permission [String] causing the failure.

@@ -2,14 +2,28 @@ package uk.gov.onelogin.sharing.orchestration.verificationrequest
 
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
-fun AttributeGroup.toItemsRequest(documentType: DocumentType): ItemsRequest = ItemsRequest(
-    docType = documentType.value,
-    nameSpaces = mapOf(
-        namespaceFor(documentType) to attributes.entries.associate { (attr, intentToRetain) ->
-            attr.value to intentToRetain
-        }
+fun AttributeGroup.toItemsRequest(documentType: DocumentType): ItemsRequest {
+    val nameSpaces = mutableMapOf<String, Map<String, Boolean>>()
+
+    if (attributes.isNotEmpty()) {
+        nameSpaces[namespaceFor(documentType)] =
+            attributes.entries.associate { (attr, intentToRetain) ->
+                attr.value to intentToRetain
+            }
+    }
+
+    if (gbAttributes.isNotEmpty()) {
+        nameSpaces[GbAttribute.NAMESPACE] =
+            gbAttributes.entries.associate { (attr, intentToRetain) ->
+                attr.value to intentToRetain
+            }
+    }
+
+    return ItemsRequest(
+        docType = documentType.value,
+        nameSpaces = nameSpaces
     )
-)
+}
 
 fun AttributeGroup.toItemsRequest(documentType: String): ItemsRequest =
     toItemsRequest(resolveDocumentType(documentType))

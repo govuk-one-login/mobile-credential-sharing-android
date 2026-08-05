@@ -27,6 +27,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -523,17 +524,32 @@ class HolderOrchestrator(
         val skDevice = context.skDevice
 
         if (skDevice != null) {
+            val isAgeOverLimit = exception.cause is AgeOverNNRequestLimitException
+
+            val deviceResponseStatus = if (isAgeOverLimit) Status.GENERAL_ERROR else Status.OK
+
             val sessionDataBytes = holderCryptoService.buildErrorSessionData(
-                deviceResponseStatus = Status.OK,
+                deviceResponseStatus = deviceResponseStatus,
                 sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
                 skDevice = skDevice,
                 encryptCounter = context.encryptCounter
             )
 
-            terminateSession(
-                finalState = HolderSessionState.Complete.Success(
+            val finalState = if (isAgeOverLimit) {
+                HolderSessionState.Complete.Failed(
+                    SessionError(
+                        message = AgeOverNNRequestLimitException.MESSAGE,
+                        reason = SessionErrorReason.AgeOverNNRequestLimit
+                    )
+                )
+            } else {
+                HolderSessionState.Complete.Success(
                     HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
-                ),
+                )
+            }
+
+            terminateSession(
+                finalState = finalState,
                 sessionDataToSend = sessionDataBytes
             )
         } else {

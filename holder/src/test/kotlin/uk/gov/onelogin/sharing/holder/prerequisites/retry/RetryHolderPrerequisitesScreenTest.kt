@@ -21,6 +21,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.ui.RetryPrerequisitesContentRule
 import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
@@ -48,7 +49,8 @@ class RetryHolderPrerequisitesScreenTest {
     private val resolver by lazy {
         ResolveHolderPrerequisiteAction(
             logger = logger,
-            orchestrator = orchestrator
+            orchestrator = orchestrator,
+            permissionChecker = FakePermissionChecker()
         )
     }
     private val initialHolderState: HolderSessionState by lazy {

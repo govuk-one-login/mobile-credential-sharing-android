@@ -39,10 +39,7 @@ internal fun UnrecoverableHolderErrorScreen(
     }
 
     BackHandler(true) {
-        scope.launch {
-            viewModel.reset()
-            currentOnExitJourney()
-        }
+        scope.launch { viewModel.reset() }
     }
 
     LaunchedEffect(Unit) {

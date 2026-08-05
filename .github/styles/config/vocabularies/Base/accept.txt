@@ -10,4 +10,5 @@ TBC
 proxying
 Keystore
 mdoc
+pytest
 Verifier's

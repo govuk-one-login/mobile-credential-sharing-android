@@ -12,7 +12,8 @@ import kotlinx.serialization.json.Json
 data class VerificationRequest(val documentType: String, val attributeGroup: AttributeGroup) :
     Parcelable {
     val requestedElements: List<String>
-        get() = attributeGroup.attributes.keys.map { it.value }
+        get() = attributeGroup.attributes.keys.map { it.value } +
+            attributeGroup.gbAttributes.keys.map { it.value }
 
     companion object {
         fun typed(documentType: DocumentType, attributeGroup: AttributeGroup): VerificationRequest =
@@ -24,14 +25,32 @@ data class VerificationRequest(val documentType: String, val attributeGroup: Att
         fun raw(
             documentType: String,
             requestedElements: Map<String, Boolean>
-        ): VerificationRequest = VerificationRequest(
-            documentType = documentType,
-            attributeGroup = AttributeGroup(
-                requestedElements.map { (key, retain) ->
-                    MdlAttribute.Custom(key) to retain
-                }.toMap()
+        ): VerificationRequest {
+            val attributes = mutableMapOf<MdlAttribute, Boolean>()
+            val gbAttributes = mutableMapOf<GbAttribute, Boolean>()
+
+            requestedElements.forEach { (key, retain) ->
+                when (key) {
+                    GbAttribute.WelshLicence.value -> gbAttributes[GbAttribute.WelshLicence] =
+                        retain
+
+                    GbAttribute.Title.value -> gbAttributes[GbAttribute.Title] = retain
+
+                    GbAttribute.ProvisionalDrivingPrivileges.value ->
+                        gbAttributes[GbAttribute.ProvisionalDrivingPrivileges] = retain
+
+                    else -> attributes[MdlAttribute.Custom(key)] = retain
+                }
+            }
+
+            return VerificationRequest(
+                documentType = documentType,
+                attributeGroup = AttributeGroup(
+                    attributes = attributes,
+                    gbAttributes = gbAttributes
+                )
             )
-        )
+        }
 
         val VerificationRequestType = object : NavType<VerificationRequest>(
             isNullableAllowed = false

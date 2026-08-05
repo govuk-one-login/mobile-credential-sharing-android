@@ -18,9 +18,16 @@ sealed class VerifierSessionState :
     override fun isComplete(): Boolean = this is Complete
 
     override fun userCanCancel(): Boolean = this::class in listOf(
+        Preflight::class,
+        ReadyToScan::class,
         Connecting::class,
         Verifying::class,
         ProcessingEngagement::class
+    )
+
+    override fun shouldConfirmCancellation(): Boolean = this::class in listOf(
+        Connecting::class,
+        Verifying::class
     )
 
     /**

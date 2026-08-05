@@ -11,7 +11,8 @@ enum class CentralBluetoothTransportError {
     FAILED_TO_SUBSCRIBE,
     FAILED_TO_START,
     SCAN_FAILED,
-    INVALID_MESSAGE_PREFIX;
+    INVALID_MESSAGE_PREFIX,
+    SERVICE_CHANGED;
 
     companion object {
         fun fromClientError(clientError: ClientError): CentralBluetoothTransportError =
@@ -24,6 +25,7 @@ enum class CentralBluetoothTransportError {
                 ClientError.FAILED_TO_START -> FAILED_TO_START
                 ClientError.SERVICE_DISCOVERED_ERROR -> INVALID_SERVICE
                 ClientError.INVALID_MESSAGE_PREFIX -> INVALID_MESSAGE_PREFIX
+                ClientError.SERVICE_CHANGED -> SERVICE_CHANGED
             }
     }
 }

@@ -457,6 +457,42 @@ class ItemsRequestStructureTest {
         )
     }
 
+    @Test
+    fun `Option 2 attributes are correctly encoded in their respective namespaces`() {
+        val gbNamespace = "org.iso.18013.5.1.GB"
+        val attributes = mapOf(
+            DocumentType.Mdl.NAMESPACE to mapOf(
+                "given_name" to true,
+                "age_over_23" to false
+            ),
+            gbNamespace to mapOf(
+                "title" to true
+            )
+        )
+        updateNamespaces(attributes)
+
+        assertThat(
+            deviceRequestHexString,
+            containsString(DocumentType.Mdl.NAMESPACE.toByteArray().toHexString())
+        )
+
+        assertThat(
+            deviceRequestHexString,
+            containsString("given_name".toByteArray().toHexString() + "f5")
+        )
+
+        assertThat(
+            deviceRequestHexString,
+            containsString("age_over_23".toByteArray().toHexString() + "f4")
+        )
+        assertThat(deviceRequestHexString, containsString(gbNamespace.toByteArray().toHexString()))
+
+        assertThat(
+            deviceRequestHexString,
+            containsString("title".toByteArray().toHexString() + "f5")
+        )
+    }
+
     private fun updateWithRequestInfo(requestInfo: ByteArray = byteArrayOf(1, 2)) {
         deviceRequest = deviceRequest.copy(
             docRequest = listOf(

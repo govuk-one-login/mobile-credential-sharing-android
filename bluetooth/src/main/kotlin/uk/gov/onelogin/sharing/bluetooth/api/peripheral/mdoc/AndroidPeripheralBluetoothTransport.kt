@@ -87,6 +87,7 @@ class AndroidPeripheralBluetoothTransport(
         ioDispatcher + "$logTag.Start".asCoroutineName()
     ) {
         cancelCurrentJobs()
+        _state.value = PeripheralBluetoothState.Idle
 
         monitoringJob.start()
         bluetoothStateMonitor.start()
@@ -110,6 +111,7 @@ class AndroidPeripheralBluetoothTransport(
             bleAdvertiser.stopAdvertise()
             gattServerManager.close()
             bluetoothStateMonitor.stop()
+            _state.value = PeripheralBluetoothState.Idle
         }
 
     override suspend fun notifySessionEnd(serviceUuid: UUID): Unit = withContext(

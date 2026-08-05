@@ -1,10 +1,12 @@
 package uk.gov.onelogin.sharing.testapp.credential.attribute.select
 
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.GbAttribute
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 
 private const val AGE_18 = 18
 private const val AGE_21 = 21
+private const val AGE_23 = 23
 
 enum class VerifierAttributeOption(val displayName: String, val attributeGroup: AttributeGroup) {
     PORTRAIT_AND_AGE_OVER_21(
@@ -32,6 +34,30 @@ enum class VerifierAttributeOption(val displayName: String, val attributeGroup: 
         attributeGroup = AttributeGroup(
             mapOf(
                 MdlAttribute.GivenName to false
+            )
+        )
+    ),
+    NAME_TITLE_RETAIN_AND_AGE_OVER_23(
+        displayName = "Name + Title (Retain) and Age Over 23",
+        attributeGroup = AttributeGroup(
+            attributes = mapOf(
+                MdlAttribute.GivenName to true,
+                MdlAttribute.AgeOver(AGE_23) to false
+            ),
+            gbAttributes = mapOf(
+                GbAttribute.Title to true
+            )
+        )
+    ),
+    REQUEST_AGE_OVER_LIMIT(
+        displayName = "Exceed age over NN Limit",
+        attributeGroup = AttributeGroup(
+            attributes = mapOf(
+                MdlAttribute.Portrait to true,
+                MdlAttribute.GivenName to true,
+                MdlAttribute.AgeOver(AGE_23) to false,
+                MdlAttribute.AgeOver(AGE_21) to false,
+                MdlAttribute.AgeOver(AGE_18) to false
             )
         )
     )

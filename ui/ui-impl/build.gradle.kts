@@ -49,7 +49,8 @@ dependencies {
         testFixtures(projects.core),
         testFixtures(projects.orchestration),
         testFixtures(projects.holder),
-        testFixtures(projects.sdk)
+        testFixtures(projects.sdk),
+        testFixtures(projects.verifier)
     ).forEach(::testImplementation)
 }
 

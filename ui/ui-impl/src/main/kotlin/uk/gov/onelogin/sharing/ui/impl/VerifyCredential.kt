@@ -80,7 +80,11 @@ internal fun VerifyCredential(
     )
 
     BackHandler(state.userCanCancel()) {
-        controller.navigateToVerifierUserCancellationDialog()
+        if (state.shouldConfirmCancellation()) {
+            controller.navigateToVerifierUserCancellationDialog()
+        } else {
+            orchestrator.cancel()
+        }
     }
 
     val scope = rememberCoroutineScope { defaultDispatcher }
@@ -97,7 +101,13 @@ internal fun VerifyCredential(
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!state.isComplete()) {
                     IconButton(
-                        onClick = { controller.navigateToVerifierUserCancellationDialog() }
+                        onClick = {
+                            if (state.shouldConfirmCancellation()) {
+                                controller.navigateToVerifierUserCancellationDialog()
+                            } else {
+                                orchestrator.cancel()
+                            }
+                        }
                     ) {
                         Icon(
                             painter = painterResource(ic_menu_close_clear_cancel),
