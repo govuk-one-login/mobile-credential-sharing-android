@@ -159,7 +159,7 @@ class BluetoothGattServerCallbackTest {
 
         assertEquals(1, fakeEmitter.events.size)
         assertEquals(
-            GattServerCallbackEvent.MessageReceived(byteArrayOf(0x33, 0x44, 0x55)),
+            GattServerCallbackEvent.MessageReceived(device, byteArrayOf(0x33, 0x44, 0x55)),
             fakeEmitter.events.firstOrNull()
         )
     }
@@ -228,7 +228,10 @@ class BluetoothGattServerCallbackTest {
 
         assertEquals(1, fakeEmitter.events.size)
         assertEquals(
-            GattServerCallbackEvent.MessageReceived(byteArrayOf(0x11, 0x22, 0x33, 0x44, 0x55)),
+            GattServerCallbackEvent.MessageReceived(
+                device,
+                byteArrayOf(0x11, 0x22, 0x33, 0x44, 0x55)
+            ),
             fakeEmitter.events.firstOrNull()
         )
     }

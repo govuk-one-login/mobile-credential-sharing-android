@@ -545,6 +545,21 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    @Config(sdk = [Build.VERSION_CODES.S])
+    @Test
+    fun `emits error and disconnects when service changed`() = runTest {
+        testEvents { callbackSlot ->
+            callbackSlot.captured.onServiceChanged(bluetoothGatt)
+
+            assertEquals(
+                GattClientEvent.Error(ClientError.SERVICE_CHANGED),
+                awaitItem()
+            )
+
+            verifyCount { bluetoothGatt.disconnect() }
+        }
+    }
+
     @Test
     fun `disconnect calls bluetoothGatt disconnect`() {
         manager.disconnect()

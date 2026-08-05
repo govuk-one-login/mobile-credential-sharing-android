@@ -44,5 +44,11 @@ enum class ClientError {
     /**
      * Indicates that a Bluetooth characteristic value's first byte is invalid.
      */
-    INVALID_MESSAGE_PREFIX
+    INVALID_MESSAGE_PREFIX,
+
+    /**
+     * Indicates that the remote GATT server's services changed during an active session,
+     * meaning the current session is no longer valid.
+     */
+    SERVICE_CHANGED
 }

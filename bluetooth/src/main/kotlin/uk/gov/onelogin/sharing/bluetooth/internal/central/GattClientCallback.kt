@@ -78,4 +78,10 @@ internal class GattClientCallback(private val gattEventEmitter: GattClientEventE
             )
         )
     }
+
+    // Note: onServiceChanged requires API 31+.
+    // On older devices the verifier will rely on the session inactivity timeout to recover.
+    override fun onServiceChanged(gatt: BluetoothGatt) {
+        gattEventEmitter.emit(GattEvent.ServiceChanged(gatt))
+    }
 }

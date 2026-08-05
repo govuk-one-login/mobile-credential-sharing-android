@@ -64,7 +64,6 @@ class GattServerEventToPeripheralBluetoothStateTest {
                     hasTransportError(PeripheralBluetoothTransportError.GATT_NOT_AVAILABLE)
                 ),
                 GattServerEvent.ServiceAdded(
-                    Int.MAX_VALUE,
                     mockk(relaxed = true)
                 ) to nullValue(),
                 GattServerEvent.ServiceStopped to nullValue(),
