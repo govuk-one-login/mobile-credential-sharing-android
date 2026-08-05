@@ -40,9 +40,11 @@ class ActivityPermissionChecker internal constructor(
                     else -> PermissionCheckResult::PermanentlyDenied
                 }.let { constructor ->
                     constructor(permission)
-                }.also {
-                    markerStore.mark(permission)
                 }
             }
         }
+
+    override fun markAsRequested(permissions: List<String>) {
+        permissions.forEach(markerStore::mark)
+    }
 }

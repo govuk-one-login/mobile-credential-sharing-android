@@ -9,12 +9,14 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.ResolvePrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.ResolvePrerequisiteAction.LogMessages.launchActionMessage
 
 @ContributesBinding(HolderUiScope::class)
 class ResolveHolderPrerequisiteAction(
     private val orchestrator: Orchestrator.Holder,
+    private val permissionChecker: PermissionChecker,
     private val logger: Logger
 ) : ResolvePrerequisiteAction<HolderSessionState> {
 
@@ -33,6 +35,9 @@ class ResolveHolderPrerequisiteAction(
                     actions.firstOrNull()
                 }
             }?.let { action ->
+                if (action is PrerequisiteAction.RequestPermissions) {
+                    permissionChecker.markAsRequested(action.permissions)
+                }
                 launcher.launch(action)
                 logger.debug(
                     logTag,
