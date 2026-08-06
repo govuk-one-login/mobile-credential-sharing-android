@@ -146,11 +146,12 @@ class AndroidPeripheralBluetoothTransport(
                         PeripheralBluetoothTransportError.ADVERTISING_FAILED
                     )
             }
+
             AdvertiserState.Idle,
-            AdvertiserState.Starting,
-                -> {
-                    // do nothing with intermediary advertisement states
-                }
+            AdvertiserState.Starting
+            -> {
+                // do nothing with intermediary advertisement states
+            }
         }
 
         logger.debug(logTag, "Advertising ${state::class.java.simpleName}")
@@ -167,6 +168,7 @@ class AndroidPeripheralBluetoothTransport(
                     gattServerManager.cancelCurrentConnection()
                 }
             }
+
             is GattServerEvent.ServiceAdded -> {
                 coroutineScope.launch(
                     ioDispatcher + "$logTag.StartAdvertising".asCoroutineName()
@@ -174,6 +176,7 @@ class AndroidPeripheralBluetoothTransport(
                     event.service?.uuid?.let { startAdvertising(it) }
                 }
             }
+
             else -> {
                 // don't perform additional logic for other events
             }

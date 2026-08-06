@@ -176,7 +176,7 @@ class AndroidPeripheralBluetoothTransportTest {
             AdvertiserState.Failed("error"),
             AdvertiserState.Starting,
             AdvertiserState.Started
-        ),
+        )
     ) = runTest(dispatcherRule.testDispatcher) {
         transport.monitoringJob.start()
         advertiser.emitState(event)
@@ -200,8 +200,8 @@ class AndroidPeripheralBluetoothTransportTest {
                 DEVICE_ADDRESS,
                 GATT_SUCCESS,
                 BluetoothProfile.STATE_CONNECTED
-            ),
-        ),
+            )
+        )
     ) = runTest(dispatcherRule.testDispatcher) {
         transport.monitoringJob.start()
         gattServerManager.emitEvent(event)
@@ -215,7 +215,7 @@ class AndroidPeripheralBluetoothTransportTest {
         @TestParameter event: AdvertiserState = testValues(
             AdvertiserState.Stopping,
             AdvertiserState.Stopped
-        ),
+        )
     ) = runTest(dispatcherRule.testDispatcher) {
         transport.isServiceReady = true
         transport.monitoringJob.start()

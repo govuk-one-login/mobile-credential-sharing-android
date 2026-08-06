@@ -147,7 +147,7 @@ class AndroidGattServerManager(
         val event = when {
             event.status == BluetoothGatt.GATT_SUCCESS &&
                 event.newState == BluetoothProfile.STATE_CONNECTED -> {
-                    connectedDevice = event.device
+                connectedDevice = event.device
                 GattServerEvent.Connected(event.device.address)
             }
 

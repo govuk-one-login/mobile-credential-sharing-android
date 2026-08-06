@@ -352,7 +352,7 @@ class AndroidGattServerManagerTest {
     }
 
     private fun BluetoothGattServerCallback.invokeDescriptorWriteCallback(
-        args: OnDescriptorWriteRequestArgs,
+        args: OnDescriptorWriteRequestArgs
     ) {
         onDescriptorWriteRequest(
             device,
@@ -368,7 +368,7 @@ class AndroidGattServerManagerTest {
     private fun setupOpenGattServer(
         bluetoothManager: BluetoothManager,
         context: Context,
-        gattServer: BluetoothGattServer = mockk(relaxed = true),
+        gattServer: BluetoothGattServer = mockk(relaxed = true)
     ): Pair<CapturingSlot<BluetoothGattServerCallback>, BluetoothGattServer> {
         val callbackSlot = slot<BluetoothGattServerCallback>()
         every {
@@ -615,7 +615,7 @@ class AndroidGattServerManagerTest {
             val server2ClientChar = mockk<BluetoothGattCharacteristic>()
             val service = mockk<BluetoothGattService> {
                 every { getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns
-                        server2ClientChar
+                    server2ClientChar
             }
             every { gattServer.getService(uuid) } returns service
 
