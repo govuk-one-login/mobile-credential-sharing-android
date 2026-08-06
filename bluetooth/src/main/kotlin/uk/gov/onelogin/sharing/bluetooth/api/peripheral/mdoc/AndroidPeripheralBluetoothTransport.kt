@@ -135,6 +135,7 @@ class AndroidPeripheralBluetoothTransport(
                 isServiceReady = true
             }
 
+            AdvertiserState.Stopping,
             is AdvertiserState.Stopped -> {
                 isServiceReady = false
             }
@@ -147,7 +148,6 @@ class AndroidPeripheralBluetoothTransport(
             }
             AdvertiserState.Idle,
             AdvertiserState.Starting,
-            AdvertiserState.Stopping,
                 -> {
                     // do nothing with intermediary advertisement states
                 }
