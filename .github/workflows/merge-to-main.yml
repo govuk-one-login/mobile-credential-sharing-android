@@ -14,8 +14,16 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  linting:
+    name: "Lint code base"
+    uses: ./.github/workflows/linting.yml
+    secrets: inherit
+
+
   bump-version:
     name: "Bump semantic version"
+    # Requires 'linting' to pass as linting verifies conventional commit structure.
+    needs: linting
     permissions:
       contents: write
       id-token: write
@@ -47,12 +55,6 @@ jobs:
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
-
-
-  linting:
-    name: "Lint code base"
-    uses: ./.github/workflows/linting.yml
-    secrets: inherit
 
 
   publishing:
