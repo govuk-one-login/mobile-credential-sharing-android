@@ -12,5 +12,10 @@ interface GattServerManager :
 
     fun open(serviceUuid: UUID)
 
+    /**
+     * Disconnects the currently connected bluetooth device.
+     */
+    fun cancelCurrentConnection()
+
     fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued
 }

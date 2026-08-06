@@ -64,12 +64,8 @@ class AndroidGattServerManager(
     private var mtu = MIN_MTU
     private var isSessionEnd = false
 
-    @Volatile
-    private var isServiceReady = false
-
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open(serviceUuid: UUID) {
-        isServiceReady = false
         val gattService = gattServiceFactory(serviceUuid)
 
         if (permissionsChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
@@ -108,7 +104,6 @@ class AndroidGattServerManager(
         gattServer = null
         connectedDevice = null
         isSessionEnd = false
-        isServiceReady = false
         mtu = MIN_MTU
         _events.tryEmit(GattServerEvent.ServiceStopped)
     }
@@ -138,26 +133,21 @@ class AndroidGattServerManager(
     }
 
     @SuppressLint("MissingPermission")
+    override fun cancelCurrentConnection() {
+        connectedDevice?.let {
+            gattServer?.cancelConnection(it)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
     private fun handleConnectionStateChange(event: GattServerCallbackEvent.ConnectionStateChange) {
         val address = event.device.address
 
         val event = when {
             event.status == BluetoothGatt.GATT_SUCCESS &&
                 event.newState == BluetoothProfile.STATE_CONNECTED -> {
-                // Reject connections that arrive before addService() completes.
-                // This happens when a device from a previous session is still actively connecting
-                // Android routes it to the new GATT server immediately on openGattServer(),
-                // before the service is registered.
-                if (!isServiceReady) {
-                    logger.debug(
-                        logTag,
-                        "Rejecting connection from $address - service not ready"
-                    )
-                    gattServer?.cancelConnection(event.device)
-                    return
-                }
-                connectedDevice = event.device
-                GattServerEvent.Connected(address)
+                    connectedDevice = event.device
+                GattServerEvent.Connected(event.device.address)
             }
 
             event.newState == BluetoothProfile.STATE_DISCONNECTED -> {
@@ -188,7 +178,6 @@ class AndroidGattServerManager(
 
     private fun handleServiceAdded(event: GattServerCallbackEvent.ServiceAdded) {
         if (event.status == BluetoothGatt.GATT_SUCCESS) {
-            isServiceReady = true
             _events.tryEmit(
                 GattServerEvent.ServiceAdded(
                     event.service
