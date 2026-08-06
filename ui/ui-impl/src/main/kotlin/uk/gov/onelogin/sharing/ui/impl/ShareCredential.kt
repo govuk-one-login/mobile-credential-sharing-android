@@ -89,7 +89,9 @@ internal fun ShareCredential(
 
     LaunchedEffect(Unit) {
         scope.launch {
-            orchestrator.start()
+            if (holderSessionState.value is HolderSessionState.NotStarted) {
+                orchestrator.start()
+            }
         }
     }
 

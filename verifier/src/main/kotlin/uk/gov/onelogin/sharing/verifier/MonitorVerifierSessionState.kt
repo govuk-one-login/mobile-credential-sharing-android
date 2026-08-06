@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.verifier
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,6 +30,8 @@ import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute.navigateToVerifie
 import uk.gov.onelogin.sharing.verifier.scan.errors.invalid.ScannedInvalidQrRoute.Companion.navigateToScannedInvalidQrRoute
 import uk.gov.onelogin.sharing.verifier.verify.VerifierPrerequisitesNavigationExt.navigateToVerifierPrerequisitesScreen
 import uk.gov.onelogin.sharing.verifier.verify.retry.RetryVerifierPrerequisitesNavigationExt.navigateToRetryVerifierPrerequisites
+
+private const val TAG = "MonitorVerifierSessionState"
 
 /**
  * Creates a [LaunchedEffect] that monitors the [sessionState].
@@ -92,31 +95,38 @@ internal suspend fun convertSessionStateToNavigation(
 
     when (state) {
         VerifierSessionState.NotStarted -> {
+            Log.d(TAG, "State: NotStarted");
             { navController.navigateToVerifierPrerequisitesScreen(exitJourneyOptions) }
         }
 
         is VerifierSessionState.Preflight -> {
+            Log.d(TAG, "State: Preflight");
             { navController.navigateToRetryVerifierPrerequisites(exitJourneyOptions) }
         }
 
         VerifierSessionState.ReadyToScan -> {
+            Log.d(TAG, "State: ReadyToScan");
             { navController.navigateToVerifierScanRoute(exitJourneyOptions) }
         }
 
         VerifierSessionState.Connecting -> {
+            Log.d(TAG, "State: Connecting");
             { navController.navigateToConnectWithHolderDeviceRoute() }
         }
 
         is VerifierSessionState.Complete.Failed -> {
+            Log.d(TAG, "State: Complete.Failed - reason: ${state.error.reason}");
             { handleSessionFailure(state, navController, context, exitJourneyOptions) }
         }
 
         // DCMAW-21173: Update success screens to close journey.
         is VerifierSessionState.Complete.Success -> {
+            Log.d(TAG, "State: Complete.Success");
             { navController.navigateToFinishedVerifierJourney(state.data, exitJourneyOptions) }
         }
 
         VerifierSessionState.Complete.Cancelled -> {
+            Log.d(TAG, "State: Complete.Cancelled");
             { navController.navigateToVerifierUserCancellationScreen(exitJourneyOptions) }
         }
 
@@ -124,6 +134,7 @@ internal suspend fun convertSessionStateToNavigation(
         VerifierSessionState.Verifying,
         VerifierSessionState.TerminatingSession
         -> {
+            Log.d(TAG, "State: ${state::class.simpleName} (no UI action)");
             {}
         }
     }

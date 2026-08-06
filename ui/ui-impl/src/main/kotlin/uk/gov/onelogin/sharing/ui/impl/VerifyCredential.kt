@@ -90,7 +90,9 @@ internal fun VerifyCredential(
     val scope = rememberCoroutineScope { defaultDispatcher }
     LaunchedEffect(Unit) {
         scope.launch {
-            orchestrator.start()
+            if (verifierSessionState.value is VerifierSessionState.NotStarted) {
+                orchestrator.start()
+            }
         }
     }
 
