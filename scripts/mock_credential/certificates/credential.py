@@ -5,12 +5,13 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from typing import Dict, List
 
+
 class IssuerAuth:
     """Handles COSE_Sign1 signing for mdoc."""
     def __init__(self, mso_tagged_bytes: bytes, leaf_cert_der: bytes):
         self.mso_tagged_bytes = mso_tagged_bytes
         self.leaf_cert_der = leaf_cert_der
-        self.protected = cbor2.dumps({1: -7}) # alg: ES256
+        self.protected = cbor2.dumps({1: -7})  # alg: ES256
 
     def sign(self, signing_key: ec.EllipticCurvePrivateKey) -> List:
         """Signs the MSO and returns the IssuerAuth COSE_Sign1 array."""
@@ -26,6 +27,7 @@ class IssuerAuth:
             self.mso_tagged_bytes,
             signature
         ]
+
 
 class Credential:
     """Final assembly of the mdoc credential."""

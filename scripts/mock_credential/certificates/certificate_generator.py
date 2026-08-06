@@ -1,18 +1,14 @@
 from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509 import Certificate, CertificateBuilder, Name
 from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import List
+
 
 class CertificateGenerator:
     def __init__(self, now: datetime):
         self.now = now
-
-    @staticmethod
-    def generate_key() -> ec.EllipticCurvePrivateKey:
-        """Generates a new P-256 EC private key."""
-        return ec.generate_private_key(ec.SECP256R1())
 
     def create_root_ca(
         self,

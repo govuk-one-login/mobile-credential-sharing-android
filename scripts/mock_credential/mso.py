@@ -1,7 +1,10 @@
 import cbor2
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, Type, TypeVar
 from .namespaces import IssuerSignedNamespaces
+
+T = TypeVar("T", bound="MSO")
+
 
 class MSO:
     def __init__(
@@ -15,6 +18,17 @@ class MSO:
         self.device_cose_key = device_cose_key
         self.doc_type = doc_type
         self.validity_days = validity_days
+
+    @classmethod
+    def from_dict(cls: Type[T], config: Dict, device_cose_key: Dict, validity_days: int = 365) -> T:
+        """Constructs an MSO from a config dict containing 'doc_type' and 'namespaces'."""
+        namespaces = IssuerSignedNamespaces.from_dict(config["namespaces"])
+        return cls(
+            namespaces=namespaces,
+            device_cose_key=device_cose_key,
+            doc_type=config["doc_type"],
+            validity_days=validity_days,
+        )
 
     def build_mso_dict(self, now: datetime) -> Dict:
         """Constructs the MSO dictionary structure."""
