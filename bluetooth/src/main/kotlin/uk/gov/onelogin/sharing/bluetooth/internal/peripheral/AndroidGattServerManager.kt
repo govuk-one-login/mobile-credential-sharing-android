@@ -55,7 +55,7 @@ class AndroidGattServerManager(
     )
     override val events: SharedFlow<GattServerEvent> = _events
     private var gattServer: BluetoothGattServer? = null
-    private var connectedDevice: BluetoothDevice? = null
+    internal var connectedDevice: BluetoothDevice? = null
 
     @SuppressLint("MissingPermission")
     private val eventEmitter = GattEventEmitter {
@@ -136,6 +136,7 @@ class AndroidGattServerManager(
     override fun cancelCurrentConnection() {
         connectedDevice?.let {
             gattServer?.cancelConnection(it)
+            connectedDevice = null
         }
     }
 
