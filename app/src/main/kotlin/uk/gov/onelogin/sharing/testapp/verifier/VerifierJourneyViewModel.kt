@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.testapp.verifier
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,8 @@ import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 /**
  * ViewModel that caches the [CredentialVerifier] so it survives configuration changes.
  */
-class VerifierJourneyViewModel : ViewModel() {
+class VerifierJourneyViewModel(private val dispatcher: CoroutineDispatcher = Dispatchers.Default) :
+    ViewModel() {
     private val _verifier = MutableStateFlow<CredentialVerifier?>(null)
     val verifier: StateFlow<CredentialVerifier?> = _verifier
 
@@ -29,7 +31,7 @@ class VerifierJourneyViewModel : ViewModel() {
         if (_verifier.value != null) return
 
         viewModelScope.launch {
-            val result = withContext(Dispatchers.Default) {
+            val result = withContext(dispatcher) {
                 factory(context, request)
             }
             _verifier.value = result

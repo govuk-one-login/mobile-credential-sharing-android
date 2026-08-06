@@ -33,6 +33,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
+import uk.gov.onelogin.sharing.orchestration.verifier.session.data.NonStartedVerifierSessionStates
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
 import uk.gov.onelogin.sharing.ui.impl.di.VerifierUiGraph
 import uk.gov.onelogin.sharing.verifier.scan.VerifierScanRoute
@@ -71,6 +72,43 @@ class VerifyCredentialTest {
         }
 
         composeTestRule.waitForIdle()
+    }
+
+    @Test
+    @UiThreadTest
+    fun `start is called when state is NotStarted`() = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialVerifierState = MutableStateFlow(VerifierSessionState.NotStarted)
+        )
+        val verifier = FakeCredentialVerifier(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent { VerifyCredential(component = verifier) }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.waitUntil { orchestrator.startCount == 1 }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `start is not called when state is not NotStarted`(
+        @TestParameter(valuesProvider = NonStartedVerifierSessionStates::class)
+        state: VerifierSessionState
+    ) = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialVerifierState = MutableStateFlow(state)
+        )
+        val verifier = FakeCredentialVerifier(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent { VerifyCredential(component = verifier) }
+        composeTestRule.waitForIdle()
+
+        assertEquals(0, orchestrator.startCount)
     }
 
     @Test
