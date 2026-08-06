@@ -8,11 +8,11 @@ from typing import Generator
 LOGGER = logging.getLogger(__name__)
 
 @pytest.fixture
-def empty_parser() -> Generator[ArgumentParser]:
+def empty_parser() -> Generator[ArgumentParser, None, None]:
     yield ArgumentParser(description="Generate a mock credential for the test app")
 
 @pytest.fixture
-def issuer_auth_input_tmp_dir(tmp_path: Path) -> Generator[Path]:
+def issuer_auth_input_tmp_dir(tmp_path: Path) -> Generator[Path, None, None]:
     fixture_dir = tmp_path / "valid_parser"
     fixture_dir.mkdir(parents = True) 
     yield fixture_dir
@@ -21,7 +21,7 @@ def issuer_auth_input_tmp_dir(tmp_path: Path) -> Generator[Path]:
 def valid_parser(
     issuer_auth_input_tmp_dir: Path,
     empty_parser: ArgumentParser
-) -> Generator[Namespace]:
+) -> Generator[Namespace, None, None]:
     empty_parser.add_argument(
         "--private-key",
         help="Path to device private key PEM",
@@ -52,5 +52,5 @@ def valid_parser(
     return args
 
 @pytest.fixture
-def valid_issuer_auth_input(valid_parser) -> Generator[IssuerAuthInput]:
+def valid_issuer_auth_input(valid_parser) -> Generator[IssuerAuthInput, None, None]:
     yield IssuerAuthInput.from_parser(valid_parser)
