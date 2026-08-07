@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.v2.Logger
@@ -9,7 +9,7 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.createNistInitialisati
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionEncryption
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
-@ContributesBinding(AppScope::class, binding = binding<EncryptDeviceRequestUseCase>())
+@ContributesBinding(SharingSessionScope::class, binding = binding<EncryptDeviceRequestUseCase>())
 class EncryptDeviceRequestUseCaseImpl(
     private val sessionEncryption: SessionEncryption,
     private val logger: Logger

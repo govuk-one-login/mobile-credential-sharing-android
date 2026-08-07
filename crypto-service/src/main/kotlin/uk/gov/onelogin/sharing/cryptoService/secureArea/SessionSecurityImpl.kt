@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.secureArea
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.SharedSecretGenerator
@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
  *
  * Uses interface delegation to provide the necessary features.
  */
-@ContributesBinding(AppScope::class, binding = binding<SessionSecurity>())
+@ContributesBinding(SharingSessionScope::class, binding = binding<SessionSecurity>())
 class SessionSecurityImpl(
     keyPairGenerator: KeyPairGenerator,
     secretGenerator: SharedSecretGenerator,

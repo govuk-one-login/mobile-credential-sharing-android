@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import uk.gov.logging.api.v2.Logger
@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablish
  *   <a href="https://govukverify.atlassian.net/wiki/spaces/DCMAW/pages/6707577055">
  *   Session Termination - Behaviour</a>
  */
-@ContributesBinding(scope = AppScope::class, binding = binding<InboundMessageClassifier>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<InboundMessageClassifier>())
 class InboundMessageClassifierImpl(private val logger: Logger) : InboundMessageClassifier {
     override fun getMessageType(rawBytes: ByteArray): InboundMessageType {
         val tree = try {

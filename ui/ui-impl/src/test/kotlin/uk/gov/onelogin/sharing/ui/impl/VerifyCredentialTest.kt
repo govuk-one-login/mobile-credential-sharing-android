@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.compose.foundation.layout.Box

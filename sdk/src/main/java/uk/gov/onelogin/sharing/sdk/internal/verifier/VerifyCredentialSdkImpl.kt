@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.sdk.internal.verifier
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerificationSession
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
@@ -13,6 +14,28 @@ class VerifyCredentialSdkImpl(
     private val credentialVerificationGraphFactory: CredentialVerificationGraph.Factory
 ) : VerifyCredentialSdk {
 
+    override fun createSession(verifierConfig: VerifierConfig): VerificationSession {
+        val credentialVerificationGraph = credentialVerificationGraphFactory
+            .create(verifierConfig.trustedRootCertificate, appGraph.logger())
+        val orchestrator = verifierGraphFactory
+            .create(
+                appGraph = appGraph,
+                credentialVerificationGraph = credentialVerificationGraph,
+                verifierConfig = verifierConfig
+            )
+            .verifierOrchestrator()
+
+        return VerificationSessionImpl(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+    }
+
+    @Deprecated(
+        message = "Use createSession() instead. CredentialVerifier exposes internal details.",
+        replaceWith = ReplaceWith("createSession(verifierConfig)")
+    )
+    @Suppress("DEPRECATION")
     override fun verifier(verifierConfig: VerifierConfig): CredentialVerifier {
         val credentialVerificationGraph = credentialVerificationGraphFactory
             .create(verifierConfig.trustedRootCertificate, appGraph.logger())

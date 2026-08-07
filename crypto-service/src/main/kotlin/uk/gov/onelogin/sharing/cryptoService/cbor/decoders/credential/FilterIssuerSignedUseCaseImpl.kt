@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.S
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 
 @Inject
-@ContributesBinding(scope = AppScope::class, binding = binding<FilterIssuerSignedUseCase>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<FilterIssuerSignedUseCase>())
 class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSignedUseCase {
 
     private val cborMapper = ObjectMapper(CBORFactory())

@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration
 
 import androidx.annotation.Keep
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
@@ -42,7 +42,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedP
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
-import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
@@ -65,8 +64,8 @@ import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
-@SingleIn(AppScope::class)
-@ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Holder>())
+@SingleIn(SharingSessionScope::class)
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<Orchestrator.Holder>())
 class HolderOrchestrator(
     private val logger: Logger,
     private val sessionFactory: SessionFactory<HolderSession>,

@@ -9,7 +9,6 @@ import dagger.hilt.android.scopes.ActivityScoped
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
-import uk.gov.onelogin.sharing.sdk.internal.shared.CredentialSharingSdkImpl
 
 @Module
 @InstallIn(ActivityComponent::class)
@@ -20,7 +19,7 @@ object CredentialSharingSdkModule {
         application: Application,
         logger: Logger,
         permissionChecker: PermissionChecker
-    ): CredentialSharingSdk = CredentialSharingSdkImpl(
+    ): CredentialSharingSdk = CredentialSharingSdk.create(
         applicationContext = application,
         logger = logger,
         permissionChecker = permissionChecker

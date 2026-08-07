@@ -1,14 +1,12 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -20,7 +18,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
  * Drives a [TerminationState] state machine through the correct sequence based on
  * whether the holder has already sent a status 20 and whether BLE is still open.
  */
-@ContributesBinding(scope = AppScope::class, binding = binding<SessionTerminator>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<SessionTerminator>())
 @Inject
 class SessionTerminatorImpl(
     private val centralBluetoothTransport: CentralBluetoothTransport,

@@ -25,7 +25,7 @@ import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
-import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.sdk.api.presenter.SharingSession
 import uk.gov.onelogin.sharing.testapp.credential.MockCredential
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState.Companion.MockCredentialStateType
@@ -44,7 +44,7 @@ object HolderTestAppJourneyNavigationExt {
     @Suppress("LongMethod")
     internal fun NavGraphBuilder.configureHolderJourneyWrapper(
         navController: NavController,
-        component: (MockCredential) -> CredentialPresenter
+        component: (MockCredential) -> SharingSession
     ) {
         composable<HolderTestAppJourney>(
             typeMap = mapOf(
@@ -84,29 +84,29 @@ object HolderTestAppJourneyNavigationExt {
             }
 
             val viewModel: HolderJourneyViewModel = viewModel()
-            viewModel.getPresenter(credential, component)
+            viewModel.getSession(credential, component)
 
-            val presenter by viewModel.presenter.collectAsStateWithLifecycle()
+            val session by viewModel.session.collectAsStateWithLifecycle()
 
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                presenter?.let { presenter ->
-                    LaunchedEffect(presenter.orchestrator) {
-                        presenter.orchestrator.holderSessionState.collect { state ->
+                session?.let { sharingSession ->
+                    LaunchedEffect(sharingSession) {
+                        sharingSession.sessionState.collect { state ->
                             if (state is HolderSessionState.Complete.Success &&
                                 state.successReason == SuccessReason.Denied
                             ) {
-                                presenter.orchestrator.reset()
+                                sharingSession.reset()
                                 navController.popBackStack()
                             }
                         }
                     }
 
                     HolderTestAppJourneyScreen(
-                        component = presenter,
+                        session = sharingSession,
                         modifier = Modifier.fillMaxSize()
                     )
                 } ?: CircularProgressIndicator()

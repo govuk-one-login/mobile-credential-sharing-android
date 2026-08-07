@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.core.di
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.Qualifier
@@ -12,7 +12,7 @@ import kotlinx.coroutines.SupervisorJob
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ApplicationScope
 
-@ContributesTo(AppScope::class)
+@ContributesTo(SharingSessionScope::class)
 interface CoroutineScopeModule {
 
     @Provides

@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.holder
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import java.io.ByteArrayOutputStream
@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
-@ContributesBinding(scope = AppScope::class, binding = binding<HolderCryptoService>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<HolderCryptoService>())
 class HolderCryptoServiceImpl(
     private val sessionSecurity: SessionSecurity,
     private val logger: Logger

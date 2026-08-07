@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredenti
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
 @Inject
-@ContributesBinding(scope = AppScope::class, binding = binding<HolderResponseUseCase>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<HolderResponseUseCase>())
 class HolderResponseUseCaseImpl(
     private val logger: Logger,
     private val deviceSignatureService: DeviceSignatureUseCase,

@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.sdk.api.presenter
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
 import dev.zacsweers.metro.Provides
@@ -8,7 +8,7 @@ import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 
-@DependencyGraph(AppScope::class)
+@DependencyGraph(SharingSessionScope::class)
 interface PresentCredentialGraph {
 
     @DependencyGraph.Factory

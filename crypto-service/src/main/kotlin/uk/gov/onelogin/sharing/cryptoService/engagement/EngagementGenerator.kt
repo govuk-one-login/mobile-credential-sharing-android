@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.engagement
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import java.util.Base64
 import java.util.UUID
@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.models.mdoc.security.Security
  * and a verifier.
  */
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 class EngagementGenerator(private val logger: Logger) : Engagement {
 
     /**

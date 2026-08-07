@@ -19,7 +19,7 @@ import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest.Companion.VerificationRequestType
-import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerificationSession
 
 object VerifierTestAppJourneyNavigationExt {
     fun NavController.navigateToTestAppVerifierJourney(
@@ -31,7 +31,7 @@ object VerifierTestAppJourneyNavigationExt {
     )
 
     internal fun NavGraphBuilder.configureVerifierJourneyWrapper(
-        requestToVerifier: (Context, VerificationRequest) -> CredentialVerifier
+        requestToSession: (Context, VerificationRequest) -> VerificationSession
     ) {
         composable<VerifierTestAppJourney>(
             typeMap = mapOf(
@@ -42,18 +42,18 @@ object VerifierTestAppJourneyNavigationExt {
             val arguments: VerifierTestAppJourney = navBackStackEntry.toRoute()
 
             val viewModel: VerifierJourneyViewModel = viewModel()
-            viewModel.getVerifier(context, arguments.request, requestToVerifier)
+            viewModel.getSession(context, arguments.request, requestToSession)
 
-            val verifier by viewModel.verifier.collectAsStateWithLifecycle()
+            val session by viewModel.session.collectAsStateWithLifecycle()
 
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                verifier?.let { verifier ->
+                session?.let { verificationSession ->
                     VerifierTestAppJourneyScreen(
-                        verifier = verifier,
+                        session = verificationSession,
                         modifier = Modifier.fillMaxSize()
                     )
                 } ?: CircularProgressIndicator()

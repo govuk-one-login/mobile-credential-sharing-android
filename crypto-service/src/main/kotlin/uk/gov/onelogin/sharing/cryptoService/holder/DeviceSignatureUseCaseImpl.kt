@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.holder
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -21,7 +21,7 @@ private const val DER_INTEGER_TAG = 0x02
 private const val BYTE_MASK = 0xFF
 
 @Inject
-@ContributesBinding(scope = AppScope::class, binding = binding<DeviceSignatureUseCase>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<DeviceSignatureUseCase>())
 class DeviceSignatureUseCaseImpl(private val logger: Logger) : DeviceSignatureUseCase {
 
     override fun buildDeviceSignedStructures(signatureBytes: ByteArray): DeviceSignatureResult {

@@ -11,7 +11,7 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,7 +36,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 @Suppress("TooManyFunctions")
 class AndroidGattServerManager(
     private val context: Context,

@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
@@ -33,8 +33,8 @@ import uk.gov.onelogin.sharing.core.coroutines.CoroutineNameExt.asCoroutineName
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(scope = AppScope::class, binding = binding<CentralBluetoothTransport>())
-@SingleIn(AppScope::class)
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<CentralBluetoothTransport>())
+@SingleIn(SharingSessionScope::class)
 class AndroidCentralBluetoothTransport(
     private val gattClientManager: GattClientManager,
     private val scanner: BluetoothScanner,

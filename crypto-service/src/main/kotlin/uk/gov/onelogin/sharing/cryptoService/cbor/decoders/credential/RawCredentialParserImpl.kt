@@ -6,10 +6,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 class RawCredentialParserImpl : RawCredentialParser {
 
     override fun parse(rawCredential: ByteArray): ParsedRawCredential = try {

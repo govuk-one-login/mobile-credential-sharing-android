@@ -3,12 +3,12 @@ package uk.gov.onelogin.sharing.bluetooth.api.adapter
 import android.bluetooth.le.BluetoothLeAdvertiser
 import android.bluetooth.le.BluetoothLeScanner
 import android.content.Context
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.prerequisites.api.ContextExt.bluetoothManager
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 @ContributesBinding(VerifierUiScope::class)
 class AndroidBluetoothAdapterProvider(val context: Context) : BluetoothAdapterProvider {
     private val bluetoothManager by lazy { context.bluetoothManager!! }

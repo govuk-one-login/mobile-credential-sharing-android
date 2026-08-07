@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.engagement
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPublicKey
@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.SessionSecurity
  * @property sessionSecurity Provides secure hardware-backed or software-backed key generation.
  * @property engagementGenerator Logic for formatting the specific engagement data.
  */
-@ContributesBinding(AppScope::class, binding = binding<GenerateEngagementQrCode>())
+@ContributesBinding(SharingSessionScope::class, binding = binding<GenerateEngagementQrCode>())
 class GenerateEngagementQrCodeUseCase(
     private val logger: Logger,
     private val sessionSecurity: SessionSecurity,

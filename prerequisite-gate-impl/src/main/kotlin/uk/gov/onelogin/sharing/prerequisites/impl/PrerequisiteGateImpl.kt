@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.prerequisites.impl
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import uk.gov.logging.api.v2.Logger
@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.api.state.CameraState
 import uk.gov.onelogin.sharing.prerequisites.api.state.LocationState
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 @Inject
 class PrerequisiteGateImpl(
     private val bluetoothEvaluator: PrerequisiteEvaluator<BluetoothState>,

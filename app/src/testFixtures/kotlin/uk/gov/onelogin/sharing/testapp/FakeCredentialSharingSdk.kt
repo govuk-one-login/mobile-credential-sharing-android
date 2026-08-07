@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+
 package uk.gov.onelogin.sharing.testapp
 
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk

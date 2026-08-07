@@ -4,7 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager.FEATURE_LOCATION
 import androidx.core.location.LocationManagerCompat
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.permissions.IterablePermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.api.state.LocationState
 
-@ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<LocationState>>())
+@ContributesBinding(SharingSessionScope::class, binding = binding<PrerequisiteEvaluator<LocationState>>())
 @Inject
 class LocationPrerequisiteEvaluator(
     private val context: Context,

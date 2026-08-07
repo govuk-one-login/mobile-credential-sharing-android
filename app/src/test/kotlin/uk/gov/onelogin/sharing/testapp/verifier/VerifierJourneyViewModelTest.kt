@@ -13,7 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
-import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerificationSession
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VerifierJourneyViewModelTest {
@@ -29,56 +29,56 @@ class VerifierJourneyViewModelTest {
     }
 
     @Test
-    fun `verifier is initially null`() {
-        assertNull(viewModel.verifier.value)
+    fun `session is initially null`() {
+        assertNull(viewModel.session.value)
     }
 
     @Test
-    fun `getVerifier creates verifier on first call`() = runTest {
+    fun `getSession creates session on first call`() = runTest {
         val context = mockk<Context>()
         val request = mockk<VerificationRequest>()
-        val expectedVerifier = mockk<CredentialVerifier>()
+        val expectedSession = mockk<VerificationSession>()
 
-        viewModel.getVerifier(context, request) { _, _ -> expectedVerifier }
+        viewModel.getSession(context, request) { _, _ -> expectedSession }
 
         advanceUntilIdle()
 
-        assertNotNull(viewModel.verifier.value)
-        assertEquals(expectedVerifier, viewModel.verifier.value)
+        assertNotNull(viewModel.session.value)
+        assertEquals(expectedSession, viewModel.session.value)
     }
 
     @Test
-    fun `getVerifier does not recreate verifier on subsequent calls`() = runTest {
+    fun `getSession does not recreate session on subsequent calls`() = runTest {
         val context = mockk<Context>()
         val request = mockk<VerificationRequest>()
-        val firstVerifier = mockk<CredentialVerifier>()
-        val secondVerifier = mockk<CredentialVerifier>()
+        val firstSession = mockk<VerificationSession>()
+        val secondSession = mockk<VerificationSession>()
 
-        viewModel.getVerifier(context, request) { _, _ -> firstVerifier }
+        viewModel.getSession(context, request) { _, _ -> firstSession }
         advanceUntilIdle()
 
-        viewModel.getVerifier(context, request) { _, _ -> secondVerifier }
+        viewModel.getSession(context, request) { _, _ -> secondSession }
         advanceUntilIdle()
 
-        assertEquals(firstVerifier, viewModel.verifier.value)
+        assertEquals(firstSession, viewModel.session.value)
     }
 
     @Test
     fun `factory is only called once`() = runTest {
         val context = mockk<Context>()
         val request = mockk<VerificationRequest>()
-        val verifier = mockk<CredentialVerifier>()
+        val session = mockk<VerificationSession>()
         var factoryCallCount = 0
 
-        val factory: (Context, VerificationRequest) -> CredentialVerifier = { _, _ ->
+        val factory: (Context, VerificationRequest) -> VerificationSession = { _, _ ->
             factoryCallCount++
-            verifier
+            session
         }
 
-        viewModel.getVerifier(context, request, factory)
+        viewModel.getSession(context, request, factory)
         advanceUntilIdle()
 
-        viewModel.getVerifier(context, request, factory)
+        viewModel.getSession(context, request, factory)
         advanceUntilIdle()
 
         assertEquals(1, factoryCallCount)
