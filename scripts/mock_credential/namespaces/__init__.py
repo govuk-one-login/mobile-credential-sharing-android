@@ -33,8 +33,3 @@ SAMPLE_ITEMS = {
 }
 
 SAMPLE_NAMESPACES: IssuerSignedNamespaces = IssuerSignedNamespaces.from_dict(SAMPLE_ITEMS)
-
-MSO_CONFIG = {
-    "doc_type": "org.iso.18013.5.1.mDL",
-    "namespaces": SAMPLE_ITEMS,
-}

@@ -16,8 +16,8 @@ from cryptography.x509.oid import ObjectIdentifier
 from datetime import datetime, timezone
 
 from mock_credential.issuer import IssuerAuthInput, ISSUER_NAME, LEAF_NAME
-from mock_credential.namespaces import SAMPLE_NAMESPACES, MSO_CONFIG
-from mock_credential.mso import MSO
+from mock_credential.namespaces import SAMPLE_NAMESPACES
+from mock_credential.mso import MSO, SAMPLE_MSO
 from mock_credential.certificates import CertificateGenerator, IssuerAuth, Credential, KeyGenerator
 
 # ISO 18013-5 mdoc DS OID
@@ -52,7 +52,7 @@ def generate():
     device_cose_key = {1: 2, -1: 1, -2: device_pub.x.to_bytes(32, "big"), -3: device_pub.y.to_bytes(32, "big")}
 
     # 3. Assemble MSO & Credential
-    mso_obj = MSO.from_dict(MSO_CONFIG, device_cose_key, validity_days=args.validity_days)
+    mso_obj = MSO.from_dict(SAMPLE_MSO, device_cose_key, validity_days=args.validity_days)
     mso_tagged_bytes = mso_obj.build_tagged_bytes(now)
 
     issuer_auth_obj = IssuerAuth(mso_tagged_bytes, leaf_cert.public_bytes(serialization.Encoding.DER))

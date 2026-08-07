@@ -1,9 +1,14 @@
 import cbor2
 from datetime import datetime, timedelta
 from typing import Dict, Type, TypeVar
-from .namespaces import IssuerSignedNamespaces
+from ..namespaces import IssuerSignedNamespaces, SAMPLE_ITEMS
 
 T = TypeVar("T", bound="MSO")
+
+SAMPLE_MSO = {
+    "doc_type": "org.iso.18013.5.1.mDL",
+    "namespaces": SAMPLE_ITEMS,
+}
 
 
 class MSO:
