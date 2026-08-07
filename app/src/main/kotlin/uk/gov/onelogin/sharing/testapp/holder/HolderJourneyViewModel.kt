@@ -20,7 +20,7 @@ class HolderJourneyViewModel(private val dispatcher: CoroutineDispatcher = Dispa
     val presenter: StateFlow<CredentialPresenter?> = _presenter
 
     /**
-     * Initialises the presenter if not already created.
+     * Initialises the presenter if not already created
      */
     fun getPresenter(credential: MockCredential, factory: (MockCredential) -> CredentialPresenter) {
         if (_presenter.value != null) return
