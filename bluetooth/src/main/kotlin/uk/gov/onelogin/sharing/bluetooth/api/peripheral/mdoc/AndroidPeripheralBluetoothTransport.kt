@@ -90,6 +90,7 @@ class AndroidPeripheralBluetoothTransport(
         ioDispatcher + "$logTag.Start".asCoroutineName()
     ) {
         cancelCurrentJobs()
+        isServiceReady = false
         _state.value = PeripheralBluetoothState.Idle
 
         gattServerManager.open(serviceUuid)
@@ -163,7 +164,7 @@ class AndroidPeripheralBluetoothTransport(
                 if (!isServiceReady) {
                     logger.debug(
                         logTag,
-                        "Rejecting connection from $${event.address} - service not ready"
+                        "Rejecting connection from ${event.address} - service not ready"
                     )
                     gattServerManager.cancelCurrentConnection()
                 }

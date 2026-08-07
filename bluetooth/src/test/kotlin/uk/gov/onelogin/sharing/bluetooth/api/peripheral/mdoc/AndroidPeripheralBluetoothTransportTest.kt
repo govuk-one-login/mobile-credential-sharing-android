@@ -236,7 +236,7 @@ class AndroidPeripheralBluetoothTransportTest {
         advanceUntilIdle()
 
         assertTrue {
-            "Rejecting connection from $$uuid - service not ready" in logger
+            "Rejecting connection from $uuid - service not ready" in logger
         }
         assertThat(
             gattServerManager.disconnectCalls,
@@ -486,4 +486,14 @@ class AndroidPeripheralBluetoothTransportTest {
                 )
             }
         }
+
+    @Test
+    fun `Starting the transport after the service is ready marks it as unready`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        transport.isServiceReady = true
+        transport.start(uuid)
+
+        assertFalse { transport.isServiceReady }
+    }
 }
