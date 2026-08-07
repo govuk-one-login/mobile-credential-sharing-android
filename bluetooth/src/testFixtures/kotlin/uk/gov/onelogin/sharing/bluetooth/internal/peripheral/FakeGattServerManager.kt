@@ -15,12 +15,17 @@ class FakeGattServerManager : GattServerManager {
 
     var openCalls = 0
     var closeCalls = 0
+    var disconnectCalls = 0
     var notifySessionEnd: Boolean = true
     var sendMessageResult: Boolean = true
     val sentMessages = mutableListOf<ByteArray>()
 
     override fun open(serviceUuid: UUID) {
         openCalls++
+    }
+
+    override fun cancelCurrentConnection() {
+        disconnectCalls++
     }
 
     override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued =

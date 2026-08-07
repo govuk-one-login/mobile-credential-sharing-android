@@ -51,6 +51,9 @@ class AndroidPeripheralBluetoothTransport(
 
     internal var monitoringJob: Job = monitorServerEvents()
 
+    @Volatile
+    internal var isServiceReady: Boolean = false
+
     private fun cancelCurrentJobs() {
         monitoringJob.cancel()
         monitoringJob = monitorServerEvents()
@@ -87,8 +90,13 @@ class AndroidPeripheralBluetoothTransport(
         ioDispatcher + "$logTag.Start".asCoroutineName()
     ) {
         cancelCurrentJobs()
+        isServiceReady = false
         _state.value = PeripheralBluetoothState.Idle
 
+        gattServerManager.open(serviceUuid)
+    }
+
+    private suspend fun startAdvertising(serviceUuid: UUID) {
         monitoringJob.start()
         bluetoothStateMonitor.start()
         try {
@@ -98,8 +106,6 @@ class AndroidPeripheralBluetoothTransport(
             _state.value =
                 PeripheralBluetoothState.Error(PeripheralBluetoothTransportError.ADVERTISING_FAILED)
         }
-
-        gattServerManager.open(serviceUuid)
     }
 
     override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean): Unit =
@@ -108,9 +114,9 @@ class AndroidPeripheralBluetoothTransport(
             if (sendEndCommand) {
                 notifySessionEnd(serviceUuid)
             }
+            bluetoothStateMonitor.stop()
             bleAdvertiser.stopAdvertise()
             gattServerManager.close()
-            bluetoothStateMonitor.stop()
             _state.value = PeripheralBluetoothState.Idle
         }
 
@@ -125,16 +131,57 @@ class AndroidPeripheralBluetoothTransport(
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {
-        if (state is AdvertiserState.Failed) {
-            _state.value =
-                PeripheralBluetoothState.Error(
-                    PeripheralBluetoothTransportError.ADVERTISING_FAILED
-                )
+        when (state) {
+            is AdvertiserState.Started -> {
+                isServiceReady = true
+            }
+
+            AdvertiserState.Stopping,
+            is AdvertiserState.Stopped -> {
+                isServiceReady = false
+            }
+
+            is AdvertiserState.Failed -> {
+                _state.value =
+                    PeripheralBluetoothState.Error(
+                        PeripheralBluetoothTransportError.ADVERTISING_FAILED
+                    )
+            }
+
+            AdvertiserState.Idle,
+            AdvertiserState.Starting
+            -> {
+                // do nothing with intermediary advertisement states
+            }
         }
+
         logger.debug(logTag, "Advertising ${state::class.java.simpleName}")
     }
 
     private fun handleGattEvent(event: GattServerEvent) {
+        when (event) {
+            is GattServerEvent.Connected -> {
+                if (!isServiceReady) {
+                    logger.debug(
+                        logTag,
+                        "Rejecting connection from ${event.address} - service not ready"
+                    )
+                    gattServerManager.cancelCurrentConnection()
+                }
+            }
+
+            is GattServerEvent.ServiceAdded -> {
+                coroutineScope.launch(
+                    ioDispatcher + "$logTag.StartAdvertising".asCoroutineName()
+                ) {
+                    startAdvertising(event.service.uuid)
+                }
+            }
+
+            else -> {
+                // don't perform additional logic for other events
+            }
+        }
         event.let(serverEventTransformer::transform)?.let { bluetoothState ->
             _state.value = bluetoothState
         }.also {

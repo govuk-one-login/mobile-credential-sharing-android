@@ -163,7 +163,7 @@ class GattServerCallback(
         }
     }
 
-    override fun onServiceAdded(status: Int, service: BluetoothGattService?) {
+    override fun onServiceAdded(status: Int, service: BluetoothGattService) {
         gatGattEventEmitter.emit(
             GattServerCallbackEvent.ServiceAdded(status, service)
         )

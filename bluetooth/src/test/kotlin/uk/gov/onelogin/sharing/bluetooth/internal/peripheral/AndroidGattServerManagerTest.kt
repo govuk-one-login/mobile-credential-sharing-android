@@ -20,6 +20,9 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.UUID
 import kotlin.test.Test
+import kotlin.test.assertNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -40,6 +43,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.toDeniedPermission
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LargeClass")
 class AndroidGattServerManagerTest {
     private val context = mockk<Context>(relaxed = true)
@@ -147,68 +151,6 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
-    fun `rejects connection when service is not ready`() = runTest {
-        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
-        manager.open(uuid)
-
-        manager.events.test {
-            callbackSlot.captured.onConnectionStateChange(
-                device,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothProfile.STATE_CONNECTED
-            )
-
-            expectNoEvents()
-        }
-
-        verify { gattServer.cancelConnection(device) }
-    }
-
-    @Test
-    fun `rejects stale connection after close and re-open until service is ready`() = runTest {
-        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
-        manager.open(uuid)
-
-        // Phase 1: Normal session — service ready, connection accepted
-        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
-        callbackSlot.captured.onConnectionStateChange(
-            device,
-            BluetoothGatt.GATT_SUCCESS,
-            BluetoothProfile.STATE_CONNECTED
-        )
-
-        // Phase 2: Session cancelled — close and re-open
-        manager.close()
-        manager.open(uuid)
-
-        // Phase 3: Stale connection arrives before service is ready → rejected
-        manager.events.test {
-            callbackSlot.captured.onConnectionStateChange(
-                device,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothProfile.STATE_CONNECTED
-            )
-            expectNoEvents()
-        }
-        verify { gattServer.cancelConnection(device) }
-
-        // Phase 4: Service registers → new connection now accepted
-        manager.events.test {
-            callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
-            awaitItem() // ServiceAdded event
-
-            callbackSlot.captured.onConnectionStateChange(
-                device,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothProfile.STATE_CONNECTED
-            )
-            assertEquals(GattServerEvent.Connected(DEVICE_ADDRESS), awaitItem())
-
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
     fun `ignores disconnection when no connection was accepted`() = runTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
         manager.open(uuid)
@@ -282,30 +224,6 @@ class AndroidGattServerManagerTest {
 
             cancelAndIgnoreRemainingEvents()
         }
-    }
-
-    @Test
-    fun `rejects connection when service added with failure status`() = runTest {
-        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
-        manager.open(uuid)
-
-        manager.events.test {
-            callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_FAILURE, fakeGattService)
-            assertEquals(
-                GattServerEvent.Error(GattServerError.SERVICE_REGISTRATION_FAILED),
-                awaitItem()
-            )
-
-            callbackSlot.captured.onConnectionStateChange(
-                device,
-                BluetoothGatt.GATT_SUCCESS,
-                BluetoothProfile.STATE_CONNECTED
-            )
-
-            expectNoEvents()
-        }
-
-        verify { gattServer.cancelConnection(device) }
     }
 
     @Test
@@ -789,5 +707,27 @@ class AndroidGattServerManagerTest {
         val result = manager.sendMessage(uuid, byteArrayOf(0x01, 0x02))
 
         assert(!result)
+    }
+
+    @Test
+    fun `Cannot cancel a connection without knowing about the device`() = runTest {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+        manager.open(uuid)
+        advanceUntilIdle()
+
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        assertEquals(device, manager.connectedDevice)
+        manager.cancelCurrentConnection()
+        advanceUntilIdle()
+
+        assertNull(manager.connectedDevice)
+        verify(exactly = 1) { gattServer.cancelConnection(device) }
     }
 }

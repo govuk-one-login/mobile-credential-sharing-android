@@ -21,7 +21,7 @@ class GattServerEventToPeripheralBluetoothState(private val logger: Logger) :
             )
 
         is GattServerEvent.ServiceAdded -> {
-            logger.debug(logTag, "Service Added: ${source.service?.uuid}")
+            logger.debug(logTag, "Service Added: ${source.service.uuid}")
             null
         }
 

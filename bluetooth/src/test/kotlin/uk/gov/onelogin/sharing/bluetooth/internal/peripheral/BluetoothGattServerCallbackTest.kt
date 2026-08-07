@@ -64,7 +64,7 @@ class BluetoothGattServerCallbackTest {
         assertEquals(1, fakeEmitter.events.size)
         val event = fakeEmitter.events.single() as GattServerCallbackEvent.ServiceAdded
         assertEquals(BluetoothGatt.GATT_SUCCESS, event.status)
-        assertEquals(uuid, event.service?.uuid)
+        assertEquals(uuid, event.service.uuid)
     }
 
     @Test

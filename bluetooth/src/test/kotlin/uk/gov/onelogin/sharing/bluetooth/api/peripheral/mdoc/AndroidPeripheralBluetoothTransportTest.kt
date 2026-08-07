@@ -1,10 +1,17 @@
 package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
+import android.bluetooth.BluetoothGatt.GATT_SUCCESS
 import android.bluetooth.BluetoothGattService
+import android.bluetooth.BluetoothProfile
 import app.cash.turbine.test
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.testValues
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -16,6 +23,7 @@ import org.hamcrest.Matchers.equalTo
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
@@ -31,11 +39,13 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBleAdvertiser
 import uk.gov.onelogin.sharing.bluetooth.ble.FakeBluetoothStateMonitor
+import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.FakeGattServerManager
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.coroutines.JobMatchers.isActive
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(TestParameterInjector::class)
 class AndroidPeripheralBluetoothTransportTest {
 
     @get:Rule
@@ -118,49 +128,147 @@ class AndroidPeripheralBluetoothTransportTest {
     }
 
     @Test
-    fun `start triggers advertiser start and gatt server open`() =
-        runTest(testScope.coroutineContext) {
-            transport.monitoringJob.start()
-            gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
-            advanceUntilIdle()
+    fun `Starting the transport defers to opening the GATT Server`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        transport.monitoringJob.start()
+        transport.start(uuid)
+        advanceUntilIdle()
 
-            transport.start(uuid)
-            advanceUntilIdle()
-
-            assertEquals(PeripheralBluetoothState.Idle, transport.state.value)
-            assertEquals(1, advertiser.startCalls)
-            assertEquals(uuid, advertiser.lastAdvertiseData?.serviceUuid)
-            assertEquals(AdvertiserState.Started, advertiser.state.value)
-            assertEquals(1, gattServerManager.openCalls)
-            assertEquals(1, bluetoothStateMonitor.startCalls)
-        }
-
-    @Test
-    fun `start sets Error state when advertiser throws`() = runTest(testScope.coroutineContext) {
-        val advertiser = FakeBleAdvertiser().apply {
-            exceptionToThrow = StartAdvertisingException(AdvertisingError.INTERNAL_ERROR)
-        }
-
-        val sessionManager = AndroidPeripheralBluetoothTransport(
-            bleAdvertiser = advertiser,
-            gattServerManager = gattServerManager,
-            bluetoothStateMonitor = bluetoothStateMonitor,
-            coroutineScope = testScope,
-            logger = logger
+        assertThat(
+            gattServerManager.openCalls,
+            equalTo(1)
         )
 
-        sessionManager.state.test {
-            assertEquals(PeripheralBluetoothState.Idle, awaitItem())
+        assertFalse { transport.isServiceReady }
+    }
 
-            sessionManager.start(uuid)
-            advanceUntilIdle()
+    @Test
+    fun `Begins advertising when receiving 'ServiceAdded' events`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        assertFalse { transport.isServiceReady }
+        transport.monitoringJob.start()
+        val service: BluetoothGattService = mockk()
+        every { service.uuid } returns uuid
 
-            assertEquals(
-                PeripheralBluetoothState.Error(
-                    PeripheralBluetoothTransportError.ADVERTISING_FAILED
-                ),
-                awaitItem()
+        val event = GattServerEvent.ServiceAdded(service)
+        gattServerManager.emitEvent(event)
+        advanceUntilIdle()
+
+        advertiser.state.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(AdvertiserState.Started)
             )
+        }
+
+        assertTrue { transport.isServiceReady }
+        assertTrue { "Completed handling gatt server event: $event" in logger }
+    }
+
+    @Test
+    fun `Advertising state changes are logged`(
+        @TestParameter event: AdvertiserState = testValues(
+            AdvertiserState.Idle,
+            AdvertiserState.Stopped,
+            AdvertiserState.Stopping,
+            AdvertiserState.Failed("error"),
+            AdvertiserState.Starting,
+            AdvertiserState.Started
+        )
+    ) = runTest(dispatcherRule.testDispatcher) {
+        transport.monitoringJob.start()
+        advertiser.emitState(event)
+        advanceUntilIdle()
+
+        assertTrue { "Advertising ${event::class.java.simpleName}" in logger }
+    }
+
+    @Test
+    fun `GATT Server event changes are logged`(
+        @TestParameter event: GattServerEvent = testValues(
+            GattServerEvent.Connected(uuid.toString()),
+            GattServerEvent.Disconnected(uuid.toString(), false),
+            GattServerEvent.ServiceAdded(mockk(relaxed = true)),
+            GattServerEvent.MessageReceived(byteArrayOf()),
+            GattServerEvent.SessionStarted,
+            GattServerEvent.ServiceStopped,
+            GattServerEvent.Error(GattServerError.GATT_NOT_AVAILABLE),
+            GattServerEvent.SessionEnd(SessionEndStates.SUCCESS),
+            GattServerEvent.UnsupportedEvent(
+                DEVICE_ADDRESS,
+                GATT_SUCCESS,
+                BluetoothProfile.STATE_CONNECTED
+            )
+        )
+    ) = runTest(dispatcherRule.testDispatcher) {
+        transport.monitoringJob.start()
+        gattServerManager.emitEvent(event)
+        advanceUntilIdle()
+
+        assertTrue { "Completed handling gatt server event: $event" in logger }
+    }
+
+    @Test
+    fun `Stopping advertising marks the service as 'not ready'`(
+        @TestParameter event: AdvertiserState = testValues(
+            AdvertiserState.Stopping,
+            AdvertiserState.Stopped
+        )
+    ) = runTest(dispatcherRule.testDispatcher) {
+        transport.isServiceReady = true
+        transport.monitoringJob.start()
+
+        advertiser.emitState(event)
+        advanceUntilIdle()
+
+        assertFalse { transport.isServiceReady }
+    }
+
+    @Test
+    fun `Disregards connections when the service isn't ready`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        transport.isServiceReady = false
+        transport.monitoringJob.start()
+        gattServerManager.emitEvent(GattServerEvent.Connected(uuid.toString()))
+        advanceUntilIdle()
+
+        assertTrue {
+            "Rejecting connection from $uuid - service not ready" in logger
+        }
+        assertThat(
+            gattServerManager.disconnectCalls,
+            equalTo(1)
+        )
+    }
+
+    @Test
+    fun `Advertiser exceptions emit an error event`(
+        @TestParameter advertisingError: AdvertisingError
+    ) = runTest(dispatcherRule.testDispatcher) {
+        advertiser.exceptionToThrow = StartAdvertisingException(advertisingError)
+        transport.monitoringJob.start()
+
+        val service: BluetoothGattService = mockk()
+        every { service.uuid } returns uuid
+        gattServerManager.emitEvent(GattServerEvent.ServiceAdded(service))
+        advanceUntilIdle()
+
+        transport.state.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(
+                    PeripheralBluetoothState.Error(
+                        PeripheralBluetoothTransportError.ADVERTISING_FAILED
+                    )
+                )
+            )
+        }
+
+        assertTrue {
+            logger.any { it.message.startsWith("Error starting advertising") }
         }
     }
 
@@ -378,4 +486,14 @@ class AndroidPeripheralBluetoothTransportTest {
                 )
             }
         }
+
+    @Test
+    fun `Starting the transport after the service is ready marks it as unready`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        transport.isServiceReady = true
+        transport.start(uuid)
+
+        assertFalse { transport.isServiceReady }
+    }
 }
