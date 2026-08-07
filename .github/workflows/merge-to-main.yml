@@ -58,9 +58,9 @@ jobs:
 
 
   publishing:
-    if: ${{ jobs.bump-version.outputs.current-version != jobs.bump-version.outputs.new-version }}
     name: "Publish code base"
     needs: bump-version
+    if: ${{ needs.bump-version.outputs.current-version != needs.bump-version.outputs.new-version }}
     permissions:
       contents: write
       id-token: write
@@ -68,8 +68,8 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/publishing.yml
     with:
-      ref: ${{ jobs.bump-version.outputs.new-version }}
-      version-code: ${{ jobs.bump-version.outputs.version-code }}
+      ref: ${{ needs.bump-version.outputs.new-version }}
+      version-code: ${{ needs.bump-version.outputs.version-code }}
 
 
   testing:
