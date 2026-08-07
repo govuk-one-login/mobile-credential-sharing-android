@@ -1,0 +1,53 @@
+# Publishes to the code base's configured maven repositories, such as GitHub packages.
+#
+# Takes in a `ref` input that defaults to the current branch / tag.
+name: Publish wallet sharing libraries
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: |
+          [Branch | Tag | SHA] of the code base to publish.
+          Used as the reference when checking out the repository.
+          
+          If not specified, defaults to `${{ github.ref }}`.
+        required: false
+        type: string
+
+concurrency:
+  group: publish-libraries-${{ github.workflow }}-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_ACTOR: ${{ github.actor }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  publish-libraries:
+    name: "Publish to maven repositories"
+    needs: bump-version
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+          fetch-tags: 'true'
+
+      - name: Setup
+        uses: ./.github/actions/android-setup
+
+      - name: Publish package
+        uses: ./mobile-android-pipelines/actions/maven-publish
+        with:
+          VERSION_NAME: ${{ inputs.ref || github.ref }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,51 @@
+# Reusable workflow for encapsulating publishing responsibilities for the code base.
+#
+# Takes in a `ref` for checking out the code base.
+# Takes in a `version-code` for Android fingerprinting purposes.
+name: "Publish code base"
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: |
+          [Branch | Tag | SHA] of the code base to publish.
+          Used as the reference when checking out the repository.
+          
+          If not specified, defaults to using `${{ github.ref }}` as a replacement.
+        required: false
+        type: string
+
+      version-code:
+        description: "The test app's version code to use when publishing to google play"
+        required: true
+        type: string
+
+concurrency:
+  group: publishing-${{ github.workflow }}-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-libraries:
+    name: "Publish libraries to maven repositories"
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    uses: ./.github/workflows/publish-libraries.yml
+    with:
+      ref: ${{ inputs.ref || github.ref }}
+
+
+  publish-to-google-play:
+    name: "Publish app to Google Play"
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    secrets: inherit
+    uses: ./.github/workflows/publish-to-google-play.yml
+    with:
+      ref: ${{ inputs.ref || github.ref }}
+      version-code: ${{ inputs.version-code }}
