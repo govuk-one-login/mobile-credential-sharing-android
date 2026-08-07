@@ -26,7 +26,6 @@ env:
 jobs:
   publish-libraries:
     name: "Publish to maven repositories"
-    needs: bump-version
     permissions:
       contents: write
       id-token: write
