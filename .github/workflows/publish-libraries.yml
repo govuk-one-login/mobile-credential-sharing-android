@@ -11,7 +11,7 @@ on:
           [Branch | Tag | SHA] of the code base to publish.
           Used as the reference when checking out the repository.
           
-          If not specified, defaults to `${{ github.ref }}`.
+          If not specified, defaults to using the github ref as a replacement.
         required: false
         type: string
 

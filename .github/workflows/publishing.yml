@@ -12,7 +12,7 @@ on:
           [Branch | Tag | SHA] of the code base to publish.
           Used as the reference when checking out the repository.
           
-          If not specified, defaults to using `${{ github.ref }}` as a replacement.
+          If not specified, defaults to using the github ref as a replacement.
         required: false
         type: string
 
