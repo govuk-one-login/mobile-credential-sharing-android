@@ -10,9 +10,10 @@ on:
       ref:
         description: |
           [Branch | Tag | SHA] of the code base to publish.
-
           Used as the reference when checking out the repository.
-        required: true
+          
+          If not specified, defaults to using `${{ github.ref }}` as a replacement.
+        required: false
         type: string
 
       version-code:
@@ -21,7 +22,7 @@ on:
         type: string
 
 concurrency:
-  group: publish-to-google-play-${{ github.workflow }}-${{ github.ref }}
+  group: publish-to-google-play-${{ github.workflow }}-${{ inputs.ref || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -40,7 +41,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.ref }}
           lfs: 'true'
           submodules: 'true'
           fetch-depth: 0
@@ -74,6 +75,7 @@ jobs:
           keystore-key-alias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
           keystore-key-password: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
           version-code: ${{ inputs.version-code }}
+          version-name: ${{ inputs.ref || github.ref }}
 
       - name: Publish to Play Store
         uses: ./mobile-android-pipelines/actions/publish-to-play-store

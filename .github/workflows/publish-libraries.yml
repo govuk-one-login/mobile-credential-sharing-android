@@ -9,13 +9,14 @@ on:
       ref:
         description: |
           [Branch | Tag | SHA] of the code base to publish.
-
           Used as the reference when checking out the repository.
-        required: true
+          
+          If not specified, defaults to `${{ github.ref }}`.
+        required: false
         type: string
 
 concurrency:
-  group: publish-libraries-${{ github.workflow }}-${{ inputs.ref }}
+  group: publish-libraries-${{ github.workflow }}-${{ inputs.ref || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -35,7 +36,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.ref }}
           lfs: 'true'
           submodules: 'true'
           fetch-depth: 0
@@ -47,6 +48,6 @@ jobs:
       - name: Publish package
         uses: ./mobile-android-pipelines/actions/maven-publish
         with:
-          VERSION_NAME: ${{ steps.versioning.outputs.new_version }}
+          VERSION_NAME: ${{ inputs.ref || github.ref }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -10,9 +10,10 @@ on:
       ref:
         description: |
           [Branch | Tag | SHA] of the code base to publish.
-          
           Used as the reference when checking out the repository.
-        required: true
+          
+          If not specified, defaults to using `${{ github.ref }}` as a replacement.
+        required: false
         type: string
 
       version-code:
@@ -21,7 +22,7 @@ on:
         type: string
 
 concurrency:
-  group: publishing-${{ github.workflow }}-${{ github.ref }}
+  group: publishing-${{ github.workflow }}-${{ inputs.ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -34,7 +35,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/publish-libraries.yml
     with:
-      ref: ${{ inputs.ref }}
+      ref: ${{ inputs.ref || github.ref }}
 
 
   publish-to-google-play:
@@ -46,5 +47,5 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/publish-to-google-play.yml
     with:
-      ref: ${{ inputs.ref }}
+      ref: ${{ inputs.ref || github.ref }}
       version-code: ${{ inputs.version-code }}
