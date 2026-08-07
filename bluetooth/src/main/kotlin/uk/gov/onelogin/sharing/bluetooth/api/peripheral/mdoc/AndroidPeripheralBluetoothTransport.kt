@@ -174,7 +174,7 @@ class AndroidPeripheralBluetoothTransport(
                 coroutineScope.launch(
                     ioDispatcher + "$logTag.StartAdvertising".asCoroutineName()
                 ) {
-                    event.service?.uuid?.let { startAdvertising(it) }
+                    startAdvertising(event.service.uuid)
                 }
             }
 

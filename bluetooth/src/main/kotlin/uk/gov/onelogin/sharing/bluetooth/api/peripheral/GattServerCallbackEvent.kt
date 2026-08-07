@@ -33,7 +33,7 @@ sealed interface GattServerCallbackEvent {
         }
     }
 
-    data class ServiceAdded(val status: Int, val service: BluetoothGattService?) :
+    data class ServiceAdded(val status: Int, val service: BluetoothGattService) :
         GattServerCallbackEvent
     data class MessageReceived(val device: BluetoothDevice, val byteArray: ByteArray) :
         GattServerCallbackEvent {
