@@ -33,7 +33,7 @@ class TestMSOFromDict:
         ids=[
             "Missing doc_type",
             "Missing namespaces",
-        ]
+        ],
     )
     def test_missing_key_raises(self, invalid_config, device_cose_key):
         with pytest.raises(KeyError):

@@ -14,7 +14,7 @@ class CertificateGenerator:
         self,
         private_key: ec.EllipticCurvePrivateKey,
         subject: Name,
-        validity_days: int = 3650
+        validity_days: int = 3650,
     ) -> Certificate:
         """Generates a self-signed root CA certificate."""
         public_key = private_key.public_key()
@@ -30,18 +30,25 @@ class CertificateGenerator:
                 x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False
             )
             .add_extension(
-                x509.AuthorityKeyIdentifier.from_issuer_public_key(public_key), critical=False
+                x509.AuthorityKeyIdentifier.from_issuer_public_key(public_key),
+                critical=False,
             )
             .add_extension(
                 x509.BasicConstraints(ca=True, path_length=None), critical=True
             )
             .add_extension(
                 x509.KeyUsage(
-                    key_cert_sign=True, crl_sign=True,
-                    digital_signature=False, content_commitment=False,
-                    key_encipherment=False, data_encipherment=False,
-                    key_agreement=False, encipher_only=False, decipher_only=False
-                ), critical=True
+                    key_cert_sign=True,
+                    crl_sign=True,
+                    digital_signature=False,
+                    content_commitment=False,
+                    key_encipherment=False,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
             )
         )
         return builder.sign(private_key, hashes.SHA256())
@@ -72,8 +79,10 @@ class CertificateGenerator:
                 x509.SubjectKeyIdentifier.from_public_key(subject_key), critical=False
             )
             .add_extension(
-                x509.AuthorityKeyIdentifier.from_issuer_public_key(issuer_cert.public_key()),
-                critical=False
+                x509.AuthorityKeyIdentifier.from_issuer_public_key(
+                    issuer_cert.public_key()
+                ),
+                critical=False,
             )
         )
 

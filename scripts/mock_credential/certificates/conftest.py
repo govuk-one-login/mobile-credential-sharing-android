@@ -11,24 +11,42 @@ from mock_credential.certificates import CertificateGenerator, KeyGenerator
 # ISO 18013-5 mdoc DS OID — same as used in generate_mock_credential.py
 OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
 
-TEST_SUBJECT_NAME = Name([
-    NameAttribute(NameOID.COUNTRY_NAME, "GB"),
-    NameAttribute(NameOID.COMMON_NAME, "Test Issuer"),
-])
+TEST_SUBJECT_NAME = Name(
+    [
+        NameAttribute(NameOID.COUNTRY_NAME, "GB"),
+        NameAttribute(NameOID.COMMON_NAME, "Test Issuer"),
+    ]
+)
 
-TEST_LEAF_NAME = Name([
-    NameAttribute(NameOID.COUNTRY_NAME, "GB"),
-    NameAttribute(NameOID.COMMON_NAME, "Test Leaf"),
-])
+TEST_LEAF_NAME = Name(
+    [
+        NameAttribute(NameOID.COUNTRY_NAME, "GB"),
+        NameAttribute(NameOID.COMMON_NAME, "Test Leaf"),
+    ]
+)
 
 LEAF_EXTENSIONS = [
-    (x509.KeyUsage(
-        digital_signature=True, content_commitment=False, key_encipherment=False,
-        data_encipherment=False, key_agreement=False, key_cert_sign=False,
-        crl_sign=False, encipher_only=False, decipher_only=False
-    ), True),
+    (
+        x509.KeyUsage(
+            digital_signature=True,
+            content_commitment=False,
+            key_encipherment=False,
+            data_encipherment=False,
+            key_agreement=False,
+            key_cert_sign=False,
+            crl_sign=False,
+            encipher_only=False,
+            decipher_only=False,
+        ),
+        True,
+    ),
     (x509.ExtendedKeyUsage([OID_MDL_DS]), True),
-    (x509.IssuerAlternativeName([x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")]), False),
+    (
+        x509.IssuerAlternativeName(
+            [x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")]
+        ),
+        False,
+    ),
 ]
 
 
@@ -48,7 +66,9 @@ def root_key() -> ec.EllipticCurvePrivateKey:
 
 
 @pytest.fixture
-def root_cert(cert_gen: CertificateGenerator, root_key: ec.EllipticCurvePrivateKey) -> Certificate:
+def root_cert(
+    cert_gen: CertificateGenerator, root_key: ec.EllipticCurvePrivateKey
+) -> Certificate:
     return cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME)
 
 
@@ -62,10 +82,13 @@ def leaf_cert(
     cert_gen: CertificateGenerator,
     leaf_key: ec.EllipticCurvePrivateKey,
     root_key: ec.EllipticCurvePrivateKey,
-    root_cert: Certificate
+    root_cert: Certificate,
 ) -> Generator[Certificate, None, None]:
     yield cert_gen.create_certificate(
-        leaf_key.public_key(), root_key, TEST_LEAF_NAME, root_cert,
+        leaf_key.public_key(),
+        root_key,
+        TEST_LEAF_NAME,
+        root_cert,
         validity_days=365,
-        extensions=LEAF_EXTENSIONS
+        extensions=LEAF_EXTENSIONS,
     )

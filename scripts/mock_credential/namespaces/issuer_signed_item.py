@@ -2,7 +2,8 @@ from cbor2 import dumps, loads, CBORTag
 from hashlib import sha256
 from typing import AnyStr, Any, Dict, Type, TypeVar
 
-T = TypeVar('T', bound='Parent') # type: ignore
+T = TypeVar("T", bound="Parent")  # type: ignore
+
 
 class IssuerSignedItem:
     def __init__(self, **kwargs):
@@ -39,11 +40,10 @@ class IssuerSignedItem:
         item_bytes = dumps(item)
         return sha256(item_bytes).digest()
 
-
     @classmethod
     def from_dict(cls: Type[T], args: Dict) -> T:
         return cls(
-            digest_id = args["digestID"],
-            element_identifier = args["elementIdentifier"],
-            element_value = args["elementValue"]
+            digest_id=args["digestID"],
+            element_identifier=args["elementIdentifier"],
+            element_value=args["elementValue"],
         )

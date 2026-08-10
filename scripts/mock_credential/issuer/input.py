@@ -1,7 +1,8 @@
 from argparse import ArgumentParser, Namespace
 from typing import TypeVar, Type
 
-T = TypeVar('T', bound='Parent') # type: ignore
+T = TypeVar("T", bound="Parent")  # type: ignore
+
 
 class IssuerAuthInput:
 
@@ -33,7 +34,7 @@ class IssuerAuthInput:
         - "issuer_private_key"
         - "output"
         - "validity_days"
-        
+
         :param cls: The class :class:`Type`. This defers to :class:`IssuerAuthInput`.
         :param args: The parsed arguments from :class:`ArgumentParser`. Generate this via
             :func:`ArgumentParser.parse_args`.
@@ -41,9 +42,9 @@ class IssuerAuthInput:
         """
 
         return cls(
-            issuer_private_key = args.issuer_private_key,
-            output = args.output,
-            private_key = args.private_key,
-            validity_days = args.validity_days,
-            x509_certificate = args.x509_certificate,
+            issuer_private_key=args.issuer_private_key,
+            output=args.output,
+            private_key=args.private_key,
+            validity_days=args.validity_days,
+            x509_certificate=args.x509_certificate,
         )

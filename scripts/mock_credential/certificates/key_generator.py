@@ -19,11 +19,13 @@ class KeyGenerator:
         print(f"'{path}' not found! Creating...")
         key = KeyGenerator.generate()
         with open(path, "xb") as f:
-            f.write(key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
+            f.write(
+                key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
         return key
 
     @staticmethod

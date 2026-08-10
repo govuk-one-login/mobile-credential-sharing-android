@@ -31,11 +31,14 @@ class TestKeyGeneratorLoad:
         path = str(tmp_path / "key.pem")
         with open(path, "xb") as f:
             from cryptography.hazmat.primitives import serialization
-            f.write(key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
+
+            f.write(
+                key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
         loaded = KeyGenerator.load(path)
         assert isinstance(loaded, ec.EllipticCurvePrivateKey)
 
@@ -44,11 +47,14 @@ class TestKeyGeneratorLoad:
         path = str(tmp_path / "key.pem")
         with open(path, "xb") as f:
             from cryptography.hazmat.primitives import serialization
-            f.write(key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
+
+            f.write(
+                key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
         loaded = KeyGenerator.load(path)
         assert loaded.private_numbers() == key.private_numbers()
 
@@ -146,8 +152,11 @@ class TestCreateCertificate:
         self, cert_gen, leaf_key, root_key, root_cert, now
     ):
         cert = cert_gen.create_certificate(
-            leaf_key.public_key(), root_key, TEST_LEAF_NAME, root_cert,
+            leaf_key.public_key(),
+            root_key,
+            TEST_LEAF_NAME,
+            root_cert,
             validity_days=100,
-            extensions=LEAF_EXTENSIONS
+            extensions=LEAF_EXTENSIONS,
         )
         assert cert.not_valid_after_utc == now + timedelta(days=100)
