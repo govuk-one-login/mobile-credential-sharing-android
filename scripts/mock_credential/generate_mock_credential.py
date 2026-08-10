@@ -47,9 +47,9 @@ def generate():
         validity_days=args.validity_days,
     )
 
-    leaf_key = KeyGenerator.generate()
-    leaf_cert = cert_gen.create_certificate(
-        leaf_key.public_key(),
+    issuer_leaf_key = KeyGenerator.generate()
+    issuer_leaf_cert = cert_gen.create_certificate(
+        issuer_leaf_key.public_key(),
         issuer_private_key,
         LEAF_NAME,
         intermediary_issuer_auth_cert,
@@ -94,9 +94,9 @@ def generate():
     mso_tagged_bytes = mso_obj.build_tagged_bytes(now)
 
     issuer_auth_obj = IssuerAuth(
-        mso_tagged_bytes, leaf_cert.public_bytes(serialization.Encoding.DER)
+        mso_tagged_bytes, issuer_leaf_cert.public_bytes(serialization.Encoding.DER)
     )
-    issuer_auth_list = issuer_auth_obj.sign(leaf_key)
+    issuer_auth_list = issuer_auth_obj.sign(issuer_leaf_key)
 
     credential = Credential(SAMPLE_NAMESPACES.build_issuer_signed_items(), issuer_auth_list)
 
