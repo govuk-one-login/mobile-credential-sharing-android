@@ -16,7 +16,7 @@ class IssuerAuthInput:
         self.output = kwargs["output"]
         self.private_key = kwargs["private_key"]
         self.validity_days = kwargs["validity_days"]
-        self.x509_certificate = kwargs["x509_certificate"]
+        self.issuer_intermediate_x509_certificate = kwargs["issuer_intermediate_x509_certificate"]
 
         logger.info("Created input instance from parameters")
 
@@ -28,7 +28,7 @@ class IssuerAuthInput:
             and (self.output == other.output)
             and (self.private_key == other.private_key)
             and (self.validity_days == other.validity_days)
-            and (self.x509_certificate == other.x509_certificate)
+            and (self.issuer_intermediate_x509_certificate == other.issuer_intermediate_x509_certificate)
         )
 
     @classmethod
@@ -55,5 +55,5 @@ class IssuerAuthInput:
             output=args.output,
             private_key=args.private_key,
             validity_days=args.validity_days,
-            x509_certificate=args.x509_certificate,
+            issuer_intermediate_x509_certificate=args.issuer_intermediate_x509_certificate,
         )

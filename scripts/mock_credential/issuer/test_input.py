@@ -44,8 +44,8 @@ class TestIssuerAuthInput:
                     private_key="",
                     validity_days=1,
                 ),
-                "x509_certificate",
-                id="Missing x509 certificate",
+                "issuer_intermediate_x509_certificate",
+                id="Missing Issuer x509 intermediary certificate",
             ),
         ],
     )

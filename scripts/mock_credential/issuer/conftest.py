@@ -39,8 +39,8 @@ def valid_parser(
         default=str(issuer_auth_input_tmp_dir) + "/test_private_issuer_key.pem",
     )
     empty_parser.add_argument(
-        "--x509-certificate",
-        help="Output path for the root CA certificate (DER format, trust anchor)",
+        "--issuer-intermediate-x509-certificate",
+        help="Output path for the intermediate CA certificate (DER format, trust anchor)",
         default=str(issuer_auth_input_tmp_dir) + "/test_x509_certificate.der",
     )
     empty_parser.add_argument(

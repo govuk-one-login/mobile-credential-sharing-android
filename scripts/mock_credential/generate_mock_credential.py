@@ -46,6 +46,10 @@ def generate():
         subject=ISSUER_NAME,
         validity_days=args.validity_days,
     )
+    with open(args.issuer_intermediate_x509_certificate, "wb") as f:
+        f.write(intermediary_issuer_auth_cert.public_bytes(serialization.Encoding.DER))
+        logger.info(f"Issuer: x509 leaf certificate: {args.issuer_intermediate_x509_certificate}")
+
 
     issuer_leaf_key = KeyGenerator.generate()
     issuer_leaf_cert = cert_gen.create_certificate(
@@ -101,14 +105,10 @@ def generate():
     credential = Credential(SAMPLE_NAMESPACES.build_issuer_signed_items(), issuer_auth_list)
 
     # 4. Save Outputs
-    with open(args.x509_certificate, "wb") as f:
-        f.write(intermediary_issuer_auth_cert.public_bytes(serialization.Encoding.DER))
-
     with open(args.output, "w") as f:
         f.write(credential.to_base64url())
 
     logger.info(f"Generated: {args.output}")
-    logger.info(f"Root Certificate: {args.x509_certificate}")
 
 
 def get_argument_parser() -> IssuerAuthInput:
@@ -122,7 +122,8 @@ def get_argument_parser() -> IssuerAuthInput:
         "--reader-auth-private-key", default="app/src/main/assets/test_private_reader_auth_key.pem"
     )
     parser.add_argument(
-        "--x509-certificate", default="app/src/main/assets/test_x509_certificate.der"
+        "--issuer-intermediate-x509-certificate",
+        default="app/src/main/assets/test_x509_certificate.der"
     )
     parser.add_argument("--output", default="app/src/main/res/raw/mock_credential.txt")
     parser.add_argument("--validity-days", type=int, default=365)
