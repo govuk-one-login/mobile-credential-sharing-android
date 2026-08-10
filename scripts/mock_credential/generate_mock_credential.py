@@ -125,6 +125,10 @@ def get_argument_parser() -> IssuerAuthInput:
         "--issuer-intermediate-x509-certificate",
         default="app/src/main/assets/test_x509_certificate.der"
     )
+    parser.add_argument(
+        "--reader-intermediate-x509-certificate",
+        default="app/src/main/assets/test_reader_auth_x509_certificate.der"
+    )
     parser.add_argument("--output", default="app/src/main/res/raw/mock_credential.txt")
     parser.add_argument("--validity-days", type=int, default=365)
 

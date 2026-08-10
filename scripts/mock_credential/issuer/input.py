@@ -17,6 +17,7 @@ class IssuerAuthInput:
         self.private_key = kwargs["private_key"]
         self.validity_days = kwargs["validity_days"]
         self.issuer_intermediate_x509_certificate = kwargs["issuer_intermediate_x509_certificate"]
+        self.reader_intermediate_x509_certificate = kwargs["reader_intermediate_x509_certificate"]
 
         logger.info("Created input instance from parameters")
 
@@ -56,4 +57,5 @@ class IssuerAuthInput:
             private_key=args.private_key,
             validity_days=args.validity_days,
             issuer_intermediate_x509_certificate=args.issuer_intermediate_x509_certificate,
+            reader_intermediate_x509_certificate=args.reader_intermediate_x509_certificate
         )

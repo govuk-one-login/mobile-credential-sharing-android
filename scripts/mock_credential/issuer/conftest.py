@@ -44,6 +44,10 @@ def valid_parser(
         default=str(issuer_auth_input_tmp_dir) + "/test_x509_certificate.der",
     )
     empty_parser.add_argument(
+        "--reader-intermediate-x509-certificate",
+        default="app/src/main/assets/test_reader_auth_x509_certificate.der"
+    )
+    empty_parser.add_argument(
         "--output",
         help="Output path for credential txt file",
         default=str(issuer_auth_input_tmp_dir) + "/mock_credential.txt",

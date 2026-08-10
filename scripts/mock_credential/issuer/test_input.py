@@ -47,6 +47,18 @@ class TestIssuerAuthInput:
                 "issuer_intermediate_x509_certificate",
                 id="Missing Issuer x509 intermediary certificate",
             ),
+            pytest.param(
+                Namespace(
+                    issuer_private_key="",
+                    reader_auth_private_key="",
+                    output="",
+                    private_key="",
+                    validity_days=1,
+                    issuer_intermediate_x509_certificate="",
+                ),
+                "reader_intermediate_x509_certificate",
+                id="Missing ReaderAuth x509 intermediary certificate",
+            ),
         ],
     )
     def test_invalid_parser_input(self, invalid_input: Namespace, missing_attribute: str):
