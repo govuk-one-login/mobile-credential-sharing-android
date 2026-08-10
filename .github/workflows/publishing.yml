@@ -16,6 +16,14 @@ on:
         required: false
         type: string
 
+      semantic-version:
+        description: |
+          The semantic version of the code base to publish.
+
+          If not specified, defaults to using the github ref as a replacement.
+        required: false
+        type: string
+
       version-code:
         description: "The test app's version code to use when publishing to google play"
         required: true
@@ -36,6 +44,7 @@ jobs:
     uses: ./.github/workflows/publish-libraries.yml
     with:
       ref: ${{ inputs.ref || github.ref }}
+      semantic-version: ${{ inputs.semantic-version || github.ref }}
 
 
   publish-to-google-play:
@@ -48,4 +57,5 @@ jobs:
     uses: ./.github/workflows/publish-to-google-play.yml
     with:
       ref: ${{ inputs.ref || github.ref }}
+      semantic-version: ${{ inputs.semantic-version || github.ref }}
       version-code: ${{ inputs.version-code }}

@@ -15,6 +15,14 @@ on:
         required: false
         type: string
 
+      semantic-version:
+        description: |
+          The semantic version of the code base to publish.
+
+          If not specified, defaults to using the github ref as a replacement.
+        required: false
+        type: string
+
 concurrency:
   group: publish-libraries-${{ github.workflow }}-${{ inputs.ref || github.ref }}
   cancel-in-progress: true
@@ -47,6 +55,6 @@ jobs:
       - name: Publish package
         uses: ./mobile-android-pipelines/actions/maven-publish
         with:
-          VERSION_NAME: ${{ inputs.ref || github.ref }}
+          VERSION_NAME: ${{ inputs.semantic-version || github.ref }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
