@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import java.security.interfaces.ECPublicKey
 import java.util.UUID
@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
  *
  * @see uk.gov.onelogin.sharing.orchestration.HolderOrchestrator
  */
-@ContributesBinding(scope = AppScope::class)
+@ContributesBinding(scope = SharingSessionScope::class)
 class HolderSessionFactory(
     private val logger: Logger,
     private val sessionSecurity: SessionSecurity,

@@ -6,7 +6,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.IntentFilter
 import android.os.Build
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(VerifierUiScope::class)
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 class AndroidBluetoothStateMonitor(private val appContext: Context, private val logger: Logger) :
     BluetoothStateMonitor {
     private val _states = MutableSharedFlow<BluetoothStatus>(

@@ -5,6 +5,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationReq
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 
+@Suppress("DEPRECATION")
 class CredentialVerifierImpl(
     @Suppress("UnusedPrivateProperty")
     private val verificationRequest: VerificationRequest,

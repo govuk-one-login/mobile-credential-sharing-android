@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.compose.runtime.Composable
@@ -15,6 +17,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameters
 import dev.zacsweers.metro.createGraphFactory
 import io.mockk.mockk
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -24,6 +27,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.data.NonStartedHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
@@ -157,6 +161,43 @@ class ShareCredentialTest {
             waitForIdle()
             onNodeWithContentDescription("Close").assertDoesNotExist()
         }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `start is called when state is NotStarted`() = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(HolderSessionState.NotStarted)
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent { ShareCredential(component = presenter) }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.waitUntil { orchestrator.startCount == 1 }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `start is not called when state is not NotStarted`(
+        @TestParameter(valuesProvider = NonStartedHolderSessionStates::class)
+        state: HolderSessionState
+    ) = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(state)
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent { ShareCredential(component = presenter) }
+        composeTestRule.waitForIdle()
+
+        assertEquals(0, orchestrator.startCount)
     }
 
     @TestParameters(valuesProvider = HolderStateToNavigationRoute::class)

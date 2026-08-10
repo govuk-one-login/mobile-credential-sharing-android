@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import java.util.UUID
@@ -33,7 +33,7 @@ import uk.gov.onelogin.sharing.core.coroutines.CoroutineNameExt.asCoroutineName
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(scope = AppScope::class, binding = binding<PeripheralBluetoothTransport>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<PeripheralBluetoothTransport>())
 class AndroidPeripheralBluetoothTransport(
     private val bleAdvertiser: BleAdvertiser,
     private val gattServerManager: GattServerManager,

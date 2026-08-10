@@ -30,11 +30,45 @@ import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
+import uk.gov.onelogin.sharing.sdk.api.verifier.VerificationSession
+import uk.gov.onelogin.sharing.sdk.internal.verifier.VerificationSessionImpl
 import uk.gov.onelogin.sharing.ui.impl.di.VerifierUiGraph
 import uk.gov.onelogin.sharing.verifier.MonitorVerifierSessionState
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes
 import uk.gov.onelogin.sharing.verifier.VerifierRoutes.configureVerifierRoutes
 import uk.gov.onelogin.sharing.verifier.cancellation.dialog.VerifierCancellationDialogNavigationExt.navigateToVerifierUserCancellationDialog
+
+/**
+ * Composable entry point for the Verifier role (credential verification) using the new
+ * session-based API.
+ *
+ * The SDK internally manages the UI graph lifecycle. The consumer is responsible for
+ * caching the [VerificationSession] across configuration changes (e.g., in a ViewModel).
+ * The internal UI graph is recreated after configuration changes but the orchestrator
+ * state (including BLE connections) is preserved.
+ *
+ * @param session The [VerificationSession] created via [VerifyCredentialSdk.createSession].
+ * @param modifier Optional [Modifier] to apply to the root composable.
+ */
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun VerifyCredential(session: VerificationSession, modifier: Modifier = Modifier) {
+    val sessionImpl = session as VerificationSessionImpl
+    val uiGraph = remember(sessionImpl.appGraph, sessionImpl.orchestrator) {
+        createGraphFactory<VerifierUiGraph.Factory>()
+            .create(sessionImpl.appGraph, sessionImpl.orchestrator)
+    }
+    val navController = rememberNavController()
+    val orchestrator = uiGraph.verifierOrchestrator()
+
+    VerifyCredential(
+        controller = navController,
+        modifier = modifier,
+        orchestrator = orchestrator,
+        verifierSessionState = orchestrator.verifierSessionState,
+        viewModelFactory = uiGraph.metroViewModelFactory
+    )
+}
 
 /**
  * Composable entry point for the Verifier role (credential verification).
@@ -44,7 +78,13 @@ import uk.gov.onelogin.sharing.verifier.cancellation.dialog.VerifierCancellation
  *
  * @param component The [CredentialVerifier] containing the app graph and verification request.
  * @param modifier Optional [Modifier] to apply to the root composable.
+ * @deprecated Use [VerifyCredential] with a [VerificationSession] instead.
  */
+@Deprecated(
+    message = "Use VerifyCredential(session: VerificationSession) instead.",
+    replaceWith = ReplaceWith("VerifyCredential(session, modifier)")
+)
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun VerifyCredential(component: CredentialVerifier, modifier: Modifier = Modifier) {
@@ -74,12 +114,8 @@ internal fun VerifyCredential(
     defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
     val state: VerifierSessionState by verifierSessionState.collectAsStateWithLifecycle()
-    MonitorVerifierSessionState(
-        sessionState = verifierSessionState,
-        controller = controller
-    )
 
-    BackHandler(state.userCanCancel()) {
+    val onCancel: () -> Unit = {
         if (state.shouldConfirmCancellation()) {
             controller.navigateToVerifierUserCancellationDialog()
         } else {
@@ -87,10 +123,19 @@ internal fun VerifyCredential(
         }
     }
 
+    MonitorVerifierSessionState(
+        sessionState = verifierSessionState,
+        controller = controller
+    )
+
+    BackHandler(state.userCanCancel(), onBack = onCancel)
+
     val scope = rememberCoroutineScope { defaultDispatcher }
     LaunchedEffect(Unit) {
         scope.launch {
-            orchestrator.start()
+            if (verifierSessionState.value is VerifierSessionState.NotStarted) {
+                orchestrator.start()
+            }
         }
     }
 
@@ -100,15 +145,7 @@ internal fun VerifyCredential(
         Surface(modifier = modifier) {
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!state.isComplete()) {
-                    IconButton(
-                        onClick = {
-                            if (state.shouldConfirmCancellation()) {
-                                controller.navigateToVerifierUserCancellationDialog()
-                            } else {
-                                orchestrator.cancel()
-                            }
-                        }
-                    ) {
+                    IconButton(onClick = onCancel) {
                         Icon(
                             painter = painterResource(ic_menu_close_clear_cancel),
                             contentDescription = "Close"

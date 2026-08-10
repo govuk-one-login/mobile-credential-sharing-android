@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.testapp.holder
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import io.mockk.mockk
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -11,7 +10,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
+import uk.gov.onelogin.sharing.sdk.FakeSharingSession
 
 @RunWith(RobolectricTestParameterInjector::class)
 class HolderTestAppJourneyScreenTest {
@@ -27,11 +26,8 @@ class HolderTestAppJourneyScreenTest {
         )
     }
 
-    private val presenter by lazy {
-        FakeCredentialPresenter(
-            appGraph = mockk(relaxed = true),
-            orchestrator = orchestrator
-        )
+    private val session by lazy {
+        FakeSharingSession(orchestrator = orchestrator)
     }
 
     @Test
@@ -45,6 +41,6 @@ class HolderTestAppJourneyScreenTest {
 
     @Composable
     private fun Render() {
-        HolderTestAppJourneyScreen(component = presenter)
+        HolderTestAppJourneyScreen(session = session)
     }
 }

@@ -9,26 +9,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
-import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.sdk.api.presenter.SharingSession
 import uk.gov.onelogin.sharing.testapp.credential.MockCredential
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState.Companion.MockCredentialStateType
@@ -47,7 +44,7 @@ object HolderTestAppJourneyNavigationExt {
     @Suppress("LongMethod")
     internal fun NavGraphBuilder.configureHolderJourneyWrapper(
         navController: NavController,
-        component: (MockCredential) -> CredentialPresenter
+        component: (MockCredential) -> SharingSession
     ) {
         composable<HolderTestAppJourney>(
             typeMap = mapOf(
@@ -86,43 +83,34 @@ object HolderTestAppJourneyNavigationExt {
                 return@composable
             }
 
-            val presenter by produceCredentialPresenter(
-                credential,
-                component
-            )
+            val viewModel: HolderJourneyViewModel = viewModel()
+            viewModel.getSession(credential, component)
+
+            val session by viewModel.session.collectAsStateWithLifecycle()
 
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                presenter?.let { presenter ->
-                    LaunchedEffect(presenter.orchestrator) {
-                        presenter.orchestrator.holderSessionState.collect { state ->
+                session?.let { sharingSession ->
+                    LaunchedEffect(sharingSession) {
+                        sharingSession.sessionState.collect { state ->
                             if (state is HolderSessionState.Complete.Success &&
                                 state.successReason == SuccessReason.Denied
                             ) {
-                                presenter.orchestrator.reset()
+                                sharingSession.reset()
                                 navController.popBackStack()
                             }
                         }
                     }
 
                     HolderTestAppJourneyScreen(
-                        component = presenter,
+                        session = sharingSession,
                         modifier = Modifier.fillMaxSize()
                     )
                 } ?: CircularProgressIndicator()
             }
         }
-    }
-
-    @Composable
-    fun produceCredentialPresenter(
-        credential: MockCredential,
-        credentialToPresenter: (MockCredential) -> CredentialPresenter,
-        dispatcher: CoroutineDispatcher = Dispatchers.Default
-    ) = produceState<CredentialPresenter?>(null, credential, credentialToPresenter) {
-        value = withContext(dispatcher) { credentialToPresenter(credential) }
     }
 }

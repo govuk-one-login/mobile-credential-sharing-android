@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.credential
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException.Companion.MESSAGE
@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialRequest
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 class CredentialRequestHandlerImpl(
     private val credentialProvider: CredentialProvider,
     private val rawCredentialParser: RawCredentialParser,

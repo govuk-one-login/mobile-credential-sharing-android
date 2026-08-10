@@ -30,7 +30,7 @@ object MainActivityRoutes {
         )
         configureHolderJourneyWrapper(navController) { credential ->
             presentCredentialSdk
-                .presenter(
+                .createSession(
                     SampleCredentialProvider(
                         credential
                     )
@@ -44,7 +44,7 @@ object MainActivityRoutes {
             val stream: InputStream = context.assets.open("test_x509_certificate.der")
             val certificate: X509Certificate =
                 factory.generateCertificate(stream) as X509Certificate
-            verifyCredentialSdk.verifier(
+            verifyCredentialSdk.createSession(
                 VerifierConfig(
                     verificationRequest = verificationRequest,
                     trustedRootCertificate = certificate

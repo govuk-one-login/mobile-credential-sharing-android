@@ -8,10 +8,10 @@ import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import androidx.annotation.RequiresPermission
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 class AndroidGattWriter : GattWriter {
     @Suppress("DEPRECATION")
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

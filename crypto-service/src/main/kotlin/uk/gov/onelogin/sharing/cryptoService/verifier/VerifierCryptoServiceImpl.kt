@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import java.math.BigInteger
@@ -40,7 +40,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.Do
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
-@ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
+@ContributesBinding(SharingSessionScope::class, binding = binding<VerifierCryptoService>())
 class VerifierCryptoServiceImpl(
     private val logger: Logger,
     private val keyPairGenerator: KeyPairGenerator,

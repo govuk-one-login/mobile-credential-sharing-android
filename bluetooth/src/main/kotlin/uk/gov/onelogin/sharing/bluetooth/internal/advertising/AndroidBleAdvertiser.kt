@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.advertising
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 class AndroidBleAdvertiser(
     private val bleProvider: BleProvider,
     private val permissionChecker: PermissionChecker,

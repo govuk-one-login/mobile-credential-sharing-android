@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.cryptoService.cryptography.usecases
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import java.security.PrivateKey
@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
-@ContributesBinding(scope = AppScope::class, binding = binding<DecryptDeviceRequestUseCase>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<DecryptDeviceRequestUseCase>())
 class DecryptDeviceRequestUseCaseImpl(
     private val sessionSecurity: SessionSecurity,
     private val deviceRequestDecoder: DeviceRequestDecoder,

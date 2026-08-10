@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.prerequisites.impl.evaluator
 
 import android.content.Context
 import android.os.UserManager
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.permissions.IterablePermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 
-@ContributesBinding(AppScope::class, binding = binding<PrerequisiteEvaluator<BluetoothState>>())
+@ContributesBinding(SharingSessionScope::class, binding = binding<PrerequisiteEvaluator<BluetoothState>>())
 @Inject
 class BluetoothPrerequisiteEvaluator(
     private val context: Context,

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package uk.gov.onelogin.sharing.sdk
 
 import io.mockk.every

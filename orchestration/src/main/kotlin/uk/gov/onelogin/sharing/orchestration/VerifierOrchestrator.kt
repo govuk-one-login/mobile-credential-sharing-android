@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration
 
 import androidx.annotation.Keep
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
@@ -64,8 +64,8 @@ private const val INVALID_SESSION_DATA = "Received invalid SessionData instance"
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions")
-@ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
-@SingleIn(AppScope::class)
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<Orchestrator.Verifier>())
+@SingleIn(SharingSessionScope::class)
 class VerifierOrchestrator(
     private val logger: Logger,
     private val prerequisiteGate: PrerequisiteGate,

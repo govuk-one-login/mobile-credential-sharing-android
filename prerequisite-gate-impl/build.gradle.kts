@@ -32,7 +32,8 @@ android {
 
 dependencies {
     listOf(
-        projects.prerequisiteGateApi
+        projects.prerequisiteGateApi,
+        projects.core
     ).forEach(::api)
 
     listOf(

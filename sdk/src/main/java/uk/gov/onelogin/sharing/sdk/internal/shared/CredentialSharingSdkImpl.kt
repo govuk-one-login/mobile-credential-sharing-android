@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.sdk.internal.presenter.PresentCredentialSdkImpl
 import uk.gov.onelogin.sharing.sdk.internal.verifier.VerifyCredentialSdkImpl
 import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 
-class CredentialSharingSdkImpl(
+internal class CredentialSharingSdkImpl(
     applicationContext: Context,
     logger: Logger,
     permissionChecker: PermissionChecker
@@ -28,17 +28,21 @@ class CredentialSharingSdkImpl(
                 permissionChecker
             )
 
+    @Deprecated(
+        message = "The app graph is an internal implementation detail. " +
+            "Use createSession() via presentCredentialSdk/verifyCredentialSdk instead."
+    )
     override val appGraph: CredentialSharingAppGraph = _appGraph
 
     override val presentCredentialSdk: PresentCredentialSdk =
         PresentCredentialSdkImpl(
-            appGraph = appGraph,
+            appGraph = _appGraph,
             presenterGraphFactory = createGraphFactory<PresentCredentialGraph.Factory>()
         )
 
     override val verifyCredentialSdk: VerifyCredentialSdk =
         VerifyCredentialSdkImpl(
-            appGraph = appGraph,
+            appGraph = _appGraph,
             verifierGraphFactory = createGraphFactory<VerifyCredentialGraph.Factory>(),
             credentialVerificationGraphFactory =
                 createGraphFactory<CredentialVerificationGraph.Factory>()

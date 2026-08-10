@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.di
 
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueue
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueueImpl
 
 @BindingContainer
-@ContributesTo(AppScope::class)
+@ContributesTo(SharingSessionScope::class)
 object BluetoothProvider {
 
     @Provides

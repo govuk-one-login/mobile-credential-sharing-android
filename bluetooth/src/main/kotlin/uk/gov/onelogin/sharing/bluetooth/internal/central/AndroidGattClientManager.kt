@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,7 +34,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
 const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 @Suppress("TooManyFunctions")
 class AndroidGattClientManager(
     private val context: Context,

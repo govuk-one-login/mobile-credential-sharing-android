@@ -1,13 +1,13 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.decoders
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseDto
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 class DeviceResponseDecoderImpl(private val logger: Logger) : DeviceResponseDecoder {
 
     override fun decode(bytes: ByteArray): DeviceResponse = try {

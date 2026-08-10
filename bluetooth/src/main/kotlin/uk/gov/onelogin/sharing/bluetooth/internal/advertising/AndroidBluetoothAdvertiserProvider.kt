@@ -5,7 +5,7 @@ import android.bluetooth.le.AdvertisingSet
 import android.bluetooth.le.AdvertisingSetCallback
 import android.bluetooth.le.BluetoothLeAdvertiser
 import androidx.annotation.RequiresPermission
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.mapper.AdvertisingParametersMa
 import uk.gov.onelogin.sharing.bluetooth.internal.mapper.BleAdvertiseDataMapper
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(scope = AppScope::class)
+@ContributesBinding(scope = SharingSessionScope::class)
 class AndroidBluetoothAdvertiserProvider(
     private val bluetoothAdapter: BluetoothAdapterProvider,
     private val logger: Logger

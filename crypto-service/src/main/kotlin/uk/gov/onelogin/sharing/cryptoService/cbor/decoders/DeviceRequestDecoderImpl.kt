@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.decoders
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
-@ContributesBinding(AppScope::class)
+@ContributesBinding(SharingSessionScope::class)
 class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
     override fun deviceRequestDecoder(bytes: ByteArray): DeviceRequest = try {
         val deviceRequestDto = CborMapper.default.readValue(

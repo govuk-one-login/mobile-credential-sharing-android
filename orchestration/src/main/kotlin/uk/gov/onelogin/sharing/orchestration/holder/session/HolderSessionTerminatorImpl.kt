@@ -1,8 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
@@ -11,7 +10,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-@ContributesBinding(scope = AppScope::class, binding = binding<HolderSessionTerminator>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<HolderSessionTerminator>())
 class HolderSessionTerminatorImpl(
     private val peripheralBluetoothTransport: PeripheralBluetoothTransport,
     private val logger: Logger

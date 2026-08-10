@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.core.sessionTimer
 
-import dev.zacsweers.metro.AppScope
+import uk.gov.onelogin.sharing.core.SharingSessionScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
 import kotlin.time.Duration
@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
  *
  * @param scope The [CoroutineScope] in which to run the timer job.
  */
-@ContributesBinding(scope = AppScope::class, binding = binding<SessionTimer>())
+@ContributesBinding(scope = SharingSessionScope::class, binding = binding<SessionTimer>())
 class SessionTimerImpl(
     @param:ApplicationScope private val scope: CoroutineScope,
     private val logger: Logger

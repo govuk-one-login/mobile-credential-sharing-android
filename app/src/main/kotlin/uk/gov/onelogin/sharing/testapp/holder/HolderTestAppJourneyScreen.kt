@@ -5,17 +5,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
-import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.sdk.api.presenter.SharingSession
 import uk.gov.onelogin.sharing.ui.impl.ShareCredential
 
 /**
  * Suppresses `ktlint:compose:vm-forwarding-check` due to the naming convention of the
- * [CredentialPresenter].
+ * [SharingSession].
  */
 @Composable
 @Suppress("ktlint:compose:vm-forwarding-check")
 internal fun HolderTestAppJourneyScreen(
-    component: CredentialPresenter,
+    session: SharingSession,
     modifier: Modifier = Modifier
 ) {
     val metrics = rememberMetricsStateHolder()
@@ -24,7 +24,7 @@ internal fun HolderTestAppJourneyScreen(
     }
 
     ShareCredential(
-        component = component,
+        session = session,
         modifier = modifier
     )
 }

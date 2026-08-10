@@ -33,7 +33,39 @@ import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDial
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.sdk.api.presenter.SharingSession
+import uk.gov.onelogin.sharing.sdk.internal.presenter.SharingSessionImpl
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
+
+/**
+ * Composable entry point for the Holder role (credential sharing) using the new session-based API.
+ *
+ * The SDK internally manages the UI graph lifecycle. The consumer is responsible for
+ * caching the [SharingSession] across configuration changes (e.g., in a ViewModel).
+ * The internal UI graph is recreated after configuration changes but the orchestrator
+ * state (including BLE connections) is preserved.
+ *
+ * @param session The [SharingSession] created via [PresentCredentialSdk.createSession].
+ * @param modifier Optional [Modifier] to apply to the root composable.
+ */
+@Composable
+fun ShareCredential(session: SharingSession, modifier: Modifier = Modifier) {
+    val sessionImpl = session as SharingSessionImpl
+    val uiGraph = remember(sessionImpl.appGraph, sessionImpl.orchestrator) {
+        createGraphFactory<HolderUiGraph.Factory>()
+            .create(sessionImpl.appGraph, sessionImpl.orchestrator)
+    }
+    val navController = rememberNavController()
+    val orchestrator = uiGraph.holderOrchestrator()
+
+    ShareCredential(
+        orchestrator = orchestrator,
+        holderSessionState = orchestrator.holderSessionState,
+        modifier = modifier,
+        navController = navController,
+        viewModelFactory = uiGraph.metroViewModelFactory
+    )
+}
 
 /**
  * Composable entry point for the Holder role (credential sharing).
@@ -43,7 +75,13 @@ import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
  *
  * @param component The [CredentialPresenter] containing the app graph and configuration.
  * @param modifier Optional [Modifier] to apply to the root composable.
+ * @deprecated Use [ShareCredential] with a [SharingSession] instead.
  */
+@Deprecated(
+    message = "Use ShareCredential(session: SharingSession) instead.",
+    replaceWith = ReplaceWith("ShareCredential(session, modifier)")
+)
+@Suppress("DEPRECATION")
 @Composable
 fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifier) {
     val uiGraph = remember(component.appGraph, component.orchestrator) {
@@ -74,13 +112,15 @@ internal fun ShareCredential(
     val scope = rememberCoroutineScope { defaultDispatcher }
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
-    BackHandler(state.userCanCancel()) {
+    val onCancel: () -> Unit = {
         if (state.shouldConfirmCancellation()) {
             navController.navigateToHolderUserCancellationDialog()
         } else {
             orchestrator.cancel()
         }
     }
+
+    BackHandler(state.userCanCancel(), onBack = onCancel)
 
     MonitorHolderSessionState(
         holderSessionState = holderSessionState,
@@ -89,7 +129,9 @@ internal fun ShareCredential(
 
     LaunchedEffect(Unit) {
         scope.launch {
-            orchestrator.start()
+            if (holderSessionState.value is HolderSessionState.NotStarted) {
+                orchestrator.start()
+            }
         }
     }
 
@@ -99,15 +141,7 @@ internal fun ShareCredential(
         Surface(modifier = modifier) {
             Column(modifier = Modifier.fillMaxSize()) {
                 if (state.userCanCancel()) {
-                    IconButton(
-                        onClick = {
-                            if (state.shouldConfirmCancellation()) {
-                                navController.navigateToHolderUserCancellationDialog()
-                            } else {
-                                orchestrator.cancel()
-                            }
-                        }
-                    ) {
+                    IconButton(onClick = onCancel) {
                         Icon(
                             painter = painterResource(ic_menu_close_clear_cancel),
                             contentDescription = "Close"
