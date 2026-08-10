@@ -93,12 +93,12 @@ class AndroidPeripheralBluetoothTransport(
         isServiceReady = false
         _state.value = PeripheralBluetoothState.Idle
 
+        monitoringJob.start()
+        bluetoothStateMonitor.start()
         gattServerManager.open(serviceUuid)
     }
 
     private suspend fun startAdvertising(serviceUuid: UUID) {
-        monitoringJob.start()
-        bluetoothStateMonitor.start()
         try {
             bleAdvertiser.startAdvertise(BleAdvertiseData(serviceUuid))
         } catch (e: StartAdvertisingException) {
