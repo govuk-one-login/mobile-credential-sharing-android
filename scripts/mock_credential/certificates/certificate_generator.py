@@ -54,7 +54,6 @@ class CertificateGenerator:
         issuer_cert: Certificate,
         validity_days: int,
         extensions: List[tuple[x509.ExtensionType, bool]],
-        is_ca: bool = False
     ) -> Certificate:
         """Generic method to create a signed certificate (Intermediate or Leaf).
 

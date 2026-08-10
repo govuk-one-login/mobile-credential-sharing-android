@@ -30,19 +30,39 @@ def generate():
     cert_gen = CertificateGenerator(now)
 
     # 1. Keys & Certificates
-    issuer_key = KeyGenerator.load_or_create(args.issuer_private_key)
-    root_cert = cert_gen.create_root_ca(issuer_key, ISSUER_NAME, validity_days=args.validity_days)
+    issuer_private_key = KeyGenerator.load_or_create(args.issuer_private_key)
+    root_cert = cert_gen.create_root_ca(
+        private_key=issuer_private_key,
+        subject=ISSUER_NAME,
+        validity_days=args.validity_days
+    )
 
     leaf_key = KeyGenerator.generate()
     leaf_cert = cert_gen.create_certificate(
-        leaf_key.public_key(), issuer_key, LEAF_NAME, root_cert,
+        leaf_key.public_key(), issuer_private_key, LEAF_NAME, root_cert,
         validity_days=min(args.validity_days, 457),
         extensions=[
-            (x509.KeyUsage(digital_signature=True, content_commitment=False, key_encipherment=False,
-                          data_encipherment=False, key_agreement=False, key_cert_sign=False,
-                          crl_sign=False, encipher_only=False, decipher_only=False), True),
+            (
+                x509.KeyUsage(
+                    digital_signature=True, 
+                    content_commitment=False, 
+                    key_encipherment=False,
+                    data_encipherment=False, 
+                    key_agreement=False,
+                    key_cert_sign=False,
+                    crl_sign=False,
+                    encipher_only=False,
+                    decipher_only=False
+                ),
+                True
+            ),
             (x509.ExtendedKeyUsage([OID_MDL_DS]), True),
-            (x509.IssuerAlternativeName([x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")]), False),
+            (
+                x509.IssuerAlternativeName(
+                    [x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")]
+                ),
+                False
+            ),
         ]
     )
 
