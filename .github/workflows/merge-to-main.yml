@@ -68,7 +68,8 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/publishing.yml
     with:
-      ref: ${{ needs.bump-version.outputs.new-version }}
+      ref: v${{ needs.bump-version.outputs.new-version }}
+      semantic-version: ${{ needs.bump-version.outputs.new-version }}
       version-code: ${{ needs.bump-version.outputs.version-code }}
 
 
