@@ -16,9 +16,7 @@ class IssuerAuth:
 
     def sign(self, signing_key: ec.EllipticCurvePrivateKey) -> List:
         """Signs the MSO and returns the IssuerAuth COSE_Sign1 array."""
-        sig_structure = cbor2.dumps(
-            ["Signature1", self.protected, b"", self.mso_tagged_bytes]
-        )
+        sig_structure = cbor2.dumps(["Signature1", self.protected, b"", self.mso_tagged_bytes])
         signature_der = signing_key.sign(sig_structure, ec.ECDSA(hashes.SHA256()))
 
         r, s = decode_dss_signature(signature_der)
@@ -40,9 +38,7 @@ class Credential:
         self.issuer_auth = issuer_auth
 
     def to_cbor(self) -> bytes:
-        return cbor2.dumps(
-            {"nameSpaces": self.namespaces_dict, "issuerAuth": self.issuer_auth}
-        )
+        return cbor2.dumps({"nameSpaces": self.namespaces_dict, "issuerAuth": self.issuer_auth})
 
     def to_base64url(self) -> str:
         cred_bytes = self.to_cbor()

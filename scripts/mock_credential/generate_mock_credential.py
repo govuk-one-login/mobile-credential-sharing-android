@@ -85,9 +85,7 @@ def generate():
     }
 
     # 3. Assemble MSO & Credential
-    mso_obj = MSO.from_dict(
-        SAMPLE_MSO, device_cose_key, validity_days=args.validity_days
-    )
+    mso_obj = MSO.from_dict(SAMPLE_MSO, device_cose_key, validity_days=args.validity_days)
     mso_tagged_bytes = mso_obj.build_tagged_bytes(now)
 
     issuer_auth_obj = IssuerAuth(
@@ -95,9 +93,7 @@ def generate():
     )
     issuer_auth_list = issuer_auth_obj.sign(leaf_key)
 
-    credential = Credential(
-        SAMPLE_NAMESPACES.build_issuer_signed_items(), issuer_auth_list
-    )
+    credential = Credential(SAMPLE_NAMESPACES.build_issuer_signed_items(), issuer_auth_list)
 
     # 4. Save Outputs
     with open(args.x509_certificate, "wb") as f:
@@ -112,12 +108,13 @@ def generate():
 
 def get_argument_parser() -> IssuerAuthInput:
     parser = argparse.ArgumentParser(description="Generate a mock credential")
-    parser.add_argument(
-        "--private-key", default="app/src/main/assets/test_private_key.pem"
-    )
+    parser.add_argument("--private-key", default="app/src/main/assets/test_private_key.pem")
     parser.add_argument(
         "--issuer-private-key",
         default="app/src/main/assets/test_private_issuer_key.pem",
+    )
+    parser.add_argument(
+        "--reader-auth-private-key", default="app/src/main/assets/test_private_reader_auth_key.pem"
     )
     parser.add_argument(
         "--x509-certificate", default="app/src/main/assets/test_x509_certificate.der"

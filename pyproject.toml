@@ -33,7 +33,7 @@ generate-mock-credential = "mock_credential:generate_mock_credential_entry_point
 
 [tool.black]
 line-length = 100
-include = "scripts/mock_credential/.*?\.pyi?$"
+include = "scripts/mock_credential/.*?\\.pyi?$"
 
 [tool.pytest]
 log_cli = true

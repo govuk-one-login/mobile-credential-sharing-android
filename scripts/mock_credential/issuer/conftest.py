@@ -30,6 +30,10 @@ def valid_parser(
         default=str(issuer_auth_input_tmp_dir) + "/test_private_key.pem",
     )
     empty_parser.add_argument(
+        "--reader-auth-private-key",
+        default=str(issuer_auth_input_tmp_dir) + "/test_reader_auth_private_key.pem",
+    )
+    empty_parser.add_argument(
         "--issuer-private-key",
         help="The private EC key for the root CA",
         default=str(issuer_auth_input_tmp_dir) + "/test_private_issuer_key.pem",

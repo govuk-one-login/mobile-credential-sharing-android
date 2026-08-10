@@ -42,9 +42,7 @@ LEAF_EXTENSIONS = [
     ),
     (x509.ExtendedKeyUsage([OID_MDL_DS]), True),
     (
-        x509.IssuerAlternativeName(
-            [x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")]
-        ),
+        x509.IssuerAlternativeName([x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")]),
         False,
     ),
 ]
@@ -66,9 +64,7 @@ def root_key() -> ec.EllipticCurvePrivateKey:
 
 
 @pytest.fixture
-def root_cert(
-    cert_gen: CertificateGenerator, root_key: ec.EllipticCurvePrivateKey
-) -> Certificate:
+def root_cert(cert_gen: CertificateGenerator, root_key: ec.EllipticCurvePrivateKey) -> Certificate:
     return cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME)
 
 

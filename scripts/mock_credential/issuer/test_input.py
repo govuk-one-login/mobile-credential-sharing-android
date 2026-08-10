@@ -11,36 +11,46 @@ class TestIssuerAuthInput:
         assert IssuerAuthInput.from_parser(valid_parser) == valid_issuer_auth_input
 
     @pytest.mark.parametrize(
-        "invalid_input",
+        "invalid_input,missing_attribute",
         [
-            Namespace(),
-            Namespace(
-                issuer_private_key="",
+            pytest.param(Namespace(), "issuer_private_key", id="Missing issuer private key"),
+            pytest.param(
+                Namespace(issuer_private_key=""),
+                "reader_auth_private_key",
+                id="Missing reader auth private key",
             ),
-            Namespace(
-                issuer_private_key="",
-                output="",
+            pytest.param(
+                Namespace(issuer_private_key="", reader_auth_private_key=""),
+                "output",
+                id="Missing output",
             ),
-            Namespace(
-                issuer_private_key="",
-                output="",
-                private_key="",
+            pytest.param(
+                Namespace(issuer_private_key="", reader_auth_private_key="", output=""),
+                "private_key",
+                id="Missing private key",
             ),
-            Namespace(
-                issuer_private_key="",
-                output="",
-                private_key="",
-                validity_days=1,
+            pytest.param(
+                Namespace(
+                    issuer_private_key="", reader_auth_private_key="", output="", private_key=""
+                ),
+                "validity_days",
+                id="Missing validity days",
             ),
-        ],
-        ids=[
-            "Missing issuer private key",
-            "Missing output",
-            "Missing private key",
-            "Missing validity days",
-            "Missing x509 certificate",
+            pytest.param(
+                Namespace(
+                    issuer_private_key="",
+                    reader_auth_private_key="",
+                    output="",
+                    private_key="",
+                    validity_days=1,
+                ),
+                "x509_certificate",
+                id="Missing x509 certificate",
+            ),
         ],
     )
-    def test_invalid_parser_input(self, invalid_input: Namespace):
-        with pytest.raises(AttributeError):
+    def test_invalid_parser_input(self, invalid_input: Namespace, missing_attribute: str):
+        with pytest.raises(AttributeError) as exception:
             IssuerAuthInput.from_parser(invalid_input)
+
+        assert f"'Namespace' object has no attribute '{missing_attribute}'" in str(exception.value)

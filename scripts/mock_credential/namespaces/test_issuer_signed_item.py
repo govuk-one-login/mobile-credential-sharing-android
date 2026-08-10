@@ -6,9 +6,7 @@ from typing import AnyStr, Any, Dict
 
 class TestIssuerSignedItem:
 
-    def test_valid_input(
-        self, valid_issuer_signed_item_input, valid_issuer_signed_item
-    ):
+    def test_valid_input(self, valid_issuer_signed_item_input, valid_issuer_signed_item):
         actual = IssuerSignedItem.from_dict(valid_issuer_signed_item_input)
 
         assert actual == valid_issuer_signed_item

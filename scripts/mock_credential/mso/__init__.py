@@ -25,9 +25,7 @@ class MSO:
         self.validity_days = validity_days
 
     @classmethod
-    def from_dict(
-        cls: Type[T], config: Dict, device_cose_key: Dict, validity_days: int = 365
-    ) -> T:
+    def from_dict(cls: Type[T], config: Dict, device_cose_key: Dict, validity_days: int = 365) -> T:
         """Constructs an MSO from a config dict containing 'doc_type' and 'namespaces'."""
         namespaces = IssuerSignedNamespaces.from_dict(config["namespaces"])
         return cls(
@@ -53,9 +51,7 @@ class MSO:
                 "validFrom": cbor2.CBORTag(0, now.strftime("%Y-%m-%dT%H:%M:%SZ")),
                 "validUntil": cbor2.CBORTag(
                     0,
-                    (now + timedelta(days=self.validity_days)).strftime(
-                        "%Y-%m-%dT%H:%M:%SZ"
-                    ),
+                    (now + timedelta(days=self.validity_days)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 ),
             },
         }

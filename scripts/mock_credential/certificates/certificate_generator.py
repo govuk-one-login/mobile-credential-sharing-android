@@ -26,16 +26,12 @@ class CertificateGenerator:
             .serial_number(x509.random_serial_number())
             .not_valid_before(self.now)
             .not_valid_after(self.now + timedelta(days=validity_days))
-            .add_extension(
-                x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False
-            )
+            .add_extension(x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False)
             .add_extension(
                 x509.AuthorityKeyIdentifier.from_issuer_public_key(public_key),
                 critical=False,
             )
-            .add_extension(
-                x509.BasicConstraints(ca=True, path_length=None), critical=True
-            )
+            .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
             .add_extension(
                 x509.KeyUsage(
                     key_cert_sign=True,
@@ -75,13 +71,9 @@ class CertificateGenerator:
             .serial_number(x509.random_serial_number())
             .not_valid_before(self.now)
             .not_valid_after(self.now + timedelta(days=validity_days))
+            .add_extension(x509.SubjectKeyIdentifier.from_public_key(subject_key), critical=False)
             .add_extension(
-                x509.SubjectKeyIdentifier.from_public_key(subject_key), critical=False
-            )
-            .add_extension(
-                x509.AuthorityKeyIdentifier.from_issuer_public_key(
-                    issuer_cert.public_key()
-                ),
+                x509.AuthorityKeyIdentifier.from_issuer_public_key(issuer_cert.public_key()),
                 critical=False,
             )
         )

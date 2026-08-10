@@ -8,6 +8,7 @@ class IssuerAuthInput:
 
     def __init__(self, **kwargs):
         self.issuer_private_key = kwargs["issuer_private_key"]
+        self.reader_auth_private_key = kwargs["reader_auth_private_key"]
         self.output = kwargs["output"]
         self.private_key = kwargs["private_key"]
         self.validity_days = kwargs["validity_days"]
@@ -17,6 +18,7 @@ class IssuerAuthInput:
         return (
             isinstance(other, IssuerAuthInput)
             and (self.issuer_private_key == other.issuer_private_key)
+            and (self.reader_auth_private_key == other.reader_auth_private_key)
             and (self.output == other.output)
             and (self.private_key == other.private_key)
             and (self.validity_days == other.validity_days)
@@ -43,6 +45,7 @@ class IssuerAuthInput:
 
         return cls(
             issuer_private_key=args.issuer_private_key,
+            reader_auth_private_key=args.reader_auth_private_key,
             output=args.output,
             private_key=args.private_key,
             validity_days=args.validity_days,

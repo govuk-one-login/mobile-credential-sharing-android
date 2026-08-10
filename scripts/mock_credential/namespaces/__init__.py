@@ -6,9 +6,7 @@ from .issuer_signed_namespaces import IssuerSignedNamespaces
 
 # Sample IssuerSignedItems for a test mDL
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PORTRAIT_BYTES = b64decode(
-    open(os.path.join(SCRIPT_DIR, "portrait.txt")).read().strip()
-)
+PORTRAIT_BYTES = b64decode(open(os.path.join(SCRIPT_DIR, "portrait.txt")).read().strip())
 
 SAMPLE_ITEMS = {
     "org.iso.18013.5.1": [
@@ -49,6 +47,4 @@ SAMPLE_ITEMS = {
     ],
 }
 
-SAMPLE_NAMESPACES: IssuerSignedNamespaces = IssuerSignedNamespaces.from_dict(
-    SAMPLE_ITEMS
-)
+SAMPLE_NAMESPACES: IssuerSignedNamespaces = IssuerSignedNamespaces.from_dict(SAMPLE_ITEMS)
