@@ -1,8 +1,12 @@
-from argparse import ArgumentParser, Namespace
+from argparse import Namespace
+import logging
+from logging518 import config as logging_config
 from typing import TypeVar, Type
 
 T = TypeVar("T", bound="Parent")  # type: ignore
 
+logging_config.fileConfig("pyproject.toml")
+logger = logging.getLogger("project")
 
 class IssuerAuthInput:
 
@@ -13,6 +17,8 @@ class IssuerAuthInput:
         self.private_key = kwargs["private_key"]
         self.validity_days = kwargs["validity_days"]
         self.x509_certificate = kwargs["x509_certificate"]
+
+        logger.info("Created input instance from parameters")
 
     def __eq__(self, other):
         return (

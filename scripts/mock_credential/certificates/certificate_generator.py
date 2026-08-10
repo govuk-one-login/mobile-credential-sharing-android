@@ -14,7 +14,7 @@ class CertificateGenerator:
         self,
         private_key: ec.EllipticCurvePrivateKey,
         subject: Name,
-        validity_days: int = 3650,
+        validity_days: int = 365,
     ) -> Certificate:
         """Generates a self-signed root CA certificate."""
         public_key = private_key.public_key()

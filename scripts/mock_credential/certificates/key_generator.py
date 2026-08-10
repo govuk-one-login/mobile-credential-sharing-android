@@ -1,6 +1,11 @@
+import logging
+from logging518 import config as logging_config
 import os
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
+
+logging_config.fileConfig("pyproject.toml")
+logger = logging.getLogger("project")
 
 
 class KeyGenerator:
@@ -14,9 +19,10 @@ class KeyGenerator:
         """
         if os.path.exists(path):
             with open(path, "rb") as f:
+                logger.info(f"Reading existing key: {path}")
                 return serialization.load_pem_private_key(f.read(), password=None)
 
-        print(f"'{path}' not found! Creating...")
+        logger.info(f"'{path}' not found! Creating...")
         key = KeyGenerator.generate()
         with open(path, "xb") as f:
             f.write(
@@ -32,9 +38,11 @@ class KeyGenerator:
     def load(path: str) -> ec.EllipticCurvePrivateKey:
         """Loads an EC private key from a PEM file at `path`."""
         with open(path, "rb") as f:
+            logger.info(f"Loading key: {path}")
             return serialization.load_pem_private_key(f.read(), password=None)
 
     @staticmethod
     def generate() -> ec.EllipticCurvePrivateKey:
         """Generates a new P-256 EC private key."""
+        logger.info(f"Generating key...")
         return ec.generate_private_key(ec.SECP256R1())

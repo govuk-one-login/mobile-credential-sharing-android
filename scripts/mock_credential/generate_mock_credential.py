@@ -4,6 +4,8 @@ Generates a mock_credential.txt for the Sharing SDK test app.
 """
 
 import argparse
+import logging
+from logging518 import config as logging_config
 import os
 import sys
 
@@ -25,6 +27,9 @@ from mock_credential.certificates import (
     KeyGenerator,
 )
 
+logging_config.fileConfig("pyproject.toml")
+logger = logging.getLogger("project")
+
 # ISO 18013-5 mdoc DS OID
 OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
 
@@ -36,7 +41,7 @@ def generate():
 
     # 1. Keys & Certificates
     issuer_private_key = KeyGenerator.load_or_create(args.issuer_private_key)
-    root_cert = cert_gen.create_root_ca(
+    intermediary_issuer_auth_cert = cert_gen.create_root_ca(
         private_key=issuer_private_key,
         subject=ISSUER_NAME,
         validity_days=args.validity_days,
@@ -47,7 +52,7 @@ def generate():
         leaf_key.public_key(),
         issuer_private_key,
         LEAF_NAME,
-        root_cert,
+        intermediary_issuer_auth_cert,
         validity_days=min(args.validity_days, 457),
         extensions=[
             (
@@ -97,13 +102,13 @@ def generate():
 
     # 4. Save Outputs
     with open(args.x509_certificate, "wb") as f:
-        f.write(root_cert.public_bytes(serialization.Encoding.DER))
+        f.write(intermediary_issuer_auth_cert.public_bytes(serialization.Encoding.DER))
 
     with open(args.output, "w") as f:
         f.write(credential.to_base64url())
 
-    print(f"Generated: {args.output}")
-    print(f"Root Certificate: {args.x509_certificate}")
+    logger.info(f"Generated: {args.output}")
+    logger.info(f"Root Certificate: {args.x509_certificate}")
 
 
 def get_argument_parser() -> IssuerAuthInput:
@@ -121,6 +126,8 @@ def get_argument_parser() -> IssuerAuthInput:
     )
     parser.add_argument("--output", default="app/src/main/res/raw/mock_credential.txt")
     parser.add_argument("--validity-days", type=int, default=365)
+
+    logger.info("Obtained command-line arguments...")
     return IssuerAuthInput.from_parser(parser.parse_args())
 
 

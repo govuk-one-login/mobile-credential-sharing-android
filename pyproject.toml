@@ -15,6 +15,7 @@ name = "mobile-credential-sharing-android-python-scripts"
 dependencies = [
     "cbor2",
     "cryptography",
+    "logging518",
 ]
 dynamic = ["version"]
 
@@ -34,6 +35,23 @@ generate-mock-credential = "mock_credential:generate_mock_credential_entry_point
 [tool.black]
 line-length = 100
 include = "scripts/mock_credential/.*?\\.pyi?$"
+
+[tool.logging]
+version = 1
+disable_existing_loggers = true
+
+[tool.logging.formatters.formatter]
+class = "logging.Formatter"
+format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+[tool.logging.handlers.ch]
+level = "INFO"
+class = "logging.StreamHandler"
+formatter = "formatter"
+
+[tool.logging.loggers.project]
+level = "DEBUG"
+handlers = ["ch"]
 
 [tool.pytest]
 log_cli = true
