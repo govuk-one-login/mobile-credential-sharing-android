@@ -1,7 +1,7 @@
 from cbor2 import dumps, loads, CBORTag
 from hashlib import sha256
 from typing import AnyStr, Dict, List, Type, TypeVar
-from mock_credential.namespaces import IssuerSignedItem
+from .issuer_signed_item import IssuerSignedItem
 
 T = TypeVar("T", bound="Parent")  # type: ignore
 

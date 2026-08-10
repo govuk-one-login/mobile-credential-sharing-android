@@ -44,5 +44,4 @@ class KeyGenerator:
     @staticmethod
     def generate() -> ec.EllipticCurvePrivateKey:
         """Generates a new P-256 EC private key."""
-        logger.info(f"Generating key...")
         return ec.generate_private_key(ec.SECP256R1())

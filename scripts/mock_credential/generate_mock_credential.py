@@ -12,12 +12,11 @@ import sys
 # Add the 'scripts' directory to the path so we can import mock_credential
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.oid import ObjectIdentifier
 from datetime import datetime, timezone
 
-from mock_credential.issuer import IssuerAuthInput, ISSUER_NAME, LEAF_NAME
+from mock_credential.issuer import IssuerAuthInput
 from mock_credential.namespaces import SAMPLE_NAMESPACES
 from mock_credential.mso import MSO, SAMPLE_MSO
 from mock_credential.certificates import (
@@ -40,48 +39,7 @@ def generate():
     cert_gen = CertificateGenerator(now)
 
     # 1. Keys & Certificates
-    issuer_private_key = KeyGenerator.load_or_create(args.issuer_private_key)
-    intermediary_issuer_auth_cert = cert_gen.create_root_ca(
-        private_key=issuer_private_key,
-        subject=ISSUER_NAME,
-        validity_days=args.validity_days,
-    )
-    with open(args.issuer_intermediate_x509_certificate, "wb") as f:
-        f.write(intermediary_issuer_auth_cert.public_bytes(serialization.Encoding.DER))
-        logger.info(f"Issuer: x509 leaf certificate: {args.issuer_intermediate_x509_certificate}")
-
-
-    issuer_leaf_key = KeyGenerator.generate()
-    issuer_leaf_cert = cert_gen.create_certificate(
-        issuer_leaf_key.public_key(),
-        issuer_private_key,
-        LEAF_NAME,
-        intermediary_issuer_auth_cert,
-        validity_days=min(args.validity_days, 457),
-        extensions=[
-            (
-                x509.KeyUsage(
-                    digital_signature=True,
-                    content_commitment=False,
-                    key_encipherment=False,
-                    data_encipherment=False,
-                    key_agreement=False,
-                    key_cert_sign=False,
-                    crl_sign=False,
-                    encipher_only=False,
-                    decipher_only=False,
-                ),
-                True,
-            ),
-            (x509.ExtendedKeyUsage([OID_MDL_DS]), True),
-            (
-                x509.IssuerAlternativeName(
-                    [x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")]
-                ),
-                False,
-            ),
-        ],
-    )
+    issuer_leaf_key, issuer_leaf_cert = args.create_issuer_auth_x509_certificate(cert_gen)
 
     # 2. Device Key
     device_key = KeyGenerator.load(args.private_key)

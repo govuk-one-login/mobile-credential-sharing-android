@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509 import Certificate
 from datetime import timedelta
 
-from mock_credential.certificates import CertificateGenerator, KeyGenerator
+from mock_credential.certificates import KeyGenerator
 from .conftest import TEST_SUBJECT_NAME, TEST_LEAF_NAME, LEAF_EXTENSIONS
 
 
