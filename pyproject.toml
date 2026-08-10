@@ -19,6 +19,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
+dev = [
+    "black"
+]
 test = [
     "pytest"
 ]
