@@ -74,12 +74,8 @@ internal fun VerifyCredential(
     defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
     val state: VerifierSessionState by verifierSessionState.collectAsStateWithLifecycle()
-    MonitorVerifierSessionState(
-        sessionState = verifierSessionState,
-        controller = controller
-    )
 
-    BackHandler(state.userCanCancel()) {
+    val onCancel: () -> Unit = {
         if (state.shouldConfirmCancellation()) {
             controller.navigateToVerifierUserCancellationDialog()
         } else {
@@ -87,10 +83,19 @@ internal fun VerifyCredential(
         }
     }
 
+    MonitorVerifierSessionState(
+        sessionState = verifierSessionState,
+        controller = controller
+    )
+
+    BackHandler(state.userCanCancel(), onBack = onCancel)
+
     val scope = rememberCoroutineScope { defaultDispatcher }
     LaunchedEffect(Unit) {
         scope.launch {
-            orchestrator.start()
+            if (verifierSessionState.value is VerifierSessionState.NotStarted) {
+                orchestrator.start()
+            }
         }
     }
 
@@ -100,15 +105,7 @@ internal fun VerifyCredential(
         Surface(modifier = modifier) {
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!state.isComplete()) {
-                    IconButton(
-                        onClick = {
-                            if (state.shouldConfirmCancellation()) {
-                                controller.navigateToVerifierUserCancellationDialog()
-                            } else {
-                                orchestrator.cancel()
-                            }
-                        }
-                    ) {
+                    IconButton(onClick = onCancel) {
                         Icon(
                             painter = painterResource(ic_menu_close_clear_cancel),
                             contentDescription = "Close"

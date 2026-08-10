@@ -74,13 +74,15 @@ internal fun ShareCredential(
     val scope = rememberCoroutineScope { defaultDispatcher }
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
-    BackHandler(state.userCanCancel()) {
+    val onCancel: () -> Unit = {
         if (state.shouldConfirmCancellation()) {
             navController.navigateToHolderUserCancellationDialog()
         } else {
             orchestrator.cancel()
         }
     }
+
+    BackHandler(state.userCanCancel(), onBack = onCancel)
 
     MonitorHolderSessionState(
         holderSessionState = holderSessionState,
@@ -89,7 +91,9 @@ internal fun ShareCredential(
 
     LaunchedEffect(Unit) {
         scope.launch {
-            orchestrator.start()
+            if (holderSessionState.value is HolderSessionState.NotStarted) {
+                orchestrator.start()
+            }
         }
     }
 
@@ -99,15 +103,7 @@ internal fun ShareCredential(
         Surface(modifier = modifier) {
             Column(modifier = Modifier.fillMaxSize()) {
                 if (state.userCanCancel()) {
-                    IconButton(
-                        onClick = {
-                            if (state.shouldConfirmCancellation()) {
-                                navController.navigateToHolderUserCancellationDialog()
-                            } else {
-                                orchestrator.cancel()
-                            }
-                        }
-                    ) {
+                    IconButton(onClick = onCancel) {
                         Icon(
                             painter = painterResource(ic_menu_close_clear_cancel),
                             contentDescription = "Close"

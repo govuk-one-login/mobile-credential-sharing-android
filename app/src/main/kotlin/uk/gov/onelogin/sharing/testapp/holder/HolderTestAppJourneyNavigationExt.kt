@@ -9,23 +9,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
@@ -86,10 +83,10 @@ object HolderTestAppJourneyNavigationExt {
                 return@composable
             }
 
-            val presenter by produceCredentialPresenter(
-                credential,
-                component
-            )
+            val viewModel: HolderJourneyViewModel = viewModel()
+            viewModel.getPresenter(credential, component)
+
+            val presenter by viewModel.presenter.collectAsStateWithLifecycle()
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -115,14 +112,5 @@ object HolderTestAppJourneyNavigationExt {
                 } ?: CircularProgressIndicator()
             }
         }
-    }
-
-    @Composable
-    fun produceCredentialPresenter(
-        credential: MockCredential,
-        credentialToPresenter: (MockCredential) -> CredentialPresenter,
-        dispatcher: CoroutineDispatcher = Dispatchers.Default
-    ) = produceState<CredentialPresenter?>(null, credential, credentialToPresenter) {
-        value = withContext(dispatcher) { credentialToPresenter(credential) }
     }
 }
