@@ -21,6 +21,7 @@ OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
 logging_config.fileConfig("pyproject.toml")
 logger = logging.getLogger("project")
 issuer_logger = logging.getLogger("IssuerAuth")
+reader_logger = logging.getLogger("ReaderAuth")
 
 class IssuerAuthInput:
 
@@ -58,10 +59,10 @@ class IssuerAuthInput:
         )
         with open(self.issuer_intermediate_x509_certificate, "wb") as f:
             f.write(intermediary_issuer_auth_cert.public_bytes(serialization.Encoding.DER))
-            issuer_logger.info(f"Issuer: Written x509 intermediate certificate: {self.issuer_intermediate_x509_certificate}")
+            issuer_logger.info(f"Written x509 intermediate certificate: {self.issuer_intermediate_x509_certificate}")
 
         issuer_leaf_key = KeyGenerator.generate()
-        logger.info("Issuer: Created leaf certificate key")
+        issuer_logger.info("Created leaf certificate key")
         issuer_leaf_cert = cert_gen.create_certificate(
             issuer_leaf_key.public_key(),
             issuer_private_key,
@@ -94,6 +95,56 @@ class IssuerAuthInput:
         )
 
         return (issuer_leaf_key, issuer_leaf_cert)
+
+
+    def create_reader_auth_x509_certificate(
+        self,
+        cert_gen: CertificateGenerator
+    ) -> Tuple[EllipticCurvePrivateKey, Certificate]:
+        reader_auth_private_key = KeyGenerator.load_or_create_pem(self.reader_auth_private_key)
+        intermediary_reader_auth_cert = cert_gen.create_root_ca(
+            private_key=reader_auth_private_key,
+            subject=ISSUER_NAME,
+            validity_days=self.validity_days,
+        )
+        with open(self.reader_intermediate_x509_certificate, "wb") as f:
+            f.write(intermediary_reader_auth_cert.public_bytes(serialization.Encoding.DER))
+            reader_logger.info(f"Written x509 intermediate certificate: {self.reader_intermediate_x509_certificate}")
+
+        reader_auth_leaf_key = KeyGenerator.generate()
+        reader_logger.info("Created leaf certificate key")
+        reader_auth_leaf_cert = cert_gen.create_certificate(
+            reader_auth_leaf_key.public_key(),
+            reader_auth_private_key,
+            LEAF_NAME,
+            intermediary_reader_auth_cert,
+            validity_days=min(self.validity_days, 457),
+            extensions=[
+                (
+                    KeyUsage(
+                        digital_signature=True,
+                        content_commitment=False,
+                        key_encipherment=False,
+                        data_encipherment=False,
+                        key_agreement=False,
+                        key_cert_sign=False,
+                        crl_sign=False,
+                        encipher_only=False,
+                        decipher_only=False,
+                    ),
+                    True,
+                ),
+                (ExtendedKeyUsage([OID_MDL_DS]), True),
+                (
+                    IssuerAlternativeName(
+                        [UniformResourceIdentifier("https://dvla.gov.uk/iaca")]
+                    ),
+                    False,
+                ),
+            ],
+        )
+
+        return (reader_auth_leaf_key, reader_auth_leaf_cert)
 
     @classmethod
     def from_parser(cls: Type[T], args: Namespace) -> T:
