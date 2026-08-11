@@ -496,4 +496,34 @@ class AndroidPeripheralBluetoothTransportTest {
 
         assertFalse { transport.isServiceReady }
     }
+
+    @Test
+    fun `service added after start advertises and allows connection`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        val service: BluetoothGattService = mockk()
+        every { service.uuid } returns uuid
+
+        transport.start(uuid)
+        advanceUntilIdle()
+
+        gattServerManager.emitEvent(GattServerEvent.ServiceAdded(service))
+        advanceUntilIdle()
+
+        assertTrue { transport.isServiceReady }
+
+        transport.state.test {
+            assertEquals(PeripheralBluetoothState.Idle, awaitItem())
+
+            gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
+            advanceUntilIdle()
+
+            assertEquals(
+                PeripheralBluetoothState.Connected(DEVICE_ADDRESS),
+                awaitItem()
+            )
+        }
+
+        assertThat(gattServerManager.disconnectCalls, equalTo(0))
+    }
 }
