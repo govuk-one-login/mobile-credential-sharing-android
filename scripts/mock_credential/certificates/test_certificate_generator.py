@@ -67,18 +67,18 @@ class TestKeyGeneratorLoadOrCreate:
 
     def test_creates_key_when_file_missing(self, tmp_path):
         path = str(tmp_path / "new_key.pem")
-        key = KeyGenerator.load_or_create(path)
+        key = KeyGenerator.load_or_create_pem(path)
         assert isinstance(key, ec.EllipticCurvePrivateKey)
 
     def test_saves_key_to_disk_when_created(self, tmp_path):
         path = str(tmp_path / "new_key.pem")
-        KeyGenerator.load_or_create(path)
+        KeyGenerator.load_or_create_pem(path)
         assert (tmp_path / "new_key.pem").exists()
 
     def test_loads_existing_key_when_file_present(self, tmp_path):
         path = str(tmp_path / "existing_key.pem")
-        original = KeyGenerator.load_or_create(path)
-        loaded = KeyGenerator.load_or_create(path)
+        original = KeyGenerator.load_or_create_pem(path)
+        loaded = KeyGenerator.load_or_create_pem(path)
         assert loaded.private_numbers() == original.private_numbers()
 
 

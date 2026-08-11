@@ -53,6 +53,10 @@ formatter = "formatter"
 level = "DEBUG"
 handlers = ["ch"]
 
+[tool.logging.loggers.IssuerAuth]
+level = "DEBUG"
+handlers = ["ch"]
+
 [tool.pytest]
 log_cli = true
 log_cli_level = "INFO"

@@ -12,7 +12,7 @@ class KeyGenerator:
     """Handles loading and generating EC private keys."""
 
     @staticmethod
-    def load_or_create(path: str) -> ec.EllipticCurvePrivateKey:
+    def load_or_create_pem(path: str) -> ec.EllipticCurvePrivateKey:
         """
         Loads an EC private key from a PEM file at `path`.
         If the file does not exist, generates a new P-256 key, saves it, and returns it.

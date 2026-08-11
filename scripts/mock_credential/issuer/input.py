@@ -50,7 +50,7 @@ class IssuerAuthInput:
         self,
         cert_gen: CertificateGenerator
     ) -> Tuple[EllipticCurvePrivateKey, Certificate]:
-        issuer_private_key = KeyGenerator.load_or_create(self.issuer_private_key)
+        issuer_private_key = KeyGenerator.load_or_create_pem(self.issuer_private_key)
         intermediary_issuer_auth_cert = cert_gen.create_root_ca(
             private_key=issuer_private_key,
             subject=ISSUER_NAME,
