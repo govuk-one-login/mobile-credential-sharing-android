@@ -14,6 +14,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 class GattServerCallback(
     private val gatGattEventEmitter: GattEventEmitter,
     private val logger: Logger,
+    private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE,
     private var messages: MutableMap<UUID, ByteArray> = mutableMapOf()
 ) : BluetoothGattServerCallback() {
     override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
@@ -65,14 +66,28 @@ class GattServerCallback(
 
                 when (indicator) {
                     NON_LAST_PART -> {
-                        messages[characteristic.uuid] = previousMessages + newMessage
-                        logger.debug(logTag, "received message part, expecting additional data")
+                        val accumulated = previousMessages + newMessage
+                        if (accumulated.size > maxReceiveBufferSize) {
+                            messages.remove(characteristic.uuid)
+                            emitExceededMaxBufferSize()
+                        } else {
+                            messages[characteristic.uuid] = accumulated
+                            logger.debug(
+                                logTag,
+                                "received message part, expecting additional data"
+                            )
+                        }
                     }
 
                     LAST_PART -> {
                         messages.remove(characteristic.uuid)
 
                         val fullMessage = previousMessages + newMessage
+
+                        if (fullMessage.size > maxReceiveBufferSize) {
+                            emitExceededMaxBufferSize()
+                            return
+                        }
 
                         gatGattEventEmitter.emit(
                             GattServerCallbackEvent.MessageReceived(device, fullMessage)
@@ -175,10 +190,16 @@ class GattServerCallback(
         )
     }
 
+    private fun emitExceededMaxBufferSize() {
+        logger.error(logTag, "ExceededMaxBufferSize")
+        gatGattEventEmitter.emit(GattServerCallbackEvent.ExceededMaxBufferSize)
+    }
+
     companion object {
         private const val BYTE_TO_HEX_FORMAT = "%02X"
 
         const val NON_LAST_PART: Byte = 0x01
         const val LAST_PART: Byte = 0x00
+        const val DEFAULT_MAX_RECEIVE_BUFFER_SIZE: Int = 64 * 1024
     }
 }

@@ -56,6 +56,7 @@ class AndroidGattServerManager(
     override val events: SharedFlow<GattServerEvent> = _events
     private var gattServer: BluetoothGattServer? = null
     internal var connectedDevice: BluetoothDevice? = null
+    private var serviceUuid: UUID? = null
 
     @SuppressLint("MissingPermission")
     private val eventEmitter = GattEventEmitter {
@@ -67,6 +68,7 @@ class AndroidGattServerManager(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open(serviceUuid: UUID) {
         val gattService = gattServiceFactory(serviceUuid)
+        this.serviceUuid = serviceUuid
 
         if (permissionsChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
@@ -103,6 +105,7 @@ class AndroidGattServerManager(
         gattServer?.close()
         gattServer = null
         connectedDevice = null
+        serviceUuid = null
         isSessionEnd = false
         mtu = MIN_MTU
         _events.tryEmit(GattServerEvent.ServiceStopped)
@@ -118,6 +121,7 @@ class AndroidGattServerManager(
             is GattServerCallbackEvent.MtuChanged -> mtu = event.mtu
             is GattServerCallbackEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
             is GattServerCallbackEvent.SessionEnd -> handleSessionEndReceived()
+            is GattServerCallbackEvent.ExceededMaxBufferSize -> handleExceededMaxBufferSize()
         }
     }
 
@@ -236,6 +240,17 @@ class AndroidGattServerManager(
     private fun handleSessionEndReceived() {
         isSessionEnd = true
         _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
+    }
+
+    /**
+     * Handles when the accumulated BLE buffer exceeds the configured maximum size.
+     * Sends the session end command to the Verifier per ISO 18013-5, then emits an error
+     * to trigger session failure and destruction.
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleExceededMaxBufferSize() {
+        serviceUuid?.let { notifySessionEnd(it) }
+        _events.tryEmit(GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE))
     }
 
     /**
