@@ -30,6 +30,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
@@ -729,5 +730,55 @@ class AndroidGattServerManagerTest {
 
         assertNull(manager.connectedDevice)
         verify(exactly = 1) { gattServer.cancelConnection(device) }
+    }
+
+    @Test
+    fun `notifies session end and emits error when buffer size exceeded`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        manager.events.test {
+            // Send a NON_LAST_PART chunk exceeding the 64KB default limit
+            val oversizedChunk = byteArrayOf(NON_LAST_PART) + ByteArray(64 * 1024 + 1) { 0x11 }
+            CharacteristicWriteRequestStub.writeRequestMessage(
+                bluetoothDevice = device,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+                },
+                message = oversizedChunk
+            ).run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
+
+            assert(fakeGattWriter.sentChunks.isNotEmpty()) {
+                "Expected session end notification to be sent"
+            }
+            assertEquals(
+                MdocState.END.code,
+                fakeGattWriter.sentChunks.last()[0]
+            )
+
+            assertEquals(
+                GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE),
+                awaitItem()
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }
