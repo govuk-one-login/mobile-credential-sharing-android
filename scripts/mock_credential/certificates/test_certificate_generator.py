@@ -7,27 +7,28 @@ from datetime import timedelta
 from mock_credential.certificates import KeyGenerator
 from .conftest import TEST_SUBJECT_NAME, TEST_LEAF_NAME, LEAF_EXTENSIONS
 
+key_gen = KeyGenerator()
 
 class TestGenerateKey:
 
     def test_returns_ec_private_key(self):
-        key = KeyGenerator.generate()
+        key = key_gen.generate()
         assert isinstance(key, ec.EllipticCurvePrivateKey)
 
     def test_uses_p256_curve(self):
-        key = KeyGenerator.generate()
+        key = key_gen.generate()
         assert isinstance(key.curve, ec.SECP256R1)
 
     def test_each_call_produces_unique_key(self):
-        key_a = KeyGenerator.generate()
-        key_b = KeyGenerator.generate()
+        key_a = key_gen.generate()
+        key_b = key_gen.generate()
         assert key_a.private_numbers() != key_b.private_numbers()
 
 
 class TestKeyGeneratorLoad:
 
     def test_load_returns_private_key(self, tmp_path):
-        key = KeyGenerator.generate()
+        key = key_gen.generate()
         path = str(tmp_path / "key.pem")
         with open(path, "xb") as f:
             from cryptography.hazmat.primitives import serialization
@@ -39,11 +40,11 @@ class TestKeyGeneratorLoad:
                     encryption_algorithm=serialization.NoEncryption(),
                 )
             )
-        loaded = KeyGenerator.load(path)
+        loaded = key_gen.load(path)
         assert isinstance(loaded, ec.EllipticCurvePrivateKey)
 
     def test_load_returns_same_key(self, tmp_path):
-        key = KeyGenerator.generate()
+        key = key_gen.generate()
         path = str(tmp_path / "key.pem")
         with open(path, "xb") as f:
             from cryptography.hazmat.primitives import serialization
@@ -55,37 +56,37 @@ class TestKeyGeneratorLoad:
                     encryption_algorithm=serialization.NoEncryption(),
                 )
             )
-        loaded = KeyGenerator.load(path)
+        loaded = key_gen.load(path)
         assert loaded.private_numbers() == key.private_numbers()
 
     def test_load_raises_when_file_missing(self, tmp_path):
         with pytest.raises(FileNotFoundError):
-            KeyGenerator.load(str(tmp_path / "missing.pem"))
+            key_gen.load(str(tmp_path / "missing.pem"))
 
 
 class TestKeyGeneratorLoadOrCreate:
 
     def test_creates_key_when_file_missing(self, tmp_path):
         path = str(tmp_path / "new_key.pem")
-        key = KeyGenerator.load_or_create_pem(path)
+        key = key_gen.load_or_create_pem(path)
         assert isinstance(key, ec.EllipticCurvePrivateKey)
 
     def test_saves_key_to_disk_when_created(self, tmp_path):
         path = str(tmp_path / "new_key.pem")
-        KeyGenerator.load_or_create_pem(path)
+        key_gen.load_or_create_pem(path)
         assert (tmp_path / "new_key.pem").exists()
 
     def test_loads_existing_key_when_file_present(self, tmp_path):
         path = str(tmp_path / "existing_key.pem")
-        original = KeyGenerator.load_or_create_pem(path)
-        loaded = KeyGenerator.load_or_create_pem(path)
+        original = key_gen.load_or_create_pem(path)
+        loaded = key_gen.load_or_create_pem(path)
         assert loaded.private_numbers() == original.private_numbers()
 
 
 class TestCreateRootCa:
 
-    def test_returns_certificate(self, cert_gen, root_key):
-        cert = cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME)
+    def test_returns_certificate(self, issuer_auth_cert_gen, root_key):
+        cert = issuer_auth_cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME)
         assert isinstance(cert, Certificate)
 
     def test_is_self_signed(self, root_cert):
@@ -110,12 +111,12 @@ class TestCreateRootCa:
         ku = root_cert.extensions.get_extension_for_class(x509.KeyUsage)
         assert ku.critical is True
 
-    def test_validity_not_before_uses_provided_now(self, cert_gen, root_key, now):
-        cert = cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME, validity_days=365)
+    def test_validity_not_before_uses_provided_now(self, issuer_auth_cert_gen, root_key, now):
+        cert = issuer_auth_cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME, validity_days=365)
         assert cert.not_valid_before_utc == now
 
-    def test_validity_not_after_applies_validity_days(self, cert_gen, root_key, now):
-        cert = cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME, validity_days=365)
+    def test_validity_not_after_applies_validity_days(self, issuer_auth_cert_gen, root_key, now):
+        cert = issuer_auth_cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME, validity_days=365)
         assert cert.not_valid_after_utc == now + timedelta(days=365)
 
 
@@ -149,9 +150,9 @@ class TestCreateCertificate:
         assert ian.critical is False
 
     def test_validity_not_after_applies_validity_days(
-        self, cert_gen, leaf_key, root_key, root_cert, now
+        self, issuer_auth_cert_gen, leaf_key, root_key, root_cert, now
     ):
-        cert = cert_gen.create_certificate(
+        cert = issuer_auth_cert_gen.create_certificate(
             leaf_key.public_key(),
             root_key,
             TEST_LEAF_NAME,

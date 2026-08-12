@@ -20,7 +20,7 @@ from mock_credential.issuer import IssuerAuthInput
 from mock_credential.namespaces import SAMPLE_NAMESPACES
 from mock_credential.mso import MSO, SAMPLE_MSO
 from mock_credential.certificates import (
-    CertificateGenerator,
+    IssuerAuthCertificateGenerator,
     IssuerAuth,
     Credential,
     KeyGenerator,
@@ -36,16 +36,19 @@ OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
 def generate():
     args = get_argument_parser()
     now = datetime.now(timezone.utc)
-    cert_gen = CertificateGenerator(now)
+    key_gen = KeyGenerator()
+    cert_gen = IssuerAuthCertificateGenerator(now)
 
     # 1. Keys & Certificates
-    issuer_leaf_key, issuer_leaf_cert = args.create_issuer_auth_certificates(cert_gen)
+    issuer_leaf_key, issuer_leaf_cert = args.create_issuer_auth_certificates(
+        cert_gen=cert_gen
+    )
     valid_reader_leaf_cert, invalid_reader_leaf_cert = args.create_reader_auth_certificates(
-        cert_gen
+        cert_gen=cert_gen
     )
 
     # 2. Device Key
-    device_key = KeyGenerator.load(args.private_key)
+    device_key = key_gen.load(args.private_key)
     device_pub = device_key.public_key().public_numbers()
     device_cose_key = {
         1: 2,

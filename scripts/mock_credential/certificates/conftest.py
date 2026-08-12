@@ -6,7 +6,7 @@ from cryptography.x509.oid import NameOID, ObjectIdentifier
 from datetime import datetime, timezone
 from typing import Generator
 
-from mock_credential.certificates import CertificateGenerator, KeyGenerator
+from mock_credential.certificates import CertificateGenerator, IssuerAuthCertificateGenerator, KeyGenerator
 
 # ISO 18013-5 mdoc DS OID — same as used in generate_mock_credential.py
 OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
@@ -54,33 +54,33 @@ def now() -> datetime:
 
 
 @pytest.fixture
-def cert_gen(now: datetime) -> CertificateGenerator:
-    return CertificateGenerator(now)
+def issuer_auth_cert_gen(now: datetime) -> CertificateGenerator:
+    return IssuerAuthCertificateGenerator(now)
 
 
 @pytest.fixture
 def root_key() -> ec.EllipticCurvePrivateKey:
-    return KeyGenerator.generate()
+    return KeyGenerator().generate()
 
 
 @pytest.fixture
-def root_cert(cert_gen: CertificateGenerator, root_key: ec.EllipticCurvePrivateKey) -> Certificate:
-    return cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME)
+def root_cert(issuer_auth_cert_gen: CertificateGenerator, root_key: ec.EllipticCurvePrivateKey) -> Certificate:
+    return issuer_auth_cert_gen.create_intermediate(root_key, TEST_SUBJECT_NAME)
 
 
 @pytest.fixture
 def leaf_key() -> ec.EllipticCurvePrivateKey:
-    return KeyGenerator.generate()
+    return KeyGenerator().generate()
 
 
 @pytest.fixture
 def leaf_cert(
-    cert_gen: CertificateGenerator,
+    issuer_auth_cert_gen: CertificateGenerator,
     leaf_key: ec.EllipticCurvePrivateKey,
     root_key: ec.EllipticCurvePrivateKey,
     root_cert: Certificate,
 ) -> Generator[Certificate, None, None]:
-    yield cert_gen.create_certificate(
+    yield issuer_auth_cert_gen.create_certificate(
         leaf_key.public_key(),
         root_key,
         TEST_LEAF_NAME,

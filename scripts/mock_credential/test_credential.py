@@ -12,7 +12,7 @@ STUB_CERT_DER = b"\x30\x82\x01\x00"  # minimal placeholder DER bytes
 
 @pytest.fixture
 def signing_key() -> ec.EllipticCurvePrivateKey:
-    return KeyGenerator.generate()
+    return KeyGenerator().generate()
 
 
 @pytest.fixture

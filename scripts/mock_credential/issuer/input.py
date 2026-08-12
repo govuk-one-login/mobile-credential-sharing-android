@@ -51,10 +51,11 @@ class IssuerAuthInput:
 
     def create_issuer_auth_certificates(
         self,
-        cert_gen: CertificateGenerator
+        cert_gen: CertificateGenerator,
+        key_gen: KeyGenerator = KeyGenerator(),
     ) -> Tuple[EllipticCurvePrivateKey, Certificate]:
-        issuer_private_key = KeyGenerator.load_or_create_pem(self.issuer_private_key)
-        intermediary_issuer_auth_cert = cert_gen.create_root_ca(
+        issuer_private_key = key_gen.load_or_create_pem(self.issuer_private_key)
+        intermediary_issuer_auth_cert = cert_gen.create_intermediate(
             private_key=issuer_private_key,
             subject=ISSUER_NAME,
             validity_days=self.validity_days,
@@ -63,7 +64,7 @@ class IssuerAuthInput:
             f.write(intermediary_issuer_auth_cert.public_bytes(serialization.Encoding.DER))
             issuer_logger.info(f"Written x509 intermediate certificate: {self.issuer_intermediate_x509_certificate}")
 
-        issuer_leaf_key = KeyGenerator.generate()
+        issuer_leaf_key = key_gen.generate()
         issuer_logger.info("Created leaf certificate key")
         issuer_leaf_cert = cert_gen.create_certificate(
             issuer_leaf_key.public_key(),
@@ -101,10 +102,11 @@ class IssuerAuthInput:
 
     def create_reader_auth_certificates(
         self,
-        cert_gen: CertificateGenerator
+        cert_gen: CertificateGenerator,
+        key_gen: KeyGenerator = KeyGenerator(),
     ) -> Tuple[Certificate, Certificate]:
-        reader_auth_private_key = KeyGenerator.load_or_create_pem(self.reader_auth_private_key)
-        intermediary_reader_auth_cert = cert_gen.create_root_ca(
+        reader_auth_private_key = key_gen.load_or_create_pem(self.reader_auth_private_key)
+        intermediary_reader_auth_cert = cert_gen.create_intermediate(
             private_key=reader_auth_private_key,
             subject=ISSUER_NAME,
             validity_days=self.validity_days,
@@ -174,10 +176,11 @@ class IssuerAuthInput:
         cert_gen: CertificateGenerator,
         reader_auth_private_key: EllipticCurvePrivateKey,
         intermediary_reader_auth_cert: Certificate,
-        extensions: List[Tuple[ExtensionType, bool]]
+        extensions: List[Tuple[ExtensionType, bool]],
+        key_gen: KeyGenerator = KeyGenerator()
     ) -> Tuple[EllipticCurvePrivateKey, Certificate]:
         
-        reader_auth_leaf_key = KeyGenerator.generate()
+        reader_auth_leaf_key = key_gen.generate()
         reader_logger.info("Created leaf certificate key")
         reader_auth_leaf_cert = cert_gen.create_certificate(
             reader_auth_leaf_key.public_key(),
