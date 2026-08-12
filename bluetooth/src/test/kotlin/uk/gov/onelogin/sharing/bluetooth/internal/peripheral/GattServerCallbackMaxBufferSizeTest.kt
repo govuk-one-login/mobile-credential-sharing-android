@@ -66,7 +66,7 @@ class GattServerCallbackMaxBufferSizeTest {
     }
 
     @Test
-    fun `AC2 - chunk exceeding 64KB limit emits ExceededMaxBufferSize`() {
+    fun `chunk exceeding 64KB limit emits ExceededMaxBufferSize`() {
         val callback = GattServerCallback(
             gatGattEventEmitter = fakeEmitter,
             logger = SystemLogger(),

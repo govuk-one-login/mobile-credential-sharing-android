@@ -244,12 +244,13 @@ class AndroidGattServerManager(
 
     /**
      * Handles when the accumulated BLE buffer exceeds the configured maximum size.
-     * Sends the session end command to the Verifier per ISO 18013-5, then emits an error
-     * to trigger session failure and destruction.
+     * Sends the session end command to the Verifier, immediately closes the connection,
+     * then emits an error to trigger session failure and destruction.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleExceededMaxBufferSize() {
         serviceUuid?.let { notifySessionEnd(it) }
+        cancelCurrentConnection()
         _events.tryEmit(GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE))
     }
 

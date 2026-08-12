@@ -485,23 +485,7 @@ class AndroidGattServerManagerTest {
         )
 
         manager.events.test {
-            CharacteristicWriteRequestStub.writeRequestMessage(
-                bluetoothDevice = device,
-                characteristic = mockk {
-                    every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
-                },
-                message = byteArrayOf(LAST_PART, 0x44, 0x55)
-            ).run {
-                callbackSlot.captured.onCharacteristicWriteRequest(
-                    device,
-                    requestId,
-                    characteristic,
-                    preparedWrite,
-                    responseNeeded,
-                    offset,
-                    value
-                )
-            }
+            sendWriteRequest(callbackSlot, device, byteArrayOf(LAST_PART, 0x44, 0x55))
 
             assertEquals(
                 GattServerEvent.MessageReceived(byteArrayOf(0x44, 0x55)),
@@ -528,23 +512,7 @@ class AndroidGattServerManagerTest {
         )
 
         manager.events.test {
-            CharacteristicWriteRequestStub.writeRequestMessage(
-                bluetoothDevice = staleDevice,
-                characteristic = mockk {
-                    every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
-                },
-                message = byteArrayOf(LAST_PART, 0x44, 0x55)
-            ).run {
-                callbackSlot.captured.onCharacteristicWriteRequest(
-                    staleDevice,
-                    requestId,
-                    characteristic,
-                    preparedWrite,
-                    responseNeeded,
-                    offset,
-                    value
-                )
-            }
+            sendWriteRequest(callbackSlot, staleDevice, byteArrayOf(LAST_PART, 0x44, 0x55))
 
             expectNoEvents()
         }
@@ -746,24 +714,7 @@ class AndroidGattServerManagerTest {
 
         manager.events.test {
             // Send a NON_LAST_PART chunk exceeding the 64KB default limit
-            val oversizedChunk = byteArrayOf(NON_LAST_PART) + ByteArray(64 * 1024 + 1) { 0x11 }
-            CharacteristicWriteRequestStub.writeRequestMessage(
-                bluetoothDevice = device,
-                characteristic = mockk {
-                    every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
-                },
-                message = oversizedChunk
-            ).run {
-                callbackSlot.captured.onCharacteristicWriteRequest(
-                    device,
-                    requestId,
-                    characteristic,
-                    preparedWrite,
-                    responseNeeded,
-                    offset,
-                    value
-                )
-            }
+            sendOversizedChunk(callbackSlot, device)
 
             assert(fakeGattWriter.sentChunks.isNotEmpty()) {
                 "Expected session end notification to be sent"
@@ -780,5 +731,85 @@ class AndroidGattServerManagerTest {
 
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `closes connection and emits error when buffer exceeded even if notification fails`() =
+        runTest {
+            val failingGattWriter = FakeGattWriter(success = false)
+            val failingManager = AndroidGattServerManager(
+                context = context,
+                bluetoothManager = bluetoothManager,
+                gattServiceFactory = { fakeGattService },
+                permissionsChecker = fakePermissionChecker,
+                logger = logger,
+                gattWriter = failingGattWriter
+            )
+            val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+            failingManager.open(uuid)
+            callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+            callbackSlot.captured.onConnectionStateChange(
+                device,
+                BluetoothGatt.GATT_SUCCESS,
+                BluetoothProfile.STATE_CONNECTED
+            )
+
+            failingManager.events.test {
+                sendOversizedChunk(callbackSlot, device)
+
+                // Error is still emitted even though the END notification failed
+                assertEquals(
+                    GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE),
+                    awaitItem()
+                )
+
+                // Simulate the BLE disconnect callback from Android
+                callbackSlot.captured.onConnectionStateChange(
+                    device,
+                    BluetoothGatt.GATT_SUCCESS,
+                    BluetoothProfile.STATE_DISCONNECTED
+                )
+
+                // No Disconnected event emitted — connection was already cancelled
+                expectNoEvents()
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    private fun sendOversizedChunk(
+        callbackSlot: CapturingSlot<BluetoothGattServerCallback>,
+        device: BluetoothDevice
+    ) {
+        sendWriteRequest(callbackSlot, device, OVERSIZED_CHUNK)
+    }
+
+    private fun sendWriteRequest(
+        callbackSlot: CapturingSlot<BluetoothGattServerCallback>,
+        device: BluetoothDevice,
+        message: ByteArray
+    ) {
+        CharacteristicWriteRequestStub.writeRequestMessage(
+            bluetoothDevice = device,
+            characteristic = mockk {
+                every { uuid } returns GattUuids.CLIENT_2_SERVER_UUID
+            },
+            message = message
+        ).run {
+            callbackSlot.captured.onCharacteristicWriteRequest(
+                device,
+                requestId,
+                characteristic,
+                preparedWrite,
+                responseNeeded,
+                offset,
+                value
+            )
+        }
+    }
+
+    private companion object {
+        val OVERSIZED_CHUNK = byteArrayOf(NON_LAST_PART) + ByteArray(64 * 1024 + 1) { 0x11 }
     }
 }
