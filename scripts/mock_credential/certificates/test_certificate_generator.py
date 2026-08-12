@@ -2,7 +2,7 @@ import pytest
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509 import Certificate
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from mock_credential.certificates import KeyGenerator
 from .conftest import TEST_SUBJECT_NAME, TEST_LEAF_NAME, LEAF_EXTENSIONS
@@ -165,11 +165,70 @@ class TestCreateCertificate:
 class TestReaderAuthCertificateGenerator:
 
     @pytest.fixture
-    def valid_reader_auth_root_cert(self, reader_auth_cert_gen, root_key):
+    def valid_reader_auth_root_cert(
+        self,
+        reader_auth_cert_gen,
+        root_key
+    ) -> Certificate:
         return reader_auth_cert_gen.create_intermediate(
             private_key=root_key,
             subject=TEST_SUBJECT_NAME,
         )
 
-    def test_version_is_3(self, valid_reader_auth_root_cert):
+    def test_version_is_3(self, valid_reader_auth_root_cert: Certificate):
         assert valid_reader_auth_root_cert.version == x509.Version.v3
+
+    def test_signature_is_ecdsa_sha_256(self, valid_reader_auth_root_cert):
+        assert valid_reader_auth_root_cert.signature_algorithm_oid == x509.SignatureAlgorithmOID.ECDSA_WITH_SHA256
+
+    def test_issuer_matches_subject(
+        self,
+        valid_reader_auth_root_cert: Certificate
+    ):
+        assert valid_reader_auth_root_cert.subject == TEST_SUBJECT_NAME
+        assert valid_reader_auth_root_cert.issuer == valid_reader_auth_root_cert.subject
+
+    def test_validity_not_before_matches_generator_property(
+        self,
+        reader_auth_cert_gen,
+        valid_reader_auth_root_cert: Certificate
+    ):
+        reader_auth_now = reader_auth_cert_gen.now
+        expected = datetime(
+            year=reader_auth_now.year,
+            month=reader_auth_now.month,
+            day=reader_auth_now.day
+        )
+        assert valid_reader_auth_root_cert.not_valid_before == expected
+        assert valid_reader_auth_root_cert.not_valid_before_utc == reader_auth_now
+
+    def test_validity_not_after_defaults_to_one_year(
+        self,
+        reader_auth_cert_gen,
+        valid_reader_auth_root_cert: Certificate
+    ):
+        reader_auth_now = reader_auth_cert_gen.now
+        expected = datetime(
+            year=reader_auth_now.year + 1,
+            month=reader_auth_now.month,
+            day=reader_auth_now.day
+        )
+        assert valid_reader_auth_root_cert.not_valid_after == expected
+
+    def test_certificate_has_common_name(
+        self,
+        valid_reader_auth_root_cert: Certificate
+    ):
+        assert x509.NameAttribute(x509.NameOID.COMMON_NAME, "Test Issuer") in valid_reader_auth_root_cert.subject
+
+    def test_public_key_algorithm_is_id_ecPublicKey(
+        self,
+        valid_reader_auth_root_cert: Certificate
+    ):
+        assert valid_reader_auth_root_cert.public_key_algorithm_oid == x509.PublicKeyAlgorithmOID.EC_PUBLIC_KEY
+
+    def test_certificate_is_uncompressed(
+        self,
+        valid_reader_auth_root_cert: Certificate
+    ):
+        assert valid_reader_auth_root_cert.
