@@ -1,3 +1,4 @@
+from .input import GenerateMockCredentialInputs
 from .generate_mock_credential import generate
 
 

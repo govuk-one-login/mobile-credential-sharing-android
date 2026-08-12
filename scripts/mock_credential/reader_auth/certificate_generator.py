@@ -7,12 +7,12 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509 import Certificate, CertificateBuilder, Name
 
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 
 class ReaderAuthCertificateGenerator(CertificateGenerator):
-    def __init__(self, now: datetime):
+    def __init__(self, now: datetime = datetime.now(tz=timezone.utc)):
         self.now = now
 
     def create_intermediate(

@@ -11,11 +11,16 @@ from cryptography.x509 import (
     UniformResourceIdentifier,
 )
 from cryptography.x509.oid import NameOID, ObjectIdentifier
+from typing import Generator
 
 from mock_credential.certificates.generators import (
     CertificateGenerator,
     IssuerAuthCertificateGenerator,
-    KeyGenerator,
+)
+from mock_credential.certificates.generators.conftest import (
+    key_gen,
+    root_key,
+    leaf_key
 )
 
 TEST_SUBJECT_NAME = Name(
@@ -58,13 +63,33 @@ LEAF_EXTENSIONS = [
 ]
 
 @fixture
-def key_gen() -> KeyGenerator:
-    return KeyGenerator()
+def issuer_auth_cert_gen() -> CertificateGenerator:
+    return IssuerAuthCertificateGenerator()
 
 @fixture
-def root_key(key_gen: KeyGenerator) -> EllipticCurvePrivateKey:
-    return key_gen.generate()
+def issuer_auth_now(issuer_auth_cert_gen):
+    return issuer_auth_cert_gen.now
 
 @fixture
-def leaf_key(key_gen: KeyGenerator) -> EllipticCurvePrivateKey:
-    return key_gen.generate()
+def root_cert(
+    issuer_auth_cert_gen: CertificateGenerator,
+    root_key: EllipticCurvePrivateKey
+) -> Certificate:
+    return issuer_auth_cert_gen.create_intermediate(root_key, TEST_SUBJECT_NAME)
+
+
+@fixture
+def leaf_cert(
+    issuer_auth_cert_gen: CertificateGenerator,
+    leaf_key: EllipticCurvePrivateKey,
+    root_key: EllipticCurvePrivateKey,
+    root_cert: Certificate,
+) -> Generator[Certificate, None, None]:
+    yield issuer_auth_cert_gen.create_certificate(
+        leaf_key.public_key(),
+        root_key,
+        TEST_LEAF_NAME,
+        root_cert,
+        validity_days=365,
+        extensions=LEAF_EXTENSIONS,
+    )

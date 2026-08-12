@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.x509.oid import ObjectIdentifier
 from datetime import datetime, timezone
 
-from mock_credential.issuer import IssuerAuthInput
+from mock_credential import GenerateMockCredentialInputs
 from mock_credential.namespaces import SAMPLE_NAMESPACES
 from mock_credential.mso import MSO, SAMPLE_MSO
 from mock_credential.certificates import (
@@ -76,7 +76,7 @@ def generate():
     logger.info(f"Generated: {args.output}")
 
 
-def get_argument_parser() -> IssuerAuthInput:
+def get_argument_parser() -> GenerateMockCredentialInputs:
     parser = argparse.ArgumentParser(description="Generate a mock credential")
     parser.add_argument("--private-key", default="app/src/main/assets/test_private_key.pem")
     parser.add_argument(
@@ -98,7 +98,7 @@ def get_argument_parser() -> IssuerAuthInput:
     parser.add_argument("--validity-days", type=int, default=365)
 
     logger.info("Obtained command-line arguments...")
-    return IssuerAuthInput.from_parser(parser.parse_args())
+    return GenerateMockCredentialInputs.from_parser(parser.parse_args())
 
 
 if __name__ == "__main__":

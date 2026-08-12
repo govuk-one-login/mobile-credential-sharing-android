@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.x509 import Certificate, ExtendedKeyUsage, KeyUsage, IssuerAlternativeName, UniformResourceIdentifier, ExtensionType
 from cryptography.x509.oid import ObjectIdentifier
 
-from mock_credential.issuer import ISSUER_NAME, LEAF_NAME
+from mock_credential.issuer_auth import ISSUER_NAME, LEAF_NAME
 from mock_credential.certificates.generators import (
     CertificateGenerator,
     KeyGenerator,
@@ -23,7 +23,7 @@ logger = logging.getLogger("project")
 issuer_logger = logging.getLogger("IssuerAuth")
 reader_logger = logging.getLogger("ReaderAuth")
 
-class IssuerAuthInput:
+class GenerateMockCredentialInputs:
 
     def __init__(self, **kwargs):
         self.issuer_private_key = kwargs["issuer_private_key"]
@@ -39,7 +39,7 @@ class IssuerAuthInput:
 
     def __eq__(self, other):
         return (
-            isinstance(other, IssuerAuthInput)
+            isinstance(other, GenerateMockCredentialInputs)
             and (self.issuer_private_key == other.issuer_private_key)
             and (self.reader_auth_private_key == other.reader_auth_private_key)
             and (self.output == other.output)

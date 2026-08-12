@@ -1,7 +1,7 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 import pytest
-from mock_credential.issuer import IssuerAuthInput
+from mock_credential import GenerateMockCredentialInputs
 import logging
 from typing import Generator
 
@@ -59,9 +59,9 @@ def valid_parser(
         help="Validity period in days (leaf capped at 457)",
     )
     args, unknown = empty_parser.parse_known_args()
-    return args
+    yield args
 
 
 @pytest.fixture
-def valid_issuer_auth_input(valid_parser) -> Generator[IssuerAuthInput, None, None]:
-    yield IssuerAuthInput.from_parser(valid_parser)
+def valid_issuer_auth_input(valid_parser) -> Generator[GenerateMockCredentialInputs, None, None]:
+    yield GenerateMockCredentialInputs.from_parser(valid_parser)

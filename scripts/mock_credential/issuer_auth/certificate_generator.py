@@ -12,7 +12,7 @@ from typing import List
 
 
 class IssuerAuthCertificateGenerator(CertificateGenerator):
-    def __init__(self, now: datetime):
+    def __init__(self, now: datetime = datetime.now()):
         self.now = now
 
     def create_intermediate(

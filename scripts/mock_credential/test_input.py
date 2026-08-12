@@ -1,14 +1,14 @@
 from argparse import Namespace
 import pytest
-from mock_credential.issuer import IssuerAuthInput
+from mock_credential import GenerateMockCredentialInputs
 
 
 class TestIssuerAuthInput:
 
     def test_valid_parser_input(
-        self, valid_parser: Namespace, valid_issuer_auth_input: IssuerAuthInput
+        self, valid_parser: Namespace, valid_issuer_auth_input: GenerateMockCredentialInputs
     ):
-        assert IssuerAuthInput.from_parser(valid_parser) == valid_issuer_auth_input
+        assert GenerateMockCredentialInputs.from_parser(valid_parser) == valid_issuer_auth_input
 
     @pytest.mark.parametrize(
         "invalid_input,missing_attribute",
@@ -63,6 +63,6 @@ class TestIssuerAuthInput:
     )
     def test_invalid_parser_input(self, invalid_input: Namespace, missing_attribute: str):
         with pytest.raises(AttributeError) as exception:
-            IssuerAuthInput.from_parser(invalid_input)
+            GenerateMockCredentialInputs.from_parser(invalid_input)
 
         assert f"'Namespace' object has no attribute '{missing_attribute}'" in str(exception.value)
