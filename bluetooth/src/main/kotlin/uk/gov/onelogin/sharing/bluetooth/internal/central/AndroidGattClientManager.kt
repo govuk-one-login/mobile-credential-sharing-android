@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import android.content.Context
@@ -35,14 +36,15 @@ import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 const val INVALID_SERVICE = "Gatt Service does not have a state characteristic"
 
 @ContributesBinding(AppScope::class)
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 class AndroidGattClientManager(
     private val context: Context,
     private val permissionChecker: PermissionChecker,
     private val serviceValidator: ServiceValidator,
     private val gattWriter: GattWriter,
     private val logger: Logger,
-    private val writeQueue: GattWriteQueue
+    private val writeQueue: GattWriteQueue,
+    private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
         extraBufferCapacity = 32
@@ -57,7 +59,7 @@ class AndroidGattClientManager(
     private var mtu = MIN_MTU
     private var isSessionEnd = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
-    private val messagesMap: MutableMap<UUID, ByteArray> = mutableMapOf()
+    private val messages: MutableMap<UUID, ByteArray> = mutableMapOf()
 
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
@@ -426,7 +428,7 @@ class AndroidGattClientManager(
             }
 
             SERVER_2_CLIENT_UUID -> {
-                handleServerToClientMessage(event.value, firstByte)
+                handleServerToClientMessage(event.characteristic, event.value, firstByte)
             }
 
             else -> {
@@ -435,27 +437,44 @@ class AndroidGattClientManager(
         }?.let { _events.tryEmit(it) }
     }
 
-    private fun handleServerToClientMessage(value: ByteArray, firstByte: Byte): GattClientEvent? {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleServerToClientMessage(
+        characteristic: BluetoothGattCharacteristic,
+        value: ByteArray,
+        firstByte: Byte
+    ): GattClientEvent? {
+        val previousMessages = messages[characteristic.uuid] ?: byteArrayOf()
         val messageBytes = value.drop(1).toByteArray()
 
         return when (firstByte) {
             NON_LAST_PART -> {
-                messagesMap[SERVER_2_CLIENT_UUID] =
-                    ((messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) + messageBytes)
-                logger.debug(
-                    logTag,
-                    "Chunked 'Server2Client' characteristic update: " +
-                        messageBytes.toHexString()
-                )
+                val accumulated = previousMessages + messageBytes
+                if (accumulated.size > maxReceiveBufferSize) {
+                    messages.remove(characteristic.uuid)
+                    handleExceededMaxBufferSize(accumulated.size)
+                } else {
+                    messages[characteristic.uuid] = accumulated
+                    logger.debug(
+                        logTag,
+                        "Chunked 'Server2Client' characteristic update: " +
+                            messageBytes.toHexString()
+                    )
+                }
 
                 // don't emit a message event until the message is complete.
                 null
             }
 
             LAST_PART -> {
-                ((messagesMap[SERVER_2_CLIENT_UUID] ?: byteArrayOf()) + messageBytes).let {
-                    GattClientEvent.Message(uuid = SERVER_2_CLIENT_UUID, value = it)
-                }.also {
+                val fullMessage = previousMessages + messageBytes
+                messages.remove(characteristic.uuid)
+
+                if (fullMessage.size > maxReceiveBufferSize) {
+                    handleExceededMaxBufferSize(fullMessage.size)
+                    return null
+                }
+
+                GattClientEvent.Message(uuid = characteristic.uuid, value = fullMessage).also {
                     logger.debug(
                         logTag,
                         "Completed 'Server2Client' message transfer:"
@@ -468,8 +487,6 @@ class AndroidGattClientManager(
                                 chunkedMessage
                             )
                         }
-
-                    messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
                 }
             }
 
@@ -479,10 +496,26 @@ class AndroidGattClientManager(
                         logTag,
                         "Received invalid status byte: ${firstByte.toHexString()}"
                     )
-                    messagesMap[SERVER_2_CLIENT_UUID] = byteArrayOf()
+                    messages[characteristic.uuid] = byteArrayOf()
                 }
             }
         }
+    }
+
+    /**
+     * Handles when the accumulated BLE buffer exceeds the configured maximum size.
+     * Sends the session end command to the holder, immediately closes the connection,
+     * then emits an error to trigger session failure and destruction.
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleExceededMaxBufferSize(bufferSize: Int) {
+        logger.error(
+            logTag,
+            "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
+        )
+        notifySessionEnd()
+        disconnect()
+        _events.tryEmit(GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE))
     }
 
     companion object {
@@ -492,5 +525,13 @@ class AndroidGattClientManager(
          * This is used for chunking long log messages due to android limitations of
          */
         const val THREE_KILOBYTE_CHAR_LENGTH = 192
+
+        /**
+         * Default maximum receive buffer size for the verifier role (2MB).
+         * The verifier receives a DeviceResponse which may include an ISO 18013-5 portrait
+         * image (up to ~1MB). With CBOR encoding, MSO, issuer signatures, and AES-GCM
+         * encryption overhead, the total payload can reach ~1.5MB.
+         */
+        const val DEFAULT_MAX_RECEIVE_BUFFER_SIZE: Int = 2 * 1024 * 1024
     }
 }
