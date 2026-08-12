@@ -5,7 +5,11 @@ from cryptography.x509 import Certificate
 from datetime import timedelta, datetime
 
 from mock_credential.certificates import KeyGenerator
-from .conftest import TEST_SUBJECT_NAME, TEST_LEAF_NAME, LEAF_EXTENSIONS
+from mock_credential.certificates.generators.conftest import (
+    LEAF_EXTENSIONS,
+    TEST_LEAF_NAME,
+    TEST_SUBJECT_NAME,
+)
 
 key_gen = KeyGenerator()
 
@@ -226,9 +230,3 @@ class TestReaderAuthCertificateGenerator:
         valid_reader_auth_root_cert: Certificate
     ):
         assert valid_reader_auth_root_cert.public_key_algorithm_oid == x509.PublicKeyAlgorithmOID.EC_PUBLIC_KEY
-
-    def test_certificate_is_uncompressed(
-        self,
-        valid_reader_auth_root_cert: Certificate
-    ):
-        assert valid_reader_auth_root_cert.

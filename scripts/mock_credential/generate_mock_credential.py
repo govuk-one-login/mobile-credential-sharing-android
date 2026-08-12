@@ -9,6 +9,8 @@ from logging518 import config as logging_config
 import os
 import sys
 
+from mock_credential.certificates.generators import IssuerAuthCertificateGenerator
+
 # Add the 'scripts' directory to the path so we can import mock_credential
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -20,7 +22,6 @@ from mock_credential.issuer import IssuerAuthInput
 from mock_credential.namespaces import SAMPLE_NAMESPACES
 from mock_credential.mso import MSO, SAMPLE_MSO
 from mock_credential.certificates import (
-    IssuerAuthCertificateGenerator,
     IssuerAuth,
     Credential,
     KeyGenerator,

@@ -9,7 +9,7 @@ from cryptography.x509 import Certificate, ExtendedKeyUsage, KeyUsage, IssuerAlt
 from cryptography.x509.oid import ObjectIdentifier
 
 from mock_credential.issuer import ISSUER_NAME, LEAF_NAME
-from mock_credential.certificates import (
+from mock_credential.certificates.generators import (
     CertificateGenerator,
     KeyGenerator,
 )
