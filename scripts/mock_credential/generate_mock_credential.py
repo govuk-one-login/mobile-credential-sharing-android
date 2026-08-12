@@ -39,8 +39,10 @@ def generate():
     cert_gen = CertificateGenerator(now)
 
     # 1. Keys & Certificates
-    issuer_leaf_key, issuer_leaf_cert = args.create_issuer_auth_x509_certificate(cert_gen)
-    reader_leaf_key, reader_leaf_cert = args.create_reader_auth_x509_certificate(cert_gen)
+    issuer_leaf_key, issuer_leaf_cert = args.create_issuer_auth_certificates(cert_gen)
+    valid_reader_leaf_cert, invalid_reader_leaf_cert = args.create_reader_auth_certificates(
+        cert_gen
+    )
 
     # 2. Device Key
     device_key = KeyGenerator.load(args.private_key)
