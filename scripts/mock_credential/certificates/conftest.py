@@ -6,7 +6,7 @@ from cryptography.x509.oid import NameOID, ObjectIdentifier
 from datetime import datetime, timezone
 from typing import Generator
 
-from mock_credential.certificates import CertificateGenerator, IssuerAuthCertificateGenerator, KeyGenerator
+from mock_credential.certificates import CertificateGenerator, IssuerAuthCertificateGenerator, KeyGenerator, ReaderAuthCertificateGenerator
 
 # ISO 18013-5 mdoc DS OID — same as used in generate_mock_credential.py
 OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
@@ -56,6 +56,11 @@ def now() -> datetime:
 @pytest.fixture
 def issuer_auth_cert_gen(now: datetime) -> CertificateGenerator:
     return IssuerAuthCertificateGenerator(now)
+
+@pytest.fixture
+def reader_auth_cert_gen(now: datetime):
+    return ReaderAuthCertificateGenerator(now)
+    
 
 
 @pytest.fixture

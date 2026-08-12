@@ -86,7 +86,7 @@ class TestKeyGeneratorLoadOrCreate:
 class TestCreateRootCa:
 
     def test_returns_certificate(self, issuer_auth_cert_gen, root_key):
-        cert = issuer_auth_cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME)
+        cert = issuer_auth_cert_gen.create_intermediate(root_key, TEST_SUBJECT_NAME)
         assert isinstance(cert, Certificate)
 
     def test_is_self_signed(self, root_cert):
@@ -112,11 +112,11 @@ class TestCreateRootCa:
         assert ku.critical is True
 
     def test_validity_not_before_uses_provided_now(self, issuer_auth_cert_gen, root_key, now):
-        cert = issuer_auth_cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME, validity_days=365)
+        cert = issuer_auth_cert_gen.create_intermediate(root_key, TEST_SUBJECT_NAME, validity_days=365)
         assert cert.not_valid_before_utc == now
 
     def test_validity_not_after_applies_validity_days(self, issuer_auth_cert_gen, root_key, now):
-        cert = issuer_auth_cert_gen.create_root_ca(root_key, TEST_SUBJECT_NAME, validity_days=365)
+        cert = issuer_auth_cert_gen.create_intermediate(root_key, TEST_SUBJECT_NAME, validity_days=365)
         assert cert.not_valid_after_utc == now + timedelta(days=365)
 
 
@@ -161,3 +161,15 @@ class TestCreateCertificate:
             extensions=LEAF_EXTENSIONS,
         )
         assert cert.not_valid_after_utc == now + timedelta(days=100)
+
+class TestReaderAuthCertificateGenerator:
+
+    @pytest.fixture
+    def valid_reader_auth_root_cert(self, reader_auth_cert_gen, root_key):
+        return reader_auth_cert_gen.create_intermediate(
+            private_key=root_key,
+            subject=TEST_SUBJECT_NAME,
+        )
+
+    def test_version_is_3(self, valid_reader_auth_root_cert):
+        assert valid_reader_auth_root_cert.version == x509.Version.v3
