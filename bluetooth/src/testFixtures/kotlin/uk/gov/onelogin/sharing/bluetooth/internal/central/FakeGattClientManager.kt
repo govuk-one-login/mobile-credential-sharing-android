@@ -17,6 +17,9 @@ class FakeGattClientManager : GattClientManager {
     var sendMessageToReturn: Boolean = true
     var lastSentData: ByteArray? = null
 
+    var notifySessionEndCalls = 0
+    var lastDisconnectParam: Boolean? = null
+
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         connectCalls++
     }
@@ -25,7 +28,11 @@ class FakeGattClientManager : GattClientManager {
         disconnectCalls++
     }
 
-    override fun notifySessionEnd(): SessionEndStates = SessionEndStates.SUCCESS
+    override suspend fun notifySessionEnd(disconnect: Boolean): SessionEndStates {
+        notifySessionEndCalls++
+        lastDisconnectParam = disconnect
+        return SessionEndStates.SUCCESS
+    }
 
     override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
         lastSentData = data

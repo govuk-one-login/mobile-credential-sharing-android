@@ -11,8 +11,12 @@ import androidx.annotation.RequiresPermission
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
@@ -22,6 +26,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Compa
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
@@ -29,6 +34,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
+import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
@@ -44,6 +50,7 @@ class AndroidGattClientManager(
     private val gattWriter: GattWriter,
     private val logger: Logger,
     private val writeQueue: GattWriteQueue,
+    @param:ApplicationScope private val coroutineScope: CoroutineScope,
     private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
@@ -110,7 +117,7 @@ class AndroidGattClientManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun notifySessionEnd(): SessionEndStates {
+    override suspend fun notifySessionEnd(disconnect: Boolean): SessionEndStates {
         val gatt =
             bluetoothGatt.let { bluetoothGatt } ?: return SessionEndStates.WRITE_TO_SERVER_FAILED
 
@@ -137,6 +144,12 @@ class AndroidGattClientManager(
             "BLE session terminated successfully via GATT End command"
         )
         isSessionEnd = true
+
+        if (disconnect) {
+            delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
+            disconnect()
+        }
+
         return SessionEndStates.SUCCESS
     }
 
@@ -504,8 +517,8 @@ class AndroidGattClientManager(
 
     /**
      * Handles when the accumulated BLE buffer exceeds the configured maximum size.
-     * Sends the session end command to the holder, immediately closes the connection,
-     * then emits an error to trigger session failure and destruction.
+     * Sends the session end command to the holder, then closes the connection and emits
+     * an error to trigger session failure and destruction.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleExceededMaxBufferSize(bufferSize: Int) {
@@ -513,9 +526,10 @@ class AndroidGattClientManager(
             logTag,
             "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
         )
-        notifySessionEnd()
-        disconnect()
-        _events.tryEmit(GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE))
+        coroutineScope.launch {
+            notifySessionEnd(disconnect = true)
+            _events.tryEmit(GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE))
+        }
     }
 
     companion object {

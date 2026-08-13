@@ -22,6 +22,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
@@ -29,6 +30,7 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasProperty
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -42,6 +44,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SER
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
+import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.FakeServiceValidator
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto
@@ -52,6 +55,9 @@ import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.
 @RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
 internal class AndroidGattClientManagerTest {
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothDevice = mockk<BluetoothDevice>(relaxed = true)
     private val bluetoothGatt = mockk<BluetoothGatt>(relaxed = true)
@@ -63,6 +69,7 @@ internal class AndroidGattClientManagerTest {
     private val fakeServiceValidator = FakeServiceValidator()
     private val logger = SystemLogger()
     private val uuid = UUID.randomUUID()
+    private val testScope = TestScope(mainDispatcherRule.testDispatcher)
 
     private lateinit var manager: AndroidGattClientManager
 
@@ -75,7 +82,8 @@ internal class AndroidGattClientManagerTest {
         fakeServiceValidator,
         gattWriter,
         logger,
-        writeQueue
+        writeQueue,
+        testScope
     )
 
     @Before
@@ -714,7 +722,7 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `writes session end to server and emits SessionEnd`() = runTest {
+    fun `writes session end to server without disconnecting`() = runTest {
         val service = setupBluetoothGattService()
 
         val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
@@ -723,6 +731,25 @@ internal class AndroidGattClientManagerTest {
         testEvents {
             val result = manager.notifySessionEnd()
             assertEquals(SessionEndStates.SUCCESS, result)
+
+            verify(exactly = 0) { bluetoothGatt.disconnect() }
+            verify(exactly = 0) { bluetoothGatt.close() }
+        }
+    }
+
+    @Test
+    fun `notifySessionEnd with disconnect true disconnects after writing end`() = runTest {
+        val service = setupBluetoothGattService()
+
+        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        testEvents {
+            val result = manager.notifySessionEnd(disconnect = true)
+            assertEquals(SessionEndStates.SUCCESS, result)
+
+            verify { bluetoothGatt.disconnect() }
+            verify { bluetoothGatt.close() }
         }
     }
 
