@@ -22,10 +22,12 @@ import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
@@ -40,6 +42,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.Chara
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceDefinition
+import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
 import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.toDeniedPermission
@@ -47,8 +50,12 @@ import uk.gov.onelogin.sharing.prerequisites.permissions.PermissionsToResultExt.
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LargeClass")
 class AndroidGattServerManagerTest {
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
     private val context = mockk<Context>(relaxed = true)
     private val bluetoothManager = mockk<BluetoothManager>(relaxed = true)
+    private val testScope = TestScope(mainDispatcherRule.testDispatcher)
     private val device = mockk<BluetoothDevice>().also {
         every { it.address } returns DEVICE_ADDRESS
     }
@@ -75,7 +82,8 @@ class AndroidGattServerManagerTest {
             gattServiceFactory = { fakeGattService },
             permissionsChecker = fakePermissionChecker,
             logger = logger,
-            gattWriter = fakeGattWriter
+            gattWriter = fakeGattWriter,
+            coroutineScope = testScope
         )
     }
 
@@ -454,7 +462,8 @@ class AndroidGattServerManagerTest {
             gattServiceFactory = { fakeGattService },
             permissionsChecker = fakePermissionChecker,
             logger = logger,
-            gattWriter = fakeGattWriter
+            gattWriter = fakeGattWriter,
+            coroutineScope = testScope
         )
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
@@ -656,7 +665,8 @@ class AndroidGattServerManagerTest {
             gattServiceFactory = { fakeGattService },
             permissionsChecker = fakePermissionChecker,
             logger = logger,
-            gattWriter = fakeGattWriter
+            gattWriter = fakeGattWriter,
+            coroutineScope = testScope
         )
         val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
         val server2ClientChar = mockk<BluetoothGattCharacteristic>()
@@ -715,6 +725,7 @@ class AndroidGattServerManagerTest {
         manager.events.test {
             // Send a NON_LAST_PART chunk exceeding the 64KB default limit
             sendOversizedChunk(callbackSlot, device)
+            testScope.advanceUntilIdle()
 
             assert(fakeGattWriter.sentChunks.isNotEmpty()) {
                 "Expected session end notification to be sent"
@@ -743,7 +754,8 @@ class AndroidGattServerManagerTest {
                 gattServiceFactory = { fakeGattService },
                 permissionsChecker = fakePermissionChecker,
                 logger = logger,
-                gattWriter = failingGattWriter
+                gattWriter = failingGattWriter,
+                coroutineScope = testScope
             )
             val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
@@ -757,6 +769,7 @@ class AndroidGattServerManagerTest {
 
             failingManager.events.test {
                 sendOversizedChunk(callbackSlot, device)
+                testScope.advanceUntilIdle()
 
                 // Error is still emitted even though the END notification failed
                 assertEquals(
@@ -777,6 +790,84 @@ class AndroidGattServerManagerTest {
                 cancelAndIgnoreRemainingEvents()
             }
         }
+
+    @Test
+    fun `messages received after limit exceeded are ignored`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        manager.events.test {
+            sendOversizedChunk(callbackSlot, device)
+            sendWriteRequest(
+                callbackSlot,
+                device,
+                byteArrayOf(LAST_PART) + ByteArray(10) { 0x22 }
+            )
+            testScope.advanceUntilIdle()
+
+            assertEquals(
+                GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE),
+                awaitItem()
+            )
+            expectNoEvents()
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `new session resets terminating state`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        manager.events.test {
+            sendOversizedChunk(callbackSlot, device)
+            testScope.advanceUntilIdle()
+
+            assertEquals(
+                GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE),
+                awaitItem()
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        // Open a new session
+        manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        manager.events.test {
+            sendWriteRequest(
+                callbackSlot,
+                device,
+                byteArrayOf(LAST_PART) + ByteArray(10) { 0x33 }
+            )
+
+            assertEquals(
+                GattServerEvent.MessageReceived(ByteArray(10) { 0x33 }),
+                awaitItem()
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 
     private fun sendOversizedChunk(
         callbackSlot: CapturingSlot<BluetoothGattServerCallback>,
