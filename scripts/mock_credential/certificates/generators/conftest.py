@@ -1,8 +1,6 @@
-from datetime import datetime
 from pytest import fixture
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.x509 import (
-    Certificate,
     ExtendedKeyUsage,
     IssuerAlternativeName,
     KeyUsage,
@@ -13,8 +11,6 @@ from cryptography.x509 import (
 from cryptography.x509.oid import NameOID, ObjectIdentifier
 
 from mock_credential.certificates.generators import (
-    CertificateGenerator,
-    IssuerAuthCertificateGenerator,
     KeyGenerator,
 )
 

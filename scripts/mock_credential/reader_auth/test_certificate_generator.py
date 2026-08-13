@@ -1,8 +1,18 @@
 from pytest import fixture
-from cryptography import x509
-from cryptography.x509 import Certificate
+from cryptography.x509 import (
+    Certificate,
+    Extensions,
+    BasicConstraints,
+    KeyUsage,
+    ExtendedKeyUsage,
+    Version,
+    SignatureAlgorithmOID,
+    NameOID,
+    NameAttribute,
+    PublicKeyAlgorithmOID
+)
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from mock_credential.certificates.generators import KeyGenerator
 from mock_credential.certificates.generators.conftest import TEST_SUBJECT_NAME
@@ -14,7 +24,7 @@ class TestReaderAuthCertificateGenerator:
         return KeyGenerator().generate()
 
     @fixture
-    def valid_reader_auth_root_cert(
+    def valid_intermediate_cert(
         self,
         reader_auth_cert_gen,
         root_key
@@ -25,25 +35,32 @@ class TestReaderAuthCertificateGenerator:
         )
 
     @fixture
+    def valid_intermediate_extensions(
+        self,
+        valid_intermediate_cert: Certificate
+    ) -> Extensions:
+        return valid_intermediate_cert.extensions
+
+    @fixture
     def reader_auth_now(self, reader_auth_cert_gen):
         return reader_auth_cert_gen.now
 
-    def test_version_is_3(self, valid_reader_auth_root_cert: Certificate):
-        assert valid_reader_auth_root_cert.version == x509.Version.v3
+    def test_version_is_3(self, valid_intermediate_cert: Certificate):
+        assert valid_intermediate_cert.version == Version.v3
 
-    def test_signature_is_ecdsa_sha_256(self, valid_reader_auth_root_cert):
-        assert valid_reader_auth_root_cert.signature_algorithm_oid == x509.SignatureAlgorithmOID.ECDSA_WITH_SHA256
+    def test_signature_is_ecdsa_sha_256(self, valid_intermediate_cert):
+        assert valid_intermediate_cert.signature_algorithm_oid == SignatureAlgorithmOID.ECDSA_WITH_SHA256
 
     def test_issuer_matches_subject(
         self,
-        valid_reader_auth_root_cert: Certificate
+        valid_intermediate_cert: Certificate
     ):
-        assert valid_reader_auth_root_cert.subject == TEST_SUBJECT_NAME
-        assert valid_reader_auth_root_cert.issuer == valid_reader_auth_root_cert.subject
+        assert valid_intermediate_cert.subject == TEST_SUBJECT_NAME
+        assert valid_intermediate_cert.issuer == valid_intermediate_cert.subject
 
     def test_validity_not_before_matches_generator_property(
         self,
-        valid_reader_auth_root_cert: Certificate,
+        valid_intermediate_cert: Certificate,
         reader_auth_now
     ):
         expected = datetime(
@@ -54,14 +71,14 @@ class TestReaderAuthCertificateGenerator:
             minute=reader_auth_now.minute,
             second=reader_auth_now.second,
         )
-        assert valid_reader_auth_root_cert.not_valid_before == expected
-        assert valid_reader_auth_root_cert.not_valid_before_utc == expected.replace(
+        assert valid_intermediate_cert.not_valid_before == expected
+        assert valid_intermediate_cert.not_valid_before_utc == expected.replace(
             tzinfo=timezone.utc
         )
 
     def test_validity_not_after_defaults_to_one_year(
         self,
-        valid_reader_auth_root_cert: Certificate,
+        valid_intermediate_cert: Certificate,
         reader_auth_now
     ):
         expected = datetime(
@@ -72,16 +89,28 @@ class TestReaderAuthCertificateGenerator:
             minute=reader_auth_now.minute,
             second=reader_auth_now.second,
         )
-        assert valid_reader_auth_root_cert.not_valid_after == expected
+        assert valid_intermediate_cert.not_valid_after == expected
 
     def test_certificate_has_common_name(
         self,
-        valid_reader_auth_root_cert: Certificate
+        valid_intermediate_cert: Certificate
     ):
-        assert x509.NameAttribute(x509.NameOID.COMMON_NAME, "Test Issuer") in valid_reader_auth_root_cert.subject
+        assert NameAttribute(NameOID.COMMON_NAME, "Test Issuer") in valid_intermediate_cert.subject
 
     def test_public_key_algorithm_is_id_ecPublicKey(
         self,
-        valid_reader_auth_root_cert: Certificate
+        valid_intermediate_cert: Certificate
     ):
-        assert valid_reader_auth_root_cert.public_key_algorithm_oid == x509.PublicKeyAlgorithmOID.EC_PUBLIC_KEY
+        assert valid_intermediate_cert.public_key_algorithm_oid == PublicKeyAlgorithmOID.EC_PUBLIC_KEY
+    
+    def test_basic_constraints_is_critical(self, valid_intermediate_extensions: Extensions):
+        bc = valid_intermediate_extensions.get_extension_for_class(BasicConstraints)
+        assert bc.critical
+
+    def test_key_usage_key_cert_sign_is_true(self, valid_intermediate_extensions: Extensions):
+        ku = valid_intermediate_extensions.get_extension_for_class(KeyUsage)
+        assert ku.value.key_cert_sign
+
+    def test_key_usage_is_critical(self, valid_intermediate_extensions: Extensions):
+        ku = valid_intermediate_extensions.get_extension_for_class(KeyUsage)
+        assert ku.critical

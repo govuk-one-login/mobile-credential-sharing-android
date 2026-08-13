@@ -1,3 +1,2 @@
 from .certificate_generator import CertificateGenerator
 from .key_generator import KeyGenerator
-from ...issuer_auth.certificate_generator import IssuerAuthCertificateGenerator

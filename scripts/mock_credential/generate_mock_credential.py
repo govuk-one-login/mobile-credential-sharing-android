@@ -9,7 +9,6 @@ from logging518 import config as logging_config
 import os
 import sys
 
-from mock_credential.certificates.generators import IssuerAuthCertificateGenerator
 
 # Add the 'scripts' directory to the path so we can import mock_credential
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -26,6 +25,8 @@ from mock_credential.certificates import (
     Credential,
     KeyGenerator,
 )
+from mock_credential.issuer_auth import IssuerAuthCertificateGenerator
+from mock_credential.reader_auth import ReaderAuthCertificateGenerator
 
 logging_config.fileConfig("pyproject.toml")
 logger = logging.getLogger("project")
@@ -38,18 +39,19 @@ def generate():
     args = get_argument_parser()
     now = datetime.now(timezone.utc)
     key_gen = KeyGenerator()
-    cert_gen = IssuerAuthCertificateGenerator(now)
+    cert_gen = IssuerAuthCertificateGenerator(now=now)
+    reader_cert_gen = ReaderAuthCertificateGenerator(now=now)
 
     # 1. Keys & Certificates
     issuer_leaf_key, issuer_leaf_cert = args.create_issuer_auth_certificates(
         cert_gen=cert_gen
     )
     valid_reader_leaf_cert, invalid_reader_leaf_cert = args.create_reader_auth_certificates(
-        cert_gen=cert_gen
+        cert_gen=reader_cert_gen
     )
 
     # 2. Device Key
-    device_key = key_gen.load(args.private_key)
+    device_key = key_gen.load_pem(args.private_key)
     device_pub = device_key.public_key().public_numbers()
     device_cose_key = {
         1: 2,

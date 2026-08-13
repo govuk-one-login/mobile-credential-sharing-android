@@ -17,7 +17,7 @@ class KeyGenerator:
         If the file does not exist, generates a new P-256 key, saves it, and returns it.
         """
         if os.path.exists(path):
-            return self.load(path)
+            return self.load_pem(path)
 
         logger.info(f"'{path}' not found! Creating...")
         key = self.generate()
@@ -31,7 +31,7 @@ class KeyGenerator:
             )
         return key
 
-    def load(self, path: str) -> ec.EllipticCurvePrivateKey:
+    def load_pem(self, path: str) -> ec.EllipticCurvePrivateKey:
         """Loads an EC private key from a PEM file at `path`."""
         with open(path, "rb") as f:
             logger.info(f"Loading key: {path}")

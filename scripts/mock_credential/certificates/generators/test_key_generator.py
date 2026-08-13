@@ -34,7 +34,7 @@ class TestKeyGenerator():
                     encryption_algorithm=serialization.NoEncryption(),
                 )
             )
-        loaded = key_gen.load(path)
+        loaded = key_gen.load_pem(path)
         assert isinstance(loaded, EllipticCurvePrivateKey)
 
     def test_load_returns_same_key(
@@ -54,12 +54,12 @@ class TestKeyGenerator():
                     encryption_algorithm=serialization.NoEncryption(),
                 )
             )
-        loaded = key_gen.load(path)
+        loaded = key_gen.load_pem(path)
         assert loaded.private_numbers() == generated_key.private_numbers()
 
     def test_load_raises_when_file_missing(self, tmp_path, key_gen: KeyGenerator):
         with raises(FileNotFoundError):
-            key_gen.load(str(tmp_path / "missing.pem"))
+            key_gen.load_pem(str(tmp_path / "missing.pem"))
     
     def test_creates_key_when_file_missing(self, tmp_path, key_gen: KeyGenerator):
         path = str(tmp_path / "new_key.pem")

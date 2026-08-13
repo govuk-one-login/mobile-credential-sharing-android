@@ -15,12 +15,14 @@ from typing import Generator
 
 from mock_credential.certificates.generators import (
     CertificateGenerator,
-    IssuerAuthCertificateGenerator,
 )
 from mock_credential.certificates.generators.conftest import (
     key_gen,
     root_key,
     leaf_key
+)
+from mock_credential.issuer_auth import (
+    IssuerAuthCertificateGenerator
 )
 
 TEST_SUBJECT_NAME = Name(
