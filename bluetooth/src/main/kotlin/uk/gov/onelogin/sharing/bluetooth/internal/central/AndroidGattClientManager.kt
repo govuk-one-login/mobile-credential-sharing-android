@@ -65,6 +65,7 @@ class AndroidGattClientManager(
     }
     private var mtu = MIN_MTU
     private var isSessionEnd = false
+    private var isTerminating = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
     private val messages: MutableMap<UUID, ByteArray> = mutableMapOf()
 
@@ -80,6 +81,7 @@ class AndroidGattClientManager(
 
         this.serviceUuid = serviceUuid
         pendingDescriptorWrites.clear()
+        isTerminating = false
         _events.tryEmit(GattClientEvent.Connecting)
 
         bluetoothGatt = try {
@@ -119,7 +121,7 @@ class AndroidGattClientManager(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override suspend fun notifySessionEnd(disconnect: Boolean): SessionEndStates {
         val gatt =
-            bluetoothGatt.let { bluetoothGatt } ?: return SessionEndStates.WRITE_TO_SERVER_FAILED
+            bluetoothGatt ?: return SessionEndStates.WRITE_TO_SERVER_FAILED
 
         val state = gatt
             .getService(serviceUuid)
@@ -396,6 +398,7 @@ class AndroidGattClientManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleServiceChanged() {
+        if (isTerminating) return
         handleError(
             ClientError.SERVICE_CHANGED,
             "Remote GATT server services changed - session invalidated"
@@ -420,6 +423,7 @@ class AndroidGattClientManager(
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleCharacteristicChanged(event: GattEvent.CharacteristicChanged) {
+        if (isTerminating) return
         val firstByte = event.value?.firstOrNull() ?: return
 
         when (event.characteristic.uuid) {
@@ -526,6 +530,7 @@ class AndroidGattClientManager(
             logTag,
             "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
         )
+        isTerminating = true
         coroutineScope.launch {
             notifySessionEnd(disconnect = true)
             _events.tryEmit(GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE))

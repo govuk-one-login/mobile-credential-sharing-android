@@ -181,6 +181,66 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
         }
     }
 
+    @Test
+    fun `chunks received after limit exceeded are ignored`() = runTest {
+        testEvents {
+            sendChunk(byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 })
+            sendChunk(byteArrayOf(LAST_PART) + ByteArray(10) { 0x22 })
+            testScope.advanceUntilIdle()
+
+            assertEquals(
+                GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                awaitItem()
+            )
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `service changed after limit exceeded is ignored`() = runTest {
+        testEvents {
+            sendChunk(byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 })
+            callbackSlot.captured.onServiceChanged(bluetoothGatt)
+            testScope.advanceUntilIdle()
+
+            assertEquals(
+                GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                awaitItem()
+            )
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `new connection resets terminating state`() = runTest {
+        testEvents {
+            sendChunk(byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 })
+            testScope.advanceUntilIdle()
+
+            assertEquals(
+                GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                awaitItem()
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        manager.events.test {
+            manager.connect(bluetoothDevice, uuid)
+            skipItems(1) // Connecting event
+
+            sendChunk(byteArrayOf(LAST_PART) + ByteArray(10) { 0x33 })
+
+            assertEquals(
+                GattClientEvent.Message(
+                    uuid = GattUuids.SERVER_2_CLIENT_UUID,
+                    value = ByteArray(10) { 0x33 }
+                ),
+                awaitItem()
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun createManager(maxReceiveBufferSize: Int = 100) {
         manager = AndroidGattClientManager(
             context,
