@@ -14,14 +14,14 @@ from cryptography.x509 import (
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from datetime import datetime, timezone
 
-from mock_credential.certificates.generators import KeyGenerator
+from mock_credential.certificates.generators import PemKeyGenerator
 from mock_credential.certificates.generators.conftest import TEST_SUBJECT_NAME
 
 
 class TestReaderAuthCertificateGenerator:
     @fixture
     def root_key(self) -> EllipticCurvePrivateKey:
-        return KeyGenerator().generate()
+        return PemKeyGenerator().generate()
 
     @fixture
     def valid_intermediate_cert(

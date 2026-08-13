@@ -4,6 +4,7 @@ from logging518 import config as logging_config
 from typing import List, TypeVar, Type, Tuple
 
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
+from cryptography.hazmat.primitives.asymmetric.types import PrivateKeyTypes
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509 import Certificate, ExtendedKeyUsage, KeyUsage, IssuerAlternativeName, UniformResourceIdentifier, ExtensionType
 from cryptography.x509.oid import ObjectIdentifier
@@ -52,9 +53,9 @@ class GenerateMockCredentialInputs:
     def create_issuer_auth_certificates(
         self,
         cert_gen: CertificateGenerator,
-        key_gen: KeyGenerator = KeyGenerator(),
+        key_gen: KeyGenerator,
     ) -> Tuple[EllipticCurvePrivateKey, Certificate]:
-        issuer_private_key = key_gen.load_or_create_pem(self.issuer_private_key)
+        issuer_private_key = key_gen.load_or_create(self.issuer_private_key)
         intermediary_issuer_auth_cert = cert_gen.create_intermediate(
             private_key=issuer_private_key,
             subject=ISSUER_NAME,
@@ -103,9 +104,10 @@ class GenerateMockCredentialInputs:
     def create_reader_auth_certificates(
         self,
         cert_gen: CertificateGenerator,
-        key_gen: KeyGenerator = KeyGenerator(),
+        root_key_gen: KeyGenerator,
+        intermediate_key_gen: KeyGenerator,
     ) -> Tuple[Certificate, Certificate]:
-        reader_auth_private_key = key_gen.load_or_create_pem(self.reader_auth_private_key)
+        reader_auth_private_key = root_key_gen.load_or_create(self.reader_auth_private_key)
         intermediary_reader_auth_cert = cert_gen.create_intermediate(
             private_key=reader_auth_private_key,
             subject=ISSUER_NAME,
@@ -145,6 +147,7 @@ class GenerateMockCredentialInputs:
             valid_reader_auth_leaf_cert
         ) = self._create_reader_auth_leaf_certificate(
             cert_gen=cert_gen,
+            key_gen=intermediate_key_gen,
             reader_auth_private_key=reader_auth_private_key,
             intermediary_reader_auth_cert=intermediary_reader_auth_cert,
             extensions=[
@@ -159,6 +162,7 @@ class GenerateMockCredentialInputs:
             invalid_reader_auth_leaf_cert
         ) = self._create_reader_auth_leaf_certificate(
             cert_gen=cert_gen,
+            key_gen=intermediate_key_gen,
             reader_auth_private_key=reader_auth_private_key,
             intermediary_reader_auth_cert=intermediary_reader_auth_cert,
             extensions=[
@@ -174,10 +178,10 @@ class GenerateMockCredentialInputs:
     def _create_reader_auth_leaf_certificate(
         self,
         cert_gen: CertificateGenerator,
-        reader_auth_private_key: EllipticCurvePrivateKey,
+        reader_auth_private_key: PrivateKeyTypes,
         intermediary_reader_auth_cert: Certificate,
         extensions: List[Tuple[ExtensionType, bool]],
-        key_gen: KeyGenerator = KeyGenerator()
+        key_gen: KeyGenerator
     ) -> Tuple[EllipticCurvePrivateKey, Certificate]:
         
         reader_auth_leaf_key = key_gen.generate()

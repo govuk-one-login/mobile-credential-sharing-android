@@ -1,2 +1,6 @@
 from .certificate_generator import CertificateGenerator
-from .key_generator import KeyGenerator
+from .key_generator import (
+    KeyGenerator,
+    PemKeyGenerator,
+    DerKeyGenerator
+)

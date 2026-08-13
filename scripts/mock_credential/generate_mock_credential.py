@@ -23,7 +23,10 @@ from mock_credential.mso import MSO, SAMPLE_MSO
 from mock_credential.certificates import (
     IssuerAuth,
     Credential,
-    KeyGenerator,
+)
+from mock_credential.certificates.generators import (
+    PemKeyGenerator,
+    DerKeyGenerator
 )
 from mock_credential.issuer_auth import IssuerAuthCertificateGenerator
 from mock_credential.reader_auth import ReaderAuthCertificateGenerator
@@ -38,20 +41,24 @@ OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
 def generate():
     args = get_argument_parser()
     now = datetime.now(timezone.utc)
-    key_gen = KeyGenerator()
+    pem_key_gen = PemKeyGenerator()
+    der_key_gen = DerKeyGenerator()
     cert_gen = IssuerAuthCertificateGenerator(now=now)
     reader_cert_gen = ReaderAuthCertificateGenerator(now=now)
 
     # 1. Keys & Certificates
     issuer_leaf_key, issuer_leaf_cert = args.create_issuer_auth_certificates(
-        cert_gen=cert_gen
+        cert_gen=cert_gen,
+        key_gen=pem_key_gen,
     )
     valid_reader_leaf_cert, invalid_reader_leaf_cert = args.create_reader_auth_certificates(
-        cert_gen=reader_cert_gen
+        cert_gen=reader_cert_gen,
+        root_key_gen=pem_key_gen,
+        intermediate_key_gen=der_key_gen
     )
 
     # 2. Device Key
-    device_key = key_gen.load_pem(args.private_key)
+    device_key = pem_key_gen.load(args.private_key)
     device_pub = device_key.public_key().public_numbers()
     device_cose_key = {
         1: 2,

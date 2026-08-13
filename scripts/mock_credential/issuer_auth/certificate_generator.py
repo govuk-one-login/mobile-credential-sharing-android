@@ -3,7 +3,7 @@ from mock_credential.certificates.generators import CertificateGenerator
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes, PrivateKeyTypes
 from cryptography.x509 import Certificate, CertificateBuilder, Name
 
 
@@ -17,7 +17,7 @@ class IssuerAuthCertificateGenerator(CertificateGenerator):
 
     def create_intermediate(
         self,
-        private_key: ec.EllipticCurvePrivateKey,
+        private_key: PrivateKeyTypes,
         subject: Name,
         validity_days: int = 365,
     ) -> Certificate:
@@ -56,8 +56,8 @@ class IssuerAuthCertificateGenerator(CertificateGenerator):
 
     def create_certificate(
         self,
-        subject_key: ec.EllipticCurvePublicKey,
-        issuer_key: ec.EllipticCurvePrivateKey,
+        subject_key: PublicKeyTypes,
+        issuer_key: PrivateKeyTypes,
         subject_name: Name,
         issuer_cert: Certificate,
         validity_days: int,

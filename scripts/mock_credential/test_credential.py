@@ -3,7 +3,8 @@ import cbor2
 import pytest
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from mock_credential.certificates import IssuerAuth, Credential, KeyGenerator
+from mock_credential.certificates import IssuerAuth, Credential
+from mock_credential.certificates.generators import PemKeyGenerator
 from mock_credential.namespaces import SAMPLE_NAMESPACES
 
 STUB_MSO_BYTES = cbor2.dumps(cbor2.CBORTag(24, cbor2.dumps({"version": "1.0"})))
@@ -12,7 +13,7 @@ STUB_CERT_DER = b"\x30\x82\x01\x00"  # minimal placeholder DER bytes
 
 @pytest.fixture
 def signing_key() -> ec.EllipticCurvePrivateKey:
-    return KeyGenerator().generate()
+    return PemKeyGenerator().generate()
 
 
 @pytest.fixture

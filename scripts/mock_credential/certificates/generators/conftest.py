@@ -12,6 +12,7 @@ from cryptography.x509.oid import NameOID, ObjectIdentifier
 
 from mock_credential.certificates.generators import (
     KeyGenerator,
+    PemKeyGenerator
 )
 
 TEST_SUBJECT_NAME = Name(
@@ -55,7 +56,7 @@ LEAF_EXTENSIONS = [
 
 @fixture
 def key_gen() -> KeyGenerator:
-    return KeyGenerator()
+    return PemKeyGenerator()
 
 @fixture
 def root_key(key_gen: KeyGenerator) -> EllipticCurvePrivateKey:
