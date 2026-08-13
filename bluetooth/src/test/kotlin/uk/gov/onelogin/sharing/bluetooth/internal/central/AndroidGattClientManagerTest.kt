@@ -738,22 +738,6 @@ internal class AndroidGattClientManagerTest {
     }
 
     @Test
-    fun `notifySessionEnd with disconnect true disconnects after writing end`() = runTest {
-        val service = setupBluetoothGattService()
-
-        val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
-        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
-
-        testEvents {
-            val result = manager.notifySessionEnd(disconnect = true)
-            assertEquals(SessionEndStates.SUCCESS, result)
-
-            verify { bluetoothGatt.disconnect() }
-            verify { bluetoothGatt.close() }
-        }
-    }
-
-    @Test
     fun `notifySessionEnd returns WRITE_TO_SERVER_FAILED when service is null`() = runTest {
         every { bluetoothGatt.getService(any()) } returns null
 

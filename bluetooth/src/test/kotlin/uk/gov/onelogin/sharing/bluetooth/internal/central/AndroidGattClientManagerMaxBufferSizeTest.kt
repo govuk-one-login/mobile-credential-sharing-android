@@ -156,6 +156,41 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
     }
 
     @Test
+    fun `disconnects and emits error when buffer exceeded even if END notification fails`() =
+        runTest {
+            val failingGattWriter = FakeGattWriter(success = false)
+            manager = AndroidGattClientManager(
+                context,
+                fakePermissionChecker,
+                fakeServiceValidator,
+                failingGattWriter,
+                logger,
+                fakeWriteQueue,
+                testScope,
+                maxReceiveBufferSize = 100
+            )
+
+            manager.events.test {
+                manager.connect(bluetoothDevice, uuid)
+                skipItems(1) // Connecting event
+
+                sendChunk(byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 })
+                testScope.advanceUntilIdle()
+
+                assertEquals(
+                    GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                    awaitItem()
+                )
+
+                // Teardown happens even though the END notification failed to write
+                verify { bluetoothGatt.disconnect() }
+                verify { bluetoothGatt.close() }
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
     fun `logs buffer size details when limit exceeded`() = runTest {
         testEvents {
             sendChunk(byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 })

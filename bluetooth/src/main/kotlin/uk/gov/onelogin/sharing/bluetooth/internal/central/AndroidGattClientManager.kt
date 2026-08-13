@@ -119,7 +119,7 @@ class AndroidGattClientManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun notifySessionEnd(disconnect: Boolean): SessionEndStates {
+    override fun notifySessionEnd(): SessionEndStates {
         val gatt =
             bluetoothGatt ?: return SessionEndStates.WRITE_TO_SERVER_FAILED
 
@@ -146,11 +146,6 @@ class AndroidGattClientManager(
             "BLE session terminated successfully via GATT End command"
         )
         isSessionEnd = true
-
-        if (disconnect) {
-            delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
-            disconnect()
-        }
 
         return SessionEndStates.SUCCESS
     }
@@ -532,7 +527,9 @@ class AndroidGattClientManager(
         )
         isTerminating = true
         coroutineScope.launch {
-            notifySessionEnd(disconnect = true)
+            notifySessionEnd()
+            delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
+            disconnect()
             _events.tryEmit(GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE))
         }
     }

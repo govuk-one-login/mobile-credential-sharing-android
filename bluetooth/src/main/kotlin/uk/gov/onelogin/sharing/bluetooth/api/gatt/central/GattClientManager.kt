@@ -13,5 +13,5 @@ interface GattClientManager : MessageSender {
 
     fun disconnect()
 
-    suspend fun notifySessionEnd(disconnect: Boolean = false): SessionEndStates
+    fun notifySessionEnd(): SessionEndStates
 }
