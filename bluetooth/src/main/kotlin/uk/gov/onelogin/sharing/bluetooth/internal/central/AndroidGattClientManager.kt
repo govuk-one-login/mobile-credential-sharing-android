@@ -60,15 +60,19 @@ class AndroidGattClientManager(
 
     @Volatile
     private var bluetoothGatt: BluetoothGatt? = null
+
     @Volatile
     private var serviceUuid: UUID? = null
     private val eventEmitter = GattClientEventEmitter {
         handleGattEvent(it)
     }
+
     @Volatile
     private var mtu = MIN_MTU
+
     @Volatile
     private var isSessionEnd = false
+
     @Volatile
     private var isTerminating = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
