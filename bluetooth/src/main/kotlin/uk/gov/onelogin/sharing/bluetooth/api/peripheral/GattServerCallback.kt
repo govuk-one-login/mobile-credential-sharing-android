@@ -69,7 +69,7 @@ class GattServerCallback(
                         val accumulated = previousMessages + newMessage
                         if (accumulated.size > maxReceiveBufferSize) {
                             messages.remove(characteristic.uuid)
-                            emitExceededMaxBufferSize()
+                            emitExceededMaxBufferSize(accumulated.size)
                         } else {
                             messages[characteristic.uuid] = accumulated
                             logger.debug(
@@ -85,7 +85,7 @@ class GattServerCallback(
                         val fullMessage = previousMessages + newMessage
 
                         if (fullMessage.size > maxReceiveBufferSize) {
-                            emitExceededMaxBufferSize()
+                            emitExceededMaxBufferSize(fullMessage.size)
                             return
                         }
 
@@ -190,8 +190,11 @@ class GattServerCallback(
         )
     }
 
-    private fun emitExceededMaxBufferSize() {
-        logger.error(logTag, "ExceededMaxBufferSize")
+    private fun emitExceededMaxBufferSize(bufferSize: Int) {
+        logger.error(
+            logTag,
+            "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
+        )
         gatGattEventEmitter.emit(GattServerCallbackEvent.ExceededMaxBufferSize)
     }
 

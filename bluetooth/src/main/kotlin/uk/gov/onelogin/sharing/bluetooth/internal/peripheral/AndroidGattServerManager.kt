@@ -61,16 +61,28 @@ class AndroidGattServerManager(
         extraBufferCapacity = 32 // queue events if consumer is slow
     )
     override val events: SharedFlow<GattServerEvent> = _events
+
+    @Volatile
     private var gattServer: BluetoothGattServer? = null
+
+    @Volatile
     internal var connectedDevice: BluetoothDevice? = null
+
+    @Volatile
     private var serviceUuid: UUID? = null
 
     @SuppressLint("MissingPermission")
     private val eventEmitter = GattEventEmitter {
         handleGattEvent(it)
     }
+
+    @Volatile
     private var mtu = MIN_MTU
+
+    @Volatile
     private var isSessionEnd = false
+
+    @Volatile
     private var isTerminating = false
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
