@@ -34,10 +34,6 @@ from mock_credential.reader_auth import ReaderAuthCertificateGenerator
 logging_config.fileConfig("pyproject.toml")
 logger = logging.getLogger("project")
 
-# ISO 18013-5 mdoc DS OID
-OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
-
-
 def generate():
     args = get_argument_parser()
     now = datetime.now(timezone.utc)
@@ -105,6 +101,14 @@ def get_argument_parser() -> GenerateMockCredentialInputs:
     )
     parser.add_argument("--output", default="app/src/main/res/raw/mock_credential.txt")
     parser.add_argument("--validity-days", type=int, default=365)
+    parser.add_argument(
+        "--reader-valid-x509-leaf-certificate",
+        default="app/src/main/assets/reader_valid_x509_leaf_certificate.der"
+    )
+    parser.add_argument(
+        "--reader-invalid-x509-leaf-certificate",
+        default="app/src/main/assets/reader_invalid_x509_leaf_certificate.der"
+    )
 
     logger.info("Obtained command-line arguments...")
     return GenerateMockCredentialInputs.from_parser(parser.parse_args())

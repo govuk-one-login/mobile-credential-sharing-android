@@ -1,7 +1,9 @@
-from pytest import fixture
+from pytest import fixture, raises
 from cryptography.x509 import (
     Certificate,
+    Extension,
     Extensions,
+    AuthorityKeyIdentifier,
     BasicConstraints,
     KeyUsage,
     ExtendedKeyUsage,
@@ -9,7 +11,9 @@ from cryptography.x509 import (
     SignatureAlgorithmOID,
     NameOID,
     NameAttribute,
-    PublicKeyAlgorithmOID
+    PublicKeyAlgorithmOID,
+    SubjectKeyIdentifier,
+    ObjectIdentifier
 )
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from datetime import datetime, timezone
@@ -17,6 +21,7 @@ from datetime import datetime, timezone
 from mock_credential.certificates.generators import PemKeyGenerator
 from mock_credential.certificates.generators.conftest import TEST_SUBJECT_NAME
 
+OID_MDL_RA = ObjectIdentifier("1.0.18013.5.1.6")
 
 class TestReaderAuthCertificateGenerator:
     @fixture
@@ -40,6 +45,13 @@ class TestReaderAuthCertificateGenerator:
         valid_intermediate_cert: Certificate
     ) -> Extensions:
         return valid_intermediate_cert.extensions
+
+    @fixture
+    def valid_intermediate_key_usage(
+        self,
+        valid_intermediate_extensions: Extensions
+    ) -> Extension[KeyUsage]:
+        return valid_intermediate_extensions.get_extension_for_class(KeyUsage)
 
     @fixture
     def reader_auth_now(self, reader_auth_cert_gen):
@@ -102,15 +114,94 @@ class TestReaderAuthCertificateGenerator:
         valid_intermediate_cert: Certificate
     ):
         assert valid_intermediate_cert.public_key_algorithm_oid == PublicKeyAlgorithmOID.EC_PUBLIC_KEY
-    
+
     def test_basic_constraints_is_critical(self, valid_intermediate_extensions: Extensions):
         bc = valid_intermediate_extensions.get_extension_for_class(BasicConstraints)
         assert bc.critical
 
-    def test_key_usage_key_cert_sign_is_true(self, valid_intermediate_extensions: Extensions):
-        ku = valid_intermediate_extensions.get_extension_for_class(KeyUsage)
-        assert ku.value.key_cert_sign
+    def test_authority_identifier_derived_from_public_key(
+        self,
+        root_key: EllipticCurvePrivateKey,
+        valid_intermediate_extensions: Extensions
+    ):
+        authority = valid_intermediate_extensions.get_extension_for_class(
+            AuthorityKeyIdentifier
+        )
 
-    def test_key_usage_is_critical(self, valid_intermediate_extensions: Extensions):
-        ku = valid_intermediate_extensions.get_extension_for_class(KeyUsage)
-        assert ku.critical
+        assert AuthorityKeyIdentifier.from_issuer_public_key(
+            root_key.public_key()
+        ).key_identifier == authority.value.key_identifier
+
+    def test_subject_key_identifier_derived_from_public_key(
+        self,
+        root_key: EllipticCurvePrivateKey,
+        valid_intermediate_extensions: Extensions
+    ):
+        subject = valid_intermediate_extensions.get_extension_for_class(
+            SubjectKeyIdentifier
+        )
+
+        assert SubjectKeyIdentifier.from_public_key(
+            root_key.public_key()
+        ).key_identifier == subject.value.key_identifier
+
+    def test_key_usage_is_critical(self, valid_intermediate_key_usage: Extension[KeyUsage]):
+        assert valid_intermediate_key_usage.critical
+
+    def test_key_usage_mandatory_fields(
+        self,
+        valid_intermediate_key_usage: Extension[KeyUsage]
+    ):
+        assert valid_intermediate_key_usage.value.digital_signature
+    
+    @staticmethod
+    def _valid_key_encipherment(valid_intermediate_key_usage: Extension[KeyUsage]):
+        return valid_intermediate_key_usage.value.key_encipherment
+
+    def test_key_usage_false_key_encipherment(
+        self,
+        valid_intermediate_key_usage: Extension[KeyUsage],
+    ):
+        assert not valid_intermediate_key_usage.value.key_encipherment
+
+    def test_key_usage_false_data_encipherment(
+        self,
+        valid_intermediate_key_usage: Extension[KeyUsage],
+    ):
+        assert not valid_intermediate_key_usage.value.data_encipherment
+
+    def test_key_usage_false_key_agreement(
+        self,
+        valid_intermediate_key_usage: Extension[KeyUsage],
+    ):
+        assert not valid_intermediate_key_usage.value.key_agreement
+
+    def test_key_usage_false_key_certificate_signature(
+        self,
+        valid_intermediate_key_usage: Extension[KeyUsage],
+    ):
+        assert not valid_intermediate_key_usage.value.key_cert_sign
+
+    def test_key_usage_false_key_crl_signature(
+        self,
+        valid_intermediate_key_usage: Extension[KeyUsage],
+    ):
+        assert not valid_intermediate_key_usage.value.crl_sign
+
+    def test_key_usage_cannot_configure_encipher_only(
+        self,
+        valid_intermediate_key_usage: Extension[KeyUsage],
+    ):
+        with raises(ValueError) as exception:
+            valid_intermediate_key_usage.value.encipher_only
+
+        assert "encipher_only is undefined unless key_agreement is true" in str(exception)
+
+    def test_key_usage_cannot_configure_decipher_only(
+        self,
+        valid_intermediate_key_usage: Extension[KeyUsage],
+    ):
+        with raises(ValueError) as exception:
+            valid_intermediate_key_usage.value.decipher_only
+
+        assert "decipher_only is undefined unless key_agreement is true" in str(exception)

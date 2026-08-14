@@ -40,9 +40,9 @@ class ReaderAuthCertificateGenerator(CertificateGenerator):
             .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
             .add_extension(
                 x509.KeyUsage(
-                    key_cert_sign=True,
-                    crl_sign=True,
-                    digital_signature=False,
+                    key_cert_sign=False,
+                    crl_sign=False,
+                    digital_signature=True,
                     content_commitment=False,
                     key_encipherment=False,
                     data_encipherment=False,

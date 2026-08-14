@@ -58,6 +58,14 @@ def valid_parser(
         default=365,
         help="Validity period in days (leaf capped at 457)",
     )
+    empty_parser.add_argument(
+        "--reader-valid-x509-leaf-certificate",
+        default=str(issuer_auth_input_tmp_dir) + "/reader_valid_x509_leaf_certificate.der"
+    )
+    empty_parser.add_argument(
+        "--reader-invalid-x509-leaf-certificate",
+        default=str(issuer_auth_input_tmp_dir) + "/reader_invalid_x509_leaf_certificate.der"
+    )
     args, unknown = empty_parser.parse_known_args()
     yield args
 
