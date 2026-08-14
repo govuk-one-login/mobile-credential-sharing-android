@@ -81,7 +81,9 @@ class AndroidGattClientManager(
 
         this.serviceUuid = serviceUuid
         pendingDescriptorWrites.clear()
+        messages.clear()
         isTerminating = false
+        isSessionEnd = false
         _events.tryEmit(GattClientEvent.Connecting)
 
         bluetoothGatt = try {
