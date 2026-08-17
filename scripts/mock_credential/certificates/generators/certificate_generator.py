@@ -25,8 +25,8 @@ class CertificateGenerator(metaclass=ABCMeta):
         issuer_key: PrivateKeyTypes,
         subject_name: Name,
         issuer_cert: Certificate,
-        validity_days: int,
         extensions: List[tuple[x509.ExtensionType, bool]],
+        validity_days: int = 365,
     ) -> Certificate:
         """Generic method to create a signed certificate (Intermediate or Leaf).
 
