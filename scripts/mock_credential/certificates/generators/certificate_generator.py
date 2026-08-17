@@ -7,7 +7,7 @@ from typing import List
 
 
 class CertificateGenerator(metaclass=ABCMeta):
-    
+
     @abstractmethod
     def create_intermediate(
         self,
@@ -34,5 +34,3 @@ class CertificateGenerator(metaclass=ABCMeta):
         caller explicit control over criticality.
         """
         pass
-
-

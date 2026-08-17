@@ -6,14 +6,21 @@ from typing import List, TypeVar, Type, Tuple
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.hazmat.primitives.asymmetric.types import PrivateKeyTypes
 from cryptography.hazmat.primitives import serialization
-from cryptography.x509 import Certificate, ExtendedKeyUsage, KeyUsage, IssuerAlternativeName, UniformResourceIdentifier, ExtensionType
+from cryptography.x509 import (
+    Certificate,
+    ExtendedKeyUsage,
+    KeyUsage,
+    IssuerAlternativeName,
+    UniformResourceIdentifier,
+    ExtensionType,
+)
 from cryptography.x509.oid import ObjectIdentifier
 
 from mock_credential.issuer_auth import ISSUER_NAME, LEAF_NAME
 from mock_credential.reader_auth import (
     READER_AUTH_COMMON_LEAF_EXTENSIONS,
     READER_AUTH_LEAF_SUBJECT_NAME,
-    PRIVACY_POLICY_URL_EXTENSION
+    PRIVACY_POLICY_URL_EXTENSION,
 )
 from mock_credential.certificates.generators import (
     CertificateGenerator,
@@ -33,6 +40,7 @@ logger = logging.getLogger("project")
 issuer_logger = logging.getLogger("IssuerAuth")
 reader_logger = logging.getLogger("ReaderAuth")
 
+
 class GenerateMockCredentialInputs:
 
     def __init__(self, **kwargs):
@@ -48,7 +56,6 @@ class GenerateMockCredentialInputs:
 
         logger.info("Created input instance from parameters")
 
-
     def __eq__(self, other):
         return (
             isinstance(other, GenerateMockCredentialInputs)
@@ -57,15 +64,21 @@ class GenerateMockCredentialInputs:
             and (self.output == other.output)
             and (self.private_key == other.private_key)
             and (self.validity_days == other.validity_days)
-            and (self.issuer_intermediate_x509_certificate == other.issuer_intermediate_x509_certificate)
-            and (self.reader_valid_x509_leaf_certificate == other.reader_valid_x509_leaf_certificate)
-            and (self.reader_invalid_x509_leaf_certificate == other.reader_invalid_x509_leaf_certificate)
+            and (
+                self.issuer_intermediate_x509_certificate
+                == other.issuer_intermediate_x509_certificate
+            )
+            and (
+                self.reader_valid_x509_leaf_certificate == other.reader_valid_x509_leaf_certificate
+            )
+            and (
+                self.reader_invalid_x509_leaf_certificate
+                == other.reader_invalid_x509_leaf_certificate
+            )
         )
 
     def create_issuer_auth_intermediate_certificate(
-        self,
-        cert_gen: CertificateGenerator,
-        key_gen: KeyGenerator
+        self, cert_gen: CertificateGenerator, key_gen: KeyGenerator
     ) -> Tuple[PrivateKeyTypes, Certificate]:
         issuer_private_key = key_gen.load_or_create(self.issuer_private_key)
         intermediary_issuer_auth_cert = cert_gen.create_intermediate(
@@ -75,21 +88,21 @@ class GenerateMockCredentialInputs:
         )
         with open(self.issuer_intermediate_x509_certificate, "wb") as f:
             f.write(intermediary_issuer_auth_cert.public_bytes(serialization.Encoding.DER))
-            issuer_logger.info(f"Written x509 intermediate certificate: {self.issuer_intermediate_x509_certificate}")
+            issuer_logger.info(
+                f"Written x509 intermediate certificate: {self.issuer_intermediate_x509_certificate}"
+            )
 
         return (issuer_private_key, intermediary_issuer_auth_cert)
-
 
     def create_issuer_auth_certificates(
         self,
         cert_gen: CertificateGenerator,
         key_gen: KeyGenerator,
     ) -> Tuple[EllipticCurvePrivateKey, Certificate]:
-        issuer_private_key, intermediary_issuer_auth_cert = self.create_issuer_auth_intermediate_certificate(
-            cert_gen=cert_gen,
-            key_gen=key_gen
+        issuer_private_key, intermediary_issuer_auth_cert = (
+            self.create_issuer_auth_intermediate_certificate(cert_gen=cert_gen, key_gen=key_gen)
         )
-        
+
         issuer_leaf_key = key_gen.generate()
         issuer_logger.info("Created leaf certificate key")
         issuer_leaf_cert = cert_gen.create_certificate(
@@ -115,16 +128,13 @@ class GenerateMockCredentialInputs:
                 ),
                 (ExtendedKeyUsage([OID_MDL_DS]), True),
                 (
-                    IssuerAlternativeName(
-                        [UniformResourceIdentifier("https://dvla.gov.uk/iaca")]
-                    ),
+                    IssuerAlternativeName([UniformResourceIdentifier("https://dvla.gov.uk/iaca")]),
                     False,
                 ),
             ],
         )
 
         return (issuer_leaf_key, issuer_leaf_cert)
-
 
     def create_reader_auth_certificates(
         self,
@@ -140,22 +150,16 @@ class GenerateMockCredentialInputs:
         )
         with open(self.reader_intermediate_x509_certificate, "wb") as f:
             f.write(intermediary_reader_auth_cert.public_bytes(serialization.Encoding.DER))
-            reader_logger.info(f"Written x509 intermediate certificate: {self.reader_intermediate_x509_certificate}")
+            reader_logger.info(
+                f"Written x509 intermediate certificate: {self.reader_intermediate_x509_certificate}"
+            )
 
-        (
-            _,
-            valid_reader_auth_leaf_cert
-        ) = self._create_reader_auth_leaf_certificate(
+        _, valid_reader_auth_leaf_cert = self._create_reader_auth_leaf_certificate(
             cert_gen=cert_gen,
             key_gen=intermediate_key_gen,
             reader_auth_private_key=reader_auth_private_key,
             intermediary_reader_auth_cert=intermediary_reader_auth_cert,
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS + [
-                (
-                    PRIVACY_POLICY_URL_EXTENSION,
-                    False
-                )
-            ]
+            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS + [(PRIVACY_POLICY_URL_EXTENSION, False)],
         )
         with open(self.reader_valid_x509_leaf_certificate, "wb") as f:
             f.write(valid_reader_auth_leaf_cert.public_bytes(serialization.Encoding.DER))
@@ -163,16 +167,13 @@ class GenerateMockCredentialInputs:
                 f"Written valid x509 leaf certificate: {self.reader_valid_x509_leaf_certificate}"
             )
 
-        (
-            _,
-            invalid_reader_auth_leaf_cert
-        ) = self._create_reader_auth_leaf_certificate(
+        _, invalid_reader_auth_leaf_cert = self._create_reader_auth_leaf_certificate(
             cert_gen=cert_gen,
             key_gen=intermediate_key_gen,
             reader_auth_private_key=reader_auth_private_key,
             intermediary_reader_auth_cert=intermediary_reader_auth_cert,
             # Doesn't contain Privacy policy OID
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
+            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS,
         )
         with open(self.reader_invalid_x509_leaf_certificate, "wb") as f:
             f.write(invalid_reader_auth_leaf_cert.public_bytes(serialization.Encoding.DER))
@@ -180,9 +181,7 @@ class GenerateMockCredentialInputs:
                 f"Written invalid x509 leaf certificate: {self.reader_invalid_x509_leaf_certificate}"
             )
 
-
         return (valid_reader_auth_leaf_cert, invalid_reader_auth_leaf_cert)
-
 
     def _create_reader_auth_leaf_certificate(
         self,
@@ -190,9 +189,9 @@ class GenerateMockCredentialInputs:
         reader_auth_private_key: PrivateKeyTypes,
         intermediary_reader_auth_cert: Certificate,
         extensions: List[Tuple[ExtensionType, bool]],
-        key_gen: KeyGenerator
+        key_gen: KeyGenerator,
     ) -> Tuple[EllipticCurvePrivateKey, Certificate]:
-        
+
         reader_auth_leaf_key = key_gen.generate()
         reader_logger.info("Created leaf certificate key")
         reader_auth_leaf_cert = cert_gen.create_certificate(
@@ -205,7 +204,6 @@ class GenerateMockCredentialInputs:
         )
 
         return (reader_auth_leaf_key, reader_auth_leaf_cert)
-
 
     @classmethod
     def from_parser(cls: Type[T], args: Namespace) -> T:

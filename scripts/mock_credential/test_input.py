@@ -1,16 +1,10 @@
 from argparse import Namespace
 import pytest
-from cryptography.x509 import (
-    Certificate
-)
-from typing import (
-    Tuple
-)
+from cryptography.x509 import Certificate
+from typing import Tuple
 
 from mock_credential import GenerateMockCredentialInputs
-from mock_credential.conftest import (
-    get_der_certificate_output
-)
+from mock_credential.conftest import get_der_certificate_output
 
 
 class TestIssuerAuthInput:
@@ -77,7 +71,7 @@ class TestIssuerAuthInput:
                     private_key="",
                     validity_days=1,
                     issuer_intermediate_x509_certificate="",
-                    reader_intermediate_x509_certificate=""
+                    reader_intermediate_x509_certificate="",
                 ),
                 "reader_valid_x509_leaf_certificate",
                 id="Missing valid ReaderAuth x509 leaf certificate",
@@ -91,7 +85,7 @@ class TestIssuerAuthInput:
                     validity_days=1,
                     issuer_intermediate_x509_certificate="",
                     reader_intermediate_x509_certificate="",
-                    reader_valid_x509_leaf_certificate=""
+                    reader_valid_x509_leaf_certificate="",
                 ),
                 "reader_invalid_x509_leaf_certificate",
                 id="Missing invalid ReaderAuth x509 leaf certificate",
@@ -105,57 +99,51 @@ class TestIssuerAuthInput:
         assert f"'Namespace' object has no attribute '{missing_attribute}'" in str(exception.value)
 
     def test_evaluated_reader_auth_certs_reference_version(
-        self,
-        reader_auth_leaf_certificate_contents: str
+        self, reader_auth_leaf_certificate_contents: str
     ):
         assert "Version: 3 (0x2)" in reader_auth_leaf_certificate_contents
 
     def test_evaluated_reader_auth_certs_reference_signature_algorithm(
-        self,
-        reader_auth_leaf_certificate_contents: str
+        self, reader_auth_leaf_certificate_contents: str
     ):
         assert "Signature Algorithm: ecdsa-with-SHA256" in reader_auth_leaf_certificate_contents
 
     def test_evaluated_reader_auth_certs_reference_issuer_information(
-        self,
-        reader_auth_leaf_certificate_contents: str
+        self, reader_auth_leaf_certificate_contents: str
     ):
-        assert "Subject: C=GB, ST=London, CN=mDoc ReaderAuth Test Leaf, O=DVLA Dev Tool" in reader_auth_leaf_certificate_contents
+        assert (
+            "Subject: C=GB, ST=London, CN=mDoc ReaderAuth Test Leaf, O=DVLA Dev Tool"
+            in reader_auth_leaf_certificate_contents
+        )
 
     def test_evaluated_reader_auth_certs_reference_public_key_algorithm(
-        self,
-        reader_auth_leaf_certificate_contents: str
+        self, reader_auth_leaf_certificate_contents: str
     ):
         assert "Public Key Algorithm: id-ecPublicKey" in reader_auth_leaf_certificate_contents
-    
+
     def test_evaluated_reader_auth_certs_reference_public_key_size(
-        self,
-        reader_auth_leaf_certificate_contents: str
+        self, reader_auth_leaf_certificate_contents: str
     ):
         assert "Public-Key: (256 bit)" in reader_auth_leaf_certificate_contents
 
     def test_evaluated_reader_auth_certs_reference_asn_oid(
-        self,
-        reader_auth_leaf_certificate_contents: str
+        self, reader_auth_leaf_certificate_contents: str
     ):
         assert "ASN1 OID: prime256v1" in reader_auth_leaf_certificate_contents
-    
+
     def test_evaluated_reader_auth_certs_reference_curve(
-        self,
-        reader_auth_leaf_certificate_contents: str
+        self, reader_auth_leaf_certificate_contents: str
     ):
         assert "NIST CURVE: P-256" in reader_auth_leaf_certificate_contents
 
     def test_valid_reader_auth_cert_references_privacy_policy_oid(
-        self,
-        valid_reader_auth_leaf_path: str
+        self, valid_reader_auth_leaf_path: str
     ):
         contents = get_der_certificate_output(valid_reader_auth_leaf_path)
         assert "1.3.6.1.4.1.72548.1.1 - URI:https://www.gov.uk/" in contents
 
     def test_invalid_reader_auth_cert_does_not_reference_privacy_policy_oid(
-        self,
-        invalid_reader_auth_leaf_path: str
+        self, invalid_reader_auth_leaf_path: str
     ):
         contents = get_der_certificate_output(invalid_reader_auth_leaf_path)
         assert "1.3.6.1.4.1.72548.1.1 - URI:https://www.gov.uk/" not in contents

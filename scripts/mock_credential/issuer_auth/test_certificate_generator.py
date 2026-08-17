@@ -10,6 +10,7 @@ from mock_credential.certificates.generators.conftest import (
     TEST_SUBJECT_NAME,
 )
 
+
 class TestCreateRootCa:
 
     def test_returns_certificate(self, issuer_auth_cert_gen, root_key):
@@ -38,7 +39,9 @@ class TestCreateRootCa:
         ku = root_cert.extensions.get_extension_for_class(x509.KeyUsage)
         assert ku.critical is True
 
-    def test_validity_not_before_uses_provided_now(self, issuer_auth_cert_gen, root_key, issuer_auth_now):
+    def test_validity_not_before_uses_provided_now(
+        self, issuer_auth_cert_gen, root_key, issuer_auth_now
+    ):
         expected = datetime(
             year=issuer_auth_now.year,
             month=issuer_auth_now.month,
@@ -46,12 +49,16 @@ class TestCreateRootCa:
             hour=issuer_auth_now.hour,
             minute=issuer_auth_now.minute,
             second=issuer_auth_now.second,
-            tzinfo=timezone.utc
+            tzinfo=timezone.utc,
         )
-        cert = issuer_auth_cert_gen.create_intermediate(root_key, TEST_SUBJECT_NAME, validity_days=365)
+        cert = issuer_auth_cert_gen.create_intermediate(
+            root_key, TEST_SUBJECT_NAME, validity_days=365
+        )
         assert cert.not_valid_before_utc == expected
 
-    def test_validity_not_after_applies_validity_days(self, issuer_auth_cert_gen, root_key, issuer_auth_now):
+    def test_validity_not_after_applies_validity_days(
+        self, issuer_auth_cert_gen, root_key, issuer_auth_now
+    ):
         expected = datetime(
             year=issuer_auth_now.year + 1,
             month=issuer_auth_now.month,
@@ -59,9 +66,11 @@ class TestCreateRootCa:
             hour=issuer_auth_now.hour,
             minute=issuer_auth_now.minute,
             second=issuer_auth_now.second,
-            tzinfo=timezone.utc
+            tzinfo=timezone.utc,
         )
-        cert = issuer_auth_cert_gen.create_intermediate(root_key, TEST_SUBJECT_NAME, validity_days=365)
+        cert = issuer_auth_cert_gen.create_intermediate(
+            root_key, TEST_SUBJECT_NAME, validity_days=365
+        )
         assert cert.not_valid_after_utc == expected
 
 
@@ -104,7 +113,7 @@ class TestCreateCertificate:
             hour=issuer_auth_now.hour,
             minute=issuer_auth_now.minute,
             second=issuer_auth_now.second,
-            tzinfo=timezone.utc
+            tzinfo=timezone.utc,
         )
         cert = issuer_auth_cert_gen.create_certificate(
             leaf_key.public_key(),
@@ -115,4 +124,3 @@ class TestCreateCertificate:
             extensions=LEAF_EXTENSIONS,
         )
         assert cert.not_valid_after_utc == expected + timedelta(days=100)
-

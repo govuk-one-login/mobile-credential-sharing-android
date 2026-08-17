@@ -16,14 +16,8 @@ from typing import Generator
 from mock_credential.certificates.generators import (
     CertificateGenerator,
 )
-from mock_credential.certificates.generators.conftest import (
-    key_gen,
-    root_key,
-    leaf_key
-)
-from mock_credential.issuer_auth import (
-    IssuerAuthCertificateGenerator
-)
+from mock_credential.certificates.generators.conftest import key_gen, root_key, leaf_key
+from mock_credential.issuer_auth import IssuerAuthCertificateGenerator
 
 TEST_SUBJECT_NAME = Name(
     [
@@ -64,18 +58,20 @@ LEAF_EXTENSIONS = [
     ),
 ]
 
+
 @fixture
 def issuer_auth_cert_gen() -> CertificateGenerator:
     return IssuerAuthCertificateGenerator()
+
 
 @fixture
 def issuer_auth_now(issuer_auth_cert_gen):
     return issuer_auth_cert_gen.now
 
+
 @fixture
 def root_cert(
-    issuer_auth_cert_gen: CertificateGenerator,
-    root_key: EllipticCurvePrivateKey
+    issuer_auth_cert_gen: CertificateGenerator, root_key: EllipticCurvePrivateKey
 ) -> Certificate:
     return issuer_auth_cert_gen.create_intermediate(root_key, TEST_SUBJECT_NAME)
 

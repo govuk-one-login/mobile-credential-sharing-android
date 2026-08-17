@@ -3,26 +3,23 @@ from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 
 from mock_credential.certificates.generators import KeyGenerator, PemKeyGenerator
 
-class TestKeyGenerator():
+
+class TestKeyGenerator:
     @fixture
     def generated_key(self, key_gen: KeyGenerator) -> EllipticCurvePrivateKey:
         return key_gen.generate()
 
     def test_generated_keys_use_p256_curve(self, generated_key: EllipticCurvePrivateKey):
         assert isinstance(generated_key.curve, SECP256R1)
-    
+
     def test_returns_ec_private_key(self, generated_key: EllipticCurvePrivateKey):
         assert isinstance(generated_key, EllipticCurvePrivateKey)
 
     def test_each_call_produces_unique_key(self, generated_key: EllipticCurvePrivateKey):
         assert generated_key.private_numbers() != PemKeyGenerator().generate().private_numbers()
 
-    
     def test_load_returns_private_key(
-        self,
-        tmp_path,
-        generated_key: EllipticCurvePrivateKey,
-        key_gen: KeyGenerator
+        self, tmp_path, generated_key: EllipticCurvePrivateKey, key_gen: KeyGenerator
     ):
         path = str(tmp_path / "key.pem")
         with open(path, "xb") as f:
@@ -39,10 +36,7 @@ class TestKeyGenerator():
         assert isinstance(loaded, EllipticCurvePrivateKey)
 
     def test_load_returns_same_key(
-        self,
-        tmp_path,
-        generated_key: EllipticCurvePrivateKey,
-        key_gen: KeyGenerator
+        self, tmp_path, generated_key: EllipticCurvePrivateKey, key_gen: KeyGenerator
     ):
         path = str(tmp_path / "key.pem")
         with open(path, "xb") as f:
@@ -61,7 +55,7 @@ class TestKeyGenerator():
     def test_load_raises_when_file_missing(self, tmp_path, key_gen: KeyGenerator):
         with raises(FileNotFoundError):
             key_gen.load(str(tmp_path / "missing.pem"))
-    
+
     def test_creates_key_when_file_missing(self, tmp_path, key_gen: KeyGenerator):
         path = str(tmp_path / "new_key.pem")
         key = key_gen.load_or_create(path)

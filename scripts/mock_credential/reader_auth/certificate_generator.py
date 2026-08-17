@@ -41,45 +41,34 @@ READER_AUTH_LEAF_SUBJECT_NAME: Name = Name(
 )
 
 READER_AUTH_COMMON_LEAF_EXTENSIONS: List[Tuple[ExtensionType, bool]] = [
-            (
-                BasicConstraints(ca=False, path_length=None),
-                True
-            ),
-            (
-                KeyUsage(
-                    digital_signature=True,
-                    content_commitment=False,
-                    key_encipherment=False,
-                    data_encipherment=False,
-                    key_agreement=False,
-                    key_cert_sign=False,
-                    crl_sign=False,
-                    encipher_only=False,
-                    decipher_only=False,
-                ),
-                True
-            ),
-            (
-                ExtendedKeyUsage(
-                    [
-                        OID_MDL_RA,
-                        OID_MDOC_RA
-                    ]
-                ),
-                True
-            ),
-            (
-                AuthorityInformationAccess(
-                    [
-                        AccessDescription(
-                            access_method=AuthorityInformationAccessOID.OCSP,
-                            access_location=UniformResourceIdentifier("https://www.gov.uk/")
-                        )
-                    ]
-                ),
-                False
-            )
-        ]
+    (BasicConstraints(ca=False, path_length=None), True),
+    (
+        KeyUsage(
+            digital_signature=True,
+            content_commitment=False,
+            key_encipherment=False,
+            data_encipherment=False,
+            key_agreement=False,
+            key_cert_sign=False,
+            crl_sign=False,
+            encipher_only=False,
+            decipher_only=False,
+        ),
+        True,
+    ),
+    (ExtendedKeyUsage([OID_MDL_RA, OID_MDOC_RA]), True),
+    (
+        AuthorityInformationAccess(
+            [
+                AccessDescription(
+                    access_method=AuthorityInformationAccessOID.OCSP,
+                    access_location=UniformResourceIdentifier("https://www.gov.uk/"),
+                )
+            ]
+        ),
+        False,
+    ),
+]
 
 PRIVACY_POLICY_URL_EXTENSION = SubjectInformationAccess(
     [
@@ -87,12 +76,11 @@ PRIVACY_POLICY_URL_EXTENSION = SubjectInformationAccess(
             access_method=ObjectIdentifier(
                 "1.3.6.1.4.1.72548.1.1",
             ),
-            access_location=UniformResourceIdentifier(
-                "https://www.gov.uk/"
-            )
+            access_location=UniformResourceIdentifier("https://www.gov.uk/"),
         )
     ]
 )
+
 
 class ReaderAuthCertificateGenerator(CertificateGenerator):
     def __init__(self, now: datetime = datetime.now(tz=timezone.utc)):
@@ -134,25 +122,17 @@ class ReaderAuthCertificateGenerator(CertificateGenerator):
                 ),
                 critical=True,
             )
-            .add_extension(
-                x509.ExtendedKeyUsage([
-                    OID_MDL_RA,
-                    OID_MDOC_RA
-                ]),
-                critical=True
-            )
+            .add_extension(x509.ExtendedKeyUsage([OID_MDL_RA, OID_MDOC_RA]), critical=True)
             .add_extension(
                 x509.AuthorityInformationAccess(
                     [
                         x509.AccessDescription(
                             access_method=AuthorityInformationAccessOID.OCSP,
-                            access_location=x509.UniformResourceIdentifier(
-                                "https://www.gov.uk/"
-                            )
+                            access_location=x509.UniformResourceIdentifier("https://www.gov.uk/"),
                         )
                     ]
                 ),
-                critical=False
+                critical=False,
             )
         )
         return builder.sign(private_key, hashes.SHA256())

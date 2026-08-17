@@ -4,13 +4,8 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from pytest import fixture
 import logging
-from typing import (
-    Generator,
-    Tuple
-)
-from cryptography.x509 import (
-    Certificate
-)
+from typing import Generator, Tuple
+from cryptography.x509 import Certificate
 
 from mock_credential import GenerateMockCredentialInputs
 from mock_credential.certificates.generators import PemKeyGenerator, DerKeyGenerator
@@ -56,7 +51,7 @@ def valid_parser(
     )
     empty_parser.add_argument(
         "--reader-intermediate-x509-certificate",
-        default="app/src/main/assets/test_reader_auth_x509_certificate.der"
+        default="app/src/main/assets/test_reader_auth_x509_certificate.der",
     )
     empty_parser.add_argument(
         "--output",
@@ -71,11 +66,11 @@ def valid_parser(
     )
     empty_parser.add_argument(
         "--reader-valid-x509-leaf-certificate",
-        default=str(input_tmp_dir) + "/reader_valid_x509_leaf_certificate.der"
+        default=str(input_tmp_dir) + "/reader_valid_x509_leaf_certificate.der",
     )
     empty_parser.add_argument(
         "--reader-invalid-x509-leaf-certificate",
-        default=str(input_tmp_dir) + "/reader_invalid_x509_leaf_certificate.der"
+        default=str(input_tmp_dir) + "/reader_invalid_x509_leaf_certificate.der",
     )
     args, _ = empty_parser.parse_known_args()
     yield args
@@ -85,56 +80,52 @@ def valid_parser(
 def valid_issuer_auth_input(valid_parser) -> Generator[GenerateMockCredentialInputs, None, None]:
     yield GenerateMockCredentialInputs.from_parser(valid_parser)
 
+
 @fixture
 def create_reader_auth_leaf_certificates(
-    valid_issuer_auth_input: GenerateMockCredentialInputs
+    valid_issuer_auth_input: GenerateMockCredentialInputs,
 ) -> Tuple[Certificate, Certificate]:
     return valid_issuer_auth_input.create_reader_auth_certificates(
         cert_gen=ReaderAuthCertificateGenerator(),
         root_key_gen=PemKeyGenerator(),
-        intermediate_key_gen=DerKeyGenerator()
+        intermediate_key_gen=DerKeyGenerator(),
     )
+
 
 @fixture
 def valid_reader_auth_leaf_path(
     valid_issuer_auth_input: GenerateMockCredentialInputs,
-    create_reader_auth_leaf_certificates: Tuple[Certificate, Certificate]
+    create_reader_auth_leaf_certificates: Tuple[Certificate, Certificate],
 ) -> str:
     return valid_issuer_auth_input.reader_valid_x509_leaf_certificate
+
 
 @fixture
 def invalid_reader_auth_leaf_path(
     valid_issuer_auth_input: GenerateMockCredentialInputs,
-    create_reader_auth_leaf_certificates: Tuple[Certificate, Certificate]
+    create_reader_auth_leaf_certificates: Tuple[Certificate, Certificate],
 ) -> str:
     return valid_issuer_auth_input.reader_invalid_x509_leaf_certificate
 
-@fixture(params=[
-    "invalid_reader_auth_leaf_path",
-    "valid_reader_auth_leaf_path",
-])
+
+@fixture(
+    params=[
+        "invalid_reader_auth_leaf_path",
+        "valid_reader_auth_leaf_path",
+    ]
+)
 def reader_auth_leaf_paths(request) -> str:
     return request.getfixturevalue(request.param)
 
+
 @fixture
-def reader_auth_leaf_certificate_contents(
-    reader_auth_leaf_paths: str
-) -> str:
+def reader_auth_leaf_certificate_contents(reader_auth_leaf_paths: str) -> str:
     return get_der_certificate_output(reader_auth_leaf_paths)
+
 
 def get_der_certificate_output(file_path: str) -> str:
     result = run(
-        args=[
-            "openssl",
-            "x509",
-            "-in",
-            file_path,
-            "-inform",
-            "DER",
-            "-noout",
-            "-text"
-        ],
-        stdout=PIPE
+        args=["openssl", "x509", "-in", file_path, "-inform", "DER", "-noout", "-text"], stdout=PIPE
     )
 
     return result.stdout.decode()

@@ -9,7 +9,6 @@ from logging518 import config as logging_config
 import os
 import sys
 
-
 # Add the 'scripts' directory to the path so we can import mock_credential
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -24,15 +23,13 @@ from mock_credential.certificates import (
     IssuerAuth,
     Credential,
 )
-from mock_credential.certificates.generators import (
-    PemKeyGenerator,
-    DerKeyGenerator
-)
+from mock_credential.certificates.generators import PemKeyGenerator, DerKeyGenerator
 from mock_credential.issuer_auth import IssuerAuthCertificateGenerator
 from mock_credential.reader_auth import ReaderAuthCertificateGenerator
 
 logging_config.fileConfig("pyproject.toml")
 logger = logging.getLogger("project")
+
 
 def generate():
     args = get_argument_parser()
@@ -48,9 +45,7 @@ def generate():
         key_gen=pem_key_gen,
     )
     valid_reader_leaf_cert, invalid_reader_leaf_cert = args.create_reader_auth_certificates(
-        cert_gen=reader_cert_gen,
-        root_key_gen=pem_key_gen,
-        intermediate_key_gen=der_key_gen
+        cert_gen=reader_cert_gen, root_key_gen=pem_key_gen, intermediate_key_gen=der_key_gen
     )
 
     # 2. Device Key
@@ -93,21 +88,21 @@ def get_argument_parser() -> GenerateMockCredentialInputs:
     )
     parser.add_argument(
         "--issuer-intermediate-x509-certificate",
-        default="app/src/main/assets/test_x509_certificate.der"
+        default="app/src/main/assets/test_x509_certificate.der",
     )
     parser.add_argument(
         "--reader-intermediate-x509-certificate",
-        default="app/src/main/assets/test_reader_auth_x509_certificate.der"
+        default="app/src/main/assets/test_reader_auth_x509_certificate.der",
     )
     parser.add_argument("--output", default="app/src/main/res/raw/mock_credential.txt")
     parser.add_argument("--validity-days", type=int, default=365)
     parser.add_argument(
         "--reader-valid-x509-leaf-certificate",
-        default="app/src/main/assets/reader_valid_x509_leaf_certificate.der"
+        default="app/src/main/assets/reader_valid_x509_leaf_certificate.der",
     )
     parser.add_argument(
         "--reader-invalid-x509-leaf-certificate",
-        default="app/src/main/assets/reader_invalid_x509_leaf_certificate.der"
+        default="app/src/main/assets/reader_invalid_x509_leaf_certificate.der",
     )
 
     logger.info("Obtained command-line arguments...")
