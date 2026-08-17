@@ -1,5 +1,5 @@
 from pytest import fixture, raises
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey, EllipticCurve, SECP256R1
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey, SECP256R1
 
 from mock_credential.certificates.generators import KeyGenerator, PemKeyGenerator
 

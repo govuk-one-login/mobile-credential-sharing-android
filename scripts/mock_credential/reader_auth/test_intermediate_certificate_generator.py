@@ -1,4 +1,4 @@
-from pytest import fixture, raises
+from pytest import raises
 import pytest
 from cryptography.x509 import (
     AccessDescription,
@@ -27,47 +27,13 @@ from cryptography.x509.oid import (
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from datetime import datetime, timezone
 
-from mock_credential.certificates.generators import PemKeyGenerator
 from mock_credential.certificates.generators.conftest import TEST_SUBJECT_NAME
+from mock_credential.reader_auth import (
+    OID_MDL_RA,
+    OID_MDOC_RA,
+)
 
-# mdlReaderAuth
-OID_MDL_RA = ObjectIdentifier("1.0.18013.5.1.6")
-# mdocReaderAuth
-OID_MDOC_RA = ObjectIdentifier("1.0.23220.4.1.6")
-
-class TestReaderAuthCertificateGenerator:
-    @fixture
-    def root_key(self) -> EllipticCurvePrivateKey:
-        return PemKeyGenerator().generate()
-
-    @fixture
-    def valid_intermediate_cert(
-        self,
-        reader_auth_cert_gen,
-        root_key
-    ) -> Certificate:
-        return reader_auth_cert_gen.create_intermediate(
-            private_key=root_key,
-            subject=TEST_SUBJECT_NAME,
-        )
-
-    @fixture
-    def valid_intermediate_extensions(
-        self,
-        valid_intermediate_cert: Certificate
-    ) -> Extensions:
-        return valid_intermediate_cert.extensions
-
-    @fixture
-    def valid_intermediate_key_usage(
-        self,
-        valid_intermediate_extensions: Extensions
-    ) -> Extension[KeyUsage]:
-        return valid_intermediate_extensions.get_extension_for_class(KeyUsage)
-
-    @fixture
-    def reader_auth_now(self, reader_auth_cert_gen):
-        return reader_auth_cert_gen.now
+class TestReaderAuthIntermediateCertificateGenerator:
 
     def test_version_is_3(self, valid_intermediate_cert: Certificate):
         assert valid_intermediate_cert.version == Version.v3

@@ -5,18 +5,80 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes, PrivateKeyTypes
-from cryptography.x509 import Certificate, CertificateBuilder, Name
+from cryptography.x509 import (
+    AuthorityInformationAccess,
+    AccessDescription,
+    UniformResourceIdentifier,
+    BasicConstraints,
+    KeyUsage,
+    ExtendedKeyUsage,
+    ObjectIdentifier,
+    ExtensionType,
+    Certificate,
+    CertificateBuilder,
+    Name,
+    NameAttribute,
+    NameOID,
+)
 from cryptography.x509.oid import AuthorityInformationAccessOID
-
 
 from datetime import datetime, timedelta, timezone
 from typing import List
 
 # mdlReaderAuth
-OID_MDL_RA = x509.ObjectIdentifier("1.0.18013.5.1.6")
+OID_MDL_RA = ObjectIdentifier("1.0.18013.5.1.6")
 # mdocReaderAuth
-OID_MDOC_RA = x509.ObjectIdentifier("1.0.23220.4.1.6")
+OID_MDOC_RA = ObjectIdentifier("1.0.23220.4.1.6")
 
+READER_AUTH_LEAF_SUBJECT_NAME: Name = Name(
+    [
+        NameAttribute(NameOID.COUNTRY_NAME, "GB"),
+        NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "London"),
+        NameAttribute(NameOID.COMMON_NAME, "mDoc ReaderAuth Test Leaf"),
+        NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
+    ]
+)
+
+READER_AUTH_COMMON_LEAF_EXTENSIONS: List[Tuple[ExtensionType, bool]] = [
+            (
+                BasicConstraints(ca=False, path_length=None),
+                True
+            ),
+            (
+                KeyUsage(
+                    digital_signature=True,
+                    content_commitment=False,
+                    key_encipherment=False,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    key_cert_sign=False,
+                    crl_sign=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                True
+            ),
+            (
+                ExtendedKeyUsage(
+                    [
+                        OID_MDL_RA,
+                        OID_MDOC_RA
+                    ]
+                ),
+                True
+            ),
+            (
+                AuthorityInformationAccess(
+                    [
+                        AccessDescription(
+                            access_method=AuthorityInformationAccessOID.OCSP,
+                            access_location=UniformResourceIdentifier("https://www.gov.uk/")
+                        )
+                    ]
+                ),
+                False
+            )
+        ]
 
 class ReaderAuthCertificateGenerator(CertificateGenerator):
     def __init__(self, now: datetime = datetime.now(tz=timezone.utc)):
