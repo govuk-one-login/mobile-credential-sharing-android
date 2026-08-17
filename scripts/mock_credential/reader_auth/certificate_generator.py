@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes, PrivateKeyTypes
 from cryptography.x509 import Certificate, CertificateBuilder, Name
+from cryptography.x509.oid import AuthorityInformationAccessOID
 
 
 from datetime import datetime, timedelta, timezone
@@ -63,6 +64,19 @@ class ReaderAuthCertificateGenerator(CertificateGenerator):
                     OID_MDOC_RA
                 ]),
                 critical=True
+            )
+            .add_extension(
+                x509.AuthorityInformationAccess(
+                    [
+                        x509.AccessDescription(
+                            access_method=AuthorityInformationAccessOID.OCSP,
+                            access_location=x509.UniformResourceIdentifier(
+                                "https://www.gov.uk/"
+                            )
+                        )
+                    ]
+                ),
+                critical=False
             )
         )
         return builder.sign(private_key, hashes.SHA256())

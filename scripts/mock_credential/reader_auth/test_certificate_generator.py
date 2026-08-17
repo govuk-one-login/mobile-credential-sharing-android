@@ -1,6 +1,8 @@
 from pytest import fixture, raises
 import pytest
 from cryptography.x509 import (
+    AccessDescription,
+    AuthorityInformationAccess,
     Certificate,
     Extension,
     ExtensionNotFound,
@@ -16,7 +18,11 @@ from cryptography.x509 import (
     PublicKeyAlgorithmOID,
     SubjectInformationAccess,
     SubjectKeyIdentifier,
-    ObjectIdentifier
+    ObjectIdentifier,
+    UniformResourceIdentifier
+)
+from cryptography.x509.oid import (
+    AuthorityInformationAccessOID
 )
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from datetime import datetime, timezone
@@ -257,3 +263,16 @@ class TestReaderAuthCertificateGenerator:
             )
 
         assert "No <class 'cryptography.x509.extensions.SubjectInformationAccess'> extension was found" in str(exception)
+
+    def test_has_ocsp_access_description(
+        self,
+        valid_intermediate_extensions: Extensions
+    ):
+        access_method = valid_intermediate_extensions.get_extension_for_class(
+            AuthorityInformationAccess
+        )
+
+        assert AccessDescription(
+            access_method=AuthorityInformationAccessOID.OCSP,
+            access_location=UniformResourceIdentifier("https://www.gov.uk/")
+        ) in access_method.value
