@@ -32,6 +32,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto.Companion.READER_AUTH_ALL_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto.Companion.VERSION_KEY
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDtoMatchers.hasVersion
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDtoStub
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDtoStub.deviceRequestStub
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto.Companion.ITEMS_REQUEST_KEY
@@ -128,18 +129,20 @@ class DeviceRequestStructureTest {
     /**
      * Scenario ID: mDLR_MS_DR_01
      * sub-scenario: Common_CBOR_03
-     *
-     * Fails conformance test due to [DeviceRequestDto.Serializer] and
-     * [DeviceRequestDto.Deserializer] ignoring the optional fields when writing / reading CBOR.
      */
+    //    @Ignore("Fails conformance test due to incomplete (de)serializer implementation")
     @Test
-    @Ignore("Fails conformance test due to incomplete (de)serializer implementation")
     fun `There are no duplicate fields - Ignored fields`(
         @TestParameter propertyName: String = testValues(
             DEVICE_REQUEST_INFO_KEY,
             READER_AUTH_ALL_KEY
         )
     ) {
+        deviceRequest = deviceRequest.copy(
+            deviceRequestInfo = byteArrayOf(0, 1),
+            readerAuthAll = byteArrayOf(1, 2)
+        )
+
         val values = mapper.readTree(deviceRequestBytes).findValues(propertyName)
         assertThat(
             values,
