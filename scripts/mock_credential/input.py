@@ -10,6 +10,11 @@ from cryptography.x509 import Certificate, ExtendedKeyUsage, KeyUsage, IssuerAlt
 from cryptography.x509.oid import ObjectIdentifier
 
 from mock_credential.issuer_auth import ISSUER_NAME, LEAF_NAME
+from mock_credential.reader_auth import (
+    READER_AUTH_COMMON_LEAF_EXTENSIONS,
+    READER_AUTH_LEAF_SUBJECT_NAME,
+    PRIVACY_POLICY_URL_EXTENSION
+)
 from mock_credential.certificates.generators import (
     CertificateGenerator,
     KeyGenerator,
@@ -137,36 +142,6 @@ class GenerateMockCredentialInputs:
             f.write(intermediary_reader_auth_cert.public_bytes(serialization.Encoding.DER))
             reader_logger.info(f"Written x509 intermediate certificate: {self.reader_intermediate_x509_certificate}")
 
-        key_usage_extension: Tuple[ExtensionType, bool] = (
-                    KeyUsage(
-                        digital_signature=True,
-                        content_commitment=False,
-                        key_encipherment=False,
-                        data_encipherment=False,
-                        key_agreement=False,
-                        key_cert_sign=False,
-                        crl_sign=False,
-                        encipher_only=False,
-                        decipher_only=False,
-                    ),
-                    True,
-                )
-        extended_key_usage_extension: Tuple[ExtensionType, bool] = (
-            ExtendedKeyUsage(
-                [
-                    OID_MDL_RA,
-                    OID_MDOC_RA
-                ]
-            ),
-            True
-        )
-        issuer_alternative_name_extension: Tuple[ExtensionType, bool] = (
-            IssuerAlternativeName(
-                [UniformResourceIdentifier("https://dvla.gov.uk/iaca")]
-            ),
-            False,
-        )
-
         (
             _,
             valid_reader_auth_leaf_cert
@@ -175,10 +150,11 @@ class GenerateMockCredentialInputs:
             key_gen=intermediate_key_gen,
             reader_auth_private_key=reader_auth_private_key,
             intermediary_reader_auth_cert=intermediary_reader_auth_cert,
-            extensions=[
-                key_usage_extension,
-                extended_key_usage_extension,
-                issuer_alternative_name_extension,
+            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS + [
+                (
+                    PRIVACY_POLICY_URL_EXTENSION,
+                    False
+                )
             ]
         )
         with open(self.reader_valid_x509_leaf_certificate, "wb") as f:
@@ -195,11 +171,7 @@ class GenerateMockCredentialInputs:
             key_gen=intermediate_key_gen,
             reader_auth_private_key=reader_auth_private_key,
             intermediary_reader_auth_cert=intermediary_reader_auth_cert,
-            extensions=[
-                key_usage_extension,
-                extended_key_usage_extension,
-                issuer_alternative_name_extension,
-            ]
+            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
         )
         with open(self.reader_invalid_x509_leaf_certificate, "wb") as f:
             f.write(invalid_reader_auth_leaf_cert.public_bytes(serialization.Encoding.DER))

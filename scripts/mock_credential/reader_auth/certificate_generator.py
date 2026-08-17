@@ -19,6 +19,7 @@ from cryptography.x509 import (
     Name,
     NameAttribute,
     NameOID,
+    SubjectInformationAccess,
 )
 from cryptography.x509.oid import AuthorityInformationAccessOID
 
@@ -79,6 +80,19 @@ READER_AUTH_COMMON_LEAF_EXTENSIONS: List[Tuple[ExtensionType, bool]] = [
                 False
             )
         ]
+
+PRIVACY_POLICY_URL_EXTENSION = SubjectInformationAccess(
+    [
+        AccessDescription(
+            access_method=ObjectIdentifier(
+                "1.3.6.1.4.1.72548.1.1",
+            ),
+            access_location=UniformResourceIdentifier(
+                "https://www.gov.uk/"
+            )
+        )
+    ]
+)
 
 class ReaderAuthCertificateGenerator(CertificateGenerator):
     def __init__(self, now: datetime = datetime.now(tz=timezone.utc)):
