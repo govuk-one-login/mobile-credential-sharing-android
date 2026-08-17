@@ -72,9 +72,6 @@ class TestReaderAuthCertificateGenerator:
     def test_version_is_3(self, valid_intermediate_cert: Certificate):
         assert valid_intermediate_cert.version == Version.v3
 
-    def test_signature_is_ecdsa_sha_256(self, valid_intermediate_cert):
-        assert valid_intermediate_cert.signature_algorithm_oid == SignatureAlgorithmOID.ECDSA_WITH_SHA256
-
     def test_issuer_matches_subject(
         self,
         valid_intermediate_cert: Certificate
@@ -276,3 +273,6 @@ class TestReaderAuthCertificateGenerator:
             access_method=AuthorityInformationAccessOID.OCSP,
             access_location=UniformResourceIdentifier("https://www.gov.uk/")
         ) in access_method.value
+
+    def test_signature_is_ecdsa_sha_256(self, valid_intermediate_cert):
+        assert valid_intermediate_cert.signature_algorithm_oid == SignatureAlgorithmOID.ECDSA_WITH_SHA256
