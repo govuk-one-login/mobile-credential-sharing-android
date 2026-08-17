@@ -3,6 +3,7 @@ import pytest
 from cryptography.x509 import (
     Certificate,
     Extension,
+    ExtensionNotFound,
     Extensions,
     AuthorityKeyIdentifier,
     BasicConstraints,
@@ -13,6 +14,7 @@ from cryptography.x509 import (
     NameOID,
     NameAttribute,
     PublicKeyAlgorithmOID,
+    SubjectInformationAccess,
     SubjectKeyIdentifier,
     ObjectIdentifier
 )
@@ -210,7 +212,10 @@ class TestReaderAuthCertificateGenerator:
 
         assert "decipher_only is undefined unless key_agreement is true" in str(exception)
 
-    def test_extended_key_usage_is_critical(self, valid_intermediate_extensions):
+    def test_extended_key_usage_is_critical(
+        self,
+        valid_intermediate_extensions: Extensions
+    ):
         extended_keys = valid_intermediate_extensions.get_extension_for_class(
             ExtendedKeyUsage
         )
@@ -240,3 +245,15 @@ class TestReaderAuthCertificateGenerator:
         )
 
         assert input in extended_keys.value
+
+    def test_intermediate_certificate_has_no_subject_information(
+        self,
+        valid_intermediate_extensions: Extensions
+    ):
+
+        with raises(ExtensionNotFound) as exception:
+            valid_intermediate_extensions.get_extension_for_class(
+                SubjectInformationAccess
+            )
+
+        assert "No <class 'cryptography.x509.extensions.SubjectInformationAccess'> extension was found" in str(exception)
