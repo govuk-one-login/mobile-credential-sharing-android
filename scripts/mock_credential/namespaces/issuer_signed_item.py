@@ -1,6 +1,6 @@
-from cbor2 import dumps, loads, CBORTag
+from cbor2 import dumps, CBORTag
 from hashlib import sha256
-from typing import AnyStr, Any, Dict, Type, TypeVar
+from typing import Dict, Type, TypeVar
 
 T = TypeVar("T", bound="Parent")  # type: ignore
 

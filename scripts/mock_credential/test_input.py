@@ -1,7 +1,5 @@
 from argparse import Namespace
 import pytest
-from cryptography.x509 import Certificate
-from typing import Tuple
 
 from mock_credential import GenerateMockCredentialInputs
 from mock_credential.conftest import get_der_certificate_output

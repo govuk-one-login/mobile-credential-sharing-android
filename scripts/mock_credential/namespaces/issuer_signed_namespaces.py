@@ -1,5 +1,4 @@
-from cbor2 import dumps, loads, CBORTag
-from hashlib import sha256
+from cbor2 import CBORTag
 from typing import AnyStr, Dict, List, Type, TypeVar
 from .issuer_signed_item import IssuerSignedItem
 
@@ -23,7 +22,7 @@ class IssuerSignedNamespaces:
     def __len__(self) -> int:
         return len(self.namespaces.keys())
 
-    def build_issuer_signed_items(self) -> Dict[AnyStr, CBORTag]:
+    def build_issuer_signed_items(self) -> Dict[str, List[CBORTag]]:
         return {
             namespace_key: [item.as_tagged_cbor() for item in items]
             for namespace_key, items in self.namespaces.items()

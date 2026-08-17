@@ -14,7 +14,6 @@ from cryptography.x509 import (
     Name,
     Version,
     SignatureAlgorithmOID,
-    NameAttribute,
     PublicKeyAlgorithmOID,
     SubjectInformationAccess,
     SubjectKeyIdentifier,

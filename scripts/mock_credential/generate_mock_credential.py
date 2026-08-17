@@ -13,7 +13,6 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from cryptography.hazmat.primitives import serialization
-from cryptography.x509.oid import ObjectIdentifier
 from datetime import datetime, timezone
 
 from mock_credential import GenerateMockCredentialInputs

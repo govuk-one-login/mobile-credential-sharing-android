@@ -1,9 +1,7 @@
 import cbor2
 import pytest
-from datetime import datetime
 
 from mock_credential.mso import MSO, SAMPLE_MSO
-from mock_credential.namespaces import SAMPLE_NAMESPACES
 
 
 class TestMSOFromDict:

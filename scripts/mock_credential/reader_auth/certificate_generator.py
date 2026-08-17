@@ -3,7 +3,6 @@ from mock_credential.certificates.generators import CertificateGenerator
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes, PrivateKeyTypes
 from cryptography.x509 import (
     AuthorityInformationAccess,

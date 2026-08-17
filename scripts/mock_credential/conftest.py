@@ -1,4 +1,3 @@
-from os import remove
 from subprocess import run, PIPE
 from argparse import ArgumentParser, Namespace
 from pathlib import Path

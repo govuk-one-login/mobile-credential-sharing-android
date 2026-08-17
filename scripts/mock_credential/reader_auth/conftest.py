@@ -1,29 +1,16 @@
-from pytest import fixture, raises
-import pytest
+from pytest import fixture
 from cryptography.x509 import (
     AccessDescription,
-    AuthorityInformationAccess,
     Certificate,
     Extension,
-    ExtensionNotFound,
     Extensions,
-    AuthorityKeyIdentifier,
-    BasicConstraints,
     KeyUsage,
-    ExtendedKeyUsage,
     Name,
-    Version,
-    SignatureAlgorithmOID,
-    NameOID,
-    NameAttribute,
-    PublicKeyAlgorithmOID,
     SubjectInformationAccess,
-    SubjectKeyIdentifier,
     ObjectIdentifier,
     UniformResourceIdentifier,
     ExtensionType,
 )
-from cryptography.x509.oid import AuthorityInformationAccessOID
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from typing import Generator, List, Tuple
 
