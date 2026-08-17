@@ -171,13 +171,14 @@ class GenerateMockCredentialInputs:
             key_gen=intermediate_key_gen,
             reader_auth_private_key=reader_auth_private_key,
             intermediary_reader_auth_cert=intermediary_reader_auth_cert,
+            # Doesn't contain Privacy policy OID
             extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
         )
         with open(self.reader_invalid_x509_leaf_certificate, "wb") as f:
             f.write(invalid_reader_auth_leaf_cert.public_bytes(serialization.Encoding.DER))
             reader_logger.info(
                 f"Written invalid x509 leaf certificate: {self.reader_invalid_x509_leaf_certificate}"
-                )
+            )
 
 
         return (valid_reader_auth_leaf_cert, invalid_reader_auth_leaf_cert)
@@ -197,7 +198,7 @@ class GenerateMockCredentialInputs:
         reader_auth_leaf_cert = cert_gen.create_certificate(
             reader_auth_leaf_key.public_key(),
             reader_auth_private_key,
-            LEAF_NAME,
+            READER_AUTH_LEAF_SUBJECT_NAME,
             intermediary_reader_auth_cert,
             validity_days=min(self.validity_days, 457),
             extensions=extensions,

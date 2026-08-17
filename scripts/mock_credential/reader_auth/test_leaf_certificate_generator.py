@@ -85,16 +85,11 @@ class TestReaderAuthLeafCertificateGenerator:
         )
         assert leaf_certificates.not_valid_after == expected
 
-    @pytest.mark.parametrize(
-        "name_attribute",
-        READER_AUTH_LEAF_SUBJECT_NAME
-    )
     def test_leaf_certificate_has_common_name(
         self,
-        name_attribute: NameAttribute,
         leaf_certificates: Certificate
     ):
-        assert name_attribute in leaf_certificates.subject
+        assert READER_AUTH_LEAF_SUBJECT_NAME == leaf_certificates.subject
 
     def test_public_key_algorithm_is_id_ecPublicKey(
         self,
