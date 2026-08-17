@@ -11,6 +11,11 @@ from cryptography.x509 import Certificate, CertificateBuilder, Name
 from datetime import datetime, timedelta, timezone
 from typing import List
 
+# mdlReaderAuth
+OID_MDL_RA = x509.ObjectIdentifier("1.0.18013.5.1.6")
+# mdocReaderAuth
+OID_MDOC_RA = x509.ObjectIdentifier("1.0.23220.4.1.6")
+
 
 class ReaderAuthCertificateGenerator(CertificateGenerator):
     def __init__(self, now: datetime = datetime.now(tz=timezone.utc)):
@@ -51,6 +56,13 @@ class ReaderAuthCertificateGenerator(CertificateGenerator):
                     decipher_only=False,
                 ),
                 critical=True,
+            )
+            .add_extension(
+                x509.ExtendedKeyUsage([
+                    OID_MDL_RA,
+                    OID_MDOC_RA
+                ]),
+                critical=True
             )
         )
         return builder.sign(private_key, hashes.SHA256())

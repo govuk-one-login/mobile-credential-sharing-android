@@ -1,4 +1,5 @@
 from pytest import fixture, raises
+import pytest
 from cryptography.x509 import (
     Certificate,
     Extension,
@@ -21,7 +22,10 @@ from datetime import datetime, timezone
 from mock_credential.certificates.generators import PemKeyGenerator
 from mock_credential.certificates.generators.conftest import TEST_SUBJECT_NAME
 
+# mdlReaderAuth
 OID_MDL_RA = ObjectIdentifier("1.0.18013.5.1.6")
+# mdocReaderAuth
+OID_MDOC_RA = ObjectIdentifier("1.0.23220.4.1.6")
 
 class TestReaderAuthCertificateGenerator:
     @fixture
@@ -205,3 +209,34 @@ class TestReaderAuthCertificateGenerator:
             valid_intermediate_key_usage.value.decipher_only
 
         assert "decipher_only is undefined unless key_agreement is true" in str(exception)
+
+    def test_extended_key_usage_is_critical(self, valid_intermediate_extensions):
+        extended_keys = valid_intermediate_extensions.get_extension_for_class(
+            ExtendedKeyUsage
+        )
+
+        assert extended_keys.critical
+
+    @pytest.mark.parametrize(
+        "input",
+        [
+            pytest.param(
+                OID_MDL_RA,
+                id="ReaderAuth: Mobile Driving Licence"
+            ),
+            pytest.param(
+                OID_MDOC_RA,
+                id="ReaderAuth: Mobile Document"
+            ),
+        ]
+    )
+    def test_extended_keys_contain_input(
+        self,
+        input: ObjectIdentifier,
+        valid_intermediate_extensions: Extensions
+    ):
+        extended_keys = valid_intermediate_extensions.get_extension_for_class(
+            ExtendedKeyUsage
+        )
+
+        assert input in extended_keys.value

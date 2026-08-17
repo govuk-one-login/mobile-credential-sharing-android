@@ -18,7 +18,10 @@ from mock_credential.certificates.generators import (
 T = TypeVar("T", bound="Parent")  # type: ignore
 # ISO 18013-5 mdoc DS OID
 OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
+# mdlReaderAuth
 OID_MDL_RA = ObjectIdentifier("1.0.18013.5.1.6")
+# mdocReaderAuth
+OID_MDOC_RA = ObjectIdentifier("1.0.23220.4.1.6")
 
 logging_config.fileConfig("pyproject.toml")
 logger = logging.getLogger("project")
@@ -149,7 +152,12 @@ class GenerateMockCredentialInputs:
                     True,
                 )
         extended_key_usage_extension: Tuple[ExtensionType, bool] = (
-            ExtendedKeyUsage([OID_MDL_RA]),
+            ExtendedKeyUsage(
+                [
+                    OID_MDL_RA,
+                    OID_MDOC_RA
+                ]
+            ),
             True
         )
         issuer_alternative_name_extension: Tuple[ExtensionType, bool] = (
