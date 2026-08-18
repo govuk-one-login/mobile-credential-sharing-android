@@ -50,5 +50,10 @@ enum class ClientError {
      * Indicates that the remote GATT server's services changed during an active session,
      * meaning the current session is no longer valid.
      */
-    SERVICE_CHANGED
+    SERVICE_CHANGED,
+
+    /**
+     * Indicates that the accumulated receive buffer exceeded the configured maximum size.
+     */
+    EXCEEDED_MAX_BUFFER_SIZE
 }
