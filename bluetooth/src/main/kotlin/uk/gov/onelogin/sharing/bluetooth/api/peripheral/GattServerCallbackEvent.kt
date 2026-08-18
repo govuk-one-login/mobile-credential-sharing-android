@@ -71,4 +71,6 @@ sealed interface GattServerCallbackEvent {
     }
 
     data object SessionEnd : GattServerCallbackEvent
+
+    data object ExceededMaxBufferSize : GattServerCallbackEvent
 }

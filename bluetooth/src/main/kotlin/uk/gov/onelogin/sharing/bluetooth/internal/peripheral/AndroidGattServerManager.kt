@@ -14,8 +14,12 @@ import androidx.annotation.RequiresPermission
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
@@ -27,17 +31,19 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueu
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
+import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
+import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
 @ContributesBinding(AppScope::class)
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 class AndroidGattServerManager(
     private val context: Context,
     private val bluetoothManager: BluetoothManager,
@@ -48,25 +54,42 @@ class AndroidGattServerManager(
     },
     private val permissionsChecker: PermissionChecker,
     private val logger: Logger,
-    private val gattWriter: GattWriter
+    private val gattWriter: GattWriter,
+    @param:ApplicationScope private val coroutineScope: CoroutineScope
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
     )
     override val events: SharedFlow<GattServerEvent> = _events
+
+    @Volatile
     private var gattServer: BluetoothGattServer? = null
+
+    @Volatile
     internal var connectedDevice: BluetoothDevice? = null
+
+    @Volatile
+    private var serviceUuid: UUID? = null
 
     @SuppressLint("MissingPermission")
     private val eventEmitter = GattEventEmitter {
         handleGattEvent(it)
     }
+
+    @Volatile
     private var mtu = MIN_MTU
+
+    @Volatile
     private var isSessionEnd = false
+
+    @Volatile
+    private var isTerminating = false
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open(serviceUuid: UUID) {
         val gattService = gattServiceFactory(serviceUuid)
+        this.serviceUuid = serviceUuid
+        isTerminating = false
 
         if (permissionsChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
@@ -103,6 +126,7 @@ class AndroidGattServerManager(
         gattServer?.close()
         gattServer = null
         connectedDevice = null
+        serviceUuid = null
         isSessionEnd = false
         mtu = MIN_MTU
         _events.tryEmit(GattServerEvent.ServiceStopped)
@@ -110,6 +134,14 @@ class AndroidGattServerManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleGattEvent(event: GattServerCallbackEvent) {
+        if (isTerminating &&
+            (
+                event is GattServerCallbackEvent.MessageReceived ||
+                    event is GattServerCallbackEvent.ExceededMaxBufferSize
+                )
+        ) {
+            return
+        }
         when (event) {
             is GattServerCallbackEvent.ConnectionStateChange -> handleConnectionStateChange(event)
             is GattServerCallbackEvent.ConnectionStateStarted -> handleConnectionStateStarted()
@@ -118,6 +150,7 @@ class AndroidGattServerManager(
             is GattServerCallbackEvent.MtuChanged -> mtu = event.mtu
             is GattServerCallbackEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
             is GattServerCallbackEvent.SessionEnd -> handleSessionEndReceived()
+            is GattServerCallbackEvent.ExceededMaxBufferSize -> handleExceededMaxBufferSize()
         }
     }
 
@@ -236,6 +269,22 @@ class AndroidGattServerManager(
     private fun handleSessionEndReceived() {
         isSessionEnd = true
         _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
+    }
+
+    /**
+     * Handles when the accumulated BLE buffer exceeds the configured maximum size.
+     * Sends the session end command to the Verifier, then closes the connection
+     * and emits an error to trigger session failure and destruction.
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleExceededMaxBufferSize() {
+        isTerminating = true
+        coroutineScope.launch {
+            serviceUuid?.let { notifySessionEnd(it) }
+            delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
+            cancelCurrentConnection()
+            _events.tryEmit(GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE))
+        }
     }
 
     /**
