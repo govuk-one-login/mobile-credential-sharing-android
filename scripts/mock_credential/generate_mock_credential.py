@@ -43,7 +43,7 @@ def generate():
         cert_gen=cert_gen,
         key_gen=pem_key_gen,
     )
-    valid_reader_leaf_cert, invalid_reader_leaf_cert = args.create_reader_auth_certificates(
+    reader_auth_certificates = args.create_reader_auth_certificates(
         cert_gen=reader_cert_gen, root_key_gen=pem_key_gen, intermediate_key_gen=der_key_gen
     )
 
@@ -104,10 +104,13 @@ def get_argument_parser() -> GenerateMockCredentialInputs:
         default="app/src/main/assets/reader_valid_x509_leaf_certificate.der",
     )
     parser.add_argument(
-        "--reader-invalid-x509-leaf-certificate",
-        default="app/src/main/assets/reader_invalid_x509_leaf_certificate.der",
+        "--reader-x509-leaf-certificate-without-privacy-policy",
+        default="app/src/main/assets/reader_x509_leaf_without_privacy_policy.der",
     )
-
+    parser.add_argument(
+        "--reader-x509-leaf-invalid-organisation",
+        default="app/src/main/assets/reader_x509_leaf_with_invalid_organisation.der",
+    )
     logger.info("Obtained command-line arguments...")
     return GenerateMockCredentialInputs.from_parser(parser.parse_args())
 

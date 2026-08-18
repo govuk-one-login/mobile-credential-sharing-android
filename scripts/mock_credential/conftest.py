@@ -68,12 +68,16 @@ def valid_parser(
         default=str(input_tmp_dir) + "/reader_valid_x509_leaf_certificate.der",
     )
     empty_parser.add_argument(
-        "--reader-invalid-x509-leaf-certificate",
-        default=str(input_tmp_dir) + "/reader_invalid_x509_leaf_certificate.der",
+        "--reader-x509-leaf-certificate-without-privacy-policy",
+        default=str(input_tmp_dir) + "/reader_x509_leaf_without_privacy_policy.der",
     )
     empty_parser.add_argument(
         "--reader-name-constrained-intermediate-x509-certificate",
         default=str(input_tmp_dir) + "/reader_name_constrained_intermediate_x509_certificate.der"
+    )
+    empty_parser.add_argument(
+        "--reader-x509-leaf-invalid-organisation",
+        default=str(input_tmp_dir) + "/reader_x509_leaf_with_invalid_organisation.der",
     )
     args, _ = empty_parser.parse_known_args()
     yield args
@@ -108,7 +112,7 @@ def invalid_reader_auth_leaf_path(
     valid_issuer_auth_input: GenerateMockCredentialInputs,
     create_reader_auth_leaf_certificates: Tuple[Certificate, Certificate],
 ) -> str:
-    return valid_issuer_auth_input.reader_invalid_x509_leaf_certificate
+    return valid_issuer_auth_input.reader_x509_leaf_certificate_without_privacy_policy
 
 
 @fixture(

@@ -23,7 +23,7 @@ from cryptography.x509 import (
 from cryptography.x509.oid import AuthorityInformationAccessOID
 
 from datetime import datetime, timedelta, timezone
-from typing import List
+from typing import List, Tuple
 
 # mdlReaderAuth
 OID_MDL_RA = ObjectIdentifier("1.0.18013.5.1.6")
@@ -34,13 +34,23 @@ READER_AUTH_LEAF_SUBJECT_NAME: Name = Name(
     [
         NameAttribute(NameOID.COUNTRY_NAME, "GB"),
         NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "London"),
-        NameAttribute(NameOID.COMMON_NAME, "mDoc ReaderAuth Test Leaf"),
-        NameAttribute(NameOID.ORGANIZATION_NAME, "DVLA Dev Tool"),
+        NameAttribute(NameOID.COMMON_NAME, "MegaDVS Intermediate"),
+        NameAttribute(NameOID.ORGANIZATION_NAME, "MegaDVS"),
     ]
 )
 
+READER_AUTH_DVS_ATTRIBUTES: List[NameAttribute] = [
+    NameAttribute(NameOID.ORGANIZATION_NAME, "MegaDVS"), 
+]
+
+def generate_dvs_subject(
+    attributes: List[NameAttribute]
+) -> Name:
+    return Name(
+        [NameAttribute(NameOID.COUNTRY_NAME, "GB")] + attributes
+    )
+
 READER_AUTH_COMMON_LEAF_EXTENSIONS: List[Tuple[ExtensionType, bool]] = [
-    (BasicConstraints(ca=False, path_length=None), True),
     (
         KeyUsage(
             digital_signature=True,

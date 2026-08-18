@@ -85,8 +85,8 @@ class TestIssuerAuthInput:
                     reader_intermediate_x509_certificate="",
                     reader_valid_x509_leaf_certificate="",
                 ),
-                "reader_invalid_x509_leaf_certificate",
-                id="Missing invalid ReaderAuth x509 leaf certificate",
+                "reader_x509_leaf_certificate_without_privacy_policy",
+                id="ReaderAuth x509 leaf certificate without privacy policy",
             ),
             pytest.param(
                 Namespace(
@@ -97,7 +97,7 @@ class TestIssuerAuthInput:
                     validity_days=1,
                     issuer_intermediate_x509_certificate="",
                     reader_intermediate_x509_certificate="",
-                    reader_invalid_x509_leaf_certificate="",
+                    reader_x509_leaf_certificate_without_privacy_policy="",
                     reader_valid_x509_leaf_certificate="",
                 ),
                 "reader_name_constrained_intermediate_x509_certificate",
@@ -125,7 +125,7 @@ class TestIssuerAuthInput:
         self, reader_auth_leaf_certificate_contents: str
     ):
         assert (
-            "Subject: C=GB, ST=London, CN=mDoc ReaderAuth Test Leaf, O=DVLA Dev Tool"
+            "O=MegaDVS"
             in reader_auth_leaf_certificate_contents
         )
 

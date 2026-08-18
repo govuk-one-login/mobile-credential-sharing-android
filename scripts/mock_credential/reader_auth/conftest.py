@@ -5,6 +5,7 @@ from cryptography.x509 import (
     Extension,
     Extensions,
     KeyUsage,
+    BasicConstraints,
     Name,
     SubjectInformationAccess,
     ObjectIdentifier,
@@ -68,7 +69,9 @@ def valid_intermediate_key_usage(valid_intermediate_extensions: Extensions) -> E
 
 @fixture
 def leaf_certificate_extensions_input() -> List[Tuple[ExtensionType, bool]]:
-    return READER_AUTH_COMMON_LEAF_EXTENSIONS
+    return READER_AUTH_COMMON_LEAF_EXTENSIONS + [
+        (BasicConstraints(ca=False, path_length=None), True)
+    ]
 
 
 @fixture
