@@ -93,6 +93,10 @@ def get_argument_parser() -> GenerateMockCredentialInputs:
         "--reader-intermediate-x509-certificate",
         default="app/src/main/assets/test_reader_auth_x509_certificate.der",
     )
+    parser.add_argument(
+        "--reader-name-constrained-intermediate-x509-certificate",
+        default="app/src/main/assets/test_reader_auth_name_constrained_x509_certificate.der"
+    )
     parser.add_argument("--output", default="app/src/main/res/raw/mock_credential.txt")
     parser.add_argument("--validity-days", type=int, default=365)
     parser.add_argument(

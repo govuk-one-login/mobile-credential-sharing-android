@@ -1,5 +1,6 @@
 import pytest
 from typing import Any, AnyStr, Dict
+from mock_credential.namespaces import IssuerSignedItem
 
 
 @pytest.fixture

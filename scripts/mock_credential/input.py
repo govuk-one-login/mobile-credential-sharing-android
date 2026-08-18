@@ -51,6 +51,7 @@ class GenerateMockCredentialInputs:
         self.validity_days = kwargs["validity_days"]
         self.issuer_intermediate_x509_certificate = kwargs["issuer_intermediate_x509_certificate"]
         self.reader_intermediate_x509_certificate = kwargs["reader_intermediate_x509_certificate"]
+        self.reader_name_constrained_intermediate_x509_certificate = kwargs["reader_name_constrained_intermediate_x509_certificate"]
         self.reader_valid_x509_leaf_certificate = kwargs["reader_valid_x509_leaf_certificate"]
         self.reader_invalid_x509_leaf_certificate = kwargs["reader_invalid_x509_leaf_certificate"]
 
@@ -233,4 +234,5 @@ class GenerateMockCredentialInputs:
             reader_intermediate_x509_certificate=args.reader_intermediate_x509_certificate,
             reader_valid_x509_leaf_certificate=args.reader_valid_x509_leaf_certificate,
             reader_invalid_x509_leaf_certificate=args.reader_invalid_x509_leaf_certificate,
+            reader_name_constrained_intermediate_x509_certificate=args.reader_name_constrained_intermediate_x509_certificate
         )

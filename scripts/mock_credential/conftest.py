@@ -71,6 +71,10 @@ def valid_parser(
         "--reader-invalid-x509-leaf-certificate",
         default=str(input_tmp_dir) + "/reader_invalid_x509_leaf_certificate.der",
     )
+    empty_parser.add_argument(
+        "--reader-name-constrained-intermediate-x509-certificate",
+        default=str(input_tmp_dir) + "/reader_name_constrained_intermediate_x509_certificate.der"
+    )
     args, _ = empty_parser.parse_known_args()
     yield args
 

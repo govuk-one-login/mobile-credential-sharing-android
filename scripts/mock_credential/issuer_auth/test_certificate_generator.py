@@ -7,6 +7,7 @@ from mock_credential.certificates.generators.conftest import (
     LEAF_EXTENSIONS,
     TEST_LEAF_NAME,
     TEST_SUBJECT_NAME,
+    key_gen,
 )
 
 
