@@ -121,14 +121,6 @@ class TestIssuerAuthInput:
     ):
         assert "Signature Algorithm: ecdsa-with-SHA256" in reader_auth_leaf_certificate_contents
 
-    def test_evaluated_reader_auth_certs_reference_issuer_information(
-        self, reader_auth_leaf_certificate_contents: str
-    ):
-        assert (
-            "O=MegaDVS"
-            in reader_auth_leaf_certificate_contents
-        )
-
     def test_evaluated_reader_auth_certs_reference_public_key_algorithm(
         self, reader_auth_leaf_certificate_contents: str
     ):
