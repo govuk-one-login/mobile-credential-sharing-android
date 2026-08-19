@@ -59,9 +59,13 @@ class GenerateMockCredentialInputs:
         self.validity_days = kwargs["validity_days"]
         self.issuer_intermediate_x509_certificate = kwargs["issuer_intermediate_x509_certificate"]
         self.reader_intermediate_x509_certificate = kwargs["reader_intermediate_x509_certificate"]
-        self.reader_name_constrained_intermediate_x509_certificate = kwargs["reader_name_constrained_intermediate_x509_certificate"]
+        self.reader_name_constrained_intermediate_x509_certificate = kwargs[
+            "reader_name_constrained_intermediate_x509_certificate"
+        ]
         self.reader_valid_x509_leaf_certificate = kwargs["reader_valid_x509_leaf_certificate"]
-        self.reader_x509_leaf_certificate_without_privacy_policy = kwargs["reader_x509_leaf_certificate_without_privacy_policy"]
+        self.reader_x509_leaf_certificate_without_privacy_policy = kwargs[
+            "reader_x509_leaf_certificate_without_privacy_policy"
+        ]
         self.reader_x509_leaf_invalid_organisation = kwargs["reader_x509_leaf_invalid_organisation"]
 
         logger.info("Created input instance from parameters")
@@ -84,7 +88,8 @@ class GenerateMockCredentialInputs:
             and (
                 self.reader_x509_leaf_certificate_without_privacy_policy
                 == other.reader_x509_leaf_certificate_without_privacy_policy
-            ) and (
+            )
+            and (
                 self.reader_x509_leaf_invalid_organisation
                 == other.reader_x509_leaf_invalid_organisation
             )
@@ -167,34 +172,40 @@ class GenerateMockCredentialInputs:
                 f"Written x509 intermediate certificate: {self.reader_intermediate_x509_certificate}"
             )
 
-        constrained_reader_auth_key, constrained_reader_auth_cert = self._create_reader_auth_leaf_certificate(
-            cert_gen=cert_gen,
-            key_gen=intermediate_key_gen,
-            subject=generate_dvs_subject(
-                attributes=READER_AUTH_DVS_ATTRIBUTES + [
-                    NameAttribute(NameOID.COMMON_NAME, "MegaDVS Intermediate"),
-                ]
-            ),
-            subject_key=reader_auth_private_key,
-            issuer_cert=intermediary_reader_auth_cert,
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS + [
-                (BasicConstraints(ca=True, path_length=None), True),
-                (PRIVACY_POLICY_URL_EXTENSION, False),
-                (
-                    NameConstraints(
-                        permitted_subtrees=[
-                            DirectoryName(
-                                Name([
-                                    NameAttribute(NameOID.COUNTRY_NAME, "GB"),
-                                    NameAttribute(NameOID.ORGANIZATION_NAME, "MegaDVS")
-                                ])
-                            )
-                        ],
-                        excluded_subtrees=None
+        constrained_reader_auth_key, constrained_reader_auth_cert = (
+            self._create_reader_auth_leaf_certificate(
+                cert_gen=cert_gen,
+                key_gen=intermediate_key_gen,
+                subject=generate_dvs_subject(
+                    attributes=READER_AUTH_DVS_ATTRIBUTES
+                    + [
+                        NameAttribute(NameOID.COMMON_NAME, "MegaDVS Intermediate"),
+                    ]
+                ),
+                subject_key=reader_auth_private_key,
+                issuer_cert=intermediary_reader_auth_cert,
+                extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
+                + [
+                    (BasicConstraints(ca=True, path_length=None), True),
+                    (PRIVACY_POLICY_URL_EXTENSION, False),
+                    (
+                        NameConstraints(
+                            permitted_subtrees=[
+                                DirectoryName(
+                                    Name(
+                                        [
+                                            NameAttribute(NameOID.COUNTRY_NAME, "GB"),
+                                            NameAttribute(NameOID.ORGANIZATION_NAME, "MegaDVS"),
+                                        ]
+                                    )
+                                )
+                            ],
+                            excluded_subtrees=None,
+                        ),
+                        True,
                     ),
-                    True
-                )
-            ],
+                ],
+            )
         )
         with open(self.reader_name_constrained_intermediate_x509_certificate, "wb") as f:
             f.write(constrained_reader_auth_cert.public_bytes(serialization.Encoding.DER))
@@ -205,17 +216,19 @@ class GenerateMockCredentialInputs:
         _, valid_reader_auth_leaf_cert = self._create_reader_auth_leaf_certificate(
             cert_gen=cert_gen,
             subject=generate_dvs_subject(
-                READER_AUTH_DVS_ATTRIBUTES + [
+                READER_AUTH_DVS_ATTRIBUTES
+                + [
                     NameAttribute(NameOID.COMMON_NAME, "Supermarket1 backend"),
-                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket1")
+                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket1"),
                 ]
             ),
             key_gen=intermediate_key_gen,
             subject_key=constrained_reader_auth_key,
             issuer_cert=constrained_reader_auth_cert,
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS + [
+            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
+            + [
                 (BasicConstraints(ca=False, path_length=None), True),
-                (PRIVACY_POLICY_URL_EXTENSION, False)
+                (PRIVACY_POLICY_URL_EXTENSION, False),
             ],
         )
         with open(self.reader_valid_x509_leaf_certificate, "wb") as f:
@@ -227,21 +240,25 @@ class GenerateMockCredentialInputs:
         _, reader_auth_leaf_without_privacy_policy = self._create_reader_auth_leaf_certificate(
             cert_gen=cert_gen,
             subject=generate_dvs_subject(
-                READER_AUTH_DVS_ATTRIBUTES + [
+                READER_AUTH_DVS_ATTRIBUTES
+                + [
                     NameAttribute(NameOID.COMMON_NAME, "Supermarket2 backend"),
-                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket2")
+                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket2"),
                 ]
             ),
             key_gen=intermediate_key_gen,
             subject_key=constrained_reader_auth_key,
             issuer_cert=constrained_reader_auth_cert,
             # Doesn't contain Privacy policy OID
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS + [
+            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
+            + [
                 (BasicConstraints(ca=False, path_length=None), True),
             ],
         )
         with open(self.reader_x509_leaf_certificate_without_privacy_policy, "wb") as f:
-            f.write(reader_auth_leaf_without_privacy_policy.public_bytes(serialization.Encoding.DER))
+            f.write(
+                reader_auth_leaf_without_privacy_policy.public_bytes(serialization.Encoding.DER)
+            )
             reader_logger.info(
                 f"Written x509 leaf certificate without privacy policy: {self.reader_x509_leaf_certificate_without_privacy_policy}"
             )
@@ -252,14 +269,15 @@ class GenerateMockCredentialInputs:
                 [
                     NameAttribute(NameOID.ORGANIZATION_NAME, "RogueDVS"),
                     NameAttribute(NameOID.COMMON_NAME, "Supermarket2 backend"),
-                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket2")
+                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket2"),
                 ]
             ),
             key_gen=intermediate_key_gen,
             subject_key=constrained_reader_auth_key,
             issuer_cert=constrained_reader_auth_cert,
             # Doesn't contain Privacy policy OID
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS + [
+            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
+            + [
                 (BasicConstraints(ca=False, path_length=None), True),
             ],
         )
@@ -327,5 +345,5 @@ class GenerateMockCredentialInputs:
             reader_valid_x509_leaf_certificate=args.reader_valid_x509_leaf_certificate,
             reader_x509_leaf_certificate_without_privacy_policy=args.reader_x509_leaf_certificate_without_privacy_policy,
             reader_name_constrained_intermediate_x509_certificate=args.reader_name_constrained_intermediate_x509_certificate,
-            reader_x509_leaf_invalid_organisation=args.reader_x509_leaf_invalid_organisation
+            reader_x509_leaf_invalid_organisation=args.reader_x509_leaf_invalid_organisation,
         )

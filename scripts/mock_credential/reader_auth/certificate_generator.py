@@ -37,15 +37,13 @@ READER_AUTH_LEAF_SUBJECT_NAME: Name = Name(
 )
 
 READER_AUTH_DVS_ATTRIBUTES: List[NameAttribute] = [
-    NameAttribute(NameOID.ORGANIZATION_NAME, "MegaDVS"), 
+    NameAttribute(NameOID.ORGANIZATION_NAME, "MegaDVS"),
 ]
 
-def generate_dvs_subject(
-    attributes: List[NameAttribute]
-) -> Name:
-    return Name(
-        [NameAttribute(NameOID.COUNTRY_NAME, "GB")] + attributes
-    )
+
+def generate_dvs_subject(attributes: List[NameAttribute]) -> Name:
+    return Name([NameAttribute(NameOID.COUNTRY_NAME, "GB")] + attributes)
+
 
 READER_AUTH_COMMON_LEAF_EXTENSIONS: List[Tuple[ExtensionType, bool]] = [
     (
