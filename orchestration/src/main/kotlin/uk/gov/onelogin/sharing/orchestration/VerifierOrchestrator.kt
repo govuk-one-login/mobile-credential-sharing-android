@@ -613,13 +613,15 @@ class VerifierOrchestrator(
             .toItemsRequest(verifierConfig.verificationRequest.documentType)
 
         runCatching {
+            val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
+            verifierCryptoService.buildReaderAuthenticationBytes(itemsRequestBytes, context)
             buildAndSendSessionEstablishment(context, itemsRequest)
         }.onFailure { e ->
-            val reason = when (e) {
-                is EncryptDeviceRequestException -> SessionErrorReason.CannotEncryptDeviceRequest
-
-                is SessionEstablishmentException ->
-                    SessionErrorReason.CannotBuildSessionEstablishment
+            val reason = when {
+                e is EncryptDeviceRequestException -> SessionErrorReason.CannotEncryptDeviceRequest
+                e is SessionEstablishmentException -> SessionErrorReason.CannotBuildSessionEstablishment
+                e.message?.contains("ReaderAuthentication") == true ->
+                    SessionErrorReason.CannotBuildReaderAuthentication
 
                 else -> SessionErrorReason.CannotSendMessage
             }

@@ -14,6 +14,7 @@ import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.cbor.base64Decode
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveSessionTranscript
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
@@ -38,6 +39,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablish
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ReaderAuthenticationDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
@@ -113,15 +115,33 @@ class VerifierCryptoServiceImpl(
         updateContext(
             VerifierCryptoContext(
                 engagementString = qrCodeData,
+                deviceEngagementBytes = qrCodeData.base64Decode(),
                 serviceUuid = serviceUuid,
                 eReaderKeyTagged = eReaderKeyTagged,
                 sessionTranscriptBytes = sessionTranscriptBytes,
+                rawSessionTranscript = sessionTranscript,
                 eReaderKeyPair = keyPair,
                 eDevicePublicKey = eDevicePublicKey,
                 skReader = skReader,
                 skDevice = skDevice
             )
         )
+    }
+
+    override fun buildReaderAuthenticationBytes(
+        itemsRequestBytes: ByteArray,
+        context: VerifierCryptoContext
+    ): ByteArray = try {
+        val dto = ReaderAuthenticationDto(
+            sessionTranscript = context.rawSessionTranscript,
+            itemsRequestBytes = itemsRequestBytes
+        )
+        EmbeddedCbor(dto.toCbor()).toCbor().also {
+            logger.debug(logTag, "ReaderAuthenticationBytes constructed successfully")
+        }
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        logger.error(logTag, "Error constructing ReaderAuthenticationBytes", e)
+        throw e
     }
 
     override fun buildSessionEstablishment(
@@ -139,12 +159,18 @@ class VerifierCryptoServiceImpl(
         throw SessionEstablishmentException(LOG_SESSION_ESTABLISHMENT_ERROR, e)
     }
 
-    override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = DeviceRequest(
-        version = "1.0",
-        docRequests = listOf(DocRequest(itemsRequest))
-    ).toDto().toCbor().also {
-        logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
+    override fun buildItemsRequestBytes(itemsRequest: ItemsRequest): ByteArray {
+        val encoded = CborMapper.default.writeValueAsBytes(itemsRequest.toDto())
+        return EmbeddedCbor(encoded).toCbor()
     }
+
+    override fun buildDeviceRequest(itemsRequest: ItemsRequest, readerAuth: ByteArray?): ByteArray =
+        DeviceRequest(
+            version = "1.0",
+            docRequests = listOf(DocRequest(itemsRequest, readerAuth))
+        ).toDto().toCbor().also {
+            logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
+        }
 
     override fun encryptDeviceRequest(
         deviceRequestBytes: ByteArray,

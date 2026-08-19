@@ -44,9 +44,11 @@ class FakeVerifierCryptoService : VerifierCryptoService {
             updater = { qrCodeData ->
                 VerifierCryptoContext(
                     engagementString = qrCodeData,
+                    deviceEngagementBytes = byteArrayOf(),
                     serviceUuid = UUID.randomUUID(),
                     eReaderKeyTagged = byteArrayOf(),
                     sessionTranscriptBytes = byteArrayOf(),
+                    rawSessionTranscript = byteArrayOf(),
                     eReaderKeyPair = validKeyPair!!,
                     eDevicePublicKey = validKeyPair.public as ECPublicKey,
                     skReader = sessionKeysToReturn.first,
@@ -56,7 +58,15 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         ).establishSession(qrCodeData, updateContext)
     }
 
-    override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = byteArrayOf(0x01, 0x02)
+    override fun buildItemsRequestBytes(itemsRequest: ItemsRequest): ByteArray = byteArrayOf(0x01)
+
+    override fun buildReaderAuthenticationBytes(
+        itemsRequestBytes: ByteArray,
+        context: VerifierCryptoContext
+    ): ByteArray = byteArrayOf(0x02)
+
+    override fun buildDeviceRequest(itemsRequest: ItemsRequest, readerAuth: ByteArray?): ByteArray =
+        byteArrayOf(0x01, 0x02)
 
     override fun encryptDeviceRequest(
         deviceRequestBytes: ByteArray,

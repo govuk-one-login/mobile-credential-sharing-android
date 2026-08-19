@@ -56,10 +56,18 @@ data class DocRequestDto(
             gen: JsonGenerator,
             provider: SerializerProvider
         ) {
-            (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
+            val fieldCount = if (value.readerAuth != null) 2 else 1
+            (gen as CBORGenerator).writeStartObject(fieldCount)
             gen.writeFieldName(ITEMS_REQUEST_KEY)
             gen.writeTag(EMBEDDED_CBOR_TAG)
             gen.writeBinary(CborMapper.default.writeValueAsBytes(value.itemsRequest))
+
+            value.readerAuth?.let {
+                gen.writeFieldName(READER_AUTH_KEY)
+                gen.writeTag(EMBEDDED_CBOR_TAG)
+                gen.writeBinary(it)
+            }
+
             gen.writeEndObject()
         }
     }
@@ -71,12 +79,14 @@ data class DocRequestDto(
                 ?: throw IllegalArgumentException("Missing itemsRequest in DocRequest")
             val itemsRequest = CborMapper.default
                 .readValue(itemsRequestNode.binaryValue(), ItemsRequestDto::class.java)
-            return DocRequestDto(itemsRequest = itemsRequest)
+
+            val readerAuth = root[READER_AUTH_KEY]?.binaryValue()
+
+            return DocRequestDto(itemsRequest = itemsRequest, readerAuth = readerAuth)
         }
     }
 
     companion object {
-        private const val FIELD_COUNT = 1
         const val ITEMS_REQUEST_KEY = "itemsRequest"
         const val READER_AUTH_KEY: String = "readerAuth"
     }
