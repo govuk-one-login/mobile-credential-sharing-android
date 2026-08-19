@@ -1,4 +1,4 @@
-from pytest import fixture
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.x509 import (
     AccessDescription,
     Certificate,
@@ -12,9 +12,6 @@ from cryptography.x509 import (
     UniformResourceIdentifier,
     ExtensionType,
 )
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
-from typing import Generator, List, Tuple
-
 from mock_credential.certificates.generators import PemKeyGenerator
 from mock_credential.certificates.generators.conftest import TEST_SUBJECT_NAME
 from mock_credential.reader_auth import (
@@ -22,6 +19,8 @@ from mock_credential.reader_auth import (
     READER_AUTH_COMMON_LEAF_EXTENSIONS,
     READER_AUTH_LEAF_SUBJECT_NAME,
 )
+from pytest import fixture
+from typing import Generator, List, Tuple
 
 
 @fixture
@@ -100,7 +99,7 @@ def valid_leaf_certificate(
                     [
                         AccessDescription(
                             access_method=ObjectIdentifier(
-                                "1.3.6.1.4.1.72548.1.1",
+                                "1.3.6.1.4.1.66559.1.1",
                             ),
                             access_location=UniformResourceIdentifier("https://www.gov.uk/"),
                         )

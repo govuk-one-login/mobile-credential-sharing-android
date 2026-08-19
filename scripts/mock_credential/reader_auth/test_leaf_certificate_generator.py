@@ -1,5 +1,5 @@
-from pytest import raises
 import pytest
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.x509 import (
     AccessDescription,
     AuthorityInformationAccess,
@@ -21,10 +21,9 @@ from cryptography.x509 import (
     UniformResourceIdentifier,
 )
 from cryptography.x509.oid import AuthorityInformationAccessOID
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from datetime import datetime, timezone
-
 from mock_credential.reader_auth import OID_MDL_RA, OID_MDOC_RA, READER_AUTH_LEAF_SUBJECT_NAME
+from pytest import raises
 
 
 class TestReaderAuthLeafCertificateGenerator:
@@ -220,7 +219,7 @@ class TestReaderAuthLeafCertificateGenerator:
 
         assert (
             AccessDescription(
-                access_method=ObjectIdentifier("1.3.6.1.4.1.72548.1.1"),
+                access_method=ObjectIdentifier("1.3.6.1.4.1.66559.1.1"),
                 access_location=UniformResourceIdentifier("https://www.gov.uk/"),
             )
             in subject_info_access.value

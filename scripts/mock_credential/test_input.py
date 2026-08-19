@@ -1,6 +1,5 @@
-from argparse import Namespace
 import pytest
-
+from argparse import Namespace
 from mock_credential import GenerateMockCredentialInputs
 from mock_credential.conftest import get_der_certificate_output
 
@@ -145,10 +144,10 @@ class TestIssuerAuthInput:
         self, valid_reader_auth_leaf_path: str
     ):
         contents = get_der_certificate_output(valid_reader_auth_leaf_path)
-        assert "1.3.6.1.4.1.72548.1.1 - URI:https://www.gov.uk/" in contents
+        assert "1.3.6.1.4.1.66559.1.1 - URI:https://www.gov.uk/" in contents
 
     def test_invalid_reader_auth_cert_does_not_reference_privacy_policy_oid(
         self, invalid_reader_auth_leaf_path: str
     ):
         contents = get_der_certificate_output(invalid_reader_auth_leaf_path)
-        assert "1.3.6.1.4.1.72548.1.1 - URI:https://www.gov.uk/" not in contents
+        assert "1.3.6.1.4.1.66559.1.1 - URI:https://www.gov.uk/" not in contents

@@ -1,6 +1,3 @@
-from mock_credential.certificates.generators import CertificateGenerator
-
-
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes, PrivateKeyTypes
@@ -21,8 +18,8 @@ from cryptography.x509 import (
     SubjectInformationAccess,
 )
 from cryptography.x509.oid import AuthorityInformationAccessOID
-
 from datetime import datetime, timedelta, timezone
+from mock_credential.certificates.generators import CertificateGenerator
 from typing import List, Tuple
 
 # mdlReaderAuth
@@ -83,7 +80,7 @@ PRIVACY_POLICY_URL_EXTENSION = SubjectInformationAccess(
     [
         AccessDescription(
             access_method=ObjectIdentifier(
-                "1.3.6.1.4.1.72548.1.1",
+                "1.3.6.1.4.1.66559.1.1",
             ),
             access_location=UniformResourceIdentifier("https://www.gov.uk/"),
         )
