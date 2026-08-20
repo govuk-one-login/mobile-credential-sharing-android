@@ -15,8 +15,6 @@ object DeviceRequestDtoStub {
                     nameSpaces = mapOf(MDL_NAMESPACE to mapOf("age_over_18" to false))
                 )
             )
-        ),
-        deviceRequestInfo = byteArrayOf(0, 1),
-        readerAuthAll = byteArrayOf(1, 2)
+        )
     )
 }

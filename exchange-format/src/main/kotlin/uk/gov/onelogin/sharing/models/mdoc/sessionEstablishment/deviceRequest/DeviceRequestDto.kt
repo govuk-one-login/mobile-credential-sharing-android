@@ -66,13 +66,23 @@ data class DeviceRequestDto(
             gen: JsonGenerator,
             provider: SerializerProvider
         ) {
-            (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
+            val optionalFieldCount = listOf(value.deviceRequestInfo, value.readerAuthAll)
+                .count { it != null }
+            (gen as CBORGenerator).writeStartObject(FIELD_COUNT + optionalFieldCount)
             gen.writeFieldName(VERSION_KEY)
             gen.writeString(value.version)
             gen.writeFieldName(DOC_REQUESTS_KEY)
             gen.writeStartArray(value.docRequest, value.docRequest.size)
             value.docRequest.forEach { provider.defaultSerializeValue(it, gen) }
             gen.writeEndArray()
+            value.deviceRequestInfo?.let {
+                gen.writeFieldName(DEVICE_REQUEST_INFO_KEY)
+                gen.writeBinary(it)
+            }
+            value.readerAuthAll?.let {
+                gen.writeFieldName(READER_AUTH_ALL_KEY)
+                gen.writeBinary(it)
+            }
             gen.writeEndObject()
         }
     }
@@ -85,7 +95,12 @@ data class DeviceRequestDto(
             val docRequests = root[DOC_REQUESTS_KEY]
                 ?.map { p.codec.treeToValue(it, DocRequestDto::class.java) }
                 ?: emptyList()
-            return DeviceRequestDto(version = version, docRequest = docRequests)
+            return DeviceRequestDto(
+                version = version,
+                docRequest = docRequests,
+                deviceRequestInfo = root[DEVICE_REQUEST_INFO_KEY]?.binaryValue(),
+                readerAuthAll = root[READER_AUTH_ALL_KEY]?.binaryValue()
+            )
         }
     }
 
