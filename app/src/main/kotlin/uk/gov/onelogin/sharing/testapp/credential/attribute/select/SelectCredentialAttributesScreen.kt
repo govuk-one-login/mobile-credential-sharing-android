@@ -76,30 +76,14 @@ internal fun SelectCredentialAttributesScreen(
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            UserDropdownMenu(
+            AttributeGroupDropdown(
                 modifier = Modifier.fillMaxWidth().testTag("attribute_group_menu"),
-                label = { Text("Attribute group") },
-                onTextFieldClickLabel = "Select attribute group",
                 textFieldValue = selected.displayName,
-                isDropdownExpanded = isAttributeGroupExpanded,
+                isAttributeGroupExpanded = isAttributeGroupExpanded,
                 onToggleDropdownExpansion = { isAttributeGroupExpanded = it },
-                dropdownMenuContents = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(spacingSingle)
-                    ) {
-                        VerifierAttributeOption.entries.forEach { option ->
-                            DropdownMenuItem(
-                                modifier = Modifier
-                                    .padding(vertical = 2.dp)
-                                    .testTag(ATTRIBUTE_GROUP_ITEM_TAG),
-                                text = { Text(option.displayName) },
-                                onClick = {
-                                    isAttributeGroupExpanded = false
-                                    selected = option
-                                }
-                            )
-                        }
-                    }
+                onSelectAttributeOption = {
+                    isAttributeGroupExpanded = false
+                    selected = it
                 }
             )
 
@@ -118,6 +102,42 @@ internal fun SelectCredentialAttributesScreen(
             }
         }
     }
+}
+
+@Composable
+private fun AttributeGroupDropdown(
+    textFieldValue: String,
+    isAttributeGroupExpanded: Boolean,
+    modifier: Modifier = Modifier,
+    onToggleDropdownExpansion: (Boolean) -> Unit = {},
+    onSelectAttributeOption: (VerifierAttributeOption) -> Unit = {}
+) {
+    UserDropdownMenu(
+        modifier = modifier,
+        label = { Text("Attribute group") },
+        onTextFieldClickLabel = "Select attribute group",
+        textFieldValue = textFieldValue,
+        isDropdownExpanded = isAttributeGroupExpanded,
+        onToggleDropdownExpansion = onToggleDropdownExpansion,
+        dropdownMenuContents = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(spacingSingle)
+            ) {
+                VerifierAttributeOption.entries.forEach { option ->
+                    DropdownMenuItem(
+                        modifier = Modifier
+                            .padding(vertical = 2.dp)
+                            .testTag(ATTRIBUTE_GROUP_ITEM_TAG),
+                        text = { Text(option.displayName) },
+                        onClick = {
+                            onToggleDropdownExpansion(false)
+                            onSelectAttributeOption(option)
+                        }
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable
