@@ -61,4 +61,5 @@ private fun transformReasonToTitle(reason: SessionErrorReason): String = when (r
     is SessionErrorReason.UnsupportedQrCodeFormat -> "UnsupportedQrCodeFormat"
     is SessionErrorReason.UnverifiableDocument -> "UnverifiableDocument"
     is SessionErrorReason.AgeOverNNRequestLimit -> "AgeOverNNRequestLimit"
+    is SessionErrorReason.CannotBuildReaderAuthentication -> "CannotBuildReaderAuthentication"
 }

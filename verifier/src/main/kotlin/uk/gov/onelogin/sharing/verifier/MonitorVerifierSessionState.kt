@@ -160,8 +160,9 @@ private fun handleSessionFailure(
         is SessionErrorReason.StatusError,
         is SessionErrorReason.AgeOverNNRequestLimit,
         SessionErrorReason.DocumentNotReturned,
-        SessionErrorReason.PeerTermination
-        ->
+        SessionErrorReason.PeerTermination,
+        SessionErrorReason.CannotBuildReaderAuthentication
+            ->
             navController.navigateToUnrecoverableVerifierError(options)
     }
 }

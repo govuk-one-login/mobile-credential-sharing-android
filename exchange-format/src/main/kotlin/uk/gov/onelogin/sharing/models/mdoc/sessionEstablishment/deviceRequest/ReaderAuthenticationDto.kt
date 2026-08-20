@@ -50,7 +50,7 @@ data class ReaderAuthenticationDto(
             provider: SerializerProvider
         ) {
             val cborGen = gen as CBORGenerator
-            cborGen.writeStartArray(ARRAY_SIZE)
+            cborGen.writeStartArray(null, ARRAY_SIZE)
             cborGen.writeString(LABEL)
             provider.defaultSerializeValue(RawCbor(value.sessionTranscript), gen)
             provider.defaultSerializeValue(RawCbor(value.itemsRequestBytes), gen)

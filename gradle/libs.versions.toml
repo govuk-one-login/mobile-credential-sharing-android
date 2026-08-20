@@ -50,6 +50,7 @@ commons-lang3 = "3.18.0"
 httpclient = "4.5.13"
 guava = "33.3.1-jre"
 play-services-basement = "18.10.0"
+leakcanary = "1.0.0"
 
 [libraries]
 app-cash-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }

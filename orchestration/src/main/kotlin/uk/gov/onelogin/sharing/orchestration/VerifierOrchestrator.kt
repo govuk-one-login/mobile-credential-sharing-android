@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration
 
+import android.util.Log
 import androidx.annotation.Keep
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -391,8 +392,8 @@ class VerifierOrchestrator(
 
     private fun isUnexpectedStatusWithData(sessionData: SessionData): Boolean =
         sessionData.data != null && sessionData.status != null &&
-            sessionData.status != SESSION_TERMINATION &&
-            sessionData.status != SessionDataStatus.OK
+                sessionData.status != SESSION_TERMINATION &&
+                sessionData.status != SessionDataStatus.OK
 
     private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
         logger.error(logTag, "Received SessionData with data and error status: $status")
@@ -580,8 +581,8 @@ class VerifierOrchestrator(
         if (currentState.isComplete()) return
 
         val isSessionStarted = currentState.shouldConfirmCancellation() ||
-            currentState is VerifierSessionState.TerminatingSession ||
-            sessionFlow.value.cryptoContext != null
+                currentState is VerifierSessionState.TerminatingSession ||
+                sessionFlow.value.cryptoContext != null
 
         if (isSessionStarted) {
             if (currentState !is VerifierSessionState.TerminatingSession) {
@@ -613,8 +614,6 @@ class VerifierOrchestrator(
             .toItemsRequest(verifierConfig.verificationRequest.documentType)
 
         runCatching {
-            val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
-            verifierCryptoService.buildReaderAuthenticationBytes(itemsRequestBytes, context)
             buildAndSendSessionEstablishment(context, itemsRequest)
         }.onFailure { e ->
             val reason = when {
@@ -633,6 +632,11 @@ class VerifierOrchestrator(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {
+        val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
+        verifierCryptoService.buildReaderAuthenticationBytes(itemsRequestBytes, context)
+
+        Log.d("ItemsRequestBytes", itemsRequestBytes.toHexString())
+
         val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
         val encryptedDeviceRequest = verifierCryptoService.encryptDeviceRequest(
             deviceRequestBytes = deviceRequestBytes,
