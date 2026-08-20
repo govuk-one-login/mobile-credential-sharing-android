@@ -93,7 +93,7 @@ class HolderSuccessScreenTest {
             }
 
             runOnUiThread {
-                controller.navigate(HolderSuccessRoute)
+                controller.navigate(HolderSuccessRoute())
             }
 
             waitUntil {
@@ -115,6 +115,40 @@ class HolderSuccessScreenTest {
             waitUntil(
                 "'onExitJourney' has an unexpected call count!: $hasExitedJourneyCount"
             ) { hasExitedJourneyCount == 1 }
+        }
+    }
+
+    @Test
+    fun `Immediately resets and exits without requiring user action`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        composeTestRule.run {
+            setContent {
+                CompositionLocalProvider(
+                    LocalMetroViewModelFactory provides viewModelFactory
+                ) {
+                    HolderSuccessScreen(
+                        viewModel = viewModel,
+                        immediatelyReset = true,
+                        onExitJourney = {
+                            hasExitedJourney = true
+                            hasExitedJourneyCount++
+                        }
+                    )
+                }
+            }
+
+            waitUntil("Didn't call orchestrator.reset() via viewmodel") {
+                orchestrator.resetCount == 1
+            }
+
+            waitUntil("Didn't call the onExitJourney") {
+                hasExitedJourney
+            }
+
+            waitUntil("Unexpected hasExitedJourneyCount call count: $hasExitedJourneyCount") {
+                hasExitedJourneyCount == 1
+            }
         }
     }
 

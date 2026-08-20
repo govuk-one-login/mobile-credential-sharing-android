@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,8 +22,6 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.testapp.credential.MockCredential
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialState
@@ -43,7 +40,6 @@ object HolderTestAppJourneyNavigationExt {
 
     @Suppress("LongMethod")
     internal fun NavGraphBuilder.configureHolderJourneyWrapper(
-        navController: NavController,
         component: (MockCredential) -> CredentialPresenter
     ) {
         composable<HolderTestAppJourney>(
@@ -94,17 +90,6 @@ object HolderTestAppJourneyNavigationExt {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 presenter?.let { presenter ->
-                    LaunchedEffect(presenter.orchestrator) {
-                        presenter.orchestrator.holderSessionState.collect { state ->
-                            if (state is HolderSessionState.Complete.Success &&
-                                state.successReason == SuccessReason.Denied
-                            ) {
-                                presenter.orchestrator.reset()
-                                navController.popBackStack()
-                            }
-                        }
-                    }
-
                     HolderTestAppJourneyScreen(
                         component = presenter,
                         modifier = Modifier.fillMaxSize()

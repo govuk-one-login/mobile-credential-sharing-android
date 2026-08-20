@@ -9,18 +9,23 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 
 object HolderSuccessNavigationExt {
-    fun NavController.navigateToHolderSuccessScreen(options: NavOptionsBuilder.() -> Unit = {}) =
-        navigate(HolderSuccessRoute, options)
+    fun NavController.navigateToHolderSuccessScreen(
+        immediatelyReset: Boolean = false,
+        options: NavOptionsBuilder.() -> Unit = {}
+    ) = navigate(HolderSuccessRoute(immediatelyReset), options)
 
     internal fun NavGraphBuilder.configureHolderSuccessScreen() {
-        composable<HolderSuccessRoute> {
+        composable<HolderSuccessRoute> { backStackEntry ->
+            val route: HolderSuccessRoute = backStackEntry.toRoute()
             val backPressDispatcher = LocalOnBackPressedDispatcherOwner.current
             HolderSuccessScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
+                immediatelyReset = route.immediatelyReset,
                 onExitJourney = {
                     backPressDispatcher
                         ?.onBackPressedDispatcher

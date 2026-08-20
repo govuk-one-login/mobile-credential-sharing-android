@@ -5,4 +5,4 @@ import kotlinx.serialization.Serializable
 
 @Keep
 @Serializable
-internal data object HolderSuccessRoute
+internal data class HolderSuccessRoute(val immediatelyReset: Boolean = false)

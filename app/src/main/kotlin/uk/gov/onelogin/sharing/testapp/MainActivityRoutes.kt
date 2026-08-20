@@ -28,7 +28,7 @@ object MainActivityRoutes {
             controller = navController,
             mockCredentials = mockCredentials
         )
-        configureHolderJourneyWrapper(navController) { credential ->
+        configureHolderJourneyWrapper { credential ->
             presentCredentialSdk
                 .presenter(
                     SampleCredentialProvider(

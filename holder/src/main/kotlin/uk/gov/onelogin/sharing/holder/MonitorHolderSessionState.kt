@@ -132,14 +132,26 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Complete.Success -> {
-            if (state.successReason == SuccessReason.UnfulfillableRequest) {
-                {
-                    navController.navigateToHolderSuccessScreen {
-                        exitJourneyOptions()
+            when (state.successReason) {
+                SuccessReason.UnfulfillableRequest -> {
+                    {
+                        navController.navigateToHolderSuccessScreen {
+                            exitJourneyOptions()
+                        }
                     }
                 }
-            } else {
-                {}
+
+                SuccessReason.Denied -> {
+                    {
+                        navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
+                            exitJourneyOptions()
+                        }
+                    }
+                }
+
+                SuccessReason.Approved -> {
+                    {}
+                }
             }
         }
 
