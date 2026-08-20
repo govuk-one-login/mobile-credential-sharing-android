@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+echo "Outputting certificate information for: ${1}"
+openssl x509 -in ${1} -inform DER -noout -text
+echo ""
+echo ""

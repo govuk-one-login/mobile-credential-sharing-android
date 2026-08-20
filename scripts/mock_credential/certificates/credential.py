@@ -8,6 +8,7 @@ from typing import Dict, List
 
 class IssuerAuth:
     """Handles COSE_Sign1 signing for mdoc."""
+
     def __init__(self, mso_tagged_bytes: bytes, leaf_cert_der: bytes):
         self.mso_tagged_bytes = mso_tagged_bytes
         self.leaf_cert_der = leaf_cert_der
@@ -25,21 +26,19 @@ class IssuerAuth:
             self.protected,
             {33: self.leaf_cert_der},
             self.mso_tagged_bytes,
-            signature
+            signature,
         ]
 
 
 class Credential:
     """Final assembly of the mdoc credential."""
+
     def __init__(self, namespaces_dict: Dict, issuer_auth: List):
         self.namespaces_dict = namespaces_dict
         self.issuer_auth = issuer_auth
 
     def to_cbor(self) -> bytes:
-        return cbor2.dumps({
-            "nameSpaces": self.namespaces_dict,
-            "issuerAuth": self.issuer_auth
-        })
+        return cbor2.dumps({"nameSpaces": self.namespaces_dict, "issuerAuth": self.issuer_auth})
 
     def to_base64url(self) -> str:
         cred_bytes = self.to_cbor()

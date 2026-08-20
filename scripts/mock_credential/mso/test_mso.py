@@ -1,9 +1,7 @@
 import cbor2
 import pytest
-from datetime import datetime
 
 from mock_credential.mso import MSO, SAMPLE_MSO
-from mock_credential.namespaces import SAMPLE_NAMESPACES
 
 
 class TestMSOFromDict:
@@ -33,7 +31,7 @@ class TestMSOFromDict:
         ids=[
             "Missing doc_type",
             "Missing namespaces",
-        ]
+        ],
     )
     def test_missing_key_raises(self, invalid_config, device_cose_key):
         with pytest.raises(KeyError):

@@ -9,5 +9,7 @@
         ".venv",
         "*/.venv",
         "~/.local/pipx/venvs"
-    ]
+    ],
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

@@ -4,81 +4,115 @@ Generates a mock_credential.txt for the Sharing SDK test app.
 """
 
 import argparse
+import logging
+from logging518 import config as logging_config
 import os
 import sys
 
 # Add the 'scripts' directory to the path so we can import mock_credential
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cryptography import x509
 from cryptography.hazmat.primitives import serialization
-from cryptography.x509.oid import ObjectIdentifier
 from datetime import datetime, timezone
 
-from mock_credential.issuer import IssuerAuthInput, ISSUER_NAME, LEAF_NAME
+from mock_credential import GenerateMockCredentialInputs
 from mock_credential.namespaces import SAMPLE_NAMESPACES
 from mock_credential.mso import MSO, SAMPLE_MSO
-from mock_credential.certificates import CertificateGenerator, IssuerAuth, Credential, KeyGenerator
+from mock_credential.certificates import (
+    IssuerAuth,
+    Credential,
+)
+from mock_credential.certificates.generators import PemKeyGenerator, DerKeyGenerator
+from mock_credential.issuer_auth import IssuerAuthCertificateGenerator
+from mock_credential.reader_auth import ReaderAuthCertificateGenerator
 
-# ISO 18013-5 mdoc DS OID
-OID_MDL_DS = ObjectIdentifier("1.0.18013.5.1.2")
+logging_config.fileConfig("pyproject.toml")
+logger = logging.getLogger("project")
 
 
 def generate():
     args = get_argument_parser()
     now = datetime.now(timezone.utc)
-    cert_gen = CertificateGenerator(now)
+    pem_key_gen = PemKeyGenerator()
+    der_key_gen = DerKeyGenerator()
+    cert_gen = IssuerAuthCertificateGenerator(now=now)
+    reader_cert_gen = ReaderAuthCertificateGenerator(now=now)
 
     # 1. Keys & Certificates
-    issuer_key = KeyGenerator.load_or_create(args.issuer_private_key)
-    root_cert = cert_gen.create_root_ca(issuer_key, ISSUER_NAME, validity_days=args.validity_days)
-
-    leaf_key = KeyGenerator.generate()
-    leaf_cert = cert_gen.create_certificate(
-        leaf_key.public_key(), issuer_key, LEAF_NAME, root_cert,
-        validity_days=min(args.validity_days, 457),
-        extensions=[
-            (x509.KeyUsage(digital_signature=True, content_commitment=False, key_encipherment=False,
-                          data_encipherment=False, key_agreement=False, key_cert_sign=False,
-                          crl_sign=False, encipher_only=False, decipher_only=False), True),
-            (x509.ExtendedKeyUsage([OID_MDL_DS]), True),
-            (x509.IssuerAlternativeName([x509.UniformResourceIdentifier("https://dvla.gov.uk/iaca")]), False),
-        ]
+    issuer_leaf_key, issuer_leaf_cert = args.create_issuer_auth_certificates(
+        cert_gen=cert_gen,
+        key_gen=pem_key_gen,
+    )
+    reader_auth_certificates = args.create_reader_auth_certificates(
+        cert_gen=reader_cert_gen, root_key_gen=pem_key_gen, intermediate_key_gen=der_key_gen
     )
 
     # 2. Device Key
-    device_key = KeyGenerator.load(args.private_key)
+    device_key = pem_key_gen.load(args.private_key)
     device_pub = device_key.public_key().public_numbers()
-    device_cose_key = {1: 2, -1: 1, -2: device_pub.x.to_bytes(32, "big"), -3: device_pub.y.to_bytes(32, "big")}
+    device_cose_key = {
+        1: 2,
+        -1: 1,
+        -2: device_pub.x.to_bytes(32, "big"),
+        -3: device_pub.y.to_bytes(32, "big"),
+    }
 
     # 3. Assemble MSO & Credential
     mso_obj = MSO.from_dict(SAMPLE_MSO, device_cose_key, validity_days=args.validity_days)
     mso_tagged_bytes = mso_obj.build_tagged_bytes(now)
 
-    issuer_auth_obj = IssuerAuth(mso_tagged_bytes, leaf_cert.public_bytes(serialization.Encoding.DER))
-    issuer_auth_list = issuer_auth_obj.sign(leaf_key)
+    issuer_auth_obj = IssuerAuth(
+        mso_tagged_bytes, issuer_leaf_cert.public_bytes(serialization.Encoding.DER)
+    )
+    issuer_auth_list = issuer_auth_obj.sign(issuer_leaf_key)
 
     credential = Credential(SAMPLE_NAMESPACES.build_issuer_signed_items(), issuer_auth_list)
 
     # 4. Save Outputs
-    with open(args.x509_certificate, "wb") as f:
-        f.write(root_cert.public_bytes(serialization.Encoding.DER))
-
     with open(args.output, "w") as f:
         f.write(credential.to_base64url())
 
-    print(f"Generated: {args.output}")
-    print(f"Root Certificate: {args.x509_certificate}")
+    logger.info(f"Generated: {args.output}")
 
 
-def get_argument_parser() -> IssuerAuthInput:
+def get_argument_parser() -> GenerateMockCredentialInputs:
     parser = argparse.ArgumentParser(description="Generate a mock credential")
     parser.add_argument("--private-key", default="app/src/main/assets/test_private_key.pem")
-    parser.add_argument("--issuer-private-key", default="app/src/main/assets/test_private_issuer_key.pem")
-    parser.add_argument("--x509-certificate", default="app/src/main/assets/test_x509_certificate.der")
+    parser.add_argument(
+        "--issuer-private-key",
+        default="app/src/main/assets/test_private_issuer_key.pem",
+    )
+    parser.add_argument(
+        "--reader-auth-private-key", default="app/src/main/assets/test_private_reader_auth_key.pem"
+    )
+    parser.add_argument(
+        "--issuer-intermediate-x509-certificate",
+        default="app/src/main/assets/test_x509_certificate.der",
+    )
+    parser.add_argument(
+        "--reader-intermediate-x509-certificate",
+        default="app/src/main/assets/test_reader_auth_x509_certificate.der",
+    )
+    parser.add_argument(
+        "--reader-name-constrained-intermediate-x509-certificate",
+        default="app/src/main/assets/test_reader_auth_name_constrained_x509_certificate.der",
+    )
     parser.add_argument("--output", default="app/src/main/res/raw/mock_credential.txt")
     parser.add_argument("--validity-days", type=int, default=365)
-    return IssuerAuthInput.from_parser(parser.parse_args())
+    parser.add_argument(
+        "--reader-valid-x509-leaf-certificate",
+        default="app/src/main/assets/reader_valid_x509_leaf_certificate.der",
+    )
+    parser.add_argument(
+        "--reader-x509-leaf-certificate-without-privacy-policy",
+        default="app/src/main/assets/reader_x509_leaf_without_privacy_policy.der",
+    )
+    parser.add_argument(
+        "--reader-x509-leaf-invalid-organisation",
+        default="app/src/main/assets/reader_x509_leaf_with_invalid_organisation.der",
+    )
+    logger.info("Obtained command-line arguments...")
+    return GenerateMockCredentialInputs.from_parser(parser.parse_args())
 
 
 if __name__ == "__main__":

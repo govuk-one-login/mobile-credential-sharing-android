@@ -17,7 +17,7 @@ class MSO:
         namespaces: IssuerSignedNamespaces,
         device_cose_key: Dict,
         doc_type: str = "org.iso.18013.5.1.mDL",
-        validity_days: int = 365
+        validity_days: int = 365,
     ):
         self.namespaces = namespaces
         self.device_cose_key = device_cose_key
@@ -43,16 +43,16 @@ class MSO:
             "valueDigests": self.namespaces.as_value_digests(),
             "deviceKeyInfo": {
                 "deviceKey": self.device_cose_key,
-                "keyAuthorizations": {
-                    "nameSpaces": list(self.namespaces)
-                },
+                "keyAuthorizations": {"nameSpaces": list(self.namespaces)},
             },
             "docType": self.doc_type,
             "validityInfo": {
                 "signed": cbor2.CBORTag(0, now.strftime("%Y-%m-%dT%H:%M:%SZ")),
                 "validFrom": cbor2.CBORTag(0, now.strftime("%Y-%m-%dT%H:%M:%SZ")),
-                "validUntil": cbor2.CBORTag(0, (now + timedelta(days=self.validity_days)).strftime(
-                    "%Y-%m-%dT%H:%M:%SZ")),
+                "validUntil": cbor2.CBORTag(
+                    0,
+                    (now + timedelta(days=self.validity_days)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                ),
             },
         }
 
