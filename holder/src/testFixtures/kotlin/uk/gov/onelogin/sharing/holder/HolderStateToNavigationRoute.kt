@@ -4,6 +4,7 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
@@ -131,6 +132,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 instanceOf<HolderSuccessRoute>(
                     HolderSuccessRoute::class.java
                 ).matches(
+                    currentBackStackEntry?.toRoute<HolderSuccessRoute>()
+                )
+            },
+            Triple(
+                "'Complete.Success(Denied)' -> HolderSuccessRoute(immediatelyReset = true)",
+                HolderSessionState.Complete.Success(
+                    HolderSessionState.Complete.SuccessReason.Denied
+                )
+            ) {
+                equalTo(HolderSuccessRoute(immediatelyReset = true)).matches(
                     currentBackStackEntry?.toRoute<HolderSuccessRoute>()
                 )
             },
