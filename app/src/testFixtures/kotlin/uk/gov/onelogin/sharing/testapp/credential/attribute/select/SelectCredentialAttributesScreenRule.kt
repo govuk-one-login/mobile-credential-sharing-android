@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.testapp.R
 class SelectCredentialAttributesScreenRule(
     composeTestRule: ComposeContentTestRule,
     private val resources: Resources = ApplicationProvider.getApplicationContext<Context>()
-        .resources,
+        .resources
 ) : ComposeContentTestRule by composeTestRule {
     private var confirmedAttributeGroup: AttributeGroup? = null
 

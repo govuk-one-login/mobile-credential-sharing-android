@@ -53,7 +53,7 @@ import uk.gov.onelogin.sharing.testapp.VERIFY_CREDENTIAL_BUTTON_TAG
 @Composable
 internal fun SelectCredentialAttributesScreen(
     modifier: Modifier = Modifier,
-    onSelectAttributeGroup: (AttributeGroup) -> Unit = {},
+    onSelectAttributeGroup: (AttributeGroup) -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     val metrics = rememberMetricsStateHolder()
@@ -76,14 +76,13 @@ internal fun SelectCredentialAttributesScreen(
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-
             UserDropdownMenu(
                 modifier = Modifier.fillMaxWidth().testTag("attribute_group_menu"),
                 label = { Text("Attribute group") },
                 onTextFieldClickLabel = "Select attribute group",
                 textFieldValue = selected.displayName,
-                isAttributeGroupExpanded = isAttributeGroupExpanded,
-                onAttributeGroupExpandedChanged = { isAttributeGroupExpanded = it },
+                isDropdownExpanded = isAttributeGroupExpanded,
+                onToggleDropdownExpansion = { isAttributeGroupExpanded = it },
                 dropdownMenuContents = {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(spacingSingle)
@@ -97,7 +96,7 @@ internal fun SelectCredentialAttributesScreen(
                                 onClick = {
                                     isAttributeGroupExpanded = false
                                     selected = option
-                                },
+                                }
                             )
                         }
                     }
@@ -124,20 +123,20 @@ internal fun SelectCredentialAttributesScreen(
 @Composable
 private fun UserDropdownMenu(
     textFieldValue: String,
-    isAttributeGroupExpanded: Boolean,
+    isDropdownExpanded: Boolean,
     dropdownMenuContents: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
     textFieldColors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
-        focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
     ),
     label: @Composable () -> Unit = {},
     onTextFieldClickLabel: String? = null,
-    onAttributeGroupExpandedChanged: (Boolean) -> Unit = {},
+    onToggleDropdownExpansion: (Boolean) -> Unit = {}
 ) {
     val attributeGroupTrailingIcon by remember {
         derivedStateOf {
-            if (isAttributeGroupExpanded) {
+            if (isDropdownExpanded) {
                 R.drawable.outline_arrow_drop_up_24
             } else {
                 R.drawable.outline_arrow_drop_down_24
@@ -171,22 +170,22 @@ private fun UserDropdownMenu(
                 .clickable(
                     role = Role.Button,
                     onClickLabel = onTextFieldClickLabel
-                ) { onAttributeGroupExpandedChanged(!isAttributeGroupExpanded) }
+                ) { onToggleDropdownExpansion(!isDropdownExpanded) }
         )
 
         DropdownMenu(
             containerColor = MaterialTheme.colorScheme.surface,
-            expanded = isAttributeGroupExpanded,
+            expanded = isDropdownExpanded,
             border = BorderStroke(
                 Dp.Hairline,
                 MaterialTheme.colorScheme.onSurface
             ),
-            onDismissRequest = { onAttributeGroupExpandedChanged(false) },
+            onDismissRequest = { onToggleDropdownExpansion(false) },
             modifier = Modifier
                 .semantics {
                     role = Role.Button
                 }
-                .clickable { onAttributeGroupExpandedChanged(!isAttributeGroupExpanded) }
+                .clickable { onToggleDropdownExpansion(!isDropdownExpanded) }
         ) {
             GdsTheme {
                 dropdownMenuContents()
