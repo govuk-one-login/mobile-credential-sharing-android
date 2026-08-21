@@ -21,6 +21,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransp
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
+import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
@@ -616,17 +617,14 @@ class VerifierOrchestrator(
         runCatching {
             buildAndSendSessionEstablishment(context, itemsRequest)
         }.onFailure { e ->
-            val reason = when {
-                e is EncryptDeviceRequestException ->
+            val reason = when (e) {
+                is EncryptDeviceRequestException ->
                     SessionErrorReason.CannotEncryptDeviceRequest
 
-                e is SessionEstablishmentException ->
+                is SessionEstablishmentException ->
                     SessionErrorReason.CannotBuildSessionEstablishment
 
-                e is ReaderAuthenticationException ->
-                    SessionErrorReason.CannotBuildReaderAuthentication
-
-                e.message?.contains("ReaderAuthentication") == true ->
+                is ReaderAuthenticationException ->
                     SessionErrorReason.CannotBuildReaderAuthentication
 
                 else -> SessionErrorReason.CannotSendMessage
@@ -641,8 +639,8 @@ class VerifierOrchestrator(
     ) {
         val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
         val readerAuthBytes = verifierCryptoService.buildReaderAuthenticationBytes(
-            itemsRequestBytes = itemsRequestBytes,
-            context = context
+            sessionTranscript = deriveUntaggedCbor(context.sessionTranscriptBytes),
+            itemsRequestBytes = itemsRequestBytes
         )
 
         val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(

@@ -51,7 +51,6 @@ class VerifierCryptoServiceImplTest {
         }
 
         assertNotNull(context)
-        assertEquals(VALID_ENCODED_DEVICE_ENGAGEMENT, context.engagementString)
         assertNotNull(context.serviceUuid)
         val eReaderKey = assertNotNull(context.eReaderKeyTagged)
         assertTrue(eReaderKey[0] == 0xD8.toByte())
@@ -237,13 +236,13 @@ class VerifierCryptoServiceImplTest {
             docType = "org.iso.18013.5.1.mDL",
             nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("family_name" to true))
         )
-        val itemsRequestUntagged = byteArrayOf(0xCA.toByte(), 0xFE.toByte(), 0xBA.toByte())
+        val itemsRequestBytes = byteArrayOf(0xCA.toByte(), 0xFE.toByte(), 0xBA.toByte())
 
-        val result = service.buildDeviceRequest(itemsRequest, itemsRequestUntagged)
+        val result = service.buildDeviceRequest(itemsRequest, itemsRequestBytes)
 
         assertTrue(result.isNotEmpty())
 
-        assertTrue(result.toHexString().contains(itemsRequestUntagged.toHexString()))
+        assertTrue(result.toHexString().contains(itemsRequestBytes.toHexString()))
     }
 
     @Test
@@ -366,15 +365,10 @@ class VerifierCryptoServiceImplTest {
 
     @Test
     fun `buildReaderAuthenticationBytes constructs correct CBOR structure`() = runTest {
-        var context: VerifierCryptoContext? = null
-        service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) {
-            context = it
-            it
-        }
-
+        val sessionTranscript = byteArrayOf(0x83.toByte(), 0x01, 0x02, 0x03)
         val itemsRequestBytes = byteArrayOf(0xD8.toByte(), 0x18, 0x42, 0x01, 0x02)
 
-        val result = service.buildReaderAuthenticationBytes(itemsRequestBytes, context!!)
+        val result = service.buildReaderAuthenticationBytes(sessionTranscript, itemsRequestBytes)
 
         assertTrue(result.isNotEmpty())
         assertEquals(0xD8.toByte(), result[0])

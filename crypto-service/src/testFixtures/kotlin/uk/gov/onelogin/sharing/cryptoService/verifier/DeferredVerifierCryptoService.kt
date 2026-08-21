@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
  * meaning that `updateContext` within [establishSession] isn't called.
  */
 class DeferredVerifierCryptoService(
-    private val updater: (qrCodeData: String) -> VerifierCryptoContext? = { null },
+    private val updater: (qrCodeData: String) -> VerifierCryptoContext? = { _ -> null },
     private val sessionDataDeserializer: (input: ByteArray) -> SessionData = { SessionData() }
 ) : VerifierCryptoService {
     override fun establishSession(
@@ -29,8 +29,8 @@ class DeferredVerifierCryptoService(
     ): ByteArray = byteArrayOf()
 
     override fun buildReaderAuthenticationBytes(
-        itemsRequestBytes: ByteArray,
-        context: VerifierCryptoContext
+        sessionTranscript: ByteArray,
+        itemsRequestBytes: ByteArray
     ): ByteArray = byteArrayOf()
 
     override fun buildItemsRequestBytes(itemsRequest: ItemsRequest): ByteArray = byteArrayOf()

@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -519,7 +520,7 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `ConnectionStateStarted passes itemsRequestBytes correctly`() = runTest {
+    fun `ConnectionStateStarted passes expected bytes to crypto service`() = runTest {
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
         orchestrator.processQrCode(VALID_MDOC_URI)
         centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
@@ -533,6 +534,8 @@ class VerifierOrchestratorTest {
             expectedBytes,
             fakeCryptoService.lastItemsRequestBytesPassedToDeviceRequest
         )
+        assertNotNull(fakeCryptoService.lastSessionTranscriptPassedToReaderAuth)
+        assertEquals(1u, fakeCryptoService.lastEncryptCounter)
     }
 
     @Test
@@ -593,6 +596,7 @@ class VerifierOrchestratorTest {
             fakeCryptoService.buildAndEncryptToReturn,
             fakeCryptoService.lastEncryptedDeviceRequest
         )
+        assertEquals(1u, fakeCryptoService.lastEncryptCounter)
     }
 
     @Test
@@ -662,6 +666,7 @@ class VerifierOrchestratorTest {
             fakeCryptoService.buildSessionEstablishmentToReturn,
             centralBluetoothTransport.lastSentData
         )
+        assertEquals(1u, fakeCryptoService.lastEncryptCounter)
     }
 
     @Test

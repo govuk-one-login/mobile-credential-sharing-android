@@ -23,13 +23,13 @@ interface VerifierCryptoService {
     /**
      * Builds the detached ReaderAuthenticationBytes payload.
      *
+     * @param sessionTranscript The raw (untagged) SessionTranscript CBOR array.
      * @param itemsRequestBytes The CBOR Tag 24 wrapped ItemsRequestBytes.
-     * @param context The current [VerifierCryptoContext].
      * @return The CBOR Tag 24 wrapped ReaderAuthenticationBytes.
      */
     fun buildReaderAuthenticationBytes(
-        itemsRequestBytes: ByteArray,
-        context: VerifierCryptoContext
+        sessionTranscript: ByteArray,
+        itemsRequestBytes: ByteArray
     ): ByteArray
 
     /**

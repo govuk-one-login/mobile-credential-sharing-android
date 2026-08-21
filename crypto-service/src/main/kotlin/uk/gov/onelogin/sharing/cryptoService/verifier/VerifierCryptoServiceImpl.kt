@@ -14,7 +14,6 @@ import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.cryptoService.cbor.base64Decode
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveSessionTranscript
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
@@ -117,12 +116,9 @@ class VerifierCryptoServiceImpl(
 
         updateContext(
             VerifierCryptoContext(
-                engagementString = qrCodeData,
-                deviceEngagementBytes = qrCodeData.base64Decode(),
                 serviceUuid = serviceUuid,
                 eReaderKeyTagged = eReaderKeyTagged,
                 sessionTranscriptBytes = sessionTranscriptBytes,
-                rawSessionTranscript = sessionTranscript,
                 eReaderKeyPair = keyPair,
                 eDevicePublicKey = eDevicePublicKey,
                 skReader = skReader,
@@ -132,11 +128,11 @@ class VerifierCryptoServiceImpl(
     }
 
     override fun buildReaderAuthenticationBytes(
-        itemsRequestBytes: ByteArray,
-        context: VerifierCryptoContext
+        sessionTranscript: ByteArray,
+        itemsRequestBytes: ByteArray
     ): ByteArray = try {
         val dto = ReaderAuthenticationDto(
-            sessionTranscript = context.rawSessionTranscript,
+            sessionTranscript = sessionTranscript,
             itemsRequestBytes = itemsRequestBytes
         )
         EmbeddedCbor(dto.toCbor()).toCbor().also {
