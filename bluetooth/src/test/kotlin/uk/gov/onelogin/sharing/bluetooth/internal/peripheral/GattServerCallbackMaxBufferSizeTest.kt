@@ -12,6 +12,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestMessage
 
 class GattServerCallbackMaxBufferSizeTest {
@@ -36,11 +38,11 @@ class GattServerCallbackMaxBufferSizeTest {
             maxReceiveBufferSize = GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE
         )
 
-        val chunk1 = byteArrayOf(GattServerCallback.NON_LAST_PART) + ByteArray(100) { 0x11 }
+        val chunk1 = byteArrayOf(NON_LAST_PART) + ByteArray(100) { 0x11 }
         sendChunk(callback, chunk1)
         assertEquals(0, fakeEmitter.events.size)
 
-        val chunk2 = byteArrayOf(GattServerCallback.LAST_PART) + ByteArray(50) { 0x22 }
+        val chunk2 = byteArrayOf(LAST_PART) + ByteArray(50) { 0x22 }
         sendChunk(callback, chunk2)
 
         assertEquals(1, fakeEmitter.events.size)
@@ -56,7 +58,7 @@ class GattServerCallbackMaxBufferSizeTest {
             maxReceiveBufferSize = GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE
         )
 
-        val message = byteArrayOf(GattServerCallback.LAST_PART) + ByteArray(200) { 0x33 }
+        val message = byteArrayOf(LAST_PART) + ByteArray(200) { 0x33 }
         sendChunk(callback, message)
 
         assertEquals(1, fakeEmitter.events.size)
@@ -73,11 +75,11 @@ class GattServerCallbackMaxBufferSizeTest {
         )
 
         val almostFull =
-            byteArrayOf(GattServerCallback.NON_LAST_PART) + ByteArray(64 * 1024) { 0x11 }
+            byteArrayOf(NON_LAST_PART) + ByteArray(64 * 1024) { 0x11 }
         sendChunk(callback, almostFull)
         assertEquals(0, fakeEmitter.events.size)
 
-        val overflow = byteArrayOf(GattServerCallback.NON_LAST_PART, 0x01)
+        val overflow = byteArrayOf(NON_LAST_PART, 0x01)
         sendChunk(callback, overflow)
 
         assertEquals(1, fakeEmitter.events.size)
@@ -95,7 +97,7 @@ class GattServerCallbackMaxBufferSizeTest {
             maxReceiveBufferSize = 10
         )
 
-        val oversized = byteArrayOf(GattServerCallback.LAST_PART) + ByteArray(11) { 0x11 }
+        val oversized = byteArrayOf(LAST_PART) + ByteArray(11) { 0x11 }
         sendChunk(callback, oversized)
 
         assertEquals(1, fakeEmitter.events.size)
@@ -113,7 +115,7 @@ class GattServerCallbackMaxBufferSizeTest {
             maxReceiveBufferSize = 100
         )
 
-        val chunk = byteArrayOf(GattServerCallback.NON_LAST_PART) + ByteArray(101) { 0x11 }
+        val chunk = byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 }
         sendChunk(callback, chunk)
 
         assertEquals(
@@ -123,7 +125,7 @@ class GattServerCallbackMaxBufferSizeTest {
 
         // Clear emitter and send a LAST_PART
         fakeEmitter.events.clear()
-        val lastPart = byteArrayOf(GattServerCallback.LAST_PART, 0x22)
+        val lastPart = byteArrayOf(LAST_PART, 0x22)
         sendChunk(callback, lastPart)
 
         // The MessageReceived should contain only the LAST_PART payload (no accumulated buffer)
@@ -143,12 +145,12 @@ class GattServerCallbackMaxBufferSizeTest {
         )
 
         val firstPart =
-            byteArrayOf(GattServerCallback.NON_LAST_PART) + ByteArray(50) { 0x11 }
+            byteArrayOf(NON_LAST_PART) + ByteArray(50) { 0x11 }
         sendChunk(callback, firstPart)
         assertEquals(0, fakeEmitter.events.size)
 
         val lastPart =
-            byteArrayOf(GattServerCallback.LAST_PART) + ByteArray(50) { 0x22 }
+            byteArrayOf(LAST_PART) + ByteArray(50) { 0x22 }
         sendChunk(callback, lastPart)
 
         assertEquals(1, fakeEmitter.events.size)

@@ -8,6 +8,8 @@ import android.bluetooth.BluetoothGattService
 import java.util.UUID
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.core.logger.logTag
 
@@ -201,8 +203,6 @@ class GattServerCallback(
     companion object {
         private const val BYTE_TO_HEX_FORMAT = "%02X"
 
-        const val NON_LAST_PART: Byte = 0x01
-        const val LAST_PART: Byte = 0x00
         const val DEFAULT_MAX_RECEIVE_BUFFER_SIZE: Int = 64 * 1024
     }
 }
