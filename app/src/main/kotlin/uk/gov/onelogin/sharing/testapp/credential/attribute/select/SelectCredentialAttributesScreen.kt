@@ -142,7 +142,7 @@ private fun AttributeGroupDropdown(
 }
 
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "kotlin:S107")
 private fun UserDropdownMenu(
     textFieldValue: String,
     isDropdownExpanded: Boolean,
