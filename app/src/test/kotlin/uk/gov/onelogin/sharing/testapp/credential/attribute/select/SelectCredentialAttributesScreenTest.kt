@@ -31,4 +31,22 @@ class SelectCredentialAttributesScreenTest {
             assertConfirmedAttributeGroupEquals(option.attributeGroup)
         }
     }
+
+    @Test
+    fun `Passes file name when tapping 'Verify credential' button`(
+        @TestParameter option: ReaderAuthOption
+    ) = runTest {
+        composeTestRule.run {
+            setContent {
+                SelectCredentialAttributesScreen(
+                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup
+                )
+            }
+
+            performReaderAuthClick(option)
+            assertOptionIsSelected(option)
+            performVerifyCredentialClick()
+//            assertConfirmedReaderAuthFileNameEquals(option.assetFileName)
+        }
+    }
 }

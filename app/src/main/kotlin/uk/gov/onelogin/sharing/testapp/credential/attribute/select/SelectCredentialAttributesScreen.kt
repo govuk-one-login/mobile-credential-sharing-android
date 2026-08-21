@@ -54,10 +54,14 @@ internal fun SelectCredentialAttributesScreen(
         metrics.putScreenState("SelectCredentialAttributesScreen")
     }
 
-    var selected by rememberSaveable {
+    var selectedAttributeGroup by rememberSaveable {
         mutableStateOf(VerifierAttributeOption.PORTRAIT_AND_AGE_OVER_21)
     }
     var isAttributeGroupExpanded by remember { mutableStateOf(false) }
+    var selectedReaderAuth by rememberSaveable {
+        mutableStateOf(ReaderAuthOption.VALID)
+    }
+    var isReaderAuthExpanded by remember { mutableStateOf(false) }
 
     Surface(
         shape = RoundedCornerShape(24.dp),
@@ -67,25 +71,39 @@ internal fun SelectCredentialAttributesScreen(
         Column(
             modifier = Modifier
                 .padding(24.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(spacingSingle)
         ) {
             AttributeGroupDropdown(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("attribute_group_menu"),
-                textFieldValue = selected.displayName,
+                textFieldValue = selectedAttributeGroup.displayName,
                 isAttributeGroupExpanded = isAttributeGroupExpanded,
                 onToggleDropdownExpansion = { isAttributeGroupExpanded = it },
                 onSelectAttributeOption = {
                     isAttributeGroupExpanded = false
-                    selected = it
+                    selectedAttributeGroup = it
+                }
+            )
+
+            ReaderAuthDropdown(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("reader_auth_menu"),
+                textFieldValue = selectedReaderAuth.displayName,
+                isAttributeGroupExpanded = isReaderAuthExpanded,
+                onToggleDropdownExpansion = { isReaderAuthExpanded = it },
+                onSelectOption = {
+                    isReaderAuthExpanded = false
+                    selectedReaderAuth = it
                 }
             )
 
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        onSelectAttributeGroup(selected.attributeGroup)
+                        onSelectAttributeGroup(selectedAttributeGroup.attributeGroup)
                     }
                 },
                 modifier = Modifier
@@ -118,18 +136,58 @@ private fun AttributeGroupDropdown(
             Column(
                 verticalArrangement = Arrangement.spacedBy(spacingSingle)
             ) {
-                VerifierAttributeOption.entries.forEach { option ->
-                    DropdownMenuItem(
-                        modifier = Modifier
-                            .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
-                            .testTag(ATTRIBUTE_GROUP_ITEM_TAG),
-                        text = { Text(option.displayName) },
-                        onClick = {
-                            onToggleDropdownExpansion(false)
-                            onSelectAttributeOption(option)
-                        }
-                    )
-                }
+                VerifierAttributeOption.entries
+                    .sortedBy(VerifierAttributeOption::displayName)
+                    .forEach { option ->
+                        DropdownMenuItem(
+                            modifier = Modifier
+                                .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
+                                .testTag(ATTRIBUTE_GROUP_ITEM_TAG),
+                            text = { Text(option.displayName) },
+                            onClick = {
+                                onToggleDropdownExpansion(false)
+                                onSelectAttributeOption(option)
+                            }
+                        )
+                    }
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReaderAuthDropdown(
+    textFieldValue: String,
+    isAttributeGroupExpanded: Boolean,
+    modifier: Modifier = Modifier,
+    onToggleDropdownExpansion: (Boolean) -> Unit = {},
+    onSelectOption: (ReaderAuthOption) -> Unit = {}
+) {
+    UserDropdownMenu(
+        modifier = modifier,
+        label = { Text("Reader Auth certificate") },
+        textFieldValue = textFieldValue,
+        isDropdownExpanded = isAttributeGroupExpanded,
+        onToggleDropdownExpansion = onToggleDropdownExpansion,
+        dropdownMenuContents = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(spacingSingle)
+            ) {
+                ReaderAuthOption.entries
+                    .sortedBy(ReaderAuthOption::displayName)
+                    .forEach { option ->
+                        DropdownMenuItem(
+                            modifier = Modifier
+                                .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
+                                .testTag("reader_auth_item"),
+                            text = { Text(option.displayName) },
+                            onClick = {
+                                onToggleDropdownExpansion(false)
+                                onSelectOption(option)
+                            }
+                        )
+                    }
             }
         }
     )
