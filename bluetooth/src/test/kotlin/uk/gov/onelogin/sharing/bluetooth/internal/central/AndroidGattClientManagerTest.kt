@@ -42,7 +42,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
@@ -1100,8 +1100,8 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
         launch {
             repeat(1) {
@@ -1133,8 +1133,9 @@ internal class AndroidGattClientManagerTest {
             val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
             val service = mockk<BluetoothGattService>(relaxed = true)
             every { bluetoothGatt.getService(uuid) } returns service
-            every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-            every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+            every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns
+                characteristic
+            every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
             launch {
                 repeat(2) {
@@ -1161,7 +1162,7 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
 
         val result = mgr.sendMessage(uuid, data)
 
@@ -1178,8 +1179,8 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
         val result = mgr.sendMessage(uuid, data)
 
@@ -1193,8 +1194,8 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
         launch {
             repeat(1) {
@@ -1224,8 +1225,8 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
         launch {
             repeat(2) {
