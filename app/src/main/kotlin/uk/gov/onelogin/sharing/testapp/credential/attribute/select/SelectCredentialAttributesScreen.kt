@@ -23,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,7 +76,9 @@ internal fun SelectCredentialAttributesScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             AttributeGroupDropdown(
-                modifier = Modifier.fillMaxWidth().testTag("attribute_group_menu"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("attribute_group_menu"),
                 textFieldValue = selected.displayName,
                 isAttributeGroupExpanded = isAttributeGroupExpanded,
                 onToggleDropdownExpansion = { isAttributeGroupExpanded = it },
@@ -155,14 +156,10 @@ private fun UserDropdownMenu(
     onTextFieldClickLabel: String? = null,
     onToggleDropdownExpansion: (Boolean) -> Unit = {}
 ) {
-    val attributeGroupTrailingIcon by remember {
-        derivedStateOf {
-            if (isDropdownExpanded) {
-                R.drawable.outline_arrow_drop_up_24
-            } else {
-                R.drawable.outline_arrow_drop_down_24
-            }
-        }
+    val attributeGroupTrailingIcon = if (isDropdownExpanded) {
+        R.drawable.outline_arrow_drop_up_24
+    } else {
+        R.drawable.outline_arrow_drop_down_24
     }
 
     Box(
