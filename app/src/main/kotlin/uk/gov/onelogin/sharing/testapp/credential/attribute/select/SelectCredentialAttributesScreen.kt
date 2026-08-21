@@ -1,9 +1,7 @@
 package uk.gov.onelogin.sharing.testapp.credential.attribute.select
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,12 +10,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
@@ -32,15 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -105,6 +99,7 @@ internal fun SelectCredentialAttributesScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AttributeGroupDropdown(
     textFieldValue: String,
@@ -116,7 +111,6 @@ private fun AttributeGroupDropdown(
     UserDropdownMenu(
         modifier = modifier,
         label = { Text("Attribute group") },
-        onTextFieldClickLabel = "Select attribute group",
         textFieldValue = textFieldValue,
         isDropdownExpanded = isAttributeGroupExpanded,
         onToggleDropdownExpansion = onToggleDropdownExpansion,
@@ -127,7 +121,7 @@ private fun AttributeGroupDropdown(
                 VerifierAttributeOption.entries.forEach { option ->
                     DropdownMenuItem(
                         modifier = Modifier
-                            .padding(vertical = 2.dp)
+                            .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
                             .testTag(ATTRIBUTE_GROUP_ITEM_TAG),
                         text = { Text(option.displayName) },
                         onClick = {
@@ -142,27 +136,27 @@ private fun AttributeGroupDropdown(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongParameterList", "kotlin:S107")
 private fun UserDropdownMenu(
     textFieldValue: String,
     isDropdownExpanded: Boolean,
     dropdownMenuContents: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
-    textFieldColors: TextFieldColors = OutlinedTextFieldDefaults.colors(
+    textFieldColors: TextFieldColors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
+        focusedContainerColor = MaterialTheme.colorScheme.surface,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+        focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
         unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
         focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
     ),
     label: @Composable () -> Unit = {},
-    onTextFieldClickLabel: String? = null,
     onToggleDropdownExpansion: (Boolean) -> Unit = {}
 ) {
-    val attributeGroupTrailingIcon = if (isDropdownExpanded) {
-        R.drawable.outline_arrow_drop_up_24
-    } else {
-        R.drawable.outline_arrow_drop_down_24
-    }
-
-    Box(
+    ExposedDropdownMenuBox(
+        expanded = isDropdownExpanded,
+        onExpandedChange = onToggleDropdownExpansion,
         modifier = modifier
     ) {
         OutlinedTextField(
@@ -172,42 +166,28 @@ private fun UserDropdownMenu(
             label = label,
             readOnly = true,
             trailingIcon = {
-                Icon(
-                    painterResource(attributeGroupTrailingIcon),
-                    contentDescription = null
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = isDropdownExpanded
                 )
             },
             modifier = Modifier
-                .fillMaxWidth()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .testTag("dropdown_text")
         )
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .testTag("expand_dropdown")
-                .clickable(
-                    role = Role.Button,
-                    onClickLabel = onTextFieldClickLabel
-                ) { onToggleDropdownExpansion(!isDropdownExpanded) }
-        )
 
-        DropdownMenu(
-            containerColor = MaterialTheme.colorScheme.surface,
+        ExposedDropdownMenu(
             expanded = isDropdownExpanded,
+            onDismissRequest = { onToggleDropdownExpansion(false) },
+            containerColor = MaterialTheme.colorScheme.surface,
             border = BorderStroke(
                 Dp.Hairline,
                 MaterialTheme.colorScheme.onSurface
             ),
-            onDismissRequest = { onToggleDropdownExpansion(false) },
+            matchAnchorWidth = true,
             modifier = Modifier
-                .semantics {
-                    role = Role.Button
-                }
-                .clickable { onToggleDropdownExpansion(!isDropdownExpanded) }
+                .testTag("dropdown_menu")
         ) {
-            GdsTheme {
-                dropdownMenuContents()
-            }
+            dropdownMenuContents()
         }
     }
 }

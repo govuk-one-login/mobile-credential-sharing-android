@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -40,10 +41,8 @@ class SelectCredentialAttributesScreenRule(
         useUnmergedTree = true
     )
 
-    fun performAttributeGroupMenuClick() = onNode(
-        hasParent(
-            hasTestTag("attribute_group_menu")
-        ) and hasTestTag("expand_dropdown"),
+    fun performAttributeGroupMenuClick() = onNodeWithTag(
+        "attribute_group_menu",
         useUnmergedTree = true
     ).performScrollTo().performClick()
 
