@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServer
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
 
 class FakeGattWriter(val success: Boolean = true) : GattWriter {
     var writes = 0

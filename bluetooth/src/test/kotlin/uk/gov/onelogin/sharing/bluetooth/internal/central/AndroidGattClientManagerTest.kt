@@ -39,6 +39,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART

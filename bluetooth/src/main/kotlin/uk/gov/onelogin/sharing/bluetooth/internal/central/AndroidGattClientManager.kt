@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.CLIENT_2_SERVER
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.STATE_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
