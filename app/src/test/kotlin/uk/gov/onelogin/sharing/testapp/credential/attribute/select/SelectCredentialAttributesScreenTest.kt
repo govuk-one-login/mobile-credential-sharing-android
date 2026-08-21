@@ -25,7 +25,7 @@ class SelectCredentialAttributesScreenTest {
                 )
             }
 
-            performOptionClick(option)
+            performAttributeGroupClick(option)
             assertOptionIsSelected(option)
             performVerifyCredentialClick()
             assertConfirmedAttributeGroupEquals(option.attributeGroup)
