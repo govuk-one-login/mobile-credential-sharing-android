@@ -141,6 +141,7 @@ private fun AttributeGroupDropdown(
 }
 
 @Composable
+@Suppress("LongParameterList")
 private fun UserDropdownMenu(
     textFieldValue: String,
     isDropdownExpanded: Boolean,
