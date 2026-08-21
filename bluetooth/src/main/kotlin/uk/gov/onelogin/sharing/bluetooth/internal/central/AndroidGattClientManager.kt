@@ -23,10 +23,11 @@ import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.CLIENT_2_SERVER_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
@@ -277,8 +278,8 @@ class AndroidGattClientManager(
         val mtuRequestSuccess = gatt.requestMtu(MtuValues.MAX_MTU)
         logger.debug(logTag, "Request max MTU success: $mtuRequestSuccess")
 
-        val state = service.getCharacteristic(GattUuids.STATE_UUID)
-        val serverToClient = service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
+        val state = service.getCharacteristic(STATE_UUID)
+        val serverToClient = service.getCharacteristic(SERVER_2_CLIENT_UUID)
 
         if (state == null || serverToClient == null) {
             handleError(ClientError.INVALID_SERVICE, INVALID_SERVICE)
@@ -309,7 +310,7 @@ class AndroidGattClientManager(
         // with Android-only devices may mask this requirement.
         listOf(state, serverToClient).forEach { characteristic ->
             characteristic
-                .getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
+                .getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_UUID)
                 ?.let { pendingDescriptorWrites.addLast(it) }
         }
     }
@@ -365,7 +366,7 @@ class AndroidGattClientManager(
         val gatt = bluetoothGatt ?: return
         val state = gatt
             .getService(serviceUuid)
-            ?.getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
+            ?.getCharacteristic(STATE_UUID) ?: return handleError(
             ClientError.INVALID_SERVICE,
             INVALID_SERVICE
         )

@@ -36,7 +36,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Compa
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs

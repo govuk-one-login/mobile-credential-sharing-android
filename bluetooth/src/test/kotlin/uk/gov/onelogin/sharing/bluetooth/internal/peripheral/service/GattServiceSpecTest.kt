@@ -7,9 +7,9 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.CLIENT_2_SERVER_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.STATE_UUID
 
 @RunWith(Parameterized::class)
 class GattServiceSpecTest(
