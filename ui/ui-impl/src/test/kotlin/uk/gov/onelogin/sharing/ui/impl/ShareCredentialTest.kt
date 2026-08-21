@@ -163,6 +163,28 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
+    fun `Denied success resets orchestrator`() = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(
+                HolderSessionState.Complete.Success(
+                    HolderSessionState.Complete.SuccessReason.Denied
+                )
+            )
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent { ShareCredential(component = presenter) }
+
+        composeTestRule.waitUntil(
+            "Denied success should reset the orchestrator"
+        ) { orchestrator.resetCount == 1 }
+    }
+
+    @Test
+    @UiThreadTest
     fun `start is called when state is NotStarted`() = runTest {
         val orchestrator = FakeOrchestrator(
             initialHolderState = MutableStateFlow(HolderSessionState.NotStarted)
