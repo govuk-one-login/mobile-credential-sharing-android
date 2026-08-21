@@ -1,22 +1,27 @@
+from mock_credential.certificates.generators import CertificateGenerator
+
+
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes, PrivateKeyTypes
 from cryptography.x509 import Certificate, CertificateBuilder, Name
+
+
 from datetime import datetime, timedelta
 from typing import List
 
 
-class CertificateGenerator:
-    def __init__(self, now: datetime):
+class IssuerAuthCertificateGenerator(CertificateGenerator):
+    def __init__(self, now: datetime = datetime.now()):
         self.now = now
 
-    def create_root_ca(
+    def create_intermediate(
         self,
-        private_key: ec.EllipticCurvePrivateKey,
+        private_key: PrivateKeyTypes,
         subject: Name,
-        validity_days: int = 3650
+        validity_days: int = 365,
     ) -> Certificate:
-        """Generates a self-signed root CA certificate."""
+        """Generates a self-signed Intermediate certificate."""
         public_key = private_key.public_key()
         builder = (
             CertificateBuilder()
@@ -26,35 +31,37 @@ class CertificateGenerator:
             .serial_number(x509.random_serial_number())
             .not_valid_before(self.now)
             .not_valid_after(self.now + timedelta(days=validity_days))
+            .add_extension(x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False)
             .add_extension(
-                x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False
+                x509.AuthorityKeyIdentifier.from_issuer_public_key(public_key),
+                critical=False,
             )
-            .add_extension(
-                x509.AuthorityKeyIdentifier.from_issuer_public_key(public_key), critical=False
-            )
-            .add_extension(
-                x509.BasicConstraints(ca=True, path_length=None), critical=True
-            )
+            .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
             .add_extension(
                 x509.KeyUsage(
-                    key_cert_sign=True, crl_sign=True,
-                    digital_signature=False, content_commitment=False,
-                    key_encipherment=False, data_encipherment=False,
-                    key_agreement=False, encipher_only=False, decipher_only=False
-                ), critical=True
+                    key_cert_sign=True,
+                    crl_sign=True,
+                    digital_signature=False,
+                    content_commitment=False,
+                    key_encipherment=False,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
             )
         )
         return builder.sign(private_key, hashes.SHA256())
 
     def create_certificate(
         self,
-        subject_key: ec.EllipticCurvePublicKey,
-        issuer_key: ec.EllipticCurvePrivateKey,
+        subject_key: PublicKeyTypes,
+        issuer_key: PrivateKeyTypes,
         subject_name: Name,
         issuer_cert: Certificate,
-        validity_days: int,
         extensions: List[tuple[x509.ExtensionType, bool]],
-        is_ca: bool = False
+        validity_days: int = 365,
     ) -> Certificate:
         """Generic method to create a signed certificate (Intermediate or Leaf).
 
@@ -69,12 +76,10 @@ class CertificateGenerator:
             .serial_number(x509.random_serial_number())
             .not_valid_before(self.now)
             .not_valid_after(self.now + timedelta(days=validity_days))
-            .add_extension(
-                x509.SubjectKeyIdentifier.from_public_key(subject_key), critical=False
-            )
+            .add_extension(x509.SubjectKeyIdentifier.from_public_key(subject_key), critical=False)
             .add_extension(
                 x509.AuthorityKeyIdentifier.from_issuer_public_key(issuer_cert.public_key()),
-                critical=False
+                critical=False,
             )
         )
 

@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
+import java.io.OutputStream
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
-import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.RawCbor
 
 /**
  * Represents the ReaderAuthentication structure as defined in ISO 18013-5.
@@ -50,16 +50,17 @@ data class ReaderAuthenticationDto(
             provider: SerializerProvider
         ) {
             val cborGen = gen as CBORGenerator
-            cborGen.writeStartArray(null, ARRAY_SIZE)
+            cborGen.writeStartArray()
             cborGen.writeString(LABEL)
-            provider.defaultSerializeValue(RawCbor(value.sessionTranscript), gen)
-            provider.defaultSerializeValue(RawCbor(value.itemsRequestBytes), gen)
+            cborGen.flush()
+            val out = cborGen.outputTarget as OutputStream
+            out.write(value.sessionTranscript)
+            out.write(value.itemsRequestBytes)
             cborGen.writeEndArray()
         }
     }
 
     companion object {
-        private const val ARRAY_SIZE = 3
         private const val LABEL = "ReaderAuthentication"
     }
 }

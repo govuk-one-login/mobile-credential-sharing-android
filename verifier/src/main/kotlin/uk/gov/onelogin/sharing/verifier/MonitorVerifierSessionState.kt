@@ -162,7 +162,7 @@ private fun handleSessionFailure(
         SessionErrorReason.DocumentNotReturned,
         SessionErrorReason.PeerTermination,
         SessionErrorReason.CannotBuildReaderAuthentication
-            ->
+        ->
             navController.navigateToUnrecoverableVerifierError(options)
     }
 }

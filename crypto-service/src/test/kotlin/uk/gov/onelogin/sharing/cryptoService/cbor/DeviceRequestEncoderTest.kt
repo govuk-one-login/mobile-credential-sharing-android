@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
@@ -10,6 +11,8 @@ import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.CBOR_T
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_NAMESPACE
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoderImpl
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 
 class DeviceRequestEncoderTest {
 
@@ -54,5 +57,37 @@ class DeviceRequestEncoderTest {
             mapOf("portrait" to false, "age_over_18" to false),
             decoded.docRequests.first().itemsRequest.nameSpaces[MDL_NAMESPACE]
         )
+    }
+
+    @Test
+    fun `DeviceRequest encodeCbor readerAuth is encoded as raw CBOR array`() {
+        val itemsRequest =
+            ItemsRequest(MDL_DOC_TYPE, mapOf(MDL_NAMESPACE to mapOf("portrait" to true)))
+        val coseSign1Array = byteArrayOf(
+            0x84.toByte(),
+            0x43,
+            0xA1.toByte(),
+            0x01,
+            0x26,
+            0xA0.toByte(),
+            0xF6.toByte(),
+            0x44,
+            0xDE.toByte(),
+            0xAD.toByte(),
+            0xBE.toByte(),
+            0xEF.toByte()
+        )
+
+        val docRequest = DocRequest(itemsRequest, readerAuth = coseSign1Array)
+        val deviceRequest =
+            uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest(
+                "1.0",
+                listOf(docRequest)
+            )
+
+        val encoded = deviceRequest.toDto().toCbor()
+
+        assertTrue(encoded.toHexString().contains(coseSign1Array.toHexString()))
+        assertFalse(encoded.toHexString().contains("d818" + coseSign1Array.toHexString()))
     }
 }

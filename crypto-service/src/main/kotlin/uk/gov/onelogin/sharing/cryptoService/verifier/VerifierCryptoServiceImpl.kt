@@ -42,6 +42,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ReaderAuthenticationDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
+@Suppress("TooManyFunctions")
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
 class VerifierCryptoServiceImpl(
     private val logger: Logger,
@@ -52,6 +53,7 @@ class VerifierCryptoServiceImpl(
     private val decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase
 ) : VerifierCryptoService {
 
+    @Suppress("LongMethod")
     override fun establishSession(
         qrCodeData: String,
         updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
@@ -59,7 +61,8 @@ class VerifierCryptoServiceImpl(
         require(qrCodeData.isNotBlank()) {
             logger.error(
                 logTag,
-                "error constructing SessionTranscript array due to DeviceEngagementBytes is blank"
+                "error constructing SessionTranscript array due to" +
+                    " DeviceEngagementBytes is blank"
             )
             "DeviceEngagementBytes must not be blank"
         }
@@ -140,8 +143,9 @@ class VerifierCryptoServiceImpl(
             logger.debug(logTag, "ReaderAuthenticationBytes constructed successfully")
         }
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-        logger.error(logTag, "Error constructing ReaderAuthenticationBytes", e)
-        throw e
+        val message = "Error constructing ReaderAuthenticationBytes"
+        logger.error(logTag, message, e)
+        throw ReaderAuthenticationException(message, e)
     }
 
     override fun buildSessionEstablishment(
@@ -164,13 +168,22 @@ class VerifierCryptoServiceImpl(
         return EmbeddedCbor(encoded).toCbor()
     }
 
-    override fun buildDeviceRequest(itemsRequest: ItemsRequest, readerAuth: ByteArray?): ByteArray =
-        DeviceRequest(
-            version = "1.0",
-            docRequests = listOf(DocRequest(itemsRequest, readerAuth))
-        ).toDto().toCbor().also {
-            logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
-        }
+    override fun buildDeviceRequest(
+        itemsRequest: ItemsRequest,
+        itemsRequestBytes: ByteArray?,
+        readerAuth: ByteArray?
+    ): ByteArray = DeviceRequest(
+        version = "1.0",
+        docRequests = listOf(
+            DocRequest(
+                itemsRequest = itemsRequest,
+                readerAuth = readerAuth,
+                itemsRequestBytes = itemsRequestBytes
+            )
+        )
+    ).toDto().toCbor().also {
+        logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
+    }
 
     override fun encryptDeviceRequest(
         deviceRequestBytes: ByteArray,

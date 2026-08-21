@@ -43,6 +43,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.DecryptDeviceResponseExcep
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
+import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
@@ -518,16 +519,21 @@ class VerifierOrchestratorTest {
     }
 
     @Test
-    fun `ConnectionStateStarted encrypts DeviceRequest with counter 1 and increments to 2`() =
-        runTest {
-            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
-            orchestrator.processQrCode(VALID_MDOC_URI)
-            centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+    fun `ConnectionStateStarted passes itemsRequestBytes correctly`() = runTest {
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
-            assertEquals(1u, fakeCryptoService.lastEncryptCounter)
-            val context = sessionFactory.getCurrentSession().cryptoContext
-            assertEquals(2u, context?.encryptCounter)
-        }
+        val expectedBytes = fakeCryptoService.buildItemsRequestBytes(mockk())
+        assertArrayEquals(
+            expectedBytes,
+            fakeCryptoService.lastItemsRequestBytesPassedToReaderAuth
+        )
+        assertArrayEquals(
+            expectedBytes,
+            fakeCryptoService.lastItemsRequestBytesPassedToDeviceRequest
+        )
+    }
 
     @Test
     fun `AC4 - encryption failure transitions to Failed with CannotEncryptDeviceRequest reason`() =
@@ -615,6 +621,35 @@ class VerifierOrchestratorTest {
 
         assertEquals(1, centralBluetoothTransport.stopCalls)
     }
+
+    @Test
+    fun `reader auth failure transitions to Failed with CannotBuildReaderAuthentication reason`() =
+        runTest {
+            val failingCryptoService = FakeVerifierCryptoService().apply {
+                buildReaderAuthenticationException = ReaderAuthenticationException(
+                    "Error constructing ReaderAuthenticationBytes",
+                    RuntimeException("CBOR failure")
+                )
+            }
+            val orchestrator = createOrchestrator(
+                cryptoService = failingCryptoService
+            )
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.processQrCode(VALID_MDOC_URI)
+            centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+            centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+            advanceUntilIdle()
+            assertThat(
+                orchestrator.verifierSessionState.value,
+                isFailed(
+                    hasReason(
+                        instanceOf(SessionErrorReason.CannotBuildReaderAuthentication::class.java)
+                    )
+                )
+            )
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+        }
 
     @Test
     fun `sendMessage success completes transmission`() = runTest {

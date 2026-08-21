@@ -55,8 +55,16 @@ interface VerifierCryptoService {
     /**
      * Constructs a [DeviceRequest] from the [itemsRequest] and optional [readerAuth]
      * signature and encodes it to CBOR bytes.
+     *
+     * @param itemsRequest The [ItemsRequest] domain model.
+     * @param itemsRequestBytes The preserved CBOR Tag 24 wrapped ItemsRequestBytes.
+     * @param readerAuth The optional ReaderAuthentication signature.
      */
-    fun buildDeviceRequest(itemsRequest: ItemsRequest, readerAuth: ByteArray? = null): ByteArray
+    fun buildDeviceRequest(
+        itemsRequest: ItemsRequest,
+        itemsRequestBytes: ByteArray? = null,
+        readerAuth: ByteArray? = null
+    ): ByteArray
 
     /**
      * Constructs and CBOR-encodes a [SessionEstablishment] map from [eReaderKeyBytes]

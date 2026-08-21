@@ -22,7 +22,18 @@ class DeferredVerifierCryptoService(
         updater(qrCodeData)?.let(updateContext)
     }
 
-    override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = byteArrayOf()
+    override fun buildDeviceRequest(
+        itemsRequest: ItemsRequest,
+        itemsRequestBytes: ByteArray?,
+        readerAuth: ByteArray?
+    ): ByteArray = byteArrayOf()
+
+    override fun buildReaderAuthenticationBytes(
+        itemsRequestBytes: ByteArray,
+        context: VerifierCryptoContext
+    ): ByteArray = byteArrayOf()
+
+    override fun buildItemsRequestBytes(itemsRequest: ItemsRequest): ByteArray = byteArrayOf()
 
     override fun buildSessionEstablishment(
         eReaderKeyBytes: ByteArray,

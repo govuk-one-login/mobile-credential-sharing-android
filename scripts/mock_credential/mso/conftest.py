@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from typing import Dict, Generator
 
 from mock_credential.mso import MSO, SAMPLE_MSO
-from mock_credential.namespaces import SAMPLE_NAMESPACES
 
 
 @pytest.fixture

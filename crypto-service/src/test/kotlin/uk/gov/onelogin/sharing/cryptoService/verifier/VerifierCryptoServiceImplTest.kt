@@ -237,10 +237,13 @@ class VerifierCryptoServiceImplTest {
             docType = "org.iso.18013.5.1.mDL",
             nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("family_name" to true))
         )
+        val itemsRequestUntagged = byteArrayOf(0xCA.toByte(), 0xFE.toByte(), 0xBA.toByte())
 
-        val result = service.buildDeviceRequest(itemsRequest)
+        val result = service.buildDeviceRequest(itemsRequest, itemsRequestUntagged)
 
         assertTrue(result.isNotEmpty())
+
+        assertTrue(result.toHexString().contains(itemsRequestUntagged.toHexString()))
     }
 
     @Test

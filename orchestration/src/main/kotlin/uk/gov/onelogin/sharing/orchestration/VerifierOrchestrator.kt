@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.orchestration
 
-import android.util.Log
 import androidx.annotation.Keep
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -25,6 +24,7 @@ import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
+import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
@@ -392,8 +392,8 @@ class VerifierOrchestrator(
 
     private fun isUnexpectedStatusWithData(sessionData: SessionData): Boolean =
         sessionData.data != null && sessionData.status != null &&
-                sessionData.status != SESSION_TERMINATION &&
-                sessionData.status != SessionDataStatus.OK
+            sessionData.status != SESSION_TERMINATION &&
+            sessionData.status != SessionDataStatus.OK
 
     private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
         logger.error(logTag, "Received SessionData with data and error status: $status")
@@ -581,8 +581,8 @@ class VerifierOrchestrator(
         if (currentState.isComplete()) return
 
         val isSessionStarted = currentState.shouldConfirmCancellation() ||
-                currentState is VerifierSessionState.TerminatingSession ||
-                sessionFlow.value.cryptoContext != null
+            currentState is VerifierSessionState.TerminatingSession ||
+            sessionFlow.value.cryptoContext != null
 
         if (isSessionStarted) {
             if (currentState !is VerifierSessionState.TerminatingSession) {
@@ -617,8 +617,15 @@ class VerifierOrchestrator(
             buildAndSendSessionEstablishment(context, itemsRequest)
         }.onFailure { e ->
             val reason = when {
-                e is EncryptDeviceRequestException -> SessionErrorReason.CannotEncryptDeviceRequest
-                e is SessionEstablishmentException -> SessionErrorReason.CannotBuildSessionEstablishment
+                e is EncryptDeviceRequestException ->
+                    SessionErrorReason.CannotEncryptDeviceRequest
+
+                e is SessionEstablishmentException ->
+                    SessionErrorReason.CannotBuildSessionEstablishment
+
+                e is ReaderAuthenticationException ->
+                    SessionErrorReason.CannotBuildReaderAuthentication
+
                 e.message?.contains("ReaderAuthentication") == true ->
                     SessionErrorReason.CannotBuildReaderAuthentication
 
@@ -633,11 +640,19 @@ class VerifierOrchestrator(
         itemsRequest: ItemsRequest
     ) {
         val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
-        verifierCryptoService.buildReaderAuthenticationBytes(itemsRequestBytes, context)
+        val readerAuthBytes = verifierCryptoService.buildReaderAuthenticationBytes(
+            itemsRequestBytes = itemsRequestBytes,
+            context = context
+        )
 
-        Log.d("ItemsRequestBytes", itemsRequestBytes.toHexString())
+        val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(
+            itemsRequest = itemsRequest,
+            itemsRequestBytes = itemsRequestBytes,
+            readerAuth = readerAuthBytes
+        )
 
-        val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
+        logger.debug(logTag, "DeviceRequestBytes: ${deviceRequestBytes.toHexString()}")
+
         val encryptedDeviceRequest = verifierCryptoService.encryptDeviceRequest(
             deviceRequestBytes = deviceRequestBytes,
             skReader = context.skReader,
