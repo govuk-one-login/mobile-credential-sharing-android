@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.peripheral
+package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
@@ -10,10 +10,9 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-class GattServerCallback(
+internal class GattServerCallback(
     private val gatGattEventEmitter: GattEventEmitter,
     private val logger: Logger,
     private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE,
