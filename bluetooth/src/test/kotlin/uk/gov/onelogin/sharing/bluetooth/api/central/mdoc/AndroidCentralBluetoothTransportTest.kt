@@ -15,12 +15,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.central.ClientClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.AndroidCentralBluetoothTransportMatchers.hasMonitoringJob
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.AndroidCentralBluetoothTransportMatchers.hasScanJob
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.isError
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
@@ -169,7 +169,7 @@ class AndroidCentralBluetoothTransportTest {
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
-            gattClientManager.emitEvent(GattClientEvent.Error(ClientError.SERVICE_NOT_FOUND))
+            gattClientManager.emitEvent(GattClientEvent.Error(ClientClientError.SERVICE_NOT_FOUND))
             assertEquals(
                 CentralBluetoothState.Error(CentralBluetoothTransportError.SERVICE_NOT_FOUND),
                 awaitItem()

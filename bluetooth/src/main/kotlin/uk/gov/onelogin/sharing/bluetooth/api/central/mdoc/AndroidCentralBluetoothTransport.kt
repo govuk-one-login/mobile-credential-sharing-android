@@ -20,11 +20,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY

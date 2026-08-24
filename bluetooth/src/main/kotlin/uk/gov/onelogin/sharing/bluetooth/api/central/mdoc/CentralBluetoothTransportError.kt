@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.ClientClientError
 
 enum class CentralBluetoothTransportError {
     BLUETOOTH_TURNED_OFF,
@@ -16,18 +16,18 @@ enum class CentralBluetoothTransportError {
     EXCEEDED_MAX_BUFFER_SIZE;
 
     companion object {
-        fun fromClientError(clientError: ClientError): CentralBluetoothTransportError =
-            when (clientError) {
-                ClientError.BLUETOOTH_PERMISSION_MISSING -> BLUETOOTH_PERMISSION_MISSING
-                ClientError.BLUETOOTH_GATT_NOT_AVAILABLE -> GATT_NOT_AVAILABLE
-                ClientError.SERVICE_NOT_FOUND -> SERVICE_NOT_FOUND
-                ClientError.INVALID_SERVICE -> INVALID_SERVICE
-                ClientError.FAILED_TO_SUBSCRIBE -> FAILED_TO_SUBSCRIBE
-                ClientError.FAILED_TO_START -> FAILED_TO_START
-                ClientError.SERVICE_DISCOVERED_ERROR -> INVALID_SERVICE
-                ClientError.INVALID_MESSAGE_PREFIX -> INVALID_MESSAGE_PREFIX
-                ClientError.SERVICE_CHANGED -> SERVICE_CHANGED
-                ClientError.EXCEEDED_MAX_BUFFER_SIZE -> EXCEEDED_MAX_BUFFER_SIZE
+        fun fromClientError(clientClientError: ClientClientError): CentralBluetoothTransportError =
+            when (clientClientError) {
+                ClientClientError.BLUETOOTH_PERMISSION_MISSING -> BLUETOOTH_PERMISSION_MISSING
+                ClientClientError.BLUETOOTH_GATT_NOT_AVAILABLE -> GATT_NOT_AVAILABLE
+                ClientClientError.SERVICE_NOT_FOUND -> SERVICE_NOT_FOUND
+                ClientClientError.INVALID_SERVICE -> INVALID_SERVICE
+                ClientClientError.FAILED_TO_SUBSCRIBE -> FAILED_TO_SUBSCRIBE
+                ClientClientError.FAILED_TO_START -> FAILED_TO_START
+                ClientClientError.SERVICE_DISCOVERED_ERROR -> INVALID_SERVICE
+                ClientClientError.INVALID_MESSAGE_PREFIX -> INVALID_MESSAGE_PREFIX
+                ClientClientError.SERVICE_CHANGED -> SERVICE_CHANGED
+                ClientClientError.EXCEEDED_MAX_BUFFER_SIZE -> EXCEEDED_MAX_BUFFER_SIZE
             }
     }
 }

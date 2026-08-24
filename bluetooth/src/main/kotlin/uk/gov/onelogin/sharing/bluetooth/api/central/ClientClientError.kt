@@ -1,11 +1,11 @@
-package uk.gov.onelogin.sharing.bluetooth.api.gatt.central
+package uk.gov.onelogin.sharing.bluetooth.api.central
 
 /**
  * Represents the possible errors that can occur during a BLE client operation.
  *
  * These errors cover issues related to service discovery, permissions, and GATT availability.
  */
-enum class ClientError {
+enum class ClientClientError {
     /**
      * Indicates service discovered but status is not BluetoothGatt.GATT_SUCCESS
      */
