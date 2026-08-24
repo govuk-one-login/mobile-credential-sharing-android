@@ -1,6 +1,6 @@
-package uk.gov.onelogin.sharing.bluetooth.api.peripheral
+package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
-class FakeGattEventEmitter : GattEventEmitter {
+internal class FakeGattEventEmitter : GattEventEmitter {
     val events = mutableListOf<GattServerCallbackEvent>()
     override fun emit(event: GattServerCallbackEvent) {
         events.add(event)

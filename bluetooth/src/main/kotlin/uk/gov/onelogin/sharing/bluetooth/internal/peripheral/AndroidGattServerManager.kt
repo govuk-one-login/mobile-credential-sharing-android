@@ -24,9 +24,6 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
