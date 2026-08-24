@@ -1,11 +1,8 @@
-from argparse import Namespace
 import logging
-from logging518 import config as logging_config
-from typing import List, TypeVar, Type, Tuple, Dict
-
+from argparse import Namespace
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.hazmat.primitives.asymmetric.types import PrivateKeyTypes
-from cryptography.hazmat.primitives import serialization
 from cryptography.x509 import (
     BasicConstraints,
     NameConstraints,
@@ -21,7 +18,11 @@ from cryptography.x509 import (
     DirectoryName,
 )
 from cryptography.x509.oid import ObjectIdentifier
-
+from logging518 import config as logging_config
+from mock_credential.certificates.generators import (
+    CertificateGenerator,
+    KeyGenerator,
+)
 from mock_credential.issuer_auth import ISSUER_NAME, LEAF_NAME
 from mock_credential.reader_auth import (
     READER_AUTH_COMMON_LEAF_EXTENSIONS,
@@ -30,10 +31,7 @@ from mock_credential.reader_auth import (
     generate_dvs_subject,
     READER_AUTH_DVS_ATTRIBUTES,
 )
-from mock_credential.certificates.generators import (
-    CertificateGenerator,
-    KeyGenerator,
-)
+from typing import List, TypeVar, Type, Tuple, Dict
 
 T = TypeVar("T", bound="Parent")  # type: ignore
 # ISO 18013-5 mdoc DS OID
@@ -213,49 +211,75 @@ class GenerateMockCredentialInputs:
                 f"Written constrained x509 intermediate certificate: {self.reader_name_constrained_intermediate_x509_certificate}"
             )
 
-        _, valid_reader_auth_leaf_cert = self._create_reader_auth_leaf_certificate(
-            cert_gen=cert_gen,
-            subject=generate_dvs_subject(
-                READER_AUTH_DVS_ATTRIBUTES
+        valid_reader_auth_leaf_key, valid_reader_auth_leaf_cert = (
+            self._create_reader_auth_leaf_certificate(
+                cert_gen=cert_gen,
+                subject=generate_dvs_subject(
+                    READER_AUTH_DVS_ATTRIBUTES
+                    + [
+                        NameAttribute(NameOID.COMMON_NAME, "Supermarket1 backend"),
+                        NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket1"),
+                    ]
+                ),
+                key_gen=intermediate_key_gen,
+                subject_key=constrained_reader_auth_key,
+                issuer_cert=constrained_reader_auth_cert,
+                extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
                 + [
-                    NameAttribute(NameOID.COMMON_NAME, "Supermarket1 backend"),
-                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket1"),
-                ]
-            ),
-            key_gen=intermediate_key_gen,
-            subject_key=constrained_reader_auth_key,
-            issuer_cert=constrained_reader_auth_cert,
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
-            + [
-                (BasicConstraints(ca=False, path_length=None), True),
-                (PRIVACY_POLICY_URL_EXTENSION, False),
-            ],
+                    (BasicConstraints(ca=False, path_length=None), True),
+                    (PRIVACY_POLICY_URL_EXTENSION, False),
+                ],
+            )
         )
-        with open(self.reader_valid_x509_leaf_certificate, "wb") as f:
+        with open(self.reader_valid_x509_leaf_certificate + ".pem", "wb") as f:
+            f.write(
+                valid_reader_auth_leaf_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
+            reader_logger.info(
+                f"Written valid x509 leaf private key: {self.reader_valid_x509_leaf_certificate}"
+            )
+        with open(self.reader_valid_x509_leaf_certificate + ".der", "wb") as f:
             f.write(valid_reader_auth_leaf_cert.public_bytes(serialization.Encoding.DER))
             reader_logger.info(
                 f"Written valid x509 leaf certificate: {self.reader_valid_x509_leaf_certificate}"
             )
 
-        _, reader_auth_leaf_without_privacy_policy = self._create_reader_auth_leaf_certificate(
-            cert_gen=cert_gen,
-            subject=generate_dvs_subject(
-                READER_AUTH_DVS_ATTRIBUTES
+        reader_auth_leaf_without_privacy_policy_key, reader_auth_leaf_without_privacy_policy = (
+            self._create_reader_auth_leaf_certificate(
+                cert_gen=cert_gen,
+                subject=generate_dvs_subject(
+                    READER_AUTH_DVS_ATTRIBUTES
+                    + [
+                        NameAttribute(NameOID.COMMON_NAME, "Supermarket2 backend"),
+                        NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket2"),
+                    ]
+                ),
+                key_gen=intermediate_key_gen,
+                subject_key=constrained_reader_auth_key,
+                issuer_cert=constrained_reader_auth_cert,
+                # Doesn't contain Privacy policy OID
+                extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
                 + [
-                    NameAttribute(NameOID.COMMON_NAME, "Supermarket2 backend"),
-                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket2"),
-                ]
-            ),
-            key_gen=intermediate_key_gen,
-            subject_key=constrained_reader_auth_key,
-            issuer_cert=constrained_reader_auth_cert,
-            # Doesn't contain Privacy policy OID
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
-            + [
-                (BasicConstraints(ca=False, path_length=None), True),
-            ],
+                    (BasicConstraints(ca=False, path_length=None), True),
+                ],
+            )
         )
-        with open(self.reader_x509_leaf_certificate_without_privacy_policy, "wb") as f:
+        with open(self.reader_x509_leaf_certificate_without_privacy_policy + ".pem", "wb") as f:
+            f.write(
+                reader_auth_leaf_without_privacy_policy_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
+            reader_logger.info(
+                f"Written x509 leaf certificate without privacy policy private key: {self.reader_x509_leaf_certificate_without_privacy_policy}"
+            )
+        with open(self.reader_x509_leaf_certificate_without_privacy_policy + ".der", "wb") as f:
             f.write(
                 reader_auth_leaf_without_privacy_policy.public_bytes(serialization.Encoding.DER)
             )
@@ -263,25 +287,38 @@ class GenerateMockCredentialInputs:
                 f"Written x509 leaf certificate without privacy policy: {self.reader_x509_leaf_certificate_without_privacy_policy}"
             )
 
-        _, reader_auth_leaf_failing_constraints = self._create_reader_auth_leaf_certificate(
-            cert_gen=cert_gen,
-            subject=generate_dvs_subject(
-                [
-                    NameAttribute(NameOID.ORGANIZATION_NAME, "RogueDVS"),
-                    NameAttribute(NameOID.COMMON_NAME, "Supermarket2 backend"),
-                    NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket2"),
-                ]
-            ),
-            key_gen=intermediate_key_gen,
-            subject_key=constrained_reader_auth_key,
-            issuer_cert=constrained_reader_auth_cert,
-            # Doesn't contain Privacy policy OID
-            extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
-            + [
-                (BasicConstraints(ca=False, path_length=None), True),
-            ],
+        reader_auth_leaf_failing_constraints_key, reader_auth_leaf_failing_constraints = (
+            self._create_reader_auth_leaf_certificate(
+                cert_gen=cert_gen,
+                subject=generate_dvs_subject(
+                    [
+                        NameAttribute(NameOID.ORGANIZATION_NAME, "RogueDVS"),
+                        NameAttribute(NameOID.COMMON_NAME, "Supermarket2 backend"),
+                        NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Supermarket2"),
+                    ]
+                ),
+                key_gen=intermediate_key_gen,
+                subject_key=constrained_reader_auth_key,
+                issuer_cert=constrained_reader_auth_cert,
+                # Doesn't contain Privacy policy OID
+                extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
+                + [
+                    (BasicConstraints(ca=False, path_length=None), True),
+                ],
+            )
         )
-        with open(self.reader_x509_leaf_invalid_organisation, "wb") as f:
+        with open(self.reader_x509_leaf_invalid_organisation + ".pem", "wb") as f:
+            f.write(
+                reader_auth_leaf_failing_constraints_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
+            reader_logger.info(
+                f"Written x509 leaf certificate without privacy policy private key: {self.reader_x509_leaf_invalid_organisation}"
+            )
+        with open(self.reader_x509_leaf_invalid_organisation + ".der", "wb") as f:
             f.write(reader_auth_leaf_failing_constraints.public_bytes(serialization.Encoding.DER))
             reader_logger.info(
                 f"Written x509 leaf certificate with invalid organisation: {self.reader_x509_leaf_invalid_organisation}"
