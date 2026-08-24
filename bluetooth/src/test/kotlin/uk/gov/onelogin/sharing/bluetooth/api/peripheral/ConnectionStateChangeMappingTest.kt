@@ -8,7 +8,6 @@ import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.GattServerCallbackEvent
 
