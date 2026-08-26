@@ -23,13 +23,22 @@ import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOpt
  * authentication's private key to use within the created [ReaderAuthCredentialProvider].
  */
 @Singleton
-class TestAppReaderAuthCredentialProviderFactory @Inject constructor(
+class TestAppReaderAuthCredentialProviderFactory(
     @ApplicationContext
     private val context: Context,
+    initialState: ReaderAuthOption
 ) : ReaderAuthCredentialProvider.Factory {
 
+    @Inject constructor(
+        @ApplicationContext
+        context: Context
+    ) : this(
+        context = context,
+        initialState = ReaderAuthOption.VALID
+    )
+
     private val _readerAuthOption: MutableStateFlow<ReaderAuthOption> = MutableStateFlow(
-        ReaderAuthOption.VALID
+        initialState
     )
     val readerAuthOption: Flow<ReaderAuthOption> = _readerAuthOption
 
@@ -37,7 +46,11 @@ class TestAppReaderAuthCredentialProviderFactory @Inject constructor(
         val privateKeySpec = context.assets.open(
             _readerAuthOption.value.leafCertificatePrivateKeyFileName
         ).let(::InputStreamReader)
-            .let(::strip)
+            .readText()
+            .lines()
+            .filterNot { it.startsWith("-----") }
+            .joinToString("")
+            .also { require(it.isNotBlank()) { "PEM file has no key content" } }
             .let(Base64::decode)
             .let(::PKCS8EncodedKeySpec)
 
@@ -51,11 +64,5 @@ class TestAppReaderAuthCredentialProviderFactory @Inject constructor(
 
     fun update(option: ReaderAuthOption) {
         _readerAuthOption.value = option
-    }
-
-    private fun strip(reader: InputStreamReader) = reader.use {
-        it.readText()
-            .replace("-----BEGIN PRIVATE KEY-----\n", "")
-            .replace("-----END PRIVATE KEY-----", "")
     }
 }
