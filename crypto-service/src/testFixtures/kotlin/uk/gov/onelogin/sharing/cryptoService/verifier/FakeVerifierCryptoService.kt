@@ -41,12 +41,11 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         lastQrCodeData = qrCodeData
         exceptionToThrow?.let { throw it }
         DeferredVerifierCryptoService(
-            updater = { qrCodeData ->
+            updater = { _ ->
                 VerifierCryptoContext(
-                    engagementString = qrCodeData,
                     serviceUuid = UUID.randomUUID(),
                     eReaderKeyTagged = byteArrayOf(),
-                    sessionTranscriptBytes = byteArrayOf(),
+                    sessionTranscriptBytes = byteArrayOf(0xD8.toByte(), 0x18, 0x41, 0x01),
                     eReaderKeyPair = validKeyPair!!,
                     eDevicePublicKey = validKeyPair.public as ECPublicKey,
                     skReader = sessionKeysToReturn.first,
@@ -56,7 +55,31 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         ).establishSession(qrCodeData, updateContext)
     }
 
-    override fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray = byteArrayOf(0x01, 0x02)
+    var lastItemsRequestBytesPassedToReaderAuth: ByteArray? = null
+    var lastSessionTranscriptPassedToReaderAuth: ByteArray? = null
+    var lastItemsRequestBytesPassedToDeviceRequest: ByteArray? = null
+    var buildReaderAuthenticationException: Exception? = null
+
+    override fun buildItemsRequestBytes(itemsRequest: ItemsRequest): ByteArray = byteArrayOf(0x01)
+
+    override fun buildReaderAuthenticationBytes(
+        sessionTranscript: ByteArray,
+        itemsRequestBytes: ByteArray
+    ): ByteArray {
+        lastSessionTranscriptPassedToReaderAuth = sessionTranscript
+        lastItemsRequestBytesPassedToReaderAuth = itemsRequestBytes
+        buildReaderAuthenticationException?.let { throw it }
+        return byteArrayOf(0x02)
+    }
+
+    override fun buildDeviceRequest(
+        itemsRequest: ItemsRequest,
+        itemsRequestBytes: ByteArray?,
+        readerAuth: ByteArray?
+    ): ByteArray {
+        lastItemsRequestBytesPassedToDeviceRequest = itemsRequestBytes
+        return byteArrayOf(0x01, 0x02)
+    }
 
     override fun encryptDeviceRequest(
         deviceRequestBytes: ByteArray,

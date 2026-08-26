@@ -22,6 +22,8 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceResponseUseCase
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_ERROR
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_SUCCESS
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
@@ -49,7 +51,6 @@ class VerifierCryptoServiceImplTest {
         }
 
         assertNotNull(context)
-        assertEquals(VALID_ENCODED_DEVICE_ENGAGEMENT, context.engagementString)
         assertNotNull(context.serviceUuid)
         val eReaderKey = assertNotNull(context.eReaderKeyTagged)
         assertTrue(eReaderKey[0] == 0xD8.toByte())
@@ -235,10 +236,13 @@ class VerifierCryptoServiceImplTest {
             docType = "org.iso.18013.5.1.mDL",
             nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("family_name" to true))
         )
+        val itemsRequestBytes = byteArrayOf(0xCA.toByte(), 0xFE.toByte(), 0xBA.toByte())
 
-        val result = service.buildDeviceRequest(itemsRequest)
+        val result = service.buildDeviceRequest(itemsRequest, itemsRequestBytes)
 
         assertTrue(result.isNotEmpty())
+
+        assertTrue(result.toHexString().contains(itemsRequestBytes.toHexString()))
     }
 
     @Test
@@ -343,6 +347,41 @@ class VerifierCryptoServiceImplTest {
         assertThrows(DecryptDeviceResponseException::class.java) {
             service.decryptDeviceResponse(byteArrayOf(0x01), ByteArray(32), 1u)
         }
+    }
+
+    @Test
+    fun `buildItemsRequestBytes returns Tag 24 wrapped bytes`() {
+        val itemsRequest = ItemsRequest(
+            docType = "org.iso.18013.5.1.mDL",
+            nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("family_name" to true))
+        )
+
+        val result = service.buildItemsRequestBytes(itemsRequest)
+
+        assertTrue(result.isNotEmpty())
+        assertEquals(0xD8.toByte(), result[0])
+        assertEquals(0x18.toByte(), result[1])
+    }
+
+    @Test
+    fun `buildReaderAuthenticationBytes constructs correct CBOR structure`() = runTest {
+        val sessionTranscript = byteArrayOf(0x83.toByte(), 0x01, 0x02, 0x03)
+        val itemsRequestBytes = byteArrayOf(0xD8.toByte(), 0x18, 0x42, 0x01, 0x02)
+
+        val result = service.buildReaderAuthenticationBytes(sessionTranscript, itemsRequestBytes)
+
+        assertTrue(result.isNotEmpty())
+        assertEquals(0xD8.toByte(), result[0])
+        assertEquals(0x18.toByte(), result[1])
+
+        val unwrapped = CborMapper.default.readValue(result, EmbeddedCbor::class.java).encoded
+        val array = CborMapper.default.readTree(unwrapped)
+
+        assertTrue(array.isArray)
+        assertEquals(3, array.size())
+        assertEquals("ReaderAuthentication", array[0].asText())
+        assertTrue(array[1].isArray)
+        assertNotNull(array[2])
     }
 
     private fun createService(

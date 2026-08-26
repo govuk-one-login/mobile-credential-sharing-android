@@ -1,3 +1,4 @@
+
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse
 
 import com.fasterxml.jackson.annotation.JsonIgnore

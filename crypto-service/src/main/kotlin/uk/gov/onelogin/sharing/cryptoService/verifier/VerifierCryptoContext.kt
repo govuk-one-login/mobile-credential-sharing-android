@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.cryptoService.verifier
 import java.security.KeyPair
 import java.security.interfaces.ECPublicKey
 import java.util.UUID
-import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
 
 /**
  * Holds ephemeral cryptographic resources for a single Verifier transaction.
@@ -12,15 +11,12 @@ import uk.gov.onelogin.sharing.models.mdoc.transcript.SessionTranscript
  * When the session is discarded, these resources are released.
  */
 data class VerifierCryptoContext(
-    /** The base64url-encoded Device Engagement string from the scanned QR code. */
-    val engagementString: String,
     /** The BLE peripheral server mode UUID extracted from the Device Engagement. */
     val serviceUuid: UUID,
     /** The Verifier's ephemeral public key in COSE format, wrapped in CBOR Tag 24. */
     val eReaderKeyTagged: ByteArray,
     /**
      * The CBOR Tag 24 wrapped SessionTranscript, used as salt for key derivation.
-     * This should be updated to be an instance of [SessionTranscript].
      */
     val sessionTranscriptBytes: ByteArray,
     /** The Verifier's ephemeral key pair (EReaderKey), retained for shared secret computation. */

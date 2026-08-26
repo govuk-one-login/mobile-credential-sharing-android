@@ -21,6 +21,26 @@ interface VerifierCryptoService {
     )
 
     /**
+     * Builds the detached ReaderAuthenticationBytes payload.
+     *
+     * @param sessionTranscript The raw (untagged) SessionTranscript CBOR array.
+     * @param itemsRequestBytes The CBOR Tag 24 wrapped ItemsRequestBytes.
+     * @return The CBOR Tag 24 wrapped ReaderAuthenticationBytes.
+     */
+    fun buildReaderAuthenticationBytes(
+        sessionTranscript: ByteArray,
+        itemsRequestBytes: ByteArray
+    ): ByteArray
+
+    /**
+     * Constructs the CBOR Tag 24 wrapped ItemsRequestBytes.
+     *
+     * @param itemsRequest The [ItemsRequest] domain model.
+     * @return The CBOR Tag 24 wrapped ItemsRequestBytes.
+     */
+    fun buildItemsRequestBytes(itemsRequest: ItemsRequest): ByteArray
+
+    /**
      * Encrypts [deviceRequestBytes] using AES-256-GCM with the [skReader] session key.
      *
      * @throws EncryptDeviceRequestException if encryption fails.
@@ -33,9 +53,18 @@ interface VerifierCryptoService {
     ): ByteArray
 
     /**
-     * Constructs a [DeviceRequest] from the [itemsRequest] and encodes it to CBOR bytes.
+     * Constructs a [DeviceRequest] from the [itemsRequest] and optional [readerAuth]
+     * signature and encodes it to CBOR bytes.
+     *
+     * @param itemsRequest The [ItemsRequest] domain model.
+     * @param itemsRequestBytes The preserved CBOR Tag 24 wrapped ItemsRequestBytes.
+     * @param readerAuth The optional ReaderAuthentication signature.
      */
-    fun buildDeviceRequest(itemsRequest: ItemsRequest): ByteArray
+    fun buildDeviceRequest(
+        itemsRequest: ItemsRequest,
+        itemsRequestBytes: ByteArray? = null,
+        readerAuth: ByteArray? = null
+    ): ByteArray
 
     /**
      * Constructs and CBOR-encodes a [SessionEstablishment] map from [eReaderKeyBytes]

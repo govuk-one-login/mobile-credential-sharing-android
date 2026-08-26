@@ -21,9 +21,11 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransp
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
+import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
+import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
@@ -616,10 +618,14 @@ class VerifierOrchestrator(
             buildAndSendSessionEstablishment(context, itemsRequest)
         }.onFailure { e ->
             val reason = when (e) {
-                is EncryptDeviceRequestException -> SessionErrorReason.CannotEncryptDeviceRequest
+                is EncryptDeviceRequestException ->
+                    SessionErrorReason.CannotEncryptDeviceRequest
 
                 is SessionEstablishmentException ->
                     SessionErrorReason.CannotBuildSessionEstablishment
+
+                is ReaderAuthenticationException ->
+                    SessionErrorReason.CannotBuildReaderAuthentication
 
                 else -> SessionErrorReason.CannotSendMessage
             }
@@ -631,7 +637,20 @@ class VerifierOrchestrator(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {
-        val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(itemsRequest)
+        val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
+        val readerAuthBytes = verifierCryptoService.buildReaderAuthenticationBytes(
+            sessionTranscript = deriveUntaggedCbor(context.sessionTranscriptBytes),
+            itemsRequestBytes = itemsRequestBytes
+        )
+
+        val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(
+            itemsRequest = itemsRequest,
+            itemsRequestBytes = itemsRequestBytes,
+            readerAuth = readerAuthBytes
+        )
+
+        logger.debug(logTag, "DeviceRequestBytes: ${deviceRequestBytes.toHexString()}")
+
         val encryptedDeviceRequest = verifierCryptoService.encryptDeviceRequest(
             deviceRequestBytes = deviceRequestBytes,
             skReader = context.skReader,

@@ -11,9 +11,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
+import java.io.OutputStream
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.RawCbor
 
 /**
  * ```
@@ -28,6 +30,7 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializ
 @JsonDeserialize(using = DocRequestDto.Deserializer::class)
 data class DocRequestDto(
     val itemsRequest: ItemsRequestDto,
+    val itemsRequestBytes: ByteArray? = null,
     @JsonIgnore
     val readerAuth: ByteArray? = null
 ) : CborEncodable {
@@ -39,6 +42,7 @@ data class DocRequestDto(
         other as DocRequestDto
 
         if (itemsRequest != other.itemsRequest) return false
+        if (!itemsRequestBytes.contentEquals(other.itemsRequestBytes)) return false
         if (!readerAuth.contentEquals(other.readerAuth)) return false
 
         return true
@@ -46,6 +50,7 @@ data class DocRequestDto(
 
     override fun hashCode(): Int {
         var result = itemsRequest.hashCode()
+        result = 31 * result + (itemsRequestBytes?.contentHashCode() ?: 0)
         result = 31 * result + (readerAuth?.contentHashCode() ?: 0)
         return result
     }
@@ -56,11 +61,26 @@ data class DocRequestDto(
             gen: JsonGenerator,
             provider: SerializerProvider
         ) {
-            (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
-            gen.writeFieldName(ITEMS_REQUEST_KEY)
-            gen.writeTag(EMBEDDED_CBOR_TAG)
-            gen.writeBinary(CborMapper.default.writeValueAsBytes(value.itemsRequest))
-            gen.writeEndObject()
+            val cborGen = gen as CBORGenerator
+            cborGen.writeStartObject()
+
+            cborGen.writeFieldName(ITEMS_REQUEST_KEY)
+            if (value.itemsRequestBytes != null) {
+                provider.defaultSerializeValue(RawCbor(value.itemsRequestBytes), gen)
+            } else {
+                cborGen.writeTag(EMBEDDED_CBOR_TAG)
+                cborGen.writeBinary(CborMapper.default.writeValueAsBytes(value.itemsRequest))
+            }
+
+            value.readerAuth?.let {
+                cborGen.flush()
+                val out = cborGen.outputTarget as OutputStream
+                out.write(CBOR_TEXT_STRING_LENGTH_10)
+                out.write(READER_AUTH_KEY.toByteArray())
+                out.write(it)
+            }
+
+            cborGen.writeEndObject()
         }
     }
 
@@ -69,15 +89,29 @@ data class DocRequestDto(
             val root = p.codec.readTree<JsonNode>(p)
             val itemsRequestNode = root[ITEMS_REQUEST_KEY]
                 ?: throw IllegalArgumentException("Missing itemsRequest in DocRequest")
+
             val itemsRequest = CborMapper.default
                 .readValue(itemsRequestNode.binaryValue(), ItemsRequestDto::class.java)
-            return DocRequestDto(itemsRequest = itemsRequest)
+
+            val readerAuthNode = root[READER_AUTH_KEY]
+            val readerAuth = when {
+                readerAuthNode == null -> null
+                readerAuthNode.isBinary -> readerAuthNode.binaryValue()
+                else -> CborMapper.default.writeValueAsBytes(readerAuthNode)
+            }
+
+            return DocRequestDto(
+                itemsRequest = itemsRequest,
+                itemsRequestBytes = null,
+                readerAuth = readerAuth
+            )
         }
     }
 
     companion object {
-        private const val FIELD_COUNT = 1
         const val ITEMS_REQUEST_KEY = "itemsRequest"
         const val READER_AUTH_KEY: String = "readerAuth"
+
+        private const val CBOR_TEXT_STRING_LENGTH_10 = 0x6A
     }
 }
