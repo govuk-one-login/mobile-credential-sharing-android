@@ -4,6 +4,7 @@ import android.R.drawable.ic_menu_close_clear_cancel
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -103,7 +104,11 @@ internal fun VerifyCredential(
         LocalMetroViewModelFactory provides viewModelFactory
     ) {
         Surface(modifier = modifier) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding()
+            ) {
                 if (!state.isComplete()) {
                     IconButton(onClick = onCancel) {
                         Icon(
