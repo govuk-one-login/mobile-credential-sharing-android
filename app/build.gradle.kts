@@ -102,6 +102,7 @@ dependencies {
     ).forEach(::kspAndroidTest)
 
     listOf(
+        libs.androidx.hilt.lifecycle.viewmodel.compose,
         projects.core, // Remove once SDK prerequisites screen handles permissions
         projects.sdk,
         projects.ui.uiApi,

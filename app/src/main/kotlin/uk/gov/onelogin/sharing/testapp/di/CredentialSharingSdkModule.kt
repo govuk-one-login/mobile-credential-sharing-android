@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
 import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.internal.shared.CredentialSharingSdkImpl
@@ -19,11 +20,13 @@ object CredentialSharingSdkModule {
     fun provideCredentialSharingSdk(
         application: Application,
         logger: Logger,
-        permissionChecker: PermissionChecker
+        permissionChecker: PermissionChecker,
+        readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory
     ): CredentialSharingSdk = CredentialSharingSdkImpl(
         applicationContext = application,
         logger = logger,
-        permissionChecker = permissionChecker
+        permissionChecker = permissionChecker,
+        readerAuthCredentialFactory = readerAuthCredentialFactory
     )
 
     @Provides

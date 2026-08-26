@@ -34,6 +34,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
@@ -46,6 +48,7 @@ import uk.gov.onelogin.sharing.testapp.VERIFY_CREDENTIAL_BUTTON_TAG
 @Composable
 internal fun SelectCredentialAttributesScreen(
     modifier: Modifier = Modifier,
+    viewModel: SelectCredentialsViewModel = hiltViewModel(),
     onSelectAttributeGroup: (AttributeGroup) -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -58,9 +61,9 @@ internal fun SelectCredentialAttributesScreen(
         mutableStateOf(VerifierAttributeOption.PORTRAIT_AND_AGE_OVER_21)
     }
     var isAttributeGroupExpanded by remember { mutableStateOf(false) }
-    var selectedReaderAuth by rememberSaveable {
-        mutableStateOf(ReaderAuthOption.VALID)
-    }
+
+    val selectedReaderAuth: ReaderAuthOption by viewModel.readerAuthOption
+        .collectAsStateWithLifecycle()
     var isReaderAuthExpanded by remember { mutableStateOf(false) }
 
     Surface(
@@ -96,7 +99,7 @@ internal fun SelectCredentialAttributesScreen(
                 onToggleDropdownExpansion = { isReaderAuthExpanded = it },
                 onSelectOption = {
                     isReaderAuthExpanded = false
-                    selectedReaderAuth = it
+                    viewModel.update(it)
                 }
             )
 
