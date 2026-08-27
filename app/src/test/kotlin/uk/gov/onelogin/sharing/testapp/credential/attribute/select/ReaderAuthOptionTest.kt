@@ -11,9 +11,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 
 @RunWith(RobolectricTestParameterInjector::class)
-class ReaderAuthOptionTest(
-    @TestParameter val option: ReaderAuthOption
-) {
+class ReaderAuthOptionTest(@TestParameter val option: ReaderAuthOption) {
     val context: Context by lazy {
         ApplicationProvider.getApplicationContext()
     }
@@ -21,7 +19,6 @@ class ReaderAuthOptionTest(
     @Test
     fun `Certificate file exists`() = runTest {
         openAsset(option.leafCertificateAssetFileName)
-
     }
 
     @Test
@@ -32,6 +29,6 @@ class ReaderAuthOptionTest(
     private fun openAsset(fileName: String) = try {
         context.assets.open(fileName)
     } catch (exception: IOException) {
-        fail("Couldn't open '${fileName}'", exception)
+        fail("Couldn't open '$fileName'", exception)
     }
 }

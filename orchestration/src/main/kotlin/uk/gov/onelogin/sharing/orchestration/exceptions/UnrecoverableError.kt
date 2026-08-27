@@ -6,7 +6,5 @@ package uk.gov.onelogin.sharing.orchestration.exceptions
  * Specifically, this means that the User journey should complete / finish due to being unable
  * to continue.
  */
-open class UnrecoverableError(
-    override val message: String? = null,
-    override val cause: Throwable
-) : Exception(message, cause)
+open class UnrecoverableError(override val message: String? = null, override val cause: Throwable) :
+    Exception(message, cause)

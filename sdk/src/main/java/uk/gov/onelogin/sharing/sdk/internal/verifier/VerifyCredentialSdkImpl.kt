@@ -12,7 +12,7 @@ class VerifyCredentialSdkImpl(
     private val appGraph: CredentialSharingAppGraph,
     private val verifierGraphFactory: VerifyCredentialGraph.Factory,
     private val credentialVerificationGraphFactory: CredentialVerificationGraph.Factory,
-    private val readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory,
+    private val readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory
 ) : VerifyCredentialSdk {
 
     override fun verifier(verifierConfig: VerifierConfig): CredentialVerifier {

@@ -19,7 +19,7 @@ class CredentialSharingSdkImpl(
     applicationContext: Context,
     logger: Logger,
     permissionChecker: PermissionChecker,
-    readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory,
+    readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory
 ) : CredentialSharingSdk {
 
     private val _appGraph: CredentialSharingAppGraph =

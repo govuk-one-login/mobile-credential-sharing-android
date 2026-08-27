@@ -19,7 +19,7 @@ interface VerifyCredentialGraph {
             @Includes appGraph: CredentialSharingAppGraph,
             @Includes credentialVerificationGraph: CredentialVerificationGraph,
             @Provides verifierConfig: VerifierConfig,
-            @Provides readerAuthCredentialProvider: ReaderAuthCredentialProvider,
+            @Provides readerAuthCredentialProvider: ReaderAuthCredentialProvider
         ): VerifyCredentialGraph
     }
 

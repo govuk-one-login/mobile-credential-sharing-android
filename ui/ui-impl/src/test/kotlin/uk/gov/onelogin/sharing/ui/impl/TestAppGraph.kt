@@ -50,7 +50,7 @@ fun createTestVerifierGraph(
     appGraph: CredentialSharingAppGraph,
     credentialVerificationGraph: CredentialVerificationGraph,
     readerAuthCredentialProvider: ReaderAuthCredentialProvider,
-    config: VerifierConfig = verifierConfigStub,
+    config: VerifierConfig = verifierConfigStub
 ): VerifyCredentialGraph = createGraphFactory<VerifyCredentialGraph.Factory>().create(
     appGraph = appGraph,
     credentialVerificationGraph = credentialVerificationGraph,

@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.TestAppReaderAuthCre
 
 @HiltViewModel
 class SelectCredentialsViewModel @Inject constructor(
-    private val readerAuthFactory: TestAppReaderAuthCredentialProviderFactory,
+    private val readerAuthFactory: TestAppReaderAuthCredentialProviderFactory
 ) : ViewModel() {
     val readerAuthOption: StateFlow<ReaderAuthOption> = readerAuthFactory
         .readerAuthOption
@@ -22,8 +22,7 @@ class SelectCredentialsViewModel @Inject constructor(
             ReaderAuthOption.VALID
         )
 
-    fun update(option: ReaderAuthOption) =
-        viewModelScope.launch {
-            readerAuthFactory.update(option)
-        }
+    fun update(option: ReaderAuthOption) = viewModelScope.launch {
+        readerAuthFactory.update(option)
+    }
 }
