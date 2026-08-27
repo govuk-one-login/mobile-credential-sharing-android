@@ -48,7 +48,7 @@ import uk.gov.onelogin.sharing.testapp.VERIFY_CREDENTIAL_BUTTON_TAG
 internal fun SelectCredentialAttributesScreen(
     modifier: Modifier = Modifier,
     viewModel: SelectCredentialsViewModel = hiltViewModel(),
-    onSelectAttributeGroup: (AttributeGroup) -> Unit = {},
+    onSelectAttributeGroup: (AttributeGroup) -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     val metrics = rememberMetricsStateHolder()
@@ -88,7 +88,7 @@ internal fun SelectCredentialAttributesScreen(
                 onSelectReaderAuthOption = {
                     isReaderAuthExpanded = false
                     viewModel.update(it)
-                },
+                }
             )
 
             Button(
@@ -119,7 +119,7 @@ private fun UserInputs(
     onToggleAttributeGroupDropdown: (Boolean) -> Unit,
     onSelectReaderAuthOption: (ReaderAuthOption) -> Unit,
     onToggleReaderAuthOptionDropdown: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         AttributeGroupDropdown(
@@ -151,7 +151,7 @@ private fun AttributeGroupDropdown(
     isAttributeGroupExpanded: Boolean,
     modifier: Modifier = Modifier,
     onToggleDropdownExpansion: (Boolean) -> Unit = {},
-    onSelectAttributeOption: (VerifierAttributeOption) -> Unit = {},
+    onSelectAttributeOption: (VerifierAttributeOption) -> Unit = {}
 ) {
     UserDropdownMenu(
         modifier = modifier,
@@ -189,7 +189,7 @@ private fun ReaderAuthDropdown(
     isAttributeGroupExpanded: Boolean,
     modifier: Modifier = Modifier,
     onToggleDropdownExpansion: (Boolean) -> Unit = {},
-    onSelectOption: (ReaderAuthOption) -> Unit = {},
+    onSelectOption: (ReaderAuthOption) -> Unit = {}
 ) {
     UserDropdownMenu(
         modifier = modifier,
@@ -237,7 +237,7 @@ private fun UserDropdownMenu(
         focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
     ),
     label: @Composable () -> Unit = {},
-    onToggleDropdownExpansion: (Boolean) -> Unit = {},
+    onToggleDropdownExpansion: (Boolean) -> Unit = {}
 ) {
     ExposedDropdownMenuBox(
         expanded = isDropdownExpanded,
