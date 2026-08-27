@@ -4,6 +4,7 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.InputStreamReader
 import java.security.KeyFactory
+import java.security.Signature
 import java.security.interfaces.ECPrivateKey
 import java.security.spec.PKCS8EncodedKeySpec
 import javax.inject.Inject
@@ -58,7 +59,7 @@ class TestAppReaderAuthCredentialProviderFactory(
             privateKey = KeyFactory.getInstance(
                 "EC"
             ).generatePrivate(privateKeySpec) as ECPrivateKey,
-            signingAlgorithm = SIGNING_ALGORITHM
+            signature = Signature.getInstance(SIGNING_ALGORITHM)
         )
     }
 

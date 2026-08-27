@@ -14,17 +14,17 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError
  * structure.
  *
  * @property privateKey The EC private key to sign with.
- * @property signingAlgorithm The signing algorithm to be used. e.g. "NONEwithECDSA"
+ * @property signature The signing algorithm to be used. e.g. "NONEwithECDSA"
  */
 class ECReaderAuthProvider(
     private val privateKey: ECPrivateKey,
-    private val signingAlgorithm: String,
+    private val signature: Signature,
 ) : ReaderAuthCredentialProvider {
 
     override fun sign(
         readerAuthenticationBytes: ByteArray,
     ): ByteArray = try {
-        return Signature.getInstance(signingAlgorithm).run {
+        return signature.run {
             initSign(privateKey)
             update(readerAuthenticationBytes)
             sign()
