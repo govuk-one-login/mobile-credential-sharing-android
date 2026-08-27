@@ -50,7 +50,7 @@ def valid_parser(
     )
     empty_parser.add_argument(
         "--reader-intermediate-x509-certificate",
-        default="app/src/main/assets/test_reader_auth_x509_certificate.der",
+        default="app/src/main/assets/test_reader_auth_x509_certificate",
     )
     empty_parser.add_argument(
         "--output",
@@ -73,7 +73,7 @@ def valid_parser(
     )
     empty_parser.add_argument(
         "--reader-name-constrained-intermediate-x509-certificate",
-        default=str(input_tmp_dir) + "/reader_name_constrained_intermediate_x509_certificate.der",
+        default=str(input_tmp_dir) + "/reader_name_constrained_intermediate_x509_certificate",
     )
     empty_parser.add_argument(
         "--reader-x509-leaf-invalid-organisation",

@@ -164,7 +164,18 @@ class GenerateMockCredentialInputs:
             subject=ISSUER_NAME,
             validity_days=self.validity_days,
         )
-        with open(self.reader_intermediate_x509_certificate, "wb") as f:
+        with open(self.reader_intermediate_x509_certificate + ".pem", "wb") as f:
+            f.write(
+                reader_auth_private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
+            reader_logger.info(
+                f"Written x509 intermediate private key: {self.reader_intermediate_x509_certificate}"
+            )
+        with open(self.reader_intermediate_x509_certificate + ".der", "wb") as f:
             f.write(intermediary_reader_auth_cert.public_bytes(serialization.Encoding.DER))
             reader_logger.info(
                 f"Written x509 intermediate certificate: {self.reader_intermediate_x509_certificate}"
@@ -205,7 +216,18 @@ class GenerateMockCredentialInputs:
                 ],
             )
         )
-        with open(self.reader_name_constrained_intermediate_x509_certificate, "wb") as f:
+        with open(self.reader_name_constrained_intermediate_x509_certificate + ".pem", "wb") as f:
+            f.write(
+                constrained_reader_auth_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+            )
+            reader_logger.info(
+                f"Written x509 intermediate private key: {self.reader_name_constrained_intermediate_x509_certificate}"
+            )
+        with open(self.reader_name_constrained_intermediate_x509_certificate + ".der", "wb") as f:
             f.write(constrained_reader_auth_cert.public_bytes(serialization.Encoding.DER))
             reader_logger.info(
                 f"Written constrained x509 intermediate certificate: {self.reader_name_constrained_intermediate_x509_certificate}"
