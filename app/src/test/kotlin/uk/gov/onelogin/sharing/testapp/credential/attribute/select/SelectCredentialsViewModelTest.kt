@@ -25,11 +25,21 @@ class SelectCredentialsViewModelTest {
     }
 
     @Test
-    fun `initial state is valid`() = runTest {
+    fun `initial reader auth option is valid`() = runTest {
         viewModel.readerAuthOption.test {
             assertThat(
                 expectMostRecentItem(),
                 equalTo(ReaderAuthOption.VALID)
+            )
+        }
+    }
+
+    @Test
+    fun `initial verifier attribute option is age over 21`() = runTest {
+        viewModel.verifierAttributeOption.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(VerifierAttributeOption.PORTRAIT_AND_AGE_OVER_21)
             )
         }
     }
@@ -48,6 +58,20 @@ class SelectCredentialsViewModelTest {
         }
 
         factory.readerAuthOption.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(option)
+            )
+        }
+    }
+
+    @Test
+    fun `Updates internal state flow with verifier attribute option`(
+        @TestParameter option: VerifierAttributeOption
+    ) = runTest {
+        viewModel.update(option)
+
+        viewModel.verifierAttributeOption.test {
             assertThat(
                 expectMostRecentItem(),
                 equalTo(option)

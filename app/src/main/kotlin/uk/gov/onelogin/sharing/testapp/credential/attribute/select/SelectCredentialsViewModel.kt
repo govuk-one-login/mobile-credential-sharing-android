@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -22,7 +23,17 @@ class SelectCredentialsViewModel @Inject constructor(
             ReaderAuthOption.VALID
         )
 
+    private val _verifierAttributeOption = MutableStateFlow(
+        VerifierAttributeOption.PORTRAIT_AND_AGE_OVER_21
+    )
+
+    val verifierAttributeOption: StateFlow<VerifierAttributeOption> = _verifierAttributeOption
+
     fun update(option: ReaderAuthOption) = viewModelScope.launch {
         readerAuthFactory.update(option)
+    }
+
+    fun update(option: VerifierAttributeOption) = viewModelScope.launch {
+        _verifierAttributeOption.value = option
     }
 }
