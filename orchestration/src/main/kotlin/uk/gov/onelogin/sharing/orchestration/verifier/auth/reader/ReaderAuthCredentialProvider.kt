@@ -5,7 +5,7 @@ package uk.gov.onelogin.sharing.orchestration.verifier.auth.reader
  */
 fun interface ReaderAuthCredentialProvider {
     /**
-     * @param readerAuthenticationBytes The [ByteArray] structure matching Reader Authentication.
+     * @param readerAuthenticationPayload The [ByteArray] structure matching Reader Authentication.
      *
      * @return A [ByteArray] representing a `COSE_Sign1` data structure.
      *
@@ -14,7 +14,7 @@ fun interface ReaderAuthCredentialProvider {
      * @throws uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError when the journey
      * should finish / complete.
      */
-    fun sign(readerAuthenticationBytes: ByteArray): ByteArray
+    fun sign(readerAuthenticationPayload: ByteArray): ByteArray
 
     /**
      * Functional interface for generating instances of [ReaderAuthCredentialProvider].

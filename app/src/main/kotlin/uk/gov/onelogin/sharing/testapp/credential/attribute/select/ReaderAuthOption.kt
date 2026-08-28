@@ -14,12 +14,12 @@ enum class ReaderAuthOption(internal val leafCertificateAsset: String, val displ
         displayName = "Missing privacy policy URL"
     );
 
-    val leafCertificateAssetFileName: String = "$leafCertificateAsset.der"
-    val leafCertificatePrivateKeyFileName: String = "$leafCertificateAsset.pem"
-
-    val certificateAssetChain: List<String> = listOf(
+    private val assetChain: List<String> = listOf(
         "test_reader_auth_x509_certificate",
         "test_reader_auth_name_constrained_x509_certificate",
         leafCertificateAsset
     )
+
+    val certificateChain: List<String> = assetChain.map { "$it.der" }
+    val privateKeyChain: List<String> = assetChain.map { "$it.pem" }
 }

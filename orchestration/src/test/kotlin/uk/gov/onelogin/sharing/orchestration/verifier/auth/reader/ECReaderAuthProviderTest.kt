@@ -1,10 +1,13 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.auth.reader
 
+import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import java.security.InvalidKeyException
 import java.security.KeyPairGenerator
 import java.security.Signature
+import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
 import kotlin.test.Test
 import kotlin.test.assertFails
@@ -20,12 +23,18 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError
 
 class ECReaderAuthProviderTest {
 
-    private var privateKey: ECPrivateKey = mockk(relaxed = true)
+    private var privateKeyOne: ECPrivateKey = mockk(relaxed = true)
+    private var privateKeyTwo: ECPrivateKey = mockk(relaxed = true)
+
+    private var certificateOne: X509Certificate = mockk(relaxed = true)
+    private var certificateTwo: X509Certificate = mockk(relaxed = true)
+
     private var signature: Signature = mockk(relaxed = true)
 
     private val provider by lazy {
         ECReaderAuthProvider(
-            privateKey = privateKey,
+            privateKeyChain = listOf(privateKeyOne, privateKeyTwo),
+            certificateChain = listOf(certificateOne, certificateTwo),
             signature = signature
         )
     }
@@ -34,7 +43,7 @@ class ECReaderAuthProviderTest {
     fun `Wraps InvalidKeyExceptions in UnrecoverableError instances`() = runTest {
         val invalidKeyException = InvalidKeyException("This is a unit test")
         every {
-            signature.initSign(privateKey)
+            signature.initSign(privateKeyTwo)
         } throws invalidKeyException
 
         val throwable = assertFails {
@@ -81,11 +90,17 @@ class ECReaderAuthProviderTest {
         keyPairGenerator.initialize(256)
         val keyPair = keyPairGenerator.generateKeyPair()
 
-        privateKey = keyPair.private as ECPrivateKey
+        privateKeyTwo = keyPair.private as ECPrivateKey
         signature = Signature.getInstance("SHA256withECDSA")
 
         val result = provider.sign(byteArrayOf(1, 2, 3, 4, 5))
 
         assertNotNull(result)
+
+        verify {
+            privateKeyOne wasNot called
+            certificateOne wasNot called
+            certificateTwo wasNot called
+        }
     }
 }

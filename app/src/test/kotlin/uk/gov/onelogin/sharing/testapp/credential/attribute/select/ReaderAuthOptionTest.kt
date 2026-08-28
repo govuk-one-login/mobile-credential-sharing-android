@@ -5,9 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.testing.junit.testparameterinjector.TestParameter
 import java.io.IOException
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.fail
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 
@@ -18,26 +19,30 @@ class ReaderAuthOptionTest(@TestParameter val option: ReaderAuthOption) {
     }
 
     @Test
-    fun `Certificate file exists`() = runTest {
-        openAsset(option.leafCertificateAssetFileName)
-    }
-
-    @Test
-    fun `Private key file exists`() = runTest {
-        openAsset(option.leafCertificatePrivateKeyFileName)
-    }
-
-    @Test
     fun `Provides a certificate chain list`() = runTest {
         val expected = listOf(
-            "test_reader_auth_x509_certificate",
-            "test_reader_auth_name_constrained_x509_certificate",
-            option.leafCertificateAsset
+            "test_reader_auth_x509_certificate.der",
+            "test_reader_auth_name_constrained_x509_certificate.der",
+            "${option.leafCertificateAsset}.der"
         )
 
-        assertEquals(
-            expected,
-            option.certificateAssetChain
+        assertThat(
+            option.certificateChain,
+            contains(expected)
+        )
+    }
+
+    @Test
+    fun `Provides a private key chain list`() = runTest {
+        val expected = listOf(
+            "test_reader_auth_x509_certificate.pem",
+            "test_reader_auth_name_constrained_x509_certificate.pem",
+            "${option.leafCertificateAsset}.pem"
+        )
+
+        assertThat(
+            option.privateKeyChain,
+            contains(expected)
         )
     }
 

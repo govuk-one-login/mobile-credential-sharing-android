@@ -3,26 +3,31 @@ package uk.gov.onelogin.sharing.orchestration.verifier.auth.reader
 import java.security.InvalidKeyException
 import java.security.Signature
 import java.security.SignatureException
+import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
 import uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError
 
 /**
  * Sample [ReaderAuthCredentialProvider] implementation that signs the provided
- * `readerAuthenticationBytes` with the [privateKey] property.
+ * `readerAuthenticationBytes` with the [privateKeyChain] property.
  *
  * It's assumed that `readerAuthenticationBytes` is already in the shape of a `COSE_Sign1`
  * structure.
  *
- * @property privateKey The EC private key to sign with.
+ * @property privateKeyChain The EC private key to sign with.
  * @property signature The signing algorithm to be used. e.g. "NONEwithECDSA"
  */
-class ECReaderAuthProvider(private val privateKey: ECPrivateKey, private val signature: Signature) :
-    ReaderAuthCredentialProvider {
+@Suppress("UnusedPrivateProperty")
+class ECReaderAuthProvider(
+    private val privateKeyChain: List<ECPrivateKey>,
+    private val certificateChain: List<X509Certificate>,
+    private val signature: Signature
+) : ReaderAuthCredentialProvider {
 
-    override fun sign(readerAuthenticationBytes: ByteArray): ByteArray = try {
-        return signature.run {
-            initSign(privateKey)
-            update(readerAuthenticationBytes)
+    override fun sign(readerAuthenticationPayload: ByteArray): ByteArray = try {
+        signature.run {
+            initSign(privateKeyChain.last())
+            update(readerAuthenticationPayload)
             sign()
         }
     } catch (invalidKey: InvalidKeyException) {

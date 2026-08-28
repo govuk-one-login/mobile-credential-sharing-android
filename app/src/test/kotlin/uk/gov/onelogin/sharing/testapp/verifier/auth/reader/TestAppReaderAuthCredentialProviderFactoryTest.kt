@@ -3,6 +3,9 @@ package uk.gov.onelogin.sharing.testapp.verifier.auth.reader
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameter
+import java.security.KeyFactory
+import java.security.cert.CertificateFactory
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
@@ -21,18 +24,20 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
 
     private var initialState: ReaderAuthOption = ReaderAuthOption.VALID
 
-    private val factory by lazy {
+    private fun factory(context: CoroutineContext) =
         TestAppReaderAuthCredentialProviderFactory(
             ApplicationProvider.getApplicationContext(),
-            initialState = initialState
+            initialState = initialState,
+            keyFactory = KeyFactory.getInstance("EC"),
+            certificateFactory = CertificateFactory.getInstance("X.509"),
+            coroutineContext = context
         )
-    }
 
     @Test
     fun `Initially selected option is configurable`() = runTest {
         initialState = option
 
-        factory.readerAuthOption.test {
+        factory(backgroundScope.coroutineContext).readerAuthOption.test {
             assertThat(
                 expectMostRecentItem(),
                 equalTo(option)
@@ -42,9 +47,10 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
 
     @Test
     fun `Internal state is updatable`() = runTest {
-        factory.update(option)
+        val providerFactory = factory(backgroundScope.coroutineContext)
+        providerFactory.update(option)
 
-        factory.readerAuthOption.test {
+        providerFactory.readerAuthOption.test {
             assertThat(
                 expectMostRecentItem(),
                 equalTo(option)
@@ -56,7 +62,7 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
     fun `Creates ECReaderAuthProvider instances`() = runTest {
         initialState = option
 
-        val result = factory.create()
+        val result = factory(backgroundScope.coroutineContext).create()
 
         assertThat(
             result,
