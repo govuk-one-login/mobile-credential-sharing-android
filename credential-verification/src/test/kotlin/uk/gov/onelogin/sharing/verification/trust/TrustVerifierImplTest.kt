@@ -14,24 +14,26 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.logging.api.v2.Logger
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseHeaderValidator
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Builder
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Decoder
+import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateChainValidatorImpl
+import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
+import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatureVerifier
+import uk.gov.onelogin.sharing.verification.trust.MsoBuilder
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
-import uk.gov.onelogin.sharing.verification.trust.chain.CertificateChainValidatorImpl
-import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
-import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
 
 class TrustVerifierImplTest {
-    private val logger: Logger = SystemLogger()
-    private val decoder = CoseSign1Decoder(logger)
+
+    private val decoder = CoseSign1Decoder()
     private val verifier = TrustVerifierImpl(
         decoder,
         CoseSignatureVerifier(
-            CoseHeaderValidator(logger)
+            CoseHeaderValidator()
         ),
-        CertificateChainValidatorImpl(logger)
+        CertificateChainValidatorImpl()
     )
     private val cborMapper = ObjectMapper(CBORFactory())
 
@@ -209,4 +211,7 @@ class TrustVerifierImplTest {
 
         return cborMapper.writeValueAsBytes(array)
     }
+
+    private fun String.hexToByteArray(): ByteArray =
+        chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 }
