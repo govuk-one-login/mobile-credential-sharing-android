@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.testapp.credential.attribute.select
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
@@ -12,10 +10,6 @@ import org.robolectric.RobolectricTestParameterInjector
 
 @RunWith(RobolectricTestParameterInjector::class)
 class ReaderAuthOptionTest(@TestParameter val option: ReaderAuthOption) {
-    val context: Context by lazy {
-        ApplicationProvider.getApplicationContext()
-    }
-
     @Test
     fun `Provides a certificate chain list`() = runTest {
         val expected = listOf(
