@@ -14,7 +14,10 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError
  * It's assumed that `readerAuthenticationBytes` is already in the shape of a `COSE_Sign1`
  * structure.
  *
- * @property privateKeyChain The EC private key to sign with.
+ * @property privateKeyChain The EC private keychain to use. The [List] begins with the uppermost
+ * private key, with the last element being the relevant leaf certificate's private key.
+ * @property certificateChain The X509 certificate chain to use. The [List] begins with the
+ * uppermost certificate, with the last element being the relevant leaf certificate.
  * @property signature The signing algorithm to be used. e.g. "NONEwithECDSA"
  */
 @Suppress("UnusedPrivateProperty")
