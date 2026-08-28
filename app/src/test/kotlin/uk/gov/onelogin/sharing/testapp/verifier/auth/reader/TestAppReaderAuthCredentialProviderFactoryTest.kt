@@ -24,14 +24,13 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
 
     private var initialState: ReaderAuthOption = ReaderAuthOption.VALID
 
-    private fun factory(context: CoroutineContext) =
-        TestAppReaderAuthCredentialProviderFactory(
-            ApplicationProvider.getApplicationContext(),
-            initialState = initialState,
-            keyFactory = KeyFactory.getInstance("EC"),
-            certificateFactory = CertificateFactory.getInstance("X.509"),
-            coroutineContext = context
-        )
+    private fun factory(context: CoroutineContext) = TestAppReaderAuthCredentialProviderFactory(
+        ApplicationProvider.getApplicationContext(),
+        initialState = initialState,
+        keyFactory = KeyFactory.getInstance("EC"),
+        certificateFactory = CertificateFactory.getInstance("X.509"),
+        coroutineContext = context
+    )
 
     @Test
     fun `Initially selected option is configurable`() = runTest {

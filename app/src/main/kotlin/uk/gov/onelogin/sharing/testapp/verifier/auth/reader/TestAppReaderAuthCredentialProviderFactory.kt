@@ -39,13 +39,13 @@ class TestAppReaderAuthCredentialProviderFactory(
     initialState: ReaderAuthOption,
     private val keyFactory: KeyFactory,
     private val certificateFactory: CertificateFactory,
-    private val coroutineContext: CoroutineContext,
+    private val coroutineContext: CoroutineContext
 ) : ReaderAuthCredentialProvider.Factory {
 
     @Inject
     constructor(
         @ApplicationContext
-        context: Context,
+        context: Context
     ) : this(
         context = context,
         initialState = ReaderAuthOption.VALID,
@@ -78,21 +78,17 @@ class TestAppReaderAuthCredentialProviderFactory(
 
     val readerAuthOption: Flow<ReaderAuthOption> = _readerAuthOption
 
-    override fun create(): ReaderAuthCredentialProvider {
-        return ECReaderAuthProvider(
-            privateKeyChain = privateKeyChain.value,
-            certificateChain = certificateChain.value,
-            signature = Signature.getInstance(SIGNING_ALGORITHM)
-        )
-    }
+    override fun create(): ReaderAuthCredentialProvider = ECReaderAuthProvider(
+        privateKeyChain = privateKeyChain.value,
+        certificateChain = certificateChain.value,
+        signature = Signature.getInstance(SIGNING_ALGORITHM)
+    )
 
     fun update(option: ReaderAuthOption) {
         _readerAuthOption.value = option
     }
 
-    private fun processPrivateKeyAssetChain(
-        chain: Sequence<String>,
-    ): List<ECPrivateKey> = chain
+    private fun processPrivateKeyAssetChain(chain: Sequence<String>): List<ECPrivateKey> = chain
         .map(context.assets::open)
         .map(::InputStreamReader)
         .map(InputStreamReader::readText)
@@ -107,9 +103,7 @@ class TestAppReaderAuthCredentialProviderFactory(
         .map { it as ECPrivateKey }
         .toList()
 
-    private fun processCertificateAssetChain(
-        chain: Sequence<String>,
-    ): List<X509Certificate> = chain
+    private fun processCertificateAssetChain(chain: Sequence<String>): List<X509Certificate> = chain
         .map(context.assets::open)
         .map(certificateFactory::generateCertificate)
         .map { it as X509Certificate }
