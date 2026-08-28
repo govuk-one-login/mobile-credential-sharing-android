@@ -2,9 +2,8 @@ package uk.gov.onelogin.sharing.testapp.credential.attribute.select
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.contains
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 
@@ -18,9 +17,9 @@ class ReaderAuthOptionTest(@TestParameter val option: ReaderAuthOption) {
             "${option.leafCertificateAsset}.der"
         )
 
-        assertThat(
-            option.certificateChain,
-            contains(expected)
+        assertEquals(
+            expected,
+            option.certificateChain
         )
     }
 
@@ -32,9 +31,9 @@ class ReaderAuthOptionTest(@TestParameter val option: ReaderAuthOption) {
             "${option.leafCertificateAsset}.pem"
         )
 
-        assertThat(
-            option.privateKeyChain,
-            contains(expected)
+        assertEquals(
+            expected,
+            option.privateKeyChain
         )
     }
 }
