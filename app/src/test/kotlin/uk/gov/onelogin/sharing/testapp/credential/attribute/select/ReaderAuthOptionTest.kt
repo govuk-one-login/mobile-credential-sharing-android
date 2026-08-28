@@ -3,9 +3,7 @@ package uk.gov.onelogin.sharing.testapp.credential.attribute.select
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.testing.junit.testparameterinjector.TestParameter
-import java.io.IOException
 import kotlin.test.Test
-import kotlin.test.fail
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
@@ -44,11 +42,5 @@ class ReaderAuthOptionTest(@TestParameter val option: ReaderAuthOption) {
             option.privateKeyChain,
             contains(expected)
         )
-    }
-
-    private fun openAsset(fileName: String) = try {
-        context.assets.open(fileName)
-    } catch (exception: IOException) {
-        fail("Couldn't open '$fileName'", exception)
     }
 }
