@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.Untrust
 class CertificateChainValidatorImpl internal constructor() : CertificateChainValidator {
 
     override fun verify(certificates: List<X509Certificate>, trustedRoot: X509Certificate) {
-        val result = try {
+        try {
             val certFactory = CertificateFactory.getInstance("X.509")
             val certPath = certFactory.generateCertPath(certificates)
 
@@ -28,11 +28,9 @@ class CertificateChainValidatorImpl internal constructor() : CertificateChainVal
 
             CertPathValidator.getInstance("PKIX").validate(certPath, params)
         } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            null
-        }
-
-        if (result == null) {
+            @Suppress("SwallowedException")
             throw UntrustedCertificate
         }
     }
 }
+
