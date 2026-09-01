@@ -9,6 +9,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
+import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
@@ -48,11 +49,13 @@ fun createTestHolderGraph(
 fun createTestVerifierGraph(
     appGraph: CredentialSharingAppGraph,
     credentialVerificationGraph: CredentialVerificationGraph,
+    readerAuthCredentialProvider: ReaderAuthCredentialProvider,
     config: VerifierConfig = verifierConfigStub
 ): VerifyCredentialGraph = createGraphFactory<VerifyCredentialGraph.Factory>().create(
     appGraph = appGraph,
     credentialVerificationGraph = credentialVerificationGraph,
-    verifierConfig = config
+    verifierConfig = config,
+    readerAuthCredentialProvider = readerAuthCredentialProvider
 )
 
 fun createTestCredentialVerificationGraph(

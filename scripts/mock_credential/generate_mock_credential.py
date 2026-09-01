@@ -5,9 +5,9 @@ Generates a mock_credential.txt for the Sharing SDK test app.
 
 import argparse
 import logging
-from logging518 import config as logging_config
 import os
 import sys
+from logging518 import config as logging_config
 
 # Add the 'scripts' directory to the path so we can import mock_credential
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -91,25 +91,25 @@ def get_argument_parser() -> GenerateMockCredentialInputs:
     )
     parser.add_argument(
         "--reader-intermediate-x509-certificate",
-        default="app/src/main/assets/test_reader_auth_x509_certificate.der",
+        default="app/src/main/assets/test_reader_auth_x509_certificate",
     )
     parser.add_argument(
         "--reader-name-constrained-intermediate-x509-certificate",
-        default="app/src/main/assets/test_reader_auth_name_constrained_x509_certificate.der",
+        default="app/src/main/assets/test_reader_auth_name_constrained_x509_certificate",
     )
     parser.add_argument("--output", default="app/src/main/res/raw/mock_credential.txt")
     parser.add_argument("--validity-days", type=int, default=365)
     parser.add_argument(
         "--reader-valid-x509-leaf-certificate",
-        default="app/src/main/assets/reader_valid_x509_leaf_certificate.der",
+        default="app/src/main/assets/reader_valid_x509_leaf_certificate",
     )
     parser.add_argument(
         "--reader-x509-leaf-certificate-without-privacy-policy",
-        default="app/src/main/assets/reader_x509_leaf_without_privacy_policy.der",
+        default="app/src/main/assets/reader_x509_leaf_without_privacy_policy",
     )
     parser.add_argument(
         "--reader-x509-leaf-invalid-organisation",
-        default="app/src/main/assets/reader_x509_leaf_with_invalid_organisation.der",
+        default="app/src/main/assets/reader_x509_leaf_with_invalid_organisation",
     )
     logger.info("Obtained command-line arguments...")
     return GenerateMockCredentialInputs.from_parser(parser.parse_args())

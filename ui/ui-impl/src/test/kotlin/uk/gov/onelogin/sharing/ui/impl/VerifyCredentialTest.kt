@@ -32,6 +32,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.orchestration.verifier.session.data.NonStartedVerifierSessionStates
 import uk.gov.onelogin.sharing.sdk.FakeCredentialVerifier
@@ -46,6 +47,8 @@ class VerifyCredentialTest {
 
     private val trustedRootCertificate: X509Certificate = mockk(relaxed = true)
 
+    private val readerAuthCredentialProvider: ReaderAuthCredentialProvider = mockk(relaxed = true)
+
     private val appGraph by lazy {
         createTestAppGraph()
     }
@@ -55,7 +58,11 @@ class VerifyCredentialTest {
     }
 
     private val verifierGraph by lazy {
-        createTestVerifierGraph(appGraph, credentialVerificationGraph)
+        createTestVerifierGraph(
+            appGraph,
+            credentialVerificationGraph,
+            readerAuthCredentialProvider = readerAuthCredentialProvider
+        )
     }
 
     private val verifier by lazy {
