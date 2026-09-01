@@ -19,7 +19,7 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.internal.matchers.ThrowableCauseMatcher.hasCause
 import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
-import uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError
+import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 
 class ECReaderAuthProviderTest {
 

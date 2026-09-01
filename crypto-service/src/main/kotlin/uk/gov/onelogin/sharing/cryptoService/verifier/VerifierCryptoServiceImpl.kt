@@ -49,7 +49,8 @@ class VerifierCryptoServiceImpl(
     private val sharedSecretGenerator: SharedSecretGenerator,
     private val sessionKeyGenerator: SessionKeyGenerator,
     private val encryptDeviceRequestUseCase: EncryptDeviceRequestUseCase,
-    private val decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase
+    private val decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase,
+    private val readerAuthCredentialProvider: ReaderAuthCredentialProvider
 ) : VerifierCryptoService {
 
     @Suppress("LongMethod")
@@ -131,6 +132,7 @@ class VerifierCryptoServiceImpl(
         sessionTranscript: ByteArray,
         itemsRequestBytes: ByteArray
     ): ByteArray = try {
+
         val dto = ReaderAuthenticationDto(
             sessionTranscript = sessionTranscript,
             itemsRequestBytes = itemsRequestBytes
@@ -138,6 +140,7 @@ class VerifierCryptoServiceImpl(
         EmbeddedCbor(dto.toCbor()).toCbor().also {
             logger.debug(logTag, "ReaderAuthenticationBytes constructed successfully")
         }
+        // DCMAW-21664: Sign reader authentication payload
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         val message = "Error constructing ReaderAuthenticationBytes"
         logger.error(logTag, message, e)

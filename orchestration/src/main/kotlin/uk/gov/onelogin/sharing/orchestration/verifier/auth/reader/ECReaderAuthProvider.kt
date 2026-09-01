@@ -5,7 +5,7 @@ import java.security.Signature
 import java.security.SignatureException
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
-import uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError
+import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 
 /**
  * Sample [ReaderAuthCredentialProvider] implementation that signs the provided
