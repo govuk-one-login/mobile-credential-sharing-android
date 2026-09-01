@@ -12,7 +12,7 @@ import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.central.ClientClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.hasAddress
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.hasSessionEnd
@@ -61,7 +61,7 @@ class GattClientEventToCentralBluetoothStateTest {
                     CentralBluetoothState.ConnectionStateStarted
                 ),
 
-                GattClientEvent.Error(ClientClientError.BLUETOOTH_PERMISSION_MISSING) to isError(
+                GattClientEvent.Error(GattClientError.BLUETOOTH_PERMISSION_MISSING) to isError(
                     equalTo(
                         CentralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING
                     )

@@ -7,14 +7,14 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.bluetooth.api.central.ClientClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 
 @RunWith(TestParameterInjector::class)
 class CentralBluetoothTransportErrorTest {
 
     @Test
     fun `Transforms client errors to Transport errors`(
-        @TestParameter inputs: Pair<ClientClientError, CentralBluetoothTransportError> =
+        @TestParameter inputs: Pair<GattClientError, CentralBluetoothTransportError> =
             testValuesIn(
                 errorMapping
             )
@@ -28,18 +28,18 @@ class CentralBluetoothTransportErrorTest {
 
     companion object {
         private val errorMapping = listOf(
-            ClientClientError.BLUETOOTH_PERMISSION_MISSING to
+            GattClientError.BLUETOOTH_PERMISSION_MISSING to
                 CentralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING,
-            ClientClientError.BLUETOOTH_GATT_NOT_AVAILABLE to
+            GattClientError.BLUETOOTH_GATT_NOT_AVAILABLE to
                 CentralBluetoothTransportError.GATT_NOT_AVAILABLE,
-            ClientClientError.SERVICE_NOT_FOUND to CentralBluetoothTransportError.SERVICE_NOT_FOUND,
-            ClientClientError.INVALID_SERVICE to CentralBluetoothTransportError.INVALID_SERVICE,
-            ClientClientError.FAILED_TO_SUBSCRIBE to
+            GattClientError.SERVICE_NOT_FOUND to CentralBluetoothTransportError.SERVICE_NOT_FOUND,
+            GattClientError.INVALID_SERVICE to CentralBluetoothTransportError.INVALID_SERVICE,
+            GattClientError.FAILED_TO_SUBSCRIBE to
                 CentralBluetoothTransportError.FAILED_TO_SUBSCRIBE,
-            ClientClientError.FAILED_TO_START to CentralBluetoothTransportError.FAILED_TO_START,
-            ClientClientError.SERVICE_DISCOVERED_ERROR to
+            GattClientError.FAILED_TO_START to CentralBluetoothTransportError.FAILED_TO_START,
+            GattClientError.SERVICE_DISCOVERED_ERROR to
                 CentralBluetoothTransportError.INVALID_SERVICE,
-            ClientClientError.INVALID_MESSAGE_PREFIX to
+            GattClientError.INVALID_MESSAGE_PREFIX to
                 CentralBluetoothTransportError.INVALID_MESSAGE_PREFIX
         )
     }
