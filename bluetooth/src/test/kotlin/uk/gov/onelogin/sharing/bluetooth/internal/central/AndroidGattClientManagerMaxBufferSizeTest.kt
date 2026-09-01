@@ -27,7 +27,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.central.ClientClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
@@ -115,7 +115,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
             testScope.advanceUntilIdle()
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE),
                 awaitItem()
             )
         }
@@ -128,7 +128,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
             testScope.advanceUntilIdle()
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE),
                 awaitItem()
             )
         }
@@ -141,7 +141,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
             testScope.advanceUntilIdle()
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE),
                 awaitItem()
             )
 
@@ -179,7 +179,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
                 testScope.advanceUntilIdle()
 
                 assertEquals(
-                    GattClientEvent.Error(ClientClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                    GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE),
                     awaitItem()
                 )
 
@@ -211,7 +211,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
             testScope.advanceUntilIdle()
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE),
                 awaitItem()
             )
         }
@@ -225,7 +225,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
             testScope.advanceUntilIdle()
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE),
                 awaitItem()
             )
             expectNoEvents()
@@ -240,7 +240,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
             testScope.advanceUntilIdle()
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE),
                 awaitItem()
             )
             expectNoEvents()
@@ -254,7 +254,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
             testScope.advanceUntilIdle()
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.EXCEEDED_MAX_BUFFER_SIZE),
+                GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE),
                 awaitItem()
             )
             cancelAndIgnoreRemainingEvents()

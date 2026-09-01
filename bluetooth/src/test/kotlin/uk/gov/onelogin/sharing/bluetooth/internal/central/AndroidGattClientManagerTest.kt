@@ -38,7 +38,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.central.ClientClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
@@ -108,7 +108,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientClientError.BLUETOOTH_PERMISSION_MISSING
+                    GattClientError.BLUETOOTH_PERMISSION_MISSING
                 ),
                 awaitItem()
             )
@@ -138,7 +138,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientClientError.BLUETOOTH_GATT_NOT_AVAILABLE
+                    GattClientError.BLUETOOTH_GATT_NOT_AVAILABLE
                 ),
                 awaitItem()
             )
@@ -171,7 +171,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientClientError.BLUETOOTH_PERMISSION_MISSING
+                    GattClientError.BLUETOOTH_PERMISSION_MISSING
                 ),
                 awaitItem()
             )
@@ -189,7 +189,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.SERVICE_DISCOVERED_ERROR),
+                GattClientEvent.Error(GattClientError.SERVICE_DISCOVERED_ERROR),
                 awaitItem()
             )
         }
@@ -206,7 +206,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.SERVICE_NOT_FOUND),
+                GattClientEvent.Error(GattClientError.SERVICE_NOT_FOUND),
                 awaitItem()
             )
         }
@@ -244,7 +244,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientClientError.INVALID_SERVICE
+                    GattClientError.INVALID_SERVICE
                 ),
                 awaitItem()
             )
@@ -349,7 +349,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientClientError.INVALID_SERVICE
+                    GattClientError.INVALID_SERVICE
                 ),
                 awaitItem()
             )
@@ -374,7 +374,7 @@ internal class AndroidGattClientManagerTest {
 
                 assertEquals(
                     GattClientEvent.Error(
-                        ClientClientError.INVALID_SERVICE
+                        GattClientError.INVALID_SERVICE
                     ),
                     awaitItem()
                 )
@@ -474,7 +474,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientClientError.INVALID_SERVICE
+                    GattClientError.INVALID_SERVICE
                 ),
                 awaitItem()
             )
@@ -499,7 +499,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientClientError.FAILED_TO_SUBSCRIBE
+                    GattClientError.FAILED_TO_SUBSCRIBE
                 ),
                 awaitItem()
             )
@@ -519,7 +519,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientClientError.FAILED_TO_START
+                    GattClientError.FAILED_TO_START
                 ),
                 awaitItem()
             )
@@ -619,7 +619,7 @@ internal class AndroidGattClientManagerTest {
             callbackSlot.captured.onServiceChanged(bluetoothGatt)
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.SERVICE_CHANGED),
+                GattClientEvent.Error(GattClientError.SERVICE_CHANGED),
                 awaitItem()
             )
 
@@ -767,7 +767,7 @@ internal class AndroidGattClientManagerTest {
                     instanceOf(GattClientEvent.Error::class.java),
                     hasProperty(
                         "error",
-                        equalTo(ClientClientError.INVALID_MESSAGE_PREFIX)
+                        equalTo(GattClientError.INVALID_MESSAGE_PREFIX)
                     )
                 )
             )
@@ -805,7 +805,7 @@ internal class AndroidGattClientManagerTest {
             assertEquals(SessionEndStates.WRITE_TO_SERVER_FAILED, result)
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.INVALID_SERVICE),
+                GattClientEvent.Error(GattClientError.INVALID_SERVICE),
                 awaitItem()
             )
         }
@@ -1010,7 +1010,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.Error(ClientClientError.FAILED_TO_SUBSCRIBE),
+                GattClientEvent.Error(GattClientError.FAILED_TO_SUBSCRIBE),
                 awaitItem()
             )
         }

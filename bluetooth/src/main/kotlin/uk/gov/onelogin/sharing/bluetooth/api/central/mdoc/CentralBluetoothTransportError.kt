@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
-import uk.gov.onelogin.sharing.bluetooth.api.central.ClientClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 
 enum class CentralBluetoothTransportError {
     BLUETOOTH_TURNED_OFF,
@@ -16,18 +16,18 @@ enum class CentralBluetoothTransportError {
     EXCEEDED_MAX_BUFFER_SIZE;
 
     companion object {
-        fun fromClientError(clientClientError: ClientClientError): CentralBluetoothTransportError =
-            when (clientClientError) {
-                ClientClientError.BLUETOOTH_PERMISSION_MISSING -> BLUETOOTH_PERMISSION_MISSING
-                ClientClientError.BLUETOOTH_GATT_NOT_AVAILABLE -> GATT_NOT_AVAILABLE
-                ClientClientError.SERVICE_NOT_FOUND -> SERVICE_NOT_FOUND
-                ClientClientError.INVALID_SERVICE -> INVALID_SERVICE
-                ClientClientError.FAILED_TO_SUBSCRIBE -> FAILED_TO_SUBSCRIBE
-                ClientClientError.FAILED_TO_START -> FAILED_TO_START
-                ClientClientError.SERVICE_DISCOVERED_ERROR -> INVALID_SERVICE
-                ClientClientError.INVALID_MESSAGE_PREFIX -> INVALID_MESSAGE_PREFIX
-                ClientClientError.SERVICE_CHANGED -> SERVICE_CHANGED
-                ClientClientError.EXCEEDED_MAX_BUFFER_SIZE -> EXCEEDED_MAX_BUFFER_SIZE
+        fun fromClientError(gattClientError: GattClientError): CentralBluetoothTransportError =
+            when (gattClientError) {
+                GattClientError.BLUETOOTH_PERMISSION_MISSING -> BLUETOOTH_PERMISSION_MISSING
+                GattClientError.BLUETOOTH_GATT_NOT_AVAILABLE -> GATT_NOT_AVAILABLE
+                GattClientError.SERVICE_NOT_FOUND -> SERVICE_NOT_FOUND
+                GattClientError.INVALID_SERVICE -> INVALID_SERVICE
+                GattClientError.FAILED_TO_SUBSCRIBE -> FAILED_TO_SUBSCRIBE
+                GattClientError.FAILED_TO_START -> FAILED_TO_START
+                GattClientError.SERVICE_DISCOVERED_ERROR -> INVALID_SERVICE
+                GattClientError.INVALID_MESSAGE_PREFIX -> INVALID_MESSAGE_PREFIX
+                GattClientError.SERVICE_CHANGED -> SERVICE_CHANGED
+                GattClientError.EXCEEDED_MAX_BUFFER_SIZE -> EXCEEDED_MAX_BUFFER_SIZE
             }
     }
 }
