@@ -19,6 +19,7 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.internal.matchers.ThrowableCauseMatcher.hasCause
 import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 
 class ECReaderAuthProviderTest {
@@ -31,8 +32,11 @@ class ECReaderAuthProviderTest {
 
     private var signature: Signature = mockk(relaxed = true)
 
+    private val logger = SystemLogger()
+
     private val provider by lazy {
         ECReaderAuthProvider(
+            logger = logger,
             privateKeyChain = listOf(privateKeyOne, privateKeyTwo),
             certificateChain = listOf(certificateOne, certificateTwo),
             signature = signature

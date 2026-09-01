@@ -5,6 +5,7 @@ import java.security.Signature
 import java.security.SignatureException
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
+import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 
@@ -23,6 +24,7 @@ import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
  */
 @Suppress("UnusedPrivateProperty")
 class ECReaderAuthProvider(
+    private val logger: Logger,
     private val privateKeyChain: List<ECPrivateKey>,
     private val certificateChain: List<X509Certificate>,
     private val signature: Signature
