@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.verification.cose
 /**
  * Public contract for COSE verification as defined in the C2-C9 implementation plan.
  */
-interface CoseVerifier {
+fun interface CoseVerifier {
     /**
      * Verifies a COSE Sign1 structure based on the provided request.
      *

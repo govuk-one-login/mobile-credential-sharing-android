@@ -5,6 +5,7 @@ import io.mockk.mockk
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
@@ -40,7 +41,7 @@ internal class CoseVerificationRequestTest {
 
         assertThat(req1, equalTo(req2))
         assertThat(req1.hashCode(), equalTo(req2.hashCode()))
-        assertThat(req1 == req3, equalTo(false))
+        assertThat(req1, not(equalTo(req3)))
     }
 
     @Test
