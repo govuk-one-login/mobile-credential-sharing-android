@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 
 private const val COSE_SIGN1_ARRAY_SIZE = 4
-private const val ES256_ALGORITHM = -7
+internal const val ES256_ALGORITHM = -7
 private const val CBOR_MAP_MAJOR_TYPE = 0xa0
 private const val CBOR_TEXT_MAJOR_TYPE = 0x60
 private const val P256_COORDINATE_SIZE = 32

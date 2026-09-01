@@ -14,7 +14,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ECReaderAuthProvider
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ECReaderAuthProvider
 import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOption
 
 @RunWith(RobolectricTestParameterInjector::class)
