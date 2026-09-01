@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.verifier.auth.reader
+package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
 /**
  * Functional interface for creating COSE_Sign1 signatures.

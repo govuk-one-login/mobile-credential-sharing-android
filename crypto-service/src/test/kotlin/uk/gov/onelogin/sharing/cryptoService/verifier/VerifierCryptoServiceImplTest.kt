@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_EN
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.EcKeyPairGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.EcdhSharedSecretGenerator
+import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.SharedSecretGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.HkdfSessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDerivationException
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
@@ -22,24 +23,40 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceResponseUseCase
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_ERROR
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_SUCCESS
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
+import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator as KPGenerator
 
 class VerifierCryptoServiceImplTest {
     private val logger = SystemLogger()
-    private val fakeEncrypt = FakeEncryptDeviceRequestUseCase()
-    private val fakeDecrypt = DecryptDeviceResponseUseCase { _, _, _ -> DeviceResponse() }
-    private val service = VerifierCryptoServiceImpl(
-        logger = logger,
-        keyPairGenerator = EcKeyPairGenerator(logger),
-        sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-        sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-        encryptDeviceRequestUseCase = fakeEncrypt,
-        decryptDeviceResponseUseCase = fakeDecrypt
-    )
+    private var encrypter = FakeEncryptDeviceRequestUseCase()
+    private var decrypter: DecryptDeviceResponseUseCase = DecryptDeviceResponseUseCase { _, _, _ -> DeviceResponse() }
+
+    private var keyPairGenerator: KPGenerator  = EcKeyPairGenerator(logger)
+    private var sharedSecretGenerator: SharedSecretGenerator = EcdhSharedSecretGenerator(logger)
+    private var sessionKeyGenerator: SessionKeyGenerator = HkdfSessionKeyGenerator(logger)
+
+    private var signedBytes = byteArrayOf(1, 2, 3, 4, 5)
+
+    private val readerAuthCredentialProvider = ReaderAuthCredentialProvider {
+        signedBytes
+    }
+
+    private val service by lazy {
+        VerifierCryptoServiceImpl(
+            logger = logger,
+            keyPairGenerator = keyPairGenerator,
+            sharedSecretGenerator = sharedSecretGenerator,
+            sessionKeyGenerator = sessionKeyGenerator,
+            encryptDeviceRequestUseCase = encrypter,
+            decryptDeviceResponseUseCase = decrypter,
+            readerAuthCredentialProvider = readerAuthCredentialProvider
+        )
+    }
 
     @Test
     fun `establishSession decorates context successfully`() = runTest {
@@ -92,14 +109,7 @@ class VerifierCryptoServiceImplTest {
             initialize(ECGenParameterSpec("secp384r1"))
         }.generateKeyPair()
 
-        val service = VerifierCryptoServiceImpl(
-            logger = logger,
-            keyPairGenerator = { _, _ -> p384KeyPair },
-            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-            sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-            encryptDeviceRequestUseCase = fakeEncrypt,
-            decryptDeviceResponseUseCase = fakeDecrypt
-        )
+        keyPairGenerator = { _, _ -> p384KeyPair }
 
         assertThrows(SharedSecretException.IncompatibleCurve::class.java) {
             service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
@@ -116,16 +126,9 @@ class VerifierCryptoServiceImplTest {
 
     @Test
     fun `malformed EDeviceKey logs error and throws`() {
-        val service = VerifierCryptoServiceImpl(
-            logger = logger,
-            keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = { _, _ ->
-                throw InvalidKeyException("malformed key")
-            },
-            sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-            encryptDeviceRequestUseCase = fakeEncrypt,
-            decryptDeviceResponseUseCase = fakeDecrypt
-        )
+        sharedSecretGenerator =  { _, _ ->
+            throw InvalidKeyException("malformed key")
+        }
 
         assertThrows(SharedSecretException.MalformedKey::class.java) {
             service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
@@ -190,14 +193,8 @@ class VerifierCryptoServiceImplTest {
             }
             byteArrayOf()
         }
-        val service = VerifierCryptoServiceImpl(
-            logger = logger,
-            keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-            sessionKeyGenerator = failingGenerator,
-            encryptDeviceRequestUseCase = fakeEncrypt,
-            decryptDeviceResponseUseCase = fakeDecrypt
-        )
+
+        sessionKeyGenerator = failingGenerator
 
         assertThrows(SessionKeyDerivationException::class.java) {
             service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
@@ -214,14 +211,8 @@ class VerifierCryptoServiceImplTest {
             }
             byteArrayOf()
         }
-        val service = VerifierCryptoServiceImpl(
-            logger = logger,
-            keyPairGenerator = EcKeyPairGenerator(logger),
-            sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-            sessionKeyGenerator = failingGenerator,
-            encryptDeviceRequestUseCase = fakeEncrypt,
-            decryptDeviceResponseUseCase = fakeDecrypt
-        )
+
+        sessionKeyGenerator = failingGenerator
 
         assertThrows(SessionKeyDerivationException::class.java) {
             service.establishSession(VALID_ENCODED_DEVICE_ENGAGEMENT) { it }
@@ -253,16 +244,17 @@ class VerifierCryptoServiceImplTest {
 
         service.encryptDeviceRequest(deviceRequestBytes, skReader, encryptCounter)
 
-        assertEquals(deviceRequestBytes, fakeEncrypt.lastDeviceRequestBytes)
-        assertEquals(skReader, fakeEncrypt.lastSkReader)
-        assertEquals(encryptCounter, fakeEncrypt.lastEncryptCounter)
+        assertEquals(deviceRequestBytes, encrypter.lastDeviceRequestBytes)
+        assertEquals(skReader, encrypter.lastSkReader)
+        assertEquals(encryptCounter, encrypter.lastEncryptCounter)
     }
 
     @Test
     fun `encryptDeviceRequest returns encrypted bytes`() {
         val encryptedResult = byteArrayOf(0xAA.toByte(), 0xBB.toByte())
         val fakeEncrypt = FakeEncryptDeviceRequestUseCase(encryptedToReturn = encryptedResult)
-        val service = createService(encryptDeviceRequestUseCase = fakeEncrypt)
+
+        encrypter = fakeEncrypt
 
         val result = service.encryptDeviceRequest(byteArrayOf(0x01), ByteArray(32), 1u)
 
@@ -277,7 +269,8 @@ class VerifierCryptoServiceImplTest {
                 RuntimeException("AES failure")
             )
         )
-        val service = createService(encryptDeviceRequestUseCase = failingEncrypt)
+
+        encrypter = failingEncrypt
 
         assertThrows(EncryptDeviceRequestException::class.java) {
             service.encryptDeviceRequest(byteArrayOf(0x01), ByteArray(32), 1u)
@@ -323,7 +316,7 @@ class VerifierCryptoServiceImplTest {
         val fakeDecryptUseCase = FakeDecryptDeviceResponseUseCase().apply {
             fakeDeviceResponse = expectedResponse
         }
-        val service = createService(decryptDeviceResponseUseCase = fakeDecryptUseCase)
+        decrypter = fakeDecryptUseCase
 
         val deviceResponseBytes = byteArrayOf(0x01, 0x02, 0x03)
         val skDevice = ByteArray(32) { 0x04 }
@@ -342,7 +335,7 @@ class VerifierCryptoServiceImplTest {
         val fakeDecryptUseCase = FakeDecryptDeviceResponseUseCase().apply {
             exception = DecryptDeviceResponseException("decrypt failed", RuntimeException())
         }
-        val service = createService(decryptDeviceResponseUseCase = fakeDecryptUseCase)
+        decrypter = fakeDecryptUseCase
 
         assertThrows(DecryptDeviceResponseException::class.java) {
             service.decryptDeviceResponse(byteArrayOf(0x01), ByteArray(32), 1u)
@@ -383,16 +376,4 @@ class VerifierCryptoServiceImplTest {
         assertTrue(array[1].isArray)
         assertNotNull(array[2])
     }
-
-    private fun createService(
-        encryptDeviceRequestUseCase: EncryptDeviceRequestUseCase = fakeEncrypt,
-        decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase = fakeDecrypt
-    ) = VerifierCryptoServiceImpl(
-        logger = logger,
-        keyPairGenerator = EcKeyPairGenerator(logger),
-        sharedSecretGenerator = EcdhSharedSecretGenerator(logger),
-        sessionKeyGenerator = HkdfSessionKeyGenerator(logger),
-        encryptDeviceRequestUseCase = encryptDeviceRequestUseCase,
-        decryptDeviceResponseUseCase = decryptDeviceResponseUseCase
-    )
 }

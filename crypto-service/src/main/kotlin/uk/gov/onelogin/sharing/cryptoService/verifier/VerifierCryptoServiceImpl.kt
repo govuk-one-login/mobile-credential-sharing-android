@@ -27,6 +27,8 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDeriva
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.HOLDER
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
@@ -137,10 +139,11 @@ class VerifierCryptoServiceImpl(
             sessionTranscript = sessionTranscript,
             itemsRequestBytes = itemsRequestBytes
         )
-        EmbeddedCbor(dto.toCbor()).toCbor().also {
+        EmbeddedCbor(dto.toCbor())
+            .let(CborEncodable::toCbor)
+            .also {
             logger.debug(logTag, "ReaderAuthenticationBytes constructed successfully")
         }
-        // DCMAW-21664: Sign reader authentication payload
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         val message = "Error constructing ReaderAuthenticationBytes"
         logger.error(logTag, message, e)
