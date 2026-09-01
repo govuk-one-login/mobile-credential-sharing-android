@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.exceptions
+package uk.gov.onelogin.sharing.models.mdoc.exceptions
 
 /**
  * Extendable [Exception] for when an error occurs.
