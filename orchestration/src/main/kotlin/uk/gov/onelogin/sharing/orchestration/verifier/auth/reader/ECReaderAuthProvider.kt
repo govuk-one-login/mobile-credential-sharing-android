@@ -5,10 +5,11 @@ import java.security.Signature
 import java.security.SignatureException
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 
 /**
- * Sample [ReaderAuthCredentialProvider] implementation that signs the provided
+ * Sample [uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider] implementation that signs the provided
  * `readerAuthenticationBytes` with the [privateKeyChain] property.
  *
  * It's assumed that `readerAuthenticationBytes` is already in the shape of a `COSE_Sign1`
