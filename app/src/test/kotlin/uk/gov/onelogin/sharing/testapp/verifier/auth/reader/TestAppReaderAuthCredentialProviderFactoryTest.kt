@@ -13,6 +13,7 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ECReaderAuthProvider
 import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOption
 
@@ -24,8 +25,11 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
 
     private var initialState: ReaderAuthOption = ReaderAuthOption.VALID
 
+    private val logger = SystemLogger()
+
     private fun factory(context: CoroutineContext) = TestAppReaderAuthCredentialProviderFactory(
         ApplicationProvider.getApplicationContext(),
+        logger = logger,
         initialState = initialState,
         keyFactory = KeyFactory.getInstance("EC"),
         certificateFactory = CertificateFactory.getInstance("X.509"),
