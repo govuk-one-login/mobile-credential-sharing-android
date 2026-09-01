@@ -45,8 +45,10 @@ internal class KeyUsageChecker(private val leafCertificate: X509Certificate) :
     }
 
     private fun checkCaKeyUsage(cert: X509Certificate) {
+        val isCritical = OID_KEY_USAGE in (cert.criticalExtensionOIDs ?: emptySet())
         val usage = cert.keyUsage ?: throw CertPathValidatorException("CA KeyUsage absent")
-        val isValid = usage[BIT_KEY_CERT_SIGN] &&
+        val isValid = isCritical &&
+            usage[BIT_KEY_CERT_SIGN] &&
             usage[BIT_CRL_SIGN] &&
             usage.indices.filter {
                 it != BIT_KEY_CERT_SIGN && it != BIT_CRL_SIGN
@@ -54,7 +56,7 @@ internal class KeyUsageChecker(private val leafCertificate: X509Certificate) :
 
         if (!isValid) {
             throw CertPathValidatorException(
-                "CA KeyUsage must only contain keyCertSign and cRLSign"
+                "CA KeyUsage must be critical and only contain keyCertSign and cRLSign"
             )
         }
     }
