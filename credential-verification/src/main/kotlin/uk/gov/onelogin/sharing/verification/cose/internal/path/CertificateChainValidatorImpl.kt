@@ -33,4 +33,3 @@ class CertificateChainValidatorImpl internal constructor() : CertificateChainVal
         }
     }
 }
-
