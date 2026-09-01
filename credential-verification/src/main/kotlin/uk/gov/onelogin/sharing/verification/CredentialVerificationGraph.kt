@@ -10,9 +10,7 @@ import uk.gov.onelogin.sharing.verification.trust.TrustVerifier
 interface CredentialVerificationGraph {
     @DependencyGraph.Factory
     fun interface Factory {
-        fun create(
-            @Provides trustedRootCertificate: X509Certificate
-        ): CredentialVerificationGraph
+        fun create(@Provides trustedRootCertificate: X509Certificate): CredentialVerificationGraph
     }
 
     fun getDocumentVerifier(): DocumentVerifier

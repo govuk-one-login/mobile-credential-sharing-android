@@ -13,11 +13,7 @@ import uk.gov.onelogin.sharing.verification.cose.internal.decode.InternalCoseSig
 internal class CoseSignatureVerifier(private val headerValidator: CoseHeaderValidator) {
     private val cborMapper = ObjectMapper(CBORFactory())
 
-    fun verify(
-        coseSign1: InternalCoseSign1,
-        publicKey: ECPublicKey,
-        payload: ByteArray
-    ) {
+    fun verify(coseSign1: InternalCoseSign1, publicKey: ECPublicKey, payload: ByteArray) {
         headerValidator.validate(coseSign1)
         val sigStructure = buildSigStructure(coseSign1.protectedHeader, payload)
         val derSignature = EcdsaSignatureTranscoder.rawToDer(coseSign1.signature)

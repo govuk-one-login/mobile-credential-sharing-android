@@ -20,10 +20,10 @@ import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Decode
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateChainValidatorImpl
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
 import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatureVerifier
-import uk.gov.onelogin.sharing.verification.trust.MsoBuilder
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
+import uk.gov.onelogin.sharing.verification.trust.MsoBuilder
 
 class TrustVerifierImplTest {
 

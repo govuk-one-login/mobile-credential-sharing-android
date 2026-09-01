@@ -29,52 +29,53 @@ class TrustVerifierImpl internal constructor(
 ) : TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
-    override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult = try {
-        val coseSign1 = coseSign1Decoder.decode(data)
-        val x5chain = coseSign1Decoder.extractX5Chain(coseSign1)
+    override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult =
+        try {
+            val coseSign1 = coseSign1Decoder.decode(data)
+            val x5chain = coseSign1Decoder.extractX5Chain(coseSign1)
 
-        val certFactory = CertificateFactory.getInstance("X.509")
-        val certs = x5chain.map {
-            certFactory.generateCertificate(ByteArrayInputStream(it)) as X509Certificate
+            val certFactory = CertificateFactory.getInstance("X.509")
+            val certs = x5chain.map {
+                certFactory.generateCertificate(ByteArrayInputStream(it)) as X509Certificate
+            }
+
+            val ordered = orderCertificates(certs)
+            val leaf = ordered.first()
+
+            certificateChainValidator.verify(ordered, trustedRoot)
+
+            val publicKey = try {
+                leaf.publicKey as ECPublicKey
+            } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+                throw CoseVerificationFailure.UntrustedCertificate
+            }
+
+            val payload = coseSign1.payload
+                ?: throw CoseVerificationFailure.MalformedCoseSign1
+
+            signatureVerifier.verify(
+                coseSign1,
+                publicKey,
+                payload
+            )
+
+            val validityPeriod = CertificateValidityPeriod(
+                notBefore = leaf.notBefore.toInstant().toKotlinInstant(),
+                notAfter = leaf.notAfter.toInstant().toKotlinInstant()
+            )
+
+            val subjectName = parseSubjectName(leaf)
+
+            IssuerAuthResult(
+                certificateValidityPeriod = validityPeriod,
+                msoPayload = payload,
+                subjectCountry = subjectName[OID_COUNTRY]
+                    ?: throw CoseVerificationFailure.MalformedCoseSign1,
+                subjectState = subjectName[OID_STATE_OR_PROVINCE]
+            )
+        } catch (e: CoseVerificationFailure) {
+            throw mapCoseFailure(e, isIssuer = true)
         }
-
-        val ordered = orderCertificates(certs)
-        val leaf = ordered.first()
-
-        certificateChainValidator.verify(ordered, trustedRoot)
-
-        val publicKey = try {
-            leaf.publicKey as ECPublicKey
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            throw CoseVerificationFailure.UntrustedCertificate
-        }
-
-        val payload = coseSign1.payload
-            ?: throw CoseVerificationFailure.MalformedCoseSign1
-
-        signatureVerifier.verify(
-            coseSign1,
-            publicKey,
-            payload
-        )
-
-        val validityPeriod = CertificateValidityPeriod(
-            notBefore = leaf.notBefore.toInstant().toKotlinInstant(),
-            notAfter = leaf.notAfter.toInstant().toKotlinInstant()
-        )
-
-        val subjectName = parseSubjectName(leaf)
-
-        IssuerAuthResult(
-            certificateValidityPeriod = validityPeriod,
-            msoPayload = payload,
-            subjectCountry = subjectName[OID_COUNTRY]
-                ?: throw CoseVerificationFailure.MalformedCoseSign1,
-            subjectState = subjectName[OID_STATE_OR_PROVINCE]
-        )
-    } catch (e: CoseVerificationFailure) {
-        throw mapCoseFailure(e, isIssuer = true)
-    }
 
     override fun verifyCOSESign1(coseData: ByteArray, publicKey: ECPublicKey, payload: ByteArray) {
         try {
@@ -89,19 +90,32 @@ class TrustVerifierImpl internal constructor(
         }
     }
 
-    private fun mapCoseFailure(e: CoseVerificationFailure, isIssuer: Boolean): VerificationResult.Failure {
+    private fun mapCoseFailure(
+        e: CoseVerificationFailure,
+        isIssuer: Boolean
+    ): VerificationResult.Failure {
         val error = when (e) {
             is CoseVerificationFailure.MalformedCoseSign1 ->
-                if (isIssuer) VerificationError.MALFORMED_ISSUER_AUTH else VerificationError.INVALID_DEVICE_SIGNATURE
+                if (isIssuer) {
+                    VerificationError.MALFORMED_ISSUER_AUTH
+                } else {
+                    VerificationError.INVALID_DEVICE_SIGNATURE
+                }
 
             is CoseVerificationFailure.UnsupportedAlgorithm,
             is CoseVerificationFailure.InvalidSignature ->
-                if (isIssuer) VerificationError.INVALID_ISSUER_SIGNATURE else VerificationError.INVALID_DEVICE_SIGNATURE
+                if (isIssuer) {
+                    VerificationError.INVALID_ISSUER_SIGNATURE
+                } else {
+                    VerificationError.INVALID_DEVICE_SIGNATURE
+                }
 
             is CoseVerificationFailure.UntrustedCertificate,
-            is CoseVerificationFailure.UnsupportedCertificateProfile -> VerificationError.UNTRUSTED_CERTIFICATE
+            is CoseVerificationFailure.UnsupportedCertificateProfile ->
+                VerificationError.UNTRUSTED_CERTIFICATE
 
-            is CoseVerificationFailure.ExpiredCertificate -> VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE
+            is CoseVerificationFailure.ExpiredCertificate ->
+                VerificationError.VALIDITY_SIGNED_OUT_OF_RANGE
         }
         return VerificationResult.Failure(error)
     }

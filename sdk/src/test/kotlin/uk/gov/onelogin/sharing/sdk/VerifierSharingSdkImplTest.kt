@@ -50,7 +50,7 @@ class VerifierSharingSdkImplTest {
             appGraph.logger()
         } returns logger
         every {
-            credentialVerificationFactory.create(trustedRootCertificate, logger)
+            credentialVerificationFactory.create(trustedRootCertificate)
         } returns credentialVerificationGraph
 
         every {

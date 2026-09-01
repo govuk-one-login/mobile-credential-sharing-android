@@ -14,7 +14,8 @@ data class StructureCase(
 
 class DisallowedCriticalExtProvider : TestParameterValuesProvider() {
     /**
-     * OIDs not in [CertificateStructureChecker.ALLOWED_CRITICAL_OIDS] that should be rejected when marked critical.
+     * OIDs not in [CertificateStructureChecker.ALLOWED_CRITICAL_OIDS] that should be rejected
+     * when marked critical.
      */
     private val disallowedOids = listOf(
         "1.3.6.1.4.1.99999.1",
@@ -42,26 +43,28 @@ class DisallowedCriticalExtProvider : TestParameterValuesProvider() {
 class ForbiddenExtensionProvider : TestParameterValuesProvider() {
     private val minimalSequence = byteArrayOf(0x30, 0x00)
 
-    override fun provideValues(context: Context?): List<StructureCase> = CertificateStructureChecker.FORBIDDEN_OIDS.map { oid ->
-        StructureCase(
-            description = "Forbidden OID $oid present",
-            chain = listOf(
-                TestCertificateGenerator(
-                    subject = LEAF_DN,
-                    keyPair = CertificateStubs.leafKeyPair,
-                    issuerKeyPair = CertificateStubs.rootKeyPair,
-                    issuer = ROOT_DN
-                ).leaf().withExtension(oid, false, minimalSequence).build()
-            ),
-            root = CertificateStubs.rootCa
-        )
-    }
+    override fun provideValues(context: Context?): List<StructureCase> =
+        CertificateStructureChecker.FORBIDDEN_OIDS.map { oid ->
+            StructureCase(
+                description = "Forbidden OID $oid present",
+                chain = listOf(
+                    TestCertificateGenerator(
+                        subject = LEAF_DN,
+                        keyPair = CertificateStubs.leafKeyPair,
+                        issuerKeyPair = CertificateStubs.rootKeyPair,
+                        issuer = ROOT_DN
+                    ).leaf().withExtension(oid, false, minimalSequence).build()
+                ),
+                root = CertificateStubs.rootCa
+            )
+        }
 }
 
 class InvalidSerialProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<StructureCase> = listOf(
         StructureCase(
-            description = "serial too short (${CertificateStructureChecker.MIN_SERIAL_OCTETS - 1} octets)",
+            description =
+                "serial too short (${CertificateStructureChecker.MIN_SERIAL_OCTETS - 1} octets)",
             chain = listOf(
                 TestCertificateGenerator(
                     subject = LEAF_DN,
@@ -71,16 +74,18 @@ class InvalidSerialProvider : TestParameterValuesProvider() {
                 ).leaf().withSerial(
                     BigInteger(
                         1,
-                        ByteArray(CertificateStructureChecker.MIN_SERIAL_OCTETS - 1) {
-                            0x7F
-                        }
+                        ByteArray
+                            (CertificateStructureChecker.MIN_SERIAL_OCTETS - 1) {
+                                0x7F
+                            }
                     )
                 ).build()
             ),
             root = CertificateStubs.rootCa
         ),
         StructureCase(
-            description = "serial too long (${CertificateStructureChecker.MAX_SERIAL_OCTETS + 1} octets)",
+            description =
+                "serial too long (${CertificateStructureChecker.MAX_SERIAL_OCTETS + 1} octets)",
             chain = listOf(
                 TestCertificateGenerator(
                     subject = LEAF_DN,
@@ -90,9 +95,10 @@ class InvalidSerialProvider : TestParameterValuesProvider() {
                 ).leaf().withSerial(
                     BigInteger(
                         1,
-                        ByteArray(CertificateStructureChecker.MAX_SERIAL_OCTETS + 1) {
-                            0x7F
-                        }
+                        ByteArray
+                            (CertificateStructureChecker.MAX_SERIAL_OCTETS + 1) {
+                                0x7F
+                            }
                     )
                 ).build()
             ),

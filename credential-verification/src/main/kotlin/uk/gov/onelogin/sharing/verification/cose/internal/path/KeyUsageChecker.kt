@@ -38,7 +38,9 @@ internal class KeyUsageChecker(private val leafCertificate: X509Certificate) :
             usage.indices.filter { it != BIT_DIGITAL_SIGNATURE }.none { usage[it] }
 
         if (!isValid) {
-            throw CertPathValidatorException("Leaf KeyUsage must be critical and only digitalSignature")
+            throw CertPathValidatorException(
+                "Leaf KeyUsage must be critical and only digitalSignature"
+            )
         }
     }
 
@@ -46,10 +48,14 @@ internal class KeyUsageChecker(private val leafCertificate: X509Certificate) :
         val usage = cert.keyUsage ?: throw CertPathValidatorException("CA KeyUsage absent")
         val isValid = usage[BIT_KEY_CERT_SIGN] &&
             usage[BIT_CRL_SIGN] &&
-            usage.indices.filter { it != BIT_KEY_CERT_SIGN && it != BIT_CRL_SIGN }.none { usage[it] }
+            usage.indices.filter {
+                it != BIT_KEY_CERT_SIGN && it != BIT_CRL_SIGN
+            }.none { usage[it] }
 
         if (!isValid) {
-            throw CertPathValidatorException("CA KeyUsage must only contain keyCertSign and cRLSign")
+            throw CertPathValidatorException(
+                "CA KeyUsage must only contain keyCertSign and cRLSign"
+            )
         }
     }
 

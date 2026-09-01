@@ -23,12 +23,16 @@ internal class BasicConstraintsChecker(private val leafCertificate: X509Certific
 
         if (isLeaf) {
             if (x509.basicConstraints != -1) {
-                throw CertPathValidatorException("Leaf certificate must not have BasicConstraints CA=true")
+                throw CertPathValidatorException(
+                    "Leaf certificate must not have BasicConstraints CA=true"
+                )
             }
         } else {
             val isCritical = OID_BASIC_CONSTRAINTS in (x509.criticalExtensionOIDs ?: emptySet())
             if (!isCritical || x509.basicConstraints == -1) {
-                throw CertPathValidatorException("CA certificate must have critical BasicConstraints CA=true")
+                throw CertPathValidatorException(
+                    "CA certificate must have critical BasicConstraints CA=true"
+                )
             }
         }
         unresolvedCritExts?.remove(OID_BASIC_CONSTRAINTS)

@@ -63,7 +63,6 @@ class VerificationComponentBoundaryTest {
 
     @Test
     fun `verification trust can depend on cose but not vice versa`() {
-        // cose -> trust check is already in PROHIBITED_FOR_COSE
         val trustClasses = scanResult.allClasses
             .filter { isProductionClassInPackage(it, PACKAGE_TRUST) }
 
@@ -85,9 +84,9 @@ class VerificationComponentBoundaryTest {
             PACKAGE_DOCUMENT,
             PACKAGE_READER,
             PACKAGE_TRUST,
-            "uk.gov.onelogin.sharing.verification.format", // CredentialFormat
-            "uk.gov.onelogin.sharing.models.mdoc",          // ExchangeFormat
-            "uk.gov.logging"                                // Logging
+            "uk.gov.onelogin.sharing.verification.format",
+            "uk.gov.onelogin.sharing.models.mdoc",
+            "uk.gov.logging"
         )
     }
 }

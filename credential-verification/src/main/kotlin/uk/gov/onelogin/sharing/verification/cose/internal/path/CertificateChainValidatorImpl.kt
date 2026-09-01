@@ -10,8 +10,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UntrustedCertificate
 
 @ContributesBinding(CredentialVerificationScope::class)
-class CertificateChainValidatorImpl internal constructor() :
-    CertificateChainValidator {
+class CertificateChainValidatorImpl internal constructor() : CertificateChainValidator {
 
     override fun verify(certificates: List<X509Certificate>, trustedRoot: X509Certificate) {
         val result = try {

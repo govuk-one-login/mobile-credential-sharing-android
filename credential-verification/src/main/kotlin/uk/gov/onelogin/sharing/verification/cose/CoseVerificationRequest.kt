@@ -8,10 +8,8 @@ import java.security.interfaces.ECPublicKey
  */
 sealed class CoseVerificationRequest {
     /** Chain-based, attached payload (IssuerAuth). */
-    data class Attached(
-        val coseSign1Bytes: ByteArray,
-        val trustedRoot: X509Certificate
-    ) : CoseVerificationRequest() {
+    data class Attached(val coseSign1Bytes: ByteArray, val trustedRoot: X509Certificate) :
+        CoseVerificationRequest() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false

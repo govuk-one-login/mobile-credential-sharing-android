@@ -8,10 +8,8 @@ import java.security.cert.X509Certificate
  */
 sealed class CoseVerificationResult {
     /** Successful result for chain-based verification with an attached payload. */
-    data class Attached(
-        val leafCertificate: X509Certificate,
-        val payload: ByteArray
-    ) : CoseVerificationResult() {
+    data class Attached(val leafCertificate: X509Certificate, val payload: ByteArray) :
+        CoseVerificationResult() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -29,9 +27,7 @@ sealed class CoseVerificationResult {
     }
 
     /** Successful result for chain-based verification with a detached payload. */
-    data class Detached(
-        val leafCertificate: X509Certificate
-    ) : CoseVerificationResult()
+    data class Detached(val leafCertificate: X509Certificate) : CoseVerificationResult()
 
     /** Successful result for key-based verification. */
     data object KeyBased : CoseVerificationResult()

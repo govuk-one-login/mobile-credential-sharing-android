@@ -32,7 +32,9 @@ class IacaContentCheckerCheckTest {
 
     @Test
     fun `check passes for leaf with mdlDS and mdocDS EKU`() {
-        val leaf = validLeaf().withEku(listOf(IacaContentChecker.OID_MDL_DS, IacaContentChecker.OID_MDOC_DS)).build()
+        val leaf = validLeaf().withEku(
+            listOf(IacaContentChecker.OID_MDL_DS, IacaContentChecker.OID_MDOC_DS)
+        ).build()
         checkerFor(leaf).check(leaf, mutableSetOf())
     }
 
@@ -46,7 +48,10 @@ class IacaContentCheckerCheckTest {
 
     @Test
     fun `check throws for leaf with non-critical EKU`() {
-        val leaf = validLeaf().withEku(listOf(IacaContentChecker.OID_MDL_DS), critical = false).build()
+        val leaf = validLeaf().withEku(
+            listOf(IacaContentChecker.OID_MDL_DS),
+            critical = false
+        ).build()
         assertThrows(CertPathValidatorException::class.java) {
             checkerFor(leaf).check(leaf, mutableSetOf())
         }
@@ -62,7 +67,9 @@ class IacaContentCheckerCheckTest {
 
     @Test
     fun `check throws for leaf with disallowed EKU OID`() {
-        val leaf = validLeaf().withEku(listOf(IacaContentChecker.OID_MDL_DS, "1.3.6.1.5.5.7.3.1")).build()
+        val leaf = validLeaf().withEku(
+            listOf(IacaContentChecker.OID_MDL_DS, "1.3.6.1.5.5.7.3.1")
+        ).build()
         assertThrows(CertPathValidatorException::class.java) {
             checkerFor(leaf).check(leaf, mutableSetOf())
         }
