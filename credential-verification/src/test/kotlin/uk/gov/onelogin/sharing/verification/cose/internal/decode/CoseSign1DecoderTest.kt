@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verification.cose.internal.decode
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import java.io.ByteArrayOutputStream
 import org.hamcrest.CoreMatchers.equalTo
@@ -57,7 +58,6 @@ class CoseSign1DecoderDecodeErrorTest(
                 @Suppress("DEPRECATION")
                 gen.writeStartArray(4)
                 writeElement(gen, protectedHeader)
-                // Unprotected header MUST be a map
                 gen.writeStartObject()
                 gen.writeEndObject()
                 gen.writeBinary(byteArrayOf(0x01))
@@ -85,6 +85,7 @@ class CoseSign1DecoderDecodeErrorTest(
 
 class CoseSign1DecoderTest {
     private val cborFactory = CBORFactory()
+    private val cborMapper = ObjectMapper(cborFactory)
     private val decoder = CoseSign1Decoder()
 
     @Test
@@ -120,8 +121,39 @@ class CoseSign1DecoderTest {
     @Test
     fun `extractX5Chain with single cert in unprotected header returns it`() {
         val certBytes = byteArrayOf(0x30, 0x01, 0x00)
-        val cbor = buildCoseSign1Cbor(unprotectedHeader = certBytes)
+        val cbor = buildCoseSign1Cbor(unprotectedHeaderMap = buildX5ChainMapCbor(certBytes))
         val coseSign1 = decoder.decode(cbor)
+
+        val result = decoder.extractX5Chain(coseSign1)
+
+        assertThat(result.size, equalTo(1))
+        assertThat(result[0], equalTo(certBytes))
+    }
+
+    @Test
+    fun `extractX5Chain with array of certs returns all`() {
+        val cert1 = byteArrayOf(0x30, 0x01)
+        val cert2 = byteArrayOf(0x30, 0x02)
+        val cbor = buildCoseSign1Cbor(unprotectedHeaderMap = buildX5ChainArrayMapCbor(cert1, cert2))
+        val coseSign1 = decoder.decode(cbor)
+
+        val result = decoder.extractX5Chain(coseSign1)
+
+        assertThat(result.size, equalTo(2))
+        assertThat(result[0], equalTo(cert1))
+        assertThat(result[1], equalTo(cert2))
+    }
+
+    @Test
+    fun `extractX5Chain falls back to protected header`() {
+        val certBytes = byteArrayOf(0x30, 0x01, 0x00)
+        val coseSign1 = InternalCoseSign1(
+            protectedHeader = buildX5ChainMapCbor(certBytes),
+            unprotectedHeader = buildEmptyMapCbor(),
+            payload = byteArrayOf(0x01),
+            signature = byteArrayOf(0x02),
+            payloadMode = InternalCoseSign1.PayloadMode.ATTACHED
+        )
 
         val result = decoder.extractX5Chain(coseSign1)
 
@@ -142,20 +174,18 @@ class CoseSign1DecoderTest {
     }
 
     private fun buildCoseSign1Cbor(
-        unprotectedHeader: ByteArray? = null,
+        unprotectedHeaderMap: ByteArray? = null,
         payload: ByteArray? = byteArrayOf(0x01)
     ): ByteArray {
         val output = ByteArrayOutputStream()
         cborFactory.createGenerator(output).use { gen ->
             @Suppress("DEPRECATION")
             gen.writeStartArray(4)
-            gen.writeBinary(byteArrayOf(0xa0.toByte()))
+            gen.writeBinary(byteArrayOf(0xa0.toByte())) // Empty protected map
 
-            if (unprotectedHeader != null) {
-                gen.writeStartObject()
-                gen.writeFieldName("33")
-                gen.writeBinary(unprotectedHeader)
-                gen.writeEndObject()
+            if (unprotectedHeaderMap != null) {
+                val node = cborMapper.readTree(unprotectedHeaderMap)
+                cborMapper.writeTree(gen, node)
             } else {
                 gen.writeStartObject()
                 gen.writeEndObject()
@@ -168,6 +198,40 @@ class CoseSign1DecoderTest {
             }
             gen.writeBinary(byteArrayOf(0x02))
             gen.writeEndArray()
+        }
+        return output.toByteArray()
+    }
+
+    private fun buildX5ChainMapCbor(certBytes: ByteArray): ByteArray {
+        val output = ByteArrayOutputStream()
+        cborFactory.createGenerator(output).use { gen ->
+            gen.writeStartObject()
+            gen.writeFieldName("33")
+            gen.writeBinary(certBytes)
+            gen.writeEndObject()
+        }
+        return output.toByteArray()
+    }
+
+    private fun buildX5ChainArrayMapCbor(vararg certs: ByteArray): ByteArray {
+        val output = ByteArrayOutputStream()
+        cborFactory.createGenerator(output).use { gen ->
+            gen.writeStartObject()
+            gen.writeFieldName("33")
+            @Suppress("DEPRECATION")
+            gen.writeStartArray(certs.size)
+            certs.forEach { gen.writeBinary(it) }
+            gen.writeEndArray()
+            gen.writeEndObject()
+        }
+        return output.toByteArray()
+    }
+
+    private fun buildEmptyMapCbor(): ByteArray {
+        val output = ByteArrayOutputStream()
+        cborFactory.createGenerator(output).use { gen ->
+            gen.writeStartObject()
+            gen.writeEndObject()
         }
         return output.toByteArray()
     }
