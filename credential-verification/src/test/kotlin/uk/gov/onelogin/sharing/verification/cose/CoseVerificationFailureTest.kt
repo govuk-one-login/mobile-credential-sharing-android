@@ -13,11 +13,12 @@ internal class CoseVerificationFailureTest {
     fun `CoseVerificationFailure has expected inheritors`() {
         val expectedInheritors = setOf(
             "MalformedCoseSign1",
+            "MissingX5Chain",
             "UnsupportedAlgorithm",
             "InvalidSignature",
             "UntrustedCertificate",
             "ExpiredCertificate",
-            "UnsupportedCertificateProfile"
+            "CertificateProfileViolation"
         )
 
         val classInfo = scanResult.getSubclasses(CoseVerificationFailure::class.java)
@@ -32,6 +33,13 @@ internal class CoseVerificationFailureTest {
     fun `MalformedCoseSign1 is throwable`() {
         assertThrows(CoseVerificationFailure.MalformedCoseSign1::class.java) {
             throw CoseVerificationFailure.MalformedCoseSign1
+        }
+    }
+
+    @Test
+    fun `MissingX5Chain is throwable`() {
+        assertThrows(CoseVerificationFailure.MissingX5Chain::class.java) {
+            throw CoseVerificationFailure.MissingX5Chain
         }
     }
 
@@ -64,9 +72,9 @@ internal class CoseVerificationFailureTest {
     }
 
     @Test
-    fun `UnsupportedCertificateProfile is throwable`() {
-        assertThrows(CoseVerificationFailure.UnsupportedCertificateProfile::class.java) {
-            throw CoseVerificationFailure.UnsupportedCertificateProfile(
+    fun `CertificateProfileViolation is throwable`() {
+        assertThrows(CoseVerificationFailure.CertificateProfileViolation::class.java) {
+            throw CoseVerificationFailure.CertificateProfileViolation(
                 CertificateProfileReason.UNSUPPORTED_ALGORITHM
             )
         }

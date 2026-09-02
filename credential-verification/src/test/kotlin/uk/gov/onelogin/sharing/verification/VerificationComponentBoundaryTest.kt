@@ -18,8 +18,8 @@ class VerificationComponentBoundaryTest {
 
     private fun isProductionCoseClass(classInfo: ClassInfo): Boolean =
         classInfo.packageName.startsWith(PACKAGE_COSE) &&
-            classInfo.isStandardClass &&
-            !classInfo.name.contains("Test")
+                classInfo.isStandardClass &&
+                !classInfo.name.contains("Test")
 
     private fun getCoseDependencyViolations(classInfo: ClassInfo): List<String> =
         classInfo.classDependencies
@@ -46,8 +46,8 @@ class VerificationComponentBoundaryTest {
 
     private fun isProductionClassInPackage(classInfo: ClassInfo, packageName: String): Boolean =
         classInfo.packageName.startsWith(packageName) &&
-            classInfo.isStandardClass &&
-            !classInfo.name.contains("Test")
+                classInfo.isStandardClass &&
+                !classInfo.name.contains("Test")
 
     private fun getDocumentDependencyViolations(classInfo: ClassInfo): List<String> =
         classInfo.classDependencies
@@ -63,13 +63,16 @@ class VerificationComponentBoundaryTest {
 
     @Test
     fun `verification trust can depend on cose but not vice versa`() {
-        val trustClasses = scanResult.allClasses
+        val violations = scanResult.allClasses
             .filter { isProductionClassInPackage(it, PACKAGE_TRUST) }
+            .flatMap { classInfo ->
+                classInfo.classDependencies
+                    .map { it.name }
+                    .filter { it.startsWith(PACKAGE_DOCUMENT) || it.startsWith(PACKAGE_READER) }
+                    .map { "Legacy Trust class ${classInfo.name} must not depend on new logic in $it" }
+            }
 
-        trustClasses.forEach { _ ->
-            // During migration, trust can depend on cose (public or internal)
-            // but cose must not depend on trust (enforced by other test)
-        }
+        assertTrue(violations.joinToString("\n"), violations.isEmpty())
     }
 
     companion object {

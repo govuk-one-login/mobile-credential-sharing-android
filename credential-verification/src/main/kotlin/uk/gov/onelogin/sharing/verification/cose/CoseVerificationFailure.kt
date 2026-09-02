@@ -7,6 +7,9 @@ sealed class CoseVerificationFailure : Exception() {
     /** The COSE_Sign1 structure is invalid or malformed. */
     data object MalformedCoseSign1 : CoseVerificationFailure()
 
+    /** The required x5chain (certificate chain) is missing from the COSE headers. */
+    data object MissingX5Chain : CoseVerificationFailure()
+
     /** The algorithm used in the COSE_Sign1 is not supported (only ES256 allowed). */
     data object UnsupportedAlgorithm : CoseVerificationFailure()
 
@@ -20,7 +23,7 @@ sealed class CoseVerificationFailure : Exception() {
     data object ExpiredCertificate : CoseVerificationFailure()
 
     /** The certificate does not match the required profile (e.g., Issuer vs Reader). */
-    data class UnsupportedCertificateProfile(val reason: CertificateProfileReason) :
+    data class CertificateProfileViolation(val reason: CertificateProfileReason) :
         CoseVerificationFailure()
 }
 

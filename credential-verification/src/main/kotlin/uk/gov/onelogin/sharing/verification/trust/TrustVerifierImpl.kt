@@ -95,7 +95,8 @@ class TrustVerifierImpl internal constructor(
         isIssuer: Boolean
     ): VerificationResult.Failure {
         val error = when (e) {
-            is CoseVerificationFailure.MalformedCoseSign1 ->
+            is CoseVerificationFailure.MalformedCoseSign1,
+            is CoseVerificationFailure.MissingX5Chain ->
                 if (isIssuer) {
                     VerificationError.MALFORMED_ISSUER_AUTH
                 } else {
@@ -111,7 +112,7 @@ class TrustVerifierImpl internal constructor(
                 }
 
             is CoseVerificationFailure.UntrustedCertificate,
-            is CoseVerificationFailure.UnsupportedCertificateProfile ->
+            is CoseVerificationFailure.CertificateProfileViolation ->
                 VerificationError.UNTRUSTED_CERTIFICATE
 
             is CoseVerificationFailure.ExpiredCertificate ->

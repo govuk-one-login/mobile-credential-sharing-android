@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.verification.cose.internal.signature
 
-import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.MalformedCoseSign1
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.InvalidSignature
 
 internal object EcdsaSignatureTranscoder {
     private const val ES256_SIGNATURE_LENGTH = 64
@@ -11,7 +11,7 @@ internal object EcdsaSignatureTranscoder {
 
     fun rawToDer(rawSignature: ByteArray): ByteArray {
         if (rawSignature.size != ES256_SIGNATURE_LENGTH) {
-            throw MalformedCoseSign1
+            throw InvalidSignature
         }
         val r = rawSignature.copyOfRange(0, COMPONENT_LENGTH).trimLeadingZeros()
         val s = rawSignature.copyOfRange(

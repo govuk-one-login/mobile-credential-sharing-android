@@ -4,13 +4,13 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.MalformedCoseSign1
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.InvalidSignature
 
 class EcdsaSignatureTranscoderTest {
 
     @Test
     fun `throws when signature is not 64 bytes`() {
-        assertThrows(MalformedCoseSign1::class.java) {
+        assertThrows(InvalidSignature::class.java) {
             EcdsaSignatureTranscoder.rawToDer(ByteArray(32))
         }
     }
