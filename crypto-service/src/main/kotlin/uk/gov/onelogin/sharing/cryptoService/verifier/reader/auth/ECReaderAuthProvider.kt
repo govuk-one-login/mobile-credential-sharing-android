@@ -29,7 +29,10 @@ class ECReaderAuthProvider(
     private val certificateChain: List<X509Certificate>,
     private val signature: Signature,
     private val protectedHeaderGenerator: ProtectedHeaderGenerator,
-) : ReaderAuthCredentialProvider, ProtectedHeaderGenerator by protectedHeaderGenerator {
+    private val unprotectedHeaderGenerator: UnprotectedHeaderGenerator,
+) : ReaderAuthCredentialProvider,
+    ProtectedHeaderGenerator by protectedHeaderGenerator,
+    UnprotectedHeaderGenerator by unprotectedHeaderGenerator {
 
     /**
      * 1. protectedHeaderBytes encoded
@@ -41,7 +44,7 @@ class ECReaderAuthProvider(
      */
     override fun sign(readerAuthenticationPayload: ByteArray): ByteArray = try {
         signature.run {
-            initSign(privateKeyChain.last())
+            initSign(privateKeyChain.first())
             update(readerAuthenticationPayload)
             sign().also {
                 logger.debug(
