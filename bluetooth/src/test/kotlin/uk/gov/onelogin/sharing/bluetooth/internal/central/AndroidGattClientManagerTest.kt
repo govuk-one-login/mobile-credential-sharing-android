@@ -21,8 +21,10 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
@@ -412,8 +414,9 @@ internal class AndroidGattClientManagerTest {
 
     @Test
     fun `sets state to start when Mtu is agreed`() = runTest {
-        setupBluetoothGattService()
-        setupCharacteristic(GattUuids.STATE_UUID)
+        val service = setupBluetoothGattService()
+        val stateCharacteristic = setupCharacteristic(GattUuids.STATE_UUID)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
 
         testEvents { callbackSlot ->
             callbackSlot.captured.onMtuChanged(
@@ -423,6 +426,13 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(1, fakeGattWriter.writes)
+
+            // Readiness is signalled only after the START write is confirmed (pacing fix).
+            callbackSlot.captured.onCharacteristicWrite(
+                bluetoothGatt,
+                stateCharacteristic,
+                BluetoothGatt.GATT_SUCCESS
+            )
 
             assertEquals(GattClientEvent.ConnectionStateStarted, awaitItem())
         }
@@ -818,7 +828,84 @@ internal class AndroidGattClientManagerTest {
                     BluetoothGatt.GATT_SUCCESS
                 )
 
+                // Readiness is signalled only after the START write is confirmed.
+                callbackSlot.captured.onCharacteristicWrite(
+                    bluetoothGatt,
+                    mocks.stateCharacteristic,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+
                 assertEquals(GattClientEvent.ConnectionStateStarted, awaitItem())
+            }
+        }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Test
+    fun `does not emit ConnectionStateStarted before START write is confirmed`() = runTest {
+        val mocks = setupCccdService()
+
+        testEvents { callbackSlot ->
+            callbackSlot.discoverServicesAndNegotiateMtu()
+
+            callbackSlot.captured.onDescriptorWrite(
+                bluetoothGatt,
+                mocks.stateDescriptor,
+                BluetoothGatt.GATT_SUCCESS
+            )
+            callbackSlot.captured.onDescriptorWrite(
+                bluetoothGatt,
+                mocks.s2cDescriptor,
+                BluetoothGatt.GATT_SUCCESS
+            )
+
+            // Readiness must NOT be signalled before START is confirmed.
+            advanceTimeBy(
+                (AndroidGattClientManager.START_CONFIRMATION_TIMEOUT - 1).milliseconds
+            )
+            expectNoEvents()
+
+            callbackSlot.captured.onCharacteristicWrite(
+                bluetoothGatt,
+                mocks.stateCharacteristic,
+                BluetoothGatt.GATT_SUCCESS
+            )
+            assertEquals(GattClientEvent.ConnectionStateStarted, awaitItem())
+        }
+    }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Test
+    fun `emits ConnectionStateStarted once via timeout fallback if confirmation never arrives`() =
+        runTest {
+            val mocks = setupCccdService()
+
+            testEvents { callbackSlot ->
+                callbackSlot.discoverServicesAndNegotiateMtu()
+
+                callbackSlot.captured.onDescriptorWrite(
+                    bluetoothGatt,
+                    mocks.stateDescriptor,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+                callbackSlot.captured.onDescriptorWrite(
+                    bluetoothGatt,
+                    mocks.s2cDescriptor,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+
+                // No confirmation: setup still progresses after the fallback window.
+                advanceTimeBy(
+                    (AndroidGattClientManager.START_CONFIRMATION_TIMEOUT + 1).milliseconds
+                )
+                assertEquals(GattClientEvent.ConnectionStateStarted, awaitItem())
+
+                // A late confirmation must not emit a second ConnectionStateStarted.
+                callbackSlot.captured.onCharacteristicWrite(
+                    bluetoothGatt,
+                    mocks.stateCharacteristic,
+                    BluetoothGatt.GATT_SUCCESS
+                )
+                expectNoEvents()
             }
         }
 
@@ -882,7 +969,8 @@ internal class AndroidGattClientManagerTest {
 
     private data class CccdMocks(
         val stateDescriptor: BluetoothGattDescriptor,
-        val s2cDescriptor: BluetoothGattDescriptor
+        val s2cDescriptor: BluetoothGattDescriptor,
+        val stateCharacteristic: BluetoothGattCharacteristic
     )
 
     private fun setupCccdService(hasDescriptors: Boolean = true): CccdMocks {
@@ -894,6 +982,7 @@ internal class AndroidGattClientManagerTest {
 
         val stateDescriptor = mockk<BluetoothGattDescriptor>(relaxed = true)
         val stateCharacteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
+        every { stateCharacteristic.uuid } returns GattUuids.STATE_UUID
         every {
             stateCharacteristic.getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
         } returns if (hasDescriptors) stateDescriptor else null
@@ -907,7 +996,7 @@ internal class AndroidGattClientManagerTest {
         every { service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID) } returns
             s2cCharacteristic
 
-        return CccdMocks(stateDescriptor, s2cDescriptor)
+        return CccdMocks(stateDescriptor, s2cDescriptor, stateCharacteristic)
     }
 
     private fun CapturingSlot<BluetoothGattCallback>.discoverServicesAndNegotiateMtu() {
