@@ -15,9 +15,9 @@ enum class ReaderAuthOption(internal val leafCertificateAsset: String, val displ
     );
 
     private val assetChain: List<String> = listOf(
-        "test_reader_auth_x509_certificate",
+        leafCertificateAsset,
         "test_reader_auth_name_constrained_x509_certificate",
-        leafCertificateAsset
+        "test_reader_auth_x509_certificate",
     )
 
     val certificateChain: List<String> = assetChain.map { "$it.der" }
