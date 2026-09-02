@@ -1,15 +1,12 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
 import java.security.InvalidKeyException
-import java.security.MessageDigest
 import java.security.Signature
 import java.security.SignatureException
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.HASH_ALGORITHM_SHA256
-import uk.gov.onelogin.sharing.cryptoService.holder.ES256_ALGORITHM
 import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 
 /**
@@ -30,9 +27,18 @@ class ECReaderAuthProvider(
     private val logger: Logger,
     private val privateKeyChain: List<ECPrivateKey>,
     private val certificateChain: List<X509Certificate>,
-    private val signature: Signature
-) : ReaderAuthCredentialProvider {
+    private val signature: Signature,
+    private val protectedHeaderGenerator: ProtectedHeaderGenerator,
+) : ReaderAuthCredentialProvider, ProtectedHeaderGenerator by protectedHeaderGenerator {
 
+    /**
+     * 1. protectedHeaderBytes encoded
+     * 2. put into Sig_structure
+     * 3. Sig_structure encoded
+     * 4. Sig_structure signed
+     * put into COSE_Sign1
+     * 5. COSE_Sign1 encoded
+     */
     override fun sign(readerAuthenticationPayload: ByteArray): ByteArray = try {
         signature.run {
             initSign(privateKeyChain.last())
@@ -54,30 +60,6 @@ class ECReaderAuthProvider(
             message = "Couldn't create signature from provided reader authentication bytes.",
             cause = signature
         )
-    }
-
-    /**
-     * Creates the protected headers for the COSE_Sign1 structure. This is defined as:
-     *
-     * ```
-     * { 1: -7, 34: [ -16, sha256(leafCertificate) ] }
-     * ```
-     */
-    internal fun generateProtectedHeaders(): Map<UInt, Any> {
-        return mapOf(
-            PROTECTED_HEADER_ALGORITHM to ES256_ALGORITHM, // alg = -7 ECDSA 256
-            PROTECTED_HEADER_X5T to arrayOf(
-                PROTECTED_HEADER_VALUE_SHA256,
-                MessageDigest
-                    .getInstance(HASH_ALGORITHM_SHA256)
-                    .digest(certificateChain.last().encoded),
-                ),
-        ).also {
-            logger.debug(
-                logTag,
-                "Generated protected headers for COSE_Sign1 structure"
-            )
-        }
     }
 
     companion object {
