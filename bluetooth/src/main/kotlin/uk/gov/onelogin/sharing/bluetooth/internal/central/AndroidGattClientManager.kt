@@ -11,8 +11,10 @@ import androidx.annotation.RequiresPermission
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -75,6 +77,19 @@ class AndroidGattClientManager(
 
     @Volatile
     private var isTerminating = false
+
+    /**
+     * Guards the one-time emission of [GattClientEvent.ConnectionStateStarted]. Readiness is
+     * deferred until the START write is confirmed so the following SessionEstablishment write is
+     * not submitted while START is still in flight (which the stack can reject as busy).
+     */
+    private val startSignalled = AtomicBoolean(false)
+
+    @Volatile
+    private var startTimeoutJob: Job? = null
+
+    @Volatile
+    private var awaitingStartConfirmation = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
     private val messages: MutableMap<UUID, ByteArray> = mutableMapOf()
 
@@ -93,6 +108,8 @@ class AndroidGattClientManager(
         messages.clear()
         isTerminating = false
         isSessionEnd = false
+        awaitingStartConfirmation = false
+        startSignalled.set(false)
         _events.tryEmit(GattClientEvent.Connecting)
 
         bluetoothGatt = try {
@@ -371,35 +388,75 @@ class AndroidGattClientManager(
         )
 
         val startValue = byteArrayOf(MdocState.START.code)
+        awaitingStartConfirmation = true
+        startSignalled.set(false)
         val writeSuccess = gattWriter.writeCharacteristic(
             gatt = gatt,
             characteristic = state,
             value = startValue
         )
 
-        if (writeSuccess) {
-            logger.debug(logTag, "Connection state = STARTED")
-            _events.tryEmit(GattClientEvent.ConnectionStateStarted)
-        } else {
+        if (!writeSuccess) {
+            awaitingStartConfirmation = false
             handleError(
                 ClientError.FAILED_TO_START,
                 "Failed to write 'Start' state"
             )
+            return
+        }
+
+        // Readiness is signalled once START is confirmed (see characteristicWritten); the
+        // timeout fallback ensures setup proceeds if the confirmation never arrives.
+        startTimeoutJob = coroutineScope.launch {
+            delay(START_CONFIRMATION_TIMEOUT.milliseconds)
+            if (awaitingStartConfirmation) {
+                logger.debug(
+                    logTag,
+                    "START confirmation timed out; proceeding after fallback delay"
+                )
+                emitConnectionStarted()
+            }
+        }
+    }
+
+    private fun emitConnectionStarted() {
+        awaitingStartConfirmation = false
+        startTimeoutJob?.cancel()
+        startTimeoutJob = null
+        if (startSignalled.compareAndSet(false, true)) {
+            logger.debug(logTag, "Connection state = STARTED")
+            _events.tryEmit(GattClientEvent.ConnectionStateStarted)
         }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun characteristicWritten(event: GattEvent.CharacteristicWrite) {
+        val uuid = event.characteristic.uuid
+        val isPendingStart = awaitingStartConfirmation && uuid == STATE_UUID
+
         if (event.status != BluetoothGatt.GATT_SUCCESS) {
-            writeQueue.onWriteComplete(event.characteristic.uuid, false)
+            if (isPendingStart) {
+                awaitingStartConfirmation = false
+                startTimeoutJob?.cancel()
+                startTimeoutJob = null
+            } else {
+                writeQueue.onWriteComplete(uuid, false)
+            }
             return handleError(
                 ClientError.FAILED_TO_START,
                 "Failed to write 'Start' state"
             )
         }
 
-        logger.debug(logTag, "Wrote value to characteristic: ${event.characteristic.uuid}")
-        writeQueue.onWriteComplete(event.characteristic.uuid, true)
+        logger.debug(logTag, "Wrote value to characteristic: $uuid")
+
+        // Signal readiness only after START is confirmed, pacing the SessionEstablishment write.
+        if (isPendingStart) {
+            emitConnectionStarted()
+            return
+        }
+
+        writeQueue.onWriteComplete(uuid, true)
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -546,6 +603,9 @@ class AndroidGattClientManager(
     }
 
     companion object {
+
+        /** Fallback (ms) for the START write confirmation so a missing callback cannot stall setup. */
+        const val START_CONFIRMATION_TIMEOUT: Long = 200L
 
         /**
          * The [String] length for 3 kilobytes of data, as kotlin uses 16 bits per [Char].
