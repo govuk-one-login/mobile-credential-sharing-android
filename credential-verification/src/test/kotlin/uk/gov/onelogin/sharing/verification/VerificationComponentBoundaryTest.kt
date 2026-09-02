@@ -18,8 +18,8 @@ class VerificationComponentBoundaryTest {
 
     private fun isProductionCoseClass(classInfo: ClassInfo): Boolean =
         classInfo.packageName.startsWith(PACKAGE_COSE) &&
-                classInfo.isStandardClass &&
-                !classInfo.name.contains("Test")
+            classInfo.isStandardClass &&
+            !classInfo.name.contains("Test")
 
     private fun getCoseDependencyViolations(classInfo: ClassInfo): List<String> =
         classInfo.classDependencies
@@ -46,8 +46,8 @@ class VerificationComponentBoundaryTest {
 
     private fun isProductionClassInPackage(classInfo: ClassInfo, packageName: String): Boolean =
         classInfo.packageName.startsWith(packageName) &&
-                classInfo.isStandardClass &&
-                !classInfo.name.contains("Test")
+            classInfo.isStandardClass &&
+            !classInfo.name.contains("Test")
 
     private fun getDocumentDependencyViolations(classInfo: ClassInfo): List<String> =
         classInfo.classDependencies
@@ -69,7 +69,9 @@ class VerificationComponentBoundaryTest {
                 classInfo.classDependencies
                     .map { it.name }
                     .filter { it.startsWith(PACKAGE_DOCUMENT) || it.startsWith(PACKAGE_READER) }
-                    .map { "Legacy Trust class ${classInfo.name} must not depend on new logic in $it" }
+                    .map {
+                        "Legacy Trust class ${classInfo.name} must not depend on new logic in $it"
+                    }
             }
 
         assertTrue(violations.joinToString("\n"), violations.isEmpty())
