@@ -73,7 +73,13 @@ class CoseSignatureVerifierTest {
         val payload = "test payload".toByteArray()
         val signature = sign(payload, protectedHeader)
 
-        val coseSign1 = InternalCoseSign1(protectedHeader, buildEmptyMap(), payload, signature)
+        val coseSign1 = InternalCoseSign1(
+            protectedHeader,
+            buildEmptyMap(),
+            payload,
+            signature,
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
 
         verifier.verify(coseSign1, publicKey, payload)
     }
@@ -85,7 +91,13 @@ class CoseSignatureVerifierTest {
         val signature = sign(payload, protectedHeader)
         signature[0] = (signature[0].toInt() xor 0xFF).toByte()
 
-        val coseSign1 = InternalCoseSign1(protectedHeader, buildEmptyMap(), payload, signature)
+        val coseSign1 = InternalCoseSign1(
+            protectedHeader,
+            buildEmptyMap(),
+            payload,
+            signature,
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
 
         assertThrows(InvalidSignature::class.java) {
             verifier.verify(coseSign1, publicKey, payload)
@@ -102,7 +114,13 @@ class CoseSignatureVerifierTest {
             .apply { initialize(ECGenParameterSpec("secp256r1")) }
             .generateKeyPair().public as ECPublicKey
 
-        val coseSign1 = InternalCoseSign1(protectedHeader, buildEmptyMap(), payload, signature)
+        val coseSign1 = InternalCoseSign1(
+            protectedHeader,
+            buildEmptyMap(),
+            payload,
+            signature,
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
 
         assertThrows(InvalidSignature::class.java) {
             verifier.verify(coseSign1, otherKey, payload)

@@ -47,7 +47,13 @@ internal class CoseHeaderValidatorFailureTest(
         private fun coseSign1(
             protectedHeader: ByteArray = buildHeader("1" to -7L),
             unprotectedHeader: ByteArray? = buildEmptyMap()
-        ) = InternalCoseSign1(protectedHeader, unprotectedHeader, byteArrayOf(0x01), ByteArray(64))
+        ) = InternalCoseSign1(
+            protectedHeader,
+            unprotectedHeader,
+            byteArrayOf(0x01),
+            ByteArray(64),
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
 
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
@@ -107,7 +113,13 @@ class CoseHeaderValidatorTest {
         val protectedHeader = cborMapper.writeValueAsBytes(node)
         val emptyMap = cborMapper.writeValueAsBytes(cborMapper.createObjectNode())
         val coseSign1 =
-            InternalCoseSign1(protectedHeader, emptyMap, byteArrayOf(0x01), ByteArray(64))
+            InternalCoseSign1(
+                protectedHeader,
+                emptyMap,
+                byteArrayOf(0x01),
+                ByteArray(64),
+                InternalCoseSign1.PayloadMode.ATTACHED
+            )
 
         validator.validate(coseSign1)
     }

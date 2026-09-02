@@ -8,8 +8,14 @@ internal data class InternalCoseSign1(
     val protectedHeader: ByteArray,
     val unprotectedHeader: ByteArray?,
     val payload: ByteArray?,
-    val signature: ByteArray
+    val signature: ByteArray,
+    val payloadMode: PayloadMode
 ) {
+    enum class PayloadMode {
+        ATTACHED,
+        DETACHED
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -20,6 +26,7 @@ internal data class InternalCoseSign1(
         if (!unprotectedHeader.contentEquals(other.unprotectedHeader)) return false
         if (!payload.contentEquals(other.payload)) return false
         if (!signature.contentEquals(other.signature)) return false
+        if (payloadMode != other.payloadMode) return false
 
         return true
     }
@@ -29,6 +36,7 @@ internal data class InternalCoseSign1(
         result = 31 * result + (unprotectedHeader?.contentHashCode() ?: 0)
         result = 31 * result + (payload?.contentHashCode() ?: 0)
         result = 31 * result + signature.contentHashCode()
+        result = 31 * result + payloadMode.hashCode()
         return result
     }
 }
