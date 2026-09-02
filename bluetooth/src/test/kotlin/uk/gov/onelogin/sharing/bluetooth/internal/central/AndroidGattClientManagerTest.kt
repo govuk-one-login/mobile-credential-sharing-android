@@ -859,7 +859,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             // Readiness must NOT be signalled before START is confirmed.
-            advanceTimeBy(
+            testScope.advanceTimeBy(
                 (AndroidGattClientManager.START_CONFIRMATION_TIMEOUT - 1).milliseconds
             )
             expectNoEvents()

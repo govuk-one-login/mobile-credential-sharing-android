@@ -109,6 +109,8 @@ class AndroidGattClientManager(
         isTerminating = false
         isSessionEnd = false
         awaitingStartConfirmation = false
+        startTimeoutJob?.cancel()
+        startTimeoutJob = null
         startSignalled.set(false)
         _events.tryEmit(GattClientEvent.Connecting)
 
@@ -407,6 +409,7 @@ class AndroidGattClientManager(
 
         // Readiness is signalled once START is confirmed (see characteristicWritten); the
         // timeout fallback ensures setup proceeds if the confirmation never arrives.
+        startTimeoutJob?.cancel()
         startTimeoutJob = coroutineScope.launch {
             delay(START_CONFIRMATION_TIMEOUT.milliseconds)
             if (awaitingStartConfirmation) {
