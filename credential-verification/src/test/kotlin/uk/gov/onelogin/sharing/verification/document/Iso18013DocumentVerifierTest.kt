@@ -18,6 +18,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.S
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocument
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingVerifiableDocumentWithPresentation
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
+import uk.gov.onelogin.sharing.verification.cose.CoseSign1Stubs
 import uk.gov.onelogin.sharing.verification.document.cose.CoseKeyDecoder
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSignedStubs.validIssuerAuth
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject
