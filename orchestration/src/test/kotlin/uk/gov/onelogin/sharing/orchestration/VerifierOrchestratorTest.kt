@@ -158,7 +158,8 @@ class VerifierOrchestratorTest {
         verifierCryptoService = cryptoService,
         documentVerifier = documentVerifier,
         sessionTerminator = sessionTerminator,
-        sessionTimer = sessionTimer
+        sessionTimer = sessionTimer,
+        readerAuthCredentialProvider = { byteArrayOf() }
     )
 
     @Before

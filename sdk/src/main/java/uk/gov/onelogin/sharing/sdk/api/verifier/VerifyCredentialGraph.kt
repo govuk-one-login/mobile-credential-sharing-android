@@ -6,6 +6,7 @@ import dev.zacsweers.metro.Includes
 import dev.zacsweers.metro.Provides
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
+import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 
@@ -17,11 +18,14 @@ interface VerifyCredentialGraph {
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
             @Includes credentialVerificationGraph: CredentialVerificationGraph,
-            @Provides verifierConfig: VerifierConfig
+            @Provides verifierConfig: VerifierConfig,
+            @Provides readerAuthCredentialProvider: ReaderAuthCredentialProvider
         ): VerifyCredentialGraph
     }
 
     fun verifierOrchestrator(): Orchestrator.Verifier
 
     fun verifierConfig(): VerifierConfig
+
+    fun readerAuthCredentialProvider(): ReaderAuthCredentialProvider
 }

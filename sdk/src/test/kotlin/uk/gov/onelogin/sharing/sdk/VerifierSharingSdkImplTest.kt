@@ -12,6 +12,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
+import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.sdk.internal.verifier.CredentialVerifierImpl
@@ -22,6 +23,7 @@ class VerifierSharingSdkImplTest {
     private val appGraph = mockk<CredentialSharingAppGraph>()
     private val logger = SystemLogger()
     private val verifierGraphFactory = mockk<VerifyCredentialGraph.Factory>()
+    private val readerAuthCredentialProvider: ReaderAuthCredentialProvider = mockk(relaxed = true)
     private val credentialVerificationFactory = mockk<CredentialVerificationGraph.Factory>(
         relaxed = true
     )
@@ -57,7 +59,8 @@ class VerifierSharingSdkImplTest {
             verifierGraphFactory.create(
                 appGraph = appGraph,
                 credentialVerificationGraph = credentialVerificationGraph,
-                verifierConfig = verifierConfig
+                verifierConfig = verifierConfig,
+                readerAuthCredentialProvider = readerAuthCredentialProvider
             )
         } returns verifierGraph
         every { verifierGraph.verifierOrchestrator() } returns orchestrator
@@ -65,7 +68,10 @@ class VerifierSharingSdkImplTest {
         val sdk = VerifyCredentialSdkImpl(
             appGraph = appGraph,
             verifierGraphFactory = verifierGraphFactory,
-            credentialVerificationGraphFactory = credentialVerificationFactory
+            credentialVerificationGraphFactory = credentialVerificationFactory,
+            readerAuthCredentialFactory = {
+                readerAuthCredentialProvider
+            }
         )
 
         val result = sdk.verifier(verifierConfig)

@@ -34,9 +34,22 @@ class SelectCredentialAttributesScreenRule(
         ) and hasTestTag("dropdown_text")
     ).assertTextContains(option.displayName)
 
+    fun assertOptionIsSelected(option: ReaderAuthOption) = onNode(
+        hasParent(
+            hasTestTag("reader_auth_menu")
+        ) and hasTestTag("dropdown_text")
+    ).assertTextContains(option.displayName)
+
     fun onVerifierOptionText(option: VerifierAttributeOption) = onNode(
         hasTestTag(
             ATTRIBUTE_GROUP_ITEM_TAG
+        ) and hasAnyChild(hasText(option.displayName)),
+        useUnmergedTree = true
+    )
+
+    fun onReaderAuthOptionText(option: ReaderAuthOption) = onNode(
+        hasTestTag(
+            "reader_auth_item"
         ) and hasAnyChild(hasText(option.displayName)),
         useUnmergedTree = true
     )
@@ -46,9 +59,19 @@ class SelectCredentialAttributesScreenRule(
         useUnmergedTree = true
     ).performScrollTo().performClick()
 
+    fun performReaderAuthMenuClick() = onNodeWithTag(
+        "reader_auth_menu",
+        useUnmergedTree = true
+    ).performScrollTo().performClick()
+
     fun performAttributeGroupClick(option: VerifierAttributeOption) {
         performAttributeGroupMenuClick()
         onVerifierOptionText(option).performClick()
+    }
+
+    fun performReaderAuthClick(option: ReaderAuthOption) {
+        performReaderAuthMenuClick()
+        onReaderAuthOptionText(option).performClick()
     }
 
     fun performVerifyCredentialClick() = onNodeWithText(
