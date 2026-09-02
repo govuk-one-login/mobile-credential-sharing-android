@@ -1,16 +1,21 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
-import javax.security.cert.Certificate
+import java.security.cert.Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 
 class CoseSign1UnprotectedHeaderGenerator(
     private val logger: Logger
 ) : UnprotectedHeaderGenerator {
+
     override fun generateUnprotectedHeaders(
         certificateChain: List<Certificate>,
     ): Map<UInt, Any> = mapOf(
-        UNPROTECTED_HEADER_X5_CHAIN to certificateChain.toTypedArray()
+        UNPROTECTED_HEADER_X5_CHAIN to certificateChain
+            .map(Certificate::getEncoded)
+            .map(CborMapper.default::writeValueAsBytes)
+            .toTypedArray()
     ).also {
         logger.debug(
             logTag,

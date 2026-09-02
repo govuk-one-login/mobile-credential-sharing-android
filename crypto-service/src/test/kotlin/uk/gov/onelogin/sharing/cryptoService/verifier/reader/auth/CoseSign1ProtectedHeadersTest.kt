@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 import io.mockk.every
 import io.mockk.mockk
 import java.security.MessageDigest
-import javax.security.cert.Certificate
+import java.security.cert.Certificate
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest

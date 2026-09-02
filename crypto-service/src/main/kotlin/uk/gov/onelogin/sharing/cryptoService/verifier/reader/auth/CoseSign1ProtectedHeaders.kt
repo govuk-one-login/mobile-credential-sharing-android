@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
 import java.security.MessageDigest
-import javax.security.cert.Certificate
+import java.security.cert.Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants
