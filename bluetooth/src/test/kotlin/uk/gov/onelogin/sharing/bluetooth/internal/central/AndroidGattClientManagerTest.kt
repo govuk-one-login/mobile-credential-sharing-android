@@ -527,9 +527,23 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     @Test
     fun `emits service disconnected`() = runTest {
+        val service = setupBluetoothGattService()
+        val stateCharacteristic = setupCharacteristic(GattUuids.STATE_UUID)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
         testEvents { callbackSlot ->
+            // Drives writeStartState() which launches the START timeout job.
+            callbackSlot.captured.onMtuChanged(
+                bluetoothGatt,
+                MtuValues.MAX_MTU,
+                BluetoothGatt.GATT_SUCCESS
+            )
+            assertEquals(1, fakeGattWriter.writes)
+
+            // Peer drops the link before START is confirmed.
             callbackSlot.captured.onConnectionStateChange(
                 bluetoothGatt,
                 BluetoothGatt.GATT_SUCCESS,
@@ -540,6 +554,40 @@ internal class AndroidGattClientManagerTest {
                 GattClientEvent.Disconnected(bluetoothGatt.device.address, false),
                 awaitItem()
             )
+
+            // The cancelled START timeout job must not emit ConnectionStateStarted late.
+            testScope.advanceTimeBy(
+                (AndroidGattClientManager.START_CONFIRMATION_TIMEOUT + 50).milliseconds
+            )
+            expectNoEvents()
+        }
+    }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Test
+    fun `does not emit ConnectionStateStarted after disconnect while START pending`() = runTest {
+        val service = setupBluetoothGattService()
+        val stateCharacteristic = setupCharacteristic(GattUuids.STATE_UUID)
+        every { service.getCharacteristic(GattUuids.STATE_UUID) } returns stateCharacteristic
+
+        testEvents { callbackSlot ->
+            // Drives writeStartState() which launches the START timeout job.
+            callbackSlot.captured.onMtuChanged(
+                bluetoothGatt,
+                MtuValues.MAX_MTU,
+                BluetoothGatt.GATT_SUCCESS
+            )
+            assertEquals(1, fakeGattWriter.writes)
+
+            // Explicit teardown before START is confirmed.
+            manager.disconnect()
+
+            // Advance past the fallback timeout; the cancelled job must not fire.
+            testScope.advanceTimeBy(
+                (AndroidGattClientManager.START_CONFIRMATION_TIMEOUT + 50).milliseconds
+            )
+
+            expectNoEvents()
         }
     }
 

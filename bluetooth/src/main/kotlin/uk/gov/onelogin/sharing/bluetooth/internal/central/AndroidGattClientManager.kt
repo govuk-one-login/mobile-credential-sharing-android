@@ -108,9 +108,7 @@ class AndroidGattClientManager(
         messages.clear()
         isTerminating = false
         isSessionEnd = false
-        awaitingStartConfirmation = false
-        startTimeoutJob?.cancel()
-        startTimeoutJob = null
+        cancelStartConfirmation()
         startSignalled.set(false)
         _events.tryEmit(GattClientEvent.Connecting)
 
@@ -143,6 +141,7 @@ class AndroidGattClientManager(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun disconnect() {
         logger.debug(logTag, "Disconnect GATT client")
+        cancelStartConfirmation()
         bluetoothGatt?.disconnect()
         bluetoothGatt?.close()
         bluetoothGatt = null
@@ -230,6 +229,7 @@ class AndroidGattClientManager(
             }
 
             event.newState == BluetoothGatt.STATE_DISCONNECTED -> {
+                cancelStartConfirmation()
                 bluetoothGatt?.close()
                 bluetoothGatt = null
                 GattClientEvent.Disconnected(address, isSessionEnd)
@@ -423,9 +423,7 @@ class AndroidGattClientManager(
     }
 
     private fun emitConnectionStarted() {
-        awaitingStartConfirmation = false
-        startTimeoutJob?.cancel()
-        startTimeoutJob = null
+        cancelStartConfirmation()
         if (startSignalled.compareAndSet(false, true)) {
             logger.debug(logTag, "Connection state = STARTED")
             _events.tryEmit(GattClientEvent.ConnectionStateStarted)
@@ -439,9 +437,7 @@ class AndroidGattClientManager(
 
         if (event.status != BluetoothGatt.GATT_SUCCESS) {
             if (isPendingStart) {
-                awaitingStartConfirmation = false
-                startTimeoutJob?.cancel()
-                startTimeoutJob = null
+                cancelStartConfirmation()
             } else {
                 writeQueue.onWriteComplete(uuid, false)
             }
@@ -460,6 +456,12 @@ class AndroidGattClientManager(
         }
 
         writeQueue.onWriteComplete(uuid, true)
+    }
+
+    private fun cancelStartConfirmation() {
+        awaitingStartConfirmation = false
+        startTimeoutJob?.cancel()
+        startTimeoutJob = null
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
