@@ -33,7 +33,11 @@ class CoseSign1DecoderDecodeErrorTest(
             arrayOf("non-binary protected header", buildCoseSign1Cbor(protectedHeader = "text")),
             arrayOf("wrapped in tag 18", buildCoseSign1Cbor(tag = 18)),
             arrayOf("wrapped in tag 24", buildCoseSign1Cbor(tag = 24)),
-            arrayOf("trailing garbage bytes", buildCoseSign1Cbor() + byteArrayOf(0xFF.toByte()))
+            arrayOf("trailing garbage bytes", buildCoseSign1Cbor() + byteArrayOf(0xFF.toByte())),
+            arrayOf(
+                "truncated array mid-stream",
+                byteArrayOf(0x84.toByte(), 0x41.toByte(), 0x01.toByte())
+            )
         )
 
         private fun buildCborArray(size: Int): ByteArray {

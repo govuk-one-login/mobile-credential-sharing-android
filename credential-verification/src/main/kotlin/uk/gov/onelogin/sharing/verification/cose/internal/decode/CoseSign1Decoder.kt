@@ -30,7 +30,7 @@ internal class CoseSign1Decoder {
      * @return An [InternalCoseSign1] with preserved raw byte segments.
      * @throws MalformedCoseSign1 if structure is not exactly a 4-element array or has tags.
      */
-    @Suppress("ThrowsCount", "NestedBlockDepth", "DEPRECATION")
+    @Suppress("ThrowsCount", "NestedBlockDepth", "DEPRECATION", "CyclomaticComplexMethod")
     fun decode(data: ByteArray): InternalCoseSign1 {
         if (data.isEmpty()) throw MalformedCoseSign1
 
@@ -39,63 +39,62 @@ internal class CoseSign1Decoder {
             throw MalformedCoseSign1
         }
 
-        val parser = cborFactory.createParser(data) as CBORParser
+        try {
+            return (cborFactory.createParser(data) as CBORParser).use { parser ->
+                if (parser.nextToken() != JsonToken.START_ARRAY) {
+                    throw MalformedCoseSign1
+                }
 
-        if (parser.nextToken() != JsonToken.START_ARRAY) {
-            throw MalformedCoseSign1
-        }
+                val protectedHeader = if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
+                    parser.binaryValue
+                } else {
+                    throw MalformedCoseSign1
+                }
 
-        val protectedHeader = if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
-            parser.binaryValue
-        } else {
-            throw MalformedCoseSign1
-        }
+                if (parser.nextToken() != JsonToken.START_OBJECT) {
+                    throw MalformedCoseSign1
+                }
+                val unprotectedStart = parser.tokenLocation.byteOffset.toInt()
+                parser.skipChildren()
+                val unprotectedEnd = parser.currentLocation.byteOffset.toInt()
+                val unprotectedHeader = data.copyOfRange(unprotectedStart, unprotectedEnd)
 
-        if (parser.nextToken() != JsonToken.START_OBJECT) {
-            throw MalformedCoseSign1
-        }
-        val unprotectedStart = parser.tokenLocation.byteOffset.toInt()
-        parser.skipChildren()
-        val unprotectedEnd = parser.currentLocation.byteOffset.toInt()
-        val unprotectedHeader = data.copyOfRange(unprotectedStart, unprotectedEnd)
+                val payloadToken = parser.nextToken()
+                val (payload, mode) = when (payloadToken) {
+                    JsonToken.VALUE_EMBEDDED_OBJECT ->
+                        parser.binaryValue to InternalCoseSign1.PayloadMode.ATTACHED
 
-        val payloadToken = parser.nextToken()
-        val (payload, mode) = when (payloadToken) {
-            JsonToken.VALUE_EMBEDDED_OBJECT ->
-                parser.binaryValue to InternalCoseSign1.PayloadMode.ATTACHED
+                    JsonToken.VALUE_NULL -> null to InternalCoseSign1.PayloadMode.DETACHED
 
-            JsonToken.VALUE_NULL -> null to InternalCoseSign1.PayloadMode.DETACHED
+                    else -> throw MalformedCoseSign1
+                }
 
-            else -> throw MalformedCoseSign1
-        }
+                val signature = if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
+                    parser.binaryValue
+                } else {
+                    throw MalformedCoseSign1
+                }
 
-        val signature = if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
-            parser.binaryValue
-        } else {
-            throw MalformedCoseSign1
-        }
+                if (parser.parsingContext.entryCount != COSE_SIGN1_SIZE) {
+                    throw MalformedCoseSign1
+                }
 
-        if (parser.parsingContext.entryCount != COSE_SIGN1_SIZE) {
-            throw MalformedCoseSign1
-        }
+                if (parser.nextToken() != JsonToken.END_ARRAY || parser.nextToken() != null) {
+                    throw MalformedCoseSign1
+                }
 
-        val hasTrailingData = try {
-            parser.nextToken() != JsonToken.END_ARRAY || parser.nextToken() != null
+                InternalCoseSign1(
+                    protectedHeader = protectedHeader,
+                    unprotectedHeader = unprotectedHeader,
+                    payload = payload,
+                    signature = signature,
+                    payloadMode = mode
+                )
+            }
         } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            true
-        }
-
-        if (hasTrailingData) {
+            @Suppress("SwallowedException")
             throw MalformedCoseSign1
         }
-
-        return InternalCoseSign1(
-            protectedHeader = protectedHeader,
-            unprotectedHeader = unprotectedHeader,
-            payload = payload,
-            signature = signature,
-            payloadMode = mode
-        )
     }
 
     /**
