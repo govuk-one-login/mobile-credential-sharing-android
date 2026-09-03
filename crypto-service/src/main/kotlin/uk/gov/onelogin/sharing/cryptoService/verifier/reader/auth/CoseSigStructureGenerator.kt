@@ -32,6 +32,11 @@ class CoseSigStructureGenerator(
                 gen.writeEndArray()
             }
         }.toByteArray()
+    }.also {
+        logger.debug(
+            logTag,
+            "CBOR-encoded Sig_Structure array: ${it.toHexString()}"
+        )
     }
 
     internal fun generateSignatureStructureData(

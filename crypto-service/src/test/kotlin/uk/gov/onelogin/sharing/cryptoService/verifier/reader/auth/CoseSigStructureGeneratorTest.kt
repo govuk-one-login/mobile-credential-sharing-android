@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import java.security.cert.Certificate
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.arrayContaining
@@ -55,14 +56,22 @@ class CoseSigStructureGeneratorTest {
         generator.generateSignatureStructureData(
             certificateChain,
             readerAuthenticationPayload
-        )
+        ).also {
+            assertTrue {
+                "Generated Sig_Structure with protected headers and reader auth bytes" in logger
+            }
+        }
     }
 
     private val result by lazy {
         generator.generateSignatureStructure(
             certificateChain,
             readerAuthenticationPayload
-        )
+        ).also {
+            assertTrue {
+                "CBOR-encoded Sig_Structure array: ${it.toHexString()}" in logger
+            }
+        }
     }
 
     private val resultHexString by lazy {
