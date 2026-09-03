@@ -1,20 +1,21 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import java.io.ByteArrayOutputStream
 import java.security.cert.Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.UnprotectedHeaderGenerator.Companion.UNPROTECTED_HEADER_X5_CHAIN
 
 class CoseSign1UnprotectedHeaderGenerator(
     private val logger: Logger
 ) : UnprotectedHeaderGenerator {
 
-    override fun generateUnprotectedHeaders(
-        certificateChain: List<Certificate>,
-    ): Map<UInt, Any> = mapOf(
+    internal fun generateUnprotectedHeaderData(
+        certificateChain: List<Certificate>
+    ): Map<Long, Any> =  mapOf(
         UNPROTECTED_HEADER_X5_CHAIN to certificateChain
             .map(Certificate::getEncoded)
-            .map(CborMapper.default::writeValueAsBytes)
             .toTypedArray()
     ).also {
         logger.debug(
@@ -23,7 +24,26 @@ class CoseSign1UnprotectedHeaderGenerator(
         )
     }
 
-    companion object {
-        internal const val UNPROTECTED_HEADER_X5_CHAIN = 33U
+    override fun generateUnprotectedHeaders(
+        certificateChain: List<Certificate>,
+    ): ByteArray = generateUnprotectedHeaderData(certificateChain).let { headers ->
+        ByteArrayOutputStream().also { out ->
+            CBORFactory().createGenerator(out).use { gen ->
+                gen.writeStartObject(headers.size)
+
+                val chain = (headers[UNPROTECTED_HEADER_X5_CHAIN] as Array<*>)
+                    .map { it as ByteArray }
+
+
+                gen.writeFieldId(UNPROTECTED_HEADER_X5_CHAIN)
+                @Suppress("DEPRECATION")
+                gen.writeStartArray(chain.size)
+                repeat(chain.size) { index ->
+                    gen.writeBinary(chain[index])
+                }
+                gen.writeEndArray()
+                gen.writeEndObject()
+            }
+        }.toByteArray()
     }
 }
