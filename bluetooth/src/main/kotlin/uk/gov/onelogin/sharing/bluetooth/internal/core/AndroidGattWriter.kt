@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.internal.central
+package uk.gov.onelogin.sharing.bluetooth.internal.core
 
 import android.Manifest
 import android.bluetooth.BluetoothDevice

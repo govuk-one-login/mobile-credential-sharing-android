@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.scanner
+package uk.gov.onelogin.sharing.bluetooth.internal.scanner
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.BluetoothLeScanner
@@ -22,6 +22,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 
 @RunWith(AndroidJUnit4::class)

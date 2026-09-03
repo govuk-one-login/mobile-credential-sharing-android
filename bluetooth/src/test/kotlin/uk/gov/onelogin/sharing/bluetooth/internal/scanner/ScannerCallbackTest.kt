@@ -1,11 +1,13 @@
-package uk.gov.onelogin.sharing.bluetooth.api.scanner
+package uk.gov.onelogin.sharing.bluetooth.internal.scanner
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.junit.runner.RunWith
-import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerCallback.Companion.toLeScanCallback
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailureMapping
+import uk.gov.onelogin.sharing.bluetooth.internal.scanner.ScannerCallback.Companion.toLeScanCallback
 
 @RunWith(TestParameterInjector::class)
 class ScannerCallbackTest {

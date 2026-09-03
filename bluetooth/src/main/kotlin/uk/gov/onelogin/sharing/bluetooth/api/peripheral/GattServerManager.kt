@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 import java.util.UUID
 import kotlinx.coroutines.flow.SharedFlow

@@ -7,7 +7,7 @@ import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 
 class MdocServiceValidatorTest {
 
