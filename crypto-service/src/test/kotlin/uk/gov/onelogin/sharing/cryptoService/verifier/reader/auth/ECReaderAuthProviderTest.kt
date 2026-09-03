@@ -36,7 +36,7 @@ class ECReaderAuthProviderTest {
 
     private val logger = SystemLogger()
 
-    private var protectedHeaderGenerator: ProtectedHeaderGenerator = { emptyMap() }
+    private var protectedHeaderGenerator: ProtectedHeaderGenerator = { byteArrayOf() }
     private var unprotectedHeaderGenerator: UnprotectedHeaderGenerator = { byteArrayOf() }
 
     private val provider by lazy {

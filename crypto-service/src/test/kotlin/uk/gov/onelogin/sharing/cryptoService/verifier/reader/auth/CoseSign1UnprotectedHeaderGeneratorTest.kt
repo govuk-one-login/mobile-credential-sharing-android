@@ -1,9 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
-import java.security.KeyPairGenerator
 import java.security.Security
 import java.security.cert.Certificate
-import java.security.cert.CertificateFactory
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -21,9 +19,6 @@ import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
 import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
 
 class CoseSign1UnprotectedHeaderGeneratorTest {
-
-    private val certificateFactory = CertificateFactory.getInstance("X.509")
-    private val keyPairGenerator = KeyPairGenerator.getInstance("EC")
 
     private val logger = SystemLogger()
 

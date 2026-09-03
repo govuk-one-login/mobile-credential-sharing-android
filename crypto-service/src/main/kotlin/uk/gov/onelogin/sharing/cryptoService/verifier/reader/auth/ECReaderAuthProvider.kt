@@ -64,10 +64,4 @@ class ECReaderAuthProvider(
             cause = signature
         )
     }
-
-    companion object {
-        internal const val PROTECTED_HEADER_X5T = 34U
-        internal const val PROTECTED_HEADER_ALGORITHM = 1U
-        internal const val PROTECTED_HEADER_VALUE_SHA256 = -16
-    }
 }
