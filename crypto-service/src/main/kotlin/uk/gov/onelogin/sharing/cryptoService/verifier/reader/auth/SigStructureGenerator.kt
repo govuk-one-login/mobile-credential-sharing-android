@@ -8,4 +8,3 @@ interface SigStructureGenerator {
         readerAuthenticationPayload: ByteArray
     ): ByteArray
 }
-
