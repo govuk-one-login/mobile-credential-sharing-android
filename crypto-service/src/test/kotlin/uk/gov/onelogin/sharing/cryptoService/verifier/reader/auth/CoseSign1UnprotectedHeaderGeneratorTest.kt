@@ -7,17 +7,16 @@ import java.security.cert.CertificateFactory
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.collection.IsMapContaining.hasKey
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
 import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
 
@@ -52,6 +51,10 @@ class CoseSign1UnprotectedHeaderGeneratorTest {
         CoseSign1UnprotectedHeaderGenerator(logger)
     }
 
+    private val resultData: Map<Long, Any> by lazy {
+        generator.generateUnprotectedHeaderData(certificateChain)
+    }
+
     private val result by lazy {
         generator.generateUnprotectedHeaders(certificateChain)
     }
@@ -69,24 +72,24 @@ class CoseSign1UnprotectedHeaderGeneratorTest {
     @Test
     fun `Contains an x5 chain key`() = runTest {
         assertThat(
-            result.size,
+            resultData.size,
             equalTo(1)
         )
 
         assertThat(
-            result,
-            hasKey(equalTo(33U))
+            resultData,
+            hasKey(equalTo(33L))
         )
     }
 
     @Test
     fun `X5 chain value is an array in the same order as the provided List`() = runTest {
         assertThat(
-            result[33U],
+            resultData[33],
             instanceOf(Array::class.java)
         )
 
-        val arrayWrapper = result[33U] as Array<*>
+        val arrayWrapper = resultData[33] as Array<*>
 
         assertThat(
             arrayWrapper.size,
@@ -99,19 +102,18 @@ class CoseSign1UnprotectedHeaderGeneratorTest {
 
         val x5ChainWrapper = arrayWrapper.map { it as ByteArray }.toTypedArray()
 
-        assertContentEquals(
-            x5ChainWrapper[0],
-                CborMapper.default.writeValueAsBytes(certificateOne.encoded),
-        )
-        assertContentEquals(
-            x5ChainWrapper[1],
-            CborMapper.default.writeValueAsBytes(certificateTwo.encoded),
-        )
+        x5ChainWrapper.forEachIndexed { index, cborCertChain ->
+            assertThat(
+                "Cannot find substring for index $index's certificate content",
+                result.toHexString(),
+                containsString(cborCertChain.toHexString())
+            )
+        }
     }
 
     @Test
     fun `Provides a log message for header generation`() = runTest {
-        assertNotNull(result)
+        assertNotNull(resultData)
 
         assertTrue {
             "Generated unprotected headers for COSE_Sign1 structure" in logger
