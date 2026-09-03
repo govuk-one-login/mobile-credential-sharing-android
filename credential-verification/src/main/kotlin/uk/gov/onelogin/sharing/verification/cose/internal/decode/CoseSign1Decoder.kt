@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.Missing
  * Implements byte-preservation using Jackson streaming to ensure cryptographic
  * signatures are verified against identical source bytes.
  */
+@Suppress("TooManyFunctions")
 @Inject
 internal class CoseSign1Decoder {
 
@@ -30,69 +31,81 @@ internal class CoseSign1Decoder {
      * @return An [InternalCoseSign1] with preserved raw byte segments.
      * @throws MalformedCoseSign1 if structure is not exactly a 4-element array or has tags.
      */
-    @Suppress("ThrowsCount", "NestedBlockDepth", "DEPRECATION", "CyclomaticComplexMethod")
     fun decode(data: ByteArray): InternalCoseSign1 {
-        if (data.isEmpty()) throw MalformedCoseSign1
+        validateRawHeader(data)
+        try {
+            return (cborFactory.createParser(data) as CBORParser).use { parser ->
+                parseCoseSign1Array(parser, data)
+            }
+        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+            @Suppress("SwallowedException")
+            throw MalformedCoseSign1
+        }
+    }
 
+    private fun validateRawHeader(data: ByteArray) {
+        if (data.isEmpty()) throw MalformedCoseSign1
         val firstByte = data[0].toInt() and BYTE_MASK
         if (firstByte in CBOR_TAG_RANGE_START..CBOR_TAG_RANGE_END) {
             throw MalformedCoseSign1
         }
+    }
 
-        try {
-            return (cborFactory.createParser(data) as CBORParser).use { parser ->
-                if (parser.nextToken() != JsonToken.START_ARRAY) {
-                    throw MalformedCoseSign1
-                }
+    private fun parseCoseSign1Array(parser: CBORParser, data: ByteArray): InternalCoseSign1 {
+        if (parser.nextToken() != JsonToken.START_ARRAY) throw MalformedCoseSign1
 
-                val protectedHeader = if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
-                    parser.binaryValue
-                } else {
-                    throw MalformedCoseSign1
-                }
+        val protectedHeader = readProtectedHeader(parser)
+        val unprotectedHeader = readUnprotectedHeader(parser, data)
+        val (payload, mode) = readPayload(parser)
+        val signature = readSignature(parser)
 
-                if (parser.nextToken() != JsonToken.START_OBJECT) {
-                    throw MalformedCoseSign1
-                }
-                val unprotectedStart = parser.tokenLocation.byteOffset.toInt()
-                parser.skipChildren()
-                val unprotectedEnd = parser.currentLocation.byteOffset.toInt()
-                val unprotectedHeader = data.copyOfRange(unprotectedStart, unprotectedEnd)
+        validateArrayEnd(parser)
 
-                val payloadToken = parser.nextToken()
-                val (payload, mode) = when (payloadToken) {
-                    JsonToken.VALUE_EMBEDDED_OBJECT ->
-                        parser.binaryValue to InternalCoseSign1.PayloadMode.ATTACHED
+        return InternalCoseSign1(
+            protectedHeader = protectedHeader,
+            unprotectedHeader = unprotectedHeader,
+            payload = payload,
+            signature = signature,
+            payloadMode = mode
+        )
+    }
 
-                    JsonToken.VALUE_NULL -> null to InternalCoseSign1.PayloadMode.DETACHED
+    private fun readProtectedHeader(parser: CBORParser): ByteArray =
+        if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
+            parser.binaryValue
+        } else {
+            throw MalformedCoseSign1
+        }
 
-                    else -> throw MalformedCoseSign1
-                }
+    @Suppress("DEPRECATION")
+    private fun readUnprotectedHeader(parser: CBORParser, data: ByteArray): ByteArray {
+        if (parser.nextToken() != JsonToken.START_OBJECT) throw MalformedCoseSign1
+        val start = parser.tokenLocation.byteOffset.toInt()
+        parser.skipChildren()
+        val end = parser.currentLocation.byteOffset.toInt()
+        return data.copyOfRange(start, end)
+    }
 
-                val signature = if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
-                    parser.binaryValue
-                } else {
-                    throw MalformedCoseSign1
-                }
+    private fun readPayload(parser: CBORParser): Pair<ByteArray?, InternalCoseSign1.PayloadMode> =
+        when (parser.nextToken()) {
+            JsonToken.VALUE_EMBEDDED_OBJECT ->
+                parser.binaryValue to InternalCoseSign1.PayloadMode.ATTACHED
 
-                if (parser.parsingContext.entryCount != COSE_SIGN1_SIZE) {
-                    throw MalformedCoseSign1
-                }
+            JsonToken.VALUE_NULL -> null to InternalCoseSign1.PayloadMode.DETACHED
 
-                if (parser.nextToken() != JsonToken.END_ARRAY || parser.nextToken() != null) {
-                    throw MalformedCoseSign1
-                }
+            else -> throw MalformedCoseSign1
+        }
 
-                InternalCoseSign1(
-                    protectedHeader = protectedHeader,
-                    unprotectedHeader = unprotectedHeader,
-                    payload = payload,
-                    signature = signature,
-                    payloadMode = mode
-                )
-            }
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            @Suppress("SwallowedException")
+    private fun readSignature(parser: CBORParser): ByteArray =
+        if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
+            parser.binaryValue
+        } else {
+            throw MalformedCoseSign1
+        }
+
+    private fun validateArrayEnd(parser: CBORParser) {
+        if (parser.parsingContext.entryCount != COSE_SIGN1_SIZE) throw MalformedCoseSign1
+        if (parser.nextToken() != JsonToken.END_ARRAY || parser.nextToken() != null) {
             throw MalformedCoseSign1
         }
     }
