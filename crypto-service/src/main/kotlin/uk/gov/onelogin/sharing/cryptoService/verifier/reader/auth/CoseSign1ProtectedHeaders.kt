@@ -39,9 +39,9 @@ class CoseSign1ProtectedHeaders(
         )
     }
 
-    override fun generateProtectedHeaders(leafCertificate: Certificate): ByteArray =
+    override fun generateProtectedHeaders(leafCertificate: Certificate): Pair<Map<Long, Any>, ByteArray> =
         generateUnprotectedHeaderData(leafCertificate).let { headers ->
-            ByteArrayOutputStream().also { out ->
+            headers to ByteArrayOutputStream().also { out ->
                 CBORFactory().createGenerator(out).use { gen ->
                     gen.writeStartObject(headers.size)
 

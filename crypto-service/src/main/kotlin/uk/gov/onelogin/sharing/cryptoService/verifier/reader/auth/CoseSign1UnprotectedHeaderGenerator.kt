@@ -26,8 +26,8 @@ class CoseSign1UnprotectedHeaderGenerator(
 
     override fun generateUnprotectedHeaders(
         certificateChain: List<Certificate>,
-    ): ByteArray = generateUnprotectedHeaderData(certificateChain).let { headers ->
-        ByteArrayOutputStream().also { out ->
+    ): Pair<Map<Long, Any>, ByteArray> = generateUnprotectedHeaderData(certificateChain).let { headers ->
+        headers to ByteArrayOutputStream().also { out ->
             CBORFactory().createGenerator(out).use { gen ->
                 gen.writeStartObject(headers.size)
 
