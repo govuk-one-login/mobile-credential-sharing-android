@@ -48,7 +48,7 @@ class CoseSigStructureGeneratorTest {
     private val generator by lazy {
         CoseSigStructureGenerator(
             logger = logger,
-            protectedHeaderGenerator = protectedHeaderGenerator,
+            protectedHeaderGenerator = protectedHeaderGenerator
         )
     }
 
@@ -87,7 +87,7 @@ class CoseSigStructureGeneratorTest {
                 protectedHeaders,
                 "",
                 readerAuthenticationPayload
-            ),
+            )
         )
     }
 
@@ -96,7 +96,7 @@ class CoseSigStructureGeneratorTest {
         @TestParameter assertion: Matcher<in String> = namedTestValuesIn(
             mapOf(
                 "Begins with a 4-element array" to startsWith(
-                    HexFormatter(CBORConstants.PREFIX_TYPE_ARRAY + 4),
+                    HexFormatter(CBORConstants.PREFIX_TYPE_ARRAY + 4)
                 ),
                 "Contains the correct substring order" to stringContainsInOrder(
                     resultData.map {
@@ -108,7 +108,7 @@ class CoseSigStructureGeneratorTest {
                     }
                 )
             )
-        ),
+        )
     ) {
         assertThat(
             resultHexString,

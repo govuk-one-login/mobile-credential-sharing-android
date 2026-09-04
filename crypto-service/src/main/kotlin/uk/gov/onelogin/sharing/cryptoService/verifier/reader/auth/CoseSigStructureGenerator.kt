@@ -23,12 +23,12 @@ import uk.gov.onelogin.sharing.core.logger.logTag
  */
 class CoseSigStructureGenerator(
     private val logger: Logger,
-    private val protectedHeaderGenerator: ProtectedHeaderGenerator,
+    private val protectedHeaderGenerator: ProtectedHeaderGenerator
 ) : SigStructureGenerator,
     ProtectedHeaderGenerator by protectedHeaderGenerator {
     override fun generateSignatureStructure(
         certificateChain: List<Certificate>,
-        readerAuthenticationPayload: ByteArray,
+        readerAuthenticationPayload: ByteArray
     ): ByteArray = generateSignatureStructureData(
         certificateChain,
         readerAuthenticationPayload
@@ -56,7 +56,7 @@ class CoseSigStructureGenerator(
 
     internal fun generateSignatureStructureData(
         certificateChain: List<Certificate>,
-        readerAuthenticationPayload: ByteArray,
+        readerAuthenticationPayload: ByteArray
     ): Array<out Any> {
         val (_, protectedHeaderBytes) = generateProtectedHeaders(
             certificateChain.first()
@@ -73,6 +73,5 @@ class CoseSigStructureGenerator(
                 "Generated Sig_Structure with protected headers and reader auth bytes"
             )
         }
-
     }
 }

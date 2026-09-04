@@ -13,6 +13,7 @@ import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.validDeviceEngagementDto
+import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator as KPGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.EcKeyPairGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.EcdhSharedSecretGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.secret.SharedSecretGenerator
@@ -29,14 +30,14 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
-import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator as KPGenerator
 
 class VerifierCryptoServiceImplTest {
     private val logger = SystemLogger()
     private var encrypter = FakeEncryptDeviceRequestUseCase()
-    private var decrypter: DecryptDeviceResponseUseCase = DecryptDeviceResponseUseCase { _, _, _ -> DeviceResponse() }
+    private var decrypter: DecryptDeviceResponseUseCase =
+        DecryptDeviceResponseUseCase { _, _, _ -> DeviceResponse() }
 
-    private var keyPairGenerator: KPGenerator  = EcKeyPairGenerator(logger)
+    private var keyPairGenerator: KPGenerator = EcKeyPairGenerator(logger)
     private var sharedSecretGenerator: SharedSecretGenerator = EcdhSharedSecretGenerator(logger)
     private var sessionKeyGenerator: SessionKeyGenerator = HkdfSessionKeyGenerator(logger)
 
@@ -126,7 +127,7 @@ class VerifierCryptoServiceImplTest {
 
     @Test
     fun `malformed EDeviceKey logs error and throws`() {
-        sharedSecretGenerator =  { _, _ ->
+        sharedSecretGenerator = { _, _ ->
             throw InvalidKeyException("malformed key")
         }
 

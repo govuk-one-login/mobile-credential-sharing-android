@@ -134,7 +134,6 @@ class VerifierCryptoServiceImpl(
         sessionTranscript: ByteArray,
         itemsRequestBytes: ByteArray
     ): ByteArray = try {
-
         val dto = ReaderAuthenticationDto(
             sessionTranscript = sessionTranscript,
             itemsRequestBytes = itemsRequestBytes
@@ -142,8 +141,8 @@ class VerifierCryptoServiceImpl(
         EmbeddedCbor(dto.toCbor())
             .let(CborEncodable::toCbor)
             .also {
-            logger.debug(logTag, "ReaderAuthenticationBytes constructed successfully")
-        }
+                logger.debug(logTag, "ReaderAuthenticationBytes constructed successfully")
+            }
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         val message = "Error constructing ReaderAuthenticationBytes"
         logger.error(logTag, message, e)

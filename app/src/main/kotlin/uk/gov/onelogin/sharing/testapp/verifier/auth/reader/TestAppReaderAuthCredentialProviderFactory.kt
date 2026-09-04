@@ -52,7 +52,7 @@ class TestAppReaderAuthCredentialProviderFactory(
     constructor(
         @ApplicationContext
         context: Context,
-        logger: Logger,
+        logger: Logger
     ) : this(
         context = context,
         logger = logger,

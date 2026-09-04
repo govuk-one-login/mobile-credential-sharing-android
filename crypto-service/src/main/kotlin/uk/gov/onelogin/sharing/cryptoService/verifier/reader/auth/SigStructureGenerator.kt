@@ -18,7 +18,6 @@ fun interface SigStructureGenerator {
      */
     fun generateSignatureStructure(
         certificateChain: List<Certificate>,
-        readerAuthenticationPayload: ByteArray,
+        readerAuthenticationPayload: ByteArray
     ): ByteArray
 }
-
