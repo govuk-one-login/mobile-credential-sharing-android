@@ -639,6 +639,10 @@ class VerifierOrchestrator(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {
+        // DCMAW-21664: Replace usages of the verifier crypto service with
+        // `readerAuthCredentialProvider.sign()`.
+        // Alternatively, use the injected `readerAuthCredentialProvider` in
+        // `VerifierCryptoServiceImpl` and remove from this class.
         val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
         val readerAuthBytes = verifierCryptoService.buildReaderAuthenticationBytes(
             sessionTranscript = deriveUntaggedCbor(context.sessionTranscriptBytes),

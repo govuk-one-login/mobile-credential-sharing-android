@@ -1,10 +1,8 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
 import java.security.InvalidKeyException
-import java.security.Signature
 import java.security.SignatureException
 import java.security.cert.X509Certificate
-import java.security.interfaces.ECPrivateKey
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
@@ -25,43 +23,50 @@ import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 @Suppress("UnusedPrivateProperty")
 class ECReaderAuthProvider(
     private val logger: Logger,
-    private val privateKeyChain: List<ECPrivateKey>,
     private val certificateChain: List<X509Certificate>,
-    private val signature: Signature,
+    private val sigStructureGenerator: SigStructureGenerator,
     private val protectedHeaderGenerator: ProtectedHeaderGenerator,
-    private val unprotectedHeaderGenerator: UnprotectedHeaderGenerator,
+    private val unprotectedHeaderGenerator: UnprotectedHeaderGenerator
 ) : ReaderAuthCredentialProvider,
     ProtectedHeaderGenerator by protectedHeaderGenerator,
+    SigStructureGenerator by sigStructureGenerator,
     UnprotectedHeaderGenerator by unprotectedHeaderGenerator {
 
-    /**
-     * 1. protectedHeaderBytes encoded
-     * 2. put into Sig_structure
-     * 3. Sig_structure encoded
-     * 4. Sig_structure signed
-     * put into COSE_Sign1
-     * 5. COSE_Sign1 encoded
-     */
     override fun sign(readerAuthenticationPayload: ByteArray): ByteArray = try {
-        signature.run {
-            initSign(privateKeyChain.first())
-            update(readerAuthenticationPayload)
-            sign().also {
-                logger.debug(
-                    logTag,
-                    "Created COSE_Sign1 structure"
-                )
-            }
+        val (protectedHeaders, protectedHeaderBytes) = generateProtectedHeaders(
+            leafCertificate = certificateChain.first()
+        )
+        val (unprotectedHeaders, unprotectedHeaderBytes) = generateUnprotectedHeaders(
+            certificateChain = certificateChain,
+        )
+
+        val signatureBytes = generateSignatureStructure(
+            certificateChain = certificateChain,
+            readerAuthenticationPayload = readerAuthenticationPayload
+        )
+
+        // DCMAW-21664: Change to Cose_Sign1 data structure then CBOR encode
+        signatureBytes.also {
+            logger.debug(
+                logTag,
+                "Created CBOR-encoded Cose_Sign1 data structure"
+            )
         }
     } catch (invalidKey: InvalidKeyException) {
-        throw UnrecoverableError(
+        UnrecoverableError(
             message = "Couldn't initialise signing with the provided Private Key.",
             cause = invalidKey
-        )
+        ).let {
+            logger.error(logTag, "${it.message}", it)
+            throw it
+        }
     } catch (signature: SignatureException) {
-        throw UnrecoverableError(
+        UnrecoverableError(
             message = "Couldn't create signature from provided reader authentication bytes.",
             cause = signature
-        )
+        ).let {
+            logger.error(logTag, "${it.message}", it)
+            throw it
+        }
     }
 }

@@ -47,11 +47,11 @@ class CoseSign1UnprotectedHeaderGeneratorTest {
     }
 
     private val resultData: Map<Long, Any> by lazy {
-        generator.generateUnprotectedHeaderData(certificateChain)
+        generator.generateUnprotectedHeaders(certificateChain).first
     }
 
-    private val result by lazy {
-        generator.generateUnprotectedHeaders(certificateChain)
+    private val result: ByteArray by lazy {
+        generator.generateUnprotectedHeaders(certificateChain).second
     }
 
     @BeforeTest

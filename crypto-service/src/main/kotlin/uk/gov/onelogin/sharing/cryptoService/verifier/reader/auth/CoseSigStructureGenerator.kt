@@ -43,11 +43,13 @@ class CoseSigStructureGenerator(
         certificateChain: List<Certificate>,
         readerAuthenticationPayload: ByteArray,
     ): Array<out Any> {
-        val protectedHeaders = generateProtectedHeaders(certificateChain.first())
+        val (_, protectedHeaderBytes) = generateProtectedHeaders(
+            certificateChain.first()
+        )
 
         return arrayOf(
             "Signature1",
-            protectedHeaders,
+            protectedHeaderBytes,
             "",
             readerAuthenticationPayload
         ).also {
