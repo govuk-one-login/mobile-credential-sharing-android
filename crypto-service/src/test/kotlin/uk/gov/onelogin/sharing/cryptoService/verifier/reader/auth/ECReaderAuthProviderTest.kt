@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.verifier.auth.reader
+package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
 import io.mockk.called
 import io.mockk.every
@@ -7,11 +7,13 @@ import io.mockk.verify
 import java.security.InvalidKeyException
 import java.security.KeyPairGenerator
 import java.security.Signature
+import java.security.SignatureException
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
 import kotlin.test.Test
 import kotlin.test.assertFails
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
@@ -19,7 +21,8 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.internal.matchers.ThrowableCauseMatcher.hasCause
 import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
-import uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError
+import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 
 class ECReaderAuthProviderTest {
 
@@ -31,11 +34,19 @@ class ECReaderAuthProviderTest {
 
     private var signature: Signature = mockk(relaxed = true)
 
+    private val logger = SystemLogger()
+
+    private var protectedHeaderGenerator: ProtectedHeaderGenerator = { byteArrayOf() }
+    private var unprotectedHeaderGenerator: UnprotectedHeaderGenerator = { byteArrayOf() }
+
     private val provider by lazy {
         ECReaderAuthProvider(
+            logger = logger,
             privateKeyChain = listOf(privateKeyOne, privateKeyTwo),
             certificateChain = listOf(certificateOne, certificateTwo),
-            signature = signature
+            signature = signature,
+            protectedHeaderGenerator = protectedHeaderGenerator,
+            unprotectedHeaderGenerator = unprotectedHeaderGenerator
         )
     }
 
@@ -62,7 +73,7 @@ class ECReaderAuthProviderTest {
 
     @Test
     fun `Wraps SignatureExceptions in UnrecoverableError instances`() = runTest {
-        val exception = java.security.SignatureException("This is a unit test")
+        val exception = SignatureException("This is a unit test")
         val input = byteArrayOf(1, 2, 3)
         every {
             signature.update(input)
@@ -101,6 +112,15 @@ class ECReaderAuthProviderTest {
             privateKeyOne wasNot called
             certificateOne wasNot called
             certificateTwo wasNot called
+        }
+    }
+
+    @Test
+    fun `Logs a successfully created COSE_Sign1 structure`() = runTest {
+        provider.sign(byteArrayOf())
+
+        assertTrue {
+            "Created COSE_Sign1 structure" in logger
         }
     }
 }

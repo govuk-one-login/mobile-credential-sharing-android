@@ -29,6 +29,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus.SESSION_TERMINATION
@@ -53,7 +54,6 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason.Unverifi
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.SessionTerminator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
@@ -639,6 +639,10 @@ class VerifierOrchestrator(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {
+        // DCMAW-21664: Replace usages of the verifier crypto service with
+        // `readerAuthCredentialProvider.sign()`.
+        // Alternatively, use the injected `readerAuthCredentialProvider` in
+        // `VerifierCryptoServiceImpl` and remove from this class.
         val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
         val readerAuthBytes = verifierCryptoService.buildReaderAuthenticationBytes(
             sessionTranscript = deriveUntaggedCbor(context.sessionTranscriptBytes),

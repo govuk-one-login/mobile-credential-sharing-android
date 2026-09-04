@@ -21,8 +21,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ECReaderAuthProvider
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
+import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSigStructureGenerator
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1ProtectedHeaders
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1UnprotectedHeaderGenerator
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ECReaderAuthProvider
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.SigningSignatureStructure
 import uk.gov.onelogin.sharing.testapp.credential.SIGNING_ALGORITHM
 import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOption
 
@@ -36,6 +41,7 @@ import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOpt
 class TestAppReaderAuthCredentialProviderFactory(
     @ApplicationContext
     private val context: Context,
+    private val logger: Logger,
     initialState: ReaderAuthOption,
     private val keyFactory: KeyFactory,
     private val certificateFactory: CertificateFactory,
@@ -45,9 +51,11 @@ class TestAppReaderAuthCredentialProviderFactory(
     @Inject
     constructor(
         @ApplicationContext
-        context: Context
+        context: Context,
+        logger: Logger
     ) : this(
         context = context,
+        logger = logger,
         initialState = ReaderAuthOption.VALID,
         keyFactory = KeyFactory.getInstance("EC"),
         coroutineContext = Dispatchers.IO,
@@ -79,9 +87,19 @@ class TestAppReaderAuthCredentialProviderFactory(
     val readerAuthOption: Flow<ReaderAuthOption> = _readerAuthOption
 
     override fun create(): ReaderAuthCredentialProvider = ECReaderAuthProvider(
-        privateKeyChain = privateKeyChain.value,
         certificateChain = certificateChain.value,
-        signature = Signature.getInstance(SIGNING_ALGORITHM)
+        logger = logger,
+        protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger),
+        unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),
+        sigStructureGenerator = SigningSignatureStructure(
+            logger = logger,
+            signature = Signature.getInstance(SIGNING_ALGORITHM),
+            privateKey = privateKeyChain.value.first(),
+            decorated = CoseSigStructureGenerator(
+                logger = logger,
+                protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger = logger)
+            )
+        )
     )
 
     fun update(option: ReaderAuthOption) {
