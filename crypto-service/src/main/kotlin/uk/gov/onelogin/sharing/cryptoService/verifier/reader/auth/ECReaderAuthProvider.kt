@@ -8,17 +8,33 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 
 /**
- * Sample [ReaderAuthCredentialProvider] implementation that signs the provided
- * `readerAuthenticationBytes` with the [privateKeyChain] property.
+ * Sample [ReaderAuthCredentialProvider] implementation that handles creating `COSE_Sign1`
+ * [ByteArray] instances.
  *
- * It's assumed that `readerAuthenticationBytes` is already in the shape of a `COSE_Sign1`
- * structure.
+ * This is achieved via interface delegation to the proceeding properties:
+ * - `sigStructureGenerator`
+ * - `protectedHeaderGenerator`
+ * - `unprotectedHeaderGenerator`
  *
- * @property privateKeyChain The EC private keychain to use. The [List] begins with the uppermost
- * private key, with the last element being the relevant leaf certificate's private key.
+ * The `COSE_Sign1` structure is defined as:
+ * ```
+ * [
+ *   protectedHeaderBytes,
+ *   unprotectedHeaderMap,
+ *   null,
+ *   signatureBytes
+ * ]
+ * ```
+ *
  * @property certificateChain The X509 certificate chain to use. The [List] begins with the
  * uppermost certificate, with the last element being the relevant leaf certificate.
- * @property signature The signing algorithm to be used. e.g. "NONEwithECDSA"
+ * @property logger The GOV.UK [Logger] to send status updates to.
+ * @property sigStructureGenerator The [SigStructureGenerator] implementation that generates part of
+ * the `COSE_Sign1` structure.
+ * @property protectedHeaderGenerator The [ProtectedHeaderGenerator] implementation that generates
+ * part of the `COSE_Sign1` structure.
+ * @property unprotectedHeaderGenerator The [UnprotectedHeaderGenerator] implementation that
+ * generates part of the `COSE_Sign1` structure.
  */
 @Suppress("UnusedPrivateProperty")
 class ECReaderAuthProvider(
@@ -33,10 +49,10 @@ class ECReaderAuthProvider(
     UnprotectedHeaderGenerator by unprotectedHeaderGenerator {
 
     override fun sign(readerAuthenticationPayload: ByteArray): ByteArray = try {
-        val (protectedHeaders, protectedHeaderBytes) = generateProtectedHeaders(
+        val (_, protectedHeaderBytes) = generateProtectedHeaders(
             leafCertificate = certificateChain.first()
         )
-        val (unprotectedHeaders, unprotectedHeaderBytes) = generateUnprotectedHeaders(
+        val (unprotectedHeaderMap, _) = generateUnprotectedHeaders(
             certificateChain = certificateChain,
         )
 

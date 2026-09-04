@@ -6,6 +6,21 @@ import java.security.cert.Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
+/**
+ * [SigStructureGenerator] implementation that acts as a decorator to the [decorated]
+ * implementation. Doing so separates the CBOR-encoding logic from the signing logic whilst
+ * maintaining the same function contract.
+ *
+ * Uses the [privateKey] to begin the [signature]'s signing process on [decorated]'s return value
+ * to obtain a `DER` encoded certificate. The `DER` data is then converted to a raw format
+ * (`R || S`) for use within COSE related data transfer.
+ *
+ * @property logger The GOV.UK [Logger] implementation to send status updates to.
+ * @property privateKey The [PrivateKey] to register the [signature] with.
+ * @property signature The [Signature] to perform signing operations with.
+ * @property decorated The [SigStructureGenerator] implementation providing the [ByteArray] data to
+ * sign.
+ */
 class SigningSignatureStructure(
     private val logger: Logger,
     private val privateKey: PrivateKey,

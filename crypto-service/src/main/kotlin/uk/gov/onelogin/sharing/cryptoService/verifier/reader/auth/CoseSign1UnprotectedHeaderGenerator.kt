@@ -7,11 +7,18 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.UnprotectedHeaderGenerator.Companion.UNPROTECTED_HEADER_X5_CHAIN
 
+/**
+ * Creates the unprotected headers for a COSE_Sign1 structure. This is defined as:
+ *
+ * ```
+ * { -33: [ leafCertificateDER, intermediateCertificateDER ] }
+ * ```
+ */
 class CoseSign1UnprotectedHeaderGenerator(
     private val logger: Logger
 ) : UnprotectedHeaderGenerator {
 
-    internal fun generateUnprotectedHeaderData(
+    private fun generateUnprotectedHeaderData(
         certificateChain: List<Certificate>
     ): Map<Long, Any> =  mapOf(
         UNPROTECTED_HEADER_X5_CHAIN to certificateChain
