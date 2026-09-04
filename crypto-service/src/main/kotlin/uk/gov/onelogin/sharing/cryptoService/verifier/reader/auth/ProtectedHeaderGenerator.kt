@@ -23,4 +23,3 @@ fun interface ProtectedHeaderGenerator {
         internal const val PROTECTED_HEADER_VALUE_SHA256: Int = -16
     }
 }
-

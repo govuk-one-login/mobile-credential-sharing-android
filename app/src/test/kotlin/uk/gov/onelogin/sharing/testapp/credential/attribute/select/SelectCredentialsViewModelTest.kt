@@ -19,7 +19,7 @@ class SelectCredentialsViewModelTest {
     private val logger = SystemLogger()
     private val factory = TestAppReaderAuthCredentialProviderFactory(
         ApplicationProvider.getApplicationContext(),
-        logger = logger,
+        logger = logger
     )
 
     private val issuerRootCertificateProvider = IssuerRootCertificateProvider(

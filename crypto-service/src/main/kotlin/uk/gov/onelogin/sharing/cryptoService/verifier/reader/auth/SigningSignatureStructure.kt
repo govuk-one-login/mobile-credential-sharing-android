@@ -25,12 +25,12 @@ class SigningSignatureStructure(
     private val logger: Logger,
     private val privateKey: PrivateKey,
     private val signature: Signature,
-    private val decorated: SigStructureGenerator,
+    private val decorated: SigStructureGenerator
 ) : SigStructureGenerator {
 
     override fun generateSignatureStructure(
         certificateChain: List<Certificate>,
-        readerAuthenticationPayload: ByteArray,
+        readerAuthenticationPayload: ByteArray
     ): ByteArray = decorated.generateSignatureStructure(
         certificateChain,
         readerAuthenticationPayload

@@ -19,19 +19,15 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ProtectedHeade
  * { 1: -7, 34: [ -16, sha256(leafCertificate) ] }
  * ```
  */
-class CoseSign1ProtectedHeaders(
-    private val logger: Logger,
-) : ProtectedHeaderGenerator {
-    private fun generateUnprotectedHeaderData(
-        leafCertificate: Certificate
-    ): Map<Long, Any> = mapOf(
+class CoseSign1ProtectedHeaders(private val logger: Logger) : ProtectedHeaderGenerator {
+    private fun generateUnprotectedHeaderData(leafCertificate: Certificate): Map<Long, Any> = mapOf(
         PROTECTED_HEADER_ALGORITHM to ES256_ALGORITHM, // alg = -7 ECDSA 256
         PROTECTED_HEADER_X5T to arrayOf(
             PROTECTED_HEADER_VALUE_SHA256,
             MessageDigest
                 .getInstance(Constants.HASH_ALGORITHM_SHA256)
-                .digest(leafCertificate.encoded),
-        ),
+                .digest(leafCertificate.encoded)
+        )
     ).also {
         logger.debug(
             logTag,
@@ -39,7 +35,9 @@ class CoseSign1ProtectedHeaders(
         )
     }
 
-    override fun generateProtectedHeaders(leafCertificate: Certificate): Pair<Map<Long, Any>, ByteArray> =
+    override fun generateProtectedHeaders(
+        leafCertificate: Certificate
+    ): Pair<Map<Long, Any>, ByteArray> =
         generateUnprotectedHeaderData(leafCertificate).let { headers ->
             headers to ByteArrayOutputStream().also { out ->
                 CBORFactory().createGenerator(out).use { gen ->

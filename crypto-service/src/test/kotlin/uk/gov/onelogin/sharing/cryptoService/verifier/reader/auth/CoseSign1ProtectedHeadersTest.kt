@@ -18,7 +18,6 @@ import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.HASH_ALGORIT
 import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
 import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
 
-
 class CoseSign1ProtectedHeadersTest {
     private val logger = SystemLogger()
     private val leafCertificate: Certificate = TestCertificateGenerator(
@@ -93,15 +92,15 @@ class CoseSign1ProtectedHeadersTest {
             equalTo(2)
         )
 
-       listOf(
-           "Hashed leaf certificate" to hashedLeafCertificate
-       ).forEach { (attribute, value) ->
-           assertThat(
-               "Cannot find provided data for '$attribute'",
-               result.toHexString(),
-               containsString(value.toHexString())
-           )
-       }
+        listOf(
+            "Hashed leaf certificate" to hashedLeafCertificate
+        ).forEach { (attribute, value) ->
+            assertThat(
+                "Cannot find provided data for '$attribute'",
+                result.toHexString(),
+                containsString(value.toHexString())
+            )
+        }
     }
 
     private fun Long.toBytes(): ByteArray {
@@ -114,6 +113,5 @@ class CoseSign1ProtectedHeadersTest {
         val buffer = ByteBuffer.allocate(Integer.BYTES)
         buffer.putInt(this)
         return buffer.array()
-
     }
 }

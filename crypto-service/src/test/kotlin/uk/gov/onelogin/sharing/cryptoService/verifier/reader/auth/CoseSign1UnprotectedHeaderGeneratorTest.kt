@@ -29,7 +29,6 @@ class CoseSign1UnprotectedHeaderGeneratorTest {
         issuer = "CN=Intermediate,ST=London"
     ).leaf().build()
 
-
     private val certificateTwo: Certificate = TestCertificateGenerator(
         subject = "CN=Intermediate,ST=London",
         keyPair = CertificateStubs.leafKeyPair,
@@ -114,5 +113,4 @@ class CoseSign1UnprotectedHeaderGeneratorTest {
             "Generated unprotected headers for COSE_Sign1 structure" in logger
         }
     }
-
 }

@@ -53,7 +53,7 @@ class ECReaderAuthProvider(
             leafCertificate = certificateChain.first()
         )
         val (unprotectedHeaderMap, _) = generateUnprotectedHeaders(
-            certificateChain = certificateChain,
+            certificateChain = certificateChain
         )
 
         val signatureBytes = generateSignatureStructure(
