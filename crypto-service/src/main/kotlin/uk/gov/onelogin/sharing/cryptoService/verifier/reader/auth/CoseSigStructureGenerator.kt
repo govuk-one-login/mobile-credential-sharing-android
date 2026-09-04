@@ -6,6 +6,21 @@ import java.security.cert.Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
+/**
+ * [SigStructureGenerator] base implementation that returns a CBOR-encoded `COSE_Sign1` data
+ * structure.
+ *
+ * This is defined as:
+ *
+ * ```
+ * [
+ *   "Signature1",
+ *   protectedHeaderBytes,
+ *   h'', // empty byte string
+ *   ReaderAuthenticationBytes
+ * ]
+ * ```
+ */
 class CoseSigStructureGenerator(
     private val logger: Logger,
     private val protectedHeaderGenerator: ProtectedHeaderGenerator,

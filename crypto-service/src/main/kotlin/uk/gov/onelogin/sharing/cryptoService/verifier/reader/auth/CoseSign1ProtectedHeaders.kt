@@ -22,7 +22,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ProtectedHeade
 class CoseSign1ProtectedHeaders(
     private val logger: Logger,
 ) : ProtectedHeaderGenerator {
-    internal fun generateUnprotectedHeaderData(
+    private fun generateUnprotectedHeaderData(
         leafCertificate: Certificate
     ): Map<Long, Any> = mapOf(
         PROTECTED_HEADER_ALGORITHM to ES256_ALGORITHM, // alg = -7 ECDSA 256
