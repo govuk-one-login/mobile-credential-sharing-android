@@ -6,6 +6,9 @@ import java.security.KeyPairGenerator
 import java.security.Signature
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.notNullValue
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.InvalidSignature
@@ -13,8 +16,7 @@ import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseHeaderValid
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.InternalCoseSign1
 
 class CoseSignatureVerifierTest {
-    private val verifier =
-        CoseSignatureVerifier(CoseHeaderValidator())
+    private val verifier = CoseSignatureVerifier(CoseHeaderValidator())
     private val cborMapper = ObjectMapper(CBORFactory())
 
     private val keyPair = KeyPairGenerator.getInstance("EC")
@@ -22,9 +24,9 @@ class CoseSignatureVerifierTest {
         .generateKeyPair()
     private val publicKey = keyPair.public as ECPublicKey
 
-    private fun buildProtectedHeader(): ByteArray {
+    private fun buildProtectedHeader(alg: Long = -7L): ByteArray {
         val node = cborMapper.createObjectNode()
-        node.put("1", -7L)
+        node.put("1", alg)
         return cborMapper.writeValueAsBytes(node)
     }
 
@@ -68,7 +70,24 @@ class CoseSignatureVerifierTest {
     }
 
     @Test
-    fun `verify succeeds with valid signature`() {
+    fun `buildSigStructure produces correct CBOR array structure`() {
+        val protectedHeader = buildProtectedHeader()
+        val payload = "payload data".toByteArray()
+
+        val sigStructure = verifier.buildSigStructure(protectedHeader, payload)
+
+        assertThat(sigStructure, notNullValue())
+        val tree = cborMapper.readTree(sigStructure)
+        assertThat(tree.isArray, equalTo(true))
+        assertThat(tree.size(), equalTo(4))
+        assertThat(tree.get(0).asText(), equalTo("Signature1"))
+        assertThat(tree.get(1).binaryValue(), equalTo(protectedHeader))
+        assertThat(tree.get(2).binaryValue(), equalTo(byteArrayOf()))
+        assertThat(tree.get(3).binaryValue(), equalTo(payload))
+    }
+
+    @Test
+    fun `verify succeeds with valid attached signature`() {
         val protectedHeader = buildProtectedHeader()
         val payload = "test payload".toByteArray()
         val signature = sign(payload, protectedHeader)
@@ -85,6 +104,42 @@ class CoseSignatureVerifierTest {
     }
 
     @Test
+    fun `verify succeeds with valid detached signature`() {
+        val protectedHeader = buildProtectedHeader()
+        val payload = "detached payload data".toByteArray()
+        val signature = sign(payload, protectedHeader)
+
+        val coseSign1 = InternalCoseSign1(
+            protectedHeader,
+            buildEmptyMap(),
+            null,
+            signature,
+            InternalCoseSign1.PayloadMode.DETACHED
+        )
+
+        verifier.verify(coseSign1, publicKey, payload)
+    }
+
+    @Test
+    fun `verify throws with invalid raw signature size`() {
+        val protectedHeader = buildProtectedHeader()
+        val payload = "test payload".toByteArray()
+        val invalidSignature = ByteArray(32) // Not 64 bytes
+
+        val coseSign1 = InternalCoseSign1(
+            protectedHeader,
+            buildEmptyMap(),
+            payload,
+            invalidSignature,
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
+
+        assertThrows(InvalidSignature::class.java) {
+            verifier.verify(coseSign1, publicKey, payload)
+        }
+    }
+
+    @Test
     fun `verify throws with tampered signature`() {
         val protectedHeader = buildProtectedHeader()
         val payload = "test payload".toByteArray()
@@ -93,6 +148,50 @@ class CoseSignatureVerifierTest {
 
         val coseSign1 = InternalCoseSign1(
             protectedHeader,
+            buildEmptyMap(),
+            payload,
+            signature,
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
+
+        assertThrows(InvalidSignature::class.java) {
+            verifier.verify(coseSign1, publicKey, payload)
+        }
+    }
+
+    @Test
+    fun `verify throws with tampered payload`() {
+        val protectedHeader = buildProtectedHeader()
+        val payload = "original payload".toByteArray()
+        val tamperedPayload = "tampered payload".toByteArray()
+        val signature = sign(payload, protectedHeader)
+
+        val coseSign1 = InternalCoseSign1(
+            protectedHeader,
+            buildEmptyMap(),
+            payload,
+            signature,
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
+
+        assertThrows(InvalidSignature::class.java) {
+            verifier.verify(coseSign1, publicKey, tamperedPayload)
+        }
+    }
+
+    @Test
+    fun `verify throws with tampered protected header`() {
+        val protectedHeader = buildProtectedHeader()
+        val payload = "test payload".toByteArray()
+        val signature = sign(payload, protectedHeader)
+
+        val tamperedNode = cborMapper.createObjectNode()
+        tamperedNode.put("1", -7L)
+        tamperedNode.put("3", 5L)
+        val tamperedHeaderBytes = cborMapper.writeValueAsBytes(tamperedNode)
+
+        val coseSign1 = InternalCoseSign1(
+            tamperedHeaderBytes,
             buildEmptyMap(),
             payload,
             signature,
