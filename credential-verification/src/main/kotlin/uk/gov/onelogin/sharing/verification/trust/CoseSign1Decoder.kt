@@ -26,6 +26,16 @@ class CoseSign1Decoder(private val logger: Logger) {
         private const val X5CHAIN_LABEL = 33
     }
 
+    /**
+     * DCMAW-21664: Should we make an encoder as well?
+     *
+     * Or rather, is it possible to reduce the [ByteArray] representations of CoseSign1 so that it
+     * only occurs at context boundaries / when we actually need the byte array, instead of passing
+     * the arrays through the system.
+     *
+     * Also, do we need to worry about byte preservation later in the journey for the CoseSign1
+     * structures?
+     */
     @Suppress("ThrowsCount")
     fun decode(data: ByteArray): CoseSign1 {
         val root = try {

@@ -10,6 +10,8 @@ import java.security.cert.X509Certificate
 /**
  * Builds valid COSE_Sign1 CBOR structures for testing.
  * Produces a real ECDSA signature over the Sig_structure.
+ *
+ * DCMAW-21664: Do we want to use part of this for `ReaderAuthCredentialProvider`?
  */
 object CoseSign1Builder {
     private val cborFactory = CBORFactory()
