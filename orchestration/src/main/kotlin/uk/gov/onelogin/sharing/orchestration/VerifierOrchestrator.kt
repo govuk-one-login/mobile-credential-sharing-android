@@ -655,6 +655,10 @@ class VerifierOrchestrator(
             readerAuth = readerAuthBytes
         )
 
+        val coseSign1Bytes = readerAuthCredentialProvider.sign(
+            readerAuthBytes
+        )
+
         logger.debug(logTag, "DeviceRequestBytes: ${deviceRequestBytes.toHexString()}")
 
         val encryptedDeviceRequest = verifierCryptoService.encryptDeviceRequest(
