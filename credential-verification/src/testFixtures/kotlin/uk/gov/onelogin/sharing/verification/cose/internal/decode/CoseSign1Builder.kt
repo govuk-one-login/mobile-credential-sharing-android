@@ -87,6 +87,23 @@ object CoseSign1Builder {
 
     fun toBytes(node: ObjectNode): ByteArray = cborMapper.writeValueAsBytes(node)
 
+    /**
+     * Assembles a 4-element COSE_Sign1 array from raw header bytes without signing, using a dummy
+     * payload and signature. Intended for negative-path tests that only exercise header validation
+     * (which runs before signature verification) and therefore do not need a real signature.
+     */
+    fun assembleUnsigned(
+        protectedHeader: ByteArray,
+        unprotectedHeader: ByteArray,
+        payload: ByteArray? = byteArrayOf(0x01, 0x02, 0x03),
+        signature: ByteArray = ByteArray(P256_COMPONENT_SIZE * 2)
+    ): ByteArray = assemble(
+        protectedHeader,
+        cborMapper.readTree(unprotectedHeader),
+        payload,
+        signature
+    )
+
     private fun assemble(
         protectedHeader: ByteArray,
         unprotectedNode: com.fasterxml.jackson.databind.JsonNode,

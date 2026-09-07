@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.Missing
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UnsupportedAlgorithm
 
 /**
- * C4: Enforces the shared certificate-header profile used by both IssuerAuth and ReaderAuth.
+ * Enforces the shared certificate-header profile used by both IssuerAuth and ReaderAuth.
  *
  * Given the decoded [InternalCoseSign1] headers from C2 (without re-encoding them), this stage:
  *  - ignores `x5bag` wherever it occurs (never chain material, never a fallback for `x5chain`),
@@ -29,8 +29,7 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.Unsuppo
  *    the SHA-256 digest of the exact DER bytes of the first supplied certificate.
  *
  * It selects the first supplied certificate as the candidate leaf and preserves the complete
- * supplied sequence unchanged. It performs no certificate-path validation, no X.509 profile
- * enforcement, and no COSE signature verification.
+ * supplied sequence unchanged.
  *
  * Any failure is raised as a typed [CoseVerificationFailure]
  * before path or signature verification is reached.

@@ -9,11 +9,11 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.toKotlinInstant
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CertificateHeaderValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Decoder
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateChainValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.path.OID_COUNTRY
 import uk.gov.onelogin.sharing.verification.cose.internal.path.OID_STATE_OR_PROVINCE
-import uk.gov.onelogin.sharing.verification.cose.internal.path.orderCertificates
 import uk.gov.onelogin.sharing.verification.cose.internal.path.parseSubjectName
 import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatureVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthR
 class TrustVerifierImpl internal constructor(
     private val coseSign1Decoder: CoseSign1Decoder,
     private val signatureVerifier: CoseSignatureVerifier,
+    private val certificateHeaderValidator: CertificateHeaderValidator,
     private val certificateChainValidator: CertificateChainValidator
 ) : TrustVerifier {
 
@@ -32,17 +33,15 @@ class TrustVerifierImpl internal constructor(
     override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult =
         try {
             val coseSign1 = coseSign1Decoder.decode(data)
-            val x5chain = coseSign1Decoder.extractX5Chain(coseSign1)
+            val certificateHeaderProfile = certificateHeaderValidator.validate(coseSign1)
 
             val certFactory = CertificateFactory.getInstance("X.509")
-            val certs = x5chain.map {
+            val certs = certificateHeaderProfile.chain.map {
                 certFactory.generateCertificate(ByteArrayInputStream(it)) as X509Certificate
             }
 
-            val ordered = orderCertificates(certs)
-            val leaf = ordered.first()
-
-            certificateChainValidator.verify(ordered, trustedRoot)
+            val leaf = certs.first()
+            certificateChainValidator.verify(certs, trustedRoot)
 
             val publicKey = try {
                 leaf.publicKey as ECPublicKey
