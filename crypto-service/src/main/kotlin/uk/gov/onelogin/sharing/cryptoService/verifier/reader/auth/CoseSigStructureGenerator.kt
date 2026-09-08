@@ -6,6 +6,11 @@ import java.security.cert.Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
+private const val INDEX_CONTEXT = 0
+private const val INDEX_PROTECTED_HEADER = 1
+private const val INDEX_EXTERNAL_AAD = 2
+private const val INDEX_PAYLOAD = 3
+
 /**
  * [SigStructureGenerator] base implementation that returns a CBOR-encoded `COSE_Sign1` data
  * structure.
@@ -35,14 +40,13 @@ class CoseSigStructureGenerator(
     ).let { sigStructureArray ->
         ByteArrayOutputStream().also { out ->
             CBORFactory().createGenerator(out).use { gen ->
-                @Suppress("DEPRECATION")
-                gen.writeStartArray(sigStructureArray.size)
+                gen.writeStartArray(null, sigStructureArray.size)
 
-                gen.writeString(sigStructureArray[0] as String)
-                gen.writeBinary(sigStructureArray[1] as ByteArray)
-                // empty strings are written as [CborConstants.BYTE_EMPTY_STRING]
-                gen.writeString(sigStructureArray[2] as String)
-                gen.writeBinary(sigStructureArray[3] as ByteArray)
+                gen.writeString(sigStructureArray[INDEX_CONTEXT] as String)
+                gen.writeBinary(sigStructureArray[INDEX_PROTECTED_HEADER] as ByteArray)
+                // external_aad is an empty CBOR byte string (h''), per COSE Sig_structure.
+                gen.writeBinary(sigStructureArray[INDEX_EXTERNAL_AAD] as ByteArray)
+                gen.writeBinary(sigStructureArray[INDEX_PAYLOAD] as ByteArray)
 
                 gen.writeEndArray()
             }
@@ -65,7 +69,7 @@ class CoseSigStructureGenerator(
         return arrayOf(
             "Signature1",
             protectedHeaderBytes,
-            "",
+            ByteArray(0),
             readerAuthenticationPayload
         ).also {
             logger.debug(
