@@ -1,6 +1,7 @@
 import base64
 import cbor2
 import pytest
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 
 from mock_credential.certificates import IssuerAuth, Credential
@@ -31,9 +32,14 @@ class TestIssuerAuth:
     def test_sign_returns_four_element_list(self, issuer_auth):
         assert len(issuer_auth) == 4
 
-    def test_sign_protected_header_contains_es256(self, issuer_auth):
+    def test_sign_protected_header_contains_es256_and_x5t(self, issuer_auth):
         protected = cbor2.loads(issuer_auth[0])
-        assert protected == {1: -7}
+        # alg: ES256
+        assert protected[1] == -7
+        # x5t: [SHA-256 (-16), 32-byte SHA-256 digest of the leaf DER]
+        expected_digest = hashes.Hash(hashes.SHA256())
+        expected_digest.update(STUB_CERT_DER)
+        assert protected[34] == [-16, expected_digest.finalize()]
 
     def test_sign_unprotected_header_contains_x5chain(self, issuer_auth):
         assert issuer_auth[1][33] == STUB_CERT_DER
