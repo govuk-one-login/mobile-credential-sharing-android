@@ -1,15 +1,10 @@
 package uk.gov.onelogin.sharing.verification.cose.internal.decode
 
 import com.fasterxml.jackson.core.JsonToken
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import dev.zacsweers.metro.Inject
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.MalformedCoseSign1
-import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.MissingX5Chain
 
 /**
  * Strict decoder for COSE_Sign1 structures as defined in ISO 18013-5.
@@ -22,7 +17,6 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.Missing
 internal class CoseSign1Decoder {
 
     private val cborFactory = CBORFactory()
-    private val mapper = ObjectMapper(cborFactory)
 
     /**
      * Decodes a COSE_Sign1 structure from raw bytes.
@@ -110,39 +104,8 @@ internal class CoseSign1Decoder {
         }
     }
 
-    /**
-     * Extracts x5chain certificates from the COSE headers.
-     */
-    fun extractX5Chain(coseSign1: InternalCoseSign1): List<ByteArray> =
-        coseSign1.unprotectedHeader?.let { extractX5ChainFromBytes(it) }
-            ?: extractX5ChainFromBytes(coseSign1.protectedHeader)
-            ?: throw MissingX5Chain
-
-    private fun extractX5ChainFromBytes(headerBytes: ByteArray): List<ByteArray>? {
-        val node = try {
-            mapper.readTree(headerBytes)
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            null
-        } ?: return null
-        return extractX5ChainFromNode(node)
-    }
-
-    private fun extractX5ChainFromNode(node: JsonNode): List<ByteArray>? {
-        val x5chainNode = node.get(X5CHAIN_LABEL.toString()) ?: return null
-        return when {
-            x5chainNode is BinaryNode -> listOf(x5chainNode.binaryValue())
-
-            x5chainNode is ArrayNode -> x5chainNode.mapNotNull { element ->
-                (element as? BinaryNode)?.binaryValue()
-            }.ifEmpty { null }
-
-            else -> null
-        }
-    }
-
     private companion object {
         const val COSE_SIGN1_SIZE = 4
-        const val X5CHAIN_LABEL = 33
         const val CBOR_TAG_RANGE_START = 0xC0
         const val CBOR_TAG_RANGE_END = 0xDF
         const val BYTE_MASK = 0xFF
