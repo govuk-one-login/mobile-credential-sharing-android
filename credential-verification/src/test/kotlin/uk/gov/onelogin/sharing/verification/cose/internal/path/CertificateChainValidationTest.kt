@@ -30,10 +30,29 @@ class CertificateChainValidationTest {
     }
 
     @Test
+    fun `root certificate in candidate chain throws UNTRUSTED_CERTIFICATE`() {
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            validator.verify(
+                listOf(CertificateStubs.leaf, CertificateStubs.intermediateCa, CertificateStubs.rootCa),
+                CertificateStubs.rootCa
+            )
+        }
+    }
+
+    @Test
     fun `invalid chain throws UNTRUSTED_CERTIFICATE`(
         @TestParameter(valuesProvider = InvalidChainProvider::class) case: InvalidChainCase
     ) {
         assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            validator.verify(case.chain, case.root)
+        }
+    }
+
+    @Test
+    fun `algorithm or key outside allow-list throws UNSUPPORTED_ALGORITHM`(
+        @TestParameter(valuesProvider = UnsupportedAlgorithmProvider::class) case: UnsupportedAlgorithmCase
+    ) {
+        assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
             validator.verify(case.chain, case.root)
         }
     }

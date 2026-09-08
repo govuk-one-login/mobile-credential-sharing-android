@@ -6,6 +6,7 @@ import java.security.cert.Certificate
 import java.security.cert.PKIXCertPathChecker
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UnsupportedAlgorithm
 
 @Suppress("TooManyFunctions")
 internal class CertificateStructureChecker(
@@ -98,21 +99,23 @@ internal class CertificateStructureChecker(
 
     private fun verifyAlgorithmStrength(cert: X509Certificate) {
         val certStrength = SIG_ALGORITHM_STRENGTH[cert.sigAlgOID]
-            ?: throw CertPathValidatorException("Disallowed signing algorithm: ${cert.sigAlgOID}")
+            ?: throw CertPathValidatorException("Disallowed signing algorithm: ${cert.sigAlgOID}", UnsupportedAlgorithm)
         val minStrength = requiredStrength(cert)
         if (certStrength < minStrength) {
-            throw CertPathValidatorException("Algorithm strength insufficient")
+            throw CertPathValidatorException("Algorithm strength insufficient", UnsupportedAlgorithm)
         }
     }
 
     private fun requiredStrength(cert: X509Certificate): Int {
         val issuerKey = issuerOf(cert).publicKey as? ECPublicKey
-            ?: throw CertPathValidatorException("Issuer public key is not EC")
+            ?: throw CertPathValidatorException("Issuer public key is not EC", UnsupportedAlgorithm)
         val curveSize = issuerKey.params.order.bitLength()
+        if (curveSize > CURVE_384) {
+            throw CertPathValidatorException("Unsupported curve size: $curveSize", UnsupportedAlgorithm)
+        }
         return when {
             curveSize <= CURVE_256 -> STRENGTH_SHA256
-            curveSize <= CURVE_384 -> STRENGTH_SHA384
-            else -> STRENGTH_SHA512
+            else -> STRENGTH_SHA384
         }
     }
 
@@ -139,9 +142,14 @@ internal class CertificateStructureChecker(
         private const val SKI_HASH_ALGORITHM = "SHA-1"
 
         val ALLOWED_CRITICAL_OIDS = setOf(
-            "2.5.29.19", // BasicConstraints
+            "2.5.29.14", // SubjectKeyIdentifier
             "2.5.29.15", // KeyUsage
-            "2.5.29.37" // ExtendedKeyUsage
+            "2.5.29.17", // SubjectAlternativeName
+            "2.5.29.19", // BasicConstraints
+            "2.5.29.30", // NameConstraints
+            "2.5.29.31", // CRLDistributionPoints
+            "2.5.29.35", // AuthorityKeyIdentifier
+            "2.5.29.37"  // ExtendedKeyUsage
         )
 
         val FORBIDDEN_OIDS = setOf(
