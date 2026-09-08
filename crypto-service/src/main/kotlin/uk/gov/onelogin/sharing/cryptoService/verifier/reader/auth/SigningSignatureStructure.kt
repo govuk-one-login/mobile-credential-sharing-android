@@ -54,12 +54,14 @@ class SigningSignatureStructure(
          */
         fun derToRaw(der: ByteArray): ByteArray {
             var offset = 2
-            val rLen = der[offset + 1].toInt() and 0xFF
-            offset += 2
+            offset++
+            val rLen = der[offset].toInt() and BYTE_MASK
+            offset++
             val r = der.copyOfRange(offset, offset + rLen)
             offset += rLen
-            val sLen = der[offset + 1].toInt() and 0xFF
-            offset += 2
+            offset++
+            val sLen = der[offset].toInt() and BYTE_MASK
+            offset++
             val s = der.copyOfRange(offset, offset + sLen)
 
             return padOrTrim(r) + padOrTrim(s)
@@ -75,5 +77,6 @@ class SigningSignatureStructure(
         }
 
         private const val P256_COMPONENT_SIZE = 32
+        private const val BYTE_MASK = 0xFF
     }
 }

@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import java.security.cert.Certificate
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.arrayContaining
@@ -41,7 +42,7 @@ class CoseSigStructureGeneratorTest {
 
     private val protectedHeaderGenerator by lazy {
         ProtectedHeaderGenerator {
-            protectedHeaders
+            emptyMap<Long, Any>() to protectedHeaders
         }
     }
 
@@ -83,10 +84,17 @@ class CoseSigStructureGeneratorTest {
         assertThat(
             resultData,
             arrayContaining(
-                "Signature1",
-                protectedHeaders,
-                "",
-                readerAuthenticationPayload
+                equalTo<Any>("Signature1"),
+                equalTo<Any>(protectedHeaders),
+                object : org.hamcrest.TypeSafeMatcher<Any>() {
+                    override fun describeTo(description: org.hamcrest.Description) {
+                        description.appendText("an empty byte string (external_aad h'')")
+                    }
+
+                    override fun matchesSafely(item: Any): Boolean =
+                        item is ByteArray && item.isEmpty()
+                },
+                equalTo<Any>(readerAuthenticationPayload)
             )
         )
     }
@@ -102,8 +110,10 @@ class CoseSigStructureGeneratorTest {
                     resultData.map {
                         when (it) {
                             is ByteArray -> it.toHexString()
+
                             is String -> it.toByteArray().toHexString()
-                            else -> throw Exception("Unexpected data type in data array")
+
+                            else -> error("Unexpected data type in data array")
                         }
                     }
                 )
