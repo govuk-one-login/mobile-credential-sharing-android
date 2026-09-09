@@ -33,7 +33,7 @@ import uk.gov.onelogin.sharing.models.mdoc.engagment.DeviceEngagementDto
 /**
  * ISO/IEC TS 18013-6:2025 conformance tests for the DeviceEngagement structure (mdoc side).
  *
- * These tests exercise the raw CBOR encoding produced for a [DeviceEngagement] structure,
+ * These tests exercise the raw CBOR encoding produced for a DeviceEngagement structure,
  * verifying the CBOR major types, additional-information bits, tag values and item ordering
  * mandated by ISO/IEC 18013-5:2021, 8.2.1.1 and RFC 7049 (RFC 8949) section 2.1.
  *
