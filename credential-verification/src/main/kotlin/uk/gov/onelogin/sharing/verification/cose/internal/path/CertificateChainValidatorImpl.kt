@@ -16,11 +16,11 @@ class CertificateChainValidatorImpl internal constructor() : CertificateChainVal
     override fun verify(certificates: List<X509Certificate>, trustedRoot: X509Certificate) {
         if (certificates.isEmpty()) throw UntrustedCertificate
 
-        if (certificates.any { it.encoded.contentEquals(trustedRoot.encoded) }) {
-            throw UntrustedCertificate
-        }
-
         try {
+            if (certificates.any { it.encoded.contentEquals(trustedRoot.encoded) }) {
+                throw UntrustedCertificate
+            }
+
             val certFactory = CertificateFactory.getInstance("X.509")
             val certPath = certFactory.generateCertPath(certificates)
 
@@ -35,7 +35,8 @@ class CertificateChainValidatorImpl internal constructor() : CertificateChainVal
 
             CertPathValidator.getInstance("PKIX").validate(certPath, params)
         } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
-            throw (e.cause as? CoseVerificationFailure) ?: UntrustedCertificate
+            throw (e as? CoseVerificationFailure) ?: (e.cause as? CoseVerificationFailure)
+                ?: UntrustedCertificate
         }
     }
 }
