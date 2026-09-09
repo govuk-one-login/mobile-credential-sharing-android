@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.UnprotectedHea
  * Creates the unprotected headers for a COSE_Sign1 structure. This is defined as:
  *
  * ```
- * { -33: [ leafCertificateDER, intermediateCertificateDER ] }
+ * { 33: [ leafCertificateDER, intermediateCertificateDER ] }
  * ```
  */
 class CoseSign1UnprotectedHeaderGenerator(private val logger: Logger) : UnprotectedHeaderGenerator {

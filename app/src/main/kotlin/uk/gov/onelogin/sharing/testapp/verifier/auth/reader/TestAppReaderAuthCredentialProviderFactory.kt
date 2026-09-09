@@ -71,7 +71,10 @@ class TestAppReaderAuthCredentialProviderFactory(
         val certificateChain = processCertificateAssetChain(option.certificateChain.asSequence())
 
         return ECReaderAuthProvider(
-            certificateChain = certificateChain,
+            // x5chain must contain the leaf and intermediate(s) only, with the root excluded
+            // (per ISO 18013-5 ReaderAuth). The asset chain is leaf-first and ends with the root,
+            // so drop the last element.
+            certificateChain = certificateChain.dropLast(1),
             logger = logger,
             protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger),
             unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),

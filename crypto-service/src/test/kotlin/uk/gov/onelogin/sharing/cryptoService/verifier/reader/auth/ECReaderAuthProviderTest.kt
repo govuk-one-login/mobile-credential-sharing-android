@@ -85,13 +85,9 @@ class ECReaderAuthProviderTest {
         )
     }
 
-    private val coseSign1: ByteArray by lazy {
-        provider.sign(byteArrayOf(1, 2, 3, 4, 5))
-    }
+    private suspend fun coseSign1(): ByteArray = provider.sign(byteArrayOf(1, 2, 3, 4, 5))
 
-    private val coseSign1Tree: JsonNode by lazy {
-        cborMapper.readTree(coseSign1)
-    }
+    private suspend fun coseSign1Tree(): JsonNode = cborMapper.readTree(coseSign1())
 
     @BeforeTest
     fun setUp() {
@@ -148,7 +144,7 @@ class ECReaderAuthProviderTest {
 
     @Test
     fun `Successfully signs provided byte array`() = runTest {
-        assertNotNull(coseSign1)
+        assertNotNull(coseSign1())
     }
 
     @Test
@@ -162,6 +158,7 @@ class ECReaderAuthProviderTest {
 
     @Test
     fun `Assembles a definite-length four-element array`() = runTest {
+        val coseSign1Tree = coseSign1Tree()
         assertTrue(coseSign1Tree.isArray)
         assertEquals(COSE_SIGN1_ARRAY_SIZE, coseSign1Tree.size())
     }
@@ -170,12 +167,12 @@ class ECReaderAuthProviderTest {
     fun `Is untagged and not wrapped in a byte string`() = runTest {
         // First byte of an untagged, definite-length 4-element CBOR array is 0x84
         // (major type 4 array, length 4). A tag or byte-string wrapper would differ.
-        assertEquals(0x84.toByte(), coseSign1[0])
+        assertEquals(0x84.toByte(), coseSign1()[0])
     }
 
     @Test
     fun `First element is the protected header bytes containing alg ES256 and x5t`() = runTest {
-        val protectedHeaderBytes = coseSign1Tree[0].binaryValue()
+        val protectedHeaderBytes = coseSign1Tree()[0].binaryValue()
         assertNotNull(protectedHeaderBytes)
 
         val headerTree = cborMapper.readTree(protectedHeaderBytes)
@@ -193,7 +190,7 @@ class ECReaderAuthProviderTest {
 
     @Test
     fun `Second element is the unprotected header map with leaf-first x5chain`() = runTest {
-        val unprotectedHeader = coseSign1Tree[1]
+        val unprotectedHeader = coseSign1Tree()[1]
         assertTrue(unprotectedHeader.isObject)
         assertEquals(1, unprotectedHeader.size())
 
@@ -207,6 +204,7 @@ class ECReaderAuthProviderTest {
 
     @Test
     fun `x5t leaf hash matches the first x5chain entry`() = runTest {
+        val coseSign1Tree = coseSign1Tree()
         val protectedHeaderBytes = coseSign1Tree[0].binaryValue()
         val hashBytes = cborMapper.readTree(protectedHeaderBytes)[X5T_LABEL.toString()][1]
             .binaryValue()
@@ -218,12 +216,12 @@ class ECReaderAuthProviderTest {
 
     @Test
     fun `Third element is explicit CBOR null for the detached payload`() = runTest {
-        assertTrue(coseSign1Tree[2].isNull)
+        assertTrue(coseSign1Tree()[2].isNull)
     }
 
     @Test
     fun `Fourth element is the raw 64-byte R S signature`() = runTest {
-        val signatureBytes = coseSign1Tree[3].binaryValue()
+        val signatureBytes = coseSign1Tree()[3].binaryValue()
         assertNotNull(signatureBytes)
         assertEquals(P256_RAW_SIGNATURE_SIZE, signatureBytes.size)
     }
@@ -233,6 +231,7 @@ class ECReaderAuthProviderTest {
         // Independently re-derive the Sig_structure and verify the emitted raw (R || S)
         // signature against the leaf public key, proving the assembled structure is coherent.
         // SHA256withPLAIN-ECDSA (BouncyCastle) consumes the raw 64-byte COSE signature directly.
+        val coseSign1Tree = coseSign1Tree()
         val protectedHeaderBytes = coseSign1Tree[0].binaryValue()
         val readerAuthenticationPayload = byteArrayOf(1, 2, 3, 4, 5)
 
