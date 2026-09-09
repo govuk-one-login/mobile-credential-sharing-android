@@ -92,7 +92,7 @@ class CertificateStructureCheckerTest {
 
     // AC8: Disallowed signing algorithm
     @Test
-    fun `cert with RSA signing algorithm throws UNTRUSTED_CERTIFICATE`() {
+    fun `cert with RSA signing algorithm throws UNSUPPORTED_ALGORITHM`() {
         val rsaKeyPair = KeyPairGenerator.getInstance("RSA").apply {
             initialize(2048)
         }.generateKeyPair()
@@ -111,14 +111,14 @@ class CertificateStructureCheckerTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).ca().withSignatureAlgorithm("SHA256withRSA").build()
 
-        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+        assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
             validator.verify(listOf(leaf), root)
         }
     }
 
     // AC9: Insufficient algorithm strength
     @Test
-    fun `cert signed with SHA256 under P-384 issuer throws UNTRUSTED_CERTIFICATE`() {
+    fun `cert signed with SHA256 under P-384 issuer throws UNSUPPORTED_ALGORITHM`() {
         val p384KeyPair = generateEcKeyPair("secp384r1")
 
         val root = TestCertificateGenerator(
@@ -135,13 +135,13 @@ class CertificateStructureCheckerTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().withSignatureAlgorithm("SHA256withECDSA").build()
 
-        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+        assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
             validator.verify(listOf(leaf), root)
         }
     }
 
     @Test
-    fun `cert signed with SHA384 under P-521 issuer throws UNTRUSTED_CERTIFICATE`() {
+    fun `cert signed with SHA384 under P-521 issuer throws UNSUPPORTED_ALGORITHM`() {
         val p521KeyPair = generateEcKeyPair("secp521r1")
 
         val root = TestCertificateGenerator(
@@ -158,7 +158,7 @@ class CertificateStructureCheckerTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().withSignatureAlgorithm("SHA384withECDSA").build()
 
-        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+        assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
             validator.verify(listOf(leaf), root)
         }
     }
@@ -186,7 +186,7 @@ class CertificateStructureCheckerTest {
     }
 
     @Test
-    fun `cert signed with SHA512 under P-521 issuer passes`() {
+    fun `cert signed with SHA512 under P-521 issuer throws UNSUPPORTED_ALGORITHM`() {
         val p521KeyPair = generateEcKeyPair("secp521r1")
 
         val root = TestCertificateGenerator(
@@ -203,7 +203,9 @@ class CertificateStructureCheckerTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().withSignatureAlgorithm("SHA512withECDSA").build()
 
-        validator.verify(listOf(leaf), root)
+        assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
+            validator.verify(listOf(leaf), root)
+        }
     }
 
     private fun generateEcKeyPair(curve: String): KeyPair =

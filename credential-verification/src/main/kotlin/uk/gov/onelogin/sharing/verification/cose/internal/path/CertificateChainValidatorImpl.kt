@@ -7,13 +7,20 @@ import java.security.cert.PKIXParameters
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UntrustedCertificate
 
 @ContributesBinding(CredentialVerificationScope::class)
 class CertificateChainValidatorImpl internal constructor() : CertificateChainValidator {
 
     override fun verify(certificates: List<X509Certificate>, trustedRoot: X509Certificate) {
+        if (certificates.isEmpty()) throw UntrustedCertificate
+
         try {
+            if (certificates.any { it.encoded.contentEquals(trustedRoot.encoded) }) {
+                throw UntrustedCertificate
+            }
+
             val certFactory = CertificateFactory.getInstance("X.509")
             val certPath = certFactory.generateCertPath(certificates)
 
@@ -27,9 +34,9 @@ class CertificateChainValidatorImpl internal constructor() : CertificateChainVal
             }
 
             CertPathValidator.getInstance("PKIX").validate(certPath, params)
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            @Suppress("SwallowedException")
-            throw UntrustedCertificate
+        } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
+            throw (e as? CoseVerificationFailure) ?: (e.cause as? CoseVerificationFailure)
+                ?: UntrustedCertificate
         }
     }
 }
