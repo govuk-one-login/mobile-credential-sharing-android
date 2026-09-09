@@ -12,9 +12,9 @@ class ReaderAuthOptionTest(@TestParameter val option: ReaderAuthOption) {
     @Test
     fun `Provides a certificate chain list`() = runTest {
         val expected = listOf(
-            "test_reader_auth_x509_certificate.der",
+            "${option.leafCertificateAsset}.der",
             "test_reader_auth_name_constrained_x509_certificate.der",
-            "${option.leafCertificateAsset}.der"
+            "test_reader_auth_x509_certificate.der"
         )
 
         assertEquals(
@@ -26,9 +26,9 @@ class ReaderAuthOptionTest(@TestParameter val option: ReaderAuthOption) {
     @Test
     fun `Provides a private key chain list`() = runTest {
         val expected = listOf(
-            "test_reader_auth_x509_certificate.pem",
+            "${option.leafCertificateAsset}.pem",
             "test_reader_auth_name_constrained_x509_certificate.pem",
-            "${option.leafCertificateAsset}.pem"
+            "test_reader_auth_x509_certificate.pem"
         )
 
         assertEquals(

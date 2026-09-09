@@ -31,8 +31,9 @@ private const val COSE_SIGN1_ARRAY_SIZE = 4
  * ]
  * ```
  *
- * @property certificateChain The X509 certificate chain to use. The [List] begins with the
- * uppermost certificate, with the last element being the relevant leaf certificate.
+ * @property certificateChain The X509 certificate chain to use. The [List] is leaf-first: the
+ * first element is the leaf certificate, followed by any intermediates, with the uppermost (root)
+ * certificate last.
  * @property logger The GOV.UK [Logger] to send status updates to.
  * @property sigStructureGenerator The [SigStructureGenerator] implementation that generates part of
  * the `COSE_Sign1` structure.
@@ -52,7 +53,7 @@ class ECReaderAuthProvider(
     SigStructureGenerator by sigStructureGenerator,
     UnprotectedHeaderGenerator by unprotectedHeaderGenerator {
 
-    override fun sign(readerAuthenticationPayload: ByteArray): ByteArray = try {
+    override suspend fun sign(readerAuthenticationPayload: ByteArray): ByteArray = try {
         val (_, protectedHeaderBytes) = generateProtectedHeaders(
             leafCertificate = certificateChain.first()
         )

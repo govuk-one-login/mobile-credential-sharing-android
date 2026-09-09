@@ -14,7 +14,7 @@ fun interface ReaderAuthCredentialProvider {
      * @throws uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError when the journey
      * should finish / complete.
      */
-    fun sign(readerAuthenticationPayload: ByteArray): ByteArray
+    suspend fun sign(readerAuthenticationPayload: ByteArray): ByteArray
 
     /**
      * Functional interface for generating instances of [ReaderAuthCredentialProvider].
