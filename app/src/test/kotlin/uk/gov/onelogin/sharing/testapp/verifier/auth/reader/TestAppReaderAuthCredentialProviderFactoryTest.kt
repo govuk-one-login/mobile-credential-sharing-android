@@ -2,6 +2,8 @@ package uk.gov.onelogin.sharing.testapp.verifier.auth.reader
 
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.google.testing.junit.testparameterinjector.TestParameter
 import java.security.KeyFactory
 import java.security.cert.CertificateFactory
@@ -69,5 +71,26 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
             result,
             instanceOf(ECReaderAuthProvider::class.java)
         )
+    }
+
+    @Test
+    fun `Emitted x5chain excludes the root certificate`() = runTest {
+        initialState = option
+
+        val coseSign1 = factory().create().sign(byteArrayOf(1, 2, 3, 4, 5))
+
+        // COSE_Sign1 = [protectedHeader, unprotectedHeader, null, signature].
+        // The unprotected header is { 33: x5chain }. The asset chain is
+        // [leaf, intermediate, root]; the root must be excluded, leaving 2 entries.
+        val unprotectedHeader = ObjectMapper(CBORFactory()).readTree(coseSign1)[1]
+        val x5chain = unprotectedHeader[X5CHAIN_LABEL]
+
+        assertThat(x5chain.isArray, equalTo(true))
+        assertThat(x5chain.size(), equalTo(EXPECTED_X5CHAIN_SIZE))
+    }
+
+    private companion object {
+        const val X5CHAIN_LABEL = "33"
+        const val EXPECTED_X5CHAIN_SIZE = 2
     }
 }
