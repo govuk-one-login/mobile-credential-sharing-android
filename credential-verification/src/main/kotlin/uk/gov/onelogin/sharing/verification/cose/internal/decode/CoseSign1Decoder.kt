@@ -1,0 +1,113 @@
+package uk.gov.onelogin.sharing.verification.cose.internal.decode
+
+import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.CBORParser
+import dev.zacsweers.metro.Inject
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.MalformedCoseSign1
+
+/**
+ * Strict decoder for COSE_Sign1 structures as defined in ISO 18013-5.
+ *
+ * Implements byte-preservation using Jackson streaming to ensure cryptographic
+ * signatures are verified against identical source bytes.
+ */
+@Suppress("TooManyFunctions")
+@Inject
+internal class CoseSign1Decoder {
+
+    private val cborFactory = CBORFactory()
+
+    /**
+     * Decodes a COSE_Sign1 structure from raw bytes.
+     *
+     * @param data The raw CBOR bytes.
+     * @return An [InternalCoseSign1] with preserved raw byte segments.
+     * @throws MalformedCoseSign1 if structure is not exactly a 4-element array or has tags.
+     */
+    fun decode(data: ByteArray): InternalCoseSign1 {
+        validateRawHeader(data)
+        try {
+            return (cborFactory.createParser(data) as CBORParser).use { parser ->
+                parseCoseSign1Array(parser, data)
+            }
+        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+            @Suppress("SwallowedException")
+            throw MalformedCoseSign1
+        }
+    }
+
+    private fun validateRawHeader(data: ByteArray) {
+        if (data.isEmpty()) throw MalformedCoseSign1
+        val firstByte = data[0].toInt() and BYTE_MASK
+        if (firstByte in CBOR_TAG_RANGE_START..CBOR_TAG_RANGE_END) {
+            throw MalformedCoseSign1
+        }
+    }
+
+    private fun parseCoseSign1Array(parser: CBORParser, data: ByteArray): InternalCoseSign1 {
+        if (parser.nextToken() != JsonToken.START_ARRAY) throw MalformedCoseSign1
+
+        val protectedHeader = readProtectedHeader(parser)
+        val unprotectedHeader = readUnprotectedHeader(parser, data)
+        val (payload, mode) = readPayload(parser)
+        val signature = readSignature(parser)
+
+        validateArrayEnd(parser)
+
+        return InternalCoseSign1(
+            protectedHeader = protectedHeader,
+            unprotectedHeader = unprotectedHeader,
+            payload = payload,
+            signature = signature,
+            payloadMode = mode
+        )
+    }
+
+    private fun readProtectedHeader(parser: CBORParser): ByteArray =
+        if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
+            parser.binaryValue
+        } else {
+            throw MalformedCoseSign1
+        }
+
+    @Suppress("DEPRECATION")
+    private fun readUnprotectedHeader(parser: CBORParser, data: ByteArray): ByteArray {
+        if (parser.nextToken() != JsonToken.START_OBJECT) throw MalformedCoseSign1
+        val start = parser.tokenLocation.byteOffset.toInt()
+        parser.skipChildren()
+        val end = parser.currentLocation.byteOffset.toInt()
+        return data.copyOfRange(start, end)
+    }
+
+    private fun readPayload(parser: CBORParser): Pair<ByteArray?, InternalCoseSign1.PayloadMode> =
+        when (parser.nextToken()) {
+            JsonToken.VALUE_EMBEDDED_OBJECT ->
+                parser.binaryValue to InternalCoseSign1.PayloadMode.ATTACHED
+
+            JsonToken.VALUE_NULL -> null to InternalCoseSign1.PayloadMode.DETACHED
+
+            else -> throw MalformedCoseSign1
+        }
+
+    private fun readSignature(parser: CBORParser): ByteArray =
+        if (parser.nextToken() == JsonToken.VALUE_EMBEDDED_OBJECT) {
+            parser.binaryValue
+        } else {
+            throw MalformedCoseSign1
+        }
+
+    private fun validateArrayEnd(parser: CBORParser) {
+        if (parser.parsingContext.entryCount != COSE_SIGN1_SIZE) throw MalformedCoseSign1
+        if (parser.nextToken() != JsonToken.END_ARRAY || parser.nextToken() != null) {
+            throw MalformedCoseSign1
+        }
+    }
+
+    private companion object {
+        const val COSE_SIGN1_SIZE = 4
+        const val CBOR_TAG_RANGE_START = 0xC0
+        const val CBOR_TAG_RANGE_END = 0xDF
+        const val BYTE_MASK = 0xFF
+    }
+}

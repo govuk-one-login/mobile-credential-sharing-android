@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
-import java.nio.ByteBuffer
 import java.security.MessageDigest
 import java.security.cert.Certificate
 import kotlin.test.Test
@@ -15,8 +14,8 @@ import org.hamcrest.Matchers
 import org.hamcrest.collection.IsMapContaining.hasEntry
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.HASH_ALGORITHM_SHA256
-import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
+import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
+import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGenerator
 
 class CoseSign1ProtectedHeadersTest {
     private val logger = SystemLogger()

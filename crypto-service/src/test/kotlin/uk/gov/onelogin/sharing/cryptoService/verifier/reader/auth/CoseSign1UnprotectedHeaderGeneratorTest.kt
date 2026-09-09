@@ -15,8 +15,8 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.collection.IsMapContaining.hasKey
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
+import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
+import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGenerator
 
 class CoseSign1UnprotectedHeaderGeneratorTest {
 

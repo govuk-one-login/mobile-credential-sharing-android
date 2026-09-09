@@ -28,8 +28,8 @@ import org.junit.internal.matchers.ThrowableCauseMatcher.hasCause
 import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
-import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
+import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
+import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGenerator
 
 private const val COSE_SIGN1_ARRAY_SIZE = 4
 private const val P256_RAW_SIGNATURE_SIZE = 64

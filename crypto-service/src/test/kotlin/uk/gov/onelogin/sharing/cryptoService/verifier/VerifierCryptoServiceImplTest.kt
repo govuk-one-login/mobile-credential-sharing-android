@@ -41,12 +41,6 @@ class VerifierCryptoServiceImplTest {
     private var sharedSecretGenerator: SharedSecretGenerator = EcdhSharedSecretGenerator(logger)
     private var sessionKeyGenerator: SessionKeyGenerator = HkdfSessionKeyGenerator(logger)
 
-    private var signedBytes = byteArrayOf(1, 2, 3, 4, 5)
-
-    private val readerAuthCredentialProvider = ReaderAuthCredentialProvider {
-        signedBytes
-    }
-
     private val service by lazy {
         VerifierCryptoServiceImpl(
             logger = logger,
@@ -54,8 +48,7 @@ class VerifierCryptoServiceImplTest {
             sharedSecretGenerator = sharedSecretGenerator,
             sessionKeyGenerator = sessionKeyGenerator,
             encryptDeviceRequestUseCase = encrypter,
-            decryptDeviceResponseUseCase = decrypter,
-            readerAuthCredentialProvider = readerAuthCredentialProvider
+            decryptDeviceResponseUseCase = decrypter
         )
     }
 

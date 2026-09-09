@@ -64,8 +64,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = HomeRoute,
-                        modifier = Modifier.safeContentPadding()
+                        startDestination = HomeRoute
                     ) {
                         configureTestAppRoutes(
                             mockCredentials = mockCredentials,

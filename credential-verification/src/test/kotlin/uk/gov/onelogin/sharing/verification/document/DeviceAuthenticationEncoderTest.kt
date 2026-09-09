@@ -8,8 +8,9 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.emptyDeviceNameSpacesBytes
-import uk.gov.onelogin.sharing.verification.document.CoseSign1Stubs.sessionTranscriptBytes
+import uk.gov.onelogin.sharing.verification.cose.CoseSign1Stubs
+import uk.gov.onelogin.sharing.verification.cose.CoseSign1Stubs.emptyDeviceNameSpacesBytes
+import uk.gov.onelogin.sharing.verification.cose.CoseSign1Stubs.sessionTranscriptBytes
 import uk.gov.onelogin.sharing.verification.format.document.MobileSecurityObject.Companion.DOC_TYPE
 
 class DeviceAuthenticationEncoderTest {

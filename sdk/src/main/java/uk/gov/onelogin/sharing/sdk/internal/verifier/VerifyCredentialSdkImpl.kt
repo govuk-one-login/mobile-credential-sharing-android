@@ -17,7 +17,7 @@ class VerifyCredentialSdkImpl(
 
     override fun verifier(verifierConfig: VerifierConfig): CredentialVerifier {
         val credentialVerificationGraph = credentialVerificationGraphFactory
-            .create(verifierConfig.trustedRootCertificate, appGraph.logger())
+            .create(verifierConfig.trustedRootCertificate)
         val orchestrator = verifierGraphFactory
             .create(
                 appGraph = appGraph,

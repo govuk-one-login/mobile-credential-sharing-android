@@ -12,7 +12,12 @@ class IssuerAuth:
     def __init__(self, mso_tagged_bytes: bytes, leaf_cert_der: bytes):
         self.mso_tagged_bytes = mso_tagged_bytes
         self.leaf_cert_der = leaf_cert_der
-        self.protected = cbor2.dumps({1: -7})  # alg: ES256
+        # Protected header: alg ES256 (-7) plus x5t (label 34) as
+        # [COSE hash alg SHA-256 (-16), 32-byte SHA-256 digest of the leaf DER].
+        # The thumbprint binds the signing leaf to the signed object (C4 profile).
+        leaf_thumbprint = hashes.Hash(hashes.SHA256())
+        leaf_thumbprint.update(leaf_cert_der)
+        self.protected = cbor2.dumps({1: -7, 34: [-16, leaf_thumbprint.finalize()]})
 
     def sign(self, signing_key: ec.EllipticCurvePrivateKey) -> List:
         """Signs the MSO and returns the IssuerAuth COSE_Sign1 array."""

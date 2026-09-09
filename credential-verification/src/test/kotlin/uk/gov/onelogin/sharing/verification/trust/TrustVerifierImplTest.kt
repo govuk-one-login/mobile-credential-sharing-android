@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import java.io.ByteArrayInputStream
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -14,24 +16,28 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.logging.api.v2.Logger
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CertificateHeaderValidator
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseHeaderValidator
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Builder
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Decoder
+import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateChainValidatorImpl
+import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
+import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatureVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResultMatchers.hasError
-import uk.gov.onelogin.sharing.verification.trust.chain.CertificateChainValidatorImpl
-import uk.gov.onelogin.sharing.verification.trust.cose.CoseHeaderValidator
-import uk.gov.onelogin.sharing.verification.trust.cose.CoseSignatureVerifier
+import uk.gov.onelogin.sharing.verification.trust.MsoBuilder
 
 class TrustVerifierImplTest {
-    private val logger: Logger = SystemLogger()
-    private val decoder = CoseSign1Decoder(logger)
+
+    private val decoder = CoseSign1Decoder()
     private val verifier = TrustVerifierImpl(
         decoder,
         CoseSignatureVerifier(
-            CoseHeaderValidator(logger)
+            CoseHeaderValidator()
         ),
-        CertificateChainValidatorImpl(logger)
+        CertificateHeaderValidator(),
+        CertificateChainValidatorImpl()
     )
     private val cborMapper = ObjectMapper(CBORFactory())
 
@@ -72,12 +78,26 @@ class TrustVerifierImplTest {
     }
 
     @Test
-    fun `CoseSign1Decoder extracts x5chain from mock credential`() {
-        val issuerAuth = extractIssuerAuth()
-        val coseSign1 = decoder.decode(issuerAuth)
-        val x5chain = decoder.extractX5Chain(coseSign1)
+    fun `header failure stops before path and signature verification`() {
+        val chainValidator = spyk(CertificateChainValidatorImpl())
+        val signatureVerifier = spyk(CoseSignatureVerifier(CoseHeaderValidator()))
+        val earlyExitVerifier = TrustVerifierImpl(
+            decoder,
+            signatureVerifier,
+            CertificateHeaderValidator(),
+            chainValidator
+        )
 
-        assertEquals(x5chain.size, 1)
+        // Valid unprotected x5chain but no protected x5t -> fails before path/signature.
+        val coseWithoutX5t = buildCoseSign1WithoutX5t(CertificateStubs.leafSignedByRoot)
+
+        val exception = assertThrows(VerificationResult.Failure::class.java) {
+            earlyExitVerifier.verifyCOSESign1(coseWithoutX5t, CertificateStubs.rootCa)
+        }
+
+        assertThat(exception, hasError(VerificationError.MALFORMED_ISSUER_AUTH))
+        verify(exactly = 0) { chainValidator.verify(any(), any()) }
+        verify(exactly = 0) { signatureVerifier.verify(any(), any(), any()) }
     }
 
     @Test
@@ -132,7 +152,7 @@ class TrustVerifierImplTest {
         val rsaCert = CertificateFactory.getInstance("X.509")
             .generateCertificate(ByteArrayInputStream(rsaCertDer)) as X509Certificate
 
-        val coseWithRsaCert = buildCoseSign1WithCertBytes(rsaCertDer)
+        val coseWithRsaCert = buildCoseSign1WithCertBytes(rsaCert)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
             verifier.verifyCOSESign1(coseWithRsaCert, rsaCert)
@@ -156,6 +176,15 @@ class TrustVerifierImplTest {
         val root = cborMapper.readTree(credentialBytes)
         val issuerAuthNode = root.get("issuerAuth") as ArrayNode
         return cborMapper.writeValueAsBytes(issuerAuthNode)
+    }
+
+    private fun buildCoseSign1WithoutX5t(cert: X509Certificate): ByteArray {
+        // Protected header carries only the algorithm; no x5t (label 34).
+        val protectedBytes = CoseSign1Builder.protectedHeaderBytes(listOf(cert), includeX5t = false)
+        // Unprotected header carries a valid single-certificate x5chain (label 33).
+        val unprotectedBytes = CoseSign1Builder.unprotectedHeaderBytes(listOf(cert))
+
+        return CoseSign1Builder.assembleUnsigned(protectedBytes, unprotectedBytes)
     }
 
     private fun buildRsaCertDer(): ByteArray {
@@ -189,24 +218,15 @@ class TrustVerifierImplTest {
             ).hexToByteArray()
     }
 
-    private fun buildCoseSign1WithCertBytes(certDer: ByteArray): ByteArray {
-        val protectedHeader = cborMapper.createObjectNode()
-        protectedHeader.put("1", -7)
-        val protectedBytes = cborMapper.writeValueAsBytes(protectedHeader)
+    private fun buildCoseSign1WithCertBytes(cert: X509Certificate): ByteArray {
+        // Protected header carries the algorithm plus a SHA-256 x5t bound to the certificate.
+        val protectedBytes = CoseSign1Builder.protectedHeaderBytes(listOf(cert))
+        // Unprotected header carries a valid single-certificate x5chain (label 33).
+        val unprotectedBytes = CoseSign1Builder.unprotectedHeaderBytes(listOf(cert))
 
-        val unprotectedHeader = cborMapper.createObjectNode()
-        unprotectedHeader.put("33", certDer)
-        val unprotectedBytes = cborMapper.writeValueAsBytes(unprotectedHeader)
-
-        val payload = byteArrayOf(0x01, 0x02, 0x03)
-        val signature = ByteArray(64)
-
-        val array = cborMapper.createArrayNode()
-        array.add(protectedBytes)
-        array.add(cborMapper.readTree(unprotectedBytes))
-        array.add(payload)
-        array.add(signature)
-
-        return cborMapper.writeValueAsBytes(array)
+        return CoseSign1Builder.assembleUnsigned(protectedBytes, unprotectedBytes)
     }
+
+    private fun String.hexToByteArray(): ByteArray =
+        chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 }

@@ -12,6 +12,8 @@ internal object ClassInfoExt {
     val scanResult by lazy {
         ClassGraph()
             .enableAllInfo()
+            .enableInterClassDependencies()
+            .acceptPackages("uk.gov.onelogin.sharing.verification")
             .scan()
     }
 
