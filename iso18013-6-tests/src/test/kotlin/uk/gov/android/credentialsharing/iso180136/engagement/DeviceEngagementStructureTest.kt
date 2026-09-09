@@ -349,10 +349,16 @@ class DeviceEngagementStructureTest {
         assertThat(eDeviceKeyNode.get(COSE_KEY_CURVE_KEY).intValue(), equalTo(COSE_KEY_CURVE_P256))
         // x (-2) uncompressed, 32-byte coordinate
         assertTrue(eDeviceKeyNode.get(COSE_KEY_X_KEY).isBinary)
-        assertThat(eDeviceKeyNode.get(COSE_KEY_X_KEY).binaryValue().size, equalTo(P256_COORDINATE_SIZE))
+        assertThat(
+            eDeviceKeyNode.get(COSE_KEY_X_KEY).binaryValue().size,
+            equalTo(P256_COORDINATE_SIZE)
+        )
         // y (-3) uncompressed, 32-byte coordinate
         assertTrue(eDeviceKeyNode.get(COSE_KEY_Y_KEY).isBinary)
-        assertThat(eDeviceKeyNode.get(COSE_KEY_Y_KEY).binaryValue().size, equalTo(P256_COORDINATE_SIZE))
+        assertThat(
+            eDeviceKeyNode.get(COSE_KEY_Y_KEY).binaryValue().size,
+            equalTo(P256_COORDINATE_SIZE)
+        )
     }
 
     /**
