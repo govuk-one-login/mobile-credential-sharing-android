@@ -102,16 +102,4 @@ class CoseSign1ProtectedHeadersTest {
             )
         }
     }
-
-    private fun Long.toBytes(): ByteArray {
-        val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
-        buffer.putLong(this)
-        return buffer.array()
-    }
-
-    private fun Int.toBytes(): ByteArray {
-        val buffer = ByteBuffer.allocate(Integer.BYTES)
-        buffer.putInt(this)
-        return buffer.array()
-    }
 }

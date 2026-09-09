@@ -58,6 +58,7 @@ class FakeVerifierCryptoService : VerifierCryptoService {
     var lastItemsRequestBytesPassedToReaderAuth: ByteArray? = null
     var lastSessionTranscriptPassedToReaderAuth: ByteArray? = null
     var lastItemsRequestBytesPassedToDeviceRequest: ByteArray? = null
+    var lastReaderAuthPassedToDeviceRequest: ByteArray? = null
     var buildReaderAuthenticationException: Exception? = null
 
     override fun buildItemsRequestBytes(itemsRequest: ItemsRequest): ByteArray = byteArrayOf(0x01)
@@ -78,6 +79,7 @@ class FakeVerifierCryptoService : VerifierCryptoService {
         readerAuth: ByteArray?
     ): ByteArray {
         lastItemsRequestBytesPassedToDeviceRequest = itemsRequestBytes
+        lastReaderAuthPassedToDeviceRequest = readerAuth
         return byteArrayOf(0x01, 0x02)
     }
 

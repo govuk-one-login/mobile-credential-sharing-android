@@ -110,9 +110,7 @@ class CoseSigStructureGeneratorTest {
                     resultData.map {
                         when (it) {
                             is ByteArray -> it.toHexString()
-
                             is String -> it.toByteArray().toHexString()
-
                             else -> error("Unexpected data type in data array")
                         }
                     }

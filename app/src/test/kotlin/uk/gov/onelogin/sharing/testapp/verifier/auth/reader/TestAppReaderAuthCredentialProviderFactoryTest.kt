@@ -5,7 +5,6 @@ import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameter
 import java.security.KeyFactory
 import java.security.cert.CertificateFactory
-import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
@@ -27,20 +26,19 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
 
     private val logger = SystemLogger()
 
-    private fun factory(context: CoroutineContext) = TestAppReaderAuthCredentialProviderFactory(
+    private fun factory() = TestAppReaderAuthCredentialProviderFactory(
         ApplicationProvider.getApplicationContext(),
         logger = logger,
         initialState = initialState,
         keyFactory = KeyFactory.getInstance("EC"),
-        certificateFactory = CertificateFactory.getInstance("X.509"),
-        coroutineContext = context
+        certificateFactory = CertificateFactory.getInstance("X.509")
     )
 
     @Test
     fun `Initially selected option is configurable`() = runTest {
         initialState = option
 
-        factory(backgroundScope.coroutineContext).readerAuthOption.test {
+        factory().readerAuthOption.test {
             assertThat(
                 expectMostRecentItem(),
                 equalTo(option)
@@ -50,7 +48,7 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
 
     @Test
     fun `Internal state is updatable`() = runTest {
-        val providerFactory = factory(backgroundScope.coroutineContext)
+        val providerFactory = factory()
         providerFactory.update(option)
 
         providerFactory.readerAuthOption.test {
@@ -65,7 +63,7 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
     fun `Creates ECReaderAuthProvider instances`() = runTest {
         initialState = option
 
-        val result = factory(backgroundScope.coroutineContext).create()
+        val result = factory().create()
 
         assertThat(
             result,
