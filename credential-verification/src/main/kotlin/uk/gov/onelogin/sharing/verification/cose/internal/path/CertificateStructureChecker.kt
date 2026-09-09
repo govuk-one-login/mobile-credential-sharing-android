@@ -163,7 +163,6 @@ internal class CertificateStructureChecker(
 
         val FORBIDDEN_OIDS = setOf(
             "2.5.29.33", // PolicyMappings
-            "2.5.29.30", // NameConstraints
             "2.5.29.36", // PolicyConstraints
             "2.5.29.54", // InhibitAnyPolicy
             "2.5.29.46" // FreshestCRL
