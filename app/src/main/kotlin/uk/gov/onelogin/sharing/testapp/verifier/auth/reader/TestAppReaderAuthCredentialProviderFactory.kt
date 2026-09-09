@@ -11,16 +11,9 @@ import java.security.interfaces.ECPrivateKey
 import java.security.spec.PKCS8EncodedKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 import kotlin.io.encoding.Base64
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSigStructureGenerator
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1ProtectedHeaders
@@ -44,8 +37,7 @@ class TestAppReaderAuthCredentialProviderFactory(
     private val logger: Logger,
     initialState: ReaderAuthOption,
     private val keyFactory: KeyFactory,
-    private val certificateFactory: CertificateFactory,
-    private val coroutineContext: CoroutineContext
+    private val certificateFactory: CertificateFactory
 ) : ReaderAuthCredentialProvider.Factory {
 
     @Inject
@@ -58,7 +50,6 @@ class TestAppReaderAuthCredentialProviderFactory(
         logger = logger,
         initialState = ReaderAuthOption.VALID,
         keyFactory = KeyFactory.getInstance("EC"),
-        coroutineContext = Dispatchers.IO,
         certificateFactory = CertificateFactory.getInstance("X.509")
     )
 
@@ -66,41 +57,35 @@ class TestAppReaderAuthCredentialProviderFactory(
         initialState
     )
 
-    private val privateKeyChain: StateFlow<List<ECPrivateKey>> = _readerAuthOption
-        .map { it.privateKeyChain.asSequence() }
-        .map { processPrivateKeyAssetChain(it) }
-        .stateIn(
-            CoroutineScope(coroutineContext),
-            SharingStarted.Lazily,
-            emptyList()
-        )
-
-    private val certificateChain: StateFlow<List<X509Certificate>> = _readerAuthOption
-        .map { it.certificateChain.asSequence() }
-        .map { processCertificateAssetChain(it) }
-        .stateIn(
-            CoroutineScope(coroutineContext),
-            SharingStarted.Lazily,
-            emptyList()
-        )
-
     val readerAuthOption: Flow<ReaderAuthOption> = _readerAuthOption
 
-    override fun create(): ReaderAuthCredentialProvider = ECReaderAuthProvider(
-        certificateChain = certificateChain.value,
-        logger = logger,
-        protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger),
-        unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),
-        sigStructureGenerator = SigningSignatureStructure(
+    /**
+     * Builds a [ReaderAuthCredentialProvider] for the currently selected [ReaderAuthOption].
+     *
+     * This reads and parses the reader authentication key and certificate chain assets.
+     * It is a blocking operation and callers are expected to invoke it off the main thread.
+     */
+    override fun create(): ReaderAuthCredentialProvider {
+        val option = _readerAuthOption.value
+        val privateKeyChain = processPrivateKeyAssetChain(option.privateKeyChain.asSequence())
+        val certificateChain = processCertificateAssetChain(option.certificateChain.asSequence())
+
+        return ECReaderAuthProvider(
+            certificateChain = certificateChain,
             logger = logger,
-            signature = Signature.getInstance(SIGNING_ALGORITHM),
-            privateKey = privateKeyChain.value.first(),
-            decorated = CoseSigStructureGenerator(
+            protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger),
+            unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),
+            sigStructureGenerator = SigningSignatureStructure(
                 logger = logger,
-                protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger = logger)
+                signature = Signature.getInstance(SIGNING_ALGORITHM),
+                privateKey = privateKeyChain.first(),
+                decorated = CoseSigStructureGenerator(
+                    logger = logger,
+                    protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger = logger)
+                )
             )
         )
-    )
+    }
 
     fun update(option: ReaderAuthOption) {
         _readerAuthOption.value = option

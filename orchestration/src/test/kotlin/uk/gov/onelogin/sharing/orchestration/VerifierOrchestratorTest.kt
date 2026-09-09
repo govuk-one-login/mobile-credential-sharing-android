@@ -47,7 +47,9 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
@@ -146,7 +148,10 @@ class VerifierOrchestratorTest {
 
     private fun createOrchestrator(
         verifierConfig: VerifierConfig = verifierConfigStub,
-        cryptoService: VerifierCryptoService = verifierCryptoService
+        cryptoService: VerifierCryptoService = verifierCryptoService,
+        readerAuthProvider: ReaderAuthCredentialProvider = ReaderAuthCredentialProvider {
+            byteArrayOf()
+        }
     ) = VerifierOrchestrator(
         logger = logger,
         prerequisiteGate = gate,
@@ -159,7 +164,7 @@ class VerifierOrchestratorTest {
         documentVerifier = documentVerifier,
         sessionTerminator = sessionTerminator,
         sessionTimer = sessionTimer,
-        readerAuthCredentialProvider = { byteArrayOf() }
+        readerAuthCredentialProvider = readerAuthProvider
     )
 
     @Before
@@ -644,6 +649,53 @@ class VerifierOrchestratorTest {
             centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
             centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
             advanceUntilIdle()
+            assertThat(
+                orchestrator.verifierSessionState.value,
+                isFailed(
+                    hasReason(
+                        instanceOf(SessionErrorReason.CannotBuildReaderAuthentication::class.java)
+                    )
+                )
+            )
+            assertEquals(1, centralBluetoothTransport.stopCalls)
+            assertEquals(1, centralBluetoothTransport.sendEndCalls)
+        }
+
+    @Test
+    fun `signed COSE_Sign1 from the reader auth provider is passed as DocRequest readerAuth`() =
+        runTest {
+            val signedReaderAuth = byteArrayOf(0x84.toByte(), 0x0A, 0x0B, 0x0C)
+            val orchestrator = createOrchestrator(
+                readerAuthProvider = { signedReaderAuth }
+            )
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.processQrCode(VALID_MDOC_URI)
+            centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+            advanceUntilIdle()
+
+            assertArrayEquals(
+                signedReaderAuth,
+                fakeCryptoService.lastReaderAuthPassedToDeviceRequest
+            )
+        }
+
+    @Test
+    fun `reader auth signing UnrecoverableError transitions to Failed with reader auth reason`() =
+        runTest {
+            val orchestrator = createOrchestrator(
+                readerAuthProvider = {
+                    throw UnrecoverableError(
+                        message = "Couldn't create signature from provided reader auth bytes.",
+                        cause = RuntimeException("signing failure")
+                    )
+                }
+            )
+            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.processQrCode(VALID_MDOC_URI)
+            centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+            centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+            advanceUntilIdle()
+
             assertThat(
                 orchestrator.verifierSessionState.value,
                 isFailed(

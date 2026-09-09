@@ -30,6 +30,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
+import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus.SESSION_TERMINATION
@@ -629,6 +630,9 @@ class VerifierOrchestrator(
                 is ReaderAuthenticationException ->
                     SessionErrorReason.CannotBuildReaderAuthentication
 
+                is UnrecoverableError ->
+                    SessionErrorReason.CannotBuildReaderAuthentication
+
                 else -> SessionErrorReason.CannotSendMessage
             }
             failWith(e.message ?: "Error building SessionEstablishment", reason)
@@ -639,24 +643,18 @@ class VerifierOrchestrator(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {
-        // DCMAW-21664: Replace usages of the verifier crypto service with
-        // `readerAuthCredentialProvider.sign()`.
-        // Alternatively, use the injected `readerAuthCredentialProvider` in
-        // `VerifierCryptoServiceImpl` and remove from this class.
         val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
         val readerAuthBytes = verifierCryptoService.buildReaderAuthenticationBytes(
             sessionTranscript = deriveUntaggedCbor(context.sessionTranscriptBytes),
             itemsRequestBytes = itemsRequestBytes
         )
 
+        val coseSign1Bytes = readerAuthCredentialProvider.sign(readerAuthBytes)
+
         val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(
             itemsRequest = itemsRequest,
             itemsRequestBytes = itemsRequestBytes,
-            readerAuth = readerAuthBytes
-        )
-
-        val coseSign1Bytes = readerAuthCredentialProvider.sign(
-            readerAuthBytes
+            readerAuth = coseSign1Bytes
         )
 
         logger.debug(logTag, "DeviceRequestBytes: ${deviceRequestBytes.toHexString()}")
