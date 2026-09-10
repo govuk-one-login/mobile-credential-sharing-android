@@ -81,6 +81,7 @@ class UnrecoverableErrorContentTest {
             SessionErrorReason.CannotBuildSessionEstablishment,
             SessionErrorReason.CannotDecryptDeviceResponse,
             SessionErrorReason.CannotEncryptDeviceRequest,
+            SessionErrorReason.CannotBuildDeviceRequest,
             SessionErrorReason.CannotProcessEngagement("qrCode"),
             SessionErrorReason.CannotSendMessage,
             SessionErrorReason.DeviceRequestProcessingError(0u),

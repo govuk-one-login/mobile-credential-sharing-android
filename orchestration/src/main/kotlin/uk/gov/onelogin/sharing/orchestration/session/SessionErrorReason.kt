@@ -39,6 +39,8 @@ sealed class SessionErrorReason {
 
     data object CannotEncryptDeviceRequest : SessionErrorReason()
 
+    data object CannotBuildDeviceRequest : SessionErrorReason()
+
     data object CannotBuildReaderAuthentication : SessionErrorReason()
 
     data object CannotBuildSessionEstablishment : SessionErrorReason()
