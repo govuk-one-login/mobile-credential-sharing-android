@@ -9,10 +9,8 @@ fun interface ReaderAuthCredentialProvider {
      *
      * @return A [ByteArray] representing a `COSE_Sign1` data structure.
      *
-     * @throws uk.gov.onelogin.sharing.models.mdoc.exceptions.RecoverableError when the User can
-     * reattempt the action
-     * @throws uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError when the journey
-     * should finish / complete.
+     * @throws uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException when
+     * the `COSE_Sign1` signature cannot be created.
      */
     suspend fun sign(readerAuthenticationPayload: ByteArray): ByteArray
 

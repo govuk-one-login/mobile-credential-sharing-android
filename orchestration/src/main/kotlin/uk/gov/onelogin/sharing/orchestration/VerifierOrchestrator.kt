@@ -30,7 +30,6 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
-import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus.SESSION_TERMINATION
@@ -628,9 +627,6 @@ class VerifierOrchestrator(
                     SessionErrorReason.CannotBuildSessionEstablishment
 
                 is ReaderAuthenticationException ->
-                    SessionErrorReason.CannotBuildReaderAuthentication
-
-                is UnrecoverableError ->
                     SessionErrorReason.CannotBuildReaderAuthentication
 
                 else -> SessionErrorReason.CannotSendMessage

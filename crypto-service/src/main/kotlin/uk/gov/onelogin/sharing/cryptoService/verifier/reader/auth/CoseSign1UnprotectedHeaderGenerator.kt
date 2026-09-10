@@ -7,6 +7,8 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.UnprotectedHeaderGenerator.Companion.UNPROTECTED_HEADER_X5_CHAIN
 
+private const val UNPROTECTED_HEADER_MAP_SIZE = 1
+
 /**
  * Creates the unprotected headers for a COSE_Sign1 structure. This is defined as:
  *
@@ -34,7 +36,7 @@ class CoseSign1UnprotectedHeaderGenerator(private val logger: Logger) : Unprotec
         generateUnprotectedHeaderData(certificateChain).let { headers ->
             headers to ByteArrayOutputStream().also { out ->
                 CBORFactory().createGenerator(out).use { gen ->
-                    gen.writeStartObject(headers.size)
+                    gen.writeStartObject(UNPROTECTED_HEADER_MAP_SIZE)
 
                     val chain = (headers[UNPROTECTED_HEADER_X5_CHAIN] as Array<*>)
                         .map { it as ByteArray }
