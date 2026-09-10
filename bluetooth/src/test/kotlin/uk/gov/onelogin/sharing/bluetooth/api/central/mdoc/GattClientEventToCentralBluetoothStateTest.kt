@@ -12,6 +12,8 @@ import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.hasAddress
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.hasSessionEnd
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.hasUuid
@@ -21,8 +23,6 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateM
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.isDisconnected
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.isError
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.isMessage
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 @RunWith(TestParameterInjector::class)
@@ -61,7 +61,7 @@ class GattClientEventToCentralBluetoothStateTest {
                     CentralBluetoothState.ConnectionStateStarted
                 ),
 
-                GattClientEvent.Error(ClientError.BLUETOOTH_PERMISSION_MISSING) to isError(
+                GattClientEvent.Error(GattClientError.BLUETOOTH_PERMISSION_MISSING) to isError(
                     equalTo(
                         CentralBluetoothTransportError.BLUETOOTH_PERMISSION_MISSING
                     )

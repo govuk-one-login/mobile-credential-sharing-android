@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.core.Transformer
 import uk.gov.onelogin.sharing.core.logger.logTag
 

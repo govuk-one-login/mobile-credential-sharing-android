@@ -14,6 +14,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import uk.gov.onelogin.sharing.bluetooth.internal.core.AndroidGattWriter
 
 @RunWith(RobolectricTestRunner::class)
 class AndroidGattWriterTest {

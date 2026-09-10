@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 import android.bluetooth.BluetoothGattService
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates

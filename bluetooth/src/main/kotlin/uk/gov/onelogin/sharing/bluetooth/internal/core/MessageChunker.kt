@@ -1,8 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
 
 private const val LOG_TAG = "MessageChunker"
 

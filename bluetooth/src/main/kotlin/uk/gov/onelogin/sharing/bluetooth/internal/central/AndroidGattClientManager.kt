@@ -20,17 +20,19 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientManager
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientManager
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.CLIENT_2_SERVER_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.STATE_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
+import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
+import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
@@ -97,7 +99,7 @@ class AndroidGattClientManager(
         if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
                 GattClientEvent.Error(
-                    ClientError.BLUETOOTH_PERMISSION_MISSING
+                    GattClientError.BLUETOOTH_PERMISSION_MISSING
                 )
             )
             return
@@ -123,7 +125,7 @@ class AndroidGattClientManager(
             logger.error(logTag, "Security exception", e)
             _events.tryEmit(
                 GattClientEvent.Error(
-                    ClientError.BLUETOOTH_PERMISSION_MISSING
+                    GattClientError.BLUETOOTH_PERMISSION_MISSING
                 )
             )
             null
@@ -132,7 +134,7 @@ class AndroidGattClientManager(
         if (bluetoothGatt == null) {
             _events.tryEmit(
                 GattClientEvent.Error(
-                    ClientError.BLUETOOTH_GATT_NOT_AVAILABLE
+                    GattClientError.BLUETOOTH_GATT_NOT_AVAILABLE
                 )
             )
         }
@@ -155,7 +157,7 @@ class AndroidGattClientManager(
         val state = gatt
             .getService(serviceUuid)
             ?.getCharacteristic(STATE_UUID) ?: return handleError(
-            ClientError.INVALID_SERVICE,
+            GattClientError.INVALID_SERVICE,
             INVALID_SERVICE
         ).let { SessionEndStates.WRITE_TO_SERVER_FAILED }
 
@@ -193,7 +195,7 @@ class AndroidGattClientManager(
         } catch (e: SecurityException) {
             logger.error(logTag, "Security exception", e)
             _events.tryEmit(
-                GattClientEvent.Error(ClientError.BLUETOOTH_PERMISSION_MISSING)
+                GattClientEvent.Error(GattClientError.BLUETOOTH_PERMISSION_MISSING)
             )
         }
     }
@@ -259,7 +261,7 @@ class AndroidGattClientManager(
         if (event.status != BluetoothGatt.GATT_SUCCESS) {
             _events.tryEmit(
                 GattClientEvent.Error(
-                    ClientError.SERVICE_DISCOVERED_ERROR
+                    GattClientError.SERVICE_DISCOVERED_ERROR
                 )
             )
             return
@@ -269,7 +271,7 @@ class AndroidGattClientManager(
         if (service == null) {
             _events.tryEmit(
                 GattClientEvent.Error(
-                    ClientError.SERVICE_NOT_FOUND
+                    GattClientError.SERVICE_NOT_FOUND
                 )
             )
             return
@@ -279,7 +281,7 @@ class AndroidGattClientManager(
             logger.debug(logTag, "Incompatible mDL service: missing characteristics")
             _events.tryEmit(
                 GattClientEvent.Error(
-                    ClientError.INVALID_SERVICE
+                    GattClientError.INVALID_SERVICE
                 )
             )
         } else {
@@ -296,11 +298,11 @@ class AndroidGattClientManager(
         val mtuRequestSuccess = gatt.requestMtu(MtuValues.MAX_MTU)
         logger.debug(logTag, "Request max MTU success: $mtuRequestSuccess")
 
-        val state = service.getCharacteristic(GattUuids.STATE_UUID)
-        val serverToClient = service.getCharacteristic(GattUuids.SERVER_2_CLIENT_UUID)
+        val state = service.getCharacteristic(STATE_UUID)
+        val serverToClient = service.getCharacteristic(SERVER_2_CLIENT_UUID)
 
         if (state == null || serverToClient == null) {
-            handleError(ClientError.INVALID_SERVICE, INVALID_SERVICE)
+            handleError(GattClientError.INVALID_SERVICE, INVALID_SERVICE)
             return
         }
 
@@ -312,7 +314,7 @@ class AndroidGattClientManager(
 
         if (!success) {
             handleError(
-                ClientError.FAILED_TO_SUBSCRIBE,
+                GattClientError.FAILED_TO_SUBSCRIBE,
                 "Failed to subscribe to characteristics"
             )
             return
@@ -328,7 +330,7 @@ class AndroidGattClientManager(
         // with Android-only devices may mask this requirement.
         listOf(state, serverToClient).forEach { characteristic ->
             characteristic
-                .getDescriptor(GattUuids.CLIENT_CHARACTERISTIC_CONFIG_UUID)
+                .getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_UUID)
                 ?.let { pendingDescriptorWrites.addLast(it) }
         }
     }
@@ -353,7 +355,7 @@ class AndroidGattClientManager(
     private fun descriptorWritten(event: GattEvent.DescriptorWrite) {
         if (event.status != BluetoothGatt.GATT_SUCCESS) {
             return handleError(
-                ClientError.FAILED_TO_SUBSCRIBE,
+                GattClientError.FAILED_TO_SUBSCRIBE,
                 "Failed to write CCCD descriptor: status=${event.status}"
             )
         }
@@ -384,8 +386,8 @@ class AndroidGattClientManager(
         val gatt = bluetoothGatt ?: return
         val state = gatt
             .getService(serviceUuid)
-            ?.getCharacteristic(GattUuids.STATE_UUID) ?: return handleError(
-            ClientError.INVALID_SERVICE,
+            ?.getCharacteristic(STATE_UUID) ?: return handleError(
+            GattClientError.INVALID_SERVICE,
             INVALID_SERVICE
         )
 
@@ -401,7 +403,7 @@ class AndroidGattClientManager(
         if (!writeSuccess) {
             awaitingStartConfirmation = false
             handleError(
-                ClientError.FAILED_TO_START,
+                GattClientError.FAILED_TO_START,
                 "Failed to write 'Start' state"
             )
             return
@@ -442,7 +444,7 @@ class AndroidGattClientManager(
                 writeQueue.onWriteComplete(uuid, false)
             }
             return handleError(
-                ClientError.FAILED_TO_START,
+                GattClientError.FAILED_TO_START,
                 "Failed to write 'Start' state"
             )
         }
@@ -468,13 +470,13 @@ class AndroidGattClientManager(
     private fun handleServiceChanged() {
         if (isTerminating) return
         handleError(
-            ClientError.SERVICE_CHANGED,
+            GattClientError.SERVICE_CHANGED,
             "Remote GATT server services changed - session invalidated"
         )
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun handleError(error: ClientError, reason: String) {
+    private fun handleError(error: GattClientError, reason: String) {
         logger.error(logTag, reason)
 
         _events.tryEmit(
@@ -576,7 +578,7 @@ class AndroidGattClientManager(
             }
 
             else -> {
-                GattClientEvent.Error(ClientError.INVALID_MESSAGE_PREFIX).also {
+                GattClientEvent.Error(GattClientError.INVALID_MESSAGE_PREFIX).also {
                     logger.debug(
                         logTag,
                         "Received invalid status byte: ${firstByte.toHexString()}"
@@ -603,7 +605,7 @@ class AndroidGattClientManager(
             notifySessionEnd()
             delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
             disconnect()
-            _events.tryEmit(GattClientEvent.Error(ClientError.EXCEEDED_MAX_BUFFER_SIZE))
+            _events.tryEmit(GattClientEvent.Error(GattClientError.EXCEEDED_MAX_BUFFER_SIZE))
         }
     }
 
