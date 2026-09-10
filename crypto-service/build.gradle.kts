@@ -54,7 +54,7 @@ dependencies {
     ).forEach(::testFixturesImplementation)
 
     listOf(
-        libs.org.bouncycastle.bcpkix.jdk18on,
+        libs.org.bouncycastle.bcprov.jdk18on,
         testFixtures(projects.credentialVerification)
     ).forEach(::testImplementation)
 }
