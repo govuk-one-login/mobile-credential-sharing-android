@@ -42,6 +42,7 @@ import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_MDOC_URI
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.cryptoService.verifier.DecryptDeviceResponseException
 import uk.gov.onelogin.sharing.cryptoService.verifier.DeferredVerifierCryptoService
+import uk.gov.onelogin.sharing.cryptoService.verifier.DeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
@@ -704,6 +705,34 @@ class VerifierOrchestratorTest {
         )
         assertEquals(1, centralBluetoothTransport.stopCalls)
         assertEquals(1, centralBluetoothTransport.sendEndCalls)
+    }
+
+    @Test
+    fun `DeviceRequest construction failure fails session and sends GATT End`() = runTest {
+        val failingCryptoService = FakeVerifierCryptoService().apply {
+            buildDeviceRequestException = DeviceRequestException(
+                "Error constructing DeviceRequest",
+                RuntimeException("CBOR encoding failure")
+            )
+        }
+        val orchestrator = createOrchestrator(cryptoService = failingCryptoService)
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+        advanceUntilIdle()
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(
+                hasReason(
+                    instanceOf(SessionErrorReason.CannotBuildDeviceRequest::class.java)
+                )
+            )
+        )
+        assertEquals(null, failingCryptoService.lastEReaderKeyBytes)
+        assertEquals(1, centralBluetoothTransport.sendEndCalls)
+        assertEquals(1, centralBluetoothTransport.stopCalls)
     }
 
     @Test

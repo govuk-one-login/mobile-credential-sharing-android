@@ -147,6 +147,7 @@ private fun handleSessionFailure(
 
         is SessionErrorReason.CannotSendMessage,
         is SessionErrorReason.CannotEncryptDeviceRequest,
+        is SessionErrorReason.CannotBuildDeviceRequest,
         is SessionErrorReason.CannotBuildSessionEstablishment,
         is SessionErrorReason.CannotDecryptDeviceResponse,
         is SessionErrorReason.MissingCryptoContext,
