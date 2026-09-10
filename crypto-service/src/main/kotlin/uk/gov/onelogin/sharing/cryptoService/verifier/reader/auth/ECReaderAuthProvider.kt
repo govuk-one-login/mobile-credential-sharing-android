@@ -8,9 +8,10 @@ import java.security.SignatureException
 import java.security.cert.X509Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
+import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 
 private const val COSE_SIGN1_ARRAY_SIZE = 4
+private const val UNPROTECTED_HEADER_MAP_SIZE = 1
 
 /**
  * Sample [ReaderAuthCredentialProvider] implementation that handles creating `COSE_Sign1`
@@ -77,7 +78,7 @@ class ECReaderAuthProvider(
             )
         }
     } catch (invalidKey: InvalidKeyException) {
-        UnrecoverableError(
+        ReaderAuthenticationException(
             message = "Couldn't initialise signing with the provided Private Key.",
             cause = invalidKey
         ).let {
@@ -85,7 +86,7 @@ class ECReaderAuthProvider(
             throw it
         }
     } catch (signature: SignatureException) {
-        UnrecoverableError(
+        ReaderAuthenticationException(
             message = "Couldn't create signature from provided reader authentication bytes.",
             cause = signature
         ).let {
@@ -139,7 +140,20 @@ class ECReaderAuthProvider(
         gen: JsonGenerator,
         unprotectedHeaderMap: Map<Long, Any>
     ) {
-        gen.writeStartObject(unprotectedHeaderMap.size)
+        require(unprotectedHeaderMap.size == UNPROTECTED_HEADER_MAP_SIZE) {
+            "Unprotected header map must contain exactly one entry, " +
+                "but was ${unprotectedHeaderMap.size}"
+        }
+        require(
+            unprotectedHeaderMap.containsKey(
+                UnprotectedHeaderGenerator.UNPROTECTED_HEADER_X5_CHAIN
+            )
+        ) {
+            "Unprotected header map must contain the x5chain entry " +
+                "(${UnprotectedHeaderGenerator.UNPROTECTED_HEADER_X5_CHAIN})"
+        }
+
+        gen.writeStartObject(UNPROTECTED_HEADER_MAP_SIZE)
 
         val x5Chain = (
             unprotectedHeaderMap[UnprotectedHeaderGenerator.UNPROTECTED_HEADER_X5_CHAIN]

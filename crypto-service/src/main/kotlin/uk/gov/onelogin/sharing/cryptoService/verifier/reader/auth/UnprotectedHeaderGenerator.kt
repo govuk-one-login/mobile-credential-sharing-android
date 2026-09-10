@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 import java.security.cert.Certificate
 
 /**
- * Component for providing protected headers for COSE_Sign1 signatures.
+ * Component for providing unprotected headers for COSE_Sign1 signatures.
  *
  * @sample CoseSign1UnprotectedHeaderGenerator
  */

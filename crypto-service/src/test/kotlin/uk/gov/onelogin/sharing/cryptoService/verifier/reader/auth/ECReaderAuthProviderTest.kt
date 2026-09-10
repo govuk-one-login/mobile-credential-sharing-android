@@ -27,7 +27,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.internal.matchers.ThrowableCauseMatcher.hasCause
 import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
+import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
 import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGenerator
 
@@ -100,7 +100,7 @@ class ECReaderAuthProviderTest {
     }
 
     @Test
-    fun `Wraps InvalidKeyExceptions in UnrecoverableError instances`() = runTest {
+    fun `Wraps InvalidKeyExceptions in ReaderAuthenticationException instances`() = runTest {
         val invalidKeyException = InvalidKeyException("This is a unit test")
         signature = mockk(relaxed = true)
         every { signature.initSign(privateKey) } throws invalidKeyException
@@ -112,7 +112,7 @@ class ECReaderAuthProviderTest {
         assertThat(
             throwable,
             allOf(
-                instanceOf(UnrecoverableError::class.java),
+                instanceOf(ReaderAuthenticationException::class.java),
                 hasMessage(equalTo("Couldn't initialise signing with the provided Private Key.")),
                 hasCause(equalTo(invalidKeyException))
             )
@@ -120,7 +120,7 @@ class ECReaderAuthProviderTest {
     }
 
     @Test
-    fun `Wraps SignatureExceptions in UnrecoverableError instances`() = runTest {
+    fun `Wraps SignatureExceptions in ReaderAuthenticationException instances`() = runTest {
         val exception = SignatureException("This is a unit test")
         val input = byteArrayOf(1, 2, 3)
         signature = mockk(relaxed = true)
@@ -133,7 +133,7 @@ class ECReaderAuthProviderTest {
         assertThat(
             throwable,
             allOf(
-                instanceOf(UnrecoverableError::class.java),
+                instanceOf(ReaderAuthenticationException::class.java),
                 hasMessage(
                     equalTo("Couldn't create signature from provided reader authentication bytes.")
                 ),

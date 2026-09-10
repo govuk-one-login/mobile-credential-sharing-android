@@ -67,21 +67,27 @@ class TestAppReaderAuthCredentialProviderFactory(
      */
     override fun create(): ReaderAuthCredentialProvider {
         val option = _readerAuthOption.value
-        val privateKeyChain = processPrivateKeyAssetChain(option.privateKeyChain.asSequence())
-        val certificateChain = processCertificateAssetChain(option.certificateChain.asSequence())
+        val privateKey = processPrivateKeyAssetChain(
+            sequenceOf(
+                option.privateKeyChain.first()
+            )
+        ).first()
+
+        // x5chain must contain the leaf and intermediate(s) only, with the root excluded.
+        // The asset chain is leaf-first and ends with the root, so drop the last element.
+        val certificateChain = processCertificateAssetChain(
+            option.certificateChain.dropLast(1).asSequence()
+        )
 
         return ECReaderAuthProvider(
-            // x5chain must contain the leaf and intermediate(s) only, with the root excluded
-            // (per ISO 18013-5 ReaderAuth). The asset chain is leaf-first and ends with the root,
-            // so drop the last element.
-            certificateChain = certificateChain.dropLast(1),
+            certificateChain = certificateChain,
             logger = logger,
             protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger),
             unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),
             sigStructureGenerator = SigningSignatureStructure(
                 logger = logger,
                 signature = Signature.getInstance(SIGNING_ALGORITHM),
-                privateKey = privateKeyChain.first(),
+                privateKey = privateKey,
                 decorated = CoseSigStructureGenerator(
                     logger = logger,
                     protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger = logger)

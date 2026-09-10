@@ -49,7 +49,6 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentExcept
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
-import uk.gov.onelogin.sharing.models.mdoc.exceptions.UnrecoverableError
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto.Companion.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
@@ -680,33 +679,32 @@ class VerifierOrchestratorTest {
         }
 
     @Test
-    fun `reader auth signing UnrecoverableError transitions to Failed with reader auth reason`() =
-        runTest {
-            val orchestrator = createOrchestrator(
-                readerAuthProvider = {
-                    throw UnrecoverableError(
-                        message = "Couldn't create signature from provided reader auth bytes.",
-                        cause = RuntimeException("signing failure")
-                    )
-                }
-            )
-            backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
-            orchestrator.processQrCode(VALID_MDOC_URI)
-            centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
-            centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
-            advanceUntilIdle()
+    fun `ReaderAuthenticationException transitions to Failed with reader auth reason`() = runTest {
+        val orchestrator = createOrchestrator(
+            readerAuthProvider = {
+                throw ReaderAuthenticationException(
+                    message = "Couldn't create signature from provided reader auth bytes.",
+                    cause = RuntimeException("signing failure")
+                )
+            }
+        )
+        backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.processQrCode(VALID_MDOC_URI)
+        centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
+        centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+        advanceUntilIdle()
 
-            assertThat(
-                orchestrator.verifierSessionState.value,
-                isFailed(
-                    hasReason(
-                        instanceOf(SessionErrorReason.CannotBuildReaderAuthentication::class.java)
-                    )
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            isFailed(
+                hasReason(
+                    instanceOf(SessionErrorReason.CannotBuildReaderAuthentication::class.java)
                 )
             )
-            assertEquals(1, centralBluetoothTransport.stopCalls)
-            assertEquals(1, centralBluetoothTransport.sendEndCalls)
-        }
+        )
+        assertEquals(1, centralBluetoothTransport.stopCalls)
+        assertEquals(1, centralBluetoothTransport.sendEndCalls)
+    }
 
     @Test
     fun `sendMessage success completes transmission`() = runTest {

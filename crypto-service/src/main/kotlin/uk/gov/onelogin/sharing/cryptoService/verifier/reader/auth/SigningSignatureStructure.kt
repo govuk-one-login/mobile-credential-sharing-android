@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.core.logger.logTag
  * maintaining the same function contract.
  *
  * Uses the [privateKey] to begin the [signature]'s signing process on [decorated]'s return value
- * to obtain a `DER` encoded certificate. The `DER` data is then converted to a raw format
+ * to obtain a `DER` encoded ECDSA signature. The `DER` signature is then converted to a raw format
  * (`R || S`) for use within COSE related data transfer.
  *
  * @property logger The GOV.UK [Logger] implementation to send status updates to.
