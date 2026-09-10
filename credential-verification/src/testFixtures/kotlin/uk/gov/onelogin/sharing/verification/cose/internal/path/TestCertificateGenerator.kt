@@ -73,6 +73,11 @@ class TestCertificateGenerator(
         this.notAfter = notAfter
     }
 
+    fun withEkuOids(oids: List<String>, critical: Boolean = true) = apply {
+        this.ekuOids = oids
+        this.ekuCritical = critical
+    }
+
     fun notYetValid() = apply {
         notBefore = Date(System.currentTimeMillis() + 365L * 86400000L)
         notAfter = Date(System.currentTimeMillis() + 2 * 365L * 86400000L)
