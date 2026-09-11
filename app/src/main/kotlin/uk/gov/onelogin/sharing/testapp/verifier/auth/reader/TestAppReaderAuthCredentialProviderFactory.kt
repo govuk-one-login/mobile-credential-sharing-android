@@ -80,8 +80,8 @@ class TestAppReaderAuthCredentialProviderFactory(
         )
 
         return ECReaderAuthProvider(
-            certificateChain = certificateChain,
             logger = logger,
+            certificateChain = certificateChain,
             protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger),
             unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),
             sigStructureGenerator = SigningSignatureStructure(
