@@ -9,14 +9,19 @@ data class UnprotectedX5tCase(val description: String, val applyTo: ObjectNode.(
     override fun toString(): String = description
 }
 
-class MissingProtectedX5tProvider : TestParameterValuesProvider() {
+class MisplacedX5tProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<UnprotectedX5tCase> = listOf(
-        UnprotectedX5tCase("x5t absent from both headers") { },
         UnprotectedX5tCase("x5t present only in unprotected header") {
             set<ArrayNode>(
                 CoseSign1Builder.X5T_LABEL,
                 CoseSign1Builder.sha256X5t(CertificateStubs.leaf)
             )
         }
+    )
+}
+
+class AbsentX5tProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<UnprotectedX5tCase> = listOf(
+        UnprotectedX5tCase("x5t absent from both headers") { }
     )
 }
