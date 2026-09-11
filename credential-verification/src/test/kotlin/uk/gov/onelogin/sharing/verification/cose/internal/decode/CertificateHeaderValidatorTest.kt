@@ -163,9 +163,27 @@ class CertificateHeaderValidatorTest {
     }
 
     @Test
-    fun `protected x5t missing fails with MalformedCoseSign1`(
+    fun `absent x5t proceeds and exposes candidate leaf`(
         @TestParameter shape: AuthShape,
-        @TestParameter(valuesProvider = MissingProtectedX5tProvider::class) case: UnprotectedX5tCase
+        @TestParameter(valuesProvider = AbsentX5tProvider::class) case: UnprotectedX5tCase
+    ) {
+        val protectedHeader = CoseSign1Builder.protectedHeaderBytes(
+            listOf(leaf),
+            includeX5t = false
+        )
+        val unprotectedHeader = CoseSign1Builder.unprotectedHeaderBytes(listOf(leaf), case.applyTo)
+
+        val profile = validator.validate(coseSign1(protectedHeader, unprotectedHeader, shape))
+
+        assertThat(profile.candidateLeaf, equalTo(leaf.encoded))
+        assertThat(profile.chain.size, equalTo(1))
+        assertThat(profile.chain[0], equalTo(leaf.encoded))
+    }
+
+    @Test
+    fun `misplaced x5t in unprotected header fails with MalformedCoseSign1`(
+        @TestParameter shape: AuthShape,
+        @TestParameter(valuesProvider = MisplacedX5tProvider::class) case: UnprotectedX5tCase
     ) {
         val protectedHeader = CoseSign1Builder.protectedHeaderBytes(
             listOf(leaf),

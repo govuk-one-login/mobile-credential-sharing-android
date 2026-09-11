@@ -25,8 +25,9 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.Unsuppo
  *  - ignores `x5bag` wherever it occurs (never chain material, never a fallback for `x5chain`),
  *  - requires a non-empty `x5chain` (label 33) present only in the unprotected header, either a
  *    single DER certificate byte string or a non-empty array of DER certificate byte strings,
- *  - requires a protected `x5t` (label 34) of the form `[SHA-256 (-16), 32-byte hash]` that equals
- *    the SHA-256 digest of the exact DER bytes of the first supplied certificate.
+ *  - treats the protected `x5t` (label 34) as optional. When present it must be of the form
+ *    `[SHA-256 (-16), 32-byte hash]` that equals the SHA-256 digest of the exact DER bytes of the
+ *    first supplied certificate. When absent, verification proceeds to the next check.
  *
  * It selects the first supplied certificate as the candidate leaf and preserves the complete
  * supplied sequence unchanged.
@@ -47,9 +48,10 @@ internal class CertificateHeaderValidator {
      *
      * @throws MissingX5Chain when no `x5chain` is present in either header.
      * @throws MalformedCoseSign1 for prohibited placement, malformed shapes, non-DER certificate
-     *  bytes, or a missing/misplaced/wrong-length/wrong-shape `x5t`.
-     * @throws UnsupportedAlgorithm when the `x5t` hash algorithm is not SHA-256 (-16).
-     * @throws InvalidSignature when the `x5t` thumbprint does not match the first certificate.
+     *  bytes, or a misplaced/wrong-length/wrong-shape `x5t`. A wholly absent `x5t` is permitted.
+     * @throws UnsupportedAlgorithm when a present `x5t` hash algorithm is not SHA-256 (-16).
+     * @throws InvalidSignature when a present `x5t` thumbprint does not match the first
+     *  certificate.
      */
     fun validate(coseSign1: InternalCoseSign1): CertificateHeaderProfile {
         val decodedProtected = decodeHeader(coseSign1.protectedHeader)
@@ -58,10 +60,16 @@ internal class CertificateHeaderValidator {
         val chain = resolveChain(decodedProtected, decodedUnprotected)
         val candidateLeaf = chain.first()
 
-        enforceThumbprint(decodedProtected, decodedUnprotected, candidateLeaf)
+        if (isX5tPresent(decodedProtected, decodedUnprotected)) {
+            enforceThumbprint(decodedProtected, decodedUnprotected, candidateLeaf)
+        }
 
         return CertificateHeaderProfile(candidateLeaf = candidateLeaf, chain = chain)
     }
+
+    private fun isX5tPresent(decodedProtected: JsonNode, decodedUnprotected: JsonNode?): Boolean =
+        hasLabel(decodedProtected, X5T_LABEL) ||
+            (decodedUnprotected != null && hasLabel(decodedUnprotected, X5T_LABEL))
 
     private fun resolveChain(
         decodedProtected: JsonNode,
