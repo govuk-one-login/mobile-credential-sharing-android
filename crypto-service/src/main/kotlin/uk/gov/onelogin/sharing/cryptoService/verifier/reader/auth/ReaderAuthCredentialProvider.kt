@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.orchestration.verifier.auth.reader
+package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
 /**
  * Functional interface for creating COSE_Sign1 signatures.
@@ -9,12 +9,10 @@ fun interface ReaderAuthCredentialProvider {
      *
      * @return A [ByteArray] representing a `COSE_Sign1` data structure.
      *
-     * @throws uk.gov.onelogin.sharing.orchestration.exceptions.RecoverableError when the User can
-     * reattempt the action
-     * @throws uk.gov.onelogin.sharing.orchestration.exceptions.UnrecoverableError when the journey
-     * should finish / complete.
+     * @throws uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException when
+     * the `COSE_Sign1` signature cannot be created.
      */
-    fun sign(readerAuthenticationPayload: ByteArray): ByteArray
+    suspend fun sign(readerAuthenticationPayload: ByteArray): ByteArray
 
     /**
      * Functional interface for generating instances of [ReaderAuthCredentialProvider].

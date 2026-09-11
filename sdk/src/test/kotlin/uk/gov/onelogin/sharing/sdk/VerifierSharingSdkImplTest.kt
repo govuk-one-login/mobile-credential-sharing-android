@@ -7,12 +7,12 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerificationRequest
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialGraph
 import uk.gov.onelogin.sharing.sdk.internal.verifier.CredentialVerifierImpl

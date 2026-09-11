@@ -6,10 +6,10 @@ import dev.zacsweers.metro.createGraphFactory
 import java.security.cert.X509Certificate
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierConfigStub.verifierConfigStub
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
