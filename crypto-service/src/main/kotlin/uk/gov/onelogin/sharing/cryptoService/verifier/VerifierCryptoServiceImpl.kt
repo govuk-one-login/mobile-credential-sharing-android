@@ -171,17 +171,23 @@ class VerifierCryptoServiceImpl(
         itemsRequest: ItemsRequest,
         itemsRequestBytes: ByteArray?,
         readerAuth: ByteArray?
-    ): ByteArray = DeviceRequest(
-        version = "1.0",
-        docRequests = listOf(
-            DocRequest(
-                itemsRequest = itemsRequest,
-                readerAuth = readerAuth,
-                itemsRequestBytes = itemsRequestBytes
+    ): ByteArray = try {
+        DeviceRequest(
+            version = "1.0",
+            docRequests = listOf(
+                DocRequest(
+                    itemsRequest = itemsRequest,
+                    readerAuth = readerAuth,
+                    itemsRequestBytes = itemsRequestBytes
+                )
             )
-        )
-    ).toDto().toCbor().also {
-        logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
+        ).toDto().toCbor().also {
+            logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
+        }
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        val message = "Error constructing DeviceRequest"
+        logger.error(logTag, message, e)
+        throw DeviceRequestException(message, e)
     }
 
     override fun encryptDeviceRequest(

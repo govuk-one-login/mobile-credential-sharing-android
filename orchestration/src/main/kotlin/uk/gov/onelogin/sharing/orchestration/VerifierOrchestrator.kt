@@ -24,6 +24,7 @@ import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
+import uk.gov.onelogin.sharing.cryptoService.verifier.DeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
@@ -622,6 +623,9 @@ class VerifierOrchestrator(
             val reason = when (e) {
                 is EncryptDeviceRequestException ->
                     SessionErrorReason.CannotEncryptDeviceRequest
+
+                is DeviceRequestException ->
+                    SessionErrorReason.CannotBuildDeviceRequest
 
                 is SessionEstablishmentException ->
                     SessionErrorReason.CannotBuildSessionEstablishment
