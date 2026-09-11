@@ -105,11 +105,10 @@ class TrustVerifierImplTest {
             signatureVerifier
         )
 
-        // Valid unprotected x5chain but no protected x5t -> fails before path/signature.
-        val coseWithoutX5t = buildCoseSign1WithoutX5t(CertificateStubs.leafSignedByRoot)
+        val coseWithMalformedHeader = buildMalformedCoseSign1(CertificateStubs.leafSignedByRoot)
 
         val exception = assertThrows(VerificationResult.Failure::class.java) {
-            earlyExitVerifier.verifyCOSESign1(coseWithoutX5t, CertificateStubs.rootCa)
+            earlyExitVerifier.verifyCOSESign1(coseWithMalformedHeader, CertificateStubs.rootCa)
         }
 
         assertThat(exception, hasError(VerificationError.MALFORMED_ISSUER_AUTH))
@@ -195,20 +194,13 @@ class TrustVerifierImplTest {
         return cborMapper.writeValueAsBytes(issuerAuthNode)
     }
 
-    private fun buildCoseSign1WithoutX5t(cert: X509Certificate): ByteArray {
-        val protectedHeader =
-            CoseSign1Builder.protectedHeaderBytes(listOf(cert), includeX5t = false)
-        val unprotectedNode = CoseSign1Builder.objectNode()
-        val leafNode = CoseSign1Builder.objectNode().binaryNode(cert.encoded)
-        unprotectedNode.set<ArrayNode>(
-            CoseSign1Builder.X5CHAIN_LABEL,
-            CoseSign1Builder.objectNode().arrayNode().add(leafNode)
-        )
-        val unprotectedHeader = CoseSign1Builder.toBytes(unprotectedNode)
-        return CoseSign1Builder.assembleUnsigned(
-            protectedHeader,
-            unprotectedHeader
-        )
+    private fun buildMalformedCoseSign1(cert: X509Certificate): ByteArray {
+        val protectedBytes = CoseSign1Builder.protectedHeaderBytes(listOf(cert)) {
+            CoseSign1Builder.putX5Chain(this, listOf(cert))
+        }
+        val unprotectedBytes = CoseSign1Builder.unprotectedHeaderBytes(listOf(cert))
+
+        return CoseSign1Builder.assembleUnsigned(protectedBytes, unprotectedBytes)
     }
 
     private fun buildRsaCertDer(): ByteArray {
