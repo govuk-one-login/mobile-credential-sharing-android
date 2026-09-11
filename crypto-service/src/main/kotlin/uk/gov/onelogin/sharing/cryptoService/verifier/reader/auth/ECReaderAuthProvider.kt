@@ -32,9 +32,10 @@ private const val UNPROTECTED_HEADER_MAP_SIZE = 1
  * ]
  * ```
  *
- * @property certificateChain The X509 certificate chain to use. The [List] is leaf-first: the
- * first element is the leaf certificate, followed by any intermediates, with the uppermost (root)
- * certificate last.
+ * @property certificateChain The X509 certificate chain to use for reader authentication, ordered
+ * leaf-first: the first element is the reader's end-entity (leaf) certificate, followed by any
+ * intermediate certificates needed to complete the chain. The consumer must exclude the trust
+ * root: the root is not included in the `x5chain` header.
  * @property logger The GOV.UK [Logger] to send status updates to.
  * @property sigStructureGenerator The [SigStructureGenerator] implementation that generates part of
  * the `COSE_Sign1` structure.
