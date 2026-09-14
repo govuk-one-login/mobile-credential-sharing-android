@@ -21,14 +21,14 @@ Internal team members can find the team ways of working on Confluence.
 
 The SDK implements the ISO 18013-5 specification:
 
-- **Device Engagement:** Generates and scans QR codes, broadcasts and connects over Bluetooth Low Energy (BLE).
-- **Session Management:** Establishes secure channels (mdoc session encryption).
-- **Message Passing:** Creates, transmits, and parses `DeviceRequests` and `DeviceResponses`.
+- **Device Engagement:** generates and scans QR codes, broadcasts and connects over Bluetooth Low Energy (BLE).
+- **Session Management:** establishes secure channels (mdoc session encryption).
+- **Message Passing:** creates, transmits, and parses `DeviceRequests` and `DeviceResponses`.
 
 This repository contains packages for:
 
 - [Bluetooth](./bluetooth): sharing data over Bluetooth
-- [Core features](./core): Common capabilities across the code base
+- [Core features](./core): common capabilities across the codebase
 - [Holder](./holder): securely share a credential with a verifier
 - [Models](./models): representing data models in Concise Binary Object Representation (CBOR) format
 - [CryptoService](./crypto-service): encryption and decryption of data for transit
@@ -92,7 +92,7 @@ Wallet [Technical Documentation](https://docs.wallet.service.gov.uk/consuming-an
 
 ## Usage
 
-### Integration Guide: Holder Role
+### Integration guide: holder role
 
 The **consumer** adopting the Holder role provisions and stores credentials securely. It acts as the
 secure vault, supplying both issuer-signed data and device signatures when a Verifier initiates a
@@ -101,14 +101,14 @@ request.
 To maintain cryptographic boundaries, the consumer provides the exact CBOR `IssuerSignedItem` bytes
 originally signed by the Issuer. The SDK doesn't sign these attributes. The SDK constructs
 `DeviceAuthentication` payloads to prove credentials as part of binding to the current BLE session.
-The Android Keystore's private key signs credentials. Finally, the SDK handles all mdoc session
+The Android Keystore signing key signs credentials. Finally, the SDK handles all mdoc session
 encryption for the transport tunnel.
 
-#### 1. Importing the module
+**1. Importing the module**
 
 Import the module into Wallet Core using GitHub Packages / Gradle Modules.
 
-#### 2. Implement the CredentialProvider
+**2. Implement the CredentialProvider**
 
 Wallet Core implements the `CredentialProvider` interface to provide the Sharing SDK with access to credentials and signing capabilities:
 
@@ -140,7 +140,7 @@ data class Credential(
 
 Initially `getCredentials` always returns an array of exactly **one** element: the decrypted raw CBOR data for the user's mDL credential.
 
-#### 3. Initialise the SDK and create a Presenter
+**3. Initialise the SDK and create a Presenter**
 
 The consumer initialises the SDK with the app context and a logger, then creates a
 `CredentialPresenter` by passing the `CredentialProvider` implementation.
@@ -155,7 +155,7 @@ val credentialProvider = MyCredentialProvider()
 val presenter = sdk.presentCredentialSdk.presenter(credentialProvider)
 ```
 
-#### 4. Present the Share Flow
+**4. Present the Share Flow**
 
 The consumer adds the presenter's flow to its view hierarchy, which triggers the sharing journey to start:
 
@@ -168,7 +168,7 @@ ShareCredential(
 
 ---
 
-### Integration Guide: Verifier Role
+### Integration guide: verifier role
 
 The **consumer** adopting the Verifier role requests attributes and consumes the verified response.
 It acts as the trust anchor, supplying the SDK with the Root Certificates of trusted issuers.
@@ -182,7 +182,7 @@ To maintain cryptographic boundaries, the SDK handles the complete transaction l
 
 The consumer defines the request and receives the validated data.
 
-#### 1. Initialise the Verifier Module
+**1. Initialise the Verifier Module**
 
 The consumer initialises the Verifier module, injecting the Root Certificates used to validate the
 Issuer's signature on the credential. The SDK utilises an internal `PrerequisiteGate` to resolve
@@ -197,7 +197,7 @@ val trustedRoots = listOf(myGovernmentRootCA, myOtherTrustedCA)
 val verifier = CredentialVerifier(trustedCertificates = trustedRoots)
 ```
 
-#### 2. Request Attributes
+**2. Request Attributes**
 
 The consumer defines the `CredentialRequest` up front. This specifies the document type and the
 required attributes.
@@ -209,7 +209,7 @@ val request = CredentialRequest(
 )
 ```
 
-#### 3. Start Verification & Process Response
+**3. Start Verification & Process Response**
 
 The SDK takes control of the flow:
 

@@ -16,12 +16,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import uk.gov.onelogin.sharing.verification.cose.CoseVerifierImpl
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.CertificateHeaderValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseHeaderValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Builder
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Decoder
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateChainValidatorImpl
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
+import uk.gov.onelogin.sharing.verification.cose.internal.profile.CertificateProfileValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatureVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
@@ -31,13 +33,22 @@ import uk.gov.onelogin.sharing.verification.trust.MsoBuilder
 class TrustVerifierImplTest {
 
     private val decoder = CoseSign1Decoder()
-    private val verifier = TrustVerifierImpl(
+    private val headerValidator = CertificateHeaderValidator()
+    private val pathValidator = CertificateChainValidatorImpl()
+    private val profileValidator = CertificateProfileValidator()
+    private val signatureVerifier = CoseSignatureVerifier(CoseHeaderValidator())
+    private val coseVerifier = CoseVerifierImpl(
         decoder,
-        CoseSignatureVerifier(
-            CoseHeaderValidator()
-        ),
-        CertificateHeaderValidator(),
-        CertificateChainValidatorImpl()
+        headerValidator,
+        pathValidator,
+        profileValidator,
+        signatureVerifier
+    )
+
+    private val verifier = TrustVerifierImpl(
+        coseVerifier,
+        decoder,
+        signatureVerifier
     )
     private val cborMapper = ObjectMapper(CBORFactory())
 
@@ -81,11 +92,17 @@ class TrustVerifierImplTest {
     fun `header failure stops before path and signature verification`() {
         val chainValidator = spyk(CertificateChainValidatorImpl())
         val signatureVerifier = spyk(CoseSignatureVerifier(CoseHeaderValidator()))
-        val earlyExitVerifier = TrustVerifierImpl(
+        val coseVerifier = CoseVerifierImpl(
             decoder,
-            signatureVerifier,
             CertificateHeaderValidator(),
-            chainValidator
+            chainValidator,
+            CertificateProfileValidator(),
+            signatureVerifier
+        )
+        val earlyExitVerifier = TrustVerifierImpl(
+            coseVerifier,
+            decoder,
+            signatureVerifier
         )
 
         // Valid unprotected x5chain but no protected x5t -> fails before path/signature.
@@ -179,12 +196,19 @@ class TrustVerifierImplTest {
     }
 
     private fun buildCoseSign1WithoutX5t(cert: X509Certificate): ByteArray {
-        // Protected header carries only the algorithm; no x5t (label 34).
-        val protectedBytes = CoseSign1Builder.protectedHeaderBytes(listOf(cert), includeX5t = false)
-        // Unprotected header carries a valid single-certificate x5chain (label 33).
-        val unprotectedBytes = CoseSign1Builder.unprotectedHeaderBytes(listOf(cert))
-
-        return CoseSign1Builder.assembleUnsigned(protectedBytes, unprotectedBytes)
+        val protectedHeader =
+            CoseSign1Builder.protectedHeaderBytes(listOf(cert), includeX5t = false)
+        val unprotectedNode = CoseSign1Builder.objectNode()
+        val leafNode = CoseSign1Builder.objectNode().binaryNode(cert.encoded)
+        unprotectedNode.set<ArrayNode>(
+            CoseSign1Builder.X5CHAIN_LABEL,
+            CoseSign1Builder.objectNode().arrayNode().add(leafNode)
+        )
+        val unprotectedHeader = CoseSign1Builder.toBytes(unprotectedNode)
+        return CoseSign1Builder.assembleUnsigned(
+            protectedHeader,
+            unprotectedHeader
+        )
     }
 
     private fun buildRsaCertDer(): ByteArray {
@@ -219,12 +243,16 @@ class TrustVerifierImplTest {
     }
 
     private fun buildCoseSign1WithCertBytes(cert: X509Certificate): ByteArray {
-        // Protected header carries the algorithm plus a SHA-256 x5t bound to the certificate.
-        val protectedBytes = CoseSign1Builder.protectedHeaderBytes(listOf(cert))
-        // Unprotected header carries a valid single-certificate x5chain (label 33).
-        val unprotectedBytes = CoseSign1Builder.unprotectedHeaderBytes(listOf(cert))
+        val protectedHeader = CoseSign1Builder.protectedHeaderBytes(listOf(cert))
+        val unprotectedNode = CoseSign1Builder.objectNode()
+        val leafNode = CoseSign1Builder.objectNode().binaryNode(cert.encoded)
+        unprotectedNode.set<ArrayNode>(
+            CoseSign1Builder.X5CHAIN_LABEL,
+            CoseSign1Builder.objectNode().arrayNode().add(leafNode)
+        )
+        val unprotectedHeader = CoseSign1Builder.toBytes(unprotectedNode)
 
-        return CoseSign1Builder.assembleUnsigned(protectedBytes, unprotectedBytes)
+        return CoseSign1Builder.assembleUnsigned(protectedHeader, unprotectedHeader)
     }
 
     private fun String.hexToByteArray(): ByteArray =

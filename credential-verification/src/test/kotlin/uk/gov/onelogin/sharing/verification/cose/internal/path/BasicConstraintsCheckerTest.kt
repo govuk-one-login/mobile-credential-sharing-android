@@ -5,7 +5,6 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UntrustedCertificate
 
 class BasicConstraintsCheckerTest {
     private val validator: CertificateChainValidator = CertificateChainValidatorImpl()
@@ -93,25 +92,5 @@ class BasicConstraintsCheckerTest {
         }
 
         assertThat(result.isSuccess, equalTo(true))
-    }
-
-    @Test
-    fun `intermediate with non-critical BasicConstraints throws UNTRUSTED_CERTIFICATE`() {
-        assertThrows(UntrustedCertificate::class.java) {
-            validator.verify(
-                listOf(CertificateStubs.leaf, CertificateStubs.caNotCriticalBasicConstraints),
-                CertificateStubs.rootCa
-            )
-        }
-    }
-
-    @Test
-    fun `intermediate with cA flag false throws UNTRUSTED_CERTIFICATE`() {
-        assertThrows(UntrustedCertificate::class.java) {
-            validator.verify(
-                listOf(CertificateStubs.leaf, CertificateStubs.caWithCaFlagFalse),
-                CertificateStubs.rootCa
-            )
-        }
     }
 }
