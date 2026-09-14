@@ -1,17 +1,16 @@
 package uk.gov.onelogin.sharing.verification.trust
 
 import dev.zacsweers.metro.ContributesBinding
-import java.io.ByteArrayInputStream
-import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
 import kotlin.time.ExperimentalTime
 import kotlin.time.toKotlinInstant
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
-import uk.gov.onelogin.sharing.verification.cose.internal.decode.CertificateHeaderValidator
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationRequest
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationResult
+import uk.gov.onelogin.sharing.verification.cose.CoseVerifierImpl
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Decoder
-import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateChainValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.path.OID_COUNTRY
 import uk.gov.onelogin.sharing.verification.cose.internal.path.OID_STATE_OR_PROVINCE
 import uk.gov.onelogin.sharing.verification.cose.internal.path.parseSubjectName
@@ -23,51 +22,27 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthR
 
 @ContributesBinding(CredentialVerificationScope::class)
 class TrustVerifierImpl internal constructor(
+    private val coseVerifier: CoseVerifierImpl,
     private val coseSign1Decoder: CoseSign1Decoder,
-    private val signatureVerifier: CoseSignatureVerifier,
-    private val certificateHeaderValidator: CertificateHeaderValidator,
-    private val certificateChainValidator: CertificateChainValidator
+    private val signatureVerifier: CoseSignatureVerifier
 ) : TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
     override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult =
         try {
-            val coseSign1 = coseSign1Decoder.decode(data)
-            val certificateHeaderProfile = certificateHeaderValidator.validate(coseSign1)
+            val result = coseVerifier.verify(
+                CoseVerificationRequest.Attached(data, trustedRoot)
+            ) as CoseVerificationResult.Attached
 
-            val certFactory = CertificateFactory.getInstance("X.509")
-            val certs = certificateHeaderProfile.chain.map {
-                certFactory.generateCertificate(ByteArrayInputStream(it)) as X509Certificate
-            }
-
-            val leaf = certs.first()
-            certificateChainValidator.verify(certs, trustedRoot)
-
-            val publicKey = try {
-                leaf.publicKey as ECPublicKey
-            } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-                throw CoseVerificationFailure.UntrustedCertificate
-            }
-
-            val payload = coseSign1.payload
-                ?: throw CoseVerificationFailure.MalformedCoseSign1
-
-            signatureVerifier.verify(
-                coseSign1,
-                publicKey,
-                payload
-            )
-
-            val validityPeriod = CertificateValidityPeriod(
-                notBefore = leaf.notBefore.toInstant().toKotlinInstant(),
-                notAfter = leaf.notAfter.toInstant().toKotlinInstant()
-            )
-
+            val leaf = result.leafCertificate
             val subjectName = parseSubjectName(leaf)
 
             IssuerAuthResult(
-                certificateValidityPeriod = validityPeriod,
-                msoPayload = payload,
+                certificateValidityPeriod = CertificateValidityPeriod(
+                    notBefore = leaf.notBefore.toInstant().toKotlinInstant(),
+                    notAfter = leaf.notAfter.toInstant().toKotlinInstant()
+                ),
+                msoPayload = result.payload,
                 subjectCountry = subjectName[OID_COUNTRY]
                     ?: throw CoseVerificationFailure.MalformedCoseSign1,
                 subjectState = subjectName[OID_STATE_OR_PROVINCE]

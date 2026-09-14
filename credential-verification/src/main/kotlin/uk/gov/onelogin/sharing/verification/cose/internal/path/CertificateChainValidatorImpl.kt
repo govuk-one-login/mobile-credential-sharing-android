@@ -27,10 +27,7 @@ class CertificateChainValidatorImpl internal constructor() : CertificateChainVal
             val trustAnchor = TrustAnchor(trustedRoot, null)
             val params = PKIXParameters(setOf(trustAnchor)).apply {
                 isRevocationEnabled = false
-                addCertPathChecker(KeyUsageChecker(certificates.first()))
-                addCertPathChecker(BasicConstraintsChecker(certificates.first()))
                 addCertPathChecker(CertificateStructureChecker(certificates, trustedRoot))
-                addCertPathChecker(IacaContentChecker(certificates, trustedRoot))
             }
 
             CertPathValidator.getInstance("PKIX").validate(certPath, params)
