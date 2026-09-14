@@ -1,13 +1,10 @@
 package uk.gov.onelogin.sharing.verification.cose.internal.path
 
 import java.security.cert.CertPathValidatorException
-import java.security.cert.X509Certificate
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 
 class KeyUsageCheckerTest {
-    private val validator: CertificateChainValidator = CertificateChainValidatorImpl()
 
     @Test
     fun `check throws when CA has keyCertSign but missing cRLSign`() {
@@ -40,48 +37,42 @@ class KeyUsageCheckerTest {
     }
 
     @Test
-    fun `leaf without KeyUsage extension throws UNTRUSTED_CERTIFICATE`() {
-        assertValidationFailure(
-            listOf(CertificateStubs.leafNoKeyUsage),
-            CertificateStubs.rootCa
-        )
+    fun `leaf without KeyUsage extension throws CertPathValidatorException`() {
+        val checker = KeyUsageChecker(CertificateStubs.leafNoKeyUsage)
+        checker.init(false)
+
+        assertThrows(CertPathValidatorException::class.java) {
+            checker.check(CertificateStubs.leafNoKeyUsage, mutableSetOf())
+        }
     }
 
     @Test
-    fun `leaf with keyCertSign instead of digitalSignature throws UNTRUSTED_CERTIFICATE`() {
-        assertValidationFailure(
-            listOf(CertificateStubs.leafWithCaKeyUsage),
-            CertificateStubs.rootCa
-        )
+    fun `leaf with keyCertSign instead of digitalSignature throws CertPathValidatorException`() {
+        val checker = KeyUsageChecker(CertificateStubs.leafWithCaKeyUsage)
+        checker.init(false)
+
+        assertThrows(CertPathValidatorException::class.java) {
+            checker.check(CertificateStubs.leafWithCaKeyUsage, mutableSetOf())
+        }
     }
 
     @Test
-    fun `leaf with non-critical KeyUsage throws UNTRUSTED_CERTIFICATE`() {
-        assertValidationFailure(
-            listOf(CertificateStubs.leafWithNonCriticalKeyUsage),
-            CertificateStubs.rootCa
-        )
+    fun `CA intermediate without KeyUsage throws CertPathValidatorException`() {
+        val checker = KeyUsageChecker(CertificateStubs.leaf)
+        checker.init(false)
+
+        assertThrows(CertPathValidatorException::class.java) {
+            checker.check(CertificateStubs.caWithoutKeyUsage, mutableSetOf())
+        }
     }
 
     @Test
-    fun `CA intermediate without KeyUsage throws UNTRUSTED_CERTIFICATE`() {
-        assertValidationFailure(
-            listOf(CertificateStubs.leaf, CertificateStubs.caWithoutKeyUsage),
-            CertificateStubs.rootCa
-        )
-    }
+    fun `leaf with extra bits set alongside digitalSignature throws CertPathValidatorException`() {
+        val checker = KeyUsageChecker(CertificateStubs.leafWithExtraBits)
+        checker.init(false)
 
-    @Test
-    fun `leaf with extra bits set alongside digitalSignature throws UNTRUSTED_CERTIFICATE`() {
-        assertValidationFailure(
-            listOf(CertificateStubs.leafWithExtraBits),
-            CertificateStubs.rootCa
-        )
-    }
-
-    private fun assertValidationFailure(chain: List<X509Certificate>, root: X509Certificate) {
-        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
-            validator.verify(chain, root)
+        assertThrows(CertPathValidatorException::class.java) {
+            checker.check(CertificateStubs.leafWithExtraBits, mutableSetOf())
         }
     }
 }

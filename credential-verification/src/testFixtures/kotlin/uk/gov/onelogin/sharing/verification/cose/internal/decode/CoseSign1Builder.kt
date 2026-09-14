@@ -124,7 +124,7 @@ object CoseSign1Builder {
     private fun buildUnprotectedHeader(chain: List<X509Certificate>): ByteArray =
         unprotectedHeaderBytes(chain)
 
-    private fun sign(protectedHeader: ByteArray, payload: ByteArray, keyPair: KeyPair): ByteArray {
+    fun sign(protectedHeader: ByteArray, payload: ByteArray, keyPair: KeyPair): ByteArray {
         val sigStructure = buildSigStructure(protectedHeader, payload)
         val sig = Signature.getInstance("SHA256withECDSA")
         sig.initSign(keyPair.private)
