@@ -1,10 +1,14 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import java.security.Security
 import java.security.cert.Certificate
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
@@ -21,6 +25,8 @@ import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
 class CoseSign1UnprotectedHeaderGeneratorTest {
 
     private val logger = SystemLogger()
+
+    private val cborMapper = ObjectMapper(CBORFactory())
 
     private val certificateOne: Certificate = TestCertificateGenerator(
         subject = "CN=Leaf,ST=London",
@@ -112,5 +118,35 @@ class CoseSign1UnprotectedHeaderGeneratorTest {
         assertTrue {
             "Generated unprotected headers for COSE_Sign1 structure" in logger
         }
+    }
+
+    @Test
+    fun `Encodes a two-plus certificate chain as a CBOR array`() = runTest {
+        val tree = cborMapper.readTree(result)
+        val x5chain = tree[33.toString()]
+
+        assertTrue(x5chain.isArray)
+        assertEquals(2, x5chain.size())
+        assertTrue(x5chain[0].binaryValue().contentEquals(certificateOne.encoded))
+        assertTrue(x5chain[1].binaryValue().contentEquals(certificateTwo.encoded))
+    }
+
+    @Test
+    fun `Encodes a single certificate as a bare byte string per RFC 9360`() = runTest {
+        certificateChain = listOf(certificateOne)
+
+        val singleResult = generator.generateUnprotectedHeaders(certificateChain).second
+        val x5chain = cborMapper.readTree(singleResult)[33.toString()]
+
+        assertTrue("x5chain must be a bare byte string, not an array") { x5chain.isBinary }
+        assertTrue(x5chain.binaryValue().contentEquals(certificateOne.encoded))
+    }
+
+    @Test
+    fun `Rejects an empty certificate chain`() = runTest {
+        val throwable = assertFails {
+            generator.generateUnprotectedHeaders(emptyList())
+        }
+        assertThat(throwable, instanceOf(IllegalArgumentException::class.java))
     }
 }
