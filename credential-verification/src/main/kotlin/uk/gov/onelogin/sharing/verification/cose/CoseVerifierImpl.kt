@@ -30,9 +30,7 @@ internal class CoseVerifierImpl(
     override fun verify(request: CoseVerificationRequest): CoseVerificationResult = when (request) {
         is CoseVerificationRequest.Attached -> verifyAttached(request)
         is CoseVerificationRequest.Detached -> verifyDetached(request)
-        is CoseVerificationRequest.KeyBased -> throw NotImplementedError(
-            "C9 implementation pending"
-        )
+        is CoseVerificationRequest.KeyBased -> verifyKeyBased(request)
     }
 
     private fun verifyAttached(
@@ -92,5 +90,23 @@ internal class CoseVerifierImpl(
         signatureVerifier.verify(coseSign1, publicKey, request.detachedPayload)
 
         return CoseVerificationResult.Detached(leafCertificate = verifiedLeaf)
+    }
+
+    private fun verifyKeyBased(
+        request: CoseVerificationRequest.KeyBased
+    ): CoseVerificationResult.KeyBased {
+
+        val coseSign1 = decoder.decode(request.coseSign1Bytes)
+        if (coseSign1.payload != null) throw MalformedCoseSign1
+
+        val publicKey = request.publicKey
+        val curveSize = publicKey.params.order.bitLength()
+        if (curveSize != 256) {
+            throw CoseVerificationFailure.UnsupportedAlgorithm
+        }
+
+        signatureVerifier.verify(coseSign1, publicKey, request.detachedPayload)
+
+        return CoseVerificationResult.KeyBased
     }
 }
