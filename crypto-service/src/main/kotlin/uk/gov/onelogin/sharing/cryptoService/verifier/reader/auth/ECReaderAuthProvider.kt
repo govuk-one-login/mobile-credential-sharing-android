@@ -133,9 +133,9 @@ class ECReaderAuthProvider(
     }.toByteArray()
 
     /**
-     * Writes the unprotected header map { 33: [leafDER, intermediateDER] } structurally into the
-     * supplied [gen]. The single entry keyed by [UnprotectedHeaderGenerator.UNPROTECTED_HEADER_X5_CHAIN]
-     * holds the ordered, leaf-first certificate DER chain.
+     * Writes the unprotected header map { 33: x5chain } structurally into the supplied [gen] by
+     * validating the in-memory [unprotectedHeaderMap] then delegating the actual CBOR layout to the
+     * shared [writeUnprotectedHeaderMap].
      */
     private fun writeUnprotectedHeaderMap(
         gen: JsonGenerator,
@@ -154,19 +154,11 @@ class ECReaderAuthProvider(
                 "(${UnprotectedHeaderGenerator.UNPROTECTED_HEADER_X5_CHAIN})"
         }
 
-        gen.writeStartObject(UNPROTECTED_HEADER_MAP_SIZE)
-
         val x5Chain = (
             unprotectedHeaderMap[UnprotectedHeaderGenerator.UNPROTECTED_HEADER_X5_CHAIN]
                 as Array<*>
             ).map { it as ByteArray }
 
-        gen.writeFieldId(UnprotectedHeaderGenerator.UNPROTECTED_HEADER_X5_CHAIN)
-        @Suppress("DEPRECATION")
-        gen.writeStartArray(x5Chain.size)
-        x5Chain.forEach(gen::writeBinary)
-        gen.writeEndArray()
-
-        gen.writeEndObject()
+        writeUnprotectedHeaderMap(gen, x5Chain)
     }
 }

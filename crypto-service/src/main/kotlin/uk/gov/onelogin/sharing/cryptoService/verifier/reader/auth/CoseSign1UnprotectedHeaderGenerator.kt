@@ -7,13 +7,12 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.UnprotectedHeaderGenerator.Companion.UNPROTECTED_HEADER_X5_CHAIN
 
-private const val UNPROTECTED_HEADER_MAP_SIZE = 1
-
 /**
  * Creates the unprotected headers for a COSE_Sign1 structure. This is defined as:
  *
  * ```
- * { 33: [ leafCertificateDER, intermediateCertificateDER ] }
+ * { 33: leafCertificateDER }                              // single certificate: bare bstr
+ * { 33: [ leafCertificateDER, intermediateCertificateDER ] } // two or more: array of bstr
  * ```
  */
 class CoseSign1UnprotectedHeaderGenerator(private val logger: Logger) : UnprotectedHeaderGenerator {
@@ -32,24 +31,18 @@ class CoseSign1UnprotectedHeaderGenerator(private val logger: Logger) : Unprotec
 
     override fun generateUnprotectedHeaders(
         certificateChain: List<Certificate>
-    ): Pair<Map<Long, Any>, ByteArray> =
-        generateUnprotectedHeaderData(certificateChain).let { headers ->
+    ): Pair<Map<Long, Any>, ByteArray> {
+        require(certificateChain.isNotEmpty()) {
+            "Certificate chain must contain at least one certificate for the x5chain header"
+        }
+        return generateUnprotectedHeaderData(certificateChain).let { headers ->
             headers to ByteArrayOutputStream().also { out ->
                 CBORFactory().createGenerator(out).use { gen ->
-                    gen.writeStartObject(UNPROTECTED_HEADER_MAP_SIZE)
-
                     val chain = (headers[UNPROTECTED_HEADER_X5_CHAIN] as Array<*>)
                         .map { it as ByteArray }
-
-                    gen.writeFieldId(UNPROTECTED_HEADER_X5_CHAIN)
-                    @Suppress("DEPRECATION")
-                    gen.writeStartArray(chain.size)
-                    repeat(chain.size) { index ->
-                        gen.writeBinary(chain[index])
-                    }
-                    gen.writeEndArray()
-                    gen.writeEndObject()
+                    writeUnprotectedHeaderMap(gen, chain)
                 }
             }.toByteArray()
         }
+    }
 }

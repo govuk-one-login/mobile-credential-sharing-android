@@ -203,6 +203,31 @@ class ECReaderAuthProviderTest {
     }
 
     @Test
+    fun `Single-certificate x5chain is a bare byte string per RFC 9360`() = runTest {
+        val singleCertProvider = ECReaderAuthProvider(
+            logger = logger,
+            certificateChain = listOf(leafCertificate),
+            protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger),
+            unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),
+            sigStructureGenerator = SigningSignatureStructure(
+                logger = logger,
+                signature = Signature.getInstance("SHA256withECDSA"),
+                privateKey = privateKey,
+                decorated = CoseSigStructureGenerator(
+                    logger = logger,
+                    protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger)
+                )
+            )
+        )
+
+        val tree = cborMapper.readTree(singleCertProvider.sign(byteArrayOf(1, 2, 3, 4, 5)))
+        val x5chain = tree[1][X5CHAIN_LABEL.toString()]
+
+        assertTrue("x5chain must be a bare byte string, not an array") { x5chain.isBinary }
+        assertTrue(x5chain.binaryValue().contentEquals(leafCertificate.encoded))
+    }
+
+    @Test
     fun `x5t leaf hash matches the first x5chain entry`() = runTest {
         val coseSign1Tree = coseSign1Tree()
         val protectedHeaderBytes = coseSign1Tree[0].binaryValue()
