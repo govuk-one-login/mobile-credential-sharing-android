@@ -17,6 +17,8 @@ class CertificateChainValidatorImpl internal constructor() : CertificateChainVal
         if (certificates.isEmpty()) throw UntrustedCertificate
 
         try {
+            trustedRoot.checkValidity()
+
             if (certificates.any { it.encoded.contentEquals(trustedRoot.encoded) }) {
                 throw UntrustedCertificate
             }
