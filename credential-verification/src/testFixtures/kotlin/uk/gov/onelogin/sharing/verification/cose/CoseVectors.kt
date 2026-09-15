@@ -96,6 +96,7 @@ object CoseVectors {
     ): ByteArray {
         val leaf = when (eku) {
             OID_READER_AUTH_EKU -> readerLeafSignedByRoot
+
             else -> TestCertificateGenerator(
                 subject = "CN=Reader,C=GB,ST=London",
                 keyPair = CertificateStubs.leafKeyPair,

@@ -60,7 +60,8 @@ class CoseVerifierImplTest {
     @Test
     fun `attached unsupported algorithm throws UnsupportedAlgorithm`() {
         val request = CoseVerificationRequest.Attached(
-            CoseVectors.createAttachedVector(alg = -35L), trustedRoot
+            CoseVectors.createAttachedVector(alg = -35L),
+            trustedRoot
         )
         assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
             verifier.verify(request)
@@ -70,7 +71,8 @@ class CoseVerifierImplTest {
     @Test
     fun `attached missing x5chain throws MissingX5Chain`() {
         val request = CoseVerificationRequest.Attached(
-            CoseVectors.createAttachedVector(includeX5chain = false), trustedRoot
+            CoseVectors.createAttachedVector(includeX5chain = false),
+            trustedRoot
         )
         assertThrows(CoseVerificationFailure.MissingX5Chain::class.java) {
             verifier.verify(request)
@@ -94,18 +96,21 @@ class CoseVerifierImplTest {
     @Test
     fun `attached profile violation throws CertificateProfileViolation`() {
         val request = CoseVerificationRequest.Attached(
-            CoseVectors.createAttachedVector(eku = "1.0.18013.5.1.6"), trustedRoot
+            CoseVectors.createAttachedVector(eku = "1.0.18013.5.1.6"),
+            trustedRoot
         )
-        val failure = assertThrows(CoseVerificationFailure.CertificateProfileViolation::class.java) {
-            verifier.verify(request)
-        }
+        val failure =
+            assertThrows(CoseVerificationFailure.CertificateProfileViolation::class.java) {
+                verifier.verify(request)
+            }
         assertThat(failure.reason, equalTo(CertificateProfileReason.CROSS_PURPOSE_REJECTION))
     }
 
     @Test
     fun `attached invalid signature throws InvalidSignature`() {
         val request = CoseVerificationRequest.Attached(
-            CoseVectors.createAttachedVector(tamperSignature = true), trustedRoot
+            CoseVectors.createAttachedVector(tamperSignature = true),
+            trustedRoot
         )
         assertThrows(CoseVerificationFailure.InvalidSignature::class.java) {
             verifier.verify(request)
@@ -231,9 +236,10 @@ class CoseVerifierImplTest {
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
             trustedRoot = trustedRoot
         )
-        val failure = assertThrows(CoseVerificationFailure.CertificateProfileViolation::class.java) {
-            verifier.verify(request)
-        }
+        val failure =
+            assertThrows(CoseVerificationFailure.CertificateProfileViolation::class.java) {
+                verifier.verify(request)
+            }
         assertThat(failure.reason, equalTo(CertificateProfileReason.CROSS_PURPOSE_REJECTION))
     }
 
@@ -310,7 +316,11 @@ class CoseVerifierImplTest {
         val spyPathValidator = spyk(pathValidator)
         val spyProfileValidator = spyk(profileValidator)
         val isolatedVerifier = CoseVerifierImpl(
-            decoder, spyHeaderValidator, spyPathValidator, spyProfileValidator, signatureVerifier
+            decoder,
+            spyHeaderValidator,
+            spyPathValidator,
+            spyProfileValidator,
+            signatureVerifier
         )
 
         val result = isolatedVerifier.verify(
@@ -328,12 +338,16 @@ class CoseVerifierImplTest {
     }
 
     @Test
-    fun `key-based protected x5bag and x5t plus unprotected x5chain succeeds without cert processing`() {
+    fun `key-based protected x5bag and x5t, unprotected x5chain succeeds no cert processing`() {
         val spyHeaderValidator = spyk(headerValidator)
         val spyPathValidator = spyk(pathValidator)
         val spyProfileValidator = spyk(profileValidator)
         val isolatedVerifier = CoseVerifierImpl(
-            decoder, spyHeaderValidator, spyPathValidator, spyProfileValidator, signatureVerifier
+            decoder,
+            spyHeaderValidator,
+            spyPathValidator,
+            spyProfileValidator,
+            signatureVerifier
         )
 
         val result = isolatedVerifier.verify(
@@ -351,12 +365,16 @@ class CoseVerifierImplTest {
     }
 
     @Test
-    fun `key-based unprotected x5bag and x5t plus protected x5chain succeeds without cert processing`() {
+    fun `key-based unprotected x5bag and x5t plus protected x5chain succeeds no cert processing`() {
         val spyHeaderValidator = spyk(headerValidator)
         val spyPathValidator = spyk(pathValidator)
         val spyProfileValidator = spyk(profileValidator)
         val isolatedVerifier = CoseVerifierImpl(
-            decoder, spyHeaderValidator, spyPathValidator, spyProfileValidator, signatureVerifier
+            decoder,
+            spyHeaderValidator,
+            spyPathValidator,
+            spyProfileValidator,
+            signatureVerifier
         )
 
         val result = isolatedVerifier.verify(

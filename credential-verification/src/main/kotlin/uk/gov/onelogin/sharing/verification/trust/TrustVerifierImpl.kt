@@ -19,9 +19,8 @@ import uk.gov.onelogin.sharing.verification.format.document.validity.Certificate
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
 
 @ContributesBinding(CredentialVerificationScope::class)
-class TrustVerifierImpl internal constructor(
-    private val coseVerifier: CoseVerifierImpl
-) : TrustVerifier {
+class TrustVerifierImpl internal constructor(private val coseVerifier: CoseVerifierImpl) :
+    TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
     override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult =

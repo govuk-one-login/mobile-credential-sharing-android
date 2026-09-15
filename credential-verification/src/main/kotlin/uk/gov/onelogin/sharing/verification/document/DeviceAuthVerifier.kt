@@ -50,30 +50,32 @@ class DeviceAuthVerifier(
     }
 
     private fun validateCoseShape(coseData: ByteArray) {
-        try {
-            (cborFactory.createParser(coseData) as CBORParser).use { parser ->
-                if (parser.nextToken() != JsonToken.START_ARRAY) {
-                    throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-                }
-                var elementIndex = 0
-                while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    if (elementIndex == INDEX_PAYLOAD &&
-                        parser.currentToken() != JsonToken.VALUE_NULL
-                    ) {
-                        throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-                    }
-                    parser.skipChildren()
-                    elementIndex++
-                }
-                if (elementIndex != COSE_SIGN1_ARRAY_SIZE) {
-                    throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-                }
-            }
-        } catch (e: VerificationResult.Failure) {
-            throw e
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+        if (!isCoseShapeValid(coseData)) {
             throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
         }
+    }
+
+    private fun isCoseShapeValid(coseData: ByteArray): Boolean = try {
+        (cborFactory.createParser(coseData) as CBORParser).use { parser ->
+            validateParserShape(parser)
+        }
+    } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+        false
+    }
+
+    private fun validateParserShape(parser: CBORParser): Boolean {
+        if (parser.nextToken() != JsonToken.START_ARRAY) return false
+        var elementIndex = 0
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            if ((elementIndex == INDEX_PAYLOAD) &&
+                (parser.currentToken() != JsonToken.VALUE_NULL)
+            ) {
+                return false
+            }
+            parser.skipChildren()
+            elementIndex++
+        }
+        return elementIndex == COSE_SIGN1_ARRAY_SIZE
     }
 
     private fun verifyKeyAuthorizations(
@@ -92,8 +94,8 @@ class DeviceAuthVerifier(
             throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_KEY)
         }
         for (entry in inner.properties()) {
-            if (entry.key !in keyAuthorizations.values &&
-                entry.key !in keyAuthorizations.keys
+            if ((entry.key !in keyAuthorizations.values) &&
+                (entry.key !in keyAuthorizations.keys)
             ) {
                 throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_KEY)
             }

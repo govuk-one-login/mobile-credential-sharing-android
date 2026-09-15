@@ -95,18 +95,21 @@ internal class CoseVerifierImpl(
     private fun verifyKeyBased(
         request: CoseVerificationRequest.KeyBased
     ): CoseVerificationResult.KeyBased {
-
         val coseSign1 = decoder.decode(request.coseSign1Bytes)
         if (coseSign1.payload != null) throw MalformedCoseSign1
 
         val publicKey = request.publicKey
         val curveSize = publicKey.params.order.bitLength()
-        if (curveSize != 256) {
+        if (curveSize != P256_CURVE_SIZE) {
             throw CoseVerificationFailure.UnsupportedAlgorithm
         }
 
         signatureVerifier.verify(coseSign1, publicKey, request.detachedPayload)
 
         return CoseVerificationResult.KeyBased
+    }
+
+    private companion object {
+        const val P256_CURVE_SIZE = 256
     }
 }
