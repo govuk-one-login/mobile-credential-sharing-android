@@ -42,13 +42,8 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        case "${{ inputs.environment }}" in
-          dev|integration) ;;
-          *)
-            echo "::error::environment must be 'dev' or 'integration', got '${{ inputs.environment }}'"
-            exit 1
-            ;;
-        esac
+        [[ "${{ inputs.environment }}" =~ ^(dev|integration)$ ]] \
+          || { echo "::error::environment must be 'dev' or 'integration'"; exit 1; }
 
     - name: Generate keypair and CSR
       id: csr
