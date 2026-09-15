@@ -9,6 +9,7 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.TestAppReaderAuthCredentialProviderFactory
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -18,9 +19,14 @@ class SelectCredentialsViewModelTest {
         ApplicationProvider.getApplicationContext()
     )
 
+    private val issuerRootCertificateProvider = IssuerRootCertificateProvider(
+        ApplicationProvider.getApplicationContext()
+    )
+
     private val viewModel by lazy {
         SelectCredentialsViewModel(
-            readerAuthFactory = factory
+            readerAuthFactory = factory,
+            issuerRootCertificateProvider = issuerRootCertificateProvider
         )
     }
 
@@ -30,6 +36,16 @@ class SelectCredentialsViewModelTest {
             assertThat(
                 expectMostRecentItem(),
                 equalTo(ReaderAuthOption.VALID)
+            )
+        }
+    }
+
+    @Test
+    fun `initial issuer root option is sharing test app mock`() = runTest {
+        viewModel.issuerRootOption.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(IssuerRootOption.SHARING_TEST_APP_MOCK)
             )
         }
     }
@@ -72,6 +88,27 @@ class SelectCredentialsViewModelTest {
         viewModel.update(option)
 
         viewModel.verifierAttributeOption.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(option)
+            )
+        }
+    }
+
+    @Test
+    fun `Updates provider instance with issuer root option`(
+        @TestParameter option: IssuerRootOption
+    ) = runTest {
+        viewModel.update(option)
+
+        viewModel.issuerRootOption.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(option)
+            )
+        }
+
+        issuerRootCertificateProvider.issuerRootOption.test {
             assertThat(
                 expectMostRecentItem(),
                 equalTo(option)

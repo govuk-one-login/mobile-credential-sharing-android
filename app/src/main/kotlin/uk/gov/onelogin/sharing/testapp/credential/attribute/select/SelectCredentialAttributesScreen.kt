@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -63,6 +64,59 @@ internal fun SelectCredentialAttributesScreen(
         .collectAsStateWithLifecycle()
     var isReaderAuthExpanded by remember { mutableStateOf(false) }
 
+    val selectedIssuerRoot: IssuerRootOption by viewModel.issuerRootOption
+        .collectAsStateWithLifecycle()
+    var isIssuerRootExpanded by remember { mutableStateOf(false) }
+
+    SelectAttributesContent(
+        modifier = modifier,
+        selectedAttributeGroup = selectedAttributeGroup,
+        isAttributeGroupExpanded = isAttributeGroupExpanded,
+        selectedReaderAuth = selectedReaderAuth,
+        isReaderAuthExpanded = isReaderAuthExpanded,
+        selectedIssuerRoot = selectedIssuerRoot,
+        isIssuerRootExpanded = isIssuerRootExpanded,
+        onToggleAttributeGroupDropdown = { isAttributeGroupExpanded = it },
+        onToggleReaderAuthOptionDropdown = { isReaderAuthExpanded = it },
+        onToggleIssuerRootOptionDropdown = { isIssuerRootExpanded = it },
+        onSelectAttributeOption = {
+            isAttributeGroupExpanded = false
+            viewModel.update(it)
+        },
+        onSelectReaderAuthOption = {
+            isReaderAuthExpanded = false
+            viewModel.update(it)
+        },
+        onSelectIssuerRootOption = {
+            isIssuerRootExpanded = false
+            viewModel.update(it)
+        },
+        onClick = {
+            coroutineScope.launch {
+                onSelectAttributeGroup(selectedAttributeGroup.attributeGroup)
+            }
+        }
+    )
+}
+
+@Composable
+@Suppress("LongParameterList", "kotlin:S107")
+private fun SelectAttributesContent(
+    selectedAttributeGroup: VerifierAttributeOption,
+    isAttributeGroupExpanded: Boolean,
+    selectedReaderAuth: ReaderAuthOption,
+    isReaderAuthExpanded: Boolean,
+    selectedIssuerRoot: IssuerRootOption,
+    isIssuerRootExpanded: Boolean,
+    onSelectAttributeOption: (VerifierAttributeOption) -> Unit,
+    onToggleAttributeGroupDropdown: (Boolean) -> Unit,
+    onSelectReaderAuthOption: (ReaderAuthOption) -> Unit,
+    onToggleReaderAuthOptionDropdown: (Boolean) -> Unit,
+    onSelectIssuerRootOption: (IssuerRootOption) -> Unit,
+    onToggleIssuerRootOptionDropdown: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     Surface(
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(1.dp, Color.Gray),
@@ -72,31 +126,25 @@ internal fun SelectCredentialAttributesScreen(
             modifier = Modifier
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(spacingSingle)
+            verticalArrangement = Arrangement.spacedBy(space = spacingSingle)
         ) {
             UserInputs(
                 selectedAttributeGroup = selectedAttributeGroup,
                 isAttributeGroupExpanded = isAttributeGroupExpanded,
                 selectedReaderAuth = selectedReaderAuth,
                 isReaderAuthExpanded = isReaderAuthExpanded,
-                onToggleAttributeGroupDropdown = { isAttributeGroupExpanded = it },
-                onToggleReaderAuthOptionDropdown = { isReaderAuthExpanded = it },
-                onSelectAttributeOption = {
-                    isAttributeGroupExpanded = false
-                    viewModel.update(it)
-                },
-                onSelectReaderAuthOption = {
-                    isReaderAuthExpanded = false
-                    viewModel.update(it)
-                }
+                selectedIssuerRoot = selectedIssuerRoot,
+                isIssuerRootExpanded = isIssuerRootExpanded,
+                onToggleAttributeGroupDropdown = onToggleAttributeGroupDropdown,
+                onToggleReaderAuthOptionDropdown = onToggleReaderAuthOptionDropdown,
+                onToggleIssuerRootOptionDropdown = onToggleIssuerRootOptionDropdown,
+                onSelectAttributeOption = onSelectAttributeOption,
+                onSelectReaderAuthOption = onSelectReaderAuthOption,
+                onSelectIssuerRootOption = onSelectIssuerRootOption
             )
 
             Button(
-                onClick = {
-                    coroutineScope.launch {
-                        onSelectAttributeGroup(selectedAttributeGroup.attributeGroup)
-                    }
-                },
+                onClick = onClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
@@ -115,16 +163,21 @@ private fun UserInputs(
     isAttributeGroupExpanded: Boolean,
     selectedReaderAuth: ReaderAuthOption,
     isReaderAuthExpanded: Boolean,
+    selectedIssuerRoot: IssuerRootOption,
+    isIssuerRootExpanded: Boolean,
     onSelectAttributeOption: (VerifierAttributeOption) -> Unit,
     onToggleAttributeGroupDropdown: (Boolean) -> Unit,
     onSelectReaderAuthOption: (ReaderAuthOption) -> Unit,
     onToggleReaderAuthOptionDropdown: (Boolean) -> Unit,
+    onSelectIssuerRootOption: (IssuerRootOption) -> Unit,
+    onToggleIssuerRootOptionDropdown: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         AttributeGroupDropdown(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(bottom = 16.dp)
                 .testTag("attribute_group_menu"),
             textFieldValue = selectedAttributeGroup.displayName,
             isAttributeGroupExpanded = isAttributeGroupExpanded,
@@ -135,11 +188,22 @@ private fun UserInputs(
         ReaderAuthDropdown(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(bottom = 16.dp)
                 .testTag("reader_auth_menu"),
             textFieldValue = selectedReaderAuth.displayName,
             isAttributeGroupExpanded = isReaderAuthExpanded,
             onToggleDropdownExpansion = onToggleReaderAuthOptionDropdown,
             onSelectOption = onSelectReaderAuthOption
+        )
+
+        IssuerRootDropdown(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("issuer_root_menu"),
+            textFieldValue = selectedIssuerRoot.displayName,
+            isIssuerRootExpanded = isIssuerRootExpanded,
+            onToggleDropdownExpansion = onToggleIssuerRootOptionDropdown,
+            onSelectOption = onSelectIssuerRootOption
         )
     }
 }
@@ -220,6 +284,43 @@ private fun ReaderAuthDropdown(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun IssuerRootDropdown(
+    textFieldValue: String,
+    isIssuerRootExpanded: Boolean,
+    modifier: Modifier = Modifier,
+    onToggleDropdownExpansion: (Boolean) -> Unit = {},
+    onSelectOption: (IssuerRootOption) -> Unit = {}
+) {
+    UserDropdownMenu(
+        modifier = modifier,
+        label = { Text("Issuer Auth root certificate") },
+        textFieldValue = textFieldValue,
+        isDropdownExpanded = isIssuerRootExpanded,
+        onToggleDropdownExpansion = onToggleDropdownExpansion,
+        dropdownMenuContents = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(spacingSingle)
+            ) {
+                IssuerRootOption.entries
+                    .forEach { option ->
+                        DropdownMenuItem(
+                            modifier = Modifier
+                                .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
+                                .testTag("issuer_root_item"),
+                            text = { Text(option.displayName) },
+                            onClick = {
+                                onToggleDropdownExpansion(false)
+                                onSelectOption(option)
+                            }
+                        )
+                    }
+            }
+        }
+    )
+}
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongParameterList", "kotlin:S107")
@@ -275,4 +376,24 @@ private fun UserDropdownMenu(
             dropdownMenuContents()
         }
     }
+}
+
+@Preview
+@Composable
+internal fun SelectCredentialAttributesScreenPreview() {
+    SelectAttributesContent(
+        modifier = Modifier,
+        selectedAttributeGroup = VerifierAttributeOption.PORTRAIT_AND_AGE_OVER_21,
+        isAttributeGroupExpanded = false,
+        selectedReaderAuth = ReaderAuthOption.VALID,
+        isReaderAuthExpanded = false,
+        selectedIssuerRoot = IssuerRootOption.SHARING_TEST_APP_MOCK,
+        isIssuerRootExpanded = false,
+        onSelectAttributeOption = {},
+        onToggleAttributeGroupDropdown = {},
+        onSelectReaderAuthOption = {},
+        onToggleReaderAuthOptionDropdown = {},
+        onSelectIssuerRootOption = {},
+        onToggleIssuerRootOptionDropdown = {}
+    )
 }
