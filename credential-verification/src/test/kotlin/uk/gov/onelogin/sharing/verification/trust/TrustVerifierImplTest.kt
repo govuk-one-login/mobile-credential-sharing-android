@@ -46,9 +46,7 @@ class TrustVerifierImplTest {
     )
 
     private val verifier = TrustVerifierImpl(
-        coseVerifier,
-        decoder,
-        signatureVerifier
+        coseVerifier
     )
     private val cborMapper = ObjectMapper(CBORFactory())
 
@@ -100,9 +98,7 @@ class TrustVerifierImplTest {
             signatureVerifier
         )
         val earlyExitVerifier = TrustVerifierImpl(
-            coseVerifier,
-            decoder,
-            signatureVerifier
+            coseVerifier
         )
 
         val coseWithMalformedHeader = buildMalformedCoseSign1(CertificateStubs.leafSignedByRoot)
