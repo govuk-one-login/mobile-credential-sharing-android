@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.sdk.api.verifier.CredentialVerifier
 /**
  * ViewModel that caches the [CredentialVerifier] so it survives configuration changes.
  */
-class VerifierJourneyViewModel(private val dispatcher: CoroutineDispatcher = Dispatchers.Default) :
+class VerifierJourneyViewModel(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) :
     ViewModel() {
     private val _verifier = MutableStateFlow<CredentialVerifier?>(null)
     val verifier: StateFlow<CredentialVerifier?> = _verifier
