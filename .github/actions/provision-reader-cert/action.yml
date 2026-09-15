@@ -106,7 +106,6 @@ runs:
 
         if [ "$http_status" != "200" ]; then
           echo "::error::issue-reader-cert returned HTTP $http_status"
-          cat "$response_file" || true
           exit 1
         fi
 
