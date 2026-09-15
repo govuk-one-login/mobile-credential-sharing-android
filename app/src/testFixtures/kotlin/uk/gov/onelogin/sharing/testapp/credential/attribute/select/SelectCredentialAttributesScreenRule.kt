@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.testapp.credential.attribute.select
 
-import android.content.Context
-import android.content.res.Resources
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.test.hasParent
@@ -9,19 +7,14 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.test.core.app.ApplicationProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
 import uk.gov.onelogin.sharing.testapp.ATTRIBUTE_GROUP_ITEM_TAG
-import uk.gov.onelogin.sharing.testapp.R
+import uk.gov.onelogin.sharing.testapp.READER_AUTH_WARNING_TAG
 
-class SelectCredentialAttributesScreenRule(
-    composeTestRule: ComposeContentTestRule,
-    private val resources: Resources = ApplicationProvider.getApplicationContext<Context>()
-        .resources
-) : ComposeContentTestRule by composeTestRule {
+class SelectCredentialAttributesScreenRule(composeTestRule: ComposeContentTestRule) :
+    ComposeContentTestRule by composeTestRule {
     private var confirmedAttributeGroup: AttributeGroup? = null
 
     fun assertConfirmedAttributeGroupEquals(group: AttributeGroup) = waitUntil {
@@ -74,10 +67,20 @@ class SelectCredentialAttributesScreenRule(
         onReaderAuthOptionText(option).performClick()
     }
 
-    fun performVerifyCredentialClick() = onNodeWithText(
-        resources.getString(R.string.verify_credential),
+    fun performVerifyCredentialClick() = onNodeWithTag(
+        "verify_credential_button",
         useUnmergedTree = true
     ).performScrollTo().performClick()
+
+    fun assertNotProvisionedWarningShown() = onNodeWithTag(
+        READER_AUTH_WARNING_TAG,
+        useUnmergedTree = true
+    ).assertExists()
+
+    fun assertNotProvisionedWarningNotShown() = onNodeWithTag(
+        READER_AUTH_WARNING_TAG,
+        useUnmergedTree = true
+    ).assertDoesNotExist()
 
     fun updateConfirmedAttributeGroup(group: AttributeGroup) {
         this.confirmedAttributeGroup = group
