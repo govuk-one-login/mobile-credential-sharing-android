@@ -6,9 +6,9 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueue
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueueImpl
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 
 @BindingContainer
 @ContributesTo(AppScope::class)

@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.gatt.central
+package uk.gov.onelogin.sharing.bluetooth.api.central
 
 import android.bluetooth.BluetoothDevice
 import java.util.UUID

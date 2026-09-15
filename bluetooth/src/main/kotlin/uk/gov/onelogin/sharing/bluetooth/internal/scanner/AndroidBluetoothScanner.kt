@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.scanner
+package uk.gov.onelogin.sharing.bluetooth.internal.scanner
 
 import android.Manifest
 import android.bluetooth.le.ScanCallback
@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
-import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerCallback.Companion.toLeScanCallback
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
+import uk.gov.onelogin.sharing.bluetooth.internal.scanner.ScannerCallback.Companion.toLeScanCallback
 import uk.gov.onelogin.sharing.core.VerifierUiScope
 import uk.gov.onelogin.sharing.core.logger.logTag
 

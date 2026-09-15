@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.bluetooth.internal.central
 
 import kotlin.test.assertEquals
 import org.junit.Test
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 
 class GattUuidsTest {
     @Test
