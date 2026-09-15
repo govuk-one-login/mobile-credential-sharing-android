@@ -12,3 +12,7 @@ Keystore
 mdoc
 pytest
 Verifier's
+AWS
+GDS
+SigV4
+openssl
