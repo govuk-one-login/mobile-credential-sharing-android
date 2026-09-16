@@ -1,9 +1,10 @@
 package uk.gov.onelogin.sharing.verification.document
 
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import dev.zacsweers.metro.Inject
 import uk.gov.onelogin.sharing.verification.document.cose.CoseKeyDecoder
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
@@ -19,11 +20,11 @@ class DeviceAuthVerifier(
     private val deviceAuthenticationEncoder: DeviceAuthenticationEncoder
 ) {
     private val cborMapper = ObjectMapper(CBORFactory())
+    private val cborFactory = CBORFactory()
 
     /**
      * @throws VerificationResult.Failure
      */
-    @Suppress("ThrowsCount")
     fun verify(
         document: VerifiableDocument.WithPresentation,
         sessionTranscriptBytes: ByteArray,
@@ -31,20 +32,7 @@ class DeviceAuthVerifier(
     ) {
         verifyKeyAuthorizations(document, deviceKeyInfo)
 
-        val root = try {
-            cborMapper.readTree(document.deviceSigned.deviceSignature) as? ArrayNode
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            null
-        } ?: throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-
-        if (root.size() != COSE_SIGN1_ARRAY_SIZE) {
-            throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-        }
-
-        val payload = root[INDEX_PAYLOAD]
-        if (payload != null && !payload.isNull) {
-            throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
-        }
+        validateCoseShape(document.deviceSigned.deviceSignature)
 
         val deviceAuthBytes = deviceAuthenticationEncoder.encode(
             sessionTranscriptBytes = sessionTranscriptBytes,
@@ -59,6 +47,35 @@ class DeviceAuthVerifier(
             publicKey = publicKey,
             payload = deviceAuthBytes
         )
+    }
+
+    private fun validateCoseShape(coseData: ByteArray) {
+        if (!isCoseShapeValid(coseData)) {
+            throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_SIGNATURE)
+        }
+    }
+
+    private fun isCoseShapeValid(coseData: ByteArray): Boolean = try {
+        (cborFactory.createParser(coseData) as CBORParser).use { parser ->
+            validateParserShape(parser)
+        }
+    } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+        false
+    }
+
+    private fun validateParserShape(parser: CBORParser): Boolean {
+        if (parser.nextToken() != JsonToken.START_ARRAY) return false
+        var elementIndex = 0
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            if ((elementIndex == INDEX_PAYLOAD) &&
+                (parser.currentToken() != JsonToken.VALUE_NULL)
+            ) {
+                return false
+            }
+            parser.skipChildren()
+            elementIndex++
+        }
+        return elementIndex == COSE_SIGN1_ARRAY_SIZE
     }
 
     private fun verifyKeyAuthorizations(
@@ -77,8 +94,8 @@ class DeviceAuthVerifier(
             throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_KEY)
         }
         for (entry in inner.properties()) {
-            if (entry.key !in keyAuthorizations.values &&
-                entry.key !in keyAuthorizations.keys
+            if ((entry.key !in keyAuthorizations.values) &&
+                (entry.key !in keyAuthorizations.keys)
             ) {
                 throw VerificationResult.Failure(VerificationError.INVALID_DEVICE_KEY)
             }
