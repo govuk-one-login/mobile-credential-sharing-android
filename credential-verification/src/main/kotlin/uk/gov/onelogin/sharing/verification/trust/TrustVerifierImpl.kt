@@ -10,22 +10,17 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationRequest
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationResult
 import uk.gov.onelogin.sharing.verification.cose.CoseVerifierImpl
-import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Decoder
 import uk.gov.onelogin.sharing.verification.cose.internal.path.OID_COUNTRY
 import uk.gov.onelogin.sharing.verification.cose.internal.path.OID_STATE_OR_PROVINCE
 import uk.gov.onelogin.sharing.verification.cose.internal.path.parseSubjectName
-import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatureVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationError
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
 import uk.gov.onelogin.sharing.verification.format.document.validity.CertificateValidityPeriod
 import uk.gov.onelogin.sharing.verification.format.document.validity.IssuerAuthResult
 
 @ContributesBinding(CredentialVerificationScope::class)
-class TrustVerifierImpl internal constructor(
-    private val coseVerifier: CoseVerifierImpl,
-    private val coseSign1Decoder: CoseSign1Decoder,
-    private val signatureVerifier: CoseSignatureVerifier
-) : TrustVerifier {
+class TrustVerifierImpl internal constructor(private val coseVerifier: CoseVerifierImpl) :
+    TrustVerifier {
 
     @OptIn(ExperimentalTime::class)
     override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult =
@@ -53,11 +48,12 @@ class TrustVerifierImpl internal constructor(
 
     override fun verifyCOSESign1(coseData: ByteArray, publicKey: ECPublicKey, payload: ByteArray) {
         try {
-            val coseSign1 = coseSign1Decoder.decode(coseData)
-            signatureVerifier.verify(
-                coseSign1,
-                publicKey,
-                payload
+            coseVerifier.verify(
+                CoseVerificationRequest.KeyBased(
+                    coseSign1Bytes = coseData,
+                    detachedPayload = payload,
+                    publicKey = publicKey
+                )
             )
         } catch (e: CoseVerificationFailure) {
             throw mapCoseFailure(e, isIssuer = false)
