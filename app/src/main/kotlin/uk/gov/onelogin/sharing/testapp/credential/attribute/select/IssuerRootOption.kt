@@ -14,16 +14,8 @@ enum class IssuerRootOption(internal val rootCertificateAsset: String, val displ
         displayName = "Sharing Test App"
     ),
     WALLET_CORE_BUILD(
-        rootCertificateAsset = "wallet_core_root_build_x509_certificate",
-        displayName = "Wallet (Build)"
-    ),
-    WALLET_CORE_DEV(
-        rootCertificateAsset = "wallet_core_root_dev_x509_certificate",
-        displayName = "Wallet (Dev)"
-    ),
-    WALLET_CORE_STAGING(
-        rootCertificateAsset = "wallet_core_root_staging_x509_certificate",
-        displayName = "Wallet (Staging)"
+        rootCertificateAsset = "wallet_core_root_x509_certificate",
+        displayName = "Wallet (Dev/Build/Stage)"
     ),
     WALLET_CORE_INTEGRATION(
         rootCertificateAsset = "wallet_core_root_integration_x509_certificate",
