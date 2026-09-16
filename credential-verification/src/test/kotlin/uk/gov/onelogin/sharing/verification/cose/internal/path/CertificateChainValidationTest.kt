@@ -113,6 +113,16 @@ class CertificateChainValidationTest {
                     CertificateStubs.intermediateWithPathLen0
                 ),
                 root = CertificateStubs.rootCa
+            ),
+            InvalidChainCase(
+                description = "expired root certificate",
+                chain = listOf(CertificateStubs.leafSignedByRoot),
+                root = CertificateStubs.expiredRootCa
+            ),
+            InvalidChainCase(
+                description = "not-yet-valid root certificate",
+                chain = listOf(CertificateStubs.leafSignedByRoot),
+                root = CertificateStubs.notYetValidRootCa
             )
         )
     }
