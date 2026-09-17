@@ -105,7 +105,7 @@ class TestAppReaderAuthCredentialProviderFactory(
 
     private fun processCertificateAssetChain(chain: Sequence<String>): List<X509Certificate> = chain
         .map(context.assets::open)
-        .map(certificateFactory::generateCertificate)
-        .map { it as X509Certificate }
+        .flatMap { input -> input.use(certificateFactory::generateCertificates).asSequence() }
+        .filterIsInstance<X509Certificate>()
         .toList()
 }

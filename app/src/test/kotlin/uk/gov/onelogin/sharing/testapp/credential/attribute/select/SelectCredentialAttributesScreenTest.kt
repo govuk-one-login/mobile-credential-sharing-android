@@ -8,6 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.ReaderAuthCertificateValidator
 import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.TestAppReaderAuthCredentialProviderFactory
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -22,8 +24,31 @@ class SelectCredentialAttributesScreenTest {
         )
     }
 
+    private val validator by lazy {
+        ReaderAuthCertificateValidator(ApplicationProvider.getApplicationContext())
+    }
+
     private val viewModel by lazy {
-        SelectCredentialsViewModel(readerAuthFactory = factory)
+        SelectCredentialsViewModel(
+            readerAuthFactory = factory,
+            certificateValidator = validator
+        )
+    }
+
+    /**
+     * Options whose bundled leaf certificate is provisioned (valid) rather than
+     * an unprovisioned DVS placeholder. Only these allow verification.
+     */
+    enum class ProvisionedReaderAuthOption(val option: ReaderAuthOption) {
+        VALID(ReaderAuthOption.VALID),
+        INVALID_NAME_CONSTRAINTS(ReaderAuthOption.INVALID_NAME_CONSTRAINTS),
+        INVALID_MISSING_PRIVACY_POLICY(ReaderAuthOption.INVALID_MISSING_PRIVACY_POLICY)
+    }
+
+    /** DVS options that are unprovisioned placeholders in a non-pipeline build. */
+    enum class PlaceholderReaderAuthOption(val option: ReaderAuthOption) {
+        DVS_DEV(ReaderAuthOption.DVS_DEV),
+        DVS_INTEGRATION(ReaderAuthOption.DVS_INTEGRATION)
     }
 
     @Test
@@ -46,8 +71,8 @@ class SelectCredentialAttributesScreenTest {
     }
 
     @Test
-    fun `Passes file name when tapping 'Verify credential' button`(
-        @TestParameter option: ReaderAuthOption
+    fun `Provisioned reader auth options verify without a warning`(
+        @TestParameter provisioned: ProvisionedReaderAuthOption
     ) = runTest {
         composeTestRule.run {
             setContent {
@@ -57,9 +82,30 @@ class SelectCredentialAttributesScreenTest {
                 )
             }
 
-            performReaderAuthClick(option)
-            assertOptionIsSelected(option)
+            performReaderAuthClick(provisioned.option)
+            assertOptionIsSelected(provisioned.option)
             performVerifyCredentialClick()
+            assertNotProvisionedWarningNotShown()
+        }
+    }
+
+    @Test
+    fun `Unprovisioned DVS options warn when verification is attempted`(
+        @TestParameter placeholder: PlaceholderReaderAuthOption
+    ) = runTest {
+        composeTestRule.run {
+            setContent {
+                SelectCredentialAttributesScreen(
+                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup,
+                    viewModel = viewModel
+                )
+            }
+
+            performReaderAuthClick(placeholder.option)
+            assertOptionIsSelected(placeholder.option)
+            assertNotProvisionedWarningNotShown()
+            performVerifyCredentialClick()
+            assertNotProvisionedWarningShown()
         }
     }
 }

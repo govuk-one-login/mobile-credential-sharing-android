@@ -50,7 +50,6 @@ internal fun SelectCredentialAttributesScreen(
     viewModel: SelectCredentialsViewModel = hiltViewModel(),
     onSelectAttributeGroup: (AttributeGroup) -> Unit = {}
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("SelectCredentialAttributesScreen")
@@ -60,6 +59,8 @@ internal fun SelectCredentialAttributesScreen(
     var isAttributeGroupExpanded by remember { mutableStateOf(false) }
 
     val selectedReaderAuth: ReaderAuthOption by viewModel.readerAuthOption
+        .collectAsStateWithLifecycle()
+    val readerAuthProvisioned: Boolean by viewModel.readerAuthProvisioned
         .collectAsStateWithLifecycle()
     var isReaderAuthExpanded by remember { mutableStateOf(false) }
 
@@ -91,20 +92,41 @@ internal fun SelectCredentialAttributesScreen(
                 }
             )
 
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        onSelectAttributeGroup(selectedAttributeGroup.attributeGroup)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-                    .testTag(VERIFY_CREDENTIAL_BUTTON_TAG)
-            ) {
-                Text(stringResource(R.string.verify_credential))
-            }
+            VerifyCredentialButton(
+                readerAuthProvisioned = readerAuthProvisioned,
+                onVerify = { onSelectAttributeGroup(selectedAttributeGroup.attributeGroup) }
+            )
         }
+    }
+}
+
+@Composable
+private fun VerifyCredentialButton(
+    readerAuthProvisioned: Boolean,
+    onVerify: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val coroutineScope = rememberCoroutineScope()
+    var showNotProvisionedWarning by remember { mutableStateOf(false) }
+
+    Button(
+        onClick = {
+            if (readerAuthProvisioned) {
+                coroutineScope.launch { onVerify() }
+            } else {
+                showNotProvisionedWarning = true
+            }
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+            .testTag(VERIFY_CREDENTIAL_BUTTON_TAG)
+    ) {
+        Text(stringResource(R.string.verify_credential))
+    }
+
+    if (showNotProvisionedWarning) {
+        NotProvisionedWarningDialog(onDismiss = { showNotProvisionedWarning = false })
     }
 }
 

@@ -9,6 +9,7 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.ReaderAuthCertificateValidator
 import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.TestAppReaderAuthCredentialProviderFactory
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -18,9 +19,14 @@ class SelectCredentialsViewModelTest {
         ApplicationProvider.getApplicationContext()
     )
 
+    private val validator = ReaderAuthCertificateValidator(
+        ApplicationProvider.getApplicationContext()
+    )
+
     private val viewModel by lazy {
         SelectCredentialsViewModel(
-            readerAuthFactory = factory
+            readerAuthFactory = factory,
+            certificateValidator = validator
         )
     }
 
@@ -43,6 +49,25 @@ class SelectCredentialsViewModelTest {
             )
         }
     }
+
+    @Test
+    fun `A provisioned option reports the reader auth certificate as provisioned`() = runTest {
+        viewModel.update(ReaderAuthOption.VALID)
+
+        viewModel.readerAuthProvisioned.test {
+            assertThat(expectMostRecentItem(), equalTo(true))
+        }
+    }
+
+    @Test
+    fun `An unprovisioned DVS option reports the reader auth certificate as not provisioned`() =
+        runTest {
+            viewModel.update(ReaderAuthOption.DVS_DEV)
+
+            viewModel.readerAuthProvisioned.test {
+                assertThat(expectMostRecentItem(), equalTo(false))
+            }
+        }
 
     @Test
     fun `Updates factory instance with reader auth option`(
