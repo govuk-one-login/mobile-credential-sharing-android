@@ -34,16 +34,42 @@ class DeviceRequestDecoderImplTest {
 
     @Test
     fun `correctly parses cbor into device request ac1`() {
-        val deviceRequestDto = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample1)
-        assertDeviceRequestParsedCorrectly(deviceRequestDto)
+        val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample1)
+        assertDeviceRequestParsedCorrectly(deviceRequest)
+        val docRequest = deviceRequest.docRequests.first()
+        assertNotNull(docRequest.itemsRequestBytes)
+        assertEquals(null, docRequest.rawReaderAuth)
         assert(logger.contains("device request decoded successfully"))
     }
 
     @Test
-    fun `correctly parses  cbor into device request ac2`() {
-        val deviceRequestDto = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
-        assertDeviceRequestParsedCorrectly(deviceRequestDto)
+    fun `correctly parses cbor with readerAuth into device request ac2`() {
+        val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
+        assertDeviceRequestParsedCorrectly(deviceRequest)
+        val docRequest = deviceRequest.docRequests.first()
+        assertNotNull(docRequest.itemsRequestBytes)
+        assertNotNull(docRequest.rawReaderAuth)
+        assertNotNull(docRequest.readerAuth)
         assert(logger.contains("device request decoded successfully"))
+    }
+
+    @Test
+    fun `itemsRequestBytes and rawReaderAuth slice directly from original input`() {
+        val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
+        val docRequest = deviceRequest.docRequests.first()
+        val itemsBytes = docRequest.itemsRequestBytes!!
+        val readerAuthBytes = docRequest.rawReaderAuth!!
+
+        assert(deviceRequestExample2.toHexString().contains(itemsBytes.toHexString()))
+        assert(deviceRequestExample2.toHexString().contains(readerAuthBytes.toHexString()))
+    }
+
+    @Test
+    fun `trailing data after top-level object throws exception`() {
+        val trailingDataBytes = deviceRequestExample1 + byteArrayOf(0x00, 0x01)
+        assertFailsWith<DeviceRequestDecodingException> {
+            deviceRequestDecoderImpl.deviceRequestDecoder(trailingDataBytes)
+        }
     }
 
     @Test
@@ -62,6 +88,89 @@ class DeviceRequestDecoderImplTest {
         }
 
         assert(logger.contains("DeviceRequest contains empty DocRequests"))
+    }
+
+    @Test
+    fun `itemsRequestBytes starts with Tag 24 and matches exact source slice`() {
+        val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample1)
+        val docRequest = deviceRequest.docRequests.first()
+        val itemsBytes = docRequest.itemsRequestBytes
+        assertNotNull(itemsBytes)
+
+        assertEquals(0xD8.toByte(), itemsBytes[0])
+        assertEquals(0x18.toByte(), itemsBytes[1])
+
+        val foundSlice = findSliceOffset(deviceRequestExample1, itemsBytes)
+        assert(foundSlice != -1)
+        val expectedSlice =
+            deviceRequestExample1.copyOfRange(foundSlice, foundSlice + itemsBytes.size)
+        assert(expectedSlice.contentEquals(itemsBytes))
+    }
+
+    @Test
+    fun `rawReaderAuth matches exact source byte slice byte for byte`() {
+        val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
+        val docRequest = deviceRequest.docRequests.first()
+        val authBytes = docRequest.rawReaderAuth
+        assertNotNull(authBytes)
+
+        val foundSlice = findSliceOffset(deviceRequestExample2, authBytes)
+        assert(foundSlice != -1)
+        val expectedSlice =
+            deviceRequestExample2.copyOfRange(foundSlice, foundSlice + authBytes.size)
+        assert(expectedSlice.contentEquals(authBytes))
+    }
+
+    @Test
+    fun `AC3 wrong-shaped COSE structure in readerAuth is preserved as exact raw bytes`() {
+        val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
+        val docRequest = deviceRequest.docRequests.first()
+        assertNotNull(docRequest.rawReaderAuth)
+        assertNotNull(docRequest.readerAuth)
+        assert(docRequest.rawReaderAuth!!.contentEquals(docRequest.readerAuth!!))
+    }
+
+    @Test
+    fun `duplicate map key in DeviceRequest throws decoding exception`() {
+        val duplicateKeyCbor = byteArrayOf(
+            0xA2.toByte(),
+            0x67.toByte(),
+            'v'.code.toByte(),
+            'e'.code.toByte(),
+            'r'.code.toByte(),
+            's'.code.toByte(),
+            'i'.code.toByte(),
+            'o'.code.toByte(),
+            'n'.code.toByte(),
+            0x63.toByte(),
+            '1'.code.toByte(),
+            '.'.code.toByte(),
+            '0'.code.toByte(),
+            0x67.toByte(),
+            'v'.code.toByte(),
+            'e'.code.toByte(),
+            'r'.code.toByte(),
+            's'.code.toByte(),
+            'i'.code.toByte(),
+            'o'.code.toByte(),
+            'n'.code.toByte(),
+            0x63.toByte(),
+            '1'.code.toByte(),
+            '.'.code.toByte(),
+            '0'.code.toByte()
+        )
+        assertFailsWith<DeviceRequestDecodingException> {
+            deviceRequestDecoderImpl.deviceRequestDecoder(duplicateKeyCbor)
+        }
+    }
+
+    private fun findSliceOffset(source: ByteArray, target: ByteArray): Int {
+        for (i in 0..source.size - target.size) {
+            if (source.copyOfRange(i, i + target.size).contentEquals(target)) {
+                return i
+            }
+        }
+        return -1
     }
 
     private fun assertDeviceRequestParsedCorrectly(deviceRequest: DeviceRequest) {
