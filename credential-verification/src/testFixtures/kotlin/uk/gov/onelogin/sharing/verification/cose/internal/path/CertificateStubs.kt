@@ -177,6 +177,20 @@ object CertificateStubs {
         issuer = "CN=Untrusted,C=GB,ST=London"
     ).ca().build()
 
+    val expiredRootCa: X509Certificate = TestCertificateGenerator(
+        subject = ROOT_DN,
+        keyPair = rootKeyPair,
+        issuerKeyPair = rootKeyPair,
+        issuer = ROOT_DN
+    ).ca().expired().build()
+
+    val notYetValidRootCa: X509Certificate = TestCertificateGenerator(
+        subject = ROOT_DN,
+        keyPair = rootKeyPair,
+        issuerKeyPair = rootKeyPair,
+        issuer = ROOT_DN
+    ).ca().notYetValid().build()
+
     val leafSignedByUntrusted: X509Certificate = TestCertificateGenerator(
         subject = LEAF_DN,
         keyPair = leafKeyPair,
