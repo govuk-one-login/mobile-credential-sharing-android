@@ -29,6 +29,7 @@ import uk.gov.onelogin.sharing.testapp.home.HomeRoute
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Suppress("DEPRECATION")
     @Inject
     lateinit var presentCredentialSdk: PresentCredentialSdk
 

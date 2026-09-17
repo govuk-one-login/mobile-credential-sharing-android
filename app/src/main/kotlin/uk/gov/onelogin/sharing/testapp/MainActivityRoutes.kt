@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.testapp.home.HomeNavigationExt.configureTestAppHo
 import uk.gov.onelogin.sharing.testapp.verifier.VerifierTestAppJourneyNavigationExt.configureVerifierJourneyWrapper
 
 object MainActivityRoutes {
+    @Suppress("DEPRECATION")
     internal fun NavGraphBuilder.configureTestAppRoutes(
         mockCredentials: List<MockCredentialState>,
         navController: NavController,

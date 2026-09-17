@@ -6,6 +6,7 @@ import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 
+@Suppress("DEPRECATION")
 class PresentCredentialSdkImpl(
     private val appGraph: CredentialSharingAppGraph,
     private val presenterGraphFactory: PresentCredentialGraph.Factory
