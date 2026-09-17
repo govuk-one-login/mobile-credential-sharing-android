@@ -16,8 +16,8 @@ import org.hamcrest.Matchers.stringContainsInOrder
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
-import uk.gov.onelogin.sharing.verification.trust.CertificateStubs
-import uk.gov.onelogin.sharing.verification.trust.TestCertificateGenerator
+import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
+import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGenerator
 
 @RunWith(TestParameterInjector::class)
 class CoseSigStructureGeneratorTest {

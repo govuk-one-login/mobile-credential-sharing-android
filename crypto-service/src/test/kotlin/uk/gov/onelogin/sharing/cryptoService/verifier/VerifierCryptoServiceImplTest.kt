@@ -24,7 +24,6 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceResponseUseCase
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_ERROR
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoServiceImpl.Companion.LOG_SESSION_ESTABLISHMENT_SUCCESS
-import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
@@ -41,12 +40,6 @@ class VerifierCryptoServiceImplTest {
     private var sharedSecretGenerator: SharedSecretGenerator = EcdhSharedSecretGenerator(logger)
     private var sessionKeyGenerator: SessionKeyGenerator = HkdfSessionKeyGenerator(logger)
 
-    private var signedBytes = byteArrayOf(1, 2, 3, 4, 5)
-
-    private val readerAuthCredentialProvider = ReaderAuthCredentialProvider {
-        signedBytes
-    }
-
     private val service by lazy {
         VerifierCryptoServiceImpl(
             logger = logger,
@@ -54,8 +47,7 @@ class VerifierCryptoServiceImplTest {
             sharedSecretGenerator = sharedSecretGenerator,
             sessionKeyGenerator = sessionKeyGenerator,
             encryptDeviceRequestUseCase = encrypter,
-            decryptDeviceResponseUseCase = decrypter,
-            readerAuthCredentialProvider = readerAuthCredentialProvider
+            decryptDeviceResponseUseCase = decrypter
         )
     }
 
