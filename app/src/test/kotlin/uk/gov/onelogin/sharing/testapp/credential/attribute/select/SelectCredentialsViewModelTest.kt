@@ -9,14 +9,17 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.TestAppReaderAuthCredentialProviderFactory
 
 @RunWith(RobolectricTestParameterInjector::class)
 class SelectCredentialsViewModelTest {
 
+    private val logger = SystemLogger()
     private val factory = TestAppReaderAuthCredentialProviderFactory(
-        ApplicationProvider.getApplicationContext()
+        ApplicationProvider.getApplicationContext(),
+        logger = logger
     )
 
     private val issuerRootCertificateProvider = IssuerRootCertificateProvider(

@@ -52,6 +52,11 @@ dependencies {
         libs.jackson.cbor,
         projects.cryptoService
     ).forEach(::testFixturesImplementation)
+
+    listOf(
+        libs.org.bouncycastle.bcprov.jdk18on,
+        testFixtures(projects.credentialVerification)
+    ).forEach(::testImplementation)
 }
 
 mavenPublishingConfig {

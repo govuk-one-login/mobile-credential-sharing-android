@@ -24,11 +24,13 @@ import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrParser
 import uk.gov.onelogin.sharing.cryptoService.scanner.QrScanResult
+import uk.gov.onelogin.sharing.cryptoService.verifier.DeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.EncryptDeviceRequestException
 import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 import uk.gov.onelogin.sharing.cryptoService.verifier.SessionEstablishmentException
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoContext
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionData
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus.SESSION_TERMINATION
@@ -53,7 +55,6 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason.Unverifi
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verifier.session.SessionTerminator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSession
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
@@ -623,6 +624,9 @@ class VerifierOrchestrator(
                 is EncryptDeviceRequestException ->
                     SessionErrorReason.CannotEncryptDeviceRequest
 
+                is DeviceRequestException ->
+                    SessionErrorReason.CannotBuildDeviceRequest
+
                 is SessionEstablishmentException ->
                     SessionErrorReason.CannotBuildSessionEstablishment
 
@@ -645,10 +649,12 @@ class VerifierOrchestrator(
             itemsRequestBytes = itemsRequestBytes
         )
 
+        val coseSign1Bytes = readerAuthCredentialProvider.sign(readerAuthBytes)
+
         val deviceRequestBytes = verifierCryptoService.buildDeviceRequest(
             itemsRequest = itemsRequest,
             itemsRequestBytes = itemsRequestBytes,
-            readerAuth = readerAuthBytes
+            readerAuth = coseSign1Bytes
         )
 
         logger.debug(logTag, "DeviceRequestBytes: ${deviceRequestBytes.toHexString()}")

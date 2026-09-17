@@ -27,6 +27,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyDeriva
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.HOLDER
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole.VERIFIER
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
@@ -41,7 +42,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ReaderAuthenticationDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 @ContributesBinding(AppScope::class, binding = binding<VerifierCryptoService>())
 class VerifierCryptoServiceImpl(
     private val logger: Logger,
@@ -135,9 +136,11 @@ class VerifierCryptoServiceImpl(
             sessionTranscript = sessionTranscript,
             itemsRequestBytes = itemsRequestBytes
         )
-        EmbeddedCbor(dto.toCbor()).toCbor().also {
-            logger.debug(logTag, "ReaderAuthenticationBytes constructed successfully")
-        }
+        EmbeddedCbor(dto.toCbor())
+            .let(CborEncodable::toCbor)
+            .also {
+                logger.debug(logTag, "ReaderAuthenticationBytes constructed successfully")
+            }
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         val message = "Error constructing ReaderAuthenticationBytes"
         logger.error(logTag, message, e)
@@ -168,17 +171,23 @@ class VerifierCryptoServiceImpl(
         itemsRequest: ItemsRequest,
         itemsRequestBytes: ByteArray?,
         readerAuth: ByteArray?
-    ): ByteArray = DeviceRequest(
-        version = "1.0",
-        docRequests = listOf(
-            DocRequest(
-                itemsRequest = itemsRequest,
-                readerAuth = readerAuth,
-                itemsRequestBytes = itemsRequestBytes
+    ): ByteArray = try {
+        DeviceRequest(
+            version = "1.0",
+            docRequests = listOf(
+                DocRequest(
+                    itemsRequest = itemsRequest,
+                    readerAuth = readerAuth,
+                    itemsRequestBytes = itemsRequestBytes
+                )
             )
-        )
-    ).toDto().toCbor().also {
-        logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
+        ).toDto().toCbor().also {
+            logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
+        }
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        val message = "Error constructing DeviceRequest"
+        logger.error(logTag, message, e)
+        throw DeviceRequestException(message, e)
     }
 
     override fun encryptDeviceRequest(
