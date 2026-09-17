@@ -58,6 +58,20 @@ jobs:
       - name: Setup
         uses: ./.github/actions/android-setup
 
+      - name: Provision dev reader certificate
+        uses: ./.github/actions/provision-reader-cert
+        with:
+          environment: dev
+          endpoint-url: ${{ vars.READER_CERT_DEV_ENDPOINT_URL }}
+          aws-role-arn: ${{ vars.READER_CERT_DEV_ROLE_ARN }}
+
+      - name: Provision integration reader certificate
+        uses: ./.github/actions/provision-reader-cert
+        with:
+          environment: integration
+          endpoint-url: ${{ vars.READER_CERT_INTEGRATION_ENDPOINT_URL }}
+          aws-role-arn: ${{ vars.READER_CERT_INTEGRATION_ROLE_ARN }}
+
       - name: Retrieve Secrets
         id: secrets
         uses: ./mobile-android-pipelines/actions/retrieve-secrets
