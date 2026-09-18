@@ -5,15 +5,15 @@ import android.content.Context
 import io.mockk.every
 import io.mockk.mockk
 import java.security.cert.X509Certificate
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertSame
-import org.junit.Assert.assertTrue
+import junit.framework.TestCase.assertTrue
+import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.internal.presenter.CredentialPresenterImpl
 import uk.gov.onelogin.sharing.sdk.internal.shared.CredentialSharingSdkImpl
@@ -37,7 +37,7 @@ class CredentialSharingSdkImplTest {
             logger = logger,
             applicationContext = mockContext,
             permissionChecker = { emptyList() },
-            readerAuthCredentialFactory = factory,
+            readerAuthCredentialFactory = factory
         )
     }
 
@@ -67,7 +67,7 @@ class CredentialSharingSdkImplTest {
 
         val presenter = sdk.createCredentialPresenter(
             credentialProvider = credentialProvider,
-            trustedReaderCertificates = trustedCerts,
+            trustedReaderCertificates = trustedCerts
         )
 
         assertNotNull(presenter)

@@ -11,18 +11,16 @@ import java.security.interfaces.ECPrivateKey
 import java.security.spec.PKCS8EncodedKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 import kotlin.io.encoding.Base64
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ECReaderAuthProvider
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
+import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSigStructureGenerator
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1ProtectedHeaders
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1UnprotectedHeaderGenerator
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ECReaderAuthProvider
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.SigningSignatureStructure
 import uk.gov.onelogin.sharing.testapp.credential.SIGNING_ALGORITHM
 import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOption
 
@@ -36,21 +34,22 @@ import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOpt
 class TestAppReaderAuthCredentialProviderFactory(
     @ApplicationContext
     private val context: Context,
+    private val logger: Logger,
     initialState: ReaderAuthOption,
     private val keyFactory: KeyFactory,
-    private val certificateFactory: CertificateFactory,
-    private val coroutineContext: CoroutineContext
+    private val certificateFactory: CertificateFactory
 ) : ReaderAuthCredentialProvider.Factory {
 
     @Inject
     constructor(
         @ApplicationContext
-        context: Context
+        context: Context,
+        logger: Logger
     ) : this(
         context = context,
+        logger = logger,
         initialState = ReaderAuthOption.VALID,
         keyFactory = KeyFactory.getInstance("EC"),
-        coroutineContext = Dispatchers.IO,
         certificateFactory = CertificateFactory.getInstance("X.509")
     )
 
@@ -58,31 +57,44 @@ class TestAppReaderAuthCredentialProviderFactory(
         initialState
     )
 
-    private val privateKeyChain: StateFlow<List<ECPrivateKey>> = _readerAuthOption
-        .map { it.privateKeyChain.asSequence() }
-        .map { processPrivateKeyAssetChain(it) }
-        .stateIn(
-            CoroutineScope(coroutineContext),
-            SharingStarted.Lazily,
-            emptyList()
-        )
-
-    private val certificateChain: StateFlow<List<X509Certificate>> = _readerAuthOption
-        .map { it.certificateChain.asSequence() }
-        .map { processCertificateAssetChain(it) }
-        .stateIn(
-            CoroutineScope(coroutineContext),
-            SharingStarted.Lazily,
-            emptyList()
-        )
-
     val readerAuthOption: Flow<ReaderAuthOption> = _readerAuthOption
 
-    override fun create(): ReaderAuthCredentialProvider = ECReaderAuthProvider(
-        privateKeyChain = privateKeyChain.value,
-        certificateChain = certificateChain.value,
-        signature = Signature.getInstance(SIGNING_ALGORITHM)
-    )
+    /**
+     * Builds a [ReaderAuthCredentialProvider] for the currently selected [ReaderAuthOption].
+     *
+     * This reads and parses the reader authentication key and certificate chain assets.
+     * It is a blocking operation and callers are expected to invoke it off the main thread.
+     */
+    override fun create(): ReaderAuthCredentialProvider {
+        val option = _readerAuthOption.value
+        val privateKey = processPrivateKeyAssetChain(
+            sequenceOf(
+                option.privateKeyChain.first()
+            )
+        ).first()
+
+        // x5chain must contain the leaf and intermediate(s) only, with the root excluded.
+        // The asset chain is leaf-first and ends with the root, so drop the last element.
+        val certificateChain = processCertificateAssetChain(
+            option.certificateChain.dropLast(1).asSequence()
+        )
+
+        return ECReaderAuthProvider(
+            logger = logger,
+            certificateChain = certificateChain,
+            protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger),
+            unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),
+            sigStructureGenerator = SigningSignatureStructure(
+                logger = logger,
+                signature = Signature.getInstance(SIGNING_ALGORITHM),
+                privateKey = privateKey,
+                decorated = CoseSigStructureGenerator(
+                    logger = logger,
+                    protectedHeaderGenerator = CoseSign1ProtectedHeaders(logger = logger)
+                )
+            )
+        )
+    }
 
     fun update(option: ReaderAuthOption) {
         _readerAuthOption.value = option

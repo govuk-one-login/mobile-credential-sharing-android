@@ -46,6 +46,7 @@ private fun transformReasonToTitle(reason: SessionErrorReason): String = when (r
     SessionErrorReason.CannotBuildSessionEstablishment -> "CannotBuildSessionEstablishment"
     SessionErrorReason.CannotDecryptDeviceResponse -> "CannotDecryptDeviceResponse"
     SessionErrorReason.CannotEncryptDeviceRequest -> "CannotEncryptDeviceRequest"
+    SessionErrorReason.CannotBuildDeviceRequest -> "CannotBuildDeviceRequest"
     is SessionErrorReason.CannotProcessEngagement -> "CannotProcessEngagement"
     SessionErrorReason.CannotSendMessage -> "CannotSendMessage"
     is SessionErrorReason.DeviceRequestProcessingError -> "DeviceRequestProcessingError"

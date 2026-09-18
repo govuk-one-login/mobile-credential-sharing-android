@@ -8,6 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.TestAppReaderAuthCredentialProviderFactory
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -16,14 +18,26 @@ class SelectCredentialAttributesScreenTest {
     @get:Rule
     val composeTestRule = SelectCredentialAttributesScreenRule(createComposeRule())
 
+    private val logger = SystemLogger()
+
     private val factory by lazy {
         TestAppReaderAuthCredentialProviderFactory(
+            ApplicationProvider.getApplicationContext(),
+            logger
+        )
+    }
+
+    private val issuerRootCertificateProvider by lazy {
+        IssuerRootCertificateProvider(
             ApplicationProvider.getApplicationContext()
         )
     }
 
     private val viewModel by lazy {
-        SelectCredentialsViewModel(readerAuthFactory = factory)
+        SelectCredentialsViewModel(
+            readerAuthFactory = factory,
+            issuerRootCertificateProvider = issuerRootCertificateProvider
+        )
     }
 
     @Test
@@ -58,6 +72,24 @@ class SelectCredentialAttributesScreenTest {
             }
 
             performReaderAuthClick(option)
+            assertOptionIsSelected(option)
+            performVerifyCredentialClick()
+        }
+    }
+
+    @Test
+    fun `Selects issuer root option before tapping 'Verify credential' button`(
+        @TestParameter option: IssuerRootOption
+    ) = runTest {
+        composeTestRule.run {
+            setContent {
+                SelectCredentialAttributesScreen(
+                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup,
+                    viewModel = viewModel
+                )
+            }
+
+            performIssuerRootClick(option)
             assertOptionIsSelected(option)
             performVerifyCredentialClick()
         }

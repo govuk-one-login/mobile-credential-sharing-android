@@ -4,8 +4,8 @@ import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
 import java.security.cert.X509Certificate
 import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
-import uk.gov.onelogin.sharing.orchestration.verifier.auth.reader.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialGraph

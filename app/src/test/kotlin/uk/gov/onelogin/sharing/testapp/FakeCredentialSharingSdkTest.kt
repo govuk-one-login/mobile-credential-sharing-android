@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 
 class FakeCredentialSharingSdkTest {
     private val appGraph: CredentialSharingAppGraph = mockk()
+
     @Suppress("DEPRECATION")
     private val presentCredentialSdk: PresentCredentialSdk = mockk(relaxed = true)
     private val verifyCredentialSdk: VerifyCredentialSdk = mockk()
@@ -28,7 +29,7 @@ class FakeCredentialSharingSdkTest {
             appGraph = appGraph,
             presentCredentialSdk = presentCredentialSdk,
             verifyCredentialSdk = verifyCredentialSdk,
-            credentialPresenter = customPresenter,
+            credentialPresenter = customPresenter
         )
 
         val result = fakeSdk.createCredentialPresenter(provider, emptyList())
@@ -46,7 +47,7 @@ class FakeCredentialSharingSdkTest {
             appGraph = appGraph,
             presentCredentialSdk = presentCredentialSdk,
             verifyCredentialSdk = verifyCredentialSdk,
-            credentialPresenter = null,
+            credentialPresenter = null
         )
 
         val result = fakeSdk.createCredentialPresenter(provider, emptyList())

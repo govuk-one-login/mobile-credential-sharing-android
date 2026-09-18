@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 import uk.gov.onelogin.sharing.testapp.MainActivityRoutes.configureTestAppRoutes
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentials
 import uk.gov.onelogin.sharing.testapp.home.HomeRoute
+import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -35,6 +36,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var verifyCredentialSdk: VerifyCredentialSdk
+
+    @Inject
+    lateinit var issuerRootCertificateProvider: IssuerRootCertificateProvider
 
     @Inject
     lateinit var logger: Logger
@@ -71,7 +75,8 @@ class MainActivity : ComponentActivity() {
                             mockCredentials = mockCredentials,
                             navController = navController,
                             presentCredentialSdk = presentCredentialSdk,
-                            verifyCredentialSdk = verifyCredentialSdk
+                            verifyCredentialSdk = verifyCredentialSdk,
+                            issuerRootCertificateProvider = issuerRootCertificateProvider
                         )
                     }
                 }
