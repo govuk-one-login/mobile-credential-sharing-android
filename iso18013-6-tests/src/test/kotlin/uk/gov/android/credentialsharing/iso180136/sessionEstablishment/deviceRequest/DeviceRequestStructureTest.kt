@@ -268,16 +268,16 @@ class DeviceRequestStructureTest {
     /**
      * Scenario: mDLR_MS_DR_06
      *
-     * Fails conformance test due to [DocRequestDto.Serializer] / [DocRequestDto.Deserializer] not
-     * writing the [DocRequestDto.readerAuth] property.
+     * The [DocRequestDto.Serializer] writes the optional [DocRequestDto.readerAuth]
+     * property when present, so a document request that carries a signed ReaderAuth exposes the
+     * `readerAuth` key when encoded.
      */
     @Test
-    @Ignore("Fails conformance test due to incomplete (de)serializer implementation")
     fun `Some document requests can have a 'readerAuth' property`() {
         deviceRequest = deviceRequest.copy(
             docRequest = listOf(
                 deviceRequest.docRequest[0].copy(
-                    readerAuth = byteArrayOf(1, 2)
+                    readerAuth = READER_AUTH_COSE_SIGN1
                 )
             )
         )
@@ -300,6 +300,75 @@ class DeviceRequestStructureTest {
         assertThat(
             deviceRequestHexString,
             containsString(prefix)
+        )
+    }
+
+    /**
+     * Scenario: mDLR_MS_DR_06
+     *
+     * `readerAuth` is an untagged four-element COSE_Sign1 array
+     * `[protectedHeaderBytes, unprotectedHeaderMap, null, signatureBytes]` and is not wrapped in
+     * Tag 24.
+     */
+    @Test
+    fun `readerAuth is an untagged four-element COSE_Sign1 array with a null payload`() {
+        deviceRequest = deviceRequest.copy(
+            docRequest = listOf(
+                deviceRequest.docRequest[0].copy(
+                    readerAuth = READER_AUTH_COSE_SIGN1
+                )
+            )
+        )
+
+        val readerAuthNode = docRequestNodes
+            .first { it.has(READER_AUTH_KEY) }
+            .get(READER_AUTH_KEY)
+
+        assertTrue(readerAuthNode.isArray)
+        assertThat(readerAuthNode.size(), equalTo(COSE_SIGN1_ELEMENT_COUNT))
+        // protected header (element 0) must be a byte string
+        assertTrue(readerAuthNode[0].isBinary)
+        // unprotected header (element 1) must be a map
+        assertTrue(readerAuthNode[1].isObject)
+        // payload (element 2) must be null for a detached signature
+        assertTrue(readerAuthNode[2].isNull)
+        // signature (element 3) must be a byte string
+        assertTrue(readerAuthNode[3].isBinary)
+
+        // The COSE_Sign1 array must be embedded raw, not wrapped in Tag 24 (0xd818).
+        assertThat(
+            deviceRequestHexString,
+            not(containsString(TAG_24_PREFIX + READER_AUTH_COSE_SIGN1.toHexString()))
+        )
+    }
+
+    private companion object {
+        const val COSE_SIGN1_ELEMENT_COUNT = 4
+        const val TAG_24_PREFIX = "d818"
+
+        /**
+         * A well-formed detached COSE_Sign1 as an untagged four-element array:
+         * `[protectedHeaderBytes, {}, null, signatureBytes]`.
+         *
+         * - `0x84`         : array of 4
+         * - `0x43 A10126`  : bstr protected header {1: -7} (ES256)
+         * - `0xA0`         : empty unprotected header map
+         * - `0xF6`         : null payload (detached)
+         * - `0x44 DEADBEEF`: bstr signature
+         */
+        val READER_AUTH_COSE_SIGN1 = byteArrayOf(
+            0x84.toByte(),
+            0x43,
+            0xA1.toByte(),
+            0x01,
+            0x26,
+            0xA0.toByte(),
+            0xF6.toByte(),
+            0x44,
+            0xDE.toByte(),
+            0xAD.toByte(),
+            0xBE.toByte(),
+            0xEF.toByte()
         )
     }
 }

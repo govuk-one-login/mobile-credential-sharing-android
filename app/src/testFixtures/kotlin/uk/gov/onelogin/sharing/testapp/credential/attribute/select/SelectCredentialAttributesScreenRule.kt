@@ -40,6 +40,12 @@ class SelectCredentialAttributesScreenRule(
         ) and hasTestTag("dropdown_text")
     ).assertTextContains(option.displayName)
 
+    fun assertOptionIsSelected(option: IssuerRootOption) = onNode(
+        hasParent(
+            hasTestTag("issuer_root_menu")
+        ) and hasTestTag("dropdown_text")
+    ).assertTextContains(option.displayName)
+
     fun onVerifierOptionText(option: VerifierAttributeOption) = onNode(
         hasTestTag(
             ATTRIBUTE_GROUP_ITEM_TAG
@@ -54,6 +60,13 @@ class SelectCredentialAttributesScreenRule(
         useUnmergedTree = true
     )
 
+    fun onIssuerRootOptionText(option: IssuerRootOption) = onNode(
+        hasTestTag(
+            "issuer_root_item"
+        ) and hasAnyChild(hasText(option.displayName)),
+        useUnmergedTree = true
+    )
+
     fun performAttributeGroupMenuClick() = onNodeWithTag(
         "attribute_group_menu",
         useUnmergedTree = true
@@ -61,6 +74,11 @@ class SelectCredentialAttributesScreenRule(
 
     fun performReaderAuthMenuClick() = onNodeWithTag(
         "reader_auth_menu",
+        useUnmergedTree = true
+    ).performScrollTo().performClick()
+
+    fun performIssuerRootMenuClick() = onNodeWithTag(
+        "issuer_root_menu",
         useUnmergedTree = true
     ).performScrollTo().performClick()
 
@@ -72,6 +90,11 @@ class SelectCredentialAttributesScreenRule(
     fun performReaderAuthClick(option: ReaderAuthOption) {
         performReaderAuthMenuClick()
         onReaderAuthOptionText(option).performClick()
+    }
+
+    fun performIssuerRootClick(option: IssuerRootOption) {
+        performIssuerRootMenuClick()
+        onIssuerRootOptionText(option).performScrollTo().performClick()
     }
 
     fun performVerifyCredentialClick() = onNodeWithText(

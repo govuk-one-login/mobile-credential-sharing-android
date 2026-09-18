@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.TestAppReaderAuthCredentialProviderFactory
 
 @HiltViewModel
 class SelectCredentialsViewModel @Inject constructor(
-    private val readerAuthFactory: TestAppReaderAuthCredentialProviderFactory
+    private val readerAuthFactory: TestAppReaderAuthCredentialProviderFactory,
+    private val issuerRootCertificateProvider: IssuerRootCertificateProvider
 ) : ViewModel() {
     val readerAuthOption: StateFlow<ReaderAuthOption> = readerAuthFactory
         .readerAuthOption
@@ -21,6 +23,14 @@ class SelectCredentialsViewModel @Inject constructor(
             viewModelScope,
             SharingStarted.Eagerly,
             ReaderAuthOption.VALID
+        )
+
+    val issuerRootOption: StateFlow<IssuerRootOption> = issuerRootCertificateProvider
+        .issuerRootOption
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            IssuerRootOption.SHARING_TEST_APP_MOCK
         )
 
     private val _verifierAttributeOption = MutableStateFlow(
@@ -31,6 +41,10 @@ class SelectCredentialsViewModel @Inject constructor(
 
     fun update(option: ReaderAuthOption) = viewModelScope.launch {
         readerAuthFactory.update(option)
+    }
+
+    fun update(option: IssuerRootOption) = viewModelScope.launch {
+        issuerRootCertificateProvider.update(option)
     }
 
     fun update(option: VerifierAttributeOption) = viewModelScope.launch {
