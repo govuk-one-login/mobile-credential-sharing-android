@@ -5,12 +5,15 @@ import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialRequest
 
 /**
- * Sample implementation of [CredentialProvider] for demonstration purposes.
+ * Test App [CredentialProvider] whose [sign] operation always fails.
  *
- * In a production app, this would retrieve actual credentials from secure storage
- * and use the Android Keystore for signing operations.
+ * [getCredentials] returns the normal Jane Doe credential, but every call to [sign] throws
+ * [MockSignException.SignError] and never returns a signature, regardless of the number of
+ * attempts. Used by the "Jane Doe (signing failure)" option to reproduce a fatal signing failure
+ * without a real local-authentication prompt.
  */
-class SampleCredentialProvider(private val activeCredential: MockCredential) : CredentialProvider {
+class FailingSignCredentialProvider(private val activeCredential: MockCredential) :
+    CredentialProvider {
 
     override suspend fun getCredentials(request: CredentialRequest): List<Credential> = listOf(
         Credential(
@@ -19,11 +22,6 @@ class SampleCredentialProvider(private val activeCredential: MockCredential) : C
         )
     )
 
-    /**
-     * Mock signing implementation for use in the Test App only.
-     *
-     * Signs the [payload] using the EC private key stored in the active [MockCredential].
-     */
     override suspend fun sign(payload: ByteArray, documentId: String): ByteArray =
-        signWithEcPrivateKey(payload, activeCredential.privateKey)
+        throw MockSignException.SignError()
 }

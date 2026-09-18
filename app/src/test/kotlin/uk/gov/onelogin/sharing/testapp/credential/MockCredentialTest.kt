@@ -26,6 +26,10 @@ class MockCredentialTest {
         assertNotEquals(sut, sut.copy(displayName = "other"))
         assertNotEquals(sut, sut.copy(rawCredential = byteArrayOf()))
         assertNotEquals(sut, sut.copy(privateKey = byteArrayOf()))
+        assertNotEquals(
+            sut,
+            sut.copy(providerType = MockCredentialProviderType.SIGNING_FAILURE)
+        )
     }
 
     @Test
