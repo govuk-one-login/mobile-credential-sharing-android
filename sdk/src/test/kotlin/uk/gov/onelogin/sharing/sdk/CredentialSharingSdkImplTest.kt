@@ -61,7 +61,22 @@ class CredentialSharingSdkImplTest {
     }
 
     @Test
-    fun `createCredentialPresenter returns CredentialPresenterImpl with appGraph`() {
+    fun `createCredentialPresenter returns CredentialPresenterImpl with default empty trusted certificates`() {
+        val credentialProvider = FakeCredentialProvider()
+
+        val presenter = sdk.createCredentialPresenter(
+            credentialProvider = credentialProvider
+        )
+
+        assertNotNull(presenter)
+        assertTrue(presenter is CredentialPresenterImpl)
+        val impl = presenter as CredentialPresenterImpl
+        assertSame(sdk.appGraph, impl.appGraph)
+        assertNotNull(impl.orchestrator)
+    }
+
+    @Test
+    fun `createCredentialPresenter returns CredentialPresenterImpl with trusted certificates list`() {
         val credentialProvider = FakeCredentialProvider()
         val trustedCerts = listOf<X509Certificate>(mockk())
 
