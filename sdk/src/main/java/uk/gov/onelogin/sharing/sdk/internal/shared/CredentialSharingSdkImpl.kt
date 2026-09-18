@@ -53,24 +53,21 @@ class CredentialSharingSdkImpl(
     override fun createCredentialPresenter(
         credentialProvider: CredentialProvider,
         trustedReaderCertificates: List<X509Certificate>
-    ): CredentialPresenter = try {
+    ): CredentialPresenter {
         if (trustedReaderCertificates.isEmpty()) {
             throw CoseVerificationFailure.UntrustedCertificate
         }
+
         val presenterGraphFactory = createGraphFactory<PresentCredentialGraph.Factory>()
         val orchestrator = presenterGraphFactory
             .create(appGraph, credentialProvider)
             .holderOrchestrator()
 
-        CredentialPresenterImpl(
+        return CredentialPresenterImpl(
             credentialProvider = credentialProvider,
             orchestrator = orchestrator,
             appGraph = appGraph
         )
-    } catch (e: CoseVerificationFailure) {
-        throw e
-    } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") _: Exception) {
-        throw CoseVerificationFailure.UntrustedCertificate
     }
 
     override val verifyCredentialSdk: VerifyCredentialSdk =
