@@ -7,6 +7,7 @@ import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 
 class FakeCredentialSharingSdk(
     override val appGraph: CredentialSharingAppGraph,
@@ -19,8 +20,13 @@ class FakeCredentialSharingSdk(
     override fun createCredentialPresenter(
         credentialProvider: CredentialProvider,
         trustedReaderCertificates: List<X509Certificate>
-    ): CredentialPresenter = credentialPresenter
-        ?:
-        @Suppress("DEPRECATION")
-        presentCredentialSdk.presenter(credentialProvider)
+    ): CredentialPresenter {
+        if (trustedReaderCertificates.isEmpty()) {
+            throw CoseVerificationFailure.UntrustedCertificate
+        }
+        return credentialPresenter
+            ?:
+            @Suppress("DEPRECATION")
+            presentCredentialSdk.presenter(credentialProvider)
+    }
 }

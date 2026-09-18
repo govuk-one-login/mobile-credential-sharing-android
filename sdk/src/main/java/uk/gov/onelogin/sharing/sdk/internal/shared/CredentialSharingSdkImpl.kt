@@ -18,6 +18,7 @@ import uk.gov.onelogin.sharing.sdk.internal.presenter.CredentialPresenterImpl
 import uk.gov.onelogin.sharing.sdk.internal.presenter.PresentCredentialSdkImpl
 import uk.gov.onelogin.sharing.sdk.internal.verifier.VerifyCredentialSdkImpl
 import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 
 class CredentialSharingSdkImpl(
     applicationContext: Context,
@@ -52,17 +53,24 @@ class CredentialSharingSdkImpl(
     override fun createCredentialPresenter(
         credentialProvider: CredentialProvider,
         trustedReaderCertificates: List<X509Certificate>
-    ): CredentialPresenter {
+    ): CredentialPresenter = try {
+        if (trustedReaderCertificates.isEmpty()) {
+            throw CoseVerificationFailure.UntrustedCertificate
+        }
         val presenterGraphFactory = createGraphFactory<PresentCredentialGraph.Factory>()
         val orchestrator = presenterGraphFactory
             .create(appGraph, credentialProvider)
             .holderOrchestrator()
 
-        return CredentialPresenterImpl(
+        CredentialPresenterImpl(
             credentialProvider = credentialProvider,
             orchestrator = orchestrator,
             appGraph = appGraph
         )
+    } catch (e: CoseVerificationFailure) {
+        throw e
+    } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") _: Exception) {
+        throw CoseVerificationFailure.UntrustedCertificate
     }
 
     override val verifyCredentialSdk: VerifyCredentialSdk =

@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.internal.presenter.CredentialPresenterImpl
 import uk.gov.onelogin.sharing.sdk.internal.shared.CredentialSharingSdkImpl
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UntrustedCertificate
 
 class CredentialSharingSdkImplTest {
     private lateinit var logger: Logger
@@ -61,22 +62,19 @@ class CredentialSharingSdkImplTest {
     }
 
     @Test
-    fun `returns CredentialPresenterImpl with default empty trusted certificates`() {
+    fun `when empty, createCredentialPresenter throws UntrustedCertificate`() {
         val credentialProvider = FakeCredentialProvider()
 
-        val presenter = sdk.createCredentialPresenter(
-            credentialProvider = credentialProvider
-        )
-
-        assertNotNull(presenter)
-        assertTrue(presenter is CredentialPresenterImpl)
-        val impl = presenter as CredentialPresenterImpl
-        assertSame(sdk.appGraph, impl.appGraph)
-        assertNotNull(impl.orchestrator)
+        kotlin.test.assertFailsWith<UntrustedCertificate> {
+            sdk.createCredentialPresenter(
+                credentialProvider = credentialProvider,
+                trustedReaderCertificates = emptyList()
+            )
+        }
     }
 
     @Test
-    fun `returns CredentialPresenterImpl with trusted certificates list`() {
+    fun `when is non-empty, createCredentialPresenter returns CredentialPresenterImpl`() {
         val credentialProvider = FakeCredentialProvider()
         val trustedCerts = listOf<X509Certificate>(mockk())
 
