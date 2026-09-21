@@ -34,8 +34,11 @@ internal class CoseVerifierImpl(
     }
 
     private fun verifyAttached(
-        request: CoseVerificationRequest.Attached
+        request: CoseVerificationRequest.Attached,
     ): CoseVerificationResult.Attached {
+        val trustedRoots = request.trustedRoots
+        if (trustedRoots.isEmpty()) throw UntrustedCertificate
+
         val coseSign1 = decoder.decode(request.coseSign1Bytes)
         val payload = coseSign1.payload ?: throw MalformedCoseSign1
 
@@ -46,9 +49,9 @@ internal class CoseVerifierImpl(
             certFactory.generateCertificate(ByteArrayInputStream(it)) as X509Certificate
         }
 
-        pathValidator.verify(chain, request.trustedRoot)
+        checkChainEmbeddedRoots(chain, trustedRoots)
 
-        val verifiedLeaf = profileValidator.validate(chain, CertificatePurpose.ISSUER_AUTH)
+        val (verifiedLeaf, _) = verifyChainAgainstRoots(chain, trustedRoots, CertificatePurpose.ISSUER_AUTH)
 
         val publicKey = try {
             verifiedLeaf.publicKey as ECPublicKey
@@ -60,13 +63,16 @@ internal class CoseVerifierImpl(
 
         return CoseVerificationResult.Attached(
             leafCertificate = verifiedLeaf,
-            payload = payload
+            payload = payload,
         )
     }
 
     private fun verifyDetached(
-        request: CoseVerificationRequest.Detached
+        request: CoseVerificationRequest.Detached,
     ): CoseVerificationResult.Detached {
+        val trustedRoots = request.trustedRoots
+        if (trustedRoots.isEmpty()) throw UntrustedCertificate
+
         val coseSign1 = decoder.decode(request.coseSign1Bytes)
         if (coseSign1.payload != null) throw MalformedCoseSign1
 
@@ -77,9 +83,9 @@ internal class CoseVerifierImpl(
             certFactory.generateCertificate(ByteArrayInputStream(it)) as X509Certificate
         }
 
-        pathValidator.verify(chain, request.trustedRoot)
+        checkChainEmbeddedRoots(chain, trustedRoots)
 
-        val verifiedLeaf = profileValidator.validate(chain, CertificatePurpose.READER_AUTH)
+        val (verifiedLeaf, _) = verifyChainAgainstRoots(chain, trustedRoots, CertificatePurpose.READER_AUTH)
 
         val publicKey = try {
             verifiedLeaf.publicKey as ECPublicKey
@@ -93,7 +99,7 @@ internal class CoseVerifierImpl(
     }
 
     private fun verifyKeyBased(
-        request: CoseVerificationRequest.KeyBased
+        request: CoseVerificationRequest.KeyBased,
     ): CoseVerificationResult.KeyBased {
         val coseSign1 = decoder.decode(request.coseSign1Bytes)
         if (coseSign1.payload != null) throw MalformedCoseSign1
@@ -107,6 +113,40 @@ internal class CoseVerifierImpl(
         signatureVerifier.verify(coseSign1, publicKey, request.detachedPayload)
 
         return CoseVerificationResult.KeyBased
+    }
+
+    private fun checkChainEmbeddedRoots(
+        chain: List<X509Certificate>,
+        trustedRoots: List<X509Certificate>,
+    ) {
+        for (cert in chain) {
+            val certEncoded = cert.encoded
+            for (root in trustedRoots) {
+                if (certEncoded.contentEquals(root.encoded)) {
+                    throw UntrustedCertificate
+                }
+            }
+        }
+    }
+
+    private fun verifyChainAgainstRoots(
+        chain: List<X509Certificate>,
+        trustedRoots: List<X509Certificate>,
+        purpose: CertificatePurpose,
+    ): Pair<X509Certificate, X509Certificate> {
+        var lastUntrustedFailure: UntrustedCertificate? = null
+
+        for (root in trustedRoots) {
+            try {
+                pathValidator.verify(chain, root)
+                val leaf = profileValidator.validate(chain, purpose)
+                return Pair(leaf, root)
+            } catch (e: UntrustedCertificate) {
+                lastUntrustedFailure = e
+            }
+        }
+
+        throw lastUntrustedFailure ?: UntrustedCertificate
     }
 
     private companion object {

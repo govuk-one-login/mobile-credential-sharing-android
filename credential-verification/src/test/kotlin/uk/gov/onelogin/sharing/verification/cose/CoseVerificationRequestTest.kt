@@ -35,13 +35,14 @@ internal class CoseVerificationRequestTest {
         val bytes2 = byteArrayOf(0x01, 0x02)
         val bytes3 = byteArrayOf(0x03, 0x04)
 
-        val req1 = CoseVerificationRequest.Attached(bytes1, root)
-        val req2 = CoseVerificationRequest.Attached(bytes2, root)
-        val req3 = CoseVerificationRequest.Attached(bytes3, root)
+        val req1 = CoseVerificationRequest.Attached(bytes1, listOf(root))
+        val req2 = CoseVerificationRequest.Attached(bytes2, listOf(root))
+        val req3 = CoseVerificationRequest.Attached(bytes3, listOf(root))
 
         assertThat(req1, equalTo(req2))
         assertThat(req1.hashCode(), equalTo(req2.hashCode()))
         assertThat(req1, not(equalTo(req3)))
+        assertThat(req1.trustedRoots, equalTo(listOf(root)))
     }
 
     @Test
@@ -51,11 +52,12 @@ internal class CoseVerificationRequestTest {
         val payload1 = byteArrayOf(0x02)
         val payload2 = byteArrayOf(0x02)
 
-        val req1 = CoseVerificationRequest.Detached(coseBytes, payload1, root)
-        val req2 = CoseVerificationRequest.Detached(coseBytes, payload2, root)
+        val req1 = CoseVerificationRequest.Detached(coseBytes, payload1, listOf(root))
+        val req2 = CoseVerificationRequest.Detached(coseBytes, payload2, listOf(root))
 
         assertThat(req1, equalTo(req2))
         assertThat(req1.hashCode(), equalTo(req2.hashCode()))
+        assertThat(req1.trustedRoots, equalTo(listOf(root)))
     }
 
     @Test

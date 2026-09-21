@@ -34,11 +34,11 @@ class CoseVerifierImplTest {
         signatureVerifier
     )
 
-    private val trustedRoot = CertificateStubs.rootCa
+    private val trustedRoots = listOf(CertificateStubs.rootCa)
 
     @Test
     fun `attached issuer auth returns verified leaf and exact payload`() {
-        val request = CoseVerificationRequest.Attached(CoseVectors.attachedMsoBytes, trustedRoot)
+        val request = CoseVerificationRequest.Attached(CoseVectors.attachedMsoBytes, trustedRoots)
 
         val result = verifier.verify(request) as CoseVerificationResult.Attached
 
@@ -51,7 +51,7 @@ class CoseVerifierImplTest {
 
     @Test
     fun `attached malformed array throws MalformedCoseSign1`() {
-        val request = CoseVerificationRequest.Attached(byteArrayOf(0x83.toByte()), trustedRoot)
+        val request = CoseVerificationRequest.Attached(byteArrayOf(0x83.toByte()), trustedRoots)
         assertThrows(CoseVerificationFailure.MalformedCoseSign1::class.java) {
             verifier.verify(request)
         }
@@ -61,7 +61,7 @@ class CoseVerifierImplTest {
     fun `attached unsupported algorithm throws UnsupportedAlgorithm`() {
         val request = CoseVerificationRequest.Attached(
             CoseVectors.createAttachedVector(alg = -35L),
-            trustedRoot
+            trustedRoots
         )
         assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
             verifier.verify(request)
@@ -72,7 +72,7 @@ class CoseVerifierImplTest {
     fun `attached missing x5chain throws MissingX5Chain`() {
         val request = CoseVerificationRequest.Attached(
             CoseVectors.createAttachedVector(includeX5chain = false),
-            trustedRoot
+            trustedRoots
         )
         assertThrows(CoseVerificationFailure.MissingX5Chain::class.java) {
             verifier.verify(request)
@@ -87,7 +87,7 @@ class CoseVerifierImplTest {
             issuerKeyPair = CertificateStubs.rootKeyPair,
             issuer = "CN=Untrusted"
         ).ca().build()
-        val request = CoseVerificationRequest.Attached(CoseVectors.attachedMsoBytes, untrustedRoot)
+        val request = CoseVerificationRequest.Attached(CoseVectors.attachedMsoBytes, listOf(untrustedRoot))
         assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
             verifier.verify(request)
         }
@@ -97,7 +97,7 @@ class CoseVerifierImplTest {
     fun `attached profile violation throws CertificateProfileViolation`() {
         val request = CoseVerificationRequest.Attached(
             CoseVectors.createAttachedVector(eku = "1.0.18013.5.1.6"),
-            trustedRoot
+            trustedRoots
         )
         val failure =
             assertThrows(CoseVerificationFailure.CertificateProfileViolation::class.java) {
@@ -110,7 +110,7 @@ class CoseVerifierImplTest {
     fun `attached invalid signature throws InvalidSignature`() {
         val request = CoseVerificationRequest.Attached(
             CoseVectors.createAttachedVector(tamperSignature = true),
-            trustedRoot
+            trustedRoots
         )
         assertThrows(CoseVerificationFailure.InvalidSignature::class.java) {
             verifier.verify(request)
@@ -122,7 +122,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createDetachedVector(),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
 
         val result = verifier.verify(request) as CoseVerificationResult.Detached
@@ -138,7 +138,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createDetachedVector(),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
 
         val result = verifier.verify(request) as CoseVerificationResult.Detached
@@ -156,7 +156,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createDetachedVector(),
             detachedPayload = mutated,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
         assertThrows(CoseVerificationFailure.InvalidSignature::class.java) {
             verifier.verify(request)
@@ -168,7 +168,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = byteArrayOf(0x83.toByte()),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
         assertThrows(CoseVerificationFailure.MalformedCoseSign1::class.java) {
             verifier.verify(request)
@@ -180,7 +180,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createAttachedVector(),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
         assertThrows(CoseVerificationFailure.MalformedCoseSign1::class.java) {
             verifier.verify(request)
@@ -192,7 +192,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createDetachedVector(alg = -35L),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
         assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
             verifier.verify(request)
@@ -204,7 +204,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createDetachedVector(includeX5chain = false),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
         assertThrows(CoseVerificationFailure.MissingX5Chain::class.java) {
             verifier.verify(request)
@@ -222,7 +222,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createDetachedVector(),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = untrustedRoot
+            trustedRoots = listOf(untrustedRoot)
         )
         assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
             verifier.verify(request)
@@ -234,7 +234,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createDetachedVector(eku = "1.0.18013.5.1.2"),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
         val failure =
             assertThrows(CoseVerificationFailure.CertificateProfileViolation::class.java) {
@@ -248,7 +248,7 @@ class CoseVerifierImplTest {
         val request = CoseVerificationRequest.Detached(
             coseSign1Bytes = CoseVectors.createDetachedVector(tamperSignature = true),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoot = trustedRoot
+            trustedRoots = trustedRoots
         )
         assertThrows(CoseVerificationFailure.InvalidSignature::class.java) {
             verifier.verify(request)
@@ -261,7 +261,7 @@ class CoseVerifierImplTest {
             CoseVerificationRequest.Detached(
                 coseSign1Bytes = CoseVectors.createDetachedVector(),
                 detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-                trustedRoot = trustedRoot
+                trustedRoots = trustedRoots
             )
         )
         assertThat(result is CoseVerificationResult.Detached, equalTo(true))
@@ -277,7 +277,7 @@ class CoseVerifierImplTest {
                 CoseVerificationRequest.Detached(
                     coseSign1Bytes = CoseVectors.createDetachedVector(),
                     detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-                    trustedRoot = differentRoot
+                    trustedRoots = listOf(differentRoot)
                 )
             )
         }
@@ -452,6 +452,106 @@ class CoseVerifierImplTest {
         )
         assertThrows(CoseVerificationFailure.InvalidSignature::class.java) {
             verifier.verify(request)
+        }
+    }
+
+    @Test
+    fun `C10 AC1 - attached and detached verification succeeds when valid against first root in trustedRoots`() {
+        val untrustedRoot = TestCertificateGenerator(
+            subject = "CN=Untrusted",
+            keyPair = CertificateStubs.rootKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Untrusted"
+        ).ca().build()
+
+        val attachedReq = CoseVerificationRequest.Attached(
+            coseSign1Bytes = CoseVectors.attachedMsoBytes,
+            trustedRoots = listOf(CertificateStubs.rootCa, untrustedRoot)
+        )
+        val attachedResult = verifier.verify(attachedReq) as CoseVerificationResult.Attached
+        assertThat(attachedResult.leafCertificate.subjectX500Principal.name, equalTo("ST=London,C=GB,CN=Leaf"))
+
+        val detachedReq = CoseVerificationRequest.Detached(
+            coseSign1Bytes = CoseVectors.createDetachedVector(),
+            detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
+            trustedRoots = listOf(CertificateStubs.rootCa, untrustedRoot)
+        )
+        val detachedResult = verifier.verify(detachedReq) as CoseVerificationResult.Detached
+        assertThat(detachedResult.leafCertificate.subjectX500Principal.name, equalTo("ST=London,C=GB,CN=Reader"))
+    }
+
+    @Test
+    fun `C10 AC2 - attached and detached verification succeeds when valid against second root in trustedRoots`() {
+        val untrustedRoot = TestCertificateGenerator(
+            subject = "CN=Untrusted",
+            keyPair = CertificateStubs.rootKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Untrusted"
+        ).ca().build()
+
+        val attachedReq = CoseVerificationRequest.Attached(
+            coseSign1Bytes = CoseVectors.attachedMsoBytes,
+            trustedRoots = listOf(untrustedRoot, CertificateStubs.rootCa)
+        )
+        val attachedResult = verifier.verify(attachedReq) as CoseVerificationResult.Attached
+        assertThat(attachedResult.leafCertificate.subjectX500Principal.name, equalTo("ST=London,C=GB,CN=Leaf"))
+
+        val detachedReq = CoseVerificationRequest.Detached(
+            coseSign1Bytes = CoseVectors.createDetachedVector(),
+            detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
+            trustedRoots = listOf(untrustedRoot, CertificateStubs.rootCa)
+        )
+        val detachedResult = verifier.verify(detachedReq) as CoseVerificationResult.Detached
+        assertThat(detachedResult.leafCertificate.subjectX500Principal.name, equalTo("ST=London,C=GB,CN=Reader"))
+    }
+
+    @Test
+    fun `C10 AC3 - chain containing any supplied root fails with UntrustedCertificate before validation`() {
+        val req1 = CoseVerificationRequest.Attached(
+            coseSign1Bytes = CoseVectors.attachedMsoBytes,
+            trustedRoots = listOf(CertificateStubs.leafSignedByRoot, CertificateStubs.rootCa)
+        )
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            verifier.verify(req1)
+        }
+
+        val req2 = CoseVerificationRequest.Attached(
+            coseSign1Bytes = CoseVectors.attachedMsoBytes,
+            trustedRoots = listOf(CertificateStubs.rootCa, CertificateStubs.leafSignedByRoot)
+        )
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            verifier.verify(req2)
+        }
+    }
+
+    @Test
+    fun `C10 AC4 - empty trustedRoots list or chain valid against no roots throws UntrustedCertificate`() {
+        val emptyAttachedReq = CoseVerificationRequest.Attached(
+            coseSign1Bytes = CoseVectors.attachedMsoBytes,
+            trustedRoots = emptyList()
+        )
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            verifier.verify(emptyAttachedReq)
+        }
+
+        val emptyDetachedReq = CoseVerificationRequest.Detached(
+            coseSign1Bytes = CoseVectors.createDetachedVector(),
+            detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
+            trustedRoots = emptyList()
+        )
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            verifier.verify(emptyDetachedReq)
+        }
+    }
+
+    @Test
+    fun `C10 Short Circuit - non-untrusted failure on root A stops execution immediately`() {
+        val unsupportedAlgReq = CoseVerificationRequest.Attached(
+            coseSign1Bytes = CoseVectors.createAttachedVector(alg = -35L),
+            trustedRoots = listOf(CertificateStubs.rootCa)
+        )
+        assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
+            verifier.verify(unsupportedAlgReq)
         }
     }
 }
