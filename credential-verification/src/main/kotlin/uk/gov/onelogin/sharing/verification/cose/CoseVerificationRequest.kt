@@ -10,6 +10,9 @@ sealed class CoseVerificationRequest {
     /** Chain-based, attached payload (IssuerAuth). */
     data class Attached(val coseSign1Bytes: ByteArray, val trustedRoots: List<X509Certificate>) :
         CoseVerificationRequest() {
+        internal constructor(coseSign1Bytes: ByteArray, trustedRoot: X509Certificate) :
+            this(coseSign1Bytes, listOf(trustedRoot))
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -32,6 +35,12 @@ sealed class CoseVerificationRequest {
         val detachedPayload: ByteArray,
         val trustedRoots: List<X509Certificate>
     ) : CoseVerificationRequest() {
+        internal constructor(
+            coseSign1Bytes: ByteArray,
+            detachedPayload: ByteArray,
+            trustedRoot: X509Certificate
+        ) : this(coseSign1Bytes, detachedPayload, listOf(trustedRoot))
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false

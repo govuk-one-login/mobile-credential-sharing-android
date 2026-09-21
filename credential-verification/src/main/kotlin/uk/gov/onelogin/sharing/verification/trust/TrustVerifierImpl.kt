@@ -26,7 +26,7 @@ class TrustVerifierImpl internal constructor(private val coseVerifier: CoseVerif
     override fun verifyCOSESign1(data: ByteArray, trustedRoot: X509Certificate): IssuerAuthResult =
         try {
             val result = coseVerifier.verify(
-                CoseVerificationRequest.Attached(data, listOf(trustedRoot))
+                CoseVerificationRequest.Attached(data, trustedRoot)
             ) as CoseVerificationResult.Attached
 
             val leaf = result.leafCertificate

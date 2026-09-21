@@ -37,7 +37,7 @@ internal class CoseVerifierImpl(
         request: CoseVerificationRequest.Attached
     ): CoseVerificationResult.Attached {
         val trustedRoots = request.trustedRoots
-        if (trustedRoots.isEmpty()) throw UntrustedCertificate
+        if (trustedRoots.isEmpty()) throw UntrustedCertificate()
 
         val coseSign1 = decoder.decode(request.coseSign1Bytes)
         val payload = coseSign1.payload ?: throw MalformedCoseSign1
@@ -67,7 +67,7 @@ internal class CoseVerifierImpl(
         request: CoseVerificationRequest.Detached
     ): CoseVerificationResult.Detached {
         val trustedRoots = request.trustedRoots
-        if (trustedRoots.isEmpty()) throw UntrustedCertificate
+        if (trustedRoots.isEmpty()) throw UntrustedCertificate()
 
         val coseSign1 = decoder.decode(request.coseSign1Bytes)
         if (coseSign1.payload != null) throw MalformedCoseSign1
@@ -115,7 +115,7 @@ internal class CoseVerifierImpl(
             val certEncoded = cert.encoded
             for (root in trustedRoots) {
                 if (certEncoded.contentEquals(root.encoded)) {
-                    throw UntrustedCertificate
+                    throw UntrustedCertificate()
                 }
             }
         }
@@ -126,7 +126,7 @@ internal class CoseVerifierImpl(
         trustedRoots: List<X509Certificate>,
         purpose: CertificatePurpose
     ): X509Certificate {
-        var lastUntrustedFailure: UntrustedCertificate? = null
+        var lastUntrustedFailure = UntrustedCertificate()
 
         for (root in trustedRoots) {
             try {
@@ -137,13 +137,13 @@ internal class CoseVerifierImpl(
             }
         }
 
-        throw lastUntrustedFailure ?: UntrustedCertificate
+        throw lastUntrustedFailure
     }
 
     private fun extractEcPublicKey(verifiedLeaf: X509Certificate): ECPublicKey = try {
         verifiedLeaf.publicKey as ECPublicKey
-    } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-        throw UntrustedCertificate
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        throw UntrustedCertificate(cause = e)
     }
 
     private companion object {

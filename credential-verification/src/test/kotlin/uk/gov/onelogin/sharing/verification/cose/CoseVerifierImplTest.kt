@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.verification.cose
 
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValuesIn
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.spyk
@@ -461,44 +463,23 @@ class CoseVerifierImplTest {
         }
     }
 
+    data class MultiRootSuccessCase(
+        val request: CoseVerificationRequest,
+        val assertResult: (CoseVerificationResult) -> Unit
+    )
+
     @Test
     fun `verification succeeds when valid root is present in trustedRoots`(
-        @TestParameter chainType: ChainType,
-        @TestParameter rootPosition: RootPosition
+        @TestParameter case: MultiRootSuccessCase = namedTestValuesIn(multiRootSuccessCases)
     ) {
-        val untrustedRoot = TestCertificateGenerator(
-            subject = "CN=Untrusted",
-            keyPair = CertificateStubs.rootKeyPair,
-            issuerKeyPair = CertificateStubs.rootKeyPair,
-            issuer = "CN=Untrusted"
-        ).ca().build()
-
-        val roots = when (rootPosition) {
-            RootPosition.FIRST -> listOf(CertificateStubs.rootCa, untrustedRoot)
-            RootPosition.SECOND -> listOf(untrustedRoot, CertificateStubs.rootCa)
-        }
-
-        val request = buildRequest(chainType, roots)
-        val result = verifier.verify(request)
-
-        when (result) {
-            is CoseVerificationResult.Attached -> assertThat(
-                result.leafCertificate.subjectX500Principal.name,
-                equalTo("ST=London,C=GB,CN=Leaf")
-            )
-
-            is CoseVerificationResult.Detached -> assertThat(
-                result.leafCertificate.subjectX500Principal.name,
-                equalTo("ST=London,C=GB,CN=Reader")
-            )
-
-            else -> error("Unexpected result type")
-        }
+        val result = verifier.verify(case.request)
+        case.assertResult(result)
     }
 
     @Test
-    fun `empty trustedRoots list throws UntrustedCertificate`(@TestParameter chainType: ChainType) {
-        val request = buildRequest(chainType, emptyList())
+    fun `empty trustedRoots list throws UntrustedCertificate`(
+        @TestParameter request: CoseVerificationRequest = namedTestValuesIn(emptyRootsCases)
+    ) {
         assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
             verifier.verify(request)
         }
@@ -506,19 +487,20 @@ class CoseVerifierImplTest {
 
     @Test
     fun `chain containing any supplied root fails with UntrustedCertificate before validation`(
-        @TestParameter rootPosition: RootPosition
-    ) {
-        val roots = when (rootPosition) {
-            RootPosition.FIRST -> listOf(CertificateStubs.leafSignedByRoot, CertificateStubs.rootCa)
-
-            RootPosition.SECOND -> listOf(
+        @TestParameter trustedRoots: List<X509Certificate> = namedTestValues(
+            "Invalid first certificate" to listOf(
+                CertificateStubs.leafSignedByRoot,
+                CertificateStubs.rootCa
+            ),
+            "Invalid second certificate" to listOf(
                 CertificateStubs.rootCa,
                 CertificateStubs.leafSignedByRoot
             )
-        }
+        )
+    ) {
         val request = CoseVerificationRequest.Attached(
             coseSign1Bytes = CoseVectors.attachedMsoBytes,
-            trustedRoots = roots
+            trustedRoots = trustedRoots
         )
         assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
             verifier.verify(request)
@@ -536,29 +518,87 @@ class CoseVerifierImplTest {
         }
     }
 
-    enum class ChainType {
-        ATTACHED,
-        DETACHED
-    }
+    private companion object {
+        private val untrustedRoot by lazy {
+            TestCertificateGenerator(
+                subject = "CN=Untrusted",
+                keyPair = CertificateStubs.rootKeyPair,
+                issuerKeyPair = CertificateStubs.rootKeyPair,
+                issuer = "CN=Untrusted"
+            ).ca().build()
+        }
 
-    enum class RootPosition {
-        FIRST,
-        SECOND
-    }
+        private val multiRootSuccessCases by lazy {
+            mapOf(
+                "ATTACHED_VALID_FIRST_ROOT" to MultiRootSuccessCase(
+                    request = CoseVerificationRequest.Attached(
+                        coseSign1Bytes = CoseVectors.attachedMsoBytes,
+                        trustedRoots = listOf(CertificateStubs.rootCa, untrustedRoot)
+                    ),
+                    assertResult = { result ->
+                        val leafCert = (result as CoseVerificationResult.Attached).leafCertificate
+                        assertThat(
+                            leafCert.subjectX500Principal.name,
+                            equalTo("ST=London,C=GB,CN=Leaf")
+                        )
+                    }
+                ),
+                "ATTACHED_VALID_SECOND_ROOT" to MultiRootSuccessCase(
+                    request = CoseVerificationRequest.Attached(
+                        coseSign1Bytes = CoseVectors.attachedMsoBytes,
+                        trustedRoots = listOf(untrustedRoot, CertificateStubs.rootCa)
+                    ),
+                    assertResult = { result ->
+                        val leafCert = (result as CoseVerificationResult.Attached).leafCertificate
+                        assertThat(
+                            leafCert.subjectX500Principal.name,
+                            equalTo("ST=London,C=GB,CN=Leaf")
+                        )
+                    }
+                ),
+                "DETACHED_VALID_FIRST_ROOT" to MultiRootSuccessCase(
+                    request = CoseVerificationRequest.Detached(
+                        coseSign1Bytes = CoseVectors.createDetachedVector(),
+                        detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
+                        trustedRoots = listOf(CertificateStubs.rootCa, untrustedRoot)
+                    ),
+                    assertResult = { result ->
+                        val leafCert = (result as CoseVerificationResult.Detached).leafCertificate
+                        assertThat(
+                            leafCert.subjectX500Principal.name,
+                            equalTo("ST=London,C=GB,CN=Reader")
+                        )
+                    }
+                ),
+                "DETACHED_VALID_SECOND_ROOT" to MultiRootSuccessCase(
+                    request = CoseVerificationRequest.Detached(
+                        coseSign1Bytes = CoseVectors.createDetachedVector(),
+                        detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
+                        trustedRoots = listOf(untrustedRoot, CertificateStubs.rootCa)
+                    ),
+                    assertResult = { result ->
+                        val leafCert = (result as CoseVerificationResult.Detached).leafCertificate
+                        assertThat(
+                            leafCert.subjectX500Principal.name,
+                            equalTo("ST=London,C=GB,CN=Reader")
+                        )
+                    }
+                )
+            )
+        }
 
-    private fun buildRequest(
-        chainType: ChainType,
-        roots: List<X509Certificate>
-    ): CoseVerificationRequest = when (chainType) {
-        ChainType.ATTACHED -> CoseVerificationRequest.Attached(
-            coseSign1Bytes = CoseVectors.attachedMsoBytes,
-            trustedRoots = roots
-        )
-
-        ChainType.DETACHED -> CoseVerificationRequest.Detached(
-            coseSign1Bytes = CoseVectors.createDetachedVector(),
-            detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
-            trustedRoots = roots
-        )
+        private val emptyRootsCases by lazy {
+            mapOf(
+                "ATTACHED_EMPTY_ROOTS" to CoseVerificationRequest.Attached(
+                    coseSign1Bytes = CoseVectors.attachedMsoBytes,
+                    trustedRoots = emptyList()
+                ),
+                "DETACHED_EMPTY_ROOTS" to CoseVerificationRequest.Detached(
+                    coseSign1Bytes = CoseVectors.createDetachedVector(),
+                    detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
+                    trustedRoots = emptyList()
+                )
+            )
+        }
     }
 }
