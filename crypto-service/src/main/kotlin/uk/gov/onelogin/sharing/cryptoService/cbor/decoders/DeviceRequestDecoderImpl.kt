@@ -143,8 +143,7 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         return DocRequest(
             itemsRequest = itemsRequest,
             readerAuth = rawReaderAuth,
-            itemsRequestBytes = itemsRequestBytes,
-            rawReaderAuth = rawReaderAuth
+            itemsRequestBytes = itemsRequestBytes
         )
     }
 
@@ -162,17 +161,16 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         }
         val endOffset = parser.currentLocation().byteOffset.toInt()
 
-        return if (payload != null && startOffset in 0..endOffset && endOffset <= source.size) {
-            val itemsBytes = source.copyOfRange(startOffset, endOffset)
-            val dto = CborMapper.default.readValue(payload, ItemsRequestDto::class.java)
-            Pair(ItemsRequest(dto.docType, dto.nameSpaces), itemsBytes)
-        } else {
-            parser.skipChildren()
-            val fallbackEnd = parser.currentLocation().byteOffset.toInt()
-            val itemsBytes = source.copyOfRange(startOffset, fallbackEnd)
-            val dto = CborMapper.default.readValue(itemsBytes, ItemsRequestDto::class.java)
-            Pair(ItemsRequest(dto.docType, dto.nameSpaces), itemsBytes)
+        if (payload == null || startOffset !in 0..endOffset || endOffset > source.size) {
+            val errorMessage =
+                "DeviceRequest CBOR decoding failed: itemsRequest must be Tag 24 wrapped bytes"
+            logger.error(logger.logTag, errorMessage)
+            throw DeviceRequestDecodingException(errorMessage)
         }
+
+        val itemsBytes = source.copyOfRange(startOffset, endOffset)
+        val dto = CborMapper.default.readValue(payload, ItemsRequestDto::class.java)
+        return Pair(ItemsRequest(dto.docType, dto.nameSpaces), itemsBytes)
     }
 
     private fun parseReaderAuthField(parser: CBORParser, source: ByteArray): ByteArray {

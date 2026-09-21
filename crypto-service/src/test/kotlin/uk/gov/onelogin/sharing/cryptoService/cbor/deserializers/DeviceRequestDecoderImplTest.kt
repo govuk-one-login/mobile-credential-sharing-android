@@ -38,7 +38,7 @@ class DeviceRequestDecoderImplTest {
         assertDeviceRequestParsedCorrectly(deviceRequest)
         val docRequest = deviceRequest.docRequests.first()
         assertNotNull(docRequest.itemsRequestBytes)
-        assertEquals(null, docRequest.rawReaderAuth)
+        assertEquals(null, docRequest.readerAuth)
         assert(logger.contains("device request decoded successfully"))
     }
 
@@ -48,17 +48,16 @@ class DeviceRequestDecoderImplTest {
         assertDeviceRequestParsedCorrectly(deviceRequest)
         val docRequest = deviceRequest.docRequests.first()
         assertNotNull(docRequest.itemsRequestBytes)
-        assertNotNull(docRequest.rawReaderAuth)
         assertNotNull(docRequest.readerAuth)
         assert(logger.contains("device request decoded successfully"))
     }
 
     @Test
-    fun `itemsRequestBytes and rawReaderAuth slice directly from original input`() {
+    fun `itemsRequestBytes and readerAuth slice directly from original input`() {
         val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
         val docRequest = deviceRequest.docRequests.first()
         val itemsBytes = docRequest.itemsRequestBytes!!
-        val readerAuthBytes = docRequest.rawReaderAuth!!
+        val readerAuthBytes = docRequest.readerAuth!!
 
         assert(deviceRequestExample2.toHexString().contains(itemsBytes.toHexString()))
         assert(deviceRequestExample2.toHexString().contains(readerAuthBytes.toHexString()))
@@ -108,10 +107,10 @@ class DeviceRequestDecoderImplTest {
     }
 
     @Test
-    fun `rawReaderAuth matches exact source byte slice byte for byte`() {
+    fun `readerAuth matches exact source byte slice byte for byte`() {
         val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
         val docRequest = deviceRequest.docRequests.first()
-        val authBytes = docRequest.rawReaderAuth
+        val authBytes = docRequest.readerAuth
         assertNotNull(authBytes)
 
         val foundSlice = findSliceOffset(deviceRequestExample2, authBytes)
@@ -125,9 +124,7 @@ class DeviceRequestDecoderImplTest {
     fun `AC3 wrong-shaped COSE structure in readerAuth is preserved as exact raw bytes`() {
         val deviceRequest = deviceRequestDecoderImpl.deviceRequestDecoder(deviceRequestExample2)
         val docRequest = deviceRequest.docRequests.first()
-        assertNotNull(docRequest.rawReaderAuth)
         assertNotNull(docRequest.readerAuth)
-        assert(docRequest.rawReaderAuth!!.contentEquals(docRequest.readerAuth!!))
     }
 
     @Test
