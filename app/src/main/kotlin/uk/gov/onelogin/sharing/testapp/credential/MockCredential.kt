@@ -8,12 +8,15 @@ package uk.gov.onelogin.sharing.testapp.credential
  * @property rawCredential The full, decrypted raw CBOR data byte string for the mDL.
  * @property privateKey The raw bytes of the private key that corresponds to the public key
  * embedded in the mock credential's MSO.
+ * @property providerType Selects which [uk.gov.onelogin.sharing.orchestration.CredentialProvider]
+ * implementation the Test App uses for this credential.
  */
 data class MockCredential(
     val id: String,
     val displayName: String,
     val rawCredential: ByteArray,
-    val privateKey: ByteArray
+    val privateKey: ByteArray,
+    val providerType: MockCredentialProviderType = MockCredentialProviderType.NORMAL
 ) {
 
     override fun toString(): String = "MockCredential(id=$id, displayName=$displayName)"
@@ -28,6 +31,7 @@ data class MockCredential(
         if (displayName != other.displayName) return false
         if (!rawCredential.contentEquals(other.rawCredential)) return false
         if (!privateKey.contentEquals(other.privateKey)) return false
+        if (providerType != other.providerType) return false
 
         return true
     }
@@ -37,6 +41,7 @@ data class MockCredential(
         result = 31 * result + displayName.hashCode()
         result = 31 * result + rawCredential.contentHashCode()
         result = 31 * result + privateKey.contentHashCode()
+        result = 31 * result + providerType.hashCode()
         return result
     }
 }

@@ -41,6 +41,22 @@ class MockCredentialStateTest {
             mockCredentialState.copy(privateKeyAssetName = "Unit test")
         )
         assertNotEquals(mockCredentialState, mockCredentialState.copy(rawCredentialRes = -2))
+        assertNotEquals(
+            mockCredentialState,
+            mockCredentialState.copy(providerType = MockCredentialProviderType.SIGNING_FAILURE)
+        )
+    }
+
+    @Test
+    fun `toCredential propagates providerType`() {
+        val state = mockCredentialState.copy(
+            providerType = MockCredentialProviderType.AUTH_CANCELLED_ONCE
+        )
+        val credential = state.toCredential(context)
+        assertEquals(
+            MockCredentialProviderType.AUTH_CANCELLED_ONCE,
+            credential.providerType
+        )
     }
 
     @Test
