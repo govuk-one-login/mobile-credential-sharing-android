@@ -20,6 +20,7 @@ import uk.gov.onelogin.sharing.testapp.verifier.VerifierTestAppJourneyNavigation
 import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 
 object MainActivityRoutes {
+    @Suppress("DEPRECATION")
     internal fun NavGraphBuilder.configureTestAppRoutes(
         mockCredentials: List<MockCredentialState>,
         navController: NavController,

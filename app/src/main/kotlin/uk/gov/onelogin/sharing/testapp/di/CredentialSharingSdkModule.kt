@@ -29,6 +29,7 @@ object CredentialSharingSdkModule {
         readerAuthCredentialFactory = readerAuthCredentialFactory
     )
 
+    @Suppress("DEPRECATION")
     @Provides
     @ActivityScoped
     fun providePresentCredentialSdk(credentialSharingSdk: CredentialSharingSdk) =
