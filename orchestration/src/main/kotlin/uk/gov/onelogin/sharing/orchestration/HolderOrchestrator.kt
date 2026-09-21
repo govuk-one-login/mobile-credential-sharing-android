@@ -41,6 +41,7 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
+import uk.gov.onelogin.sharing.orchestration.SignException
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
@@ -62,6 +63,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -200,7 +202,6 @@ class HolderOrchestrator(
                 "confirmConsent called in an invalid state: $state"
             }
             check(state is HolderSessionState.AwaitingUserConsent)
-            safeTransitionTo(HolderSessionState.ProcessingResponse)
 
             val sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
                 "Missing session transcript"
@@ -223,38 +224,88 @@ class HolderOrchestrator(
                         filteredIssuerSigned = filteredIssuerSigned
                     )
 
-                    val sessionDataBytes = holderCryptoService.buildDeviceResponse(
-                        documents = listOf(document),
-                        skDevice = skDevice,
-                        encryptCounter = context.encryptCounter
-                    )
-
-                    val sent = peripheralBluetoothTransport.sendMessage(
-                        serviceUuid = context.sessionUuid,
-                        data = sessionDataBytes
-                    )
-                    sessionTimer.reset()
-
-                    sessionFlow.value.updateSessionContext {
-                        it.copy(encryptCounter = it.encryptCounter + 1u)
-                    }
-
-                    if (sent) {
-                        safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
-                    } else {
-                        failWith(
-                            message = "Failed to send DeviceResponse",
-                            reason = SessionErrorReason.CannotSendMessage
-                        )
-                    }
+                    safeTransitionTo(HolderSessionState.ProcessingResponse)
+                    sendDeviceResponse(document = document, skDevice = skDevice)
+                } catch (e: SignException.LocalAuthCancelled) {
+                    // Neutral outcome: keep the session active on the consent screen.
+                    // The user can retry, deny, or cancel.
+                    logger.debug(logTag, "$SIGNING_CANCELLED ${e.message ?: ""}".trimEnd())
                 } catch (e: DeviceSignatureException) {
-                    sendTerminationAndFail(e)
+                    handleFatalSigningFailure(e)
                 }
             }
         } catch (e: IllegalStateException) {
             appCoroutineScope.launch {
                 sendTerminationAndFail(e)
             }
+        }
+    }
+
+    private suspend fun sendDeviceResponse(
+        document: VerifiableDocument.WithPresentation,
+        skDevice: ByteArray
+    ) {
+        val context = currentContext
+        val sessionDataBytes = holderCryptoService.buildDeviceResponse(
+            documents = listOf(document),
+            skDevice = skDevice,
+            encryptCounter = context.encryptCounter
+        )
+
+        val sent = peripheralBluetoothTransport.sendMessage(
+            serviceUuid = context.sessionUuid,
+            data = sessionDataBytes
+        )
+        sessionTimer.reset()
+
+        sessionFlow.value.updateSessionContext {
+            it.copy(encryptCounter = it.encryptCounter + 1u)
+        }
+
+        if (sent) {
+            safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
+        } else {
+            failWith(
+                message = "Failed to send DeviceResponse",
+                reason = SessionErrorReason.CannotSendMessage
+            )
+        }
+    }
+
+    /**
+     * Handles a fatal [DeviceSignatureException] raised while signing during consent (AC6).
+     *
+     * Transmits an encrypted termination `SessionData` containing a `DeviceResponse` with no
+     * documents and `status: 0` ([Status.OK]) and `SessionData.status: 20`
+     * ([SessionDataStatus.SESSION_TERMINATION]), then enters a terminal
+     * [HolderSessionState.Complete.Failed] state (which routes to the Generic Error screen).
+     */
+    private suspend fun handleFatalSigningFailure(exception: DeviceSignatureException) {
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
+        val context = currentContext
+        val skDevice = context.skDevice
+
+        if (skDevice != null) {
+            val sessionDataBytes = holderCryptoService.buildErrorSessionData(
+                deviceResponseStatus = Status.OK,
+                sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+                skDevice = skDevice,
+                encryptCounter = context.encryptCounter
+            )
+
+            terminateSession(
+                finalState = HolderSessionState.Complete.Failed(
+                    SessionError(
+                        message = exception.message ?: UNKNOWN_ERROR,
+                        exception = exception
+                    )
+                ),
+                sessionDataToSend = sessionDataBytes
+            )
+        } else {
+            sendTerminationAndFail(
+                IllegalStateException("Missing skDevice during fatal signing termination")
+            )
         }
     }
 
@@ -819,5 +870,7 @@ class HolderOrchestrator(
         const val UNRECOGNISED_MESSAGE =
             "Sequencing violation: inbound message is not a recognised type"
         const val STOPPING_BLE_ADVERTISING = "Stopping BLE advertising"
+        const val SIGNING_CANCELLED =
+            "Local authentication cancelled during signing; remaining on consent screen."
     }
 }
