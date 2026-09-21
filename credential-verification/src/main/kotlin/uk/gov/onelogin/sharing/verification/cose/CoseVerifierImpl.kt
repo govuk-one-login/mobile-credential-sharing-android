@@ -34,7 +34,7 @@ internal class CoseVerifierImpl(
     }
 
     private fun verifyAttached(
-        request: CoseVerificationRequest.Attached,
+        request: CoseVerificationRequest.Attached
     ): CoseVerificationResult.Attached {
         val trustedRoots = request.trustedRoots
         if (trustedRoots.isEmpty()) throw UntrustedCertificate
@@ -51,24 +51,20 @@ internal class CoseVerifierImpl(
 
         checkChainEmbeddedRoots(chain, trustedRoots)
 
-        val (verifiedLeaf, _) = verifyChainAgainstRoots(chain, trustedRoots, CertificatePurpose.ISSUER_AUTH)
-
-        val publicKey = try {
-            verifiedLeaf.publicKey as ECPublicKey
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            throw UntrustedCertificate
-        }
+        val verifiedLeaf =
+            verifyChainAgainstRoots(chain, trustedRoots, CertificatePurpose.ISSUER_AUTH)
+        val publicKey = extractEcPublicKey(verifiedLeaf)
 
         signatureVerifier.verify(coseSign1, publicKey, payload)
 
         return CoseVerificationResult.Attached(
             leafCertificate = verifiedLeaf,
-            payload = payload,
+            payload = payload
         )
     }
 
     private fun verifyDetached(
-        request: CoseVerificationRequest.Detached,
+        request: CoseVerificationRequest.Detached
     ): CoseVerificationResult.Detached {
         val trustedRoots = request.trustedRoots
         if (trustedRoots.isEmpty()) throw UntrustedCertificate
@@ -85,13 +81,9 @@ internal class CoseVerifierImpl(
 
         checkChainEmbeddedRoots(chain, trustedRoots)
 
-        val (verifiedLeaf, _) = verifyChainAgainstRoots(chain, trustedRoots, CertificatePurpose.READER_AUTH)
-
-        val publicKey = try {
-            verifiedLeaf.publicKey as ECPublicKey
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-            throw UntrustedCertificate
-        }
+        val verifiedLeaf =
+            verifyChainAgainstRoots(chain, trustedRoots, CertificatePurpose.READER_AUTH)
+        val publicKey = extractEcPublicKey(verifiedLeaf)
 
         signatureVerifier.verify(coseSign1, publicKey, request.detachedPayload)
 
@@ -99,7 +91,7 @@ internal class CoseVerifierImpl(
     }
 
     private fun verifyKeyBased(
-        request: CoseVerificationRequest.KeyBased,
+        request: CoseVerificationRequest.KeyBased
     ): CoseVerificationResult.KeyBased {
         val coseSign1 = decoder.decode(request.coseSign1Bytes)
         if (coseSign1.payload != null) throw MalformedCoseSign1
@@ -117,7 +109,7 @@ internal class CoseVerifierImpl(
 
     private fun checkChainEmbeddedRoots(
         chain: List<X509Certificate>,
-        trustedRoots: List<X509Certificate>,
+        trustedRoots: List<X509Certificate>
     ) {
         for (cert in chain) {
             val certEncoded = cert.encoded
@@ -132,21 +124,26 @@ internal class CoseVerifierImpl(
     private fun verifyChainAgainstRoots(
         chain: List<X509Certificate>,
         trustedRoots: List<X509Certificate>,
-        purpose: CertificatePurpose,
-    ): Pair<X509Certificate, X509Certificate> {
+        purpose: CertificatePurpose
+    ): X509Certificate {
         var lastUntrustedFailure: UntrustedCertificate? = null
 
         for (root in trustedRoots) {
             try {
                 pathValidator.verify(chain, root)
-                val leaf = profileValidator.validate(chain, purpose)
-                return Pair(leaf, root)
+                return profileValidator.validate(chain, purpose)
             } catch (e: UntrustedCertificate) {
                 lastUntrustedFailure = e
             }
         }
 
         throw lastUntrustedFailure ?: UntrustedCertificate
+    }
+
+    private fun extractEcPublicKey(verifiedLeaf: X509Certificate): ECPublicKey = try {
+        verifiedLeaf.publicKey as ECPublicKey
+    } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+        throw UntrustedCertificate
     }
 
     private companion object {
