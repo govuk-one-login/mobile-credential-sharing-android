@@ -4,12 +4,14 @@ import androidx.test.core.app.ApplicationProvider
 import java.security.Signature
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.onelogin.sharing.orchestration.CredentialRequest
+import uk.gov.onelogin.sharing.orchestration.SignResult
 import uk.gov.onelogin.sharing.testapp.SampleCredentialProviderStub
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialData.mockCredentialState
 
@@ -50,10 +52,11 @@ class SampleCredentialProviderTest {
                 .map { it.toInt(16).toByte() }
                 .toByteArray()
 
-            val signature = credentialProvider.sign(
+            val result = credentialProvider.sign(
                 payload = deviceAuthenticationBytes,
                 documentId = "org.iso.18013.5.1.mDL"
             )
+            val signature = assertIs<SignResult.Success>(result).signature
 
             val isValid = Signature.getInstance(SIGNING_ALGORITHM).run {
                 initVerify(SampleCredentialProviderStub.keyPair.public)
@@ -65,8 +68,12 @@ class SampleCredentialProviderTest {
 
     @Test
     fun `sign produces different signatures for different payloads`() = runTest {
-        val sig1 = credentialProvider.sign("payload-one".toByteArray(), documentId = "doc-id")
-        val sig2 = credentialProvider.sign("payload-two".toByteArray(), documentId = "doc-id")
+        val sig1 = assertIs<SignResult.Success>(
+            credentialProvider.sign("payload-one".toByteArray(), documentId = "doc-id")
+        ).signature
+        val sig2 = assertIs<SignResult.Success>(
+            credentialProvider.sign("payload-two".toByteArray(), documentId = "doc-id")
+        ).signature
         assertTrue(!sig1.contentEquals(sig2))
     }
 }

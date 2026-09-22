@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.testapp.credential
 import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialRequest
+import uk.gov.onelogin.sharing.orchestration.SignResult
 
 /**
  * Sample implementation of [CredentialProvider] for demonstration purposes.
@@ -24,6 +25,6 @@ class SampleCredentialProvider(private val activeCredential: MockCredential) : C
      *
      * Signs the [payload] using the EC private key stored in the active [MockCredential].
      */
-    override suspend fun sign(payload: ByteArray, documentId: String): ByteArray =
-        signWithEcPrivateKey(payload, activeCredential.privateKey)
+    override suspend fun sign(payload: ByteArray, documentId: String): SignResult =
+        SignResult.Success(signWithEcPrivateKey(payload, activeCredential.privateKey))
 }

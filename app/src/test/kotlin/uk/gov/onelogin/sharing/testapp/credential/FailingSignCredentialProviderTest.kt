@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.testapp.credential
 import androidx.test.core.app.ApplicationProvider
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
@@ -11,6 +11,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.onelogin.sharing.orchestration.CredentialRequest
 import uk.gov.onelogin.sharing.orchestration.CredentialSigningException
+import uk.gov.onelogin.sharing.orchestration.SignResult
 import uk.gov.onelogin.sharing.testapp.SampleCredentialProviderStub
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialData.mockCredentialState
 
@@ -36,19 +37,19 @@ class FailingSignCredentialProviderTest {
     }
 
     @Test
-    fun `sign always throws public Unrecoverable mapped from the mock error`() = runTest {
-        val error = assertFailsWith<CredentialSigningException.Unrecoverable> {
-            credentialProvider.sign("payload".toByteArray(), documentId = "doc-id")
-        }
-        assertTrue(error.cause is MockSignException.SignError)
+    fun `sign always returns an unrecoverable Failure mapped from the mock error`() = runTest {
+        val result = credentialProvider.sign("payload".toByteArray(), documentId = "doc-id")
+
+        val failure = assertIs<SignResult.Failure>(result)
+        val exception = assertIs<CredentialSigningException.Unrecoverable>(failure.exception)
+        assertTrue(exception.cause is MockSignException.SignError)
     }
 
     @Test
     fun `sign keeps failing on repeated attempts`() = runTest {
         repeat(3) {
-            assertFailsWith<CredentialSigningException.Unrecoverable> {
-                credentialProvider.sign("payload".toByteArray(), documentId = "doc-id")
-            }
+            val result = credentialProvider.sign("payload".toByteArray(), documentId = "doc-id")
+            assertIs<SignResult.Failure>(result)
         }
     }
 }

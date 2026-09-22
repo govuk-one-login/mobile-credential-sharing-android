@@ -13,6 +13,7 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCase
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialSigningException
+import uk.gov.onelogin.sharing.orchestration.SignResult
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
@@ -55,24 +56,42 @@ class HolderResponseUseCaseImpl(
         }
     }
 
-    @Suppress("TooGenericExceptionCaught")
-    private suspend fun sign(toBeSigned: ByteArray, documentId: String): ByteArray = try {
-        credentialProvider.sign(
-            payload = toBeSigned,
-            documentId = documentId
-        )
-    } catch (e: CredentialSigningException.Recoverable) {
-        logger.debug(logTag, "Recoverable signing failure (e.g. local authentication cancelled)")
-        throw e
-    } catch (e: CredentialSigningException.Unrecoverable) {
-        throw DeviceSignatureException(
-            e.message ?: "Fatal signing failure from credential provider",
-            e
-        )
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        throw DeviceSignatureException(e.message ?: "Failed to sign device authentication", e)
+    /**
+     * Invokes [CredentialProvider.sign] and normalises its [SignResult] into the neutral-vs-fatal
+     * distinction the orchestrator relies on:
+     *
+     * - [SignResult.Success] returns the signature bytes.
+     * - [SignResult.Failure] with [CredentialSigningException.Recoverable] is thrown unchanged so
+     *   the orchestrator can keep the session active and let the user retry.
+     * - [SignResult.Failure] with [CredentialSigningException.Unrecoverable] is mapped to a fatal
+     *   [DeviceSignatureException].
+     */
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
+    private suspend fun sign(toBeSigned: ByteArray, documentId: String): ByteArray {
+        val result = try {
+            credentialProvider.sign(payload = toBeSigned, documentId = documentId)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw DeviceSignatureException(e.message ?: "Failed to sign device authentication", e)
+        }
+
+        return when (result) {
+            is SignResult.Success -> result.signature
+
+            is SignResult.Failure -> when (val cause = result.exception) {
+                is CredentialSigningException.Recoverable -> {
+                    logger.debug(logTag, "Recoverable signing failure")
+                    throw cause
+                }
+
+                is CredentialSigningException.Unrecoverable ->
+                    throw DeviceSignatureException(
+                        cause.message ?: "Fatal signing failure from credential provider",
+                        cause
+                    )
+            }
+        }
     }
 
     private companion object {

@@ -5,16 +5,17 @@ import uk.gov.onelogin.sharing.orchestration.Credential
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialRequest
 import uk.gov.onelogin.sharing.orchestration.CredentialSigningException
+import uk.gov.onelogin.sharing.orchestration.SignResult
 
 /**
  * Test App [CredentialProvider] whose first [sign] attempt reports a cancelled
  * local-authentication prompt, then signs normally on subsequent attempts.
  *
  * [getCredentials] returns the normal Jane Doe credential.
- * The first call to [sign] returns a [CredentialSigningException.Recoverable] and the
- * second and subsequent calls sign successfully using the Jane Doe private key.
- * Used by the "Jane Doe (authentication cancelled once)" option to reproduce a cancelled
- * authentication.
+ * The first call to [sign] returns a [SignResult.Failure] with
+ * [CredentialSigningException.Recoverable] and the second and subsequent calls return a
+ * [SignResult.Success] signed with the Jane Doe private key. Used by the "Jane Doe (authentication
+ * cancelled once)" option to reproduce a cancelled authentication.
  */
 class AuthCancelledOnceCredentialProvider(private val activeCredential: MockCredential) :
     CredentialProvider {
@@ -28,13 +29,17 @@ class AuthCancelledOnceCredentialProvider(private val activeCredential: MockCred
         )
     )
 
-    override suspend fun sign(payload: ByteArray, documentId: String): ByteArray {
+    override suspend fun sign(payload: ByteArray, documentId: String): SignResult {
         if (hasCancelledOnce.compareAndSet(false, true)) {
-            throw CredentialSigningException.Recoverable(MockSignException.LocalAuthCancelled())
+            return SignResult.Failure(
+                CredentialSigningException.Recoverable(MockSignException.LocalAuthCancelled())
+            )
         }
-        return signWithEcPrivateKey(
-            payload = payload,
-            privateKeyBytes = activeCredential.privateKey
+        return SignResult.Success(
+            signWithEcPrivateKey(
+                payload = payload,
+                privateKeyBytes = activeCredential.privateKey
+            )
         )
     }
 }
