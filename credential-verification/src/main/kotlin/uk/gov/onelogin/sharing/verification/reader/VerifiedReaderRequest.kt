@@ -7,7 +7,4 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.Do
  * Result of successful cryptographic and certificate verification containing the validated [DocRequest]
  * and the verified Reader leaf certificate.
  */
-data class VerifiedReaderRequest(
-    val docRequest: DocRequest,
-    val readerCertificate: X509Certificate,
-)
+data class VerifiedReaderRequest(val docRequest: DocRequest, val readerCertificate: X509Certificate)

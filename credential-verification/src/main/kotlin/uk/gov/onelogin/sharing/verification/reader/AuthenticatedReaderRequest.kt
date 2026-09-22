@@ -7,7 +7,4 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.Do
  * Result of successful privacy metadata validation containing the candidate [DocRequest]
  * and the verified privacy-policy URI.
  */
-data class AuthenticatedReaderRequest(
-    val docRequest: DocRequest,
-    val privacyPolicyUrl: Uri,
-)
+data class AuthenticatedReaderRequest(val docRequest: DocRequest, val privacyPolicyUrl: Uri)

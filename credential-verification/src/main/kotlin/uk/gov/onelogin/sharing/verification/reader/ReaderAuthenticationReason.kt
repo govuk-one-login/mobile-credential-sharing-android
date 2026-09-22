@@ -23,5 +23,5 @@ enum class ReaderAuthenticationReason {
     PRIVACY_POLICY_URL_INVALID,
 
     /** The decrypted DeviceRequest bytes could not be decoded. */
-    MALFORMED_DEVICE_REQUEST,
+    MALFORMED_DEVICE_REQUEST
 }

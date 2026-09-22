@@ -24,7 +24,7 @@ fun interface ReaderAuthentication {
         decryptedDeviceRequestBytes: ByteArray,
         untaggedSessionTranscriptBytes: ByteArray,
         supportedDocumentTypes: List<String>,
-        trustedReaderCertificates: List<X509Certificate>,
+        trustedReaderCertificates: List<X509Certificate>
     ): ReaderAuthenticationOutcome
 }
 

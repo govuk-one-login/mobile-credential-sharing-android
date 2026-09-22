@@ -19,6 +19,6 @@ fun interface VerifyReaderAuthUseCase {
     fun verify(
         candidateDocRequest: DocRequest,
         untaggedSessionTranscriptBytes: ByteArray,
-        trustedReaderCertificates: List<X509Certificate>,
+        trustedReaderCertificates: List<X509Certificate>
     ): VerifiedReaderRequest
 }

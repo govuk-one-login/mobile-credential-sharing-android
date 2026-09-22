@@ -5,5 +5,5 @@ package uk.gov.onelogin.sharing.verification.reader
  */
 class ReaderAuthenticationFailure(
     val reason: ReaderAuthenticationReason,
-    cause: Throwable? = null,
+    cause: Throwable? = null
 ) : Exception("Reader Authentication failed with reason: $reason", cause)
