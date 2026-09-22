@@ -34,6 +34,7 @@ import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
+import uk.gov.onelogin.sharing.orchestration.CredentialSigningException
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -41,7 +42,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
-import uk.gov.onelogin.sharing.orchestration.SignException
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
@@ -226,7 +226,7 @@ class HolderOrchestrator(
 
                     safeTransitionTo(HolderSessionState.ProcessingResponse)
                     sendDeviceResponse(document = document, skDevice = skDevice)
-                } catch (e: SignException.LocalAuthCancelled) {
+                } catch (e: CredentialSigningException.Recoverable) {
                     // Neutral outcome: keep the session active on the consent screen.
                     // The user can retry, deny, or cancel.
                     logger.debug(logTag, "$SIGNING_CANCELLED ${e.message ?: ""}".trimEnd())

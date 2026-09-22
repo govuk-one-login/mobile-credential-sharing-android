@@ -11,6 +11,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import uk.gov.onelogin.sharing.orchestration.CredentialRequest
+import uk.gov.onelogin.sharing.orchestration.CredentialSigningException
 import uk.gov.onelogin.sharing.testapp.SampleCredentialProviderStub
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialData.mockCredentialState
 
@@ -36,17 +37,18 @@ class AuthCancelledOnceCredentialProviderTest {
     }
 
     @Test
-    fun `first sign throws LocalAuthCancelled`() = runTest {
-        assertFailsWith<MockSignException.LocalAuthCancelled> {
+    fun `first sign throws public Recoverable mapped from the mock error`() = runTest {
+        val error = assertFailsWith<CredentialSigningException.Recoverable> {
             credentialProvider.sign("payload".toByteArray(), documentId = "doc-id")
         }
+        assertTrue(error.cause is MockSignException.LocalAuthCancelled)
     }
 
     @Test
     fun `second sign returns a valid signature`() = runTest {
         val payload = "device-authentication".toByteArray()
 
-        assertFailsWith<MockSignException.LocalAuthCancelled> {
+        assertFailsWith<CredentialSigningException.Recoverable> {
             credentialProvider.sign(payload, documentId = "doc-id")
         }
 
@@ -64,7 +66,7 @@ class AuthCancelledOnceCredentialProviderTest {
     fun `subsequent signs continue to succeed`() = runTest {
         val payload = "payload".toByteArray()
 
-        assertFailsWith<MockSignException.LocalAuthCancelled> {
+        assertFailsWith<CredentialSigningException.Recoverable> {
             credentialProvider.sign(payload, documentId = "doc-id")
         }
 

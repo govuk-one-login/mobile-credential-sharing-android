@@ -5,13 +5,14 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import java.security.GeneralSecurityException
+import kotlinx.coroutines.CancellationException
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCase
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
-import uk.gov.onelogin.sharing.orchestration.SignException
+import uk.gov.onelogin.sharing.orchestration.CredentialSigningException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.verification.format.document.device.DeviceSigned
 
@@ -60,14 +61,16 @@ class HolderResponseUseCaseImpl(
             payload = toBeSigned,
             documentId = documentId
         )
-    } catch (e: SignException.LocalAuthCancelled) {
-        logger.debug(logTag, "Local authentication cancelled during signing")
+    } catch (e: CredentialSigningException.Recoverable) {
+        logger.debug(logTag, "Recoverable signing failure (e.g. local authentication cancelled)")
         throw e
-    } catch (e: SignException.SignError) {
+    } catch (e: CredentialSigningException.Unrecoverable) {
         throw DeviceSignatureException(
             e.message ?: "Fatal signing failure from credential provider",
             e
         )
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         throw DeviceSignatureException(e.message ?: "Failed to sign device authentication", e)
     }
