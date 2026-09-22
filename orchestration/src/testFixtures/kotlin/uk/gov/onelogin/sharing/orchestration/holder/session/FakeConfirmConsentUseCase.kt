@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import kotlinx.coroutines.CompletableDeferred
-import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
@@ -24,8 +23,19 @@ class FakeConfirmConsentUseCase(
                 deviceSignature = byteArrayOf()
             )
         ),
-    private val gate: CompletableDeferred<Unit>? = null
+    private val gate: CompletableDeferred<Unit>? = null,
+    /**
+     * When set, [exception] is thrown only for the first [failuresBeforeSuccess] [execute] calls;
+     * subsequent calls succeed and return [documentToReturn]. This models a signing failure that
+     * can be retried (e.g. a recoverable local-authentication cancellation).
+     *
+     * When `null` (default) the original behaviour applies: if [exception] is set it is thrown on
+     * every call.
+     */
+    private val failuresBeforeSuccess: Int? = null
 ) : ConfirmConsentUseCase {
+
+    private var attempts = 0
 
     override suspend fun execute(
         sessionTranscript: ByteArray,
@@ -34,7 +44,11 @@ class FakeConfirmConsentUseCase(
         filteredIssuerSigned: IssuerSigned
     ): VerifiableDocument.WithPresentation {
         gate?.await()
-        exception?.let { throw DeviceSignatureException("Sign failed", it) }
+        attempts++
+        exception?.let {
+            val shouldThrow = failuresBeforeSuccess == null || attempts <= failuresBeforeSuccess
+            if (shouldThrow) throw it
+        }
         return documentToReturn
     }
 }

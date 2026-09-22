@@ -296,7 +296,7 @@ class HolderOrchestrator(
             terminateSession(
                 finalState = HolderSessionState.Complete.Failed(
                     SessionError(
-                        message = exception.message ?: UNKNOWN_ERROR,
+                        message = SIGNING_FAILED,
                         exception = exception
                     )
                 ),
@@ -872,5 +872,6 @@ class HolderOrchestrator(
         const val STOPPING_BLE_ADVERTISING = "Stopping BLE advertising"
         const val SIGNING_CANCELLED =
             "Local authentication cancelled during signing; remaining on consent screen."
+        const val SIGNING_FAILED = "Unable to sign the credential"
     }
 }
