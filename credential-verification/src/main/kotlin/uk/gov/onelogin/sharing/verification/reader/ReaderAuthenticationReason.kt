@@ -4,7 +4,7 @@ package uk.gov.onelogin.sharing.verification.reader
  * Stable reason identifiers for Reader Authentication failures.
  */
 enum class ReaderAuthenticationReason {
-    /** The rawReaderAuth field was missing from the DocRequest. */
+    /** The readerAuth field was missing from the DocRequest. */
     READER_AUTH_MISSING,
 
     /** The cryptographic COSE signature on Reader Authentication was invalid. */
