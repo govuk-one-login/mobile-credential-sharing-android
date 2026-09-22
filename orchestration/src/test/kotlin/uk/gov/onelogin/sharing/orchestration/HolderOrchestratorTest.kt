@@ -1155,16 +1155,9 @@ class HolderOrchestratorTest {
 
     @Test
     fun `sequencing violation in processingResponse sends status 20 and terminates`() = runTest {
-        val consentGate = kotlinx.coroutines.CompletableDeferred<Unit>()
-        with(
-            TerminationTestFixture(
-                confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
-            )
-        ) {
-            startAndDeliver()
-            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
-
-            orchestrator.confirmConsent()
+        initialStates[0] = HolderSessionState.ProcessingResponse
+        with(TerminationTestFixture()) {
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
             advanceUntilIdle()
             assertThat(orchestrator.holderSessionState.value, isProcessingResponse())
 
@@ -1543,30 +1536,27 @@ class HolderOrchestratorTest {
                 holderCryptoService = FakeHolderCryptoService()
             )
 
-            orchestrator.holderSessionState.test {
-                awaitItem()
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
 
-                orchestrator.start()
-                skipItems(2)
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+            advanceUntilIdle()
 
-                transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-                awaitItem()
+            transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+            advanceUntilIdle()
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-                transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
-                awaitItem()
+            val resetCallsBeforeOutbound = sessionTimer.resetCalls
 
-                val resetCallsBeforeOutbound = sessionTimer.resetCalls
+            orchestrator.confirmConsent()
+            advanceUntilIdle()
 
-                orchestrator.confirmConsent()
-
-                awaitItem()
-                awaitItem()
-
-                assertEquals(
-                    resetCallsBeforeOutbound + 1,
-                    sessionTimer.resetCalls
-                )
-            }
+            assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
+            assertEquals(
+                resetCallsBeforeOutbound + 1,
+                sessionTimer.resetCalls
+            )
         }
 
     @Test

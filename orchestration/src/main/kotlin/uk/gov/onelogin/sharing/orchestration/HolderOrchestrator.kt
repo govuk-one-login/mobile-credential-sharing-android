@@ -272,14 +272,6 @@ class HolderOrchestrator(
         }
     }
 
-    /**
-     * Handles a fatal [DeviceSignatureException] raised while signing during consent (AC6).
-     *
-     * Transmits an encrypted termination `SessionData` containing a `DeviceResponse` with no
-     * documents and `status: 0` ([Status.OK]) and `SessionData.status: 20`
-     * ([SessionDataStatus.SESSION_TERMINATION]), then enters a terminal
-     * [HolderSessionState.Complete.Failed] state (which routes to the Generic Error screen).
-     */
     private suspend fun handleFatalSigningFailure(exception: DeviceSignatureException) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         val context = currentContext
