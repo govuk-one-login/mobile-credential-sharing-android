@@ -118,11 +118,10 @@ interface CredentialProvider {
     request: CredentialRequest
   ): List<Credential>
 
-  @Throws(CredentialSigningException::class)
   suspend fun sign(
     payload: ByteArray,
     documentId: String
-  ): ByteArray
+  ): SignResult
 }
 ```
 
@@ -141,9 +140,15 @@ data class Credential(
 
 Initially `getCredentials` always returns an array of exactly **one** element: the decrypted raw CBOR data for the user's mDL credential.
 
-On success, `sign` returns the raw signature bytes. On failure, throw a `CredentialSigningException`:
+On success, return `SignResult.Success` with the raw signature bytes. On failure, return
+`SignResult.Failure` wrapping a `CredentialSigningException`:
 
 ```kotlin
+sealed class SignResult {
+  class Success(val signature: ByteArray) : SignResult()
+  data class Failure(val exception: CredentialSigningException) : SignResult()
+}
+
 sealed class CredentialSigningException protected constructor(
   cause: Throwable? = null
 ) : Exception(cause) {
@@ -152,7 +157,7 @@ sealed class CredentialSigningException protected constructor(
 }
 ```
 
-The SDK recognises two outcomes:
+The SDK recognises two failure outcomes:
 
 - `Recoverable` (For example: the user cancelled local authentication): the session stays active on the
   'Agree to Share' screen with no message sent to the Verifier. The user can retry, deny, or cancel.
