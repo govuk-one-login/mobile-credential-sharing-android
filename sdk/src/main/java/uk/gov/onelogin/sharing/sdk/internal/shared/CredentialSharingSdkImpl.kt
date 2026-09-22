@@ -55,7 +55,7 @@ class CredentialSharingSdkImpl(
         trustedReaderCertificates: List<X509Certificate>
     ): CredentialPresenter {
         if (trustedReaderCertificates.isEmpty()) {
-            throw CoseVerificationFailure.UntrustedCertificate
+            throw CoseVerificationFailure.UntrustedCertificate()
         }
 
         val presenterGraphFactory = createGraphFactory<PresentCredentialGraph.Factory>()

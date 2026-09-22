@@ -8,20 +8,23 @@ import java.security.interfaces.ECPublicKey
  */
 sealed class CoseVerificationRequest {
     /** Chain-based, attached payload (IssuerAuth). */
-    data class Attached(val coseSign1Bytes: ByteArray, val trustedRoot: X509Certificate) :
+    data class Attached(val coseSign1Bytes: ByteArray, val trustedRoots: List<X509Certificate>) :
         CoseVerificationRequest() {
+        internal constructor(coseSign1Bytes: ByteArray, trustedRoot: X509Certificate) :
+            this(coseSign1Bytes, listOf(trustedRoot))
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
             other as Attached
             if (!coseSign1Bytes.contentEquals(other.coseSign1Bytes)) return false
-            if (trustedRoot != other.trustedRoot) return false
+            if (trustedRoots != other.trustedRoots) return false
             return true
         }
 
         override fun hashCode(): Int {
             var result = coseSign1Bytes.contentHashCode()
-            result = 31 * result + trustedRoot.hashCode()
+            result = 31 * result + trustedRoots.hashCode()
             return result
         }
     }
@@ -30,22 +33,28 @@ sealed class CoseVerificationRequest {
     data class Detached(
         val coseSign1Bytes: ByteArray,
         val detachedPayload: ByteArray,
-        val trustedRoot: X509Certificate
+        val trustedRoots: List<X509Certificate>
     ) : CoseVerificationRequest() {
+        internal constructor(
+            coseSign1Bytes: ByteArray,
+            detachedPayload: ByteArray,
+            trustedRoot: X509Certificate
+        ) : this(coseSign1Bytes, detachedPayload, listOf(trustedRoot))
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
             other as Detached
             if (!coseSign1Bytes.contentEquals(other.coseSign1Bytes)) return false
             if (!detachedPayload.contentEquals(other.detachedPayload)) return false
-            if (trustedRoot != other.trustedRoot) return false
+            if (trustedRoots != other.trustedRoots) return false
             return true
         }
 
         override fun hashCode(): Int {
             var result = coseSign1Bytes.contentHashCode()
             result = 31 * result + detachedPayload.contentHashCode()
-            result = 31 * result + trustedRoot.hashCode()
+            result = 31 * result + trustedRoots.hashCode()
             return result
         }
     }
