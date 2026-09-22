@@ -30,6 +30,7 @@ import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificat
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Suppress("DEPRECATION")
     @Inject
     lateinit var presentCredentialSdk: PresentCredentialSdk
 

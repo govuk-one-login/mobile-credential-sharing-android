@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.testapp.R
 data class MockCredentialState(
     val displayName: String,
     val id: String = UUID.randomUUID().toString(),
+    val providerType: MockCredentialProviderType = MockCredentialProviderType.NORMAL,
     private val privateKeyAssetName: String = "test_private_key.pem",
     private val rawCredentialRes: Int = R.raw.mock_credential
 ) : Parcelable {
@@ -65,7 +66,8 @@ data class MockCredentialState(
             id = this.id,
             displayName = this.displayName,
             rawCredential = Base64.getUrlDecoder().decode(base64EncodedRawCredential),
-            privateKey = privateKey
+            privateKey = privateKey,
+            providerType = this.providerType
         )
     }
 

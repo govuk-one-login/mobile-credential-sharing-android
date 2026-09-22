@@ -1,14 +1,23 @@
 package uk.gov.onelogin.sharing.sdk
 
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import io.mockk.every
 import io.mockk.mockk
+import java.security.cert.X509Certificate
+import junit.framework.TestCase.assertTrue
 import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
+import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
+import uk.gov.onelogin.sharing.sdk.internal.presenter.CredentialPresenterImpl
 import uk.gov.onelogin.sharing.sdk.internal.shared.CredentialSharingSdkImpl
+import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UntrustedCertificate
 
 class CredentialSharingSdkImplTest {
     private lateinit var logger: Logger
@@ -19,9 +28,15 @@ class CredentialSharingSdkImplTest {
     fun setUp() {
         logger = SystemLogger()
 
+        val mockBluetoothManager = mockk<BluetoothManager>(relaxed = true)
+        val mockContext = mockk<Context>(relaxed = true) {
+            every { getSystemService(Context.BLUETOOTH_SERVICE) } returns mockBluetoothManager
+            every { getSystemService(BluetoothManager::class.java) } returns mockBluetoothManager
+        }
+
         sdk = CredentialSharingSdkImpl(
             logger = logger,
-            applicationContext = mockk(),
+            applicationContext = mockContext,
             permissionChecker = { emptyList() },
             readerAuthCredentialFactory = factory
         )
@@ -30,5 +45,48 @@ class CredentialSharingSdkImplTest {
     @Test
     fun `SDK is successfully initialized`() {
         assertNotNull(sdk)
+        assertNotNull(sdk.appGraph)
+        assertNotNull(sdk.verifyCredentialSdk)
+    }
+
+    @Test
+    fun `legacy presentCredentialSdk returns CredentialPresenter`() {
+        @Suppress("DEPRECATION")
+        val presentSdk = sdk.presentCredentialSdk
+        assertNotNull(presentSdk)
+
+        val credentialProvider = FakeCredentialProvider()
+        val presenter = presentSdk.presenter(credentialProvider)
+        assertNotNull(presenter)
+        assertTrue(presenter is CredentialPresenterImpl)
+    }
+
+    @Test
+    fun `when empty, createCredentialPresenter throws UntrustedCertificate`() {
+        val credentialProvider = FakeCredentialProvider()
+
+        kotlin.test.assertFailsWith<UntrustedCertificate> {
+            sdk.createCredentialPresenter(
+                credentialProvider = credentialProvider,
+                trustedReaderCertificates = emptyList()
+            )
+        }
+    }
+
+    @Test
+    fun `when is non-empty, createCredentialPresenter returns CredentialPresenterImpl`() {
+        val credentialProvider = FakeCredentialProvider()
+        val trustedCerts = listOf<X509Certificate>(mockk())
+
+        val presenter = sdk.createCredentialPresenter(
+            credentialProvider = credentialProvider,
+            trustedReaderCertificates = trustedCerts
+        )
+
+        assertNotNull(presenter)
+        assertTrue(presenter is CredentialPresenterImpl)
+        val impl = presenter as CredentialPresenterImpl
+        assertSame(sdk.appGraph, impl.appGraph)
+        assertNotNull(impl.orchestrator)
     }
 }
