@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.sdk.api.verifier
 
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 
 fun interface VerifyCredentialSdk {
@@ -12,7 +13,12 @@ fun interface VerifyCredentialSdk {
      * If your `create()` implementation can block, call this function off the main thread.
      *
      * @param verifierConfig configuration including the verification request and trusted root.
+     * @param readerAuthCredentialFactory factory that supplies the reader-auth credential provider
+     * used to sign reader authentication payloads.
      * @return a [CredentialVerifier] bound to the supplied configuration.
      */
-    fun verifier(verifierConfig: VerifierConfig): CredentialVerifier
+    fun verifier(
+        verifierConfig: VerifierConfig,
+        readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory
+    ): CredentialVerifier
 }

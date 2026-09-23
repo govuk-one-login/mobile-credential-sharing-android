@@ -11,11 +11,13 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 class VerifyCredentialSdkImpl(
     private val appGraph: CredentialSharingAppGraph,
     private val verifierGraphFactory: VerifyCredentialGraph.Factory,
-    private val credentialVerificationGraphFactory: CredentialVerificationGraph.Factory,
-    private val readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory
+    private val credentialVerificationGraphFactory: CredentialVerificationGraph.Factory
 ) : VerifyCredentialSdk {
 
-    override fun verifier(verifierConfig: VerifierConfig): CredentialVerifier {
+    override fun verifier(
+        verifierConfig: VerifierConfig,
+        readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory
+    ): CredentialVerifier {
         val credentialVerificationGraph = credentialVerificationGraphFactory
             .create(verifierConfig.trustedRootCertificate)
         val orchestrator = verifierGraphFactory

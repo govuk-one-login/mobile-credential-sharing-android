@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.testapp
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
@@ -20,12 +21,13 @@ import uk.gov.onelogin.sharing.testapp.verifier.VerifierTestAppJourneyNavigation
 import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 
 object MainActivityRoutes {
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "LongParameterList")
     internal fun NavGraphBuilder.configureTestAppRoutes(
         mockCredentials: List<MockCredentialState>,
         navController: NavController,
         presentCredentialSdk: PresentCredentialSdk,
         verifyCredentialSdk: VerifyCredentialSdk,
+        readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory,
         issuerRootCertificateProvider: IssuerRootCertificateProvider
     ) {
         configureTestAppHomeScreen(navController)
@@ -46,7 +48,8 @@ object MainActivityRoutes {
                     verificationRequest = verificationRequest,
                     trustedRootCertificate = issuerRootCertificateProvider
                         .trustedRootCertificate()
-                )
+                ),
+                readerAuthCredentialFactory = readerAuthCredentialFactory
             )
         }
     }
