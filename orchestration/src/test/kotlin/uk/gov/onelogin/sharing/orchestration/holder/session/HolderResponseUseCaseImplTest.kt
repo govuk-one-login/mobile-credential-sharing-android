@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import java.security.GeneralSecurityException
 import kotlin.test.assertFailsWith
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -15,6 +16,7 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureResult
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCase
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
+import uk.gov.onelogin.sharing.orchestration.CredentialSigningException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 
 class HolderResponseUseCaseImplTest {
@@ -143,7 +145,7 @@ class HolderResponseUseCaseImplTest {
                 useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
             }
 
-            assertEquals("Failed to generate device response", thrown.message)
+            assertEquals("Failed to build DeviceSigned structure", thrown.message)
             assertEquals(cause, thrown.cause)
         }
 
@@ -157,7 +159,40 @@ class HolderResponseUseCaseImplTest {
                 useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
             }
 
-            assertEquals("Failed to generate device response", thrown.message)
+            assertEquals("key error", thrown.message)
             assertEquals(cause, thrown.cause)
         }
+
+    @Test
+    fun `generateDeviceResponse rethrows Recoverable unchanged`() = runTest {
+        val recoverable = CredentialSigningException.Recoverable()
+        coEvery { credentialProvider.sign(any(), any()) } throws recoverable
+
+        val thrown = assertFailsWith<CredentialSigningException.Recoverable> {
+            useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
+        }
+
+        assertEquals(recoverable, thrown)
+    }
+
+    @Test
+    fun `generateDeviceResponse maps Unrecoverable to DeviceSignatureException`() = runTest {
+        val unrecoverable = CredentialSigningException.Unrecoverable(RuntimeException("boom"))
+        coEvery { credentialProvider.sign(any(), any()) } throws unrecoverable
+
+        val thrown = assertFailsWith<DeviceSignatureException> {
+            useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
+        }
+
+        assertEquals(unrecoverable, thrown.cause)
+    }
+
+    @Test
+    fun `generateDeviceResponse propagates CancellationException without conversion`() = runTest {
+        coEvery { credentialProvider.sign(any(), any()) } throws CancellationException("cancelled")
+
+        assertFailsWith<CancellationException> {
+            useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
+        }
+    }
 }
