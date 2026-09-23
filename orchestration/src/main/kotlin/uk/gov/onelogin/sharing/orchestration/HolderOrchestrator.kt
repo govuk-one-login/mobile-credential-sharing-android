@@ -8,6 +8,7 @@ import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -35,7 +36,6 @@ import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
-import uk.gov.onelogin.sharing.orchestration.CredentialSigningException
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
@@ -48,6 +48,7 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartE
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl
+import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
@@ -63,6 +64,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 @Keep
@@ -214,57 +216,71 @@ class HolderOrchestrator(
             }
             check(state is HolderSessionState.AwaitingUserConsent)
 
-            val sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
-                "Missing session transcript"
-            }
-            val validatedCredential = checkNotNull(context.validatedCredential) {
-                "Missing validated credential"
-            }
-            val filteredIssuerSigned = checkNotNull(context.filteredIssuerSigned) {
-                "Missing filtered issuer signed"
-            }
-
-            val skDevice = checkNotNull(context.skDevice) { "Missing skDevice" }
+            val submission = PendingConsent(
+                sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
+                    "Missing session transcript"
+                },
+                deviceRequest = state.request,
+                validatedCredential = checkNotNull(context.validatedCredential) {
+                    "Missing validated credential"
+                },
+                filteredIssuerSigned = checkNotNull(context.filteredIssuerSigned) {
+                    "Missing filtered issuer signed"
+                },
+                skDevice = checkNotNull(context.skDevice) { "Missing skDevice" }
+            )
 
             val activeSession = sessionFlow.value
             signingJob = appCoroutineScope.launch {
-                try {
-                    val document = confirmConsentUseCase.execute(
-                        sessionTranscript = sessionTranscript,
-                        deviceRequest = state.request,
-                        validatedCredential = validatedCredential,
-                        filteredIssuerSigned = filteredIssuerSigned
-                    )
-
-                    // The signing prompt can suspend for a long time. If the session was reset
-                    // (replaced) or terminated/cancelled while signing was in progress, the
-                    // captured document and skDevice no longer belong to the active session, so
-                    // the response must be discarded rather than sent over the wrong session.
-                    if (sessionFlow.value !== activeSession || activeSession.isComplete()) {
-                        consentInFlight.set(false)
-                        logger.debug(
-                            logTag,
-                            "Session changed during signing; discarding stale device response"
-                        )
-                        return@launch
-                    }
-
-                    safeTransitionTo(HolderSessionState.ProcessingResponse)
-                    sendDeviceResponse(document = document, skDevice = skDevice)
-                } catch (e: CredentialSigningException.Recoverable) {
-                    // Neutral outcome: keep the session active on the consent screen.
-                    // The user can retry, deny, or cancel, so allow re-entry.
-                    consentInFlight.set(false)
-                    logger.debug(logTag, "$SIGNING_CANCELLED ${e.message ?: ""}".trimEnd())
-                } catch (e: DeviceSignatureException) {
-                    handleFatalSigningFailure(e)
-                }
+                signAndRespond(submission, activeSession)
             }
         } catch (e: IllegalStateException) {
             consentInFlight.set(false)
             appCoroutineScope.launch {
                 sendTerminationAndFail(e)
             }
+        }
+    }
+
+    private suspend fun signAndRespond(submission: PendingConsent, activeSession: HolderSession) {
+        try {
+            val document = confirmConsentUseCase.execute(
+                sessionTranscript = submission.sessionTranscript,
+                deviceRequest = submission.deviceRequest,
+                validatedCredential = submission.validatedCredential,
+                filteredIssuerSigned = submission.filteredIssuerSigned
+            )
+
+            // The signing prompt can suspend for a long time. If the session was reset (replaced)
+            // or terminated/cancelled while signing was in progress, the captured document and
+            // skDevice no longer belong to the active session, so the response is discarded.
+            if (sessionFlow.value !== activeSession || activeSession.isComplete()) {
+                consentInFlight.set(false)
+                logger.debug(
+                    logTag,
+                    "Session changed during signing; discarding stale device response"
+                )
+                return
+            }
+
+            safeTransitionTo(HolderSessionState.ProcessingResponse)
+            sendDeviceResponse(document = document, skDevice = submission.skDevice)
+        } catch (e: CredentialSigningException.Recoverable) {
+            // Neutral outcome: keep the session active on the consent screen.
+            // The user can retry, deny, or cancel.
+            consentInFlight.set(false)
+            logger.debug(logTag, "$SIGNING_CANCELLED ${e.message ?: ""}".trimEnd())
+        } catch (e: DeviceSignatureException) {
+            handleFatalSigningFailure(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            handleFatalSigningFailure(
+                DeviceSignatureException(
+                    e.message ?: "Unexpected error building or sending device response",
+                    e
+                )
+            )
         }
     }
 
@@ -335,6 +351,9 @@ class HolderOrchestrator(
             check(state is HolderSessionState.AwaitingUserConsent) {
                 "denyConsent called in an invalid state: $state"
             }
+
+            signingJob?.cancel()
+            consentInFlight.set(false)
 
             safeTransitionTo(HolderSessionState.ProcessingResponse)
 
@@ -884,6 +903,19 @@ class HolderOrchestrator(
 
         safeTransitionTo(finalState)
     }
+
+    /**
+     * The validated inputs required to sign and build a device response, captured up front from
+     * the session context so the signing coroutine does not re-read mutable session state.
+     * Not a `data class`: it holds [ByteArray]s and needs no structural equality.
+     */
+    private class PendingConsent(
+        val sessionTranscript: ByteArray,
+        val deviceRequest: DeviceRequest,
+        val validatedCredential: ValidatedCredential,
+        val filteredIssuerSigned: IssuerSigned,
+        val skDevice: ByteArray
+    )
 
     private companion object {
         val INACTIVITY_TIMEOUT = 300.seconds
