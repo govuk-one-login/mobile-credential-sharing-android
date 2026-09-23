@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import java.io.OutputStream
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 
 /**
  * Represents the ReaderAuthentication structure as defined in ISO 18013-5.
@@ -62,5 +63,20 @@ data class ReaderAuthenticationDto(
 
     companion object {
         private const val LABEL = "ReaderAuthentication"
+
+        /**
+         * Builds Tag 24 wrapped ReaderAuthenticationBytes payload from the untagged active session transcript
+         * and preserved ItemsRequestBytes as required by ISO/IEC 18013-5 Clause 8.3.2.1.
+         */
+        fun createReaderAuthenticationBytes(
+            untaggedSessionTranscriptBytes: ByteArray,
+            itemsRequestBytes: ByteArray
+        ): ByteArray {
+            val dto = ReaderAuthenticationDto(
+                sessionTranscript = untaggedSessionTranscriptBytes,
+                itemsRequestBytes = itemsRequestBytes
+            )
+            return EmbeddedCbor(dto.toCbor()).toCbor()
+        }
     }
 }

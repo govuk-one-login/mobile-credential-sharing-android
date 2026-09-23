@@ -3,7 +3,10 @@ package uk.gov.onelogin.sharing.verification.cose
 /**
  * Sealed hierarchy for typed COSE verification failures.
  */
-sealed class CoseVerificationFailure : Exception() {
+sealed class CoseVerificationFailure(
+    override val message: String? = null,
+    override val cause: Throwable? = null
+) : Exception(message, cause) {
     /** The COSE_Sign1 structure is invalid or malformed. */
     data object MalformedCoseSign1 : CoseVerificationFailure()
 
@@ -17,7 +20,10 @@ sealed class CoseVerificationFailure : Exception() {
     data object InvalidSignature : CoseVerificationFailure()
 
     /** The certificate chain is not trusted or invalid. */
-    data object UntrustedCertificate : CoseVerificationFailure()
+    data class UntrustedCertificate(
+        override val message: String? = null,
+        override val cause: Throwable? = null
+    ) : CoseVerificationFailure(message, cause)
 
     /** A certificate in the chain has expired. */
     data object ExpiredCertificate : CoseVerificationFailure()

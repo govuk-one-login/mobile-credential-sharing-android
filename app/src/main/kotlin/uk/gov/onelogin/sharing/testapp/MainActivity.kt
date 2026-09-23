@@ -8,31 +8,29 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.metrics.performance.JankStats
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.api.BuildConfig
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
-import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
+import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 import uk.gov.onelogin.sharing.testapp.MainActivityRoutes.configureTestAppRoutes
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentials
 import uk.gov.onelogin.sharing.testapp.home.HomeRoute
 import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Suppress("DEPRECATION")
     @Inject
-    lateinit var presentCredentialSdk: PresentCredentialSdk
+    lateinit var sharingSdk: CredentialSharingSdk
 
     @Inject
     lateinit var verifyCredentialSdk: VerifyCredentialSdk
@@ -72,9 +70,10 @@ class MainActivity : ComponentActivity() {
                         startDestination = HomeRoute
                     ) {
                         configureTestAppRoutes(
+                            context = this@MainActivity,
                             mockCredentials = mockCredentials,
                             navController = navController,
-                            presentCredentialSdk = presentCredentialSdk,
+                            sharingSdkImpl = sharingSdk,
                             verifyCredentialSdk = verifyCredentialSdk,
                             issuerRootCertificateProvider = issuerRootCertificateProvider
                         )

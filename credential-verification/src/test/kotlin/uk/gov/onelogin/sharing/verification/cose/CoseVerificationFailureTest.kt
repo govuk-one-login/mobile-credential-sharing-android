@@ -60,7 +60,7 @@ internal class CoseVerificationFailureTest {
     @Test
     fun `UntrustedCertificate is throwable`() {
         assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
-            throw CoseVerificationFailure.UntrustedCertificate
+            throw CoseVerificationFailure.UntrustedCertificate()
         }
     }
 

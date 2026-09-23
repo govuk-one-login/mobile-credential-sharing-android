@@ -13,7 +13,7 @@ class PresentCredentialSdkImpl(
 ) : PresentCredentialSdk {
     override fun presenter(credentialProvider: CredentialProvider): CredentialPresenter {
         val orchestrator = presenterGraphFactory
-            .create(appGraph, credentialProvider)
+            .create(appGraph, credentialProvider, emptyList())
             .holderOrchestrator()
 
         return CredentialPresenterImpl(

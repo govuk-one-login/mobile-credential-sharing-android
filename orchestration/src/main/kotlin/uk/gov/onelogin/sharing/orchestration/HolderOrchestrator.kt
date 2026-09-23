@@ -5,8 +5,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import java.security.interfaces.ECPrivateKey
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -42,7 +40,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedP
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
-import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
@@ -62,6 +59,8 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
+import java.security.interfaces.ECPrivateKey
+import kotlin.time.Duration.Companion.seconds
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
