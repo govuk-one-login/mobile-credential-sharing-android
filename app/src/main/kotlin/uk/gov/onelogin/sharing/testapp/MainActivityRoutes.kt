@@ -7,6 +7,7 @@ import java.io.IOException
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
@@ -32,6 +33,7 @@ object MainActivityRoutes {
         navController: NavController,
         sharingSdkImpl: CredentialSharingSdk,
         verifyCredentialSdk: VerifyCredentialSdk,
+        readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory,
         issuerRootCertificateProvider: IssuerRootCertificateProvider
     ) {
         configureTestAppHomeScreen(navController)
@@ -52,7 +54,8 @@ object MainActivityRoutes {
                     verificationRequest = verificationRequest,
                     trustedRootCertificate = issuerRootCertificateProvider
                         .trustedRootCertificate()
-                )
+                ),
+                readerAuthCredentialFactory = readerAuthCredentialFactory
             )
         }
     }
