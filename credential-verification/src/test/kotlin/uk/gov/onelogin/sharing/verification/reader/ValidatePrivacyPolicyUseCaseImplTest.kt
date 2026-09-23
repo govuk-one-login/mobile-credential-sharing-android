@@ -53,7 +53,9 @@ class ValidatePrivacyPolicyUseCaseImplTest {
             every { mockUri.host } returns if (urlString.contains("://") &&
                 !urlString.startsWith("https:///")
             ) {
-                urlString.substringAfter("://").substringBefore('/').substringBefore('@')
+                urlString.substringAfter("://")
+                    .substringBefore('/')
+                    .substringBefore('@')
             } else {
                 null
             }
@@ -104,15 +106,26 @@ class ValidatePrivacyPolicyUseCaseImplTest {
         ).leaf().build()
 
         val failure = assertThrows(ReaderAuthenticationFailure::class.java) {
-            useCase.validate(VerifiedReaderRequest(sampleDocRequest, leafCertWithoutSia))
+            useCase.validate(
+                VerifiedReaderRequest(
+                    sampleDocRequest,
+                    leafCertWithoutSia
+                )
+            )
         }
 
-        assertEquals(ReaderAuthenticationReason.PRIVACY_POLICY_URL_INVALID, failure.reason)
+        assertEquals(
+            ReaderAuthenticationReason.PRIVACY_POLICY_URL_INVALID,
+            failure.reason
+        )
     }
 
     @Test
     fun `missing privacy policy OID in SIA throws PRIVACY_POLICY_URL_INVALID`() {
-        val wrongOidSia = buildSiaExtensionValue("1.3.6.1.5.5.7.48.1", "https://example.com/ocsp")
+        val wrongOidSia = buildSiaExtensionValue(
+            "1.3.6.1.5.5.7.48.1",
+            "https://example.com/ocsp"
+        )
 
         val leafCertWrongOid = TestCertificateGenerator(
             subject = "CN=Reader Leaf,O=Test Org,C=GB",
@@ -129,7 +142,7 @@ class ValidatePrivacyPolicyUseCaseImplTest {
     }
 
     @Test
-    fun `invalid privacy policy URL violates required conditions and throws PRIVACY_POLICY_URL_INVALID`(
+    fun `invalid privacy policy URL violates conditions and throws PRIVACY_POLICY_URL_INVALID`(
         @TestParameter invalidUrl: String = namedTestValues(
             "HTTP scheme" to "http://example.gov.uk/privacy",
             "FTP scheme" to "ftp://example.gov.uk/privacy",
@@ -141,7 +154,10 @@ class ValidatePrivacyPolicyUseCaseImplTest {
             "Length > 2048 chars" to "https://example.gov.uk/" + "a".repeat(2040)
         )
     ) {
-        val siaBytes = buildSiaExtensionValue(SIA_PRIVACY_OID, invalidUrl)
+        val siaBytes = buildSiaExtensionValue(
+            SIA_PRIVACY_OID,
+            invalidUrl
+        )
 
         val leafCert = TestCertificateGenerator(
             subject = "CN=Reader Leaf,O=Test Org,C=GB",
@@ -154,7 +170,10 @@ class ValidatePrivacyPolicyUseCaseImplTest {
             useCase.validate(VerifiedReaderRequest(sampleDocRequest, leafCert))
         }
 
-        assertEquals(ReaderAuthenticationReason.PRIVACY_POLICY_URL_INVALID, failure.reason)
+        assertEquals(
+            ReaderAuthenticationReason.PRIVACY_POLICY_URL_INVALID,
+            failure.reason
+        )
     }
 
     @Test
@@ -169,7 +188,12 @@ class ValidatePrivacyPolicyUseCaseImplTest {
             issuer = "CN=Root CA"
         ).leaf().withExtension(OID_SIA, false, siaBytes).build()
 
-        val authenticatedRequest = useCase.validate(VerifiedReaderRequest(sampleDocRequest, leafCertNoOrg))
+        val authenticatedRequest = useCase.validate(
+            VerifiedReaderRequest(
+                sampleDocRequest,
+                leafCertNoOrg
+            )
+        )
 
         assertEquals(validUrl, authenticatedRequest.privacyPolicyUrl.toString())
         assertEquals(null, authenticatedRequest.readerOrganizationName)

@@ -10,5 +10,5 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.Do
 data class AuthenticatedReaderRequest(
     val docRequest: DocRequest,
     val privacyPolicyUrl: Uri,
-    val readerOrganizationName: String? = null,
+    val readerOrganizationName: String? = null
 )
