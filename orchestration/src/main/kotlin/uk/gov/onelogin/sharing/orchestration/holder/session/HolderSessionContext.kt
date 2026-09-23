@@ -5,6 +5,7 @@ import java.security.cert.X509Certificate
 import java.util.UUID
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
+import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
 
 data class HolderSessionContext(
     val sessionUuid: UUID,
@@ -16,6 +17,7 @@ data class HolderSessionContext(
     val encryptCounter: UInt = 1u,
     val skDevice: ByteArray? = null,
     val sessionTranscriptBytes: ByteArray? = null,
+    val authenticatedReaderRequest: AuthenticatedReaderRequest? = null,
     val validatedCredential: ValidatedCredential? = null,
     val filteredIssuerSigned: IssuerSigned? = null
 )
