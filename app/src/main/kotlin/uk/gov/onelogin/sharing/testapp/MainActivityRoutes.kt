@@ -31,7 +31,7 @@ object MainActivityRoutes {
         context: Context,
         mockCredentials: List<MockCredentialState>,
         navController: NavController,
-        sharingSdkImpl: CredentialSharingSdk,
+        sharingSdk: CredentialSharingSdk,
         verifyCredentialSdk: VerifyCredentialSdk,
         readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory,
         issuerRootCertificateProvider: IssuerRootCertificateProvider
@@ -42,7 +42,7 @@ object MainActivityRoutes {
             mockCredentials = mockCredentials
         )
         configureHolderJourneyWrapper { credential ->
-            sharingSdkImpl.createCredentialPresenter(
+            sharingSdk.createCredentialPresenter(
                 credentialProvider = credentialProviderFor(credential),
                 trustedReaderCertificates = loadReaderRootCertificate(context)
             )

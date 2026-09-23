@@ -20,7 +20,6 @@ import uk.gov.logging.api.BuildConfig
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
-import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 import uk.gov.onelogin.sharing.testapp.MainActivityRoutes.configureTestAppRoutes
@@ -78,7 +77,7 @@ class MainActivity : ComponentActivity() {
                             context = this@MainActivity,
                             mockCredentials = mockCredentials,
                             navController = navController,
-                            sharingSdkImpl = sharingSdk,
+                            sharingSdk = sharingSdk,
                             verifyCredentialSdk = verifyCredentialSdk,
                             readerAuthCredentialFactory = readerAuthCredentialFactory,
                             issuerRootCertificateProvider = issuerRootCertificateProvider
