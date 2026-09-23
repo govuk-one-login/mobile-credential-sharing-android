@@ -20,6 +20,7 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.api.BuildConfig
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
+import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.sdk.api.presenter.PresentCredentialSdk
 import uk.gov.onelogin.sharing.sdk.api.verifier.VerifyCredentialSdk
 import uk.gov.onelogin.sharing.testapp.MainActivityRoutes.configureTestAppRoutes
@@ -36,6 +37,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var verifyCredentialSdk: VerifyCredentialSdk
+
+    @Inject
+    lateinit var readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory
 
     @Inject
     lateinit var issuerRootCertificateProvider: IssuerRootCertificateProvider
@@ -76,6 +80,7 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             presentCredentialSdk = presentCredentialSdk,
                             verifyCredentialSdk = verifyCredentialSdk,
+                            readerAuthCredentialFactory = readerAuthCredentialFactory,
                             issuerRootCertificateProvider = issuerRootCertificateProvider
                         )
                     }

@@ -4,7 +4,6 @@ import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
 import java.security.cert.X509Certificate
 import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
@@ -23,8 +22,7 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 class CredentialSharingSdkImpl(
     applicationContext: Context,
     logger: Logger,
-    permissionChecker: PermissionChecker,
-    readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory
+    permissionChecker: PermissionChecker
 ) : CredentialSharingSdk {
 
     private val _appGraph: CredentialSharingAppGraph =
@@ -75,7 +73,6 @@ class CredentialSharingSdkImpl(
             appGraph = appGraph,
             verifierGraphFactory = createGraphFactory<VerifyCredentialGraph.Factory>(),
             credentialVerificationGraphFactory =
-                createGraphFactory<CredentialVerificationGraph.Factory>(),
-            readerAuthCredentialFactory = readerAuthCredentialFactory
+                createGraphFactory<CredentialVerificationGraph.Factory>()
         )
 }

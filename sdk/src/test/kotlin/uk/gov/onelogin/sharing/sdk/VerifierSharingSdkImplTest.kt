@@ -68,13 +68,15 @@ class VerifierSharingSdkImplTest {
         val sdk = VerifyCredentialSdkImpl(
             appGraph = appGraph,
             verifierGraphFactory = verifierGraphFactory,
-            credentialVerificationGraphFactory = credentialVerificationFactory,
+            credentialVerificationGraphFactory = credentialVerificationFactory
+        )
+
+        val result = sdk.verifier(
+            verifierConfig,
             readerAuthCredentialFactory = {
                 readerAuthCredentialProvider
             }
         )
-
-        val result = sdk.verifier(verifierConfig)
 
         assertTrue(result is CredentialVerifierImpl)
 
