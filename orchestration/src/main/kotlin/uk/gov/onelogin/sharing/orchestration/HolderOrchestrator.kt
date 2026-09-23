@@ -6,6 +6,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,7 +44,6 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedP
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
-import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotCancelException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
@@ -84,6 +84,8 @@ class HolderOrchestrator(
     private val sessionTimer: SessionTimer
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
+    private val consentInFlight = AtomicBoolean(false)
+    private var signingJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
     private val currentContext: HolderSessionContext get() = sessionFlow.value.sessionContext
 
@@ -106,6 +108,7 @@ class HolderOrchestrator(
 
     override fun start() {
         if (sessionFlow.value.isComplete()) {
+            consentInFlight.set(false)
             sessionFlow.update {
                 sessionFactory.create().also {
                     logger.debug(
@@ -195,6 +198,14 @@ class HolderOrchestrator(
     }
 
     override fun confirmConsent() {
+        // Guard against re-entry (e.g. double taps). Because signing now suspends on the
+        // consumer's local-auth prompt, the session state remains AwaitingUserConsent until
+        // execute() completes, so the state check alone cannot prevent concurrent submissions.
+        if (!consentInFlight.compareAndSet(false, true)) {
+            logger.debug(logTag, "confirmConsent ignored: a submission is already in flight")
+            return
+        }
+
         val state = holderSessionState.value
         val context = currentContext
         try {
@@ -215,7 +226,8 @@ class HolderOrchestrator(
 
             val skDevice = checkNotNull(context.skDevice) { "Missing skDevice" }
 
-            appCoroutineScope.launch {
+            val activeSession = sessionFlow.value
+            signingJob = appCoroutineScope.launch {
                 try {
                     val document = confirmConsentUseCase.execute(
                         sessionTranscript = sessionTranscript,
@@ -224,17 +236,32 @@ class HolderOrchestrator(
                         filteredIssuerSigned = filteredIssuerSigned
                     )
 
+                    // The signing prompt can suspend for a long time. If the session was reset
+                    // (replaced) or terminated/cancelled while signing was in progress, the
+                    // captured document and skDevice no longer belong to the active session, so
+                    // the response must be discarded rather than sent over the wrong session.
+                    if (sessionFlow.value !== activeSession || activeSession.isComplete()) {
+                        consentInFlight.set(false)
+                        logger.debug(
+                            logTag,
+                            "Session changed during signing; discarding stale device response"
+                        )
+                        return@launch
+                    }
+
                     safeTransitionTo(HolderSessionState.ProcessingResponse)
                     sendDeviceResponse(document = document, skDevice = skDevice)
                 } catch (e: CredentialSigningException.Recoverable) {
                     // Neutral outcome: keep the session active on the consent screen.
-                    // The user can retry, deny, or cancel.
+                    // The user can retry, deny, or cancel, so allow re-entry.
+                    consentInFlight.set(false)
                     logger.debug(logTag, "$SIGNING_CANCELLED ${e.message ?: ""}".trimEnd())
                 } catch (e: DeviceSignatureException) {
                     handleFatalSigningFailure(e)
                 }
             }
         } catch (e: IllegalStateException) {
+            consentInFlight.set(false)
             appCoroutineScope.launch {
                 sendTerminationAndFail(e)
             }
@@ -339,6 +366,8 @@ class HolderOrchestrator(
 
     override fun cancel() {
         if (sessionFlow.value.isComplete()) return
+        signingJob?.cancel()
+        consentInFlight.set(false)
         appCoroutineScope.launch {
             terminateSession(
                 finalState = HolderSessionState.Complete.Cancelled,
@@ -349,6 +378,8 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
+        signingJob?.cancel()
+        consentInFlight.set(false)
         sessionFlow.update {
             sessionFactory.create().also {
                 logger.debug(

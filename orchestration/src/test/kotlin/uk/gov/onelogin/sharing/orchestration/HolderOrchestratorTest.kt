@@ -805,6 +805,89 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `double tap on confirm consent only submits a single device response`() = runTest {
+        val consentGate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            sessionFactory = sessionFactory,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // First tap: begins signing and suspends on the gate.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Second tap while the first submission is still in flight: must be ignored.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        // Release signing and let the (single) submission complete.
+        consentGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(1, peripheralTransport.sendMessageCalls)
+        assertEquals(1, fakeCryptoService.lastEncryptCounter?.toInt())
+        assertEquals(
+            2u,
+            sessionFactory.getCurrentSession().sessionContext.encryptCounter
+        )
+        assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
+    }
+
+    @Test
+    fun `reset during signing discards the stale device response`() = runTest {
+        val consentGate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // Begin signing; it suspends on the gate.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Reset replaces the session while signing is in flight.
+        orchestrator.reset()
+        advanceUntilIdle()
+
+        // Releasing the gate must not produce a device response on the new session.
+        consentGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(0, peripheralTransport.sendMessageCalls)
+        assertEquals(null, fakeCryptoService.lastEncryptCounter)
+    }
+
+    @Test
     fun `recoverable signing failure keeps session in AwaitingUserConsent`() = runTest {
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()

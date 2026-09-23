@@ -10,8 +10,8 @@ interface CredentialProvider {
     /**
      * Signs the COSE `Sig_structure` [payload] with the private key bound to [documentId].
      *
-     * On success, returns the raw signature bytes. On failure, throw a
-     * [CredentialSigningException] describing the outcome so the SDK can react correctly:
+     * On success, returns the DER-encoded ECDSA (ES256 / P-256) signature bytes. On failure,
+     * throw a [CredentialSigningException] describing the outcome so the SDK can react correctly:
      *
      * - [CredentialSigningException.Recoverable] — signing did not complete but the session can
      *   continue. For example when the user cancels local-authentication prompt.
