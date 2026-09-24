@@ -6,7 +6,9 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import java.security.interfaces.ECPrivateKey
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -46,6 +48,7 @@ import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartE
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestException
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl
+import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
@@ -61,6 +64,8 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
+import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
+import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
@@ -86,6 +91,8 @@ class HolderOrchestrator(
     private val readerAuthentication: ReaderAuthentication,
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
+    private val consentInFlight = AtomicBoolean(false)
+    private var signingJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
     private val currentContext: HolderSessionContext get() = sessionFlow.value.sessionContext
 
@@ -108,6 +115,7 @@ class HolderOrchestrator(
 
     override fun start() {
         if (sessionFlow.value.isComplete()) {
+            consentInFlight.set(false)
             sessionFlow.update {
                 sessionFactory.create().also {
                     logger.debug(
@@ -197,6 +205,14 @@ class HolderOrchestrator(
     }
 
     override fun confirmConsent() {
+        // Guard against re-entry (e.g. double taps). Because signing now suspends on the
+        // consumer's local-auth prompt, the session state remains AwaitingUserConsent until
+        // execute() completes, so the state check alone cannot prevent concurrent submissions.
+        if (!consentInFlight.compareAndSet(false, true)) {
+            logger.debug(logTag, "confirmConsent ignored: a submission is already in flight")
+            return
+        }
+
         val state = holderSessionState.value
         val context = currentContext
         try {
@@ -204,61 +220,132 @@ class HolderOrchestrator(
                 "confirmConsent called in an invalid state: $state"
             }
             check(state is HolderSessionState.AwaitingUserConsent)
-            safeTransitionTo(HolderSessionState.ProcessingResponse)
 
-            val sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
-                "Missing session transcript"
-            }
-            val validatedCredential = checkNotNull(context.validatedCredential) {
-                "Missing validated credential"
-            }
-            val filteredIssuerSigned = checkNotNull(context.filteredIssuerSigned) {
-                "Missing filtered issuer signed"
-            }
+            val submission = PendingConsent(
+                sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
+                    "Missing session transcript"
+                },
+                deviceRequest = state.request,
+                validatedCredential = checkNotNull(context.validatedCredential) {
+                    "Missing validated credential"
+                },
+                filteredIssuerSigned = checkNotNull(context.filteredIssuerSigned) {
+                    "Missing filtered issuer signed"
+                },
+                skDevice = checkNotNull(context.skDevice) { "Missing skDevice" }
+            )
 
-            val skDevice = checkNotNull(context.skDevice) { "Missing skDevice" }
-
-            appCoroutineScope.launch {
-                try {
-                    val document = confirmConsentUseCase.execute(
-                        sessionTranscript = sessionTranscript,
-                        deviceRequest = state.request,
-                        validatedCredential = validatedCredential,
-                        filteredIssuerSigned = filteredIssuerSigned
-                    )
-
-                    val sessionDataBytes = holderCryptoService.buildDeviceResponse(
-                        documents = listOf(document),
-                        skDevice = skDevice,
-                        encryptCounter = context.encryptCounter
-                    )
-
-                    val sent = peripheralBluetoothTransport.sendMessage(
-                        serviceUuid = context.sessionUuid,
-                        data = sessionDataBytes
-                    )
-                    sessionTimer.reset()
-
-                    sessionFlow.value.updateSessionContext {
-                        it.copy(encryptCounter = it.encryptCounter + 1u)
-                    }
-
-                    if (sent) {
-                        safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
-                    } else {
-                        failWith(
-                            message = "Failed to send DeviceResponse",
-                            reason = SessionErrorReason.CannotSendMessage
-                        )
-                    }
-                } catch (e: DeviceSignatureException) {
-                    sendTerminationAndFail(e)
-                }
+            val activeSession = sessionFlow.value
+            signingJob = appCoroutineScope.launch {
+                signAndRespond(submission, activeSession)
             }
         } catch (e: IllegalStateException) {
+            consentInFlight.set(false)
             appCoroutineScope.launch {
                 sendTerminationAndFail(e)
             }
+        }
+    }
+
+    private suspend fun signAndRespond(submission: PendingConsent, activeSession: HolderSession) {
+        try {
+            val document = confirmConsentUseCase.execute(
+                sessionTranscript = submission.sessionTranscript,
+                deviceRequest = submission.deviceRequest,
+                validatedCredential = submission.validatedCredential,
+                filteredIssuerSigned = submission.filteredIssuerSigned
+            )
+
+            // The signing prompt can suspend for a long time. If the session was reset (replaced)
+            // or terminated/cancelled while signing was in progress, the captured document and
+            // skDevice no longer belong to the active session, so the response is discarded.
+            if (sessionFlow.value !== activeSession || activeSession.isComplete()) {
+                consentInFlight.set(false)
+                logger.debug(
+                    logTag,
+                    "Session changed during signing; discarding stale device response"
+                )
+                return
+            }
+
+            safeTransitionTo(HolderSessionState.ProcessingResponse)
+            sendDeviceResponse(document = document, skDevice = submission.skDevice)
+        } catch (e: CredentialSigningException.Recoverable) {
+            // Neutral outcome: keep the session active on the consent screen.
+            // The user can retry, deny, or cancel.
+            consentInFlight.set(false)
+            logger.debug(logTag, "$SIGNING_CANCELLED ${e.message ?: ""}".trimEnd())
+        } catch (e: DeviceSignatureException) {
+            handleFatalSigningFailure(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            handleFatalSigningFailure(
+                DeviceSignatureException(
+                    e.message ?: "Unexpected error building or sending device response",
+                    e
+                )
+            )
+        }
+    }
+
+    private suspend fun sendDeviceResponse(
+        document: VerifiableDocument.WithPresentation,
+        skDevice: ByteArray
+    ) {
+        val context = currentContext
+        val sessionDataBytes = holderCryptoService.buildDeviceResponse(
+            documents = listOf(document),
+            skDevice = skDevice,
+            encryptCounter = context.encryptCounter
+        )
+
+        val sent = peripheralBluetoothTransport.sendMessage(
+            serviceUuid = context.sessionUuid,
+            data = sessionDataBytes
+        )
+        sessionTimer.reset()
+
+        sessionFlow.value.updateSessionContext {
+            it.copy(encryptCounter = it.encryptCounter + 1u)
+        }
+
+        if (sent) {
+            safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
+        } else {
+            failWith(
+                message = "Failed to send DeviceResponse",
+                reason = SessionErrorReason.CannotSendMessage
+            )
+        }
+    }
+
+    private suspend fun handleFatalSigningFailure(exception: DeviceSignatureException) {
+        logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
+        val context = currentContext
+        val skDevice = context.skDevice
+
+        if (skDevice != null) {
+            val sessionDataBytes = holderCryptoService.buildErrorSessionData(
+                deviceResponseStatus = Status.OK,
+                sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+                skDevice = skDevice,
+                encryptCounter = context.encryptCounter
+            )
+
+            terminateSession(
+                finalState = HolderSessionState.Complete.Failed(
+                    SessionError(
+                        message = SIGNING_FAILED,
+                        exception = exception
+                    )
+                ),
+                sessionDataToSend = sessionDataBytes
+            )
+        } else {
+            sendTerminationAndFail(
+                IllegalStateException("Missing skDevice during fatal signing termination")
+            )
         }
     }
 
@@ -269,6 +356,9 @@ class HolderOrchestrator(
             check(state is HolderSessionState.AwaitingUserConsent) {
                 "denyConsent called in an invalid state: $state"
             }
+
+            signingJob?.cancel()
+            consentInFlight.set(false)
 
             safeTransitionTo(HolderSessionState.ProcessingResponse)
 
@@ -300,6 +390,8 @@ class HolderOrchestrator(
 
     override fun cancel() {
         if (sessionFlow.value.isComplete()) return
+        signingJob?.cancel()
+        consentInFlight.set(false)
         appCoroutineScope.launch {
             terminateSession(
                 finalState = HolderSessionState.Complete.Cancelled,
@@ -310,6 +402,8 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
+        signingJob?.cancel()
+        consentInFlight.set(false)
         sessionFlow.update {
             sessionFactory.create().also {
                 logger.debug(
@@ -852,6 +946,19 @@ class HolderOrchestrator(
         safeTransitionTo(finalState)
     }
 
+    /**
+     * The validated inputs required to sign and build a device response, captured up front from
+     * the session context so the signing coroutine does not re-read mutable session state.
+     * Not a `data class`: it holds [ByteArray]s and needs no structural equality.
+     */
+    private class PendingConsent(
+        val sessionTranscript: ByteArray,
+        val deviceRequest: DeviceRequest,
+        val validatedCredential: ValidatedCredential,
+        val filteredIssuerSigned: IssuerSigned,
+        val skDevice: ByteArray
+    )
+
     private companion object {
         val INACTIVITY_TIMEOUT = 300.seconds
         const val UNKNOWN_ERROR = "Unknown error"
@@ -860,5 +967,8 @@ class HolderOrchestrator(
         const val UNRECOGNISED_MESSAGE =
             "Sequencing violation: inbound message is not a recognised type"
         const val STOPPING_BLE_ADVERTISING = "Stopping BLE advertising"
+        const val SIGNING_CANCELLED =
+            "Local authentication cancelled during signing; remaining on consent screen."
+        const val SIGNING_FAILED = "Unable to sign the credential"
     }
 }

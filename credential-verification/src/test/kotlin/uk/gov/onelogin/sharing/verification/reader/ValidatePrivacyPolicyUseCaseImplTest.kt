@@ -68,7 +68,8 @@ class ValidatePrivacyPolicyUseCaseImplTest {
         }
         useCase = ValidatePrivacyPolicyUseCaseImpl(
             siaExtensionParser = SiaExtensionParser(),
-            privacyPolicyUrlValidator = PrivacyPolicyUrlValidator()
+            privacyPolicyUrlValidator = PrivacyPolicyUrlValidator(),
+            subjectNameParser = SubjectNameParser()
         )
     }
 
@@ -144,6 +145,27 @@ class ValidatePrivacyPolicyUseCaseImplTest {
     }
 
     @Test
+    fun `sibling OID 1_3_6_1_4_1_66559_1_2 in SIA throws PRIVACY_POLICY_URL_INVALID`() {
+        val siblingOidSia = buildSiaExtensionValue(
+            "1.3.6.1.4.1.66559.1.2",
+            "https://example.com/sibling"
+        )
+
+        val leafCertWrongOid = TestCertificateGenerator(
+            subject = "CN=Reader Leaf,O=Test Org,C=GB",
+            keyPair = keyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root CA"
+        ).leaf().withExtension(OID_SIA, false, siblingOidSia).build()
+
+        val failure = assertThrows(ReaderAuthenticationFailure::class.java) {
+            useCase.validate(VerifiedReaderRequest(sampleDocRequest, leafCertWrongOid))
+        }
+
+        assertEquals(ReaderAuthenticationReason.PRIVACY_POLICY_URL_INVALID, failure.reason)
+    }
+
+    @Test
     fun `invalid privacy policy URL violates conditions and throws PRIVACY_POLICY_URL_INVALID`(
         @TestParameter invalidUrl: String = namedTestValues(
             "HTTP scheme" to "http://example.gov.uk/privacy",
@@ -199,6 +221,31 @@ class ValidatePrivacyPolicyUseCaseImplTest {
 
         assertEquals(validUrl, authenticatedRequest.privacyPolicyUrl.toString())
         assertEquals(null, authenticatedRequest.readerOrganizationName)
+    }
+
+    @Test
+    fun `extracts organizationName when CN contains an escaped comma`() {
+        val validUrl = "https://example.gov.uk/privacy"
+        val expectedOrg = "GOV.UK, OneLogin Reader"
+        val siaBytes = buildSiaExtensionValue(SIA_PRIVACY_OID, validUrl)
+
+        val leafCertWithEscapedComma = TestCertificateGenerator(
+            subject = "CN=DVLA\\, " +
+                "Driver & Vehicle Licensing Agency,O=GOV.UK\\, OneLogin Reader,C=GB",
+            keyPair = keyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root CA"
+        ).leaf().withExtension(OID_SIA, false, siaBytes).build()
+
+        val authenticatedRequest = useCase.validate(
+            VerifiedReaderRequest(
+                sampleDocRequest,
+                leafCertWithEscapedComma
+            )
+        )
+
+        assertEquals(validUrl, authenticatedRequest.privacyPolicyUrl.toString())
+        assertEquals(expectedOrg, authenticatedRequest.readerOrganizationName)
     }
 
     private fun buildSiaExtensionValue(accessMethodOid: String, uriString: String): ByteArray {

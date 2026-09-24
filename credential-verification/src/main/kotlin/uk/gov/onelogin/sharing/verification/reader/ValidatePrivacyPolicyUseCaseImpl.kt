@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.verification.reader
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import java.security.cert.X509Certificate
+import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.PRIVACY_POLICY_URL_INVALID
 
 /**
@@ -13,10 +13,12 @@ import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.PR
  * of the verified Reader leaf certificate, extracts the unvalidated organizationName, and discards the certificate.
  */
 @Inject
+@ContributesBinding(CredentialVerificationScope::class)
 @ContributesBinding(AppScope::class)
 class ValidatePrivacyPolicyUseCaseImpl(
     private val siaExtensionParser: SiaExtensionParser,
-    private val privacyPolicyUrlValidator: PrivacyPolicyUrlValidator
+    private val privacyPolicyUrlValidator: PrivacyPolicyUrlValidator,
+    private val subjectNameParser: SubjectNameParser,
 ) : ValidatePrivacyPolicyUseCase {
 
     override fun validate(
@@ -32,20 +34,7 @@ class ValidatePrivacyPolicyUseCaseImpl(
         return AuthenticatedReaderRequest(
             docRequest = verifiedReaderRequest.docRequest,
             privacyPolicyUrl = validUri,
-            readerOrganizationName = extractOrganizationName(leafCert)
+            readerOrganizationName = subjectNameParser.extractOrganizationName(leafCert)
         )
-    }
-
-    private fun extractOrganizationName(cert: X509Certificate): String? = try {
-        val dn = cert.subjectX500Principal.getName("RFC2253")
-        dn.split(',').map { it.trim() }.firstNotNullOfOrNull { rdn ->
-            if (rdn.startsWith("O=") || rdn.startsWith("2.5.4.10=")) {
-                rdn.substring(rdn.indexOf('=') + 1).trim()
-            } else {
-                null
-            }
-        }
-    } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-        null
     }
 }

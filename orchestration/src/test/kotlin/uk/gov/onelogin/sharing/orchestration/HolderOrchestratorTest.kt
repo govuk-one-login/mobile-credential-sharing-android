@@ -4,7 +4,9 @@ import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import java.security.GeneralSecurityException
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -30,13 +32,13 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.sessionTimer.FakeSessionTimer
-import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequest
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
+import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
@@ -76,7 +78,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessi
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers.isSuccessful
 import uk.gov.onelogin.sharing.orchestration.session.FakeSessionFactory
-import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 import uk.gov.onelogin.sharing.orchestration.session.matchers.FakeSessionFactoryMatchers.currentSessionState
@@ -752,7 +753,7 @@ class HolderOrchestratorTest {
     @Test
     fun `sign failure sends status 20 termination and transitions to failed`() = runTest {
         val fakeConfirmConsentUseCase = FakeConfirmConsentUseCase(
-            exception = RuntimeException("Signing failed")
+            exception = DeviceSignatureException("Signing failed")
         )
         val fakeCryptoService = FakeHolderCryptoService()
         val peripheralTransport = FakePeripheralBluetoothTransport()
@@ -780,11 +781,329 @@ class HolderOrchestratorTest {
         orchestrator.confirmConsent()
         advanceUntilIdle()
 
+        assertEquals(Status.OK, fakeCryptoService.lastErrorDeviceResponseStatus)
         assertEquals(
             SessionDataStatus.SESSION_TERMINATION,
-            fakeCryptoService.lastBuildTerminationStatus
+            fakeCryptoService.lastErrorSessionDataStatus
         )
+        assertEquals(1, peripheralTransport.sendMessageCalls)
         assertThat(orchestrator.holderSessionState.value, isFailed())
+    }
+
+    @Test
+    fun `unexpected failure while sending device response terminates the session`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptException = GeneralSecurityException("exception")
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastErrorSessionDataStatus
+        )
+        assertEquals(1, peripheralTransport.sendMessageCalls)
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+    }
+
+    @Test
+    fun `signing occurs in AwaitingUserConsent then transitions to ProcessingResponse`() = runTest {
+        val consentGate = CompletableDeferred<Unit>()
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        consentGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
+    }
+
+    @Test
+    fun `double tap on confirm consent only submits a single device response`() = runTest {
+        val consentGate = CompletableDeferred<Unit>()
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            sessionFactory = sessionFactory,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // First tap: begins signing and suspends on the gate.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Second tap while the first submission is still in flight: must be ignored.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        // Release signing and let the (single) submission complete.
+        consentGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(1, peripheralTransport.sendMessageCalls)
+        assertEquals(1, fakeCryptoService.lastEncryptCounter?.toInt())
+        assertEquals(
+            2u,
+            sessionFactory.getCurrentSession().sessionContext.encryptCounter
+        )
+        assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
+    }
+
+    @Test
+    fun `reset during signing discards the stale device response`() = runTest {
+        val consentGate = CompletableDeferred<Unit>()
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // Begin signing; it suspends on the gate.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Reset replaces the session while signing is in flight.
+        orchestrator.reset()
+        advanceUntilIdle()
+
+        // Releasing the gate must not produce a device response on the new session.
+        consentGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(0, peripheralTransport.sendMessageCalls)
+        assertEquals(null, fakeCryptoService.lastEncryptCounter)
+    }
+
+    @Test
+    fun `deny during signing cancels signing and shares no credential`() = runTest {
+        val consentGate = CompletableDeferred<Unit>()
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // Begin signing; it suspends on the gate.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Deny while signing is in flight.
+        orchestrator.denyConsent()
+        advanceUntilIdle()
+
+        // Releasing the gate must not send response.
+        consentGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(null, fakeCryptoService.lastEncryptCounter)
+        assertEquals(
+            SessionDataStatus.SESSION_TERMINATION,
+            fakeCryptoService.lastErrorSessionDataStatus
+        )
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
+    }
+
+    @Test
+    fun `recoverable signing failure keeps session in AwaitingUserConsent`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(
+                exception = CredentialSigningException.Recoverable()
+            )
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+
+        assertEquals(0, peripheralTransport.sendMessageCalls)
+        assertEquals(null, fakeCryptoService.lastErrorSessionDataStatus)
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+    }
+
+    @Test
+    fun `signing can be retried after a recoverable failure`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        // First execute() fails recoverably, the retry succeeds.
+        val confirmConsentUseCase = FakeConfirmConsentUseCase(
+            exception = CredentialSigningException.Recoverable(),
+            failuresBeforeSuccess = 1
+        )
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = confirmConsentUseCase
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // First attempt: recoverable failure, stays on consent.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Retry from the same active session: succeeds and journey proceeds.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
+    }
+
+    @Test
+    fun `deny after a recoverable failure terminates the session`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(
+                exception = CredentialSigningException.Recoverable()
+            )
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Existing denial behaviour still applies from AwaitingUserConsent.
+        orchestrator.denyConsent()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
+    }
+
+    @Test
+    fun `cancel after a recoverable failure tears down the session`() = runTest {
+        val fakeCryptoService = FakeHolderCryptoService()
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(
+                exception = CredentialSigningException.Recoverable()
+            )
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Existing cancellation behaviour still applies from AwaitingUserConsent.
+        orchestrator.cancel()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isCancelled())
     }
 
     @Test
@@ -1009,16 +1328,9 @@ class HolderOrchestratorTest {
 
     @Test
     fun `sequencing violation in processingResponse sends status 20 and terminates`() = runTest {
-        val consentGate = kotlinx.coroutines.CompletableDeferred<Unit>()
-        with(
-            TerminationTestFixture(
-                confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
-            )
-        ) {
-            startAndDeliver()
-            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
-
-            orchestrator.confirmConsent()
+        initialStates[0] = HolderSessionState.ProcessingResponse
+        with(TerminationTestFixture()) {
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
             advanceUntilIdle()
             assertThat(orchestrator.holderSessionState.value, isProcessingResponse())
 
@@ -1314,7 +1626,7 @@ class HolderOrchestratorTest {
             sessionFactory = sessionFactory
         )
 
-        val messageSentDeferred = kotlinx.coroutines.CompletableDeferred<Boolean>()
+        val messageSentDeferred = CompletableDeferred<Boolean>()
         transport.sendMessageResultDeferred = messageSentDeferred
 
         orchestrator.holderSessionState.test {
@@ -1397,30 +1709,27 @@ class HolderOrchestratorTest {
                 holderCryptoService = FakeHolderCryptoService()
             )
 
-            orchestrator.holderSessionState.test {
-                awaitItem()
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
 
-                orchestrator.start()
-                skipItems(2)
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+            advanceUntilIdle()
 
-                transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-                awaitItem()
+            transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+            advanceUntilIdle()
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-                transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
-                awaitItem()
+            val resetCallsBeforeOutbound = sessionTimer.resetCalls
 
-                val resetCallsBeforeOutbound = sessionTimer.resetCalls
+            orchestrator.confirmConsent()
+            advanceUntilIdle()
 
-                orchestrator.confirmConsent()
-
-                awaitItem()
-                awaitItem()
-
-                assertEquals(
-                    resetCallsBeforeOutbound + 1,
-                    sessionTimer.resetCalls
-                )
-            }
+            assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
+            assertEquals(
+                resetCallsBeforeOutbound + 1,
+                sessionTimer.resetCalls
+            )
         }
 
     @Test

@@ -66,6 +66,21 @@ class SiaExtensionParserTest {
         assertNull(parser.extractPrivacyPolicyUrl(cert))
     }
 
+    @Test
+    fun `returns null when SIA extension contains sibling OID 1_3_6_1_4_1_66559_1_2`() {
+        val siblingOidSia =
+            buildSiaExtensionValue("1.3.6.1.4.1.66559.1.2", "https://example.com/sibling")
+
+        val cert = TestCertificateGenerator(
+            subject = "CN=Reader Leaf,O=Test Org,C=GB",
+            keyPair = keyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root CA"
+        ).leaf().withExtension(OID_SIA, false, siblingOidSia).build()
+
+        assertNull(parser.extractPrivacyPolicyUrl(cert))
+    }
+
     private fun buildSiaExtensionValue(accessMethodOid: String, uriString: String): ByteArray {
         val accessMethod = ASN1ObjectIdentifier(accessMethodOid)
         val location = GeneralName(GeneralName.uniformResourceIdentifier, uriString)
