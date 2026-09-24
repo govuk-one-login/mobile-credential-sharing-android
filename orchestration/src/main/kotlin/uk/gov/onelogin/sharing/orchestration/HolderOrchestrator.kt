@@ -506,6 +506,7 @@ class HolderOrchestrator(
         handleConnectionLoss(isGattEnd = true)
     }
 
+    @Suppress("LongMethod", "NestedBlockDepth")
     private fun handleSessionEstablishment(message: ByteArray) {
         val keypair = validateSessionEstablishmentPreconditions() ?: return
 
@@ -543,6 +544,13 @@ class HolderOrchestrator(
                             deviceRequest.docRequests.first()
                         )
                     )
+                }
+
+                sessionFlow.value.sessionContext.authenticatedReaderRequest?.let {
+                    logger.debug(logTag, "privacy policy = ${it.privacyPolicyUrl}")
+                    it.readerOrganizationName?.let { orgName ->
+                        logger.debug(logTag, "organisation name = $orgName")
+                    }
                 }
             } else {
                 // Non-empty list: the consumer supplied trusted Reader CA roots via
