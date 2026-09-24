@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.verification.reader
 
 import android.net.Uri
-import dev.zacsweers.metro.Inject
 import androidx.core.net.toUri
+import dev.zacsweers.metro.Inject
 
 private const val MAX_URL_LENGTH = 2048
 private const val SCHEME_HTTPS = "https"
