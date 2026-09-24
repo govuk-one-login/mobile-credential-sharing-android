@@ -4,16 +4,12 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import java.security.cert.X509Certificate
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
-import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.MALFORMED_DEVICE_REQUEST
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
 /**
  * Production implementation of [ReaderAuthentication].
  *
- * Orchestrates candidate selection across [DocRequest] candidates in a [DeviceRequestDto],
+ * Orchestrates candidate selection across candidates in a [DeviceRequest],
  * executing R4 cryptographic verification and R5 privacy policy URL validation.
  */
 @Inject
@@ -21,44 +17,21 @@ import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.MA
 class ReaderAuthenticationImpl(
     private val verifyReaderAuthUseCase: VerifyReaderAuthUseCase,
     private val validatePrivacyPolicyUseCase: ValidatePrivacyPolicyUseCase,
-    private val trustedReaderCertificates: List<X509Certificate>,
 ) : ReaderAuthentication {
 
     override fun authenticateDeviceRequest(
-        decryptedDeviceRequestBytes: ByteArray,
+        deviceRequest: DeviceRequest,
         untaggedSessionTranscriptBytes: ByteArray,
-        supportedDocumentTypes: List<String>
+        trustedReaderCertificates: List<X509Certificate>,
     ): ReaderAuthenticationOutcome {
-        val deviceRequestDto = try {
-            CborMapper.default.readValue(
-                decryptedDeviceRequestBytes,
-                DeviceRequestDto::class.java,
-            )
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            throw ReaderAuthenticationFailure(MALFORMED_DEVICE_REQUEST, e)
-        }
-
         var lastFailure: ReaderAuthenticationFailure? = null
 
-        for (docReqDto in deviceRequestDto.docRequest) {
-            val candidateDocRequest = DocRequest(
-                itemsRequest = ItemsRequest(
-                    docType = docReqDto.itemsRequest.docType,
-                    nameSpaces = docReqDto.itemsRequest.nameSpaces,
-                ),
-                readerAuth = docReqDto.readerAuth,
-                itemsRequestBytes = docReqDto.itemsRequestBytes,
-            )
-
-            if (candidateDocRequest.itemsRequest.docType !in supportedDocumentTypes) {
-                continue
-            }
-
+        for (candidateDocRequest in deviceRequest.docRequests) {
             try {
                 val verifiedRequest = verifyReaderAuthUseCase.verify(
                     candidateDocRequest = candidateDocRequest,
                     untaggedSessionTranscriptBytes = untaggedSessionTranscriptBytes,
-                    trustedReaderCertificates = this.trustedReaderCertificates,
+                    trustedReaderCertificates = trustedReaderCertificates,
                 )
 
                 val authenticatedRequest = validatePrivacyPolicyUseCase.validate(verifiedRequest)

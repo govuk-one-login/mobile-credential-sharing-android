@@ -10,12 +10,9 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequestDto
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequestDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDto
 
 class ReaderAuthenticationImplTest {
 
@@ -27,47 +24,24 @@ class ReaderAuthenticationImplTest {
     private val sampleTranscript = byteArrayOf(0x01, 0x02)
     private val docTypeMdl = "org.iso.18013.5.1.mDL"
     private val docTypeAamva = "org.iso.18013.5.1.aamva"
-    private val supportedTypes = listOf(docTypeMdl, docTypeAamva)
     private val sampleNameSpaces = mapOf("org.iso.18013.5.1" to mapOf("family_name" to false))
 
     @Before
     fun setUp() {
         readerAuthentication = ReaderAuthenticationImpl(
             verifyReaderAuthUseCase = verifyReaderAuthUseCase,
-            validatePrivacyPolicyUseCase = validatePrivacyPolicyUseCase,
-            trustedReaderCertificates = listOf(mockCert),
+            validatePrivacyPolicyUseCase = validatePrivacyPolicyUseCase
         )
     }
 
     @Test
-    fun `AC1 - invalid deviceRequest CBOR bytes throws MALFORMED_DEVICE_REQUEST`() {
-        val invalidBytes = byteArrayOf(0xFF.toByte(), 0xFF.toByte())
-
-        val failure = assertThrows(ReaderAuthenticationFailure::class.java) {
-            readerAuthentication.authenticateDeviceRequest(
-                decryptedDeviceRequestBytes = invalidBytes,
-                untaggedSessionTranscriptBytes = sampleTranscript,
-                supportedDocumentTypes = supportedTypes
-            )
-        }
-
-        assertEquals(ReaderAuthenticationReason.MALFORMED_DEVICE_REQUEST, failure.reason)
-    }
-
-    @Test
-    fun `AC2 - request with unsupported docType returns Unfulfillable without calling R4 or R5`() {
-        val unsupportedDto = DeviceRequestDto(
-            version = "1.0",
-            docRequest = listOf(
-                DocRequestDto(itemsRequest = ItemsRequestDto(docType = "unsupported.doc.type", nameSpaces = sampleNameSpaces))
-            )
-        )
-        val bytes = CborMapper.default.writeValueAsBytes(unsupportedDto)
+    fun `empty docRequests returns Unfulfillable`() {
+        val emptyDeviceRequest = DeviceRequest(version = "1.0", docRequests = emptyList())
 
         val outcome = readerAuthentication.authenticateDeviceRequest(
-            decryptedDeviceRequestBytes = bytes,
+            deviceRequest = emptyDeviceRequest,
             untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes
+            trustedReaderCertificates = listOf(mockCert),
         )
 
         assertTrue(outcome is ReaderAuthenticationOutcome.Unfulfillable)
@@ -76,50 +50,43 @@ class ReaderAuthenticationImplTest {
     }
 
     @Test
-    fun `AC3 - selects first candidate that passes both R4 and R5`() {
+    fun `selects first candidate that passes both R4 and R5`() {
         val mockUri: Uri = mockk()
-        val docReqDtoA = DocRequestDto(itemsRequest = ItemsRequestDto(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
-        val docReqDtoB = DocRequestDto(itemsRequest = ItemsRequestDto(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
-        val docReqDtoC = DocRequestDto(itemsRequest = ItemsRequestDto(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
-        val docReqDtoD = DocRequestDto(itemsRequest = ItemsRequestDto(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
+        val docReqA = DocRequest(itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
+        val docReqB = DocRequest(itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
+        val docReqC = DocRequest(itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
+        val docReqD = DocRequest(itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
 
-        val dto = DeviceRequestDto(
-            version = "1.0",
-            docRequest = listOf(docReqDtoA, docReqDtoB, docReqDtoC, docReqDtoD)
-        )
-        val bytes = CborMapper.default.writeValueAsBytes(dto)
+        val deviceRequest = DeviceRequest(version = "1.0", docRequests = listOf(docReqA, docReqB, docReqC, docReqD))
 
-        val sampleMdlDocRequest = DocRequest(itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
-        val sampleAamvaDocRequest = DocRequest(itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
+        val verifiedReqB = VerifiedReaderRequest(docReqB, mockCert)
+        val verifiedReqC = VerifiedReaderRequest(docReqC, mockCert)
 
-        val verifiedReqB = VerifiedReaderRequest(sampleMdlDocRequest, mockCert)
-        val verifiedReqC = VerifiedReaderRequest(sampleAamvaDocRequest, mockCert)
-
-        // Candidate A (mDL) fails R4, Candidate B (mDL) passes R4, Candidate C (aamva) passes R4
+        // Candidate A fails R4, Candidate B passes R4, Candidate C passes R4
         every {
             verifyReaderAuthUseCase.verify(any(), any(), any())
         } throws ReaderAuthenticationFailure(ReaderAuthenticationReason.INVALID_READER_SIGNATURE) andThen
             verifiedReqB andThen
             verifiedReqC
 
-        // Candidate B (mDL) fails R5
+        // Candidate B fails R5
         every {
             validatePrivacyPolicyUseCase.validate(verifiedReqB)
         } throws ReaderAuthenticationFailure(ReaderAuthenticationReason.PRIVACY_POLICY_URL_INVALID)
 
-        // Candidate C (aamva) passes R5
+        // Candidate C passes R5
         every {
             validatePrivacyPolicyUseCase.validate(verifiedReqC)
         } returns AuthenticatedReaderRequest(
-            docRequest = sampleAamvaDocRequest,
+            docRequest = docReqC,
             privacyPolicyUrl = mockUri,
             readerOrganizationName = "GOV.UK OneLogin"
         )
 
         val outcome = readerAuthentication.authenticateDeviceRequest(
-            decryptedDeviceRequestBytes = bytes,
+            deviceRequest = deviceRequest,
             untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes
+            trustedReaderCertificates = listOf(mockCert),
         )
 
         assertTrue(outcome is ReaderAuthenticationOutcome.Success)
@@ -132,12 +99,11 @@ class ReaderAuthenticationImplTest {
     }
 
     @Test
-    fun `AC4 - all candidates fail throws final candidate failure`() {
-        val docReqDtoA = DocRequestDto(itemsRequest = ItemsRequestDto(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
-        val docReqDtoB = DocRequestDto(itemsRequest = ItemsRequestDto(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
+    fun `all candidates fail throws final candidate failure`() {
+        val docReqA = DocRequest(itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
+        val docReqB = DocRequest(itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
 
-        val dto = DeviceRequestDto(version = "1.0", docRequest = listOf(docReqDtoA, docReqDtoB))
-        val bytes = CborMapper.default.writeValueAsBytes(dto)
+        val deviceRequest = DeviceRequest(version = "1.0", docRequests = listOf(docReqA, docReqB))
 
         // Candidate A fails R4 with INVALID_READER_SIGNATURE
         every {
@@ -156,9 +122,9 @@ class ReaderAuthenticationImplTest {
 
         val failure = assertThrows(ReaderAuthenticationFailure::class.java) {
             readerAuthentication.authenticateDeviceRequest(
-                decryptedDeviceRequestBytes = bytes,
+                deviceRequest = deviceRequest,
                 untaggedSessionTranscriptBytes = sampleTranscript,
-                supportedDocumentTypes = supportedTypes
+                trustedReaderCertificates = listOf(mockCert),
             )
         }
 
