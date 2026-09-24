@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.verification.reader
 
 import android.net.Uri
 import dev.zacsweers.metro.Inject
+import androidx.core.net.toUri
 
 private const val MAX_URL_LENGTH = 2048
 private const val SCHEME_HTTPS = "https"
@@ -18,7 +19,7 @@ class PrivacyPolicyUrlValidator {
         if (!isCompliant) return null
 
         return try {
-            Uri.parse(rawUrl)
+            rawUrl.toUri()
         } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
             null
         }
