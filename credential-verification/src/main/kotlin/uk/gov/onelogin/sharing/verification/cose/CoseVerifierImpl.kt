@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verification.cose
 
-import dev.zacsweers.metro.Inject
 import java.io.ByteArrayInputStream
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -12,6 +11,10 @@ import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseSign1Decode
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateChainValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.profile.CertificateProfileValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.profile.CertificatePurpose
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatureVerifier
 
 /**
@@ -19,7 +22,9 @@ import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatur
  * verification pipeline.
  */
 @Inject
-internal class CoseVerifierImpl(
+@ContributesBinding(AppScope::class)
+@ContributesBinding(CredentialVerificationScope::class)
+class CoseVerifierImpl internal constructor(
     private val decoder: CoseSign1Decoder,
     private val headerValidator: CertificateHeaderValidator,
     private val pathValidator: CertificateChainValidator,

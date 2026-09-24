@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.verification.cose.internal.path
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import java.security.cert.CertPathValidator
 import java.security.cert.CertificateFactory
@@ -10,6 +11,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UntrustedCertificate
 
+@ContributesBinding(AppScope::class)
 @ContributesBinding(CredentialVerificationScope::class)
 class CertificateChainValidatorImpl internal constructor() : CertificateChainValidator {
 

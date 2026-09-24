@@ -11,6 +11,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import io.mockk.every
+import io.mockk.mockk
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
@@ -87,6 +89,9 @@ import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationOutcome
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -113,6 +118,18 @@ class HolderOrchestratorTest {
     }
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
+
+    private val fakeReaderAuthentication: ReaderAuthentication = mockk {
+        every {
+            authenticateDeviceRequest(any(), any(), any(), any())
+        } returns ReaderAuthenticationOutcome.Success(
+            AuthenticatedReaderRequest(
+                docRequest = mockk(relaxed = true),
+                privacyPolicyUrl = mockk(relaxed = true),
+                readerOrganizationName = "GOV.UK OneLogin Test"
+            )
+        )
+    }
 
     private val sessionTimer = FakeSessionTimer()
     private val fakeCredentialRequestHandler = FakeCredentialRequestHandler().apply {
@@ -145,7 +162,8 @@ class HolderOrchestratorTest {
         credentialRequestHandler: CredentialRequestHandler = fakeCredentialRequestHandler,
         confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
         holderSessionTerminator: HolderSessionTerminator = FakeHolderSessionTerminator(),
-        inboundMessageClassifier: InboundMessageClassifier = FakeInboundMessageClassifier()
+        inboundMessageClassifier: InboundMessageClassifier = FakeInboundMessageClassifier(),
+        readerAuthentication: ReaderAuthentication = fakeReaderAuthentication,
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -158,7 +176,8 @@ class HolderOrchestratorTest {
         confirmConsentUseCase = confirmConsentUseCase,
         holderSessionTerminator = holderSessionTerminator,
         inboundMessageClassifier = inboundMessageClassifier,
-        sessionTimer = sessionTimer
+        sessionTimer = sessionTimer,
+        readerAuthentication = readerAuthentication
     )
 
     @Test

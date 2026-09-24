@@ -1,9 +1,9 @@
 package uk.gov.onelogin.sharing.verification.reader
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import java.security.cert.X509Certificate
-import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.PRIVACY_POLICY_URL_INVALID
 
 /**
@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.PR
  * of the verified Reader leaf certificate, extracts the unvalidated organizationName, and discards the certificate.
  */
 @Inject
-@ContributesBinding(CredentialVerificationScope::class)
+@ContributesBinding(AppScope::class)
 class ValidatePrivacyPolicyUseCaseImpl(
     private val siaExtensionParser: SiaExtensionParser,
     private val privacyPolicyUrlValidator: PrivacyPolicyUrlValidator

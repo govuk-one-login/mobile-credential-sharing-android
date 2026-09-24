@@ -62,6 +62,10 @@ import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationOutcome
+
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
 @SingleIn(AppScope::class)
@@ -78,7 +82,8 @@ class HolderOrchestrator(
     private val credentialRequestHandler: CredentialRequestHandler,
     private val holderSessionTerminator: HolderSessionTerminator,
     private val inboundMessageClassifier: InboundMessageClassifier,
-    private val sessionTimer: SessionTimer
+    private val sessionTimer: SessionTimer,
+    private val readerAuthentication: ReaderAuthentication,
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
@@ -441,9 +446,46 @@ class HolderOrchestrator(
                 return
             }
 
+            val transcript = checkNotNull(currentContext.sessionTranscriptBytes) {
+                "Missing session transcript"
+            }
+            val outcome = readerAuthentication.authenticateDeviceRequest(
+                decryptedDeviceRequestBytes = message,
+                untaggedSessionTranscriptBytes = transcript,
+                supportedDocumentTypes = listOf(DocumentType.Mdl.NAMESPACE),
+                trustedReaderCertificates = emptyList(),
+            )
+
+            when (outcome) {
+                is ReaderAuthenticationOutcome.Success -> {
+                    val authReq = outcome.authenticatedReaderRequest
+                    logger.debug(
+                        logTag,
+                        "Reader Authenticated: Org = ${authReq.readerOrganizationName}, Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                    )
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(authenticatedReaderRequest = authReq)
+                    }
+                }
+
+                is ReaderAuthenticationOutcome.Unfulfillable -> {
+                    logger.error(logTag, "Reader Authentication UNFULFILLABLE")
+                    appCoroutineScope.launch {
+                        handleNoMatchTermination(
+                            CredentialRequestException("Unfulfillable request")
+                        )
+                    }
+                    return
+                }
+            }
+
             val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
             appCoroutineScope.launch {
                 requestAndValidateCredential(requestedDocType, deviceRequest)
+            }
+        } catch (_: ReaderAuthenticationFailure) {
+            appCoroutineScope.launch {
+                handlePolicyViolation()
             }
         } catch (e: DeviceRequestValidationException) {
             appCoroutineScope.launch {

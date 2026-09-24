@@ -1,11 +1,11 @@
 package uk.gov.onelogin.sharing.verification.reader
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ReaderAuthenticationDto
-import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationRequest
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationResult
@@ -23,7 +23,7 @@ import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.UN
  * and preserved [DocRequest.itemsRequestBytes], and executes certificate-backed COSE_Sign1 signature verification.
  */
 @Inject
-@ContributesBinding(CredentialVerificationScope::class)
+@ContributesBinding(AppScope::class)
 class VerifyReaderAuthUseCaseImpl(private val coseVerifier: CoseVerifier) :
     VerifyReaderAuthUseCase {
 
