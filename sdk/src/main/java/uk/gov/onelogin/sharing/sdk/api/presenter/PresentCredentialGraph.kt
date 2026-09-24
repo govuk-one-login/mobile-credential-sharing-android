@@ -24,4 +24,6 @@ interface PresentCredentialGraph {
     fun holderOrchestrator(): Orchestrator.Holder
 
     fun credentialProvider(): CredentialProvider
+
+    fun trustedReaderCertificates(): List<X509Certificate>
 }

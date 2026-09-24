@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
 import java.util.UUID
 import uk.gov.logging.api.v2.Logger
@@ -22,8 +21,7 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
 class HolderSessionFactory(
     private val logger: Logger,
     private val sessionSecurity: SessionSecurity,
-    private val engagementGenerator: Engagement,
-    private val trustedReaderCertificates: List<X509Certificate> = emptyList()
+    private val engagementGenerator: Engagement
 ) : SessionFactory<HolderSession> {
     override fun create(): HolderSession {
         val uuid = UUID.randomUUID()
@@ -51,8 +49,7 @@ class HolderSessionFactory(
             sessionUuid = uuid,
             keyPair = keyPair,
             engagement = engagement,
-            qrCode = qrCode,
-            trustedReaderCertificates = trustedReaderCertificates
+            qrCode = qrCode
         )
 
         return HolderSessionImpl(

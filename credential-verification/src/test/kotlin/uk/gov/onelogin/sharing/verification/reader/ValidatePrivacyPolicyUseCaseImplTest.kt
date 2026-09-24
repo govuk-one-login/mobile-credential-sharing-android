@@ -9,7 +9,6 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import java.security.KeyPairGenerator
-import java.security.cert.X509Certificate
 import java.security.spec.ECGenParameterSpec
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
 import org.bouncycastle.asn1.DERSequence
@@ -67,7 +66,10 @@ class ValidatePrivacyPolicyUseCaseImplTest {
             every { mockUri.isAbsolute } returns urlString.contains("://")
             mockUri
         }
-        useCase = ValidatePrivacyPolicyUseCaseImpl()
+        useCase = ValidatePrivacyPolicyUseCaseImpl(
+            siaExtensionParser = SiaExtensionParser(),
+            privacyPolicyUrlValidator = PrivacyPolicyUrlValidator()
+        )
     }
 
     @After
