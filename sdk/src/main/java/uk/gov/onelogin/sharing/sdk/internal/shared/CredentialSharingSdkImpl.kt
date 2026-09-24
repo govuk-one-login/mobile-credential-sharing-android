@@ -58,7 +58,7 @@ class CredentialSharingSdkImpl(
 
         val presenterGraphFactory = createGraphFactory<PresentCredentialGraph.Factory>()
         val orchestrator = presenterGraphFactory
-            .create(appGraph, credentialProvider)
+            .create(appGraph, credentialProvider, trustedReaderCertificates)
             .holderOrchestrator()
 
         return CredentialPresenterImpl(

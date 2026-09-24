@@ -4,6 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
 import dev.zacsweers.metro.Provides
+import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingAppGraph
@@ -15,7 +16,8 @@ interface PresentCredentialGraph {
     fun interface Factory {
         fun create(
             @Includes appGraph: CredentialSharingAppGraph,
-            @Provides credentialProvider: CredentialProvider
+            @Provides credentialProvider: CredentialProvider,
+            @Provides trustedReaderCertificates: List<X509Certificate>
         ): PresentCredentialGraph
     }
 

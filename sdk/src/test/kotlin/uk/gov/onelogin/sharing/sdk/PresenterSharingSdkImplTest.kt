@@ -22,7 +22,13 @@ class PresenterSharingSdkImplTest {
     fun `holder returns CredentialHolder with expected dependencies`() {
         val credentialProvider = FakeCredentialProvider()
 
-        every { presenterGraphFactory.create(appGraph, credentialProvider) } returns holderGraph
+        every {
+            presenterGraphFactory.create(
+                appGraph,
+                credentialProvider,
+                listOf()
+            )
+        } returns holderGraph
         every { holderGraph.holderOrchestrator() } returns orchestrator
 
         val sdk = PresentCredentialSdkImpl(

@@ -43,7 +43,8 @@ fun createTestHolderGraph(
     credentialProvider: CredentialProvider = FakeCredentialProvider()
 ): PresentCredentialGraph = createGraphFactory<PresentCredentialGraph.Factory>().create(
     appGraph = appGraph,
-    credentialProvider = credentialProvider
+    credentialProvider = credentialProvider,
+    trustedReaderCertificates = listOf()
 )
 
 fun createTestVerifierGraph(
