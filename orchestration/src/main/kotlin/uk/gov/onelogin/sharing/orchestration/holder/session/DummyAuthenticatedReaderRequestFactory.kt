@@ -11,7 +11,9 @@ import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
 /**
  * Temporary implementation that returns placeholder privacy-policy and organisation values.
  *
- * Used on the deprecated path
+ * Used on the deprecated path.
+ *
+ * To be removed in: https://govukverify.atlassian.net/browse/DCMAW-23451 (EX2)
  */
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<AuthenticatedReaderRequestFactory>())

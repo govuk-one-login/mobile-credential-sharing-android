@@ -532,6 +532,7 @@ class HolderOrchestrator(
                 it.copy(decryptCounter = it.decryptCounter + 1u)
             }
 
+            // To be removed in: https://govukverify.atlassian.net/browse/DCMAW-23451 (EX2)
             if (trustedReaderCertificates.isEmpty()) {
                 // Empty list: only reachable via the deprecated presentCredentialSdk path,
                 // which hardcodes emptyList(). Reader authentication is skipped to preserve

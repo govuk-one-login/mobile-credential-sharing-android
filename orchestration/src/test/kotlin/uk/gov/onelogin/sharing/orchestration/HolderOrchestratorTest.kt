@@ -570,6 +570,9 @@ class HolderOrchestratorTest {
         assertEquals(2u, currentSession.sessionContext.decryptCounter)
     }
 
+    /**
+     * To be removed in: https://govukverify.atlassian.net/browse/DCMAW-23451 (EX2)
+     */
     @Test
     fun `populates dummy authenticatedReaderRequest when trusted reader cert list is empty`() =
         runTest {

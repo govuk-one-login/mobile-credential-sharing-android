@@ -12,6 +12,8 @@ import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
  * [android.net.Uri] is the throwing Android stub in plain JVM unit tests, so the default
  * [privacyPolicyUrl] is a mock whose `toString()` returns [DEFAULT_PRIVACY_POLICY_URL]. This keeps
  * the Uri handling contained in the fake, out of both production code and the test classes.
+ *
+ * To be removed in: https://govukverify.atlassian.net/browse/DCMAW-23451 (EX2)
  */
 class FakeAuthenticatedReaderRequestFactory(
     private val privacyPolicyUrl: Uri = mockk {
