@@ -27,8 +27,7 @@ class ReaderAuthenticationImpl(
     override fun authenticateDeviceRequest(
         decryptedDeviceRequestBytes: ByteArray,
         untaggedSessionTranscriptBytes: ByteArray,
-        supportedDocumentTypes: List<String>,
-        trustedReaderCertificates: List<X509Certificate>,
+        supportedDocumentTypes: List<String>
     ): ReaderAuthenticationOutcome {
         val deviceRequestDto = try {
             CborMapper.default.readValue(
@@ -56,11 +55,10 @@ class ReaderAuthenticationImpl(
             }
 
             try {
-                val activeTrust = this.trustedReaderCertificates.ifEmpty { trustedReaderCertificates }
                 val verifiedRequest = verifyReaderAuthUseCase.verify(
                     candidateDocRequest = candidateDocRequest,
                     untaggedSessionTranscriptBytes = untaggedSessionTranscriptBytes,
-                    trustedReaderCertificates = activeTrust,
+                    trustedReaderCertificates = this.trustedReaderCertificates,
                 )
 
                 val authenticatedRequest = validatePrivacyPolicyUseCase.validate(verifiedRequest)

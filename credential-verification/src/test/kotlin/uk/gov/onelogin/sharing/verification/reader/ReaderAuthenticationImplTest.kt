@@ -47,8 +47,7 @@ class ReaderAuthenticationImplTest {
             readerAuthentication.authenticateDeviceRequest(
                 decryptedDeviceRequestBytes = invalidBytes,
                 untaggedSessionTranscriptBytes = sampleTranscript,
-                supportedDocumentTypes = supportedTypes,
-                trustedReaderCertificates = listOf(mockCert),
+                supportedDocumentTypes = supportedTypes
             )
         }
 
@@ -68,8 +67,7 @@ class ReaderAuthenticationImplTest {
         val outcome = readerAuthentication.authenticateDeviceRequest(
             decryptedDeviceRequestBytes = bytes,
             untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes,
-            trustedReaderCertificates = listOf(mockCert),
+            supportedDocumentTypes = supportedTypes
         )
 
         assertTrue(outcome is ReaderAuthenticationOutcome.Unfulfillable)
@@ -121,8 +119,7 @@ class ReaderAuthenticationImplTest {
         val outcome = readerAuthentication.authenticateDeviceRequest(
             decryptedDeviceRequestBytes = bytes,
             untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes,
-            trustedReaderCertificates = listOf(mockCert),
+            supportedDocumentTypes = supportedTypes
         )
 
         assertTrue(outcome is ReaderAuthenticationOutcome.Success)
@@ -161,8 +158,7 @@ class ReaderAuthenticationImplTest {
             readerAuthentication.authenticateDeviceRequest(
                 decryptedDeviceRequestBytes = bytes,
                 untaggedSessionTranscriptBytes = sampleTranscript,
-                supportedDocumentTypes = supportedTypes,
-                trustedReaderCertificates = listOf(mockCert),
+                supportedDocumentTypes = supportedTypes
             )
         }
 

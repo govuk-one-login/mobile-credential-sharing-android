@@ -1,7 +1,9 @@
 package uk.gov.onelogin.sharing.verification.reader
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ReaderAuthenticationDto
 import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
@@ -14,7 +16,6 @@ import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.MA
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.READER_AUTH_MISSING
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.UNSUPPORTED_READER_AUTH_ALGORITHM
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.UNTRUSTED_READER_CERTIFICATE
-import java.security.cert.X509Certificate
 
 /**
  * Production implementation of [VerifyReaderAuthUseCase].
@@ -23,6 +24,7 @@ import java.security.cert.X509Certificate
  * and preserved [DocRequest.itemsRequestBytes], and executes certificate-backed COSE_Sign1 signature verification.
  */
 @Inject
+@ContributesBinding(AppScope::class)
 @ContributesBinding(CredentialVerificationScope::class)
 class VerifyReaderAuthUseCaseImpl(private val coseVerifier: CoseVerifier) :
     VerifyReaderAuthUseCase {

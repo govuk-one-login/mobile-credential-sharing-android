@@ -546,8 +546,7 @@ class HolderOrchestrator(
             val outcome = readerAuthentication.authenticateDeviceRequest(
                 decryptedDeviceRequestBytes = message,
                 untaggedSessionTranscriptBytes = transcript,
-                supportedDocumentTypes = listOf(DocumentType.Mdl.NAMESPACE),
-                trustedReaderCertificates = emptyList(),
+                supportedDocumentTypes = listOf(DocumentType.Mdl.NAMESPACE)
             )
 
             when (outcome) {
