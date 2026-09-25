@@ -5,6 +5,10 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import java.security.cert.X509Certificate
+import java.security.interfaces.ECPrivateKey
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,10 +71,6 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationOutcome
-import java.security.cert.X509Certificate
-import java.security.interfaces.ECPrivateKey
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -574,8 +574,8 @@ class HolderOrchestrator(
                             logger.debug(
                                 logTag,
                                 "Reader Authenticated: Org =" +
-                                        " ${authReq.readerOrganizationName}, Privacy Policy URL = " +
-                                        "${authReq.privacyPolicyUrl}"
+                                    " ${authReq.readerOrganizationName}, Privacy Policy URL = " +
+                                    "${authReq.privacyPolicyUrl}"
                             )
                             sessionFlow.value.updateSessionContext {
                                 it.copy(authenticatedReaderRequest = authReq)
@@ -603,8 +603,6 @@ class HolderOrchestrator(
                 }
                 return
             }
-
-
 
             val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
             appCoroutineScope.launch {
