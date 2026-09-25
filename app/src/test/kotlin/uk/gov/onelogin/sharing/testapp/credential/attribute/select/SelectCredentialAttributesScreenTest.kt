@@ -47,7 +47,9 @@ class SelectCredentialAttributesScreenTest {
         composeTestRule.run {
             setContent {
                 SelectCredentialAttributesScreen(
-                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup,
+                    onSelectAttributeGroup = {
+                        composeTestRule.updateConfirmedAttributeGroup(it.attributeGroup)
+                    },
                     viewModel = viewModel
                 )
             }
@@ -66,7 +68,9 @@ class SelectCredentialAttributesScreenTest {
         composeTestRule.run {
             setContent {
                 SelectCredentialAttributesScreen(
-                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup,
+                    onSelectAttributeGroup = {
+                        composeTestRule.updateConfirmedAttributeGroup(it.attributeGroup)
+                    },
                     viewModel = viewModel
                 )
             }
@@ -84,7 +88,9 @@ class SelectCredentialAttributesScreenTest {
         composeTestRule.run {
             setContent {
                 SelectCredentialAttributesScreen(
-                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup,
+                    onSelectAttributeGroup = {
+                        composeTestRule.updateConfirmedAttributeGroup(it.attributeGroup)
+                    },
                     viewModel = viewModel
                 )
             }

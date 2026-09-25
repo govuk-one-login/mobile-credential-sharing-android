@@ -36,6 +36,7 @@ import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
@@ -562,7 +563,10 @@ class HolderOrchestrator(
                 logger.debug(logTag, "Cert list is not empty")
             }
 
-            if (!deviceRequestContainsPortrait(deviceRequest)) {
+            val selectedDocRequest = currentContext.authenticatedReaderRequest?.docRequest
+                ?: deviceRequest.docRequests.first()
+
+            if (!docRequestContainsPortrait(selectedDocRequest)) {
                 logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
                 appCoroutineScope.launch {
                     handlePolicyViolation()
@@ -570,9 +574,14 @@ class HolderOrchestrator(
                 return
             }
 
-            val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
+            val selectedDeviceRequest = DeviceRequest(
+                version = deviceRequest.version,
+                docRequests = listOf(selectedDocRequest)
+            )
+
+            val requestedDocType = selectedDocRequest.itemsRequest.docType
             appCoroutineScope.launch {
-                requestAndValidateCredential(requestedDocType, deviceRequest)
+                requestAndValidateCredential(requestedDocType, selectedDeviceRequest)
             }
         } catch (e: ReaderAuthenticationFailure) {
             appCoroutineScope.launch {
@@ -911,12 +920,10 @@ class HolderOrchestrator(
         }
     }
 
-    private fun deviceRequestContainsPortrait(deviceRequest: DeviceRequest): Boolean =
-        deviceRequest.docRequests.any { docRequest ->
-            docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
-                namespace == DocumentType.Mdl.NAMESPACE &&
-                    elements.containsKey(MdlAttribute.Portrait.value)
-            }
+    private fun docRequestContainsPortrait(docRequest: DocRequest): Boolean =
+        docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
+            namespace == DocumentType.Mdl.NAMESPACE &&
+                elements.containsKey(MdlAttribute.Portrait.value)
         }
 
     private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {

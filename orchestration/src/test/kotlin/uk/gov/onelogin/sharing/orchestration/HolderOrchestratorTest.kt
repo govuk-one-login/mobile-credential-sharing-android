@@ -45,6 +45,8 @@ import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -1921,8 +1923,14 @@ class HolderOrchestratorTest {
         runTest {
             val mockUri: Uri = mockk()
             val expectedOrgName = "GOV.UK OneLogin Reader Org"
+            val validMdlDocRequest = DocRequest(
+                itemsRequest = ItemsRequest(
+                    docType = "org.iso.18013.5.1.mDL",
+                    nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("portrait" to false))
+                )
+            )
             val mockAuthReq = AuthenticatedReaderRequest(
-                docRequest = mockk(relaxed = true),
+                docRequest = validMdlDocRequest,
                 privacyPolicyUrl = mockUri,
                 readerOrganizationName = expectedOrgName
             )

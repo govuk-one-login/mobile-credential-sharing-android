@@ -49,7 +49,7 @@ import uk.gov.onelogin.sharing.testapp.VERIFY_CREDENTIAL_BUTTON_TAG
 internal fun SelectCredentialAttributesScreen(
     modifier: Modifier = Modifier,
     viewModel: SelectCredentialsViewModel = hiltViewModel(),
-    onSelectAttributeGroup: (AttributeGroup) -> Unit = {}
+    onSelectAttributeGroup: (VerifierAttributeOption) -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     val metrics = rememberMetricsStateHolder()
@@ -93,7 +93,7 @@ internal fun SelectCredentialAttributesScreen(
         },
         onClick = {
             coroutineScope.launch {
-                onSelectAttributeGroup(selectedAttributeGroup.attributeGroup)
+                onSelectAttributeGroup(selectedAttributeGroup)
             }
         }
     )
