@@ -5,51 +5,49 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 
+/**
+ * Production implementation of [ReaderAuthentication].
+ *
+ * Orchestrates candidate selection across candidates in a [DeviceRequest],
+ * executing cryptographic verification and privacy policy URL validation.
+ */
 @Inject
 @ContributesBinding(AppScope::class)
-@ContributesBinding(CredentialVerificationScope::class)
 class ReaderAuthenticationImpl(
     private val verifyReaderAuthUseCase: VerifyReaderAuthUseCase,
-    private val validatePrivacyPolicyUseCase: ValidatePrivacyPolicyUseCase
+    private val validatePrivacyPolicyUseCase: ValidatePrivacyPolicyUseCase,
 ) : ReaderAuthentication {
 
     override fun authenticateDeviceRequest(
         deviceRequest: DeviceRequest,
         sessionTranscriptBytes: ByteArray,
         supportedDocumentTypes: List<String>,
-        trustedReaderCertificates: List<X509Certificate>
+        trustedReaderCertificates: List<X509Certificate>,
     ): ReaderAuthenticationResult {
-        var lastFailure: ReaderAuthenticationFailure? = null
-
         val supportedCandidates = deviceRequest.docRequests.filter {
             it.itemsRequest.docType in supportedDocumentTypes
         }
 
-        val successOutcome = supportedCandidates.firstNotNullOfOrNull { candidateDocRequest ->
+        if (supportedCandidates.isEmpty()) return ReaderAuthenticationResult.Unfulfillable
+
+        var lastFailure: ReaderAuthenticationFailure? = null
+
+        for (candidate in supportedCandidates) {
             try {
                 val verifiedRequest = verifyReaderAuthUseCase.verify(
-                    candidateDocRequest = candidateDocRequest,
+                    candidateDocRequest = candidate,
                     untaggedSessionTranscriptBytes = sessionTranscriptBytes,
-                    trustedReaderCertificates = trustedReaderCertificates
+                    trustedReaderCertificates = trustedReaderCertificates,
                 )
-
                 val authenticatedRequest = validatePrivacyPolicyUseCase.validate(verifiedRequest)
-
-                ReaderAuthenticationResult.Success(authenticatedRequest)
+                return ReaderAuthenticationResult.Success(authenticatedRequest)
             } catch (e: ReaderAuthenticationFailure) {
                 lastFailure = e
-                null
             }
         }
 
-        if (successOutcome != null) {
-            return successOutcome
-        }
-
-        lastFailure?.let { throw it }
-
-        return ReaderAuthenticationResult.Unfulfillable
+        throw lastFailure
+            ?: ReaderAuthenticationFailure(ReaderAuthenticationReason.READER_AUTH_MISSING)
     }
 }
