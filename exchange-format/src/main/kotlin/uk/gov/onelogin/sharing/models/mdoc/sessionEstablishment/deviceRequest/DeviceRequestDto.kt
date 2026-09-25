@@ -115,11 +115,7 @@ data class DeviceRequestDto(
     fun toDomain(): DeviceRequest = DeviceRequest(
         version = version,
         docRequests = docRequest.map {
-            DocRequest(
-                itemsRequest = it.itemsRequest.toDomain(),
-                readerAuth = it.readerAuth,
-                itemsRequestBytes = it.itemsRequestBytes
-            )
+            DocRequest(ItemsRequest(it.itemsRequest.docType, it.itemsRequest.nameSpaces))
         }
     )
 }

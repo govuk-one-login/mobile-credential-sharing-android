@@ -55,7 +55,9 @@ class DocRequestDtoTest {
         val serialized = CborMapper.default.writeValueAsBytes(dto)
         val result = CborMapper.default.readValue(serialized, DocRequestDto::class.java)
 
-        assertEquals(dto.itemsRequest, result.itemsRequest)
-        assertEquals(dto.readerAuth, result.readerAuth)
+        assertThat(
+            result,
+            equalTo(dto)
+        )
     }
 }

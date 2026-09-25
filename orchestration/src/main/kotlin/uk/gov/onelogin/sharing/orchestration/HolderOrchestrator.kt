@@ -582,7 +582,6 @@ class HolderOrchestrator(
                 requestAndValidateCredential(requestedDocType, deviceRequest)
             }
         } catch (e: ReaderAuthenticationFailure) {
-            logger.error(logTag, "Reader Authentication Failed: ${e.reason}", e)
             appCoroutineScope.launch {
                 handleReaderAuthFailure(e)
             }
