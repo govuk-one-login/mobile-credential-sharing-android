@@ -31,9 +31,10 @@ android {
 
 dependencies {
     listOf(
+        libs.jackson.cbor,
         projects.credentialFormat,
         projects.exchangeFormat
-    ).forEach(::api)
+    ).forEach(::implementation)
 
     listOf(
         libs.org.hamcrest,

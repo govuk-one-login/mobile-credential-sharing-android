@@ -1,10 +1,10 @@
 package uk.gov.onelogin.sharing.orchestration
 
+import android.net.Uri
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import io.mockk.every
 import io.mockk.mockk
 import java.security.GeneralSecurityException
 import java.security.cert.X509Certificate
@@ -97,8 +97,8 @@ import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
 import uk.gov.onelogin.sharing.verification.reader.FakeReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
-import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationOutcome
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationResult
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -127,7 +127,7 @@ class HolderOrchestratorTest {
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
     private val fakeReaderAuthentication = FakeReaderAuthentication(
-        resultToReturn = ReaderAuthenticationOutcome.Success(
+        resultToReturn = ReaderAuthenticationResult.Success(
             AuthenticatedReaderRequest(
                 docRequest = mockk(relaxed = true),
                 privacyPolicyUrl = mockk(relaxed = true),
@@ -1867,9 +1867,9 @@ class HolderOrchestratorTest {
         }
 
     @Test
-    fun `Reader Authentication Unfulfillable transitions to Success UnfulfillableRequest and does not request credentials`() = runTest {
+    fun `Unfulfillable transitions to Success and does not request credentials`() = runTest {
         val fakeReaderAuth = FakeReaderAuthentication(
-            resultToReturn = ReaderAuthenticationOutcome.Unfulfillable
+            resultToReturn = ReaderAuthenticationResult.Unfulfillable
         )
         val transport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(
@@ -1893,7 +1893,9 @@ class HolderOrchestratorTest {
     @Test
     fun `Reader Authentication Failure transitions to Failed with error`() = runTest {
         val fakeReaderAuth = FakeReaderAuthentication(
-            exceptionToThrow = ReaderAuthenticationFailure(ReaderAuthenticationReason.UNTRUSTED_READER_CERTIFICATE)
+            exceptionToThrow = ReaderAuthenticationFailure(
+                ReaderAuthenticationReason.UNTRUSTED_READER_CERTIFICATE
+            )
         )
         val transport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(
@@ -1913,6 +1915,45 @@ class HolderOrchestratorTest {
         assertThat(orchestrator.holderSessionState.value, isFailed())
         assertEquals(1, fakeReaderAuth.authenticateCalls)
     }
+
+    @Test
+    fun `Reader Authentication Success populates authenticatedReaderRequest on sessionContext`() =
+        runTest {
+            val mockUri: Uri = mockk()
+            val expectedOrgName = "GOV.UK OneLogin Reader Org"
+            val mockAuthReq = AuthenticatedReaderRequest(
+                docRequest = mockk(relaxed = true),
+                privacyPolicyUrl = mockUri,
+                readerOrganizationName = expectedOrgName
+            )
+            val fakeReaderAuth = FakeReaderAuthentication(
+                resultToReturn = ReaderAuthenticationResult.Success(mockAuthReq)
+            )
+            val transport = FakePeripheralBluetoothTransport()
+            val sessionFactory = createSessionFactory()
+            val orchestrator = createOrchestrator(
+                sessionFactory = sessionFactory,
+                peripheralBluetoothTransport = transport,
+                readerAuthentication = fakeReaderAuth,
+                trustedReaderCertificates = listOf(mockk())
+            )
+
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
+
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+            transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+            advanceUntilIdle()
+
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+            assertEquals(1, fakeReaderAuth.authenticateCalls)
+
+            val storedReq =
+                sessionFactory.getCurrentSession().sessionContext.authenticatedReaderRequest
+            assertEquals(mockUri, storedReq?.privacyPolicyUrl)
+            assertEquals(expectedOrgName, storedReq?.readerOrganizationName)
+        }
 
     private inner class PeerTerminationFixture(
         status: SessionDataStatus,

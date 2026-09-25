@@ -21,7 +21,7 @@ import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatur
  * Production implementation of [CoseVerifier] that composes the strict C2-C9
  * verification pipeline.
  */
-@Inject
+
 @ContributesBinding(AppScope::class)
 @ContributesBinding(CredentialVerificationScope::class)
 class CoseVerifierImpl internal constructor(

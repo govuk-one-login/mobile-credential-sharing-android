@@ -37,7 +37,7 @@ class CertificateChainValidatorImpl internal constructor() : CertificateChainVal
             CertPathValidator.getInstance("PKIX").validate(certPath, params)
         } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
             throw (e as? CoseVerificationFailure) ?: (e.cause as? CoseVerificationFailure)
-                ?: UntrustedCertificate(message = e.message ?: e.javaClass.simpleName, cause = e)
+                ?: UntrustedCertificate()
         }
     }
 }

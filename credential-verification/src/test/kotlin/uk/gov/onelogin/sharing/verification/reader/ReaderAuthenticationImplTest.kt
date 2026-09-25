@@ -32,8 +32,7 @@ class ReaderAuthenticationImplTest {
     fun setUp() {
         readerAuthentication = ReaderAuthenticationImpl(
             verifyReaderAuthUseCase = verifyReaderAuthUseCase,
-            validatePrivacyPolicyUseCase = validatePrivacyPolicyUseCase,
-            trustedReaderCertificates = listOf(mockCert)
+            validatePrivacyPolicyUseCase = validatePrivacyPolicyUseCase
         )
     }
 
@@ -43,11 +42,12 @@ class ReaderAuthenticationImplTest {
 
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = emptyDeviceRequest,
-            untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes
+            sessionTranscriptBytes = sampleTranscript,
+            supportedDocumentTypes = supportedTypes,
+            trustedReaderCertificates = listOf(mockCert)
         )
 
-        assertTrue(outcome is ReaderAuthenticationOutcome.Unfulfillable)
+        assertTrue(outcome is ReaderAuthenticationResult.Unfulfillable)
         verify(exactly = 0) { verifyReaderAuthUseCase.verify(any(), any(), any()) }
         verify(exactly = 0) { validatePrivacyPolicyUseCase.validate(any()) }
     }
@@ -63,11 +63,12 @@ class ReaderAuthenticationImplTest {
 
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = deviceRequest,
-            untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes
+            sessionTranscriptBytes = sampleTranscript,
+            supportedDocumentTypes = supportedTypes,
+            trustedReaderCertificates = listOf(mockCert)
         )
 
-        assertTrue(outcome is ReaderAuthenticationOutcome.Unfulfillable)
+        assertTrue(outcome is ReaderAuthenticationResult.Unfulfillable)
         verify(exactly = 0) { verifyReaderAuthUseCase.verify(any(), any(), any()) }
         verify(exactly = 0) { validatePrivacyPolicyUseCase.validate(any()) }
     }
@@ -102,12 +103,13 @@ class ReaderAuthenticationImplTest {
 
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = deviceRequest,
-            untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = listOf(docTypeMdl)
+            sessionTranscriptBytes = sampleTranscript,
+            supportedDocumentTypes = listOf(docTypeMdl),
+            trustedReaderCertificates = listOf(mockCert)
         )
 
-        assertTrue(outcome is ReaderAuthenticationOutcome.Success)
-        val success = outcome as ReaderAuthenticationOutcome.Success
+        assertTrue(outcome is ReaderAuthenticationResult.Success)
+        val success = outcome as ReaderAuthenticationResult.Success
         assertEquals(docTypeMdl, success.authenticatedReaderRequest.docRequest.itemsRequest.docType)
 
         // eVRC is skipped completely (0 calls for eVRC)
@@ -166,12 +168,13 @@ class ReaderAuthenticationImplTest {
 
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = deviceRequest,
-            untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes
+            sessionTranscriptBytes = sampleTranscript,
+            supportedDocumentTypes = supportedTypes,
+            trustedReaderCertificates = listOf(mockCert)
         )
 
-        assertTrue(outcome is ReaderAuthenticationOutcome.Success)
-        val success = outcome as ReaderAuthenticationOutcome.Success
+        assertTrue(outcome is ReaderAuthenticationResult.Success)
+        val success = outcome as ReaderAuthenticationResult.Success
         assertEquals(mockUri, success.authenticatedReaderRequest.privacyPolicyUrl)
         assertEquals("GOV.UK OneLogin", success.authenticatedReaderRequest.readerOrganizationName)
 
@@ -222,8 +225,9 @@ class ReaderAuthenticationImplTest {
         val failure = assertThrows(ReaderAuthenticationFailure::class.java) {
             readerAuthentication.authenticateDeviceRequest(
                 deviceRequest = deviceRequest,
-                untaggedSessionTranscriptBytes = sampleTranscript,
-                supportedDocumentTypes = supportedTypes
+                sessionTranscriptBytes = sampleTranscript,
+                supportedDocumentTypes = supportedTypes,
+                trustedReaderCertificates = listOf(mockCert)
             )
         }
 

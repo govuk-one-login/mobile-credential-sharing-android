@@ -17,13 +17,6 @@ import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.RE
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.UNSUPPORTED_READER_AUTH_ALGORITHM
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.UNTRUSTED_READER_CERTIFICATE
 
-/**
- * Production implementation of [VerifyReaderAuthUseCase].
- *
- * Reconstructs the exact [ReaderAuthenticationBytes] payload from the active untagged session transcript
- * and preserved [DocRequest.itemsRequestBytes], and executes certificate-backed COSE_Sign1 signature verification.
- */
-@Inject
 @ContributesBinding(AppScope::class)
 @ContributesBinding(CredentialVerificationScope::class)
 class VerifyReaderAuthUseCaseImpl(private val coseVerifier: CoseVerifier) :

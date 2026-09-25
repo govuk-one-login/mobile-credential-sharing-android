@@ -6,7 +6,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
  * Test double implementation of [ReaderAuthentication] for unit testing.
  */
 class FakeReaderAuthentication(
-    var resultToReturn: ReaderAuthenticationOutcome = ReaderAuthenticationOutcome.Unfulfillable,
+    var resultToReturn: ReaderAuthenticationResult = ReaderAuthenticationResult.Unfulfillable,
     var exceptionToThrow: ReaderAuthenticationFailure? = null
 ) : ReaderAuthentication {
 
@@ -15,15 +15,19 @@ class FakeReaderAuthentication(
     var lastSupportedDocumentTypes: List<String>? = null
     var authenticateCalls = 0
 
+    var lastTrustedReaderCertificates: List<java.security.cert.X509Certificate>? = null
+
     override fun authenticateDeviceRequest(
         deviceRequest: DeviceRequest,
-        untaggedSessionTranscriptBytes: ByteArray,
-        supportedDocumentTypes: List<String>
-    ): ReaderAuthenticationOutcome {
+        sessionTranscriptBytes: ByteArray,
+        supportedDocumentTypes: List<String>,
+        trustedReaderCertificates: List<java.security.cert.X509Certificate>
+    ): ReaderAuthenticationResult {
         authenticateCalls++
         lastDeviceRequest = deviceRequest
-        lastTranscript = untaggedSessionTranscriptBytes
+        lastTranscript = sessionTranscriptBytes
         lastSupportedDocumentTypes = supportedDocumentTypes
+        lastTrustedReaderCertificates = trustedReaderCertificates
 
         exceptionToThrow?.let { throw it }
 

@@ -70,7 +70,7 @@ import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
-import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationOutcome
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationResult
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -558,41 +558,7 @@ class HolderOrchestrator(
                     }
                 }
             } else {
-                readerAuthentication.let { auth ->
-                    val transcript = checkNotNull(currentContext.sessionTranscriptBytes) {
-                        "Missing session transcript"
-                    }
-                    val outcome = auth.authenticateDeviceRequest(
-                        deviceRequest = deviceRequest,
-                        untaggedSessionTranscriptBytes = transcript,
-                        supportedDocumentTypes = listOf(DocumentType.Mdl.value)
-                    )
-
-                    when (outcome) {
-                        is ReaderAuthenticationOutcome.Success -> {
-                            val authReq = outcome.authenticatedReaderRequest
-                            logger.debug(
-                                logTag,
-                                "Reader Authenticated: Org =" +
-                                    " ${authReq.readerOrganizationName}, Privacy Policy URL = " +
-                                    "${authReq.privacyPolicyUrl}"
-                            )
-                            sessionFlow.value.updateSessionContext {
-                                it.copy(authenticatedReaderRequest = authReq)
-                            }
-                        }
-
-                        is ReaderAuthenticationOutcome.Unfulfillable -> {
-                            logger.error(logTag, "Reader Authentication UNFULFILLABLE")
-                            appCoroutineScope.launch {
-                                handleNoMatchTermination(
-                                    CredentialRequestException("Unfulfillable request")
-                                )
-                            }
-                            return
-                        }
-                    }
-                }
+                if (!authenticateReaderRequest(deviceRequest)) return
                 logger.debug(logTag, "Cert list is not empty")
             }
 
@@ -818,6 +784,43 @@ class HolderOrchestrator(
             ),
             sessionDataToSend = sessionDataBytes
         )
+    }
+
+    private fun authenticateReaderRequest(deviceRequest: DeviceRequest): Boolean {
+        val transcript = checkNotNull(currentContext.sessionTranscriptBytes) {
+            "Missing session transcript"
+        }
+        val outcome = readerAuthentication.authenticateDeviceRequest(
+            deviceRequest = deviceRequest,
+            sessionTranscriptBytes = transcript,
+            supportedDocumentTypes = listOf(DocumentType.Mdl.value),
+            trustedReaderCertificates = currentContext.trustedReaderCertificates
+        )
+
+        return when (outcome) {
+            is ReaderAuthenticationResult.Success -> {
+                val authReq = outcome.authenticatedReaderRequest
+                logger.debug(
+                    logTag,
+                    "Reader Authenticated: Org = ${authReq.readerOrganizationName}," +
+                        " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                )
+                sessionFlow.value.updateSessionContext {
+                    it.copy(authenticatedReaderRequest = authReq)
+                }
+                true
+            }
+
+            is ReaderAuthenticationResult.Unfulfillable -> {
+                logger.error(logTag, "Reader Authentication UNFULFILLABLE")
+                appCoroutineScope.launch {
+                    handleNoMatchTermination(
+                        CredentialRequestException("Unfulfillable request")
+                    )
+                }
+                false
+            }
+        }
     }
 
     private suspend fun sendTerminationAndFail(exception: Exception) {
