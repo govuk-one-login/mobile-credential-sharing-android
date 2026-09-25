@@ -5,7 +5,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
@@ -90,7 +89,6 @@ class HolderOrchestrator(
     private val inboundMessageClassifier: InboundMessageClassifier,
     private val sessionTimer: SessionTimer,
     private val readerAuthentication: ReaderAuthentication,
-    private val trustedReaderCertificates: List<X509Certificate> = emptyList(),
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val consentInFlight = AtomicBoolean(false)
@@ -546,13 +544,10 @@ class HolderOrchestrator(
                 val transcript = checkNotNull(currentContext.sessionTranscriptBytes) {
                     "Missing session transcript"
                 }
-                val activeTrust =
-                    trustedReaderCertificates.ifEmpty { currentContext.trustedReaderCertificates }
                 val outcome = auth.authenticateDeviceRequest(
                     deviceRequest = deviceRequest,
                     untaggedSessionTranscriptBytes = transcript,
-                    supportedDocumentTypes = listOf(DocumentType.Mdl.value),
-                    trustedReaderCertificates = activeTrust
+                    supportedDocumentTypes = listOf(DocumentType.Mdl.value)
                 )
 
                 when (outcome) {

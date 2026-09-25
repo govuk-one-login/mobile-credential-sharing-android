@@ -24,9 +24,7 @@ class ReaderAuthenticationImpl(
         deviceRequest: DeviceRequest,
         untaggedSessionTranscriptBytes: ByteArray,
         supportedDocumentTypes: List<String>,
-        trustedReaderCertificates: List<X509Certificate>,
     ): ReaderAuthenticationOutcome {
-        val activeTrust = this.trustedReaderCertificates.ifEmpty { trustedReaderCertificates }
         var lastFailure: ReaderAuthenticationFailure? = null
 
         val supportedCandidates = deviceRequest.docRequests.filter {
@@ -42,7 +40,7 @@ class ReaderAuthenticationImpl(
                 val verifiedRequest = verifyReaderAuthUseCase.verify(
                     candidateDocRequest = candidateDocRequest,
                     untaggedSessionTranscriptBytes = untaggedSessionTranscriptBytes,
-                    trustedReaderCertificates = activeTrust,
+                    trustedReaderCertificates = this.trustedReaderCertificates,
                 )
 
                 val authenticatedRequest = validatePrivacyPolicyUseCase.validate(verifiedRequest)

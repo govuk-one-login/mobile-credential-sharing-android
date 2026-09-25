@@ -44,8 +44,7 @@ class ReaderAuthenticationImplTest {
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = emptyDeviceRequest,
             untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes,
-            trustedReaderCertificates = listOf(mockCert),
+            supportedDocumentTypes = supportedTypes
         )
 
         assertTrue(outcome is ReaderAuthenticationOutcome.Unfulfillable)
@@ -61,8 +60,7 @@ class ReaderAuthenticationImplTest {
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = deviceRequest,
             untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes,
-            trustedReaderCertificates = listOf(mockCert),
+            supportedDocumentTypes = supportedTypes
         )
 
         assertTrue(outcome is ReaderAuthenticationOutcome.Unfulfillable)
@@ -94,8 +92,7 @@ class ReaderAuthenticationImplTest {
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = deviceRequest,
             untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = listOf(docTypeMdl),
-            trustedReaderCertificates = listOf(mockCert),
+            supportedDocumentTypes = listOf(docTypeMdl)
         )
 
         assertTrue(outcome is ReaderAuthenticationOutcome.Success)
@@ -144,8 +141,7 @@ class ReaderAuthenticationImplTest {
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = deviceRequest,
             untaggedSessionTranscriptBytes = sampleTranscript,
-            supportedDocumentTypes = supportedTypes,
-            trustedReaderCertificates = listOf(mockCert),
+            supportedDocumentTypes = supportedTypes
         )
 
         assertTrue(outcome is ReaderAuthenticationOutcome.Success)
@@ -183,8 +179,7 @@ class ReaderAuthenticationImplTest {
             readerAuthentication.authenticateDeviceRequest(
                 deviceRequest = deviceRequest,
                 untaggedSessionTranscriptBytes = sampleTranscript,
-                supportedDocumentTypes = supportedTypes,
-                trustedReaderCertificates = listOf(mockCert),
+                supportedDocumentTypes = supportedTypes
             )
         }
 
