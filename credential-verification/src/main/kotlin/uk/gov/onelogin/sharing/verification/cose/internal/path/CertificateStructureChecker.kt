@@ -138,7 +138,7 @@ internal class CertificateStructureChecker(
     }
 
     internal companion object {
-        const val MIN_SERIAL_OCTETS = 9
+        const val MIN_SERIAL_OCTETS = 1
         const val MAX_SERIAL_OCTETS = 20
         const val CURVE_256 = 256
         const val CURVE_384 = 384

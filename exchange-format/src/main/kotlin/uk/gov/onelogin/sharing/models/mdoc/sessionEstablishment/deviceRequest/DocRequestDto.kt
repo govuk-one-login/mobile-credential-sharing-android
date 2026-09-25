@@ -14,6 +14,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import java.io.OutputStream
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.RawCbor
 
@@ -90,6 +91,13 @@ data class DocRequestDto(
             val itemsRequestNode = root[ITEMS_REQUEST_KEY]
                 ?: throw IllegalArgumentException("Missing itemsRequest in DocRequest")
 
+            val itemsRequestBytes = if (itemsRequestNode.isBinary) {
+                val rawInner = itemsRequestNode.binaryValue()
+                EmbeddedCbor(rawInner).toCbor()
+            } else {
+                null
+            }
+
             val itemsRequest = CborMapper.default
                 .readValue(itemsRequestNode.binaryValue(), ItemsRequestDto::class.java)
 
@@ -102,7 +110,7 @@ data class DocRequestDto(
 
             return DocRequestDto(
                 itemsRequest = itemsRequest,
-                itemsRequestBytes = null,
+                itemsRequestBytes = itemsRequestBytes,
                 readerAuth = readerAuth
             )
         }

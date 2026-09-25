@@ -131,18 +131,18 @@ class CoseVerifierImpl internal constructor(
         trustedRoots: List<X509Certificate>,
         purpose: CertificatePurpose
     ): X509Certificate {
-        var lastUntrustedFailure = UntrustedCertificate()
+        var lastFailure: CoseVerificationFailure = UntrustedCertificate()
 
         for (root in trustedRoots) {
             try {
                 pathValidator.verify(chain, root)
                 return profileValidator.validate(chain, purpose)
-            } catch (e: UntrustedCertificate) {
-                lastUntrustedFailure = e
+            } catch (e: CoseVerificationFailure) {
+                lastFailure = e
             }
         }
 
-        throw lastUntrustedFailure
+        throw lastFailure
     }
 
     private fun extractEcPublicKey(verifiedLeaf: X509Certificate): ECPublicKey = try {
