@@ -172,15 +172,22 @@ class VerifierCryptoServiceImpl(
         itemsRequestBytes: ByteArray?,
         readerAuth: ByteArray?
     ): ByteArray = try {
+        val unsupportedCandidate = DocRequest(
+            itemsRequest = ItemsRequest(
+                docType = "org.iso.18013.5.1.eVRC",
+                nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("vehicle_category" to false))
+            )
+        )
+        val validMdlCandidate = DocRequest(
+            itemsRequest = itemsRequest,
+            readerAuth = readerAuth,
+            itemsRequestBytes = itemsRequestBytes
+        )
+        val docRequests = listOf(unsupportedCandidate, validMdlCandidate)
+
         DeviceRequest(
             version = "1.0",
-            docRequests = listOf(
-                DocRequest(
-                    itemsRequest = itemsRequest,
-                    readerAuth = readerAuth,
-                    itemsRequestBytes = itemsRequestBytes
-                )
-            )
+            docRequests = docRequests
         ).toDto().toCbor().also {
             logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
         }

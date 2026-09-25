@@ -128,17 +128,17 @@ class TestReaderAuthIntermediateCertificateGenerator:
     ):
         assert not valid_intermediate_key_usage.value.key_agreement
 
-    def test_key_usage_false_key_certificate_signature(
+    def test_key_usage_true_key_certificate_signature(
         self,
         valid_intermediate_key_usage: Extension[KeyUsage],
     ):
-        assert not valid_intermediate_key_usage.value.key_cert_sign
+        assert valid_intermediate_key_usage.value.key_cert_sign
 
-    def test_key_usage_false_key_crl_signature(
+    def test_key_usage_true_key_crl_signature(
         self,
         valid_intermediate_key_usage: Extension[KeyUsage],
     ):
-        assert not valid_intermediate_key_usage.value.crl_sign
+        assert valid_intermediate_key_usage.value.crl_sign
 
     def test_key_usage_cannot_configure_encipher_only(
         self,

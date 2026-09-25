@@ -1,10 +1,13 @@
 package uk.gov.onelogin.sharing.verification.cose
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import java.io.ByteArrayInputStream
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPublicKey
+import uk.gov.onelogin.sharing.verification.CredentialVerificationScope
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.MalformedCoseSign1
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.UntrustedCertificate
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.CertificateHeaderValidator
@@ -18,8 +21,10 @@ import uk.gov.onelogin.sharing.verification.cose.internal.signature.CoseSignatur
  * Production implementation of [CoseVerifier] that composes the strict C2-C9
  * verification pipeline.
  */
-@Inject
-internal class CoseVerifierImpl(
+
+@ContributesBinding(AppScope::class)
+@ContributesBinding(CredentialVerificationScope::class)
+class CoseVerifierImpl internal constructor(
     private val decoder: CoseSign1Decoder,
     private val headerValidator: CertificateHeaderValidator,
     private val pathValidator: CertificateChainValidator,
@@ -126,18 +131,18 @@ internal class CoseVerifierImpl(
         trustedRoots: List<X509Certificate>,
         purpose: CertificatePurpose
     ): X509Certificate {
-        var lastUntrustedFailure = UntrustedCertificate()
+        var lastFailure: CoseVerificationFailure = UntrustedCertificate()
 
         for (root in trustedRoots) {
             try {
                 pathValidator.verify(chain, root)
                 return profileValidator.validate(chain, purpose)
-            } catch (e: UntrustedCertificate) {
-                lastUntrustedFailure = e
+            } catch (e: CoseVerificationFailure) {
+                lastFailure = e
             }
         }
 
-        throw lastUntrustedFailure
+        throw lastFailure
     }
 
     private fun extractEcPublicKey(verifiedLeaf: X509Certificate): ECPublicKey = try {

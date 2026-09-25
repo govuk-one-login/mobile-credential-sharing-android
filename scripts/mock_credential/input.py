@@ -26,6 +26,7 @@ from mock_credential.certificates.generators import (
 from mock_credential.issuer_auth import ISSUER_NAME, LEAF_NAME
 from mock_credential.reader_auth import (
     READER_AUTH_COMMON_LEAF_EXTENSIONS,
+    READER_AUTH_COMMON_INTERMEDIATE_EXTENSIONS,
     READER_AUTH_LEAF_SUBJECT_NAME,
     PRIVACY_POLICY_URL_EXTENSION,
     generate_dvs_subject,
@@ -193,7 +194,7 @@ class GenerateMockCredentialInputs:
                 ),
                 subject_key=reader_auth_private_key,
                 issuer_cert=intermediary_reader_auth_cert,
-                extensions=READER_AUTH_COMMON_LEAF_EXTENSIONS
+                extensions=READER_AUTH_COMMON_INTERMEDIATE_EXTENSIONS
                 + [
                     (BasicConstraints(ca=True, path_length=None), True),
                     (PRIVACY_POLICY_URL_EXTENSION, False),

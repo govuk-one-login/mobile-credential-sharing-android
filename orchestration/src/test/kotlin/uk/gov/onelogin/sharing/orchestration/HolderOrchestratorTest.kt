@@ -1,9 +1,11 @@
 package uk.gov.onelogin.sharing.orchestration
 
+import android.net.Uri
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import io.mockk.mockk
 import java.security.GeneralSecurityException
 import java.security.cert.X509Certificate
 import kotlin.time.Duration.Companion.seconds
@@ -43,6 +45,8 @@ import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
@@ -91,6 +95,12 @@ import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
+import uk.gov.onelogin.sharing.verification.reader.FakeReaderAuthentication
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationResult
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -117,6 +127,16 @@ class HolderOrchestratorTest {
     }
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
+
+    private val fakeReaderAuthentication = FakeReaderAuthentication(
+        resultToReturn = ReaderAuthenticationResult.Success(
+            AuthenticatedReaderRequest(
+                docRequest = mockk(relaxed = true),
+                privacyPolicyUrl = mockk(relaxed = true),
+                readerOrganizationName = "GOV.UK OneLogin Test"
+            )
+        )
+    )
 
     private val sessionTimer = FakeSessionTimer()
     private val fakeCredentialRequestHandler = FakeCredentialRequestHandler().apply {
@@ -152,7 +172,8 @@ class HolderOrchestratorTest {
         inboundMessageClassifier: InboundMessageClassifier = FakeInboundMessageClassifier(),
         trustedReaderCertificates: List<X509Certificate> = emptyList(),
         authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory =
-            FakeAuthenticatedReaderRequestFactory()
+            FakeAuthenticatedReaderRequestFactory(),
+        readerAuthentication: ReaderAuthentication = fakeReaderAuthentication
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -166,6 +187,7 @@ class HolderOrchestratorTest {
         holderSessionTerminator = holderSessionTerminator,
         inboundMessageClassifier = inboundMessageClassifier,
         sessionTimer = sessionTimer,
+        readerAuthentication = readerAuthentication,
         trustedReaderCertificates = trustedReaderCertificates,
         authenticatedReaderRequestFactory = authenticatedReaderRequestFactory
     )
@@ -1844,6 +1866,101 @@ class HolderOrchestratorTest {
                     cryptoService.lastErrorSessionDataStatus
                 )
             }
+        }
+
+    @Test
+    fun `Unfulfillable transitions to Success and does not request credentials`() = runTest {
+        val fakeReaderAuth = FakeReaderAuthentication(
+            resultToReturn = ReaderAuthenticationResult.Unfulfillable
+        )
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            readerAuthentication = fakeReaderAuth,
+            trustedReaderCertificates = listOf(mockk())
+        )
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
+        assertEquals(1, fakeReaderAuth.authenticateCalls)
+    }
+
+    @Test
+    fun `Reader Authentication Failure transitions to Failed with error`() = runTest {
+        val fakeReaderAuth = FakeReaderAuthentication(
+            exceptionToThrow = ReaderAuthenticationFailure(
+                ReaderAuthenticationReason.UNTRUSTED_READER_CERTIFICATE
+            )
+        )
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            readerAuthentication = fakeReaderAuth,
+            trustedReaderCertificates = listOf(mockk())
+        )
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assertEquals(1, fakeReaderAuth.authenticateCalls)
+    }
+
+    @Test
+    fun `Reader Authentication Success populates authenticatedReaderRequest on sessionContext`() =
+        runTest {
+            val mockUri: Uri = mockk()
+            val expectedOrgName = "GOV.UK OneLogin Reader Org"
+            val validMdlDocRequest = DocRequest(
+                itemsRequest = ItemsRequest(
+                    docType = "org.iso.18013.5.1.mDL",
+                    nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("portrait" to false))
+                )
+            )
+            val mockAuthReq = AuthenticatedReaderRequest(
+                docRequest = validMdlDocRequest,
+                privacyPolicyUrl = mockUri,
+                readerOrganizationName = expectedOrgName
+            )
+            val fakeReaderAuth = FakeReaderAuthentication(
+                resultToReturn = ReaderAuthenticationResult.Success(mockAuthReq)
+            )
+            val transport = FakePeripheralBluetoothTransport()
+            val sessionFactory = createSessionFactory()
+            val orchestrator = createOrchestrator(
+                sessionFactory = sessionFactory,
+                peripheralBluetoothTransport = transport,
+                readerAuthentication = fakeReaderAuth,
+                trustedReaderCertificates = listOf(mockk())
+            )
+
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
+
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+            transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+            advanceUntilIdle()
+
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+            assertEquals(1, fakeReaderAuth.authenticateCalls)
+
+            val storedReq =
+                sessionFactory.getCurrentSession().sessionContext.authenticatedReaderRequest
+            assertEquals(mockUri, storedReq?.privacyPolicyUrl)
+            assertEquals(expectedOrgName, storedReq?.readerOrganizationName)
         }
 
     private inner class PeerTerminationFixture(
