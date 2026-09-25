@@ -19,6 +19,10 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -43,8 +47,8 @@ class HolderConsentScreenTest {
         )
     }
 
-    // DCMAW-16715 AC1: all IntentToRetain flags are false
-    private val deviceRequestWithoutRetain = DeviceRequestStub.deviceRequest(
+    // AC1: attributes displayed without intent-to-retain (all flags false)
+    private val presentationWithoutRetain = consentPresentation(
         mapOf(
             "family_name" to false,
             "document_number" to false,
@@ -55,8 +59,8 @@ class HolderConsentScreenTest {
         )
     )
 
-    // DCMAW-16715 AC2: all IntentToRetain flags are true except portrait which is false
-    private val deviceRequestWithRetain = DeviceRequestStub.deviceRequest(
+    // AC2: attributes displayed with intent-to-retain (all true except portrait)
+    private val presentationWithRetain = consentPresentation(
         mapOf(
             "family_name" to true,
             "document_number" to true,
@@ -67,11 +71,30 @@ class HolderConsentScreenTest {
         )
     )
 
+    private fun consentPresentation(elements: Map<String, Boolean>) = ConsentPresentation(
+        documents = listOf(
+            ConsentDocument(
+                docType = "org.iso.18013.5.1.mDL",
+                namespaces = listOf(
+                    ConsentNamespace(
+                        nameSpace = "org.iso.18013.5.1",
+                        attributes = elements.map { (id, retain) ->
+                            ConsentAttribute(elementIdentifier = id, intentToRetain = retain)
+                        }
+                    )
+                )
+            )
+        )
+    )
+
     @Test
     fun `AC1 - Displays title, elements without IntentToRetain, and buttons`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
-                HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
             }
 
             composeTestRule.setContent { Render() }
@@ -89,7 +112,10 @@ class HolderConsentScreenTest {
     fun `AC2 - Displays elements with IntentToRetain flags, portrait is false`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
-                HolderSessionState.AwaitingUserConsent(deviceRequestWithRetain)
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithRetain
+                )
             }
 
             composeTestRule.setContent { Render() }
@@ -102,7 +128,10 @@ class HolderConsentScreenTest {
     @Test
     fun `Displays docType from the DeviceRequest`() = runTest(dispatcherRule.testDispatcher) {
         holderState.update {
-            HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+            HolderSessionState.AwaitingUserConsent(
+                request = DeviceRequestStub.deviceRequestStub,
+                presentation = presentationWithoutRetain
+            )
         }
 
         composeTestRule.setContent { Render() }
@@ -113,7 +142,10 @@ class HolderConsentScreenTest {
     @Test
     fun `Displays namespace from the DeviceRequest`() = runTest(dispatcherRule.testDispatcher) {
         holderState.update {
-            HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+            HolderSessionState.AwaitingUserConsent(
+                request = DeviceRequestStub.deviceRequestStub,
+                presentation = presentationWithoutRetain
+            )
         }
 
         composeTestRule.setContent { Render() }
@@ -135,7 +167,10 @@ class HolderConsentScreenTest {
     @Test
     fun `Deny button shows confirmation dialog`() = runTest(dispatcherRule.testDispatcher) {
         holderState.update {
-            HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+            HolderSessionState.AwaitingUserConsent(
+                request = DeviceRequestStub.deviceRequestStub,
+                presentation = presentationWithoutRetain
+            )
         }
 
         composeTestRule.setContent { Render() }
@@ -149,7 +184,10 @@ class HolderConsentScreenTest {
     @Test
     fun `Deny dialog confirm button calls denyConsent`() = runTest(dispatcherRule.testDispatcher) {
         holderState.update {
-            HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+            HolderSessionState.AwaitingUserConsent(
+                request = DeviceRequestStub.deviceRequestStub,
+                presentation = presentationWithoutRetain
+            )
         }
 
         composeTestRule.setContent { Render() }
@@ -166,7 +204,10 @@ class HolderConsentScreenTest {
     @Test
     fun `Deny dialog dismiss button hides dialog`() = runTest(dispatcherRule.testDispatcher) {
         holderState.update {
-            HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+            HolderSessionState.AwaitingUserConsent(
+                request = DeviceRequestStub.deviceRequestStub,
+                presentation = presentationWithoutRetain
+            )
         }
 
         composeTestRule.setContent { Render() }
@@ -185,7 +226,10 @@ class HolderConsentScreenTest {
     fun `Back button is disabled and screen remains visible`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
-                HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
             }
 
             lateinit var navController: TestNavHostController

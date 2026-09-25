@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -26,12 +26,12 @@ class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
-    val deviceRequest: StateFlow<DeviceRequest?> = orchestrator
+    val presentation: StateFlow<ConsentPresentation?> = orchestrator
         .holderSessionState
         .map { state ->
             state as? HolderSessionState.AwaitingUserConsent
         }.map { consentState ->
-            consentState?.request
+            consentState?.presentation
         }.stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
