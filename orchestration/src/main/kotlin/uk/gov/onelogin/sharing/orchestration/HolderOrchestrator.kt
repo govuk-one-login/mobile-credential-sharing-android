@@ -52,6 +52,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequest
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.orchestration.holder.session.AuthenticatedReaderRequestFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -639,8 +640,19 @@ class HolderOrchestrator(
                 )
             }
 
+            val presentation = ConsentPresentationFactory.create(
+                deviceRequest = deviceRequest,
+                matchedAttributes = result.matchedAttributes,
+                authenticatedReaderRequest = currentContext.authenticatedReaderRequest
+            )
+
             logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)
-            safeTransitionTo(HolderSessionState.AwaitingUserConsent(deviceRequest))
+            safeTransitionTo(
+                HolderSessionState.AwaitingUserConsent(
+                    request = deviceRequest,
+                    presentation = presentation
+                )
+            )
         } catch (e: CredentialRequestException) {
             handleNoMatchTermination(e)
         }

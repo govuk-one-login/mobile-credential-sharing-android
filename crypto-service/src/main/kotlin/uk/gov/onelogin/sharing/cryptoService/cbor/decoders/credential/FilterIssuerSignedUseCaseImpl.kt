@@ -9,6 +9,8 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
+import kotlin.collections.isNotEmpty
+import kotlin.collections.map
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
@@ -24,7 +26,7 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
     override fun filter(
         validatedCredential: ParsedRawCredential,
         deviceRequest: DeviceRequest
-    ): IssuerSigned {
+    ): FilteredIssuerSigned {
         val ageOverNNCount = deviceRequest.docRequests.sumOf { docRequest ->
             docRequest.itemsRequest.nameSpaces.values.sumOf { elements ->
                 elements.keys.count { isAgeOverNN(it) }
@@ -43,12 +45,16 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
         val credentialNameSpaces = parseNameSpaces(validatedCredential.nameSpaces)
 
         val filteredNameSpaces = mutableMapOf<String, List<ByteArray>>()
+        val matchedAttributes = mutableMapOf<String, List<MatchedAttribute>>()
 
         for ((nameSpace, requestedElements) in requestedNameSpaces) {
             val credentialItems = credentialNameSpaces[nameSpace] ?: continue
-            val retained = filterItems(credentialItems, requestedElements)
-            if (retained.isNotEmpty()) {
-                filteredNameSpaces[nameSpace] = retained
+            val matchedItems = filterItems(credentialItems, requestedElements)
+            if (matchedItems.isNotEmpty()) {
+                filteredNameSpaces[nameSpace] = matchedItems.map { it.bytes }
+                matchedAttributes[nameSpace] = matchedItems.map {
+                    MatchedAttribute(it.identifier, it.intentToRetain)
+                }
             }
         }
 
@@ -70,7 +76,10 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
             issuerAuth = validatedCredential.issuerAuth
         )
         logger.debug(logTag, "IssuerSigned assembled with ${filteredNameSpaces.size} namespace(s)")
-        return issuerSigned
+        return FilteredIssuerSigned(
+            issuerSigned = issuerSigned,
+            matchedAttributes = matchedAttributes
+        )
     }
 
     /**
@@ -103,11 +112,11 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
     private fun filterItems(
         itemBytes: List<ByteArray>,
         requestedElements: Map<String, Boolean>
-    ): List<ByteArray> {
+    ): List<MatchedItem> {
         val exactRequested = requestedElements.keys.filter { !isAgeOverNN(it) }.toSet()
         val ageOverRequests = requestedElements.keys.filter { isAgeOverNN(it) }
 
-        val retained = mutableListOf<ByteArray>()
+        val matchedItems = mutableListOf<MatchedItem>()
 
         val decodedItems = itemBytes.mapNotNull { bytes ->
             val identifier = readElementIdentifier(bytes) ?: return@mapNotNull null
@@ -115,16 +124,25 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
         }
 
         for ((identifier, bytes) in decodedItems) {
-            if (identifier in exactRequested) retained.add(bytes)
+            if (identifier in exactRequested) {
+                matchedItems.add(
+                    MatchedItem(
+                        identifier = identifier,
+                        intentToRetain = requestedElements[identifier] ?: false,
+                        bytes = bytes
+                    )
+                )
+            }
         }
 
         val ageOverItems = decodedItems.filter { (id, _) -> isAgeOverNN(id) }
         for (requestedKey in ageOverRequests) {
             val requestedAge = parseAgeOverNN(requestedKey) ?: continue
-            resolveAgeOver(requestedAge, ageOverItems)?.let { retained.add(it) }
+            val intentToRetain = requestedElements[requestedKey] ?: false
+            resolveAgeOver(requestedAge, intentToRetain, ageOverItems)?.let { matchedItems.add(it) }
         }
 
-        return retained
+        return matchedItems
     }
 
     private fun readElementIdentifier(itemBytes: ByteArray): String? = try {
@@ -149,24 +167,42 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
      */
     private fun resolveAgeOver(
         requestedAge: Int,
+        intentToRetain: Boolean,
         ageOverItems: List<Pair<String, ByteArray>>
-    ): ByteArray? {
-        data class AgeItem(val age: Int, val value: Boolean, val bytes: ByteArray)
+    ): MatchedItem? {
+        data class AgeItem(
+            val identifier: String,
+            val age: Int,
+            val value: Boolean,
+            val bytes: ByteArray
+        )
 
-        val parsed = ageOverItems.mapNotNull { (id, bytes) ->
-            val age = parseAgeOverNN(id) ?: return@mapNotNull null
+        val parsed = ageOverItems.mapNotNull { (identifier, bytes) ->
+            val age = parseAgeOverNN(identifier) ?: return@mapNotNull null
             val value = readBooleanValue(bytes) ?: return@mapNotNull null
-            AgeItem(age, value, bytes)
+            AgeItem(identifier, age, value, bytes)
         }
 
-        return parsed.filter { it.value && it.age >= requestedAge }.minByOrNull { it.age }?.bytes
-            ?: parsed.filter { !it.value && it.age <= requestedAge }.maxByOrNull { it.age }?.bytes
+        val resolved = parsed.filter { it.value && it.age >= requestedAge }.minByOrNull { it.age }
+            ?: parsed.filter { !it.value && it.age <= requestedAge }.maxByOrNull { it.age }
+
+        return resolved?.let { MatchedItem(it.identifier, intentToRetain, it.bytes) }
     }
 
     private fun isAgeOverNN(identifier: String) = AGE_OVER_PATTERN.matches(identifier)
 
     private fun parseAgeOverNN(identifier: String): Int? =
         AGE_OVER_PATTERN.find(identifier)?.groupValues?.get(1)?.toIntOrNull()
+
+    /**
+     * A credential item that matched the request: the resolved element identifier, its
+     * intent-to-retain flag and the original IssuerSignedItemBytes.
+     */
+    private data class MatchedItem(
+        val identifier: String,
+        val intentToRetain: Boolean,
+        val bytes: ByteArray
+    )
 
     private companion object {
         val AGE_OVER_PATTERN = Regex("^age_over_(\\d{2})$")

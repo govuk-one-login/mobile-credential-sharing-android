@@ -65,8 +65,17 @@ sealed class HolderSessionState :
     /**
      * State for when a successful connection and processing establishment occurs,
      * allowing the User to consent to data being shared with the Verifying device.
+     *
+     * @param request The original decrypted [DeviceRequest]. Retained for building the
+     * DeviceResponse on approval.
+     * @param presentation The information shown on the consent screen: the filtered attributes that
+     * will actually be shared, plus the verified ReaderAuth privacy-policy link and organisation
+     * name.
      */
-    data class AwaitingUserConsent(val request: DeviceRequest) : HolderSessionState()
+    data class AwaitingUserConsent(
+        val request: DeviceRequest,
+        val presentation: ConsentPresentation = ConsentPresentation(documents = emptyList())
+    ) : HolderSessionState()
 
     /**
      * State for when the consenting User is generating the proof before completing the

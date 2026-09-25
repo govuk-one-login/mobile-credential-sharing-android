@@ -13,6 +13,10 @@ import org.junit.Rule
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -59,14 +63,31 @@ class HolderConsentViewModelTest {
     }
 
     @Test
-    fun `Emits AwaitingUserConsent when orchestrator transitions`() =
+    fun `Emits AwaitingUserConsent presentation when orchestrator transitions`() =
         runTest(dispatcherRule.testDispatcher) {
-            viewModel.deviceRequest.test {
+            val presentation = ConsentPresentation(
+                documents = listOf(
+                    ConsentDocument(
+                        docType = "org.iso.18013.5.1.mDL",
+                        namespaces = listOf(
+                            ConsentNamespace(
+                                nameSpace = "org.iso.18013.5.1",
+                                attributes = listOf(ConsentAttribute("family_name", false))
+                            )
+                        )
+                    )
+                )
+            )
+
+            viewModel.presentation.test {
                 assertThat(awaitItem(), nullValue())
 
-                holderState.value = HolderSessionState.AwaitingUserConsent(deviceRequestStub)
+                holderState.value = HolderSessionState.AwaitingUserConsent(
+                    request = deviceRequestStub,
+                    presentation = presentation
+                )
 
-                assertThat(awaitItem(), equalTo(deviceRequestStub))
+                assertThat(awaitItem(), equalTo(presentation))
             }
         }
 }

@@ -48,7 +48,7 @@ class CredentialRequestHandlerImpl(
     ): CredentialRequestResult {
         val parsed = parseCredential(credential)
         val validatedCredential = validateDocType(credential.id, parsed, requestedDocType)
-        val filteredIssuerSigned = try {
+        val filtered = try {
             filterIssuerSignedUseCase.filter(
                 ParsedRawCredential(
                     nameSpaces = parsed.nameSpaces,
@@ -64,7 +64,8 @@ class CredentialRequestHandlerImpl(
         }
         return CredentialRequestResult(
             validatedCredential = validatedCredential,
-            filteredIssuerSigned = filteredIssuerSigned
+            filteredIssuerSigned = filtered.issuerSigned,
+            matchedAttributes = filtered.matchedAttributes
         )
     }
 
