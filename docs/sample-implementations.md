@@ -35,7 +35,7 @@ class SecureVaultCredentialProvider : CredentialProvider {
     }
     
     /// 2. Sign Device Response
-    override suspend fun sign(payload: ByteArray, documentId: String): ByteArray {
+    override suspend fun sign(payload: ByteArray, documentId: String): SignResult {
         val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
         val privateKey = keyStore.getKey(documentId, null) as java.security.PrivateKey
         
