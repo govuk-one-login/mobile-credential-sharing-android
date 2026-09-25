@@ -16,14 +16,14 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 @ContributesBinding(AppScope::class)
 class ReaderAuthenticationImpl(
     private val verifyReaderAuthUseCase: VerifyReaderAuthUseCase,
-    private val validatePrivacyPolicyUseCase: ValidatePrivacyPolicyUseCase,
+    private val validatePrivacyPolicyUseCase: ValidatePrivacyPolicyUseCase
 ) : ReaderAuthentication {
 
     override fun authenticateDeviceRequest(
         deviceRequest: DeviceRequest,
         sessionTranscriptBytes: ByteArray,
         supportedDocumentTypes: List<String>,
-        trustedReaderCertificates: List<X509Certificate>,
+        trustedReaderCertificates: List<X509Certificate>
     ): ReaderAuthenticationResult {
         val supportedCandidates = deviceRequest.docRequests.filter {
             it.itemsRequest.docType in supportedDocumentTypes
@@ -38,7 +38,7 @@ class ReaderAuthenticationImpl(
                 val verifiedRequest = verifyReaderAuthUseCase.verify(
                     candidateDocRequest = candidate,
                     untaggedSessionTranscriptBytes = sessionTranscriptBytes,
-                    trustedReaderCertificates = trustedReaderCertificates,
+                    trustedReaderCertificates = trustedReaderCertificates
                 )
                 val authenticatedRequest = validatePrivacyPolicyUseCase.validate(verifiedRequest)
                 return ReaderAuthenticationResult.Success(authenticatedRequest)
