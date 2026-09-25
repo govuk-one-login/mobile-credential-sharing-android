@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
  * Production implementation of [ReaderAuthentication].
  *
  * Orchestrates candidate selection across candidates in a [DeviceRequest],
- * executing R4 cryptographic verification and R5 privacy policy URL validation.
+ * executing cryptographic verification and privacy policy URL validation.
  */
 @Inject
 @ContributesBinding(AppScope::class)
