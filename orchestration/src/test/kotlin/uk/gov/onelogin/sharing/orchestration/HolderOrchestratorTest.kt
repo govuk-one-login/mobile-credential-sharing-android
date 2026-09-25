@@ -94,8 +94,11 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
+import uk.gov.onelogin.sharing.verification.reader.FakeReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationOutcome
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(TestParameterInjector::class)
@@ -123,17 +126,15 @@ class HolderOrchestratorTest {
 
     private val fakeDecryptDeviceRequestUseCase = FakeDecryptDeviceRequestUseCase()
 
-    private val fakeReaderAuthentication: ReaderAuthentication = mockk {
-        every {
-            authenticateDeviceRequest(any(), any(), any())
-        } returns ReaderAuthenticationOutcome.Success(
+    private val fakeReaderAuthentication = FakeReaderAuthentication(
+        resultToReturn = ReaderAuthenticationOutcome.Success(
             AuthenticatedReaderRequest(
                 docRequest = mockk(relaxed = true),
                 privacyPolicyUrl = mockk(relaxed = true),
                 readerOrganizationName = "GOV.UK OneLogin Test"
             )
         )
-    }
+    )
 
     private val sessionTimer = FakeSessionTimer()
     private val fakeCredentialRequestHandler = FakeCredentialRequestHandler().apply {
@@ -1864,6 +1865,54 @@ class HolderOrchestratorTest {
                 )
             }
         }
+
+    @Test
+    fun `Reader Authentication Unfulfillable transitions to Success UnfulfillableRequest and does not request credentials`() = runTest {
+        val fakeReaderAuth = FakeReaderAuthentication(
+            resultToReturn = ReaderAuthenticationOutcome.Unfulfillable
+        )
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            readerAuthentication = fakeReaderAuth,
+            trustedReaderCertificates = listOf(mockk())
+        )
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isSuccessful())
+        assertEquals(1, fakeReaderAuth.authenticateCalls)
+    }
+
+    @Test
+    fun `Reader Authentication Failure transitions to Failed with error`() = runTest {
+        val fakeReaderAuth = FakeReaderAuthentication(
+            exceptionToThrow = ReaderAuthenticationFailure(ReaderAuthenticationReason.UNTRUSTED_READER_CERTIFICATE)
+        )
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            readerAuthentication = fakeReaderAuth,
+            trustedReaderCertificates = listOf(mockk())
+        )
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isFailed())
+        assertEquals(1, fakeReaderAuth.authenticateCalls)
+    }
 
     private inner class PeerTerminationFixture(
         status: SessionDataStatus,
