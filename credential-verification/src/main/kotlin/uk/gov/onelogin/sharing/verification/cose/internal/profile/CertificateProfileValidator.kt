@@ -137,47 +137,12 @@ internal class CertificateProfileValidator {
     }
 
     private fun extractAttribute(dn: String, attr: String): String? {
-        for (rdn in splitRdns(dn)) {
-            val eqIndex = rdn.indexOf('=')
-            if (eqIndex > 0) {
-                val key = rdn.substring(0, eqIndex).trim()
-                if (key.equals(attr, ignoreCase = true)) {
-                    return rdn.substring(eqIndex + 1).trim().ifEmpty { null }
-                }
-            }
-        }
-        return null
-    }
-
-    private fun splitRdns(dn: String): List<String> {
-        val rdns = mutableListOf<String>()
-        val current = StringBuilder()
-        var i = 0
-        while (i < dn.length) {
-            when (val ch = dn[i]) {
-                '\\' -> if (i + 1 < dn.length) {
-                    current.append(ch)
-                    current.append(dn[i + 1])
-                    i += 2
-                } else {
-                    current.append(ch)
-                    i++
-                }
-
-                ',' -> {
-                    rdns.add(current.toString().trim())
-                    current.clear()
-                    i++
-                }
-
-                else -> {
-                    current.append(ch)
-                    i++
-                }
-            }
-        }
-        if (current.isNotEmpty()) rdns.add(current.toString().trim())
-        return rdns
+        val prefix = "$attr="
+        val start = dn.indexOf(prefix)
+        if (start < 0) return null
+        val valueStart = start + prefix.length
+        val end = dn.indexOf(',', valueStart).let { if (it < 0) dn.length else it }
+        return dn.substring(valueStart, end).trim().ifEmpty { null }
     }
 
     private companion object {
