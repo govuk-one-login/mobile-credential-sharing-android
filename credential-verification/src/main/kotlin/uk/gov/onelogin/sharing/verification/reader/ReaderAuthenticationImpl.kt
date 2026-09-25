@@ -17,13 +17,13 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 class ReaderAuthenticationImpl(
     private val verifyReaderAuthUseCase: VerifyReaderAuthUseCase,
     private val validatePrivacyPolicyUseCase: ValidatePrivacyPolicyUseCase,
-    private val trustedReaderCertificates: List<X509Certificate>,
+    private val trustedReaderCertificates: List<X509Certificate>
 ) : ReaderAuthentication {
 
     override fun authenticateDeviceRequest(
         deviceRequest: DeviceRequest,
         untaggedSessionTranscriptBytes: ByteArray,
-        supportedDocumentTypes: List<String>,
+        supportedDocumentTypes: List<String>
     ): ReaderAuthenticationOutcome {
         var lastFailure: ReaderAuthenticationFailure? = null
 
@@ -31,24 +31,25 @@ class ReaderAuthenticationImpl(
             it.itemsRequest.docType in supportedDocumentTypes
         }
 
-        if (supportedCandidates.isEmpty()) {
-            return ReaderAuthenticationOutcome.Unfulfillable
-        }
-
-        for (candidateDocRequest in supportedCandidates) {
+        val successOutcome = supportedCandidates.firstNotNullOfOrNull { candidateDocRequest ->
             try {
                 val verifiedRequest = verifyReaderAuthUseCase.verify(
                     candidateDocRequest = candidateDocRequest,
                     untaggedSessionTranscriptBytes = untaggedSessionTranscriptBytes,
-                    trustedReaderCertificates = this.trustedReaderCertificates,
+                    trustedReaderCertificates = this.trustedReaderCertificates
                 )
 
                 val authenticatedRequest = validatePrivacyPolicyUseCase.validate(verifiedRequest)
 
-                return ReaderAuthenticationOutcome.Success(authenticatedRequest)
+                ReaderAuthenticationOutcome.Success(authenticatedRequest)
             } catch (e: ReaderAuthenticationFailure) {
                 lastFailure = e
+                null
             }
+        }
+
+        if (successOutcome != null) {
+            return successOutcome
         }
 
         lastFailure?.let { throw it }

@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import io.mockk.every
+import io.mockk.mockk
 import java.security.GeneralSecurityException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
@@ -13,8 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import io.mockk.every
-import io.mockk.mockk
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
@@ -164,7 +164,7 @@ class HolderOrchestratorTest {
         confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
         holderSessionTerminator: HolderSessionTerminator = FakeHolderSessionTerminator(),
         inboundMessageClassifier: InboundMessageClassifier = FakeInboundMessageClassifier(),
-        readerAuthentication: ReaderAuthentication = fakeReaderAuthentication,
+        readerAuthentication: ReaderAuthentication = fakeReaderAuthentication
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,

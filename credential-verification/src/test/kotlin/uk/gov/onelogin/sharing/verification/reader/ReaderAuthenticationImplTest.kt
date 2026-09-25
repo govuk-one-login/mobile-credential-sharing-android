@@ -33,7 +33,7 @@ class ReaderAuthenticationImplTest {
         readerAuthentication = ReaderAuthenticationImpl(
             verifyReaderAuthUseCase = verifyReaderAuthUseCase,
             validatePrivacyPolicyUseCase = validatePrivacyPolicyUseCase,
-            trustedReaderCertificates = listOf(mockCert),
+            trustedReaderCertificates = listOf(mockCert)
         )
     }
 
@@ -54,8 +54,12 @@ class ReaderAuthenticationImplTest {
 
     @Test
     fun `request with no supported docTypes returns Unfulfillable without calling R4 or R5`() {
-        val unsupportedDocRequest = DocRequest(itemsRequest = ItemsRequest(docType = docTypeEvrc, nameSpaces = sampleNameSpaces))
-        val deviceRequest = DeviceRequest(version = "1.0", docRequests = listOf(unsupportedDocRequest))
+        val unsupportedDocRequest = DocRequest(
+            itemsRequest =
+                ItemsRequest(docType = docTypeEvrc, nameSpaces = sampleNameSpaces)
+        )
+        val deviceRequest =
+            DeviceRequest(version = "1.0", docRequests = listOf(unsupportedDocRequest))
 
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = deviceRequest,
@@ -71,10 +75,17 @@ class ReaderAuthenticationImplTest {
     @Test
     fun `skips unsupported candidate eVRC and authenticates first supported candidate mDL`() {
         val mockUri: Uri = mockk()
-        val docReqEvrc = DocRequest(itemsRequest = ItemsRequest(docType = docTypeEvrc, nameSpaces = sampleNameSpaces))
-        val docReqMdl = DocRequest(itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
+        val docReqEvrc =
+            DocRequest(
+                itemsRequest = ItemsRequest(docType = docTypeEvrc, nameSpaces = sampleNameSpaces)
+            )
+        val docReqMdl =
+            DocRequest(
+                itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces)
+            )
 
-        val deviceRequest = DeviceRequest(version = "1.0", docRequests = listOf(docReqEvrc, docReqMdl))
+        val deviceRequest =
+            DeviceRequest(version = "1.0", docRequests = listOf(docReqEvrc, docReqMdl))
         val verifiedReqMdl = VerifiedReaderRequest(docReqMdl, mockCert)
 
         every {
@@ -107,12 +118,25 @@ class ReaderAuthenticationImplTest {
     @Test
     fun `selects first candidate that passes both R4 and R5`() {
         val mockUri: Uri = mockk()
-        val docReqA = DocRequest(itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
-        val docReqB = DocRequest(itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
-        val docReqC = DocRequest(itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
-        val docReqD = DocRequest(itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
+        val docReqA =
+            DocRequest(
+                itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces)
+            )
+        val docReqB =
+            DocRequest(
+                itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces)
+            )
+        val docReqC =
+            DocRequest(
+                itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces)
+            )
+        val docReqD =
+            DocRequest(
+                itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces)
+            )
 
-        val deviceRequest = DeviceRequest(version = "1.0", docRequests = listOf(docReqA, docReqB, docReqC, docReqD))
+        val deviceRequest =
+            DeviceRequest(version = "1.0", docRequests = listOf(docReqA, docReqB, docReqC, docReqD))
 
         val verifiedReqB = VerifiedReaderRequest(docReqB, mockCert)
         val verifiedReqC = VerifiedReaderRequest(docReqC, mockCert)
@@ -120,7 +144,9 @@ class ReaderAuthenticationImplTest {
         // Candidate A fails R4, Candidate B passes R4, Candidate C passes R4
         every {
             verifyReaderAuthUseCase.verify(any(), any(), any())
-        } throws ReaderAuthenticationFailure(ReaderAuthenticationReason.INVALID_READER_SIGNATURE) andThen
+        } throws ReaderAuthenticationFailure(
+            ReaderAuthenticationReason.INVALID_READER_SIGNATURE
+        ) andThen
             verifiedReqB andThen
             verifiedReqC
 
@@ -155,19 +181,37 @@ class ReaderAuthenticationImplTest {
 
     @Test
     fun `all candidates fail throws final candidate failure`() {
-        val docReqA = DocRequest(itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces))
-        val docReqB = DocRequest(itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces))
+        val docReqA =
+            DocRequest(
+                itemsRequest = ItemsRequest(docType = docTypeMdl, nameSpaces = sampleNameSpaces)
+            )
+        val docReqB =
+            DocRequest(
+                itemsRequest = ItemsRequest(docType = docTypeAamva, nameSpaces = sampleNameSpaces)
+            )
 
         val deviceRequest = DeviceRequest(version = "1.0", docRequests = listOf(docReqA, docReqB))
 
         // Candidate A fails R4 with INVALID_READER_SIGNATURE
         every {
-            verifyReaderAuthUseCase.verify(match { it.itemsRequest.docType == docTypeMdl }, any(), any())
+            verifyReaderAuthUseCase.verify(
+                match {
+                    it.itemsRequest.docType == docTypeMdl
+                },
+                any(),
+                any()
+            )
         } throws ReaderAuthenticationFailure(ReaderAuthenticationReason.INVALID_READER_SIGNATURE)
 
         // Candidate B passes R4
         every {
-            verifyReaderAuthUseCase.verify(match { it.itemsRequest.docType == docTypeAamva }, any(), any())
+            verifyReaderAuthUseCase.verify(
+                match {
+                    it.itemsRequest.docType == docTypeAamva
+                },
+                any(),
+                any()
+            )
         } returns VerifiedReaderRequest(mockk(), mockCert)
 
         // Candidate B fails R5 with PRIVACY_POLICY_URL_INVALID

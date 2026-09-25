@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason.PR
 class ValidatePrivacyPolicyUseCaseImpl(
     private val siaExtensionParser: SiaExtensionParser,
     private val privacyPolicyUrlValidator: PrivacyPolicyUrlValidator,
-    private val subjectNameParser: SubjectNameParser,
+    private val subjectNameParser: SubjectNameParser
 ) : ValidatePrivacyPolicyUseCase {
 
     override fun validate(

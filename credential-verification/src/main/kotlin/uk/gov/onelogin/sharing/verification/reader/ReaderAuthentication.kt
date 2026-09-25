@@ -22,7 +22,7 @@ fun interface ReaderAuthentication {
     fun authenticateDeviceRequest(
         deviceRequest: DeviceRequest,
         untaggedSessionTranscriptBytes: ByteArray,
-        supportedDocumentTypes: List<String>,
+        supportedDocumentTypes: List<String>
     ): ReaderAuthenticationOutcome
 }
 

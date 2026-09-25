@@ -66,7 +66,6 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
-
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationOutcome
@@ -88,7 +87,7 @@ class HolderOrchestrator(
     private val holderSessionTerminator: HolderSessionTerminator,
     private val inboundMessageClassifier: InboundMessageClassifier,
     private val sessionTimer: SessionTimer,
-    private val readerAuthentication: ReaderAuthentication,
+    private val readerAuthentication: ReaderAuthentication
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val consentInFlight = AtomicBoolean(false)
@@ -507,6 +506,7 @@ class HolderOrchestrator(
         handleConnectionLoss(isGattEnd = true)
     }
 
+    @Suppress("LongMethod")
     private fun handleSessionEstablishment(message: ByteArray) {
         val keypair = validateSessionEstablishmentPreconditions() ?: return
 
@@ -555,7 +555,9 @@ class HolderOrchestrator(
                         val authReq = outcome.authenticatedReaderRequest
                         logger.debug(
                             logTag,
-                            "Reader Authenticated: Org = ${authReq.readerOrganizationName}, Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                            "Reader Authenticated: Org =" +
+                                " ${authReq.readerOrganizationName}, Privacy Policy URL = " +
+                                "${authReq.privacyPolicyUrl}"
                         )
                         sessionFlow.value.updateSessionContext {
                             it.copy(authenticatedReaderRequest = authReq)
