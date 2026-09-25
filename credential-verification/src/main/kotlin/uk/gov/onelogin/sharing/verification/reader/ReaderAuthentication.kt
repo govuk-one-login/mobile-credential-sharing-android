@@ -16,6 +16,7 @@ fun interface ReaderAuthentication {
      *
      * @param deviceRequest The decoded [DeviceRequest] received over BLE.
      * @param untaggedSessionTranscriptBytes The active untagged session transcript bytes.
+     * @param supportedDocumentTypes The list of document types supported by the product.
      * @param trustedReaderCertificates The list of trusted Reader CA certificates.
      * @return [ReaderAuthenticationOutcome.Success] or [ReaderAuthenticationOutcome.Unfulfillable].
      * @throws ReaderAuthenticationFailure if every candidate fails verification.
@@ -23,6 +24,7 @@ fun interface ReaderAuthentication {
     fun authenticateDeviceRequest(
         deviceRequest: DeviceRequest,
         untaggedSessionTranscriptBytes: ByteArray,
+        supportedDocumentTypes: List<String>,
         trustedReaderCertificates: List<X509Certificate>
     ): ReaderAuthenticationOutcome
 }

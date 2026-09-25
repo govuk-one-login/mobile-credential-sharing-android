@@ -17,21 +17,32 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 class ReaderAuthenticationImpl(
     private val verifyReaderAuthUseCase: VerifyReaderAuthUseCase,
     private val validatePrivacyPolicyUseCase: ValidatePrivacyPolicyUseCase,
+    private val trustedReaderCertificates: List<X509Certificate>,
 ) : ReaderAuthentication {
 
     override fun authenticateDeviceRequest(
         deviceRequest: DeviceRequest,
         untaggedSessionTranscriptBytes: ByteArray,
+        supportedDocumentTypes: List<String>,
         trustedReaderCertificates: List<X509Certificate>,
     ): ReaderAuthenticationOutcome {
+        val activeTrust = this.trustedReaderCertificates.ifEmpty { trustedReaderCertificates }
         var lastFailure: ReaderAuthenticationFailure? = null
 
-        for (candidateDocRequest in deviceRequest.docRequests) {
+        val supportedCandidates = deviceRequest.docRequests.filter {
+            it.itemsRequest.docType in supportedDocumentTypes
+        }
+
+        if (supportedCandidates.isEmpty()) {
+            return ReaderAuthenticationOutcome.Unfulfillable
+        }
+
+        for (candidateDocRequest in supportedCandidates) {
             try {
                 val verifiedRequest = verifyReaderAuthUseCase.verify(
                     candidateDocRequest = candidateDocRequest,
                     untaggedSessionTranscriptBytes = untaggedSessionTranscriptBytes,
-                    trustedReaderCertificates = trustedReaderCertificates,
+                    trustedReaderCertificates = activeTrust,
                 )
 
                 val authenticatedRequest = validatePrivacyPolicyUseCase.validate(verifiedRequest)

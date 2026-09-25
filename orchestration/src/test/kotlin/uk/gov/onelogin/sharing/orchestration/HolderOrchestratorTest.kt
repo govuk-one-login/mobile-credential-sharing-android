@@ -122,7 +122,7 @@ class HolderOrchestratorTest {
 
     private val fakeReaderAuthentication: ReaderAuthentication = mockk {
         every {
-            authenticateDeviceRequest(any(), any(), any())
+            authenticateDeviceRequest(any(), any(), any(), any())
         } returns ReaderAuthenticationOutcome.Success(
             AuthenticatedReaderRequest(
                 docRequest = mockk(relaxed = true),

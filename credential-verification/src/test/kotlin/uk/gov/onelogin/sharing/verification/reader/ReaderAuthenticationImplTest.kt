@@ -24,13 +24,15 @@ class ReaderAuthenticationImplTest {
     private val sampleTranscript = byteArrayOf(0x01, 0x02)
     private val docTypeMdl = "org.iso.18013.5.1.mDL"
     private val docTypeAamva = "org.iso.18013.5.1.aamva"
+    private val supportedTypes = listOf(docTypeMdl, docTypeAamva)
     private val sampleNameSpaces = mapOf("org.iso.18013.5.1" to mapOf("family_name" to false))
 
     @Before
     fun setUp() {
         readerAuthentication = ReaderAuthenticationImpl(
             verifyReaderAuthUseCase = verifyReaderAuthUseCase,
-            validatePrivacyPolicyUseCase = validatePrivacyPolicyUseCase
+            validatePrivacyPolicyUseCase = validatePrivacyPolicyUseCase,
+            trustedReaderCertificates = listOf(mockCert)
         )
     }
 
@@ -41,6 +43,24 @@ class ReaderAuthenticationImplTest {
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = emptyDeviceRequest,
             untaggedSessionTranscriptBytes = sampleTranscript,
+            supportedDocumentTypes = supportedTypes,
+            trustedReaderCertificates = listOf(mockCert),
+        )
+
+        assertTrue(outcome is ReaderAuthenticationOutcome.Unfulfillable)
+        verify(exactly = 0) { verifyReaderAuthUseCase.verify(any(), any(), any()) }
+        verify(exactly = 0) { validatePrivacyPolicyUseCase.validate(any()) }
+    }
+
+    @Test
+    fun `request with no supported docTypes returns Unfulfillable without calling R4 or R5`() {
+        val unsupportedDocRequest = DocRequest(itemsRequest = ItemsRequest(docType = "unsupported.type", nameSpaces = sampleNameSpaces))
+        val deviceRequest = DeviceRequest(version = "1.0", docRequests = listOf(unsupportedDocRequest))
+
+        val outcome = readerAuthentication.authenticateDeviceRequest(
+            deviceRequest = deviceRequest,
+            untaggedSessionTranscriptBytes = sampleTranscript,
+            supportedDocumentTypes = supportedTypes,
             trustedReaderCertificates = listOf(mockCert),
         )
 
@@ -86,6 +106,7 @@ class ReaderAuthenticationImplTest {
         val outcome = readerAuthentication.authenticateDeviceRequest(
             deviceRequest = deviceRequest,
             untaggedSessionTranscriptBytes = sampleTranscript,
+            supportedDocumentTypes = supportedTypes,
             trustedReaderCertificates = listOf(mockCert),
         )
 
@@ -124,6 +145,7 @@ class ReaderAuthenticationImplTest {
             readerAuthentication.authenticateDeviceRequest(
                 deviceRequest = deviceRequest,
                 untaggedSessionTranscriptBytes = sampleTranscript,
+                supportedDocumentTypes = supportedTypes,
                 trustedReaderCertificates = listOf(mockCert),
             )
         }

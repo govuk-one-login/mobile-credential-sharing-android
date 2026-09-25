@@ -60,6 +60,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
@@ -550,6 +551,7 @@ class HolderOrchestrator(
                 val outcome = auth.authenticateDeviceRequest(
                     deviceRequest = deviceRequest,
                     untaggedSessionTranscriptBytes = transcript,
+                    supportedDocumentTypes = listOf(DocumentType.Mdl.value),
                     trustedReaderCertificates = activeTrust
                 )
 
