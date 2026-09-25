@@ -5,9 +5,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import java.security.interfaces.ECPrivateKey
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,6 +46,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequest
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequestHandlerImpl
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
+import uk.gov.onelogin.sharing.orchestration.holder.session.AuthenticatedReaderRequestFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
@@ -69,6 +67,10 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationOutcome
+import java.security.cert.X509Certificate
+import java.security.interfaces.ECPrivateKey
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -87,6 +89,8 @@ class HolderOrchestrator(
     private val holderSessionTerminator: HolderSessionTerminator,
     private val inboundMessageClassifier: InboundMessageClassifier,
     private val sessionTimer: SessionTimer,
+    private val trustedReaderCertificates: List<X509Certificate>,
+    private val authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory,
     private val readerAuthentication: ReaderAuthentication
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
@@ -506,7 +510,7 @@ class HolderOrchestrator(
         handleConnectionLoss(isGattEnd = true)
     }
 
-    @Suppress("LongMethod")
+    @Suppress("LongMethod", "NestedBlockDepth")
     private fun handleSessionEstablishment(message: ByteArray) {
         val keypair = validateSessionEstablishmentPreconditions() ?: return
 
@@ -532,6 +536,66 @@ class HolderOrchestrator(
                 it.copy(decryptCounter = it.decryptCounter + 1u)
             }
 
+            // To be removed in: https://govukverify.atlassian.net/browse/DCMAW-23451 (EX2)
+            if (trustedReaderCertificates.isEmpty()) {
+                // Empty list: only reachable via the deprecated presentCredentialSdk path,
+                // which hardcodes emptyList(). Reader authentication is skipped to preserve
+                // the existing behaviour. Temporarily populate authenticatedReaderRequest with
+                // dummy privacy-policy and organisation name.
+                logger.debug(logTag, "Cert list is empty")
+                sessionFlow.value.updateSessionContext {
+                    it.copy(
+                        authenticatedReaderRequest = authenticatedReaderRequestFactory.create(
+                            deviceRequest.docRequests.first()
+                        )
+                    )
+                }
+
+                sessionFlow.value.sessionContext.authenticatedReaderRequest?.let {
+                    logger.debug(logTag, "privacy policy = ${it.privacyPolicyUrl}")
+                    it.readerOrganizationName?.let { orgName ->
+                        logger.debug(logTag, "organisation name = $orgName")
+                    }
+                }
+            } else {
+                readerAuthentication.let { auth ->
+                    val transcript = checkNotNull(currentContext.sessionTranscriptBytes) {
+                        "Missing session transcript"
+                    }
+                    val outcome = auth.authenticateDeviceRequest(
+                        deviceRequest = deviceRequest,
+                        untaggedSessionTranscriptBytes = transcript,
+                        supportedDocumentTypes = listOf(DocumentType.Mdl.value)
+                    )
+
+                    when (outcome) {
+                        is ReaderAuthenticationOutcome.Success -> {
+                            val authReq = outcome.authenticatedReaderRequest
+                            logger.debug(
+                                logTag,
+                                "Reader Authenticated: Org =" +
+                                        " ${authReq.readerOrganizationName}, Privacy Policy URL = " +
+                                        "${authReq.privacyPolicyUrl}"
+                            )
+                            sessionFlow.value.updateSessionContext {
+                                it.copy(authenticatedReaderRequest = authReq)
+                            }
+                        }
+
+                        is ReaderAuthenticationOutcome.Unfulfillable -> {
+                            logger.error(logTag, "Reader Authentication UNFULFILLABLE")
+                            appCoroutineScope.launch {
+                                handleNoMatchTermination(
+                                    CredentialRequestException("Unfulfillable request")
+                                )
+                            }
+                            return
+                        }
+                    }
+                }
+                logger.debug(logTag, "Cert list is not empty")
+            }
+
             if (!deviceRequestContainsPortrait(deviceRequest)) {
                 logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
                 appCoroutineScope.launch {
@@ -540,41 +604,7 @@ class HolderOrchestrator(
                 return
             }
 
-            readerAuthentication.let { auth ->
-                val transcript = checkNotNull(currentContext.sessionTranscriptBytes) {
-                    "Missing session transcript"
-                }
-                val outcome = auth.authenticateDeviceRequest(
-                    deviceRequest = deviceRequest,
-                    untaggedSessionTranscriptBytes = transcript,
-                    supportedDocumentTypes = listOf(DocumentType.Mdl.value)
-                )
 
-                when (outcome) {
-                    is ReaderAuthenticationOutcome.Success -> {
-                        val authReq = outcome.authenticatedReaderRequest
-                        logger.debug(
-                            logTag,
-                            "Reader Authenticated: Org =" +
-                                " ${authReq.readerOrganizationName}, Privacy Policy URL = " +
-                                "${authReq.privacyPolicyUrl}"
-                        )
-                        sessionFlow.value.updateSessionContext {
-                            it.copy(authenticatedReaderRequest = authReq)
-                        }
-                    }
-
-                    is ReaderAuthenticationOutcome.Unfulfillable -> {
-                        logger.error(logTag, "Reader Authentication UNFULFILLABLE")
-                        appCoroutineScope.launch {
-                            handleNoMatchTermination(
-                                CredentialRequestException("Unfulfillable request")
-                            )
-                        }
-                        return
-                    }
-                }
-            }
 
             val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
             appCoroutineScope.launch {
@@ -880,17 +910,13 @@ class HolderOrchestrator(
         }
     }
 
-    private fun deviceRequestContainsPortrait(deviceRequest: DeviceRequest): Boolean {
-        for (docRequest in deviceRequest.docRequests) {
-            for ((namespace, elements) in docRequest.itemsRequest.nameSpaces) {
-                logger.debug(logTag, "CHECKING NAMESPACE: '$namespace', elements: ${elements.keys}")
-                if (elements.containsKey(MdlAttribute.Portrait.value)) {
-                    return true
-                }
+    private fun deviceRequestContainsPortrait(deviceRequest: DeviceRequest): Boolean =
+        deviceRequest.docRequests.any { docRequest ->
+            docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
+                namespace == DocumentType.Mdl.NAMESPACE &&
+                    elements.containsKey(MdlAttribute.Portrait.value)
             }
         }
-        return false
-    }
 
     private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {
         val currentState = holderSessionState.value

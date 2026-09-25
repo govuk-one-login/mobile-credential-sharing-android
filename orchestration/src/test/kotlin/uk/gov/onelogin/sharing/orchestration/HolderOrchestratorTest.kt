@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.every
 import io.mockk.mockk
 import java.security.GeneralSecurityException
+import java.security.cert.X509Certificate
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -54,7 +55,9 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.CredentialRequest
 import uk.gov.onelogin.sharing.orchestration.holder.credential.FakeCredentialRequestHandler
 import uk.gov.onelogin.sharing.orchestration.holder.credential.NoMatchTerminationCase
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
+import uk.gov.onelogin.sharing.orchestration.holder.session.AuthenticatedReaderRequestFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.FakeAuthenticatedReaderRequestFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeInboundMessageClassifier
@@ -164,6 +167,9 @@ class HolderOrchestratorTest {
         confirmConsentUseCase: ConfirmConsentUseCase = FakeConfirmConsentUseCase(),
         holderSessionTerminator: HolderSessionTerminator = FakeHolderSessionTerminator(),
         inboundMessageClassifier: InboundMessageClassifier = FakeInboundMessageClassifier(),
+        trustedReaderCertificates: List<X509Certificate> = emptyList(),
+        authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory =
+            FakeAuthenticatedReaderRequestFactory(),
         readerAuthentication: ReaderAuthentication = fakeReaderAuthentication
     ) = HolderOrchestrator(
         logger = logger,
@@ -178,7 +184,9 @@ class HolderOrchestratorTest {
         holderSessionTerminator = holderSessionTerminator,
         inboundMessageClassifier = inboundMessageClassifier,
         sessionTimer = sessionTimer,
-        readerAuthentication = readerAuthentication
+        readerAuthentication = readerAuthentication,
+        trustedReaderCertificates = trustedReaderCertificates,
+        authenticatedReaderRequestFactory = authenticatedReaderRequestFactory
     )
 
     @Test
@@ -580,6 +588,49 @@ class HolderOrchestratorTest {
 
         assertEquals(2u, currentSession.sessionContext.decryptCounter)
     }
+
+    /**
+     * To be removed in: https://govukverify.atlassian.net/browse/DCMAW-23451 (EX2)
+     */
+    @Test
+    fun `populates dummy authenticatedReaderRequest when trusted reader cert list is empty`() =
+        runTest {
+            val sessionFactory = createSessionFactory()
+            val peripheralTransport = FakePeripheralBluetoothTransport()
+
+            val orchestrator = createOrchestrator(
+                sessionFactory = sessionFactory,
+                peripheralBluetoothTransport = peripheralTransport,
+                trustedReaderCertificates = emptyList()
+            )
+            backgroundScope.launch {
+                orchestrator.holderSessionState.collect {}
+            }
+            orchestrator.start()
+            advanceUntilIdle()
+
+            peripheralTransport.emitState(
+                PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
+            )
+            peripheralTransport.emitState(
+                PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+            )
+            advanceUntilIdle()
+
+            val authenticatedReaderRequest =
+                sessionFactory.getCurrentSession()
+                    .sessionContext
+                    .authenticatedReaderRequest
+
+            assertEquals(
+                FakeAuthenticatedReaderRequestFactory.DEFAULT_PRIVACY_POLICY_URL,
+                authenticatedReaderRequest?.privacyPolicyUrl.toString()
+            )
+            assertEquals(
+                FakeAuthenticatedReaderRequestFactory.DEFAULT_ORGANISATION_NAME,
+                authenticatedReaderRequest?.readerOrganizationName
+            )
+        }
 
     @Test
     fun `CBOR decoding failure builds termination SessionData and transitions to failed`() =
