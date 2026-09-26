@@ -31,6 +31,7 @@ import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
+import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -809,53 +810,72 @@ class HolderOrchestrator(
         var lastAuthFailure: ReaderAuthenticationFailure? = null
 
         for (candidate in supportedCandidates) {
-            val candidateDeviceRequest = DeviceRequest(
-                version = deviceRequest.version,
-                docRequests = listOf(candidate)
-            )
-
-            try {
-                val outcome = readerAuthentication.authenticateDeviceRequest(
-                    deviceRequest = candidateDeviceRequest,
-                    sessionTranscriptBytes = transcript,
-                    supportedDocumentTypes = listOf(DocumentType.Mdl.value),
-                    trustedReaderCertificates = currentContext.trustedReaderCertificates
-                )
-
-                when (outcome) {
-                    is ReaderAuthenticationResult.Success -> {
-                        val authReq = outcome.authenticatedReaderRequest
-                        if (!docRequestContainsPortrait(authReq.docRequest)) {
-                            logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
-                            continue
-                        }
-
-                        sessionFlow.value.updateSessionContext {
-                            it.copy(authenticatedReaderRequest = authReq)
-                        }
-
-                        val requestedDocType = authReq.docRequest.itemsRequest.docType
-                        try {
-                            requestAndValidateCredential(requestedDocType, candidateDeviceRequest)
-                            return
-                        } catch (e: CredentialRequestException) {
-                            logger.error(logTag, "Candidate failed attribute matching: ${e.message}")
-                        }
-                    }
-
-                    is ReaderAuthenticationResult.Unfulfillable -> continue
-                }
-            } catch (e: ReaderAuthenticationFailure) {
-                lastAuthFailure = e
+            val failure = evaluateCandidate(candidate, deviceRequest.version, transcript)
+                ?: return
+            if (failure is ReaderAuthenticationFailure) {
+                lastAuthFailure = failure
             }
         }
 
-        lastAuthFailure?.let {
-            handleReaderAuthFailure(it)
-            return
+        if (lastAuthFailure != null) {
+            handleReaderAuthFailure(lastAuthFailure)
+        } else {
+            handleNoMatchTermination(CredentialRequestException("Unfulfillable request"))
         }
+    }
 
-        handleNoMatchTermination(CredentialRequestException("Unfulfillable request"))
+    private suspend fun evaluateCandidate(
+        candidate: DocRequest,
+        version: String,
+        transcript: ByteArray
+    ): Throwable? {
+        val candidateDeviceRequest = DeviceRequest(
+            version = version,
+            docRequests = listOf(candidate)
+        )
+
+        return try {
+            val outcome = readerAuthentication.authenticateDeviceRequest(
+                deviceRequest = candidateDeviceRequest,
+                sessionTranscriptBytes = transcript,
+                supportedDocumentTypes = listOf(DocumentType.Mdl.value),
+                trustedReaderCertificates = currentContext.trustedReaderCertificates
+            )
+
+            when (outcome) {
+                is ReaderAuthenticationResult.Success -> {
+                    val authReq = outcome.authenticatedReaderRequest
+                    logger.debug(
+                        logTag,
+                        "Reader Authenticated: Org = ${authReq.readerOrganizationName}," +
+                            " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                    )
+                    if (!docRequestContainsPortrait(authReq.docRequest)) {
+                        logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                        return IllegalStateException(PORTRAIT_POLICY_VIOLATION)
+                    }
+
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(authenticatedReaderRequest = authReq)
+                    }
+
+                    val requestedDocType = authReq.docRequest.itemsRequest.docType
+                    try {
+                        requestAndValidateCredential(requestedDocType, candidateDeviceRequest)
+                        null
+                    } catch (e: CredentialRequestException) {
+                        logger.error(logTag, "Candidate failed attribute matching: ${e.message}")
+                        e
+                    }
+                }
+
+                is ReaderAuthenticationResult.Unfulfillable -> {
+                    CredentialRequestException("Unfulfillable candidate")
+                }
+            }
+        } catch (e: ReaderAuthenticationFailure) {
+            e
+        }
     }
 
     private suspend fun sendTerminationAndFail(exception: Exception) {

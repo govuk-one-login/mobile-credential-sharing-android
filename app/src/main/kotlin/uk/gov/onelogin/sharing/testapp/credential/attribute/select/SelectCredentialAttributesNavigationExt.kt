@@ -27,9 +27,13 @@ object SelectCredentialAttributesNavigationExt {
             SelectCredentialAttributesScreen(
                 onSelectAttributeGroup = { verifierOption ->
                     scope.launch {
-                        val docType =
-                            verifierOption.docTypeOverride?.let { DocumentType.Custom(it) }
-                                ?: DocumentType.Mdl
+                        val docType = when (verifierOption.docRequestMode) {
+                            DocRequestMode.SINGLE -> DocumentType.Mdl
+
+                            DocRequestMode.MULTI_DOC_REQUEST -> DocumentType.Custom(
+                                "MULTI_UNSUPPORTED_AND_VALID"
+                            )
+                        }
                         controller.navigateToTestAppVerifierJourney(
                             VerificationRequest.typed(
                                 docType,

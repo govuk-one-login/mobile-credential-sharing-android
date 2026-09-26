@@ -37,7 +37,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto.Companion.
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ReaderAuthenticationDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
@@ -50,7 +49,8 @@ class VerifierCryptoServiceImpl(
     private val sharedSecretGenerator: SharedSecretGenerator,
     private val sessionKeyGenerator: SessionKeyGenerator,
     private val encryptDeviceRequestUseCase: EncryptDeviceRequestUseCase,
-    private val decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase
+    private val decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase,
+    private val docRequestBuilder: DocRequestBuilder = DocRequestBuilderImpl()
 ) : VerifierCryptoService {
 
     @Suppress("LongMethod")
@@ -172,37 +172,12 @@ class VerifierCryptoServiceImpl(
         itemsRequestBytes: ByteArray?,
         readerAuth: ByteArray?
     ): ByteArray = try {
-        val unmatchableItemsRequest = ItemsRequest(
-            docType = "org.iso.18013.5.1.mDL",
-            nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("age_over_99" to false))
-        )
-        val unmatchableItemsRequestBytes = buildItemsRequestBytes(unmatchableItemsRequest)
-
-        val unmatchableMdlCandidate = DocRequest(
-            itemsRequest = unmatchableItemsRequest,
-            readerAuth = readerAuth,
-            itemsRequestBytes = unmatchableItemsRequestBytes
-        )
-
-        val unsupportedEvrcItemsRequest = ItemsRequest(
-            docType = "org.iso.18013.5.1.eVRC",
-            nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("vehicle_category" to false))
-        )
-        val unsupportedEvrcItemsRequestBytes = buildItemsRequestBytes(unsupportedEvrcItemsRequest)
-
-        val unsupportedEvrcCandidate = DocRequest(
-            itemsRequest = unsupportedEvrcItemsRequest,
-            readerAuth = readerAuth,
-            itemsRequestBytes = unsupportedEvrcItemsRequestBytes
-        )
-
-        val validMdlCandidate = DocRequest(
+        val docRequests = docRequestBuilder.buildDocRequests(
             itemsRequest = itemsRequest,
+            itemsRequestBytes = itemsRequestBytes,
             readerAuth = readerAuth,
-            itemsRequestBytes = itemsRequestBytes
+            buildItemsRequestBytes = ::buildItemsRequestBytes
         )
-
-        val docRequests = listOf(unmatchableMdlCandidate, unsupportedEvrcCandidate, validMdlCandidate)
 
         DeviceRequest(
             version = "1.0",

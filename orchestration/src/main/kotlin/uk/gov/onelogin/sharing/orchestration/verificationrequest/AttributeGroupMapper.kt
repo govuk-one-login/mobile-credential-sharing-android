@@ -35,5 +35,12 @@ internal fun resolveDocumentType(documentType: String): DocumentType = when (doc
 
 private fun namespaceFor(documentType: DocumentType): String = when (documentType) {
     is DocumentType.Mdl -> DocumentType.Mdl.NAMESPACE
-    is DocumentType.Custom -> documentType.value
+
+    is DocumentType.Custom -> {
+        if (documentType.value.startsWith("MULTI_")) {
+            DocumentType.Mdl.NAMESPACE
+        } else {
+            documentType.value
+        }
+    }
 }

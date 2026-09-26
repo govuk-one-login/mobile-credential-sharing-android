@@ -84,7 +84,7 @@ class SelectCredentialAttributesScreenRule(
 
     fun performAttributeGroupClick(option: VerifierAttributeOption) {
         performAttributeGroupMenuClick()
-        onVerifierOptionText(option).performClick()
+        onVerifierOptionText(option).performScrollTo().performClick()
     }
 
     fun performReaderAuthClick(option: ReaderAuthOption) {

@@ -643,7 +643,25 @@ class VerifierOrchestrator(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {
-        val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
+        val effectiveItemsRequest = when (itemsRequest.docType) {
+            "MULTI_UNMATCHABLE_UNSUPPORTED_VALID" -> {
+                ItemsRequest(
+                    docType = "org.iso.18013.5.1.mDL",
+                    nameSpaces = mapOf(
+                        "org.iso.18013.5.1" to mapOf(
+                            "portrait" to false,
+                            "age_over_99" to false
+                        )
+                    )
+                )
+            }
+
+            "MULTI_UNSUPPORTED_AND_VALID" -> itemsRequest.copy(docType = "org.iso.18013.5.1.mDL")
+
+            else -> itemsRequest
+        }
+
+        val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(effectiveItemsRequest)
         val readerAuthBytes = verifierCryptoService.buildReaderAuthenticationBytes(
             sessionTranscript = deriveUntaggedCbor(context.sessionTranscriptBytes),
             itemsRequestBytes = itemsRequestBytes

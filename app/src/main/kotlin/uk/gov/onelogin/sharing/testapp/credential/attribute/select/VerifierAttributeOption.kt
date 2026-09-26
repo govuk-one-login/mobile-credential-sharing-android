@@ -8,10 +8,15 @@ private const val AGE_18 = 18
 private const val AGE_21 = 21
 private const val AGE_23 = 23
 
+enum class DocRequestMode {
+    SINGLE,
+    MULTI_DOC_REQUEST
+}
+
 enum class VerifierAttributeOption(
     val displayName: String,
     val attributeGroup: AttributeGroup,
-    val docTypeOverride: String? = null
+    val docRequestMode: DocRequestMode = DocRequestMode.SINGLE
 ) {
     PORTRAIT_AND_AGE_OVER_21(
         displayName = "Portrait and Age Over 21",
@@ -33,15 +38,15 @@ enum class VerifierAttributeOption(
             )
         )
     ),
-    MULTI_CANDIDATE_REQUEST(
-        displayName = "Multi-Candidate Request (eVRC + mDL)",
+    MULTI_DOC_REQUEST(
+        displayName = "Multi Doc Request: Unsupported + Valid (eVRC + mDL)",
         attributeGroup = AttributeGroup(
             mapOf(
                 MdlAttribute.Portrait to false,
                 MdlAttribute.AgeOver(AGE_21) to false
             )
         ),
-        docTypeOverride = "MULTI_CANDIDATE"
+        docRequestMode = DocRequestMode.MULTI_DOC_REQUEST
     ),
     MISSING_PORTRAIT(
         displayName = "Name (Missing Portrait)",
