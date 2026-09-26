@@ -25,6 +25,11 @@ class DocRequestBuilderImpl : DocRequestBuilder {
             createValidMdlCandidate(itemsRequest, readerAuth, itemsRequestBytes)
         )
 
+        TYPE_MULTI_CUSTOM_UK_AND_VALID -> listOf(
+            createCustomUkPidCandidate(readerAuth, buildItemsRequestBytes),
+            createValidMdlCandidate(itemsRequest, readerAuth, itemsRequestBytes)
+        )
+
         else -> listOf(
             DocRequest(
                 itemsRequest = itemsRequest,
@@ -41,6 +46,21 @@ class DocRequestBuilderImpl : DocRequestBuilder {
         val req = ItemsRequest(
             docType = DOC_TYPE_EVRC,
             nameSpaces = mapOf(NAMESPACE_ISO to mapOf(ATTR_VEHICLE_CATEGORY to false))
+        )
+        return DocRequest(
+            itemsRequest = req,
+            readerAuth = readerAuth,
+            itemsRequestBytes = buildItemsRequestBytes(req)
+        )
+    }
+
+    private fun createCustomUkPidCandidate(
+        readerAuth: ByteArray?,
+        buildItemsRequestBytes: (ItemsRequest) -> ByteArray
+    ): DocRequest {
+        val req = ItemsRequest(
+            docType = DOC_TYPE_UK_PID,
+            nameSpaces = mapOf(NAMESPACE_UK_PID to mapOf(ATTR_UK_NATIONAL_ID to false))
         )
         return DocRequest(
             itemsRequest = req,
@@ -67,11 +87,16 @@ class DocRequestBuilderImpl : DocRequestBuilder {
 
     companion object {
         const val TYPE_MULTI_UNSUPPORTED_AND_VALID = "MULTI_UNSUPPORTED_AND_VALID"
+        const val TYPE_MULTI_CUSTOM_UK_AND_VALID = "MULTI_CUSTOM_UK_AND_VALID"
 
         const val DOC_TYPE_MDL = "org.iso.18013.5.1.mDL"
         const val DOC_TYPE_EVRC = "org.iso.18013.5.1.eVRC"
+        const val DOC_TYPE_UK_PID = "org.uk.1800.5.0.pid"
+
         const val NAMESPACE_ISO = "org.iso.18013.5.1"
+        const val NAMESPACE_UK_PID = "org.uk.1800.5.0"
 
         const val ATTR_VEHICLE_CATEGORY = "vehicle_category"
+        const val ATTR_UK_NATIONAL_ID = "uk_national_id"
     }
 }

@@ -74,4 +74,25 @@ class DocRequestBuilderImplTest {
         assertEquals("org.iso.18013.5.1.mDL", result[1].itemsRequest.docType)
         org.junit.Assert.assertTrue(result[1].itemsRequest.nameSpaces.containsKey("org.iso.18013.5.1"))
     }
+
+    @Test
+    fun `multi custom UK and valid request builds custom UK candidate and valid MDL candidate`() {
+        val itemsRequest = ItemsRequest(
+            docType = DocRequestBuilderImpl.TYPE_MULTI_CUSTOM_UK_AND_VALID,
+            nameSpaces = mapOf("MULTI_CUSTOM_UK_AND_VALID" to mapOf("portrait" to false))
+        )
+
+        val result = builder.buildDocRequests(
+            itemsRequest = itemsRequest,
+            itemsRequestBytes = sampleItemsRequestBytes,
+            readerAuth = sampleReaderAuth,
+            buildItemsRequestBytes = mockBuildItemsBytes
+        )
+
+        assertEquals(2, result.size)
+        assertEquals("org.uk.1800.5.0.pid", result[0].itemsRequest.docType)
+        org.junit.Assert.assertTrue(result[0].itemsRequest.nameSpaces.containsKey("org.uk.1800.5.0"))
+        assertEquals("org.iso.18013.5.1.mDL", result[1].itemsRequest.docType)
+        org.junit.Assert.assertTrue(result[1].itemsRequest.nameSpaces.containsKey("org.iso.18013.5.1"))
+    }
 }

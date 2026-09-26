@@ -33,6 +33,10 @@ object SelectCredentialAttributesNavigationExt {
                             DocRequestMode.MULTI_DOC_REQUEST -> DocumentType.Custom(
                                 "MULTI_UNSUPPORTED_AND_VALID"
                             )
+
+                            DocRequestMode.MULTI_CUSTOM_UK_AND_VALID -> DocumentType.Custom(
+                                "MULTI_CUSTOM_UK_AND_VALID"
+                            )
                         }
                         controller.navigateToTestAppVerifierJourney(
                             VerificationRequest.typed(

@@ -10,22 +10,23 @@ private const val AGE_23 = 23
 
 enum class DocRequestMode {
     SINGLE,
-    MULTI_DOC_REQUEST
+    MULTI_DOC_REQUEST,
+    MULTI_CUSTOM_UK_AND_VALID,
 }
 
 enum class VerifierAttributeOption(
     val displayName: String,
     val attributeGroup: AttributeGroup,
-    val docRequestMode: DocRequestMode = DocRequestMode.SINGLE
+    val docRequestMode: DocRequestMode = DocRequestMode.SINGLE,
 ) {
     PORTRAIT_AND_AGE_OVER_21(
         displayName = "Portrait and Age Over 21",
         attributeGroup = AttributeGroup(
             mapOf(
                 MdlAttribute.Portrait to false,
-                MdlAttribute.AgeOver(AGE_21) to false
+                MdlAttribute.AgeOver(AGE_21) to false,
             )
-        )
+        ),
     ),
     PORTRAIT_NAME_RETAIN_AND_AGE_OVER_18(
         displayName = "Portrait and Name (Retain) and Age Over 18",
@@ -34,39 +35,49 @@ enum class VerifierAttributeOption(
                 MdlAttribute.Portrait to true,
                 MdlAttribute.GivenName to true,
                 MdlAttribute.FamilyName to true,
-                MdlAttribute.AgeOver(AGE_18) to false
+                MdlAttribute.AgeOver(AGE_18) to false,
             )
-        )
+        ),
     ),
     MULTI_DOC_REQUEST(
         displayName = "Multi Doc Request: Unsupported + Valid (eVRC + mDL)",
         attributeGroup = AttributeGroup(
             mapOf(
                 MdlAttribute.Portrait to false,
-                MdlAttribute.AgeOver(AGE_21) to false
+                MdlAttribute.AgeOver(AGE_21) to false,
             )
         ),
-        docRequestMode = DocRequestMode.MULTI_DOC_REQUEST
+        docRequestMode = DocRequestMode.MULTI_DOC_REQUEST,
+    ),
+    MULTI_CUSTOM_UK_AND_VALID(
+        displayName = "Multi Doc Request: Custom UK Namespace + Valid (UK PID + mDL)",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to false,
+                MdlAttribute.AgeOver(AGE_21) to false,
+            )
+        ),
+        docRequestMode = DocRequestMode.MULTI_CUSTOM_UK_AND_VALID,
     ),
     MISSING_PORTRAIT(
         displayName = "Name (Missing Portrait)",
         attributeGroup = AttributeGroup(
             mapOf(
-                MdlAttribute.GivenName to false
+                MdlAttribute.GivenName to false,
             )
-        )
+        ),
     ),
     NAME_TITLE_RETAIN_AND_AGE_OVER_23(
         displayName = "Name + Title (Retain) and Age Over 23",
         attributeGroup = AttributeGroup(
             attributes = mapOf(
                 MdlAttribute.GivenName to true,
-                MdlAttribute.AgeOver(AGE_23) to false
+                MdlAttribute.AgeOver(AGE_23) to false,
             ),
             gbAttributes = mapOf(
-                GbAttribute.Title to true
+                GbAttribute.Title to true,
             )
-        )
+        ),
     ),
     REQUEST_AGE_OVER_LIMIT(
         displayName = "Exceed age over NN Limit",
@@ -76,8 +87,8 @@ enum class VerifierAttributeOption(
                 MdlAttribute.GivenName to true,
                 MdlAttribute.AgeOver(AGE_23) to false,
                 MdlAttribute.AgeOver(AGE_21) to false,
-                MdlAttribute.AgeOver(AGE_18) to false
+                MdlAttribute.AgeOver(AGE_18) to false,
             )
-        )
-    )
+        ),
+    ),
 }
