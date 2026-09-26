@@ -558,30 +558,27 @@ class HolderOrchestrator(
                         logger.debug(logTag, "organisation name = $orgName")
                     }
                 }
-            } else {
-                if (!authenticateReaderRequest(deviceRequest)) return
-                logger.debug(logTag, "Cert list is not empty")
-            }
 
-            val selectedDocRequest = currentContext.authenticatedReaderRequest?.docRequest
-                ?: deviceRequest.docRequests.first()
+                val selectedDocRequest = currentContext.authenticatedReaderRequest?.docRequest
+                    ?: deviceRequest.docRequests.first()
 
-            if (!docRequestContainsPortrait(selectedDocRequest)) {
-                logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                if (!docRequestContainsPortrait(selectedDocRequest)) {
+                    logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                    appCoroutineScope.launch {
+                        handlePolicyViolation()
+                    }
+                    return
+                }
+
+                val requestedDocType = selectedDocRequest.itemsRequest.docType
                 appCoroutineScope.launch {
-                    handlePolicyViolation()
+                    requestAndValidateCredential(requestedDocType, deviceRequest)
+                }
+            } else {
+                appCoroutineScope.launch {
+                    processReaderAuthenticationAndCredentials(deviceRequest)
                 }
                 return
-            }
-
-            val selectedDeviceRequest = DeviceRequest(
-                version = deviceRequest.version,
-                docRequests = listOf(selectedDocRequest)
-            )
-
-            val requestedDocType = selectedDocRequest.itemsRequest.docType
-            appCoroutineScope.launch {
-                requestAndValidateCredential(requestedDocType, selectedDeviceRequest)
             }
         } catch (e: ReaderAuthenticationFailure) {
             appCoroutineScope.launch {
@@ -795,41 +792,70 @@ class HolderOrchestrator(
         )
     }
 
-    private fun authenticateReaderRequest(deviceRequest: DeviceRequest): Boolean {
+    private suspend fun processReaderAuthenticationAndCredentials(deviceRequest: DeviceRequest) {
         val transcript = checkNotNull(currentContext.sessionTranscriptBytes) {
             "Missing session transcript"
         }
-        val outcome = readerAuthentication.authenticateDeviceRequest(
-            deviceRequest = deviceRequest,
-            sessionTranscriptBytes = transcript,
-            supportedDocumentTypes = listOf(DocumentType.Mdl.value),
-            trustedReaderCertificates = currentContext.trustedReaderCertificates
-        )
 
-        return when (outcome) {
-            is ReaderAuthenticationResult.Success -> {
-                val authReq = outcome.authenticatedReaderRequest
-                logger.debug(
-                    logTag,
-                    "Reader Authenticated: Org = ${authReq.readerOrganizationName}," +
-                        " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+        val supportedCandidates = deviceRequest.docRequests.filter {
+            it.itemsRequest.docType in listOf(DocumentType.Mdl.value)
+        }
+
+        if (supportedCandidates.isEmpty()) {
+            handleNoMatchTermination(CredentialRequestException("Unfulfillable request"))
+            return
+        }
+
+        var lastAuthFailure: ReaderAuthenticationFailure? = null
+
+        for (candidate in supportedCandidates) {
+            val candidateDeviceRequest = DeviceRequest(
+                version = deviceRequest.version,
+                docRequests = listOf(candidate)
+            )
+
+            try {
+                val outcome = readerAuthentication.authenticateDeviceRequest(
+                    deviceRequest = candidateDeviceRequest,
+                    sessionTranscriptBytes = transcript,
+                    supportedDocumentTypes = listOf(DocumentType.Mdl.value),
+                    trustedReaderCertificates = currentContext.trustedReaderCertificates
                 )
-                sessionFlow.value.updateSessionContext {
-                    it.copy(authenticatedReaderRequest = authReq)
-                }
-                true
-            }
 
-            is ReaderAuthenticationResult.Unfulfillable -> {
-                logger.error(logTag, "Reader Authentication UNFULFILLABLE")
-                appCoroutineScope.launch {
-                    handleNoMatchTermination(
-                        CredentialRequestException("Unfulfillable request")
-                    )
+                when (outcome) {
+                    is ReaderAuthenticationResult.Success -> {
+                        val authReq = outcome.authenticatedReaderRequest
+                        if (!docRequestContainsPortrait(authReq.docRequest)) {
+                            logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                            continue
+                        }
+
+                        sessionFlow.value.updateSessionContext {
+                            it.copy(authenticatedReaderRequest = authReq)
+                        }
+
+                        val requestedDocType = authReq.docRequest.itemsRequest.docType
+                        try {
+                            requestAndValidateCredential(requestedDocType, candidateDeviceRequest)
+                            return
+                        } catch (e: CredentialRequestException) {
+                            logger.error(logTag, "Candidate failed attribute matching: ${e.message}")
+                        }
+                    }
+
+                    is ReaderAuthenticationResult.Unfulfillable -> continue
                 }
-                false
+            } catch (e: ReaderAuthenticationFailure) {
+                lastAuthFailure = e
             }
         }
+
+        lastAuthFailure?.let {
+            handleReaderAuthFailure(it)
+            return
+        }
+
+        handleNoMatchTermination(CredentialRequestException("Unfulfillable request"))
     }
 
     private suspend fun sendTerminationAndFail(exception: Exception) {

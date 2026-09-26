@@ -172,18 +172,37 @@ class VerifierCryptoServiceImpl(
         itemsRequestBytes: ByteArray?,
         readerAuth: ByteArray?
     ): ByteArray = try {
-        val unsupportedCandidate = DocRequest(
-            itemsRequest = ItemsRequest(
-                docType = "org.iso.18013.5.1.eVRC",
-                nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("vehicle_category" to false))
-            )
+        val unmatchableItemsRequest = ItemsRequest(
+            docType = "org.iso.18013.5.1.mDL",
+            nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("age_over_99" to false))
         )
+        val unmatchableItemsRequestBytes = buildItemsRequestBytes(unmatchableItemsRequest)
+
+        val unmatchableMdlCandidate = DocRequest(
+            itemsRequest = unmatchableItemsRequest,
+            readerAuth = readerAuth,
+            itemsRequestBytes = unmatchableItemsRequestBytes
+        )
+
+        val unsupportedEvrcItemsRequest = ItemsRequest(
+            docType = "org.iso.18013.5.1.eVRC",
+            nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("vehicle_category" to false))
+        )
+        val unsupportedEvrcItemsRequestBytes = buildItemsRequestBytes(unsupportedEvrcItemsRequest)
+
+        val unsupportedEvrcCandidate = DocRequest(
+            itemsRequest = unsupportedEvrcItemsRequest,
+            readerAuth = readerAuth,
+            itemsRequestBytes = unsupportedEvrcItemsRequestBytes
+        )
+
         val validMdlCandidate = DocRequest(
             itemsRequest = itemsRequest,
             readerAuth = readerAuth,
             itemsRequestBytes = itemsRequestBytes
         )
-        val docRequests = listOf(unsupportedCandidate, validMdlCandidate)
+
+        val docRequests = listOf(unmatchableMdlCandidate, unsupportedEvrcCandidate, validMdlCandidate)
 
         DeviceRequest(
             version = "1.0",
