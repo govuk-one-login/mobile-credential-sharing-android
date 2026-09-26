@@ -72,7 +72,9 @@ class DocRequestBuilderImplTest {
 
         assertEquals(2, result.size)
         assertEquals("org.iso.18013.5.1.mDL", result[1].itemsRequest.docType)
-        org.junit.Assert.assertTrue(result[1].itemsRequest.nameSpaces.containsKey("org.iso.18013.5.1"))
+        org.junit.Assert.assertTrue(
+            result[1].itemsRequest.nameSpaces.containsKey("org.iso.18013.5.1")
+        )
     }
 
     @Test
@@ -91,8 +93,12 @@ class DocRequestBuilderImplTest {
 
         assertEquals(2, result.size)
         assertEquals("org.uk.1800.5.0.pid", result[0].itemsRequest.docType)
-        org.junit.Assert.assertTrue(result[0].itemsRequest.nameSpaces.containsKey("org.uk.1800.5.0"))
+        org.junit.Assert.assertTrue(
+            result[0].itemsRequest.nameSpaces.containsKey("org.uk.1800.5.0")
+        )
         assertEquals("org.iso.18013.5.1.mDL", result[1].itemsRequest.docType)
-        org.junit.Assert.assertTrue(result[1].itemsRequest.nameSpaces.containsKey("org.iso.18013.5.1"))
+        org.junit.Assert.assertTrue(
+            result[1].itemsRequest.nameSpaces.containsKey("org.iso.18013.5.1")
+        )
     }
 }

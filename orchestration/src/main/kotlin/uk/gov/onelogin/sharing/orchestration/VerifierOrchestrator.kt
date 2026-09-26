@@ -647,7 +647,8 @@ class VerifierOrchestrator(
             ItemsRequest(
                 docType = "org.iso.18013.5.1.mDL",
                 nameSpaces = mapOf(
-                    "org.iso.18013.5.1" to (itemsRequest.nameSpaces.values.firstOrNull() ?: emptyMap())
+                    "org.iso.18013.5.1" to
+                        (itemsRequest.nameSpaces.values.firstOrNull() ?: emptyMap())
                 )
             )
         } else {
