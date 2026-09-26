@@ -54,11 +54,9 @@ class DocRequestBuilderImpl : DocRequestBuilder {
         readerAuth: ByteArray?,
         itemsRequestBytes: ByteArray?
     ): DocRequest {
-        val mdlNameSpaces = if (itemsRequest.nameSpaces.containsKey(NAMESPACE_ISO)) {
-            itemsRequest.nameSpaces
-        } else {
-            mapOf(NAMESPACE_ISO to (itemsRequest.nameSpaces.values.firstOrNull() ?: emptyMap()))
-        }
+        val mdlNameSpaces = mapOf(
+            NAMESPACE_ISO to (itemsRequest.nameSpaces.values.firstOrNull() ?: emptyMap())
+        )
         val req = ItemsRequest(docType = DOC_TYPE_MDL, nameSpaces = mdlNameSpaces)
         return DocRequest(
             itemsRequest = req,

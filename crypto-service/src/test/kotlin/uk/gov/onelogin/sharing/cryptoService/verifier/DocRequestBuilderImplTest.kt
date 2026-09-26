@@ -55,4 +55,23 @@ class DocRequestBuilderImplTest {
         assertEquals("org.iso.18013.5.1.eVRC", result[0].itemsRequest.docType)
         assertEquals("org.iso.18013.5.1.mDL", result[1].itemsRequest.docType)
     }
+
+    @Test
+    fun `multi unsupported and valid normalizes custom namespace to MDL namespace`() {
+        val itemsRequest = ItemsRequest(
+            docType = DocRequestBuilderImpl.TYPE_MULTI_UNSUPPORTED_AND_VALID,
+            nameSpaces = mapOf("MULTI_UNSUPPORTED_AND_VALID" to mapOf("portrait" to false))
+        )
+
+        val result = builder.buildDocRequests(
+            itemsRequest = itemsRequest,
+            itemsRequestBytes = sampleItemsRequestBytes,
+            readerAuth = sampleReaderAuth,
+            buildItemsRequestBytes = mockBuildItemsBytes
+        )
+
+        assertEquals(2, result.size)
+        assertEquals("org.iso.18013.5.1.mDL", result[1].itemsRequest.docType)
+        org.junit.Assert.assertTrue(result[1].itemsRequest.nameSpaces.containsKey("org.iso.18013.5.1"))
+    }
 }
