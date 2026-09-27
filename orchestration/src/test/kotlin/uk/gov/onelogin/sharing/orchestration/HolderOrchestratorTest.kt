@@ -45,6 +45,7 @@ import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoServiceImpl
 import uk.gov.onelogin.sharing.cryptoService.usecases.FakeDecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
@@ -1961,6 +1962,69 @@ class HolderOrchestratorTest {
                 sessionFactory.getCurrentSession().sessionContext.authenticatedReaderRequest
             assertEquals(mockUri, storedReq?.privacyPolicyUrl)
             assertEquals(expectedOrgName, storedReq?.readerOrganizationName)
+        }
+
+    @Test
+    fun `evaluates candidates in input order and skips candidate missing portrait attribute`() =
+        runTest {
+            val mockUri: Uri = mockk()
+            val expectedOrgName = "GOV.UK OneLogin Reader Org"
+            val docRequestMissingPortrait = DocRequest(
+                itemsRequest = ItemsRequest(
+                    docType = "org.iso.18013.5.1.mDL",
+                    nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("age_over_21" to false))
+                )
+            )
+            val docRequestWithPortrait = DocRequest(
+                itemsRequest = ItemsRequest(
+                    docType = "org.iso.18013.5.1.mDL",
+                    nameSpaces = mapOf("org.iso.18013.5.1" to mapOf("portrait" to false))
+                )
+            )
+            val multiCandidateDeviceRequest = DeviceRequest(
+                version = "1.0",
+                docRequests = listOf(docRequestMissingPortrait, docRequestWithPortrait)
+            )
+            fakeDecryptDeviceRequestUseCase.deviceRequestToReturn = multiCandidateDeviceRequest
+
+            val authReqMissingPortrait = AuthenticatedReaderRequest(
+                docRequest = docRequestMissingPortrait,
+                privacyPolicyUrl = mockUri,
+                readerOrganizationName = expectedOrgName
+            )
+            val authReqWithPortrait = AuthenticatedReaderRequest(
+                docRequest = docRequestWithPortrait,
+                privacyPolicyUrl = mockUri,
+                readerOrganizationName = expectedOrgName
+            )
+
+            var callCount = 0
+            val fakeReaderAuth = ReaderAuthentication { request, _, _, _ ->
+                callCount++
+                if (callCount == 1) {
+                    ReaderAuthenticationResult.Success(authReqMissingPortrait)
+                } else {
+                    ReaderAuthenticationResult.Success(authReqWithPortrait)
+                }
+            }
+
+            val transport = FakePeripheralBluetoothTransport()
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                readerAuthentication = fakeReaderAuth,
+                trustedReaderCertificates = listOf(mockk())
+            )
+
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
+
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+            transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+            advanceUntilIdle()
+
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+            assertEquals(2, callCount)
         }
 
     private inner class PeerTerminationFixture(

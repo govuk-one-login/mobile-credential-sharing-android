@@ -11,7 +11,8 @@ private const val AGE_23 = 23
 enum class DocRequestMode {
     SINGLE,
     MULTI_DOC_REQUEST,
-    MULTI_CUSTOM_UK_AND_VALID
+    MULTI_CUSTOM_UK_AND_VALID,
+    MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID
 }
 
 enum class VerifierAttributeOption(
@@ -58,6 +59,16 @@ enum class VerifierAttributeOption(
             )
         ),
         docRequestMode = DocRequestMode.MULTI_CUSTOM_UK_AND_VALID
+    ),
+    MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID(
+        displayName = "Multi Doc Request: Untrusted + Missing Portrait + Valid",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to false,
+                MdlAttribute.AgeOver(AGE_21) to false
+            )
+        ),
+        docRequestMode = DocRequestMode.MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID
     ),
     MISSING_PORTRAIT(
         displayName = "Name (Missing Portrait)",

@@ -101,4 +101,36 @@ class DocRequestBuilderImplTest {
             result[1].itemsRequest.nameSpaces.containsKey("org.iso.18013.5.1")
         )
     }
+
+    @Test
+    fun `multi untrusted missing portrait valid request builds 3 candidates`() {
+        val itemsRequest = ItemsRequest(
+            docType = DocRequestBuilderImpl.TYPE_MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID,
+            nameSpaces = mapOf(
+                "MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID" to mapOf("portrait" to false)
+            )
+        )
+
+        val result = builder.buildDocRequests(
+            itemsRequest = itemsRequest,
+            itemsRequestBytes = sampleItemsRequestBytes,
+            readerAuth = sampleReaderAuth,
+            buildItemsRequestBytes = mockBuildItemsBytes
+        )
+
+        assertEquals(3, result.size)
+        assertEquals("org.iso.18013.5.1.mDL", result[0].itemsRequest.docType)
+        assertEquals("org.iso.18013.5.1.mDL", result[1].itemsRequest.docType)
+        assertEquals("org.iso.18013.5.1.mDL", result[2].itemsRequest.docType)
+        org.junit.Assert.assertFalse(
+            result[1].itemsRequest.nameSpaces["org.iso.18013.5.1"]?.containsKey(
+                "portrait"
+            ) ?: true
+        )
+        org.junit.Assert.assertTrue(
+            result[2].itemsRequest.nameSpaces["org.iso.18013.5.1"]?.containsKey(
+                "portrait"
+            ) ?: false
+        )
+    }
 }

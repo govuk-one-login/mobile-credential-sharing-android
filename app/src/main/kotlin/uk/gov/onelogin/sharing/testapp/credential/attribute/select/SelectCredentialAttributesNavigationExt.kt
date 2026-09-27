@@ -37,6 +37,11 @@ object SelectCredentialAttributesNavigationExt {
                             DocRequestMode.MULTI_CUSTOM_UK_AND_VALID -> DocumentType.Custom(
                                 "MULTI_CUSTOM_UK_AND_VALID"
                             )
+
+                            DocRequestMode.MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID ->
+                                DocumentType.Custom(
+                                    "MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID"
+                                )
                         }
                         controller.navigateToTestAppVerifierJourney(
                             VerificationRequest.typed(
