@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.consent
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,6 +70,16 @@ internal fun HolderConsentContent(
 ) {
     val scope = rememberCoroutineScope()
     var showDenyDialog by remember { mutableStateOf(false) }
+    var showPrivacyPolicy by remember { mutableStateOf(false) }
+
+    val privacyPolicyUrl = presentation.privacyPolicyUrl
+    if (showPrivacyPolicy && privacyPolicyUrl != null) {
+        PrivacyPolicyWebView(
+            url = privacyPolicyUrl,
+            onClose = { showPrivacyPolicy = false }
+        )
+        return
+    }
 
     if (showDenyDialog) {
         DenyConfirmationDialog(
@@ -98,6 +110,10 @@ internal fun HolderConsentContent(
             )
         }
 
+        if (privacyPolicyUrl != null) {
+            PrivacyPolicyLink(onClick = { showPrivacyPolicy = true })
+        }
+
         presentation.documents.forEach { document ->
             ConsentDocumentSection(document)
         }
@@ -119,6 +135,20 @@ internal fun HolderConsentContent(
             }
         }
     }
+}
+
+@Composable
+private fun PrivacyPolicyLink(onClick: () -> Unit) {
+    Text(
+        text = stringResource(R.string.holder_consent_privacy_policy_link),
+        style = MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.primary,
+            textDecoration = TextDecoration.Underline
+        ),
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .clickable(onClick = onClick)
+    )
 }
 
 @Composable
@@ -201,6 +231,7 @@ internal fun HolderConsentScreenPreview() {
                     )
                 )
             ),
+            privacyPolicyUrl = "https://verifier.example/privacy",
             organizationName = "Yoti Ltd"
         )
     )

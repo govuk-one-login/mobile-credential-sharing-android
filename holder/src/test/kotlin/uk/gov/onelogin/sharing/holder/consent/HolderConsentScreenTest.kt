@@ -87,6 +87,18 @@ class HolderConsentScreenTest {
         )
     )
 
+    // AC5: presentation carrying a verified privacy-policy URL
+    private val presentationWithPrivacyPolicy = ConsentPresentation(
+        documents = presentationWithoutRetain.documents,
+        privacyPolicyUrl = "https://verifier.example/privacy"
+    )
+
+    // AC5: presentation without a privacy-policy URL
+    private val presentationWithoutPrivacyPolicy = ConsentPresentation(
+        documents = presentationWithoutRetain.documents,
+        privacyPolicyUrl = null
+    )
+
     @Test
     fun `AC1 - Displays title, elements without IntentToRetain, and buttons`() =
         runTest(dispatcherRule.testDispatcher) {
@@ -264,6 +276,54 @@ class HolderConsentScreenTest {
             composeTestRule.waitForIdle()
 
             assertEquals("consent", navController.currentDestination?.route)
+        }
+
+    @Test
+    fun `AC5 - Privacy policy link is displayed when a URL is present`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithPrivacyPolicy
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.assertPrivacyPolicyLinkIsDisplayed()
+        }
+
+    @Test
+    fun `AC5 - Privacy policy link is absent when no URL is present`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutPrivacyPolicy
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.assertPrivacyPolicyLinkDoesNotExist()
+        }
+
+    @Test
+    fun `AC5 - Tapping the privacy policy link opens the embedded web view`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithPrivacyPolicy
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.clickPrivacyPolicyLink()
+            composeTestRule.waitForIdle()
+
+            composeTestRule.assertPrivacyPolicyCloseIsDisplayed()
         }
 
     @Composable
