@@ -560,9 +560,7 @@ class HolderOrchestrator(
                     }
                 }
 
-                val selectedDocRequest = deviceRequest.docRequests.first()
-
-                if (!docRequestContainsPortrait(selectedDocRequest)) {
+                if (!deviceRequestContainsPortrait(deviceRequest)) {
                     logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
                     appCoroutineScope.launch {
                         handlePolicyViolation()
@@ -570,7 +568,7 @@ class HolderOrchestrator(
                     return
                 }
 
-                val requestedDocType = selectedDocRequest.itemsRequest.docType
+                val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
                 appCoroutineScope.launch {
                     requestAndValidateCredential(requestedDocType, deviceRequest)
                 }
@@ -964,6 +962,11 @@ class HolderOrchestrator(
             }
         }
     }
+
+    private fun deviceRequestContainsPortrait(deviceRequest: DeviceRequest): Boolean =
+        deviceRequest.docRequests.any { docRequest ->
+            docRequestContainsPortrait(docRequest)
+        }
 
     private fun docRequestContainsPortrait(docRequest: DocRequest): Boolean =
         docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
