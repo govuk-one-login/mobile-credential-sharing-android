@@ -560,8 +560,7 @@ class HolderOrchestrator(
                     }
                 }
 
-                val selectedDocRequest = currentContext.authenticatedReaderRequest?.docRequest
-                    ?: deviceRequest.docRequests.first()
+                val selectedDocRequest = deviceRequest.docRequests.first()
 
                 if (!docRequestContainsPortrait(selectedDocRequest)) {
                     logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
@@ -812,8 +811,8 @@ class HolderOrchestrator(
         for (candidate in supportedCandidates) {
             val failure = evaluateCandidate(candidate, deviceRequest.version, transcript)
                 ?: return
-            if (failure is ReaderAuthenticationFailure) {
-                lastAuthFailure = failure
+            (failure as? ReaderAuthenticationFailure)?.let {
+                lastAuthFailure = it
             }
         }
 
