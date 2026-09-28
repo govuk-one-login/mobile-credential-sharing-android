@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -24,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -46,6 +48,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
     BackHandler(enabled = true) { }
 
     val presentation by viewModel.presentation.collectAsStateWithLifecycle()
+    val showPrivacyPolicy by viewModel.showPrivacyPolicy.collectAsStateWithLifecycle()
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
@@ -55,6 +58,9 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
     presentation?.let {
         HolderConsentContent(
             presentation = it,
+            showPrivacyPolicy = showPrivacyPolicy,
+            onShowPrivacyPolicy = viewModel::onShowPrivacyPolicy,
+            onClosePrivacyPolicy = viewModel::onClosePrivacyPolicy,
             onAccept = viewModel::onAccept,
             onDeny = viewModel::onDeny
         )
@@ -65,18 +71,20 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
 @Composable
 internal fun HolderConsentContent(
     presentation: ConsentPresentation,
+    showPrivacyPolicy: Boolean = false,
+    onShowPrivacyPolicy: () -> Unit = {},
+    onClosePrivacyPolicy: () -> Unit = {},
     onAccept: () -> Unit = {},
     onDeny: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     var showDenyDialog by remember { mutableStateOf(false) }
-    var showPrivacyPolicy by remember { mutableStateOf(false) }
 
     val privacyPolicyUrl = presentation.privacyPolicyUrl
     if (showPrivacyPolicy && privacyPolicyUrl != null) {
         PrivacyPolicyWebView(
             url = privacyPolicyUrl,
-            onClose = { showPrivacyPolicy = false }
+            onClose = onClosePrivacyPolicy
         )
         return
     }
@@ -102,6 +110,12 @@ internal fun HolderConsentContent(
             style = MaterialTheme.typography.headlineSmall
         )
 
+        presentation.documents.forEach { document ->
+            ConsentDocumentSection(document)
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
         presentation.organizationSentence?.let { sentence ->
             Text(
                 text = sentence,
@@ -111,14 +125,10 @@ internal fun HolderConsentContent(
         }
 
         if (privacyPolicyUrl != null) {
-            PrivacyPolicyLink(onClick = { showPrivacyPolicy = true })
+            PrivacyPolicyLink(onClick = onShowPrivacyPolicy)
         }
 
-        presentation.documents.forEach { document ->
-            ConsentDocumentSection(document)
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier

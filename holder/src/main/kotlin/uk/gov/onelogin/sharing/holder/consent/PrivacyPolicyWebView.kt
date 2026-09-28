@@ -1,36 +1,41 @@
 package uk.gov.onelogin.sharing.holder.consent
 
-import android.annotation.SuppressLint
+import android.os.Bundle
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings.LOAD_NO_CACHE
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import uk.gov.onelogin.sharing.holder.R
 
+private const val WEBVIEW_STATE_KEY = "WEBVIEW_STATE"
+
 /**
  * A full-screen, embedded [WebView] that displays the verified ReaderAuth privacy-policy [url].
- *
- * The WebView is locked down to reduce risk when loading a Verifier-supplied URL:
- * - JavaScript is enabled (many privacy pages require it to render) but file and content access is
- *   disabled.
- * - Navigation is restricted to `https` URLs; any other scheme (for example `intent://`, `tel:`,
- *   `file:`) is blocked so a redirect cannot escape the WebView or trigger another app.
  */
+
 @Composable
 internal fun PrivacyPolicyWebView(url: String, onClose: () -> Unit) {
+    val webViewStateBundle = rememberSaveable { Bundle() }
+
+    BackHandler(enabled = true) {
+        onClose()
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TextButton(
@@ -47,8 +52,18 @@ internal fun PrivacyPolicyWebView(url: String, onClose: () -> Unit) {
                         WebView(context).apply {
                             webViewClient = PrivacyPolicyWebViewClient()
                             configureSecureSettings()
-                            loadUrl(url)
+
+                            if (webViewStateBundle.containsKey(WEBVIEW_STATE_KEY)) {
+                                restoreState(webViewStateBundle.getBundle(WEBVIEW_STATE_KEY)!!)
+                            } else {
+                                loadUrl(url)
+                            }
                         }
+                    },
+                    onRelease = { releasedWebView ->
+                        val bundle = Bundle()
+                        releasedWebView.saveState(bundle)
+                        webViewStateBundle.putBundle(WEBVIEW_STATE_KEY, bundle)
                     }
                 )
             }
@@ -56,28 +71,22 @@ internal fun PrivacyPolicyWebView(url: String, onClose: () -> Unit) {
     }
 }
 
-@SuppressLint("SetJavaScriptEnabled")
 private fun WebView.configureSecureSettings() {
     settings.apply {
-        javaScriptEnabled = true
         allowFileAccess = false
         allowContentAccess = false
         domStorageEnabled = false
-        cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
+        cacheMode = LOAD_NO_CACHE
     }
 }
 
 /**
- * Restricts in-WebView navigation to `https` URLs, blocking any attempt to leave the embedded view
+ * Restricts navigation to `https` URLs, blocking any attempt to leave the embedded view
  * via other schemes.
  */
 private class PrivacyPolicyWebViewClient : WebViewClient() {
-    override fun shouldOverrideUrlLoading(
-        view: WebView?,
-        request: WebResourceRequest?
-    ): Boolean {
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val scheme = request?.url?.scheme?.lowercase()
-        // Return true to *cancel* loading when the scheme is not https.
         return scheme != HTTPS_SCHEME
     }
 
