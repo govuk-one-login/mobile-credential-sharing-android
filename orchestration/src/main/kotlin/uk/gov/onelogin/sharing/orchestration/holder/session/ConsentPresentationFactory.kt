@@ -7,8 +7,9 @@ import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
 /**
  * Builds the [ConsentPresentation] shown on the "Agree to Share" screen.
  *
- * The displayed attributes are driven entirely by the output of filtering the
- * credential against the DeviceRequest. Used what will be included in the DeviceResponse
+ * The displayed attributes are driven by the output of filtering the credential against
+ * the DeviceRequest. Requested attributes that do not have any matching attributes on the
+ * credential are not presented.
  */
 object ConsentPresentationFactory {
 

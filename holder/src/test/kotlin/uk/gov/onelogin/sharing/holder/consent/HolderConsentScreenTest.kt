@@ -87,13 +87,11 @@ class HolderConsentScreenTest {
         )
     )
 
-    // AC5: presentation carrying a verified privacy-policy URL
     private val presentationWithPrivacyPolicy = ConsentPresentation(
         documents = presentationWithoutRetain.documents,
         privacyPolicyUrl = "https://verifier.example/privacy"
     )
 
-    // AC5: presentation without a privacy-policy URL
     private val presentationWithoutPrivacyPolicy = ConsentPresentation(
         documents = presentationWithoutRetain.documents,
         privacyPolicyUrl = null
@@ -279,7 +277,7 @@ class HolderConsentScreenTest {
         }
 
     @Test
-    fun `AC5 - Privacy policy link is displayed when a URL is present`() =
+    fun `Privacy policy link is displayed when a URL is present`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
                 HolderSessionState.AwaitingUserConsent(
@@ -294,7 +292,7 @@ class HolderConsentScreenTest {
         }
 
     @Test
-    fun `AC5 - Privacy policy link is absent when no URL is present`() =
+    fun `Privacy policy link is absent when no URL is present`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
                 HolderSessionState.AwaitingUserConsent(
@@ -309,7 +307,7 @@ class HolderConsentScreenTest {
         }
 
     @Test
-    fun `AC5 - Tapping the privacy policy link opens the embedded web view`() =
+    fun `Tapping the privacy policy link opens the embedded web view`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
                 HolderSessionState.AwaitingUserConsent(

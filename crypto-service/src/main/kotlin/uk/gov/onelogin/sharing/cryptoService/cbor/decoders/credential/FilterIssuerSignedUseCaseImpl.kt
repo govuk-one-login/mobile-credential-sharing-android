@@ -15,7 +15,6 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
-import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 
 @Inject
 @ContributesBinding(scope = AppScope::class, binding = binding<FilterIssuerSignedUseCase>())
@@ -116,6 +115,8 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
         val exactRequested = requestedElements.keys.filter { !isAgeOverNN(it) }.toSet()
         val ageOverRequests = requestedElements.keys.filter { isAgeOverNN(it) }
 
+        logger.debug(logTag, "Requested attributes: ${requestedElements.keys}")
+
         val matchedItems = mutableListOf<MatchedItem>()
 
         val decodedItems = itemBytes.mapNotNull { bytes ->
@@ -125,6 +126,7 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
 
         for ((identifier, bytes) in decodedItems) {
             if (identifier in exactRequested) {
+                logger.debug(logTag, "$identifier found in credential")
                 matchedItems.add(
                     MatchedItem(
                         identifier = identifier,

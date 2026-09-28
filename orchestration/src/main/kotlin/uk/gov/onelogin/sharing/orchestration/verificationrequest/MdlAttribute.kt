@@ -105,6 +105,12 @@ sealed class MdlAttribute(open val value: String) : Parcelable {
 
     @Serializable
     @TypeParceler<MdlAttribute, MdlAttributeParceler>()
+    data object EyeColour : MdlAttribute("eye_colour") {
+        override fun validate(data: Any) = data is String && data.length <= MAX_LENGTH
+    }
+
+    @Serializable
+    @TypeParceler<MdlAttribute, MdlAttributeParceler>()
     data class AgeOver(private val age: Int) : MdlAttribute("age_over_%02d".format(age)) {
         init {
             require(age in MIN_AGE..MAX_AGE) {

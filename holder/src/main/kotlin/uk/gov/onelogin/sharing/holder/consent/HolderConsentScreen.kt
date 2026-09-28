@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -116,9 +115,9 @@ internal fun HolderConsentContent(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        presentation.organizationSentence?.let { sentence ->
+        presentation.normalisedOrganizationName?.let { orgName ->
             Text(
-                text = sentence,
+                text = stringResource(R.string.holder_consent_organization_sentence, orgName),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -242,7 +241,7 @@ internal fun HolderConsentScreenPreview() {
                 )
             ),
             privacyPolicyUrl = "https://verifier.example/privacy",
-            organizationName = "Yoti Ltd"
+            organizationName = "Organisation Ltd"
         )
     )
 }

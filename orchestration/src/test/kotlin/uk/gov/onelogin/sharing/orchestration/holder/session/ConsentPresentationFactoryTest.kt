@@ -114,15 +114,15 @@ class ConsentPresentationFactoryTest {
             authenticatedReaderRequest = AuthenticatedReaderRequest(
                 docRequest = mockk(relaxed = true),
                 privacyPolicyUrl = uri,
-                readerOrganizationName = "Yoti Ltd"
+                readerOrganizationName = "Organisation Ltd"
             )
         )
 
         assertEquals("https://verifier.example/privacy", presentation.privacyPolicyUrl)
-        assertEquals("Yoti Ltd", presentation.organizationName)
+        assertEquals("Organisation Ltd", presentation.organizationName)
         assertEquals(
-            "The person doing the check is using an approved app powered by Yoti Ltd.",
-            presentation.organizationSentence
+            "Organisation Ltd.",
+            presentation.normalisedOrganizationName
         )
     }
 
@@ -138,6 +138,6 @@ class ConsentPresentationFactoryTest {
 
         assertNull(presentation.privacyPolicyUrl)
         assertNull(presentation.organizationName)
-        assertNull(presentation.organizationSentence)
+        assertNull(presentation.normalisedOrganizationName)
     }
 }

@@ -68,9 +68,8 @@ sealed class HolderSessionState :
      *
      * @param request The original decrypted [DeviceRequest]. Retained for building the
      * DeviceResponse on approval.
-     * @param presentation The information shown on the consent screen: the filtered attributes that
-     * will actually be shared, plus the verified ReaderAuth privacy-policy link and organisation
-     * name.
+     * @param presentation The information shown on the consent screen:
+     *    - The attributes plus the verified ReaderAuth privacy-policy link and organisation name.
      */
     data class AwaitingUserConsent(
         val request: DeviceRequest,

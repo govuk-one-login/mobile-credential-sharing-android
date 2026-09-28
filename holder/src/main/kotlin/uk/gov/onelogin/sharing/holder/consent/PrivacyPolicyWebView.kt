@@ -5,15 +5,14 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings.LOAD_NO_CACHE
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -32,13 +31,9 @@ private const val WEBVIEW_STATE_KEY = "WEBVIEW_STATE"
 internal fun PrivacyPolicyWebView(url: String, onClose: () -> Unit) {
     val webViewStateBundle = rememberSaveable { Bundle() }
 
-    BackHandler(enabled = true) {
-        onClose()
-    }
-
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            TextButton(
+            Button(
                 onClick = onClose,
                 modifier = Modifier.padding(8.dp)
             ) {
@@ -64,6 +59,7 @@ internal fun PrivacyPolicyWebView(url: String, onClose: () -> Unit) {
                         val bundle = Bundle()
                         releasedWebView.saveState(bundle)
                         webViewStateBundle.putBundle(WEBVIEW_STATE_KEY, bundle)
+                        releasedWebView.destroy()
                     }
                 )
             }
