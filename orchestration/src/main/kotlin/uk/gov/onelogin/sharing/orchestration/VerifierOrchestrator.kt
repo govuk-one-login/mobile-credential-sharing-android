@@ -643,7 +643,19 @@ class VerifierOrchestrator(
         context: VerifierCryptoContext,
         itemsRequest: ItemsRequest
     ) {
-        val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(itemsRequest)
+        val effectiveItemsRequest = if (itemsRequest.docType.startsWith("MULTI_")) {
+            ItemsRequest(
+                docType = "org.iso.18013.5.1.mDL",
+                nameSpaces = mapOf(
+                    "org.iso.18013.5.1" to
+                        (itemsRequest.nameSpaces.values.firstOrNull() ?: emptyMap())
+                )
+            )
+        } else {
+            itemsRequest
+        }
+
+        val itemsRequestBytes = verifierCryptoService.buildItemsRequestBytes(effectiveItemsRequest)
         val readerAuthBytes = verifierCryptoService.buildReaderAuthenticationBytes(
             sessionTranscript = deriveUntaggedCbor(context.sessionTranscriptBytes),
             itemsRequestBytes = itemsRequestBytes

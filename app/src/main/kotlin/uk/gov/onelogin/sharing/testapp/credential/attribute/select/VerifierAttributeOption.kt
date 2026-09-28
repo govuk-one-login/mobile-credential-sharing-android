@@ -8,7 +8,18 @@ private const val AGE_18 = 18
 private const val AGE_21 = 21
 private const val AGE_23 = 23
 
-enum class VerifierAttributeOption(val displayName: String, val attributeGroup: AttributeGroup) {
+enum class DocRequestMode {
+    SINGLE,
+    MULTI_DOC_REQUEST,
+    MULTI_CUSTOM_UK_AND_VALID,
+    MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID
+}
+
+enum class VerifierAttributeOption(
+    val displayName: String,
+    val attributeGroup: AttributeGroup,
+    val docRequestMode: DocRequestMode = DocRequestMode.SINGLE
+) {
     PORTRAIT_AND_AGE_OVER_21(
         displayName = "Portrait and Age Over 21",
         attributeGroup = AttributeGroup(
@@ -28,6 +39,36 @@ enum class VerifierAttributeOption(val displayName: String, val attributeGroup: 
                 MdlAttribute.AgeOver(AGE_18) to false
             )
         )
+    ),
+    MULTI_DOC_REQUEST(
+        displayName = "Multi Doc Request: Unsupported + Valid (eVRC + mDL)",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to false,
+                MdlAttribute.AgeOver(AGE_21) to false
+            )
+        ),
+        docRequestMode = DocRequestMode.MULTI_DOC_REQUEST
+    ),
+    MULTI_CUSTOM_UK_AND_VALID(
+        displayName = "Multi Doc Request: Custom UK Namespace + Valid (UK PID + mDL)",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to false,
+                MdlAttribute.AgeOver(AGE_21) to false
+            )
+        ),
+        docRequestMode = DocRequestMode.MULTI_CUSTOM_UK_AND_VALID
+    ),
+    MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID(
+        displayName = "Multi Doc Request: Untrusted + Missing Portrait + Valid",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to false,
+                MdlAttribute.AgeOver(AGE_21) to false
+            )
+        ),
+        docRequestMode = DocRequestMode.MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID
     ),
     MISSING_PORTRAIT(
         displayName = "Name (Missing Portrait)",

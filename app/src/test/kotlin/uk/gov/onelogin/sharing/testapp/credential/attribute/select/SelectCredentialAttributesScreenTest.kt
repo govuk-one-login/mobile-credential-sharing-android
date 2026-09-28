@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -41,13 +42,14 @@ class SelectCredentialAttributesScreenTest {
     }
 
     @Test
-    fun `Attribute groups are passed to lambda when tapping 'Verify credential' button`(
+    fun `Passes exact VerifierAttributeOption when tapping 'Verify credential' button`(
         @TestParameter option: VerifierAttributeOption
     ) = runTest {
+        var selectedOption: VerifierAttributeOption? = null
         composeTestRule.run {
             setContent {
                 SelectCredentialAttributesScreen(
-                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup,
+                    onSelectAttributeGroup = { selectedOption = it },
                     viewModel = viewModel
                 )
             }
@@ -55,7 +57,7 @@ class SelectCredentialAttributesScreenTest {
             performAttributeGroupClick(option)
             assertOptionIsSelected(option)
             performVerifyCredentialClick()
-            assertConfirmedAttributeGroupEquals(option.attributeGroup)
+            assertEquals(option, selectedOption)
         }
     }
 
@@ -66,7 +68,9 @@ class SelectCredentialAttributesScreenTest {
         composeTestRule.run {
             setContent {
                 SelectCredentialAttributesScreen(
-                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup,
+                    onSelectAttributeGroup = {
+                        composeTestRule.updateConfirmedAttributeGroup(it.attributeGroup)
+                    },
                     viewModel = viewModel
                 )
             }
@@ -84,7 +88,9 @@ class SelectCredentialAttributesScreenTest {
         composeTestRule.run {
             setContent {
                 SelectCredentialAttributesScreen(
-                    onSelectAttributeGroup = composeTestRule::updateConfirmedAttributeGroup,
+                    onSelectAttributeGroup = {
+                        composeTestRule.updateConfirmedAttributeGroup(it.attributeGroup)
+                    },
                     viewModel = viewModel
                 )
             }

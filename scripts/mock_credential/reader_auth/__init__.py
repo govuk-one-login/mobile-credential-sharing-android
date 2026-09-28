@@ -7,6 +7,7 @@ from .certificate_generator import (
     READER_AUTH_DVS_ATTRIBUTES,
     generate_dvs_subject,
     READER_AUTH_COMMON_LEAF_EXTENSIONS,
+    READER_AUTH_COMMON_INTERMEDIATE_EXTENSIONS,
     ReaderAuthCertificateGenerator,
     PRIVACY_POLICY_URL_EXTENSION,
 )

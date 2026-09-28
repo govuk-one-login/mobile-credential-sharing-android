@@ -37,7 +37,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto.Companion.
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ReaderAuthenticationDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
@@ -50,7 +49,8 @@ class VerifierCryptoServiceImpl(
     private val sharedSecretGenerator: SharedSecretGenerator,
     private val sessionKeyGenerator: SessionKeyGenerator,
     private val encryptDeviceRequestUseCase: EncryptDeviceRequestUseCase,
-    private val decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase
+    private val decryptDeviceResponseUseCase: DecryptDeviceResponseUseCase,
+    private val docRequestBuilder: DocRequestBuilder = DocRequestBuilderImpl()
 ) : VerifierCryptoService {
 
     @Suppress("LongMethod")
@@ -172,15 +172,16 @@ class VerifierCryptoServiceImpl(
         itemsRequestBytes: ByteArray?,
         readerAuth: ByteArray?
     ): ByteArray = try {
+        val docRequests = docRequestBuilder.buildDocRequests(
+            itemsRequest = itemsRequest,
+            itemsRequestBytes = itemsRequestBytes,
+            readerAuth = readerAuth,
+            buildItemsRequestBytes = ::buildItemsRequestBytes
+        )
+
         DeviceRequest(
             version = "1.0",
-            docRequests = listOf(
-                DocRequest(
-                    itemsRequest = itemsRequest,
-                    readerAuth = readerAuth,
-                    itemsRequestBytes = itemsRequestBytes
-                )
-            )
+            docRequests = docRequests
         ).toDto().toCbor().also {
             logger.debug(logTag, "DeviceRequest bytes: ${it.toHexString()}")
         }

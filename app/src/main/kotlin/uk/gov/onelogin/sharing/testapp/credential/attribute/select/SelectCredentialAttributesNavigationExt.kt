@@ -25,12 +25,28 @@ object SelectCredentialAttributesNavigationExt {
         dialog<SelectCredentialAttributesRoute> {
             val scope = rememberCoroutineScope { Dispatchers.Main }
             SelectCredentialAttributesScreen(
-                onSelectAttributeGroup = { attributeGroup ->
+                onSelectAttributeGroup = { verifierOption ->
                     scope.launch {
+                        val docType = when (verifierOption.docRequestMode) {
+                            DocRequestMode.SINGLE -> DocumentType.Mdl
+
+                            DocRequestMode.MULTI_DOC_REQUEST -> DocumentType.Custom(
+                                "MULTI_UNSUPPORTED_AND_VALID"
+                            )
+
+                            DocRequestMode.MULTI_CUSTOM_UK_AND_VALID -> DocumentType.Custom(
+                                "MULTI_CUSTOM_UK_AND_VALID"
+                            )
+
+                            DocRequestMode.MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID ->
+                                DocumentType.Custom(
+                                    "MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID"
+                                )
+                        }
                         controller.navigateToTestAppVerifierJourney(
                             VerificationRequest.typed(
-                                DocumentType.Mdl,
-                                attributeGroup = attributeGroup
+                                docType,
+                                attributeGroup = verifierOption.attributeGroup
                             )
                         ) {
                             popUpTo<HomeRoute> {

@@ -31,11 +31,13 @@ import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
+import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRANSITION_TO_STATE
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
@@ -68,6 +70,9 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationResult
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -87,7 +92,8 @@ class HolderOrchestrator(
     private val inboundMessageClassifier: InboundMessageClassifier,
     private val sessionTimer: SessionTimer,
     private val trustedReaderCertificates: List<X509Certificate>,
-    private val authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory
+    private val authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory,
+    private val readerAuthentication: ReaderAuthentication
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val consentInFlight = AtomicBoolean(false)
@@ -553,26 +559,28 @@ class HolderOrchestrator(
                         logger.debug(logTag, "organisation name = $orgName")
                     }
                 }
-            } else {
-                // Non-empty list: the consumer supplied trusted Reader CA roots via
-                // createCredentialPresenter. This branch will run reader authentication
-                // (VerifyReaderAuthUseCase against trustedReaderCertificates, then
-                // ValidatePrivacyPolicyUseCase) and populate
-                // HolderSessionContext.authenticatedReaderRequest
-                logger.debug(logTag, "Cert list is not empty")
-            }
 
-            if (!deviceRequestContainsPortrait(deviceRequest)) {
-                logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                if (!deviceRequestContainsPortrait(deviceRequest)) {
+                    logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                    appCoroutineScope.launch {
+                        handlePolicyViolation()
+                    }
+                    return
+                }
+
+                val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
                 appCoroutineScope.launch {
-                    handlePolicyViolation()
+                    requestAndValidateCredential(requestedDocType, deviceRequest)
+                }
+            } else {
+                appCoroutineScope.launch {
+                    processReaderAuthenticationAndCredentials(deviceRequest)
                 }
                 return
             }
-
-            val requestedDocType = deviceRequest.docRequests.first().itemsRequest.docType
+        } catch (e: ReaderAuthenticationFailure) {
             appCoroutineScope.launch {
-                requestAndValidateCredential(requestedDocType, deviceRequest)
+                handleReaderAuthFailure(e)
             }
         } catch (e: DeviceRequestValidationException) {
             appCoroutineScope.launch {
@@ -757,6 +765,116 @@ class HolderOrchestrator(
         )
     }
 
+    private suspend fun handleReaderAuthFailure(failure: ReaderAuthenticationFailure) {
+        logger.error(logTag, "Reader Authentication Failed: ${failure.reason}", failure)
+        val context = currentContext
+        val skDevice = checkNotNull(context.skDevice) {
+            "skDevice must be derived before handling reader authentication failure"
+        }
+
+        val sessionDataBytes = holderCryptoService.buildErrorSessionData(
+            deviceResponseStatus = Status.GENERAL_ERROR,
+            sessionDataStatus = SessionDataStatus.SESSION_TERMINATION,
+            skDevice = skDevice,
+            encryptCounter = context.encryptCounter
+        )
+
+        terminateSession(
+            finalState = HolderSessionState.Complete.Failed(
+                SessionError(
+                    message = "Reader Authentication Failed: ${failure.reason}",
+                    exception = failure
+                )
+            ),
+            sessionDataToSend = sessionDataBytes
+        )
+    }
+
+    private suspend fun processReaderAuthenticationAndCredentials(deviceRequest: DeviceRequest) {
+        val transcript = checkNotNull(currentContext.sessionTranscriptBytes) {
+            "Missing session transcript"
+        }
+
+        val supportedCandidates = deviceRequest.docRequests.filter {
+            it.itemsRequest.docType in listOf(DocumentType.Mdl.value)
+        }
+
+        if (supportedCandidates.isEmpty()) {
+            handleNoMatchTermination(CredentialRequestException("Unfulfillable request"))
+            return
+        }
+
+        var lastAuthFailure: ReaderAuthenticationFailure? = null
+
+        for (candidate in supportedCandidates) {
+            val failure = evaluateCandidate(candidate, deviceRequest.version, transcript)
+                ?: return
+            (failure as? ReaderAuthenticationFailure)?.let {
+                lastAuthFailure = it
+            }
+        }
+
+        if (lastAuthFailure != null) {
+            handleReaderAuthFailure(lastAuthFailure)
+        } else {
+            handleNoMatchTermination(CredentialRequestException("Unfulfillable request"))
+        }
+    }
+
+    private suspend fun evaluateCandidate(
+        candidate: DocRequest,
+        version: String,
+        transcript: ByteArray
+    ): Throwable? {
+        val candidateDeviceRequest = DeviceRequest(
+            version = version,
+            docRequests = listOf(candidate)
+        )
+
+        return try {
+            val outcome = readerAuthentication.authenticateDeviceRequest(
+                deviceRequest = candidateDeviceRequest,
+                sessionTranscriptBytes = transcript,
+                supportedDocumentTypes = listOf(DocumentType.Mdl.value),
+                trustedReaderCertificates = currentContext.trustedReaderCertificates
+            )
+
+            when (outcome) {
+                is ReaderAuthenticationResult.Success -> {
+                    val authReq = outcome.authenticatedReaderRequest
+                    logger.debug(
+                        logTag,
+                        "Reader Authenticated: Org = ${authReq.readerOrganizationName}," +
+                            " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                    )
+                    if (!docRequestContainsPortrait(authReq.docRequest)) {
+                        logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                        return IllegalStateException(PORTRAIT_POLICY_VIOLATION)
+                    }
+
+                    sessionFlow.value.updateSessionContext {
+                        it.copy(authenticatedReaderRequest = authReq)
+                    }
+
+                    val requestedDocType = authReq.docRequest.itemsRequest.docType
+                    try {
+                        requestAndValidateCredential(requestedDocType, candidateDeviceRequest)
+                        null
+                    } catch (e: CredentialRequestException) {
+                        logger.error(logTag, "Candidate failed attribute matching: ${e.message}")
+                        e
+                    }
+                }
+
+                is ReaderAuthenticationResult.Unfulfillable -> {
+                    CredentialRequestException("Unfulfillable candidate")
+                }
+            }
+        } catch (e: ReaderAuthenticationFailure) {
+            e
+        }
+    }
+
     private suspend fun sendTerminationAndFail(exception: Exception) {
         logger.error(logTag, exception.message ?: UNKNOWN_ERROR, exception)
         val sessionDataBytes = holderCryptoService.buildTerminationSessionData(
@@ -847,10 +965,13 @@ class HolderOrchestrator(
 
     private fun deviceRequestContainsPortrait(deviceRequest: DeviceRequest): Boolean =
         deviceRequest.docRequests.any { docRequest ->
-            docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
-                namespace == DocumentType.Mdl.NAMESPACE &&
-                    elements.containsKey(MdlAttribute.Portrait.value)
-            }
+            docRequestContainsPortrait(docRequest)
+        }
+
+    private fun docRequestContainsPortrait(docRequest: DocRequest): Boolean =
+        docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
+            namespace == DocumentType.Mdl.NAMESPACE &&
+                elements.containsKey(MdlAttribute.Portrait.value)
         }
 
     private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {
