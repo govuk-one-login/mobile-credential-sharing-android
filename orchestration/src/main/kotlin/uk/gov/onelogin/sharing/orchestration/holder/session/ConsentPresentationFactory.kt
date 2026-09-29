@@ -1,24 +1,22 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.MatchedAttribute
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
 
 /**
  * Builds the [ConsentPresentation] shown on the "Agree to Share" screen.
  *
  * The displayed attributes are driven by the output of filtering the credential against
- * the DeviceRequest. Requested attributes that do not have any matching attributes on the
- * credential are not presented.
+ * the selected, authenticated request. Requested attributes that do not have any matching
+ * attributes on the credential are not presented.
  */
 object ConsentPresentationFactory {
 
     fun create(
-        deviceRequest: DeviceRequest,
         matchedAttributes: Map<String, List<MatchedAttribute>>,
         authenticatedReaderRequest: AuthenticatedReaderRequest?
     ): ConsentPresentation {
-        val docType = deviceRequest.docRequests.firstOrNull()?.itemsRequest?.docType
+        val docType = authenticatedReaderRequest?.docRequest?.itemsRequest?.docType
 
         val namespaces = matchedAttributes
             .filterValues { it.isNotEmpty() }

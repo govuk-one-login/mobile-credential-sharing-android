@@ -649,7 +649,6 @@ class HolderOrchestrator(
             }
 
             val presentation = ConsentPresentationFactory.create(
-                deviceRequest = deviceRequest,
                 matchedAttributes = result.matchedAttributes,
                 authenticatedReaderRequest = currentContext.authenticatedReaderRequest
             )

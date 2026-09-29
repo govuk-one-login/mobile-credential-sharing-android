@@ -172,13 +172,6 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
         intentToRetain: Boolean,
         ageOverItems: List<Pair<String, ByteArray>>
     ): MatchedItem? {
-        data class AgeItem(
-            val identifier: String,
-            val age: Int,
-            val value: Boolean,
-            val bytes: ByteArray
-        )
-
         val parsed = ageOverItems.mapNotNull { (identifier, bytes) ->
             val age = parseAgeOverNN(identifier) ?: return@mapNotNull null
             val value = readBooleanValue(bytes) ?: return@mapNotNull null
@@ -203,6 +196,13 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
     private data class MatchedItem(
         val identifier: String,
         val intentToRetain: Boolean,
+        val bytes: ByteArray
+    )
+
+    private data class AgeItem(
+        val identifier: String,
+        val age: Int,
+        val value: Boolean,
         val bytes: ByteArray
     )
 

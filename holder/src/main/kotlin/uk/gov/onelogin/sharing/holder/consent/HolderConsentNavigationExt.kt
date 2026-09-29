@@ -7,10 +7,7 @@ import androidx.navigation.compose.composable
 
 object HolderConsentNavigationExt {
     fun NavController.navigateToHolderConsentScreen(options: NavOptionsBuilder.() -> Unit = {}) =
-        navigate(HolderConsentRoute) {
-            launchSingleTop = true
-            options()
-        }
+        navigate(HolderConsentRoute, options)
 
     internal fun NavGraphBuilder.configureHolderConsentScreen() {
         composable<HolderConsentRoute> {

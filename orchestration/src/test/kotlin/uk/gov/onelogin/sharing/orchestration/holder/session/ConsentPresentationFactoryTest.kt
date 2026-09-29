@@ -7,7 +7,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.MatchedAttribute
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
@@ -17,24 +16,25 @@ class ConsentPresentationFactoryTest {
     private val docType = "org.iso.18013.5.1.mDL"
     private val namespace = "org.iso.18013.5.1"
 
-    private fun deviceRequest(nameSpaces: Map<String, Map<String, Boolean>>) = DeviceRequest(
-        version = "1.0",
-        docRequests = listOf(DocRequest(ItemsRequest(docType = docType, nameSpaces = nameSpaces)))
+    private fun readerRequest(
+        privacyPolicyUrl: Uri = mockk(relaxed = true),
+        readerOrganizationName: String? = null
+    ) = AuthenticatedReaderRequest(
+        docRequest = DocRequest(ItemsRequest(docType = docType, nameSpaces = emptyMap())),
+        privacyPolicyUrl = privacyPolicyUrl,
+        readerOrganizationName = readerOrganizationName
     )
 
     @Test
     fun `maps retained attributes onto the display model`() {
         val presentation = ConsentPresentationFactory.create(
-            deviceRequest = deviceRequest(
-                mapOf(namespace to mapOf("family_name" to true, "given_name" to false))
-            ),
             matchedAttributes = mapOf(
                 namespace to listOf(
                     MatchedAttribute("family_name", true),
                     MatchedAttribute("given_name", false)
                 )
             ),
-            authenticatedReaderRequest = null
+            authenticatedReaderRequest = readerRequest()
         )
 
         assertEquals(1, presentation.documents.size)
@@ -53,19 +53,10 @@ class ConsentPresentationFactoryTest {
     fun `only retained attributes are displayed`() {
         // Request asks for three, but only one was retained by filtering.
         val presentation = ConsentPresentationFactory.create(
-            deviceRequest = deviceRequest(
-                mapOf(
-                    namespace to mapOf(
-                        "family_name" to true,
-                        "given_name" to true,
-                        "portrait" to false
-                    )
-                )
-            ),
             matchedAttributes = mapOf(
                 namespace to listOf(MatchedAttribute("family_name", true))
             ),
-            authenticatedReaderRequest = null
+            authenticatedReaderRequest = readerRequest()
         )
 
         assertEquals(
@@ -77,11 +68,10 @@ class ConsentPresentationFactoryTest {
     @Test
     fun `resolved age attribute is displayed with inherited intent to retain`() {
         val presentation = ConsentPresentationFactory.create(
-            deviceRequest = deviceRequest(mapOf(namespace to mapOf("age_over_18" to true))),
             matchedAttributes = mapOf(
                 namespace to listOf(MatchedAttribute("age_over_21", true))
             ),
-            authenticatedReaderRequest = null
+            authenticatedReaderRequest = readerRequest()
         )
 
         assertEquals(
@@ -93,8 +83,19 @@ class ConsentPresentationFactoryTest {
     @Test
     fun `namespaces with no retained attributes are omitted`() {
         val presentation = ConsentPresentationFactory.create(
-            deviceRequest = deviceRequest(mapOf(namespace to mapOf("family_name" to true))),
             matchedAttributes = emptyMap(),
+            authenticatedReaderRequest = readerRequest()
+        )
+
+        assertEquals(emptyList(), presentation.documents)
+    }
+
+    @Test
+    fun `no documents when the authenticated reader request is null`() {
+        val presentation = ConsentPresentationFactory.create(
+            matchedAttributes = mapOf(
+                namespace to listOf(MatchedAttribute("family_name", true))
+            ),
             authenticatedReaderRequest = null
         )
 
@@ -107,12 +108,10 @@ class ConsentPresentationFactoryTest {
         every { uri.toString() } returns "https://verifier.example/privacy"
 
         val presentation = ConsentPresentationFactory.create(
-            deviceRequest = deviceRequest(mapOf(namespace to mapOf("family_name" to true))),
             matchedAttributes = mapOf(
                 namespace to listOf(MatchedAttribute("family_name", true))
             ),
-            authenticatedReaderRequest = AuthenticatedReaderRequest(
-                docRequest = mockk(relaxed = true),
+            authenticatedReaderRequest = readerRequest(
                 privacyPolicyUrl = uri,
                 readerOrganizationName = "Organisation Ltd"
             )
@@ -129,7 +128,6 @@ class ConsentPresentationFactoryTest {
     @Test
     fun `privacy policy and organisation name are null when reader request is null`() {
         val presentation = ConsentPresentationFactory.create(
-            deviceRequest = deviceRequest(mapOf(namespace to mapOf("family_name" to true))),
             matchedAttributes = mapOf(
                 namespace to listOf(MatchedAttribute("family_name", true))
             ),
