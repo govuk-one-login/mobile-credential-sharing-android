@@ -68,13 +68,18 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
             throw NoMatchingAttributesException(message)
         }
 
-        logger.debug(logTag, "nameSpaces: ${filteredNameSpaces.keys}")
-
         val issuerSigned = SharingIssuerSigned(
             nameSpaces = filteredNameSpaces,
             issuerAuth = validatedCredential.issuerAuth
         )
-        logger.debug(logTag, "IssuerSigned assembled with ${filteredNameSpaces.size} namespace(s)")
+
+        val requestedCount = requestedNameSpaces.values.sumOf { it.size }
+        val returnedCount = matchedAttributes.values.sumOf { it.size }
+        logger.debug(
+            logTag,
+            "Filtered attributes: requested=$requestedCount, returned=$returnedCount"
+        )
+
         return FilteredIssuerSigned(
             issuerSigned = issuerSigned,
             matchedAttributes = matchedAttributes
@@ -115,8 +120,6 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
         val exactRequested = requestedElements.keys.filter { !isAgeOverNN(it) }.toSet()
         val ageOverRequests = requestedElements.keys.filter { isAgeOverNN(it) }
 
-        logger.debug(logTag, "Requested attributes: ${requestedElements.keys}")
-
         val matchedItems = mutableListOf<MatchedItem>()
 
         val decodedItems = itemBytes.mapNotNull { bytes ->
@@ -126,7 +129,6 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
 
         for ((identifier, bytes) in decodedItems) {
             if (identifier in exactRequested) {
-                logger.debug(logTag, "$identifier found in credential")
                 matchedItems.add(
                     MatchedItem(
                         identifier = identifier,
@@ -214,7 +216,5 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
             "SessionData termination initiated due to no matching NameSpaces"
         const val LOG_NO_MATCHING_ATTRIBUTES =
             "SessionData termination initiated due to no matching attributes"
-        const val LOG_AGE_OVER_LIMIT =
-            "SessionData termination initiated due to exceeding age_over_NN request limit"
     }
 }
