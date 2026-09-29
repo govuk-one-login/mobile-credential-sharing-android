@@ -185,7 +185,7 @@ class HolderConsentScreenTest {
     }
 
     @Test
-    fun `Back button is disabled and screen remains visible`() =
+    fun `Back button behaviour is handled at a higher level`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
                 HolderSessionState.AwaitingUserConsent(deviceRequestWithoutRetain)
@@ -224,8 +224,8 @@ class HolderConsentScreenTest {
             composeTestRule.waitForIdle()
 
             assertThat(
-                orchestrator.denyConsentCount,
-                equalTo(1)
+                navController.currentDestination?.route,
+                equalTo("previous")
             )
         }
 

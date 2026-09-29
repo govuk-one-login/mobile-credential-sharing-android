@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.consent
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,8 +39,6 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 
 @Composable
 internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
-    BackHandler(enabled = true, onBack = viewModel::onDeny)
-
     val request by viewModel.deviceRequest.collectAsStateWithLifecycle()
 
     val metrics = rememberMetricsStateHolder()
