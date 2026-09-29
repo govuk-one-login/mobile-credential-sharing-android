@@ -40,7 +40,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 
 @Composable
 internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
-    BackHandler(enabled = true) { }
+    BackHandler(enabled = true, onBack = viewModel::onDeny)
 
     val request by viewModel.deviceRequest.collectAsStateWithLifecycle()
 

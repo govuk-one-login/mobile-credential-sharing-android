@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.consent
 
-import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.ComposeNavigator
@@ -12,6 +13,8 @@ import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -189,9 +192,11 @@ class HolderConsentScreenTest {
             }
 
             lateinit var navController: TestNavHostController
+            var backPressDispatcher: OnBackPressedDispatcherOwner? = null
 
             composeTestRule.setContent {
                 val context = LocalContext.current
+                backPressDispatcher = LocalOnBackPressedDispatcherOwner.current
                 navController = TestNavHostController(context).apply {
                     navigatorProvider.addNavigator(ComposeNavigator())
                     navigatorProvider.addNavigator(DialogNavigator())
@@ -214,12 +219,14 @@ class HolderConsentScreenTest {
             composeTestRule.waitForIdle()
 
             composeTestRule.runOnUiThread {
-                val activity = navController.context as ComponentActivity
-                activity.onBackPressedDispatcher.onBackPressed()
+                backPressDispatcher!!.onBackPressedDispatcher.onBackPressed()
             }
             composeTestRule.waitForIdle()
 
-            assertEquals("consent", navController.currentDestination?.route)
+            assertThat(
+                orchestrator.denyConsentCount,
+                equalTo(1)
+            )
         }
 
     @Composable

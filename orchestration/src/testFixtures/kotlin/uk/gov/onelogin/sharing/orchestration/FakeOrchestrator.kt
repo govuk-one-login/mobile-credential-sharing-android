@@ -20,6 +20,7 @@ class FakeOrchestrator(
     var startCount: Int = 0,
     var cancelCount: Int = 0,
     var resetCount: Int = 0,
+    var denyConsentCount: Int = 0,
     private val onConfirmConsent: () -> Unit = {}
 ) : Orchestrator.Holder,
     Orchestrator.Verifier,
@@ -61,6 +62,7 @@ class FakeOrchestrator(
 
     override fun denyConsent() {
         cancelCount++
+        denyConsentCount++
     }
 
     override fun reset() {
