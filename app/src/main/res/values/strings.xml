@@ -6,6 +6,8 @@
     <string name="select_attribute_group">Select attribute group</string>
     <string name="verify_credential">Verify Credential</string>
     <string name="verifier">Verifier</string>
+    <string name="reader_auth_not_provisioned_title">Certificate not provisioned</string>
+    <string name="reader_auth_not_provisioned_warning">This build was not provisioned by the deployment pipeline, so this reader certificate is a placeholder. Publish through the pipeline to obtain a valid certificate before verifying.</string>
 
     <!-- TODO: Remove once SDK prerequisites screen handles permissions -->
     <string name="camera_permission_permanently_denied">The camera permission is permanently denied.</string>

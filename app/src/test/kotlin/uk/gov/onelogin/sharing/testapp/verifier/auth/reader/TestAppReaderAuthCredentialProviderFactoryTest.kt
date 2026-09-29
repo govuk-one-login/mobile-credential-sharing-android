@@ -19,10 +19,7 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ECReaderAuthPr
 import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOption
 
 @RunWith(RobolectricTestParameterInjector::class)
-class TestAppReaderAuthCredentialProviderFactoryTest(
-    @TestParameter
-    private val option: ReaderAuthOption
-) {
+class TestAppReaderAuthCredentialProviderFactoryTest {
 
     private var initialState: ReaderAuthOption = ReaderAuthOption.VALID
 
@@ -36,20 +33,32 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
         certificateFactory = CertificateFactory.getInstance("X.509")
     )
 
-    @Test
-    fun `Initially selected option is configurable`() = runTest {
-        initialState = option
+    enum class ProvisionedReaderAuthOption(val option: ReaderAuthOption) {
+        VALID(ReaderAuthOption.VALID),
+        INVALID_NAME_CONSTRAINTS(ReaderAuthOption.INVALID_NAME_CONSTRAINTS),
+        INVALID_MISSING_PRIVACY_POLICY(ReaderAuthOption.INVALID_MISSING_PRIVACY_POLICY)
+    }
 
-        factory().readerAuthOption.test {
-            assertThat(
-                expectMostRecentItem(),
-                equalTo(option)
-            )
-        }
+    enum class PlaceholderReaderAuthOption(val option: ReaderAuthOption) {
+        DVS_DEV(ReaderAuthOption.DVS_DEV),
+        DVS_INTEGRATION(ReaderAuthOption.DVS_INTEGRATION)
     }
 
     @Test
-    fun `Internal state is updatable`() = runTest {
+    fun `Initially selected option is configurable`(@TestParameter option: ReaderAuthOption) =
+        runTest {
+            initialState = option
+
+            factory().readerAuthOption.test {
+                assertThat(
+                    expectMostRecentItem(),
+                    equalTo(option)
+                )
+            }
+        }
+
+    @Test
+    fun `Internal state is updatable`(@TestParameter option: ReaderAuthOption) = runTest {
         val providerFactory = factory()
         providerFactory.update(option)
 
@@ -62,8 +71,10 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
     }
 
     @Test
-    fun `Creates ECReaderAuthProvider instances`() = runTest {
-        initialState = option
+    fun `Creates ECReaderAuthProvider instances`(
+        @TestParameter provisioned: ProvisionedReaderAuthOption
+    ) = runTest {
+        initialState = provisioned.option
 
         val result = factory().create()
 
@@ -74,8 +85,10 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
     }
 
     @Test
-    fun `Emitted x5chain excludes the root certificate`() = runTest {
-        initialState = option
+    fun `Emitted x5chain excludes the root certificate`(
+        @TestParameter provisioned: ProvisionedReaderAuthOption
+    ) = runTest {
+        initialState = provisioned.option
 
         val coseSign1 = factory().create().sign(byteArrayOf(1, 2, 3, 4, 5))
 
@@ -87,6 +100,17 @@ class TestAppReaderAuthCredentialProviderFactoryTest(
 
         assertThat(x5chain.isArray, equalTo(true))
         assertThat(x5chain.size(), equalTo(EXPECTED_X5CHAIN_SIZE))
+    }
+
+    @Test
+    fun `Unprovisioned DVS options fail creation`(
+        @TestParameter placeholder: PlaceholderReaderAuthOption
+    ) = runTest {
+        initialState = placeholder.option
+
+        kotlin.test.assertFailsWith<IllegalArgumentException> {
+            factory().create()
+        }
     }
 
     private companion object {

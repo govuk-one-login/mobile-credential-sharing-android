@@ -62,6 +62,8 @@ internal fun SelectCredentialAttributesScreen(
 
     val selectedReaderAuth: ReaderAuthOption by viewModel.readerAuthOption
         .collectAsStateWithLifecycle()
+    val readerAuthProvisioned: Boolean by viewModel.readerAuthProvisioned
+        .collectAsStateWithLifecycle()
     var isReaderAuthExpanded by remember { mutableStateOf(false) }
 
     val selectedIssuerRoot: IssuerRootOption by viewModel.issuerRootOption
@@ -76,6 +78,7 @@ internal fun SelectCredentialAttributesScreen(
         isReaderAuthExpanded = isReaderAuthExpanded,
         selectedIssuerRoot = selectedIssuerRoot,
         isIssuerRootExpanded = isIssuerRootExpanded,
+        readerAuthProvisioned = readerAuthProvisioned,
         onToggleAttributeGroupDropdown = { isAttributeGroupExpanded = it },
         onToggleReaderAuthOptionDropdown = { isReaderAuthExpanded = it },
         onToggleIssuerRootOptionDropdown = { isIssuerRootExpanded = it },
@@ -91,7 +94,7 @@ internal fun SelectCredentialAttributesScreen(
             isIssuerRootExpanded = false
             viewModel.update(it)
         },
-        onClick = {
+        onVerifyClick = {
             coroutineScope.launch {
                 onSelectAttributeGroup(selectedAttributeGroup)
             }
@@ -108,6 +111,7 @@ private fun SelectAttributesContent(
     isReaderAuthExpanded: Boolean,
     selectedIssuerRoot: IssuerRootOption,
     isIssuerRootExpanded: Boolean,
+    readerAuthProvisioned: Boolean,
     onSelectAttributeOption: (VerifierAttributeOption) -> Unit,
     onToggleAttributeGroupDropdown: (Boolean) -> Unit,
     onSelectReaderAuthOption: (ReaderAuthOption) -> Unit,
@@ -115,7 +119,7 @@ private fun SelectAttributesContent(
     onSelectIssuerRootOption: (IssuerRootOption) -> Unit,
     onToggleIssuerRootOptionDropdown: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onVerifyClick: () -> Unit = {}
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
@@ -143,16 +147,41 @@ private fun SelectAttributesContent(
                 onSelectIssuerRootOption = onSelectIssuerRootOption
             )
 
-            Button(
-                onClick = onClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-                    .testTag(VERIFY_CREDENTIAL_BUTTON_TAG)
-            ) {
-                Text(stringResource(R.string.verify_credential))
-            }
+            VerifyCredentialButton(
+                readerAuthProvisioned = readerAuthProvisioned,
+                onVerify = onVerifyClick
+            )
         }
+    }
+}
+
+@Composable
+private fun VerifyCredentialButton(
+    readerAuthProvisioned: Boolean,
+    onVerify: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val coroutineScope = rememberCoroutineScope()
+    var showNotProvisionedWarning by remember { mutableStateOf(false) }
+
+    Button(
+        onClick = {
+            if (readerAuthProvisioned) {
+                coroutineScope.launch { onVerify() }
+            } else {
+                showNotProvisionedWarning = true
+            }
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+            .testTag(VERIFY_CREDENTIAL_BUTTON_TAG)
+    ) {
+        Text(stringResource(R.string.verify_credential))
+    }
+
+    if (showNotProvisionedWarning) {
+        NotProvisionedWarningDialog(onDismiss = { showNotProvisionedWarning = false })
     }
 }
 
@@ -389,11 +418,13 @@ internal fun SelectCredentialAttributesScreenPreview() {
         isReaderAuthExpanded = false,
         selectedIssuerRoot = IssuerRootOption.SHARING_TEST_APP_MOCK,
         isIssuerRootExpanded = false,
+        readerAuthProvisioned = true,
         onSelectAttributeOption = {},
         onToggleAttributeGroupDropdown = {},
         onSelectReaderAuthOption = {},
         onToggleReaderAuthOptionDropdown = {},
         onSelectIssuerRootOption = {},
-        onToggleIssuerRootOptionDropdown = {}
+        onToggleIssuerRootOptionDropdown = {},
+        onVerifyClick = {}
     )
 }
