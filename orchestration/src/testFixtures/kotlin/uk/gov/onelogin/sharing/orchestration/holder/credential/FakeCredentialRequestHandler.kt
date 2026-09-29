@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.credential
 
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.MatchedAttribute
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
@@ -11,6 +12,7 @@ class FakeCredentialRequestHandler : CredentialRequestHandler {
         nameSpaces = emptyMap(),
         issuerAuth = byteArrayOf()
     )
+    var matchedAttributesToReturn: Map<String, List<MatchedAttribute>> = emptyMap()
 
     override suspend fun requestAndValidate(
         requestedDocType: String,
@@ -21,7 +23,8 @@ class FakeCredentialRequestHandler : CredentialRequestHandler {
             ?: throw CredentialRequestException("No result configured")
         return CredentialRequestResult(
             validatedCredential = validated,
-            filteredIssuerSigned = filteredIssuerSignedToReturn
+            filteredIssuerSigned = filteredIssuerSignedToReturn,
+            matchedAttributes = matchedAttributesToReturn
         )
     }
 }

@@ -9,4 +9,5 @@
     <string name="creating_qr_code">Creating QR code...</string>
     <string name="generating_qr_code_data">Generating QR code data...</string>
     <string name="have_not_met_requirements">Haven’t met requirements...</string>
+    <string name="holder_consent_organization_sentence">The person doing the check is using an approved app powered by %1$s</string>
 </resources>

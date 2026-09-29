@@ -8,7 +8,14 @@ fun interface FilterIssuerSignedUseCase {
      * Filters the credential's nameSpaces against the DeviceRequest, preserving original
      * IssuerSignedItemBytes to maintain MSO hash integrity.
      *
+     * @return a [FilteredIssuerSigned] holding:
+     *   - the filtered [IssuerSigned] (used to build the DeviceResponse)
+     *   - the credential's attributes that matched the DeviceRequest attributes.
+     *
      * @throws NoMatchingAttributesException if no matching namespaces or attributes are found.
      */
-    fun filter(validatedCredential: ParsedRawCredential, deviceRequest: DeviceRequest): IssuerSigned
+    fun filter(
+        validatedCredential: ParsedRawCredential,
+        deviceRequest: DeviceRequest
+    ): FilteredIssuerSigned
 }

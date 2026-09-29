@@ -1,12 +1,14 @@
 package uk.gov.onelogin.sharing.holder.consent
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -26,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,24 +37,29 @@ import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 
 @Composable
 internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
     BackHandler(enabled = true) { }
 
-    val request by viewModel.deviceRequest.collectAsStateWithLifecycle()
+    val presentation by viewModel.presentation.collectAsStateWithLifecycle()
+    val showPrivacyPolicy by viewModel.showPrivacyPolicy.collectAsStateWithLifecycle()
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderConsentScreen")
     }
 
-    request?.let {
+    presentation?.let {
         HolderConsentContent(
-            request = it,
+            presentation = it,
+            showPrivacyPolicy = showPrivacyPolicy,
+            onShowPrivacyPolicy = viewModel::onShowPrivacyPolicy,
+            onClosePrivacyPolicy = viewModel::onClosePrivacyPolicy,
             onAccept = viewModel::onAccept,
             onDeny = viewModel::onDeny
         )
@@ -61,12 +69,24 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
 @Suppress("LongMethod")
 @Composable
 internal fun HolderConsentContent(
-    request: DeviceRequest,
+    presentation: ConsentPresentation,
+    showPrivacyPolicy: Boolean = false,
+    onShowPrivacyPolicy: () -> Unit = {},
+    onClosePrivacyPolicy: () -> Unit = {},
     onAccept: () -> Unit = {},
     onDeny: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     var showDenyDialog by remember { mutableStateOf(false) }
+
+    val privacyPolicyUrl = presentation.privacyPolicyUrl
+    if (showPrivacyPolicy && privacyPolicyUrl != null) {
+        PrivacyPolicyWebView(
+            url = privacyPolicyUrl,
+            onClose = onClosePrivacyPolicy
+        )
+        return
+    }
 
     if (showDenyDialog) {
         DenyConfirmationDialog(
@@ -89,35 +109,25 @@ internal fun HolderConsentContent(
             style = MaterialTheme.typography.headlineSmall
         )
 
-        request.docRequests.forEach { docRequest ->
-            Text(
-                text = docRequest.itemsRequest.docType,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-
-            docRequest.itemsRequest.nameSpaces.forEach { (nameSpace, elements) ->
-                Text(
-                    text = nameSpace,
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-
-                elements.forEach { (identifier, intentToRetain) ->
-                    Text(
-                        text = "$identifier — ${
-                            stringResource(
-                                R.string.holder_consent_intent_to_retain,
-                                intentToRetain
-                            )
-                        }",
-                        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
-                    )
-                }
-            }
+        presentation.documents.forEach { document ->
+            ConsentDocumentSection(document)
         }
 
         Spacer(modifier = Modifier.weight(1f))
+
+        presentation.normalisedOrganizationName?.let { orgName ->
+            Text(
+                text = stringResource(R.string.holder_consent_organization_sentence, orgName),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+        if (privacyPolicyUrl != null) {
+            PrivacyPolicyLink(onClick = onShowPrivacyPolicy)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier
@@ -134,6 +144,59 @@ internal fun HolderConsentContent(
             }
         }
     }
+}
+
+@Composable
+private fun PrivacyPolicyLink(onClick: () -> Unit) {
+    Text(
+        text = stringResource(R.string.holder_consent_privacy_policy_link),
+        style = MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.primary,
+            textDecoration = TextDecoration.Underline
+        ),
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .clickable(onClick = onClick)
+    )
+}
+
+@Composable
+private fun ConsentDocumentSection(document: ConsentDocument) {
+    Text(
+        text = document.docType,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 16.dp)
+    )
+
+    document.namespaces.forEach { namespace ->
+        ConsentNamespaceSection(namespace)
+    }
+}
+
+@Composable
+private fun ConsentNamespaceSection(namespace: ConsentNamespace) {
+    Text(
+        text = namespace.nameSpace,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(top = 8.dp)
+    )
+
+    namespace.attributes.forEach { attribute ->
+        ConsentAttributeRow(attribute)
+    }
+}
+
+@Composable
+private fun ConsentAttributeRow(attribute: ConsentAttribute) {
+    Text(
+        text = "${attribute.elementIdentifier} — ${
+            stringResource(
+                R.string.holder_consent_intent_to_retain,
+                attribute.intentToRetain
+            )
+        }",
+        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+    )
 }
 
 @Composable
@@ -161,22 +224,24 @@ private fun DenyConfirmationDialog(onConfirmDeny: () -> Unit, onDismiss: () -> U
 @Preview(showBackground = true)
 internal fun HolderConsentScreenPreview() {
     HolderConsentContent(
-        request = DeviceRequest(
-            version = "1.0",
-            docRequests = listOf(
-                DocRequest(
-                    ItemsRequest(
-                        docType = "org.iso.18013.5.1.mDL",
-                        nameSpaces = mapOf(
-                            "org.iso.18013.5.1" to mapOf(
-                                "family_name" to false,
-                                "document_number" to false,
-                                "portrait" to false
+        presentation = ConsentPresentation(
+            documents = listOf(
+                ConsentDocument(
+                    docType = "org.iso.18013.5.1.mDL",
+                    namespaces = listOf(
+                        ConsentNamespace(
+                            nameSpace = "org.iso.18013.5.1",
+                            attributes = listOf(
+                                ConsentAttribute("family_name", false),
+                                ConsentAttribute("document_number", false),
+                                ConsentAttribute("age_over_21", true)
                             )
                         )
                     )
                 )
-            )
+            ),
+            privacyPolicyUrl = "https://verifier.example/privacy",
+            organizationName = "Organisation Ltd"
         )
     )
 }

@@ -7,6 +7,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 private const val AGE_18 = 18
 private const val AGE_21 = 21
 private const val AGE_23 = 23
+private const val AGE_30 = 30
 
 enum class DocRequestMode {
     SINGLE,
@@ -30,13 +31,14 @@ enum class VerifierAttributeOption(
         )
     ),
     PORTRAIT_NAME_RETAIN_AND_AGE_OVER_18(
-        displayName = "Portrait and Name (Retain) and Age Over 18",
+        displayName = "Portrait and Name and Age Over 30 and Eye Colour",
         attributeGroup = AttributeGroup(
             mapOf(
                 MdlAttribute.Portrait to true,
                 MdlAttribute.GivenName to true,
                 MdlAttribute.FamilyName to true,
-                MdlAttribute.AgeOver(AGE_18) to false
+                MdlAttribute.AgeOver(AGE_30) to false,
+                MdlAttribute.EyeColour to true
             )
         )
     ),
