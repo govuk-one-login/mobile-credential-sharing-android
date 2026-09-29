@@ -69,7 +69,8 @@ dependencies {
         libs.bundles.androidx.camera,
         testFixtures(projects.bluetooth),
         testFixtures(projects.core),
-        testFixtures(projects.cryptoService)
+        testFixtures(projects.cryptoService),
+        testFixtures(projects.credentialVerification)
     ).forEach(::testImplementation)
 }
 

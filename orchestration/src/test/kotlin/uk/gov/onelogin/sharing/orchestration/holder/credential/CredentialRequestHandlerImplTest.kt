@@ -7,6 +7,8 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeFilterIssuerSignedUseCase
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.FakeRawCredentialParser
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilteredIssuerSigned
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.MatchedAttribute
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.RawCredentialParsingException
@@ -30,6 +32,10 @@ class CredentialRequestHandlerImplTest {
         issuerAuth = issuerAuth
     )
 
+    private val matchedAttributes = mapOf(
+        "org.iso.18013.5.1" to listOf(MatchedAttribute("family_name", true))
+    )
+
     private val fakeCredentialProvider = FakeCredentialProvider().apply {
         credentialsToReturn = listOf(
             Credential(id = "test-id", rawCredential = byteArrayOf(0x01))
@@ -45,7 +51,10 @@ class CredentialRequestHandlerImplTest {
     }
 
     private val fakeFilter = FakeFilterIssuerSignedUseCase(
-        issuerSignedToReturn = filteredIssuerSigned
+        resultToReturn = FilteredIssuerSigned(
+            issuerSigned = filteredIssuerSigned,
+            matchedAttributes = matchedAttributes
+        )
     )
 
     private val handler = CredentialRequestHandlerImpl(
@@ -62,6 +71,7 @@ class CredentialRequestHandlerImplTest {
         assertArrayEquals(nameSpaces, result.validatedCredential.nameSpaces)
         assertArrayEquals(issuerAuth, result.validatedCredential.issuerAuth)
         assertEquals(filteredIssuerSigned, result.filteredIssuerSigned)
+        assertEquals(matchedAttributes, result.matchedAttributes)
         assertEquals(listOf(docType), fakeCredentialProvider.lastRequest?.documentTypes)
     }
 

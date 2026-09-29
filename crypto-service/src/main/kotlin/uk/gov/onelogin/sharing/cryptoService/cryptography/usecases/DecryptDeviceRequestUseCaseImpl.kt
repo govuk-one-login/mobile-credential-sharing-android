@@ -77,13 +77,12 @@ class DecryptDeviceRequestUseCaseImpl(
 
         val deviceRequest = deviceRequestDecoder.deviceRequestDecoder(plaintext)
 
-        deviceRequest
-            .docRequests.firstOrNull()
-            ?.itemsRequest
-            ?.nameSpaces
-            ?.forEach { (key, value) ->
-                logger.debug(logTag, "Requests: key = $key, value = $value")
+        deviceRequest.docRequests.forEach { docRequest ->
+            logger.debug(logTag, "Requests for docType '${docRequest.itemsRequest.docType}':")
+            docRequest.itemsRequest.nameSpaces.forEach { (key, value) ->
+                logger.debug(logTag, "  key = $key, value = $value")
             }
+        }
 
         return deviceRequest
     }

@@ -110,10 +110,10 @@ class AttributeGroupMapperTest {
     fun `toItemsRequest with Custom doc type uses custom value as both docType and namespace`() {
         val attributeGroup = AttributeGroup(mapOf(MdlAttribute.GivenName to false))
 
-        val result = attributeGroup.toItemsRequest(DocumentType.Custom("org.example.doc"))
+        val result = attributeGroup.toItemsRequest(DocumentType.Custom("org.uk.1800.5.0"))
 
-        assertEquals("org.example.doc", result.docType)
-        assertTrue(result.nameSpaces.containsKey("org.example.doc"))
+        assertEquals("org.uk.1800.5.0", result.docType)
+        assertTrue(result.nameSpaces.containsKey("org.uk.1800.5.0"))
     }
 
     @Test

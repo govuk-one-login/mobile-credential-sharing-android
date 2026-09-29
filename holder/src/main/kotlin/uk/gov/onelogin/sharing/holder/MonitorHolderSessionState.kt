@@ -107,7 +107,9 @@ internal suspend fun convertSessionStateToNavigation(
 
         is HolderSessionState.AwaitingUserConsent -> {
             {
-                navController.navigateToHolderConsentScreen()
+                navController.navigateToHolderConsentScreen {
+                    launchSingleTop = true
+                }
             }
         }
 

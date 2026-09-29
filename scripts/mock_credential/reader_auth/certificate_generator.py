@@ -74,6 +74,35 @@ READER_AUTH_COMMON_LEAF_EXTENSIONS: List[Tuple[ExtensionType, bool]] = [
     ),
 ]
 
+READER_AUTH_COMMON_INTERMEDIATE_EXTENSIONS: List[Tuple[ExtensionType, bool]] = [
+    (
+        KeyUsage(
+            digital_signature=False,
+            content_commitment=False,
+            key_encipherment=False,
+            data_encipherment=False,
+            key_agreement=False,
+            key_cert_sign=True,
+            crl_sign=True,
+            encipher_only=False,
+            decipher_only=False,
+        ),
+        True,
+    ),
+    (ExtendedKeyUsage([OID_MDL_RA, OID_MDOC_RA]), True),
+    (
+        AuthorityInformationAccess(
+            [
+                AccessDescription(
+                    access_method=AuthorityInformationAccessOID.OCSP,
+                    access_location=UniformResourceIdentifier("https://www.gov.uk/"),
+                )
+            ]
+        ),
+        False,
+    ),
+]
+
 PRIVACY_POLICY_URL_EXTENSION = SubjectInformationAccess(
     [
         AccessDescription(
@@ -114,8 +143,8 @@ class ReaderAuthCertificateGenerator(CertificateGenerator):
             .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
             .add_extension(
                 x509.KeyUsage(
-                    key_cert_sign=False,
-                    crl_sign=False,
+                    key_cert_sign=True,
+                    crl_sign=True,
                     digital_signature=True,
                     content_commitment=False,
                     key_encipherment=False,

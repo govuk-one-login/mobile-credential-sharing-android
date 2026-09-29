@@ -13,8 +13,10 @@ import org.junit.Test
 import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequest
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssuerSignedUseCaseImpl
+import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.MatchedAttribute
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.NoMatchingAttributesException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.ParsedRawCredential
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
@@ -100,10 +102,17 @@ class FilterIssuerSignedUseCaseImplTest {
 
         val result = useCase.filter(parsedCredential(credentialBytes), request)
 
-        val items = result.nameSpaces!![namespace]!!
+        val items = result.issuerSigned.nameSpaces!![namespace]!!
         assertEquals(2, items.size)
         assertArrayEquals(familyNameBytes, items[0])
         assertArrayEquals(givenNameBytes, items[1])
+        assertEquals(
+            listOf(
+                MatchedAttribute("family_name", true),
+                MatchedAttribute("given_name", true)
+            ),
+            result.matchedAttributes[namespace]
+        )
     }
 
     @Test
@@ -126,7 +135,7 @@ class FilterIssuerSignedUseCaseImplTest {
 
         val result = useCase.filter(parsedCredential(credentialBytes), request)
 
-        val nameSpaces = result.nameSpaces!!
+        val nameSpaces = result.issuerSigned.nameSpaces!!
         assertEquals(2, nameSpaces.size)
         assertArrayEquals(familyNameBytes, nameSpaces[namespace]!![0])
         assertArrayEquals(drivingPrivilegesBytes, nameSpaces[gbNamespace]!![0])
@@ -140,7 +149,37 @@ class FilterIssuerSignedUseCaseImplTest {
 
         val result = useCase.filter(parsedCredential(credentialBytes), request)
 
-        assertArrayEquals(issuerAuth, result.issuerAuth)
+        assertArrayEquals(issuerAuth, result.issuerSigned.issuerAuth)
+        assertEquals(
+            listOf(MatchedAttribute("family_name", true)),
+            result.matchedAttributes[namespace]
+        )
+    }
+
+    @Test
+    fun `filter returns only existing attributes in credential`() {
+        val itemBytes = buildItemBytes(0, "family_name", "Smith")
+        val credentialBytes = buildNameSpacesBytes(mapOf(namespace to listOf(itemBytes)))
+        val request =
+            deviceRequest(
+                mapOf(
+                    namespace to mapOf(
+                        "family_name" to true,
+                        "non_existent" to true
+                    )
+                )
+            )
+
+        val result = useCase.filter(parsedCredential(credentialBytes), request)
+
+        val items = result.issuerSigned.nameSpaces!![namespace]!!
+        assertEquals(1, items.size)
+        assertArrayEquals(itemBytes, items[0])
+        assertEquals(
+            listOf(MatchedAttribute("family_name", true)),
+            result.matchedAttributes[namespace]
+        )
+        assertArrayEquals(issuerAuth, result.issuerSigned.issuerAuth)
     }
 
     @Test
@@ -181,9 +220,13 @@ class FilterIssuerSignedUseCaseImplTest {
 
         val result = useCase.filter(parsedCredential(credentialBytes), request)
 
-        val items = result.nameSpaces!![namespace]!!
+        val items = result.issuerSigned.nameSpaces!![namespace]!!
         assertEquals(1, items.size)
         assertArrayEquals(age21Bytes, items[0])
+        assertEquals(
+            listOf(MatchedAttribute("age_over_21", true)),
+            result.matchedAttributes[namespace]
+        )
     }
 
     @Test
@@ -199,9 +242,13 @@ class FilterIssuerSignedUseCaseImplTest {
 
         val result = useCase.filter(parsedCredential(credentialBytes), request)
 
-        val items = result.nameSpaces!![namespace]!!
+        val items = result.issuerSigned.nameSpaces!![namespace]!!
         assertEquals(1, items.size)
         assertArrayEquals(age21Bytes, items[0])
+        assertEquals(
+            listOf(MatchedAttribute("age_over_21", true)),
+            result.matchedAttributes[namespace]
+        )
     }
 
     @Test

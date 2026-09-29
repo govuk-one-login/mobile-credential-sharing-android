@@ -54,4 +54,20 @@ class HolderConsentScreenRule(
     fun clickDenyDialogDismiss() = onNodeWithText(
         resources.getString(R.string.holder_consent_deny_dialog_dismiss)
     ).performClick()
+
+    fun assertPrivacyPolicyLinkIsDisplayed() = onNodeWithText(
+        resources.getString(R.string.holder_consent_privacy_policy_link)
+    ).assertIsDisplayed()
+
+    fun assertPrivacyPolicyLinkDoesNotExist() = onNodeWithText(
+        resources.getString(R.string.holder_consent_privacy_policy_link)
+    ).assertDoesNotExist()
+
+    fun clickPrivacyPolicyLink() = onNodeWithText(
+        resources.getString(R.string.holder_consent_privacy_policy_link)
+    ).performClick()
+
+    fun assertPrivacyPolicyCloseIsDisplayed() = onNodeWithText(
+        resources.getString(R.string.holder_consent_privacy_policy_close)
+    ).assertIsDisplayed()
 }

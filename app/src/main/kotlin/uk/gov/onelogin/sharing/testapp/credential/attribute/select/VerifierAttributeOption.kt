@@ -7,8 +7,20 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 private const val AGE_18 = 18
 private const val AGE_21 = 21
 private const val AGE_23 = 23
+private const val AGE_30 = 30
 
-enum class VerifierAttributeOption(val displayName: String, val attributeGroup: AttributeGroup) {
+enum class DocRequestMode {
+    SINGLE,
+    MULTI_DOC_REQUEST,
+    MULTI_CUSTOM_UK_AND_VALID,
+    MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID
+}
+
+enum class VerifierAttributeOption(
+    val displayName: String,
+    val attributeGroup: AttributeGroup,
+    val docRequestMode: DocRequestMode = DocRequestMode.SINGLE
+) {
     PORTRAIT_AND_AGE_OVER_21(
         displayName = "Portrait and Age Over 21",
         attributeGroup = AttributeGroup(
@@ -19,15 +31,46 @@ enum class VerifierAttributeOption(val displayName: String, val attributeGroup: 
         )
     ),
     PORTRAIT_NAME_RETAIN_AND_AGE_OVER_18(
-        displayName = "Portrait and Name (Retain) and Age Over 18",
+        displayName = "Portrait and Name and Age Over 30 and Eye Colour",
         attributeGroup = AttributeGroup(
             mapOf(
                 MdlAttribute.Portrait to true,
                 MdlAttribute.GivenName to true,
                 MdlAttribute.FamilyName to true,
-                MdlAttribute.AgeOver(AGE_18) to false
+                MdlAttribute.AgeOver(AGE_30) to false,
+                MdlAttribute.EyeColour to true
             )
         )
+    ),
+    MULTI_DOC_REQUEST(
+        displayName = "Multi Doc Request: Unsupported + Valid (eVRC + mDL)",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to false,
+                MdlAttribute.AgeOver(AGE_21) to false
+            )
+        ),
+        docRequestMode = DocRequestMode.MULTI_DOC_REQUEST
+    ),
+    MULTI_CUSTOM_UK_AND_VALID(
+        displayName = "Multi Doc Request: Custom UK Namespace + Valid (UK PID + mDL)",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to false,
+                MdlAttribute.AgeOver(AGE_21) to false
+            )
+        ),
+        docRequestMode = DocRequestMode.MULTI_CUSTOM_UK_AND_VALID
+    ),
+    MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID(
+        displayName = "Multi Doc Request: Untrusted + Missing Portrait + Valid",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to false,
+                MdlAttribute.AgeOver(AGE_21) to false
+            )
+        ),
+        docRequestMode = DocRequestMode.MULTI_UNTRUSTED_MISSING_PORTRAIT_VALID
     ),
     MISSING_PORTRAIT(
         displayName = "Name (Missing Portrait)",

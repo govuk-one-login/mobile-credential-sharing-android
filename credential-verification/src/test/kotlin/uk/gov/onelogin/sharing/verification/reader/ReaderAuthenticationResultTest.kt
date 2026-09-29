@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.Do
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
 
-class ReaderAuthenticationOutcomeTest {
+class ReaderAuthenticationResultTest {
 
     @Test
     fun `ReaderAuthenticationOutcome has expected inheritors`() {
@@ -22,7 +22,7 @@ class ReaderAuthenticationOutcomeTest {
         )
 
         val classInfo =
-            scanResult.getClassesImplementing(ReaderAuthenticationOutcome::class.java.name)
+            scanResult.getClassesImplementing(ReaderAuthenticationResult::class.java.name)
 
         assertThat(
             classInfo.map(ClassInfo::getSimpleName).toSet(),
@@ -49,9 +49,9 @@ class ReaderAuthenticationOutcomeTest {
         val req1 = AuthenticatedReaderRequest(docRequest = docRequest1, privacyPolicyUrl = uri)
         val req2 = AuthenticatedReaderRequest(docRequest = docRequest2, privacyPolicyUrl = uri)
 
-        val success1 = ReaderAuthenticationOutcome.Success(req1)
-        val success2 = ReaderAuthenticationOutcome.Success(req1)
-        val success3 = ReaderAuthenticationOutcome.Success(req2)
+        val success1 = ReaderAuthenticationResult.Success(req1)
+        val success2 = ReaderAuthenticationResult.Success(req1)
+        val success3 = ReaderAuthenticationResult.Success(req2)
 
         assertEquals(req1, success1.authenticatedReaderRequest)
         assertEquals(success1, success2)
