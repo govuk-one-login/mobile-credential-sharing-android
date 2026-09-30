@@ -70,16 +70,18 @@ internal fun ShareCredential(
     viewModelFactory: MetroViewModelFactory,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+    defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) {
     val scope = rememberCoroutineScope { defaultDispatcher }
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
     val onCancel: () -> Unit = {
-        if (state.shouldConfirmCancellation()) {
-            navController.navigateToHolderUserCancellationDialog()
-        } else {
-            orchestrator.cancel()
+        scope.launch {
+            if (state.shouldConfirmCancellation()) {
+                navController.navigateToHolderUserCancellationDialog()
+            } else {
+                orchestrator.cancel()
+            }
         }
     }
 
