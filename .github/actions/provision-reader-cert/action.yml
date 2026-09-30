@@ -69,14 +69,11 @@ runs:
         echo "key_file=$key_file" >> "$GITHUB_OUTPUT"
         echo "csr_file=$csr_file" >> "$GITHUB_OUTPUT"
 
-    # TODO(DCMAW-23264): Re-enable once the AWS role for GitHub OIDC is set up
-    # and the /issue-reader-cert endpoint requires authentication. The endpoint
-    # is currently reachable without auth, so this step is disabled for now.
-    # - name: Configure AWS credentials
-    #   uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
-    #   with:
-    #     role-to-assume: ${{ inputs.aws-role-arn }}
-    #     aws-region: ${{ inputs.aws-region }}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+      with:
+        role-to-assume: ${{ inputs.aws-role-arn }}
+        aws-region: ${{ inputs.aws-region }}
 
     - name: Request certificate
       id: issue
@@ -92,13 +89,13 @@ runs:
         # Build the request body with the CSR as a JSON string.
         jq -Rs '{ csrPem: . }' "${{ steps.csr.outputs.csr_file }}" > "$workdir/request.json"
 
-        # curl (pre-installed on the runner) issues the request.
-        # TODO(DCMAW-23264): Re-enable SigV4 signing once the AWS role is
-        # available and the endpoint requires authentication. Credentials come
-        # from the env exported by configure-aws-credentials (see disabled step
-        # above). The endpoint is currently reachable without auth.
+        # curl (pre-installed on the runner) signs the request with SigV4.
+        # Credentials come from the env exported by configure-aws-credentials.
         http_status="$(
           curl --silent --show-error \
+            --aws-sigv4 "aws:amz:${AWS_REGION}:execute-api" \
+            --user "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" \
+            -H "x-amz-security-token: ${AWS_SESSION_TOKEN}" \
             -H 'Content-Type: application/json' \
             -X POST \
             -d @"$workdir/request.json" \
@@ -106,19 +103,6 @@ runs:
             -w '%{http_code}' \
             "${ENDPOINT_URL}/issue-reader-cert"
         )"
-        # Authenticated variant (restore alongside the SigV4 auth above):
-        # http_status="$(
-        #   curl --silent --show-error \
-        #     --aws-sigv4 "aws:amz:${AWS_REGION}:execute-api" \
-        #     --user "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" \
-        #     -H "x-amz-security-token: ${AWS_SESSION_TOKEN}" \
-        #     -H 'Content-Type: application/json' \
-        #     -X POST \
-        #     -d @"$workdir/request.json" \
-        #     -o "$response_file" \
-        #     -w '%{http_code}' \
-        #     "${ENDPOINT_URL}/issue-reader-cert"
-        # )"
 
         if [ "$http_status" != "200" ]; then
           echo "::error::issue-reader-cert returned HTTP $http_status"
