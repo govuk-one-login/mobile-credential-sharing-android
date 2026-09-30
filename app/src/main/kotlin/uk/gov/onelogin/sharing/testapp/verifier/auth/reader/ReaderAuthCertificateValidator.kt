@@ -25,11 +25,19 @@ class ReaderAuthCertificateValidator(
      * Reads the leaf certificate asset for [option] and classifies it.
      */
     fun validate(option: ReaderAuthOption): ReaderAuthCertificateStatus {
-        val bytes = runCatching {
+        val certBytes = runCatching {
             context.assets.open(option.leafCertificateAsset).use { it.readBytes() }
         }.getOrElse { return ReaderAuthCertificateStatus.PLACEHOLDER }
 
-        return classify(bytes)
+        val keyBytes = runCatching {
+            context.assets.open(option.privateKeyChain.first()).use { it.readBytes() }
+        }.getOrElse { return ReaderAuthCertificateStatus.PLACEHOLDER }
+
+        if (keyBytes.decodeToString().contains(PLACEHOLDER_KEY_SENTINEL)) {
+            return ReaderAuthCertificateStatus.PLACEHOLDER
+        }
+
+        return classify(certBytes)
     }
 
     /**
@@ -57,6 +65,7 @@ class ReaderAuthCertificateValidator(
 
     private companion object {
         const val PLACEHOLDER_SENTINEL = "DVS_PLACEHOLDER_CERTIFICATE_REPLACE_IN_CI"
+        const val PLACEHOLDER_KEY_SENTINEL = "DVS_PLACEHOLDER_PRIVATE_KEY_REPLACE_IN_CI"
     }
 }
 

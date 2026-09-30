@@ -40,8 +40,7 @@ class TestAppReaderAuthCredentialProviderFactoryTest {
     }
 
     enum class PlaceholderReaderAuthOption(val option: ReaderAuthOption) {
-        DVS_DEV(ReaderAuthOption.DVS_DEV),
-        DVS_INTEGRATION(ReaderAuthOption.DVS_INTEGRATION)
+        DVS_DEV(ReaderAuthOption.DVS_DEV)
     }
 
     @Test

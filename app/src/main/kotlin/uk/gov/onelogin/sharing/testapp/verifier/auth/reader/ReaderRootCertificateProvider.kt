@@ -36,17 +36,40 @@ class ReaderRootCertificateProvider @Inject constructor(
     /**
      * Reads and parses the trusted reader root certificates based on the selected [ReaderRootOption].
      */
-    fun trustedReaderCertificates(): List<X509Certificate> = when (_readerRootOption.value) {
-        ReaderRootOption.ALL -> allTrustedRootCertificates()
+    fun trustedReaderCertificates(): List<X509Certificate> {
+        val certs = when (_readerRootOption.value) {
+            ReaderRootOption.SHARING_TEST_APP_MOCK ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.VALID))
 
-        ReaderRootOption.SHARING_TEST_APP_MOCK ->
-            listOfNotNull(rootCertificateFor(ReaderAuthOption.VALID))
+            ReaderRootOption.DVS_DEV ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_DEV))
 
-        ReaderRootOption.DVS_DEV ->
-            listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_DEV))
+            ReaderRootOption.DVS_INTEGRATION ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_INTEGRATION))
 
-        ReaderRootOption.DVS_INTEGRATION ->
-            listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_INTEGRATION))
+            ReaderRootOption.DVS_P256 ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_P256))
+
+            ReaderRootOption.DVS_P384 ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_P384))
+
+            ReaderRootOption.DVS_HYBRID ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_HYBRID))
+
+            ReaderRootOption.DVS_P384_LEAF_P256_CA ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_P384_LEAF_P256_CA))
+
+            ReaderRootOption.DVS_P384_LEAF_P256_CA_NO_POLICY ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_P384_LEAF_P256_CA_NO_POLICY))
+
+            ReaderRootOption.DVS_HYBRID_UNSUPPORTED ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_HYBRID_UNSUPPORTED))
+
+            ReaderRootOption.DVS_INVALID_CURVE ->
+                listOfNotNull(rootCertificateFor(ReaderAuthOption.DVS_INVALID_CURVE))
+        }
+        android.util.Log.d("ReaderRootCertProvider", "trustedReaderCertificates for option '${_readerRootOption.value}': ${certs.map { it.subjectX500Principal.name }}")
+        return certs
     }
 
     fun allTrustedRootCertificates(): List<X509Certificate> =

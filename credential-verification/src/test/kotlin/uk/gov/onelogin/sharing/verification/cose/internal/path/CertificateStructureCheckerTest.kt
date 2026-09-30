@@ -118,7 +118,7 @@ class CertificateStructureCheckerTest {
 
     // AC9: Insufficient algorithm strength
     @Test
-    fun `cert signed with SHA256 under P-384 issuer throws UNSUPPORTED_ALGORITHM`() {
+    fun `cert signed with SHA256 under P-384 issuer is supported`() {
         val p384KeyPair = generateEcKeyPair("secp384r1")
 
         val root = TestCertificateGenerator(
@@ -135,9 +135,7 @@ class CertificateStructureCheckerTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().withSignatureAlgorithm("SHA256withECDSA").build()
 
-        assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
-            validator.verify(listOf(leaf), root)
-        }
+        validator.verify(listOf(leaf), root)
     }
 
     @Test

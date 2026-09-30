@@ -82,7 +82,7 @@ class SelectCredentialAttributesScreenRule(composeTestRule: ComposeContentTestRu
 
     fun performReaderAuthClick(option: ReaderAuthOption) {
         performReaderAuthMenuClick()
-        onReaderAuthOptionText(option).performClick()
+        onReaderAuthOptionText(option).performScrollTo().performClick()
     }
 
     fun performIssuerRootClick(option: IssuerRootOption) {

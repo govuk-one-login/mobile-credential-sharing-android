@@ -55,13 +55,20 @@ class SelectCredentialAttributesScreenTest {
     enum class ProvisionedReaderAuthOption(val option: ReaderAuthOption) {
         VALID(ReaderAuthOption.VALID),
         INVALID_NAME_CONSTRAINTS(ReaderAuthOption.INVALID_NAME_CONSTRAINTS),
-        INVALID_MISSING_PRIVACY_POLICY(ReaderAuthOption.INVALID_MISSING_PRIVACY_POLICY)
+        INVALID_MISSING_PRIVACY_POLICY(ReaderAuthOption.INVALID_MISSING_PRIVACY_POLICY),
+        DVS_INTEGRATION(ReaderAuthOption.DVS_INTEGRATION),
+        DVS_P256(ReaderAuthOption.DVS_P256),
+        DVS_P384(ReaderAuthOption.DVS_P384),
+        DVS_HYBRID(ReaderAuthOption.DVS_HYBRID),
+        DVS_P384_LEAF_P256_CA(ReaderAuthOption.DVS_P384_LEAF_P256_CA),
+        DVS_P384_LEAF_P256_CA_NO_POLICY(ReaderAuthOption.DVS_P384_LEAF_P256_CA_NO_POLICY),
+        DVS_HYBRID_UNSUPPORTED(ReaderAuthOption.DVS_HYBRID_UNSUPPORTED),
+        DVS_INVALID_CURVE(ReaderAuthOption.DVS_INVALID_CURVE)
     }
 
     /** DVS options that are unprovisioned placeholders in a non-pipeline build. */
     enum class PlaceholderReaderAuthOption(val option: ReaderAuthOption) {
-        DVS_DEV(ReaderAuthOption.DVS_DEV),
-        DVS_INTEGRATION(ReaderAuthOption.DVS_INTEGRATION)
+        DVS_DEV(ReaderAuthOption.DVS_DEV)
     }
 
     @Test

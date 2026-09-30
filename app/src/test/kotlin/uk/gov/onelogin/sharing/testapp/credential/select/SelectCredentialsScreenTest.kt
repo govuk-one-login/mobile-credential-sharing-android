@@ -31,6 +31,7 @@ class SelectCredentialsScreenTest {
             setContent {
                 SelectCredentialsScreen(
                     credentials = credentials,
+                    viewModel = null,
                     onSelectCredential = composeTestRule::updateMockCredentialState
                 )
             }

@@ -137,9 +137,13 @@ class TestAppReaderAuthCredentialProviderFactory(
     }
 
     private fun processPrivateKeyAssetChain(chain: Sequence<String>): List<ECPrivateKey> = chain
-        .map(context.assets::open)
-        .map(::InputStreamReader)
-        .map(InputStreamReader::readText)
+        .map { assetPath ->
+            val text = context.assets.open(assetPath).use { InputStreamReader(it).readText() }
+            require(!text.contains("DVS_PLACEHOLDER")) {
+                "Private key asset '$assetPath' is an unprovisioned placeholder."
+            }
+            text
+        }
         .map(CharSequence::lines)
         .map { privateKeyLines ->
             privateKeyLines.filterNot { it.startsWith("-----") }

@@ -40,7 +40,6 @@ import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
-import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
 import uk.gov.onelogin.sharing.testapp.ATTRIBUTE_GROUP_ITEM_TAG
 import uk.gov.onelogin.sharing.testapp.R
 import uk.gov.onelogin.sharing.testapp.VERIFY_CREDENTIAL_BUTTON_TAG
@@ -253,24 +252,20 @@ private fun AttributeGroupDropdown(
         isDropdownExpanded = isAttributeGroupExpanded,
         onToggleDropdownExpansion = onToggleDropdownExpansion,
         dropdownMenuContents = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(spacingSingle)
-            ) {
-                VerifierAttributeOption.entries
-                    .sortedBy(VerifierAttributeOption::displayName)
-                    .forEach { option ->
-                        DropdownMenuItem(
-                            modifier = Modifier
-                                .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
-                                .testTag(ATTRIBUTE_GROUP_ITEM_TAG),
-                            text = { Text(option.displayName) },
-                            onClick = {
-                                onToggleDropdownExpansion(false)
-                                onSelectAttributeOption(option)
-                            }
-                        )
-                    }
-            }
+            VerifierAttributeOption.entries
+                .sortedBy(VerifierAttributeOption::displayName)
+                .forEach { option ->
+                    DropdownMenuItem(
+                        modifier = Modifier
+                            .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
+                            .testTag(ATTRIBUTE_GROUP_ITEM_TAG),
+                        text = { Text(option.displayName) },
+                        onClick = {
+                            onToggleDropdownExpansion(false)
+                            onSelectAttributeOption(option)
+                        }
+                    )
+                }
         }
     )
 }
@@ -291,24 +286,20 @@ private fun ReaderAuthDropdown(
         isDropdownExpanded = isAttributeGroupExpanded,
         onToggleDropdownExpansion = onToggleDropdownExpansion,
         dropdownMenuContents = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(spacingSingle)
-            ) {
-                ReaderAuthOption.entries
-                    .sortedBy(ReaderAuthOption::displayName)
-                    .forEach { option ->
-                        DropdownMenuItem(
-                            modifier = Modifier
-                                .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
-                                .testTag("reader_auth_item"),
-                            text = { Text(option.displayName) },
-                            onClick = {
-                                onToggleDropdownExpansion(false)
-                                onSelectOption(option)
-                            }
-                        )
-                    }
-            }
+            ReaderAuthOption.entries
+                .sortedBy(ReaderAuthOption::displayName)
+                .forEach { option ->
+                    DropdownMenuItem(
+                        modifier = Modifier
+                            .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
+                            .testTag("reader_auth_item"),
+                        text = { Text(option.displayName) },
+                        onClick = {
+                            onToggleDropdownExpansion(false)
+                            onSelectOption(option)
+                        }
+                    )
+                }
         }
     )
 }
@@ -329,23 +320,19 @@ private fun IssuerRootDropdown(
         isDropdownExpanded = isIssuerRootExpanded,
         onToggleDropdownExpansion = onToggleDropdownExpansion,
         dropdownMenuContents = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(spacingSingle)
-            ) {
-                IssuerRootOption.entries
-                    .forEach { option ->
-                        DropdownMenuItem(
-                            modifier = Modifier
-                                .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
-                                .testTag("issuer_root_item"),
-                            text = { Text(option.displayName) },
-                            onClick = {
-                                onToggleDropdownExpansion(false)
-                                onSelectOption(option)
-                            }
-                        )
-                    }
-            }
+            IssuerRootOption.entries
+                .forEach { option ->
+                    DropdownMenuItem(
+                        modifier = Modifier
+                            .padding(ExposedDropdownMenuDefaults.ItemContentPadding)
+                            .testTag("issuer_root_item"),
+                        text = { Text(option.displayName) },
+                        onClick = {
+                            onToggleDropdownExpansion(false)
+                            onSelectOption(option)
+                        }
+                    )
+                }
         }
     )
 }
@@ -399,8 +386,7 @@ private fun UserDropdownMenu(
                 MaterialTheme.colorScheme.onSurface
             ),
             matchAnchorWidth = true,
-            modifier = Modifier
-                .testTag("dropdown_menu")
+            modifier = Modifier.testTag("dropdown_menu")
         ) {
             dropdownMenuContents()
         }
