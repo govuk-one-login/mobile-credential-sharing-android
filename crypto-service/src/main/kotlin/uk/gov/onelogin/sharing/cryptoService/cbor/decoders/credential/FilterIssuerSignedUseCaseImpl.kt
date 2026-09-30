@@ -140,13 +140,36 @@ class FilterIssuerSignedUseCaseImpl(private val logger: Logger) : FilterIssuerSi
         }
 
         val ageOverItems = decodedItems.filter { (id, _) -> isAgeOverNN(id) }
+        val ageOverMatches = mutableListOf<MatchedItem>()
         for (requestedKey in ageOverRequests) {
             val requestedAge = parseAgeOverNN(requestedKey) ?: continue
             val intentToRetain = requestedElements[requestedKey] ?: false
-            resolveAgeOver(requestedAge, intentToRetain, ageOverItems)?.let { matchedItems.add(it) }
+            resolveAgeOver(requestedAge, intentToRetain, ageOverItems)
+                ?.let { ageOverMatches.add(it) }
         }
 
+        matchedItems.addAll(deduplicateAgeOver(ageOverMatches))
+
         return matchedItems
+    }
+
+    /**
+     * Consolidates resolved age_over_NN matches so that each age_over element identifier appears at
+     * most once. Multiple requested age_over_NN attributes can resolve to the same element.
+     *
+     * When duplicates are merged, [MatchedItem.intentToRetain] is combined using the most
+     * restrictive (privacy-preserving) rule: if any duplicate specifies intentToRetain = true, the
+     * merged element retains intentToRetain = true.
+     */
+    private fun deduplicateAgeOver(matchedItems: List<MatchedItem>): List<MatchedItem> {
+        val merged = LinkedHashMap<String, MatchedItem>()
+        for (item in matchedItems) {
+            val existing = merged[item.identifier]
+            merged[item.identifier] =
+                existing?.copy(intentToRetain = existing.intentToRetain || item.intentToRetain)
+                    ?: item
+        }
+        return merged.values.toList()
     }
 
     private fun readElementIdentifier(itemBytes: ByteArray): String? = try {
