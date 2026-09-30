@@ -23,10 +23,12 @@ import androidx.navigation.compose.rememberNavController
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
@@ -71,6 +73,7 @@ internal fun ShareCredential(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    uiDispatcher: CoroutineContext = Dispatchers.Main
 ) {
     val scope = rememberCoroutineScope { defaultDispatcher }
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
@@ -78,14 +81,14 @@ internal fun ShareCredential(
     val onCancel: () -> Unit = {
         scope.launch {
             if (state.shouldConfirmCancellation()) {
-                navController.navigateToHolderUserCancellationDialog()
+                withContext(uiDispatcher) {
+                    navController.navigateToHolderUserCancellationDialog()
+                }
             } else {
                 orchestrator.cancel()
             }
         }
     }
-
-    BackHandler(state.userCanCancel(), onBack = onCancel)
 
     MonitorHolderSessionState(
         holderSessionState = holderSessionState,
@@ -128,4 +131,6 @@ internal fun ShareCredential(
             }
         }
     }
+
+    BackHandler(state.userCanCancel(), onBack = onCancel)
 }
