@@ -70,6 +70,28 @@ class CredentialProviderTest {
     }
 
     @Test
+    fun `signV2 default wraps a legacy Recoverable into SignResult Failure`() = runTest {
+        val recoverable = CredentialSigningException.Recoverable()
+        val provider = LegacyProvider { _, _ -> throw recoverable }
+
+        val result = provider.signV2(payload, documentId)
+
+        val failure = result as SignResult.Failure
+        assertSame(recoverable, failure.exception)
+    }
+
+    @Test
+    fun `signV2 default wraps a legacy Unrecoverable into SignResult Failure`() = runTest {
+        val unrecoverable = CredentialSigningException.Unrecoverable(RuntimeException("boom"))
+        val provider = LegacyProvider { _, _ -> throw unrecoverable }
+
+        val result = provider.signV2(payload, documentId)
+
+        val failure = result as SignResult.Failure
+        assertSame(unrecoverable, failure.exception)
+    }
+
+    @Test
     fun `deprecated sign default unwraps a Success from signV2`() = runTest {
         val provider = NewProvider(SignResult.Success(signature))
 

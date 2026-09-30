@@ -21,6 +21,10 @@ interface CredentialProvider {
         message = "Superseded by signV2, which returns a SignResult.",
         replaceWith = ReplaceWith("signV2(payload, documentId)")
     )
+    @Throws(
+        CredentialSigningException.Recoverable::class,
+        CredentialSigningException.Unrecoverable::class
+    )
     @Suppress("DEPRECATION")
     suspend fun sign(payload: ByteArray, documentId: String): ByteArray =
         when (val result = signV2(payload, documentId)) {
@@ -46,8 +50,11 @@ interface CredentialProvider {
      *   ends in a failed state.
      */
     @Suppress("DEPRECATION")
-    suspend fun signV2(payload: ByteArray, documentId: String): SignResult =
+    suspend fun signV2(payload: ByteArray, documentId: String): SignResult = try {
         SignResult.Success(sign(payload, documentId))
+    } catch (e: CredentialSigningException) {
+        SignResult.Failure(e)
+    }
 }
 
 /**
