@@ -110,6 +110,7 @@ class AndroidCentralBluetoothTransport(
         cancelCurrentJobs()
         gattClientManager.disconnect()
         bluetoothStateMonitor.stop()
+        _state.value = CentralBluetoothState.Idle
     }
 
     private suspend fun notifySessionEnd() {
