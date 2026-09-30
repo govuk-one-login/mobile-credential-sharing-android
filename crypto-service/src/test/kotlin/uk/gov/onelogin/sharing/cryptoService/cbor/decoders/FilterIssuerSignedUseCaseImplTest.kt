@@ -315,4 +315,92 @@ class FilterIssuerSignedUseCaseImplTest {
 
         assertThat(ex, hasMessage(equalTo(AgeOverNNRequestLimitException.MESSAGE)))
     }
+
+    @Test
+    fun `dedupes to single age_over element with retention disabled when both requests false`() {
+        val age18Bytes = buildItemBytes(0, "age_over_18", true)
+        val credentialBytes = buildNameSpacesBytes(mapOf(namespace to listOf(age18Bytes)))
+        val request = deviceRequest(
+            mapOf(namespace to mapOf("age_over_16" to false, "age_over_17" to false))
+        )
+
+        val result = useCase.filter(parsedCredential(credentialBytes), request)
+
+        val items = result.issuerSigned.nameSpaces!![namespace]!!
+        assertEquals(1, items.size)
+        assertArrayEquals(age18Bytes, items[0])
+        assertEquals(
+            listOf(MatchedAttribute("age_over_18", false)),
+            result.matchedAttributes[namespace]
+        )
+    }
+
+    @Test
+    fun `dedupes to single age_over element with retention enabled when requests conflict`() {
+        val age18Bytes = buildItemBytes(0, "age_over_18", true)
+        val credentialBytes = buildNameSpacesBytes(mapOf(namespace to listOf(age18Bytes)))
+        val request = deviceRequest(
+            mapOf(namespace to mapOf("age_over_16" to false, "age_over_17" to true))
+        )
+
+        val result = useCase.filter(parsedCredential(credentialBytes), request)
+
+        val items = result.issuerSigned.nameSpaces!![namespace]!!
+        assertEquals(1, items.size)
+        assertArrayEquals(age18Bytes, items[0])
+        assertEquals(
+            listOf(MatchedAttribute("age_over_18", true)),
+            result.matchedAttributes[namespace]
+        )
+    }
+
+    @Test
+    fun `dedupes to single age_over element with retention enabled when both requests true`() {
+        val age18Bytes = buildItemBytes(0, "age_over_18", true)
+        val credentialBytes = buildNameSpacesBytes(mapOf(namespace to listOf(age18Bytes)))
+        val request = deviceRequest(
+            mapOf(
+                namespace to mapOf(
+                    "age_over_16" to true,
+                    "age_over_17" to true
+                )
+            )
+        )
+
+        val result = useCase.filter(parsedCredential(credentialBytes), request)
+
+        val items = result.issuerSigned.nameSpaces!![namespace]!!
+        assertEquals(1, items.size)
+        assertArrayEquals(age18Bytes, items[0])
+        assertEquals(
+            listOf(MatchedAttribute("age_over_18", true)),
+            result.matchedAttributes[namespace]
+        )
+    }
+
+    @Test
+    fun `retains age_over elements separately when requests resolve to different elements`() {
+        val age18Bytes = buildItemBytes(0, "age_over_18", true)
+        val age21Bytes = buildItemBytes(1, "age_over_21", true)
+        val credentialBytes = buildNameSpacesBytes(
+            mapOf(namespace to listOf(age18Bytes, age21Bytes))
+        )
+        val request = deviceRequest(
+            mapOf(namespace to mapOf("age_over_18" to false, "age_over_21" to false))
+        )
+
+        val result = useCase.filter(parsedCredential(credentialBytes), request)
+
+        val items = result.issuerSigned.nameSpaces!![namespace]!!
+        assertEquals(2, items.size)
+        assertArrayEquals(age18Bytes, items[0])
+        assertArrayEquals(age21Bytes, items[1])
+        assertEquals(
+            listOf(
+                MatchedAttribute("age_over_18", false),
+                MatchedAttribute("age_over_21", false)
+            ),
+            result.matchedAttributes[namespace]
+        )
+    }
 }
