@@ -79,6 +79,16 @@ class SelectCredentialsViewModelTest {
     }
 
     @Test
+    fun `An unprovisioned DVS option reports the reader auth certificate as not provisioned`() =
+        runTest {
+            viewModel.update(ReaderAuthOption.DVS_DEV)
+
+            viewModel.readerAuthProvisioned.test {
+                assertThat(expectMostRecentItem(), equalTo(false))
+            }
+        }
+
+    @Test
     fun `Updates factory instance with reader auth option`(
         @TestParameter option: ReaderAuthOption
     ) = runTest {

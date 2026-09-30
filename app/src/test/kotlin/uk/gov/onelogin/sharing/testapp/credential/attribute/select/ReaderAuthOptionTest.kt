@@ -21,17 +21,17 @@ class ReaderAuthOptionTest {
         mocked.forEach { (option, leaf) ->
             assertEquals(
                 listOf(
-                    "test_reader_auth_x509_certificate.der",
+                    "$leaf.der",
                     "test_reader_auth_name_constrained_x509_certificate.der",
-                    "$leaf.der"
+                    "test_reader_auth_x509_certificate.der"
                 ),
                 option.certificateChain
             )
             assertEquals(
                 listOf(
-                    "test_reader_auth_x509_certificate.pem",
+                    "$leaf.pem",
                     "test_reader_auth_name_constrained_x509_certificate.pem",
-                    "$leaf.pem"
+                    "test_reader_auth_x509_certificate.pem"
                 ),
                 option.privateKeyChain
             )
@@ -60,7 +60,7 @@ class ReaderAuthOptionTest {
     }
 
     @Test
-    fun `Leaf certificate asset is the last certificate in the chain`() = runTest {
+    fun `Leaf certificate asset is the first certificate in the chain`() = runTest {
         assertEquals(
             "reader_dvs_dev_chain.der",
             ReaderAuthOption.DVS_DEV.leafCertificateAsset

@@ -23,10 +23,14 @@ class ReaderAuthCertificateValidatorTest {
     }
 
     @Test
-    fun `Placeholder sentinel bytes are treated as placeholder`() = runTest {
+    fun `Unprovisioned DVS options are placeholders`() = runTest {
         assertEquals(
             ReaderAuthCertificateStatus.PLACEHOLDER,
-            validator.classify("DVS_PLACEHOLDER_CERTIFICATE_REPLACE_IN_CI".encodeToByteArray())
+            validator.validate(ReaderAuthOption.DVS_DEV)
+        )
+        assertEquals(
+            ReaderAuthCertificateStatus.PLACEHOLDER,
+            validator.validate(ReaderAuthOption.DVS_INTEGRATION)
         )
     }
 

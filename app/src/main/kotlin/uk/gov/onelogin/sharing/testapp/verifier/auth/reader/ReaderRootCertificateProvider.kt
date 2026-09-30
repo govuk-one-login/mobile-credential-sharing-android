@@ -53,22 +53,21 @@ class ReaderRootCertificateProvider @Inject constructor(
         ReaderAuthOption.entries.mapNotNull { rootCertificateFor(it) }.distinct()
 
     fun rootCertificateFor(option: ReaderAuthOption): X509Certificate? = try {
-        if (option.certificateChain.size > 1) {
-            val rootAsset = option.certificateChain.first()
-            context.assets.open(rootAsset).use { stream ->
+        val certs = option.certificateChain.flatMap { asset ->
+            context.assets.open(asset).use { stream ->
                 certificateFactory.generateCertificates(stream)
                     .filterIsInstance<X509Certificate>()
-                    .firstOrNull()
-            }
-        } else {
-            val chainAsset = option.certificateChain.first()
-            context.assets.open(chainAsset).use { stream ->
-                certificateFactory.generateCertificates(stream)
-                    .filterIsInstance<X509Certificate>()
-                    .lastOrNull()
             }
         }
+        certs.firstOrNull(::isSelfSigned) ?: certs.lastOrNull()
     } catch (_: Exception) {
         null
+    }
+
+    private fun isSelfSigned(cert: X509Certificate): Boolean = try {
+        cert.verify(cert.publicKey)
+        true
+    } catch (_: java.security.GeneralSecurityException) {
+        false
     }
 }

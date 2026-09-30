@@ -39,6 +39,11 @@ class TestAppReaderAuthCredentialProviderFactoryTest {
         INVALID_MISSING_PRIVACY_POLICY(ReaderAuthOption.INVALID_MISSING_PRIVACY_POLICY)
     }
 
+    enum class PlaceholderReaderAuthOption(val option: ReaderAuthOption) {
+        DVS_DEV(ReaderAuthOption.DVS_DEV),
+        DVS_INTEGRATION(ReaderAuthOption.DVS_INTEGRATION)
+    }
+
     @Test
     fun `Initially selected option is configurable`(@TestParameter option: ReaderAuthOption) =
         runTest {
@@ -95,6 +100,17 @@ class TestAppReaderAuthCredentialProviderFactoryTest {
 
         assertThat(x5chain.isArray, equalTo(true))
         assertThat(x5chain.size(), equalTo(EXPECTED_X5CHAIN_SIZE))
+    }
+
+    @Test
+    fun `Unprovisioned DVS options fail creation`(
+        @TestParameter placeholder: PlaceholderReaderAuthOption
+    ) = runTest {
+        initialState = placeholder.option
+
+        kotlin.test.assertFailsWith<IllegalArgumentException> {
+            factory().create()
+        }
     }
 
     private companion object {

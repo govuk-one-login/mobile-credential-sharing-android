@@ -69,7 +69,7 @@ class TestAppReaderAuthCredentialProviderFactory(
         val option = _readerAuthOption.value
         val privateKey = processPrivateKeyAssetChain(
             sequenceOf(
-                option.privateKeyChain.last()
+                option.privateKeyChain.first()
             )
         ).first()
 
