@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 import java.security.cert.Certificate
+import java.security.interfaces.ECPublicKey
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants
@@ -12,27 +13,38 @@ import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ProtectedHeade
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ProtectedHeaderGenerator.Companion.PROTECTED_HEADER_VALUE_SHA256
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ProtectedHeaderGenerator.Companion.PROTECTED_HEADER_X5T
 
+internal const val ES384_ALGORITHM = -35
+private const val P384_KEY_BIT_LENGTH = 384
+
 /**
  * Creates the protected headers for the COSE_Sign1 structure. This is defined as:
  *
  * ```
- * { 1: -7, 34: [ -16, sha256(leafCertificate) ] }
+ * { 1: -7 (or -35 for P-384), 34: [ -16, sha256(leafCertificate) ] }
  * ```
  */
 class CoseSign1ProtectedHeaders(private val logger: Logger) : ProtectedHeaderGenerator {
-    private fun generateProtectedHeaderData(leafCertificate: Certificate): Map<Long, Any> = mapOf(
-        PROTECTED_HEADER_ALGORITHM to ES256_ALGORITHM, // alg = -7 ECDSA 256
-        PROTECTED_HEADER_X5T to arrayOf(
-            PROTECTED_HEADER_VALUE_SHA256,
-            MessageDigest
-                .getInstance(Constants.HASH_ALGORITHM_SHA256)
-                .digest(leafCertificate.encoded)
-        )
-    ).also {
-        logger.debug(
-            logTag,
-            "Generated protected headers for COSE_Sign1 structure"
-        )
+    private fun generateProtectedHeaderData(leafCertificate: Certificate): Map<Long, Any> {
+        val ecPublicKey = leafCertificate.publicKey as? ECPublicKey
+        val alg = if (ecPublicKey?.params?.order?.bitLength() == P384_KEY_BIT_LENGTH) {
+            ES384_ALGORITHM
+        } else {
+            ES256_ALGORITHM
+        }
+        return mapOf(
+            PROTECTED_HEADER_ALGORITHM to alg,
+            PROTECTED_HEADER_X5T to arrayOf(
+                PROTECTED_HEADER_VALUE_SHA256,
+                MessageDigest
+                    .getInstance(Constants.HASH_ALGORITHM_SHA256)
+                    .digest(leafCertificate.encoded)
+            )
+        ).also {
+            logger.debug(
+                logTag,
+                "Generated protected headers for COSE_Sign1 structure"
+            )
+        }
     }
 
     override fun generateProtectedHeaders(

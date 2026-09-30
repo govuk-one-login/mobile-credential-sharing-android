@@ -6,6 +6,7 @@ import dev.zacsweers.metro.Inject
 import java.security.Signature
 import java.security.interfaces.ECPublicKey
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.InvalidSignature
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseAlgorithm
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseHeaderValidator
 import uk.gov.onelogin.sharing.verification.cose.internal.decode.InternalCoseSign1
 
@@ -14,10 +15,10 @@ internal class CoseSignatureVerifier(private val headerValidator: CoseHeaderVali
     private val cborMapper = ObjectMapper(CBORFactory())
 
     fun verify(coseSign1: InternalCoseSign1, publicKey: ECPublicKey, payload: ByteArray) {
-        headerValidator.validate(coseSign1)
+        val algorithm = headerValidator.validate(coseSign1)
         val sigStructure = buildSigStructure(coseSign1.protectedHeader, payload)
-        val derSignature = EcdsaSignatureTranscoder.rawToDer(coseSign1.signature)
-        verifyEcdsa(sigStructure, derSignature, publicKey)
+        val derSignature = EcdsaSignatureTranscoder.rawToDer(coseSign1.signature, algorithm)
+        verifyEcdsa(sigStructure, derSignature, publicKey, algorithm)
     }
 
     internal fun buildSigStructure(protectedHeader: ByteArray, payload: ByteArray): ByteArray {
@@ -32,9 +33,14 @@ internal class CoseSignatureVerifier(private val headerValidator: CoseHeaderVali
     private fun verifyEcdsa(
         sigStructure: ByteArray,
         derSignature: ByteArray,
-        publicKey: ECPublicKey
+        publicKey: ECPublicKey,
+        algorithm: CoseAlgorithm
     ) {
-        val sig = Signature.getInstance("SHA256withECDSA")
+        val curveSize = publicKey.params.order.bitLength()
+        if (curveSize != algorithm.curveBitLength) {
+            throw InvalidSignature
+        }
+        val sig = Signature.getInstance(algorithm.jcaAlgorithmName)
         sig.initVerify(publicKey)
         sig.update(sigStructure)
         if (!sig.verify(derSignature)) {

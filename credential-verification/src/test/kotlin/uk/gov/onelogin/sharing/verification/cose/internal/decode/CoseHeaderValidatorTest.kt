@@ -69,8 +69,8 @@ internal class CoseHeaderValidatorFailureTest(
                 UnsupportedAlgorithm
             ),
             arrayOf(
-                "algorithm is not ES256",
-                coseSign1(protectedHeader = buildHeader("1" to -35L)),
+                "algorithm is not supported",
+                coseSign1(protectedHeader = buildHeader("1" to -36L)),
                 UnsupportedAlgorithm
             ),
             arrayOf(
@@ -121,6 +121,26 @@ class CoseHeaderValidatorTest {
                 InternalCoseSign1.PayloadMode.ATTACHED
             )
 
-        validator.validate(coseSign1)
+        val result = validator.validate(coseSign1)
+        org.junit.Assert.assertEquals(CoseAlgorithm.ES256, result)
+    }
+
+    @Test
+    fun `valid ES384 header passes`() {
+        val node = cborMapper.createObjectNode()
+        node.put("1", -35L)
+        val protectedHeader = cborMapper.writeValueAsBytes(node)
+        val emptyMap = cborMapper.writeValueAsBytes(cborMapper.createObjectNode())
+        val coseSign1 =
+            InternalCoseSign1(
+                protectedHeader,
+                emptyMap,
+                byteArrayOf(0x01),
+                ByteArray(96),
+                InternalCoseSign1.PayloadMode.ATTACHED
+            )
+
+        val result = validator.validate(coseSign1)
+        org.junit.Assert.assertEquals(CoseAlgorithm.ES384, result)
     }
 }

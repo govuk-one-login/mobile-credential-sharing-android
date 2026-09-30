@@ -33,11 +33,11 @@ enum class ReaderAuthOption(
     // with one cert (.der) and one key (.pem) file per member.
     constructor(displayName: String, leaf: String) : this(
         displayName = displayName,
-        certificateChain = listOf(SHARED_ROOT, SHARED_INTERMEDIATE, leaf).map { "$it.der" },
-        privateKeyChain = listOf(SHARED_ROOT, SHARED_INTERMEDIATE, leaf).map { "$it.pem" }
+        certificateChain = listOf(leaf, SHARED_INTERMEDIATE, SHARED_ROOT).map { "$it.der" },
+        privateKeyChain = listOf(leaf, SHARED_INTERMEDIATE, SHARED_ROOT).map { "$it.pem" }
     )
 
-    val leafCertificateAsset: String get() = certificateChain.last()
+    val leafCertificateAsset: String get() = certificateChain.first()
 
     private companion object {
         const val SHARED_ROOT = "test_reader_auth_x509_certificate"

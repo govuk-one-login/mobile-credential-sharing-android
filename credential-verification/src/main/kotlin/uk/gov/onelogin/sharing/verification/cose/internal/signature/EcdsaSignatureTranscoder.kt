@@ -1,22 +1,26 @@
 package uk.gov.onelogin.sharing.verification.cose.internal.signature
 
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.InvalidSignature
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseAlgorithm
 
 internal object EcdsaSignatureTranscoder {
-    private const val ES256_SIGNATURE_LENGTH = 64
-    private const val COMPONENT_LENGTH = 32
     private const val DER_SEQUENCE_TAG: Byte = 0x30
     private const val DER_INTEGER_TAG: Byte = 0x02
     private const val SIGN_BIT_MASK = 0x80
 
-    fun rawToDer(rawSignature: ByteArray): ByteArray {
-        if (rawSignature.size != ES256_SIGNATURE_LENGTH) {
+    fun rawToDer(rawSignature: ByteArray, algorithm: CoseAlgorithm? = null): ByteArray {
+        if (algorithm != null && rawSignature.size != algorithm.signatureLength) {
             throw InvalidSignature
         }
-        val r = rawSignature.copyOfRange(0, COMPONENT_LENGTH).trimLeadingZeros()
+        val componentLength = when (rawSignature.size) {
+            CoseAlgorithm.ES256.signatureLength -> CoseAlgorithm.ES256.signatureLength / 2
+            CoseAlgorithm.ES384.signatureLength -> CoseAlgorithm.ES384.signatureLength / 2
+            else -> throw InvalidSignature
+        }
+        val r = rawSignature.copyOfRange(0, componentLength).trimLeadingZeros()
         val s = rawSignature.copyOfRange(
-            COMPONENT_LENGTH,
-            ES256_SIGNATURE_LENGTH
+            componentLength,
+            rawSignature.size
         ).trimLeadingZeros()
         val rEncoded = derInteger(r)
         val sEncoded = derInteger(s)
