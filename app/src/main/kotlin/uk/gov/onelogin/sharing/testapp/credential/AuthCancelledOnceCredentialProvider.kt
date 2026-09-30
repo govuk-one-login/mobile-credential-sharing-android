@@ -29,7 +29,7 @@ class AuthCancelledOnceCredentialProvider(private val activeCredential: MockCred
         )
     )
 
-    override suspend fun sign(payload: ByteArray, documentId: String): SignResult {
+    override suspend fun signV2(payload: ByteArray, documentId: String): SignResult {
         if (hasCancelledOnce.compareAndSet(false, true)) {
             return SignResult.Failure(
                 CredentialSigningException.Recoverable(MockSignException.LocalAuthCancelled())

@@ -52,7 +52,7 @@ class SampleCredentialProviderTest {
                 .map { it.toInt(16).toByte() }
                 .toByteArray()
 
-            val result = credentialProvider.sign(
+            val result = credentialProvider.signV2(
                 payload = deviceAuthenticationBytes,
                 documentId = "org.iso.18013.5.1.mDL"
             )
@@ -69,10 +69,10 @@ class SampleCredentialProviderTest {
     @Test
     fun `sign produces different signatures for different payloads`() = runTest {
         val sig1 = assertIs<SignResult.Success>(
-            credentialProvider.sign("payload-one".toByteArray(), documentId = "doc-id")
+            credentialProvider.signV2("payload-one".toByteArray(), documentId = "doc-id")
         ).signature
         val sig2 = assertIs<SignResult.Success>(
-            credentialProvider.sign("payload-two".toByteArray(), documentId = "doc-id")
+            credentialProvider.signV2("payload-two".toByteArray(), documentId = "doc-id")
         ).signature
         assertTrue(!sig1.contentEquals(sig2))
     }

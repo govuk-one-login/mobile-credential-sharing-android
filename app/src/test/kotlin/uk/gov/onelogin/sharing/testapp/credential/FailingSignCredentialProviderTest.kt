@@ -38,7 +38,7 @@ class FailingSignCredentialProviderTest {
 
     @Test
     fun `sign always returns an unrecoverable Failure mapped from the mock error`() = runTest {
-        val result = credentialProvider.sign("payload".toByteArray(), documentId = "doc-id")
+        val result = credentialProvider.signV2("payload".toByteArray(), documentId = "doc-id")
 
         val failure = assertIs<SignResult.Failure>(result)
         val exception = assertIs<CredentialSigningException.Unrecoverable>(failure.exception)
@@ -48,7 +48,7 @@ class FailingSignCredentialProviderTest {
     @Test
     fun `sign keeps failing on repeated attempts`() = runTest {
         repeat(3) {
-            val result = credentialProvider.sign("payload".toByteArray(), documentId = "doc-id")
+            val result = credentialProvider.signV2("payload".toByteArray(), documentId = "doc-id")
             assertIs<SignResult.Failure>(result)
         }
     }
