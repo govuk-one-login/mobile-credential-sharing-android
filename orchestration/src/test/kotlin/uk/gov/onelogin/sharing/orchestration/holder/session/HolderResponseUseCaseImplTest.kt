@@ -54,7 +54,7 @@ class HolderResponseUseCaseImplTest {
     @Test
     fun `generateDeviceResponse returns DeviceSigned with empty CBOR map nameSpaces`() = runTest {
         coEvery {
-            credentialProvider.signV2(
+            credentialProvider.signWithResult(
                 any(),
                 validatedCredential.credentialId
             )
@@ -75,7 +75,7 @@ class HolderResponseUseCaseImplTest {
     fun `generateDeviceResponse returns DeviceSigned with deviceAuth from signatureResult`() =
         runTest {
             coEvery {
-                credentialProvider.signV2(
+                credentialProvider.signWithResult(
                     any(),
                     validatedCredential.credentialId
                 )
@@ -96,7 +96,7 @@ class HolderResponseUseCaseImplTest {
     fun `generateDeviceResponse passes deviceAuthBytes and credentialId to credentialProvider`() =
         runTest {
             coEvery {
-                credentialProvider.signV2(
+                credentialProvider.signWithResult(
                     any(),
                     validatedCredential.credentialId
                 )
@@ -111,7 +111,7 @@ class HolderResponseUseCaseImplTest {
             )
 
             coVerify {
-                credentialProvider.signV2(
+                credentialProvider.signWithResult(
                     any(),
                     validatedCredential.credentialId
                 )
@@ -122,7 +122,7 @@ class HolderResponseUseCaseImplTest {
     fun `generateDeviceResponse passes signature bytes from provider to deviceSignatureService`() =
         runTest {
             coEvery {
-                credentialProvider.signV2(
+                credentialProvider.signWithResult(
                     any(),
                     validatedCredential.credentialId
                 )
@@ -139,7 +139,7 @@ class HolderResponseUseCaseImplTest {
     fun `generateDeviceResponse wraps DeviceSignatureException in DeviceSignatureException`() =
         runTest {
             val cause = DeviceSignatureException("inner failure")
-            coEvery { credentialProvider.signV2(any(), any()) } returns SignResult.Success(
+            coEvery { credentialProvider.signWithResult(any(), any()) } returns SignResult.Success(
                 signatureBytes
             )
             coEvery { deviceSignatureService.buildDeviceSignedStructures(any()) } throws cause
@@ -156,7 +156,7 @@ class HolderResponseUseCaseImplTest {
     fun `generateDeviceResponse wraps GeneralSecurityException in DeviceSignatureException`() =
         runTest {
             val cause = GeneralSecurityException("key error")
-            coEvery { credentialProvider.signV2(any(), any()) } throws cause
+            coEvery { credentialProvider.signWithResult(any(), any()) } throws cause
 
             val thrown = assertFailsWith<DeviceSignatureException> {
                 useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
@@ -169,7 +169,8 @@ class HolderResponseUseCaseImplTest {
     @Test
     fun `generateDeviceResponse rethrows Recoverable from a Failure result`() = runTest {
         val recoverable = CredentialSigningException.Recoverable()
-        coEvery { credentialProvider.signV2(any(), any()) } returns SignResult.Failure(recoverable)
+        coEvery { credentialProvider.signWithResult(any(), any()) } returns
+            SignResult.Failure(recoverable)
 
         val thrown = assertFailsWith<CredentialSigningException.Recoverable> {
             useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)
@@ -183,7 +184,7 @@ class HolderResponseUseCaseImplTest {
         runTest {
             val unrecoverable = CredentialSigningException.Unrecoverable(RuntimeException("boom"))
             coEvery {
-                credentialProvider.signV2(any(), any())
+                credentialProvider.signWithResult(any(), any())
             } returns SignResult.Failure(unrecoverable)
 
             val thrown = assertFailsWith<DeviceSignatureException> {
@@ -195,7 +196,7 @@ class HolderResponseUseCaseImplTest {
 
     @Test
     fun `generateDeviceResponse propagates CancellationException without conversion`() = runTest {
-        coEvery { credentialProvider.signV2(any(), any()) } throws
+        coEvery { credentialProvider.signWithResult(any(), any()) } throws
             CancellationException("cancelled")
 
         assertFailsWith<CancellationException> {
@@ -207,7 +208,7 @@ class HolderResponseUseCaseImplTest {
     fun `generateDeviceResponse maps an unexpected thrown exception to DeviceSignatureException`() =
         runTest {
             val cause = RuntimeException("unexpected")
-            coEvery { credentialProvider.signV2(any(), any()) } throws cause
+            coEvery { credentialProvider.signWithResult(any(), any()) } throws cause
 
             val thrown = assertFailsWith<DeviceSignatureException> {
                 useCase.generateDeviceResponse(validatedCredential, deviceAuthBytes)

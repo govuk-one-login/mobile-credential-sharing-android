@@ -23,7 +23,7 @@ class FailingSignCredentialProvider(private val activeCredential: MockCredential
         )
     )
 
-    override suspend fun signV2(payload: ByteArray, documentId: String): SignResult =
+    override suspend fun signWithResult(payload: ByteArray, documentId: String): SignResult =
         SignResult.Failure(
             CredentialSigningException.Unrecoverable(MockSignException.SignError())
         )

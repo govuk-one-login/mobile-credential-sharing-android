@@ -11,6 +11,6 @@ class FakeCredentialProvider : CredentialProvider {
         return credentialsToReturn
     }
 
-    override suspend fun signV2(payload: ByteArray, documentId: String): SignResult =
+    override suspend fun signWithResult(payload: ByteArray, documentId: String): SignResult =
         SignResult.Success(ByteArray(0))
 }

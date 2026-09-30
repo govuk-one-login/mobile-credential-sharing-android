@@ -39,7 +39,10 @@ class AuthCancelledOnceCredentialProviderTest {
 
     @Test
     fun `first sign returns a recoverable Failure mapped from the mock error`() = runTest {
-        val result = credentialProvider.signV2("payload".toByteArray(), documentId = "doc-id")
+        val result = credentialProvider.signWithResult(
+            "payload".toByteArray(),
+            documentId = "doc-id"
+        )
 
         val failure = assertIs<SignResult.Failure>(result)
         val exception = assertIs<CredentialSigningException.Recoverable>(failure.exception)
@@ -50,9 +53,11 @@ class AuthCancelledOnceCredentialProviderTest {
     fun `second sign returns a valid signature`() = runTest {
         val payload = "device-authentication".toByteArray()
 
-        assertIs<SignResult.Failure>(credentialProvider.signV2(payload, documentId = "doc-id"))
+        assertIs<SignResult.Failure>(
+            credentialProvider.signWithResult(payload, documentId = "doc-id")
+        )
 
-        val result = credentialProvider.signV2(payload, documentId = "doc-id")
+        val result = credentialProvider.signWithResult(payload, documentId = "doc-id")
         val signature = assertIs<SignResult.Success>(result).signature
 
         val isValid = Signature.getInstance(SIGNING_ALGORITHM).run {
@@ -67,13 +72,15 @@ class AuthCancelledOnceCredentialProviderTest {
     fun `subsequent signs continue to succeed`() = runTest {
         val payload = "payload".toByteArray()
 
-        assertIs<SignResult.Failure>(credentialProvider.signV2(payload, documentId = "doc-id"))
+        assertIs<SignResult.Failure>(
+            credentialProvider.signWithResult(payload, documentId = "doc-id")
+        )
 
         val sig1 = assertIs<SignResult.Success>(
-            credentialProvider.signV2(payload, documentId = "doc-id")
+            credentialProvider.signWithResult(payload, documentId = "doc-id")
         ).signature
         val sig2 = assertIs<SignResult.Success>(
-            credentialProvider.signV2(payload, documentId = "doc-id")
+            credentialProvider.signWithResult(payload, documentId = "doc-id")
         ).signature
 
         assertTrue(sig1.isNotEmpty())

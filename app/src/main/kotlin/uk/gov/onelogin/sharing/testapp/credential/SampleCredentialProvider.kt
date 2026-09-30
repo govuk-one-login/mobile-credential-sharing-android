@@ -25,6 +25,6 @@ class SampleCredentialProvider(private val activeCredential: MockCredential) : C
      *
      * Signs the [payload] using the EC private key stored in the active [MockCredential].
      */
-    override suspend fun signV2(payload: ByteArray, documentId: String): SignResult =
+    override suspend fun signWithResult(payload: ByteArray, documentId: String): SignResult =
         SignResult.Success(signWithEcPrivateKey(payload, activeCredential.privateKey))
 }

@@ -57,7 +57,7 @@ class HolderResponseUseCaseImpl(
     }
 
     /**
-     * Invokes [CredentialProvider.signV2] and normalises its [SignResult] into the neutral-vs-fatal
+     * Invokes [CredentialProvider.signWithResult] and normalises its [SignResult] into the neutral-vs-fatal
      * distinction the orchestrator relies on:
      *
      * - [SignResult.Success] returns the signature bytes.
@@ -69,7 +69,7 @@ class HolderResponseUseCaseImpl(
     @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     private suspend fun sign(toBeSigned: ByteArray, documentId: String): ByteArray {
         val result = try {
-            credentialProvider.signV2(payload = toBeSigned, documentId = documentId)
+            credentialProvider.signWithResult(payload = toBeSigned, documentId = documentId)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

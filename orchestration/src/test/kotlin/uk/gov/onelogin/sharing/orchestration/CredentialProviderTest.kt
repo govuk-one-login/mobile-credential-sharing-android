@@ -19,31 +19,32 @@ class CredentialProviderTest {
         override suspend fun getCredentials(request: CredentialRequest): List<Credential> =
             emptyList()
 
-        @Deprecated("Superseded by signV2, which returns a SignResult.")
+        @Deprecated("Superseded by signWithResult, which returns a SignResult.")
         override suspend fun sign(payload: ByteArray, documentId: String): ByteArray =
             onSign(payload, documentId)
     }
 
-    /** New provider: overrides only [signV2], returning a [SignResult]. */
+    /** New provider: overrides only [signWithResult], returning a [SignResult]. */
     private class NewProvider(private val result: SignResult) : CredentialProvider {
         override suspend fun getCredentials(request: CredentialRequest): List<Credential> =
             emptyList()
 
-        override suspend fun signV2(payload: ByteArray, documentId: String): SignResult = result
+        override suspend fun signWithResult(payload: ByteArray, documentId: String): SignResult =
+            result
     }
 
     @Test
-    fun `signV2 default wraps a legacy sign result in Success`() = runTest {
+    fun `signWithResult default wraps a legacy sign result in Success`() = runTest {
         val provider = LegacyProvider { _, _ -> signature }
 
-        val result = provider.signV2(payload, documentId)
+        val result = provider.signWithResult(payload, documentId)
 
         val success = result as SignResult.Success
         assertArrayEquals(signature, success.signature)
     }
 
     @Test
-    fun `signV2 default forwards payload and documentId to legacy sign`() = runTest {
+    fun `signWithResult default forwards payload and documentId to legacy sign`() = runTest {
         var seenPayload: ByteArray? = null
         var seenDocumentId: String? = null
         val provider = LegacyProvider { p, d ->
@@ -52,47 +53,47 @@ class CredentialProviderTest {
             signature
         }
 
-        provider.signV2(payload, documentId)
+        provider.signWithResult(payload, documentId)
 
         assertArrayEquals(payload, seenPayload)
         assertTrue(seenDocumentId == documentId)
     }
 
     @Test
-    fun `signV2 default surfaces a throwing legacy sign by rethrowing`() = runTest {
+    fun `signWithResult default surfaces a throwing legacy sign by rethrowing`() = runTest {
         val boom = IllegalStateException("legacy signing failed")
         val provider = LegacyProvider { _, _ -> throw boom }
 
         val thrown = assertFailsWith<IllegalStateException> {
-            provider.signV2(payload, documentId)
+            provider.signWithResult(payload, documentId)
         }
         assertSame(boom, thrown)
     }
 
     @Test
-    fun `signV2 default wraps a legacy Recoverable into SignResult Failure`() = runTest {
+    fun `signWithResult default wraps a legacy Recoverable into SignResult Failure`() = runTest {
         val recoverable = CredentialSigningException.Recoverable()
         val provider = LegacyProvider { _, _ -> throw recoverable }
 
-        val result = provider.signV2(payload, documentId)
+        val result = provider.signWithResult(payload, documentId)
 
         val failure = result as SignResult.Failure
         assertSame(recoverable, failure.exception)
     }
 
     @Test
-    fun `signV2 default wraps a legacy Unrecoverable into SignResult Failure`() = runTest {
+    fun `signWithResult default wraps a legacy Unrecoverable into SignResult Failure`() = runTest {
         val unrecoverable = CredentialSigningException.Unrecoverable(RuntimeException("boom"))
         val provider = LegacyProvider { _, _ -> throw unrecoverable }
 
-        val result = provider.signV2(payload, documentId)
+        val result = provider.signWithResult(payload, documentId)
 
         val failure = result as SignResult.Failure
         assertSame(unrecoverable, failure.exception)
     }
 
     @Test
-    fun `deprecated sign default unwraps a Success from signV2`() = runTest {
+    fun `deprecated sign default unwraps a Success from signWithResult`() = runTest {
         val provider = NewProvider(SignResult.Success(signature))
 
         @Suppress("DEPRECATION")
@@ -102,7 +103,7 @@ class CredentialProviderTest {
     }
 
     @Test
-    fun `deprecated sign default throws the exception from a signV2 Failure`() = runTest {
+    fun `deprecated sign default throws the exception from a signWithResult Failure`() = runTest {
         val cause = RuntimeException("root cause")
         val provider = NewProvider(
             SignResult.Failure(CredentialSigningException.Unrecoverable(cause))

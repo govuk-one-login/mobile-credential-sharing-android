@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration
 
 /**
- * Error contract for [CredentialProvider.signV2].
+ * Error contract for [CredentialProvider.signWithResult].
  *
  * A consuming application maps its own signing errors onto one of these outcomes so
  * the Sharing SDK can react appropriately. The SDK recognises exactly two outcomes and does not

@@ -11,15 +11,15 @@ interface CredentialProvider {
      * Signs the COSE `Sig_structure` [payload] with the private key bound to [documentId],
      * returning the DER-encoded ECDSA (ES256 / P-256) signature bytes.
      *
-     * @deprecated Superseded by [signV2], which returns a [SignResult] so recoverable failures
+     * @deprecated Superseded by [signWithResult], which returns a [SignResult] so recoverable failures
      * (for example the user cancelling the local-authentication prompt) can be distinguished from
-     * unrecoverable ones. Migrate to [signV2] when convenient.
+     * unrecoverable ones. Migrate to [signWithResult] when convenient.
      *
      * This method is transitional and will be removed in a future release.
      */
     @Deprecated(
-        message = "Superseded by signV2, which returns a SignResult.",
-        replaceWith = ReplaceWith("signV2(payload, documentId)")
+        message = "Superseded by signWithResult, which returns a SignResult.",
+        replaceWith = ReplaceWith("signWithResult(payload, documentId)")
     )
     @Throws(
         CredentialSigningException.Recoverable::class,
@@ -27,7 +27,7 @@ interface CredentialProvider {
     )
     @Suppress("DEPRECATION")
     suspend fun sign(payload: ByteArray, documentId: String): ByteArray =
-        when (val result = signV2(payload, documentId)) {
+        when (val result = signWithResult(payload, documentId)) {
             is SignResult.Success -> result.signature
             is SignResult.Failure -> throw result.exception
         }
@@ -50,7 +50,7 @@ interface CredentialProvider {
      *   ends in a failed state.
      */
     @Suppress("DEPRECATION")
-    suspend fun signV2(payload: ByteArray, documentId: String): SignResult = try {
+    suspend fun signWithResult(payload: ByteArray, documentId: String): SignResult = try {
         SignResult.Success(sign(payload, documentId))
     } catch (e: CredentialSigningException) {
         SignResult.Failure(e)
@@ -58,7 +58,7 @@ interface CredentialProvider {
 }
 
 /**
- * Outcome of [CredentialProvider.signV2].
+ * Outcome of [CredentialProvider.signWithResult].
  */
 sealed class SignResult {
     /** Signing succeeded; [signature] is the DER-encoded ECDSA (ES256 / P-256) signature. */

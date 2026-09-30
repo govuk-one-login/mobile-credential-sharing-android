@@ -119,15 +119,15 @@ interface CredentialProvider {
   ): List<Credential>
 
   // Primary signing entry point. Implement this.
-  suspend fun signV2(
+  suspend fun signWithResult(
     payload: ByteArray,
     documentId: String
   ): SignResult
 
-  // Deprecated: superseded by signV2. Retained for backward compatibility and
+  // Deprecated: superseded by signWithResult. Retained for backward compatibility and
   // will be removed in a future release. Existing implementations that override
   // only this method continue to work unchanged.
-  @Deprecated("Superseded by signV2, which returns a SignResult.")
+  @Deprecated("Superseded by signWithResult, which returns a SignResult.")
   suspend fun sign(
     payload: ByteArray,
     documentId: String
@@ -135,7 +135,7 @@ interface CredentialProvider {
 }
 ```
 
-New integrations should implement `signV2`, which returns a `SignResult`.
+New integrations should implement `signWithResult`, which returns a `SignResult`.
 
 The `CredentialRequest` contains an array of document types that the verifier requests:
 
@@ -152,7 +152,7 @@ data class Credential(
 
 Initially `getCredentials` always returns an array of exactly **one** element: the decrypted raw CBOR data for the user's mDL credential.
 
-On success, return `SignResult.Success` from `signV2` with the raw signature bytes. On failure,
+On success, return `SignResult.Success` from `signWithResult` with the raw signature bytes. On failure,
 return `SignResult.Failure` wrapping a `CredentialSigningException`:
 
 ```kotlin
