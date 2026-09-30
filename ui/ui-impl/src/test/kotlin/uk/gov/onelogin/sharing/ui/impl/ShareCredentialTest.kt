@@ -265,6 +265,7 @@ class ShareCredentialTest {
             setContent { SetupExtendedShareCredential(presenter) }
             waitForIdle()
             onNodeWithContentDescription("Close").performClick()
+            waitForIdle()
         }
     }
 
