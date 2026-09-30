@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.verification.cose
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
 import java.io.ByteArrayInputStream
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -103,7 +102,7 @@ class CoseVerifierImpl internal constructor(
 
         val publicKey = request.publicKey
         val curveSize = publicKey.params.order.bitLength()
-        if (curveSize != P256_CURVE_SIZE) {
+        if (curveSize != P256_CURVE_SIZE && curveSize != P384_CURVE_SIZE) {
             throw CoseVerificationFailure.UnsupportedAlgorithm
         }
 
@@ -153,5 +152,6 @@ class CoseVerifierImpl internal constructor(
 
     private companion object {
         const val P256_CURVE_SIZE = 256
+        const val P384_CURVE_SIZE = 384
     }
 }

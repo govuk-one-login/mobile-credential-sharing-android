@@ -67,7 +67,7 @@ class CoseVerifierImplTest {
     @Test
     fun `attached unsupported algorithm throws UnsupportedAlgorithm`() {
         val request = CoseVerificationRequest.Attached(
-            CoseVectors.createAttachedVector(alg = -35L),
+            CoseVectors.createAttachedVector(alg = -36L),
             trustedRoots
         )
         assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
@@ -198,7 +198,7 @@ class CoseVerifierImplTest {
     @Test
     fun `detached unsupported algorithm throws UnsupportedAlgorithm`() {
         val request = CoseVerificationRequest.Detached(
-            coseSign1Bytes = CoseVectors.createDetachedVector(alg = -35L),
+            coseSign1Bytes = CoseVectors.createDetachedVector(alg = -36L),
             detachedPayload = CoseVectors.detachedReaderAuthPayloadBytes,
             trustedRoots = trustedRoots
         )
@@ -426,7 +426,7 @@ class CoseVerifierImplTest {
     @Test
     fun `key-based unsupported algorithm throws UnsupportedAlgorithm`() {
         val request = CoseVerificationRequest.KeyBased(
-            coseSign1Bytes = CoseVectors.createKeyBasedVector(alg = -35L),
+            coseSign1Bytes = CoseVectors.createKeyBasedVector(alg = -36L),
             detachedPayload = CoseVectors.keyBasedPayloadBytes,
             publicKey = CoseVectors.devicePublicKey
         )
@@ -436,15 +436,15 @@ class CoseVerifierImplTest {
     }
 
     @Test
-    fun `key-based non-P256 public key throws UnsupportedAlgorithm`() {
-        val p384Key = KeyPairGenerator.getInstance("EC")
-            .apply { initialize(ECGenParameterSpec("secp384r1")) }
+    fun `key-based unsupported curve public key throws UnsupportedAlgorithm`() {
+        val p521Key = KeyPairGenerator.getInstance("EC")
+            .apply { initialize(ECGenParameterSpec("secp521r1")) }
             .generateKeyPair().public as ECPublicKey
 
         val request = CoseVerificationRequest.KeyBased(
             coseSign1Bytes = CoseVectors.createKeyBasedVector(),
             detachedPayload = CoseVectors.keyBasedPayloadBytes,
-            publicKey = p384Key
+            publicKey = p521Key
         )
         assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
             verifier.verify(request)
@@ -510,7 +510,7 @@ class CoseVerifierImplTest {
     @Test
     fun `non-untrusted failure on root A stops execution immediately`() {
         val unsupportedAlgReq = CoseVerificationRequest.Attached(
-            coseSign1Bytes = CoseVectors.createAttachedVector(alg = -35L),
+            coseSign1Bytes = CoseVectors.createAttachedVector(alg = -36L),
             trustedRoots = listOf(CertificateStubs.rootCa)
         )
         assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {

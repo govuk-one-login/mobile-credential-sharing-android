@@ -1,12 +1,7 @@
 package uk.gov.onelogin.sharing.testapp
 
-import android.content.Context
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import java.io.IOException
-import java.security.cert.CertificateException
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.VerifierConfig
@@ -24,17 +19,18 @@ import uk.gov.onelogin.sharing.testapp.holder.HolderTestAppJourneyNavigationExt.
 import uk.gov.onelogin.sharing.testapp.home.HomeNavigationExt.configureTestAppHomeScreen
 import uk.gov.onelogin.sharing.testapp.verifier.VerifierTestAppJourneyNavigationExt.configureVerifierJourneyWrapper
 import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
+import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.ReaderRootCertificateProvider
 
 @Suppress("LongParameterList")
 object MainActivityRoutes {
     internal fun NavGraphBuilder.configureTestAppRoutes(
-        context: Context,
         mockCredentials: List<MockCredentialState>,
         navController: NavController,
         sharingSdk: CredentialSharingSdk,
         verifyCredentialSdk: VerifyCredentialSdk,
         readerAuthCredentialFactory: ReaderAuthCredentialProvider.Factory,
-        issuerRootCertificateProvider: IssuerRootCertificateProvider
+        issuerRootCertificateProvider: IssuerRootCertificateProvider,
+        readerRootCertificateProvider: ReaderRootCertificateProvider
     ) {
         configureTestAppHomeScreen(navController)
         configureSelectMockCredentialDialog(
@@ -44,7 +40,8 @@ object MainActivityRoutes {
         configureHolderJourneyWrapper { credential ->
             sharingSdk.createCredentialPresenter(
                 credentialProvider = credentialProviderFor(credential),
-                trustedReaderCertificates = loadReaderRootCertificate(context)
+                trustedReaderCertificates = readerRootCertificateProvider
+                    .trustedReaderCertificates()
             )
         }
         configureVerifierAttributesSelection(navController)
@@ -75,16 +72,4 @@ object MainActivityRoutes {
             MockCredentialProviderType.AUTH_CANCELLED_ONCE ->
                 AuthCancelledOnceCredentialProvider(credential)
         }
-
-    private fun loadReaderRootCertificate(context: Context): List<X509Certificate> = try {
-        context.assets.open("test_reader_auth_x509_certificate.der").use { inputStream ->
-            val cert = CertificateFactory.getInstance("X.509")
-                .generateCertificate(inputStream) as X509Certificate
-            listOf(cert)
-        }
-    } catch (_: IOException) {
-        emptyList()
-    } catch (_: CertificateException) {
-        emptyList()
-    }
 }

@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.testapp.MainActivityRoutes.configureTestAppRoutes
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentials
 import uk.gov.onelogin.sharing.testapp.home.HomeRoute
 import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
+import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.ReaderRootCertificateProvider
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -41,6 +42,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var issuerRootCertificateProvider: IssuerRootCertificateProvider
+
+    @Inject
+    lateinit var readerRootCertificateProvider: ReaderRootCertificateProvider
 
     @Inject
     lateinit var logger: Logger
@@ -74,13 +78,13 @@ class MainActivity : ComponentActivity() {
                         startDestination = HomeRoute
                     ) {
                         configureTestAppRoutes(
-                            context = this@MainActivity,
                             mockCredentials = mockCredentials,
                             navController = navController,
                             sharingSdk = sharingSdk,
                             verifyCredentialSdk = verifyCredentialSdk,
                             readerAuthCredentialFactory = readerAuthCredentialFactory,
-                            issuerRootCertificateProvider = issuerRootCertificateProvider
+                            issuerRootCertificateProvider = issuerRootCertificateProvider,
+                            readerRootCertificateProvider = readerRootCertificateProvider
                         )
                     }
                 }

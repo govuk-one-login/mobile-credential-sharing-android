@@ -69,15 +69,17 @@ class TestAppReaderAuthCredentialProviderFactory(
         val option = _readerAuthOption.value
         val privateKey = processPrivateKeyAssetChain(
             sequenceOf(
-                option.privateKeyChain.first()
+                option.privateKeyChain.last()
             )
         ).first()
 
-        // x5chain must contain the leaf and intermediate(s) only, with the root excluded.
-        // The asset chain is leaf-first and ends with the root, so drop the last element.
-        val certificateChain = processCertificateAssetChain(
-            option.certificateChain.dropLast(1).asSequence()
-        )
+        val certificateChain = getTransmittedCertificateChain(option)
+
+        val signingAlgorithm = if (privateKey.params.order.bitLength() == P384_KEY_BIT_LENGTH) {
+            SHA384_WITH_ECDSA
+        } else {
+            SIGNING_ALGORITHM
+        }
 
         return ECReaderAuthProvider(
             logger = logger,
@@ -86,7 +88,7 @@ class TestAppReaderAuthCredentialProviderFactory(
             unprotectedHeaderGenerator = CoseSign1UnprotectedHeaderGenerator(logger),
             sigStructureGenerator = SigningSignatureStructure(
                 logger = logger,
-                signature = Signature.getInstance(SIGNING_ALGORITHM),
+                signature = Signature.getInstance(signingAlgorithm),
                 privateKey = privateKey,
                 decorated = CoseSigStructureGenerator(
                     logger = logger,
@@ -98,6 +100,40 @@ class TestAppReaderAuthCredentialProviderFactory(
 
     fun update(option: ReaderAuthOption) {
         _readerAuthOption.value = option
+    }
+
+    private fun getTransmittedCertificateChain(option: ReaderAuthOption): List<X509Certificate> {
+        val parsedCerts = processCertificateAssetChain(option.certificateChain.asSequence())
+
+        require(parsedCerts.isNotEmpty()) {
+            "Certificate chain for option $option is empty or an unprovisioned placeholder."
+        }
+
+        val nonRootCerts = parsedCerts.filterNot(::isSelfSigned)
+        if (nonRootCerts.isEmpty()) {
+            return parsedCerts
+        }
+
+        val leaf = nonRootCerts.firstOrNull { cert ->
+            nonRootCerts.none { other -> other != cert && isSignedBy(other, cert) }
+        } ?: nonRootCerts.last()
+
+        val intermediates = nonRootCerts.filter { it != leaf }
+        return listOf(leaf) + intermediates
+    }
+
+    private fun isSelfSigned(cert: X509Certificate): Boolean = try {
+        cert.verify(cert.publicKey)
+        true
+    } catch (_: java.security.GeneralSecurityException) {
+        false
+    }
+
+    private fun isSignedBy(cert: X509Certificate, issuer: X509Certificate): Boolean = try {
+        cert.verify(issuer.publicKey)
+        true
+    } catch (_: java.security.GeneralSecurityException) {
+        false
     }
 
     private fun processPrivateKeyAssetChain(chain: Sequence<String>): List<ECPrivateKey> = chain
@@ -115,9 +151,19 @@ class TestAppReaderAuthCredentialProviderFactory(
         .map { it as ECPrivateKey }
         .toList()
 
-    private fun processCertificateAssetChain(chain: Sequence<String>): List<X509Certificate> = chain
-        .map(context.assets::open)
-        .flatMap { input -> input.use(certificateFactory::generateCertificates).asSequence() }
-        .filterIsInstance<X509Certificate>()
-        .toList()
+    @Suppress("TooGenericExceptionCaught")
+    private fun processCertificateAssetChain(chain: Sequence<String>): List<X509Certificate> = try {
+        chain
+            .map(context.assets::open)
+            .flatMap { input -> input.use(certificateFactory::generateCertificates).asSequence() }
+            .filterIsInstance<X509Certificate>()
+            .toList()
+    } catch (e: Exception) {
+        throw IllegalArgumentException("Unable to parse certificate chain asset", e)
+    }
+
+    private companion object {
+        private const val P384_KEY_BIT_LENGTH = 384
+        private const val SHA384_WITH_ECDSA = "SHA384withECDSA"
+    }
 }

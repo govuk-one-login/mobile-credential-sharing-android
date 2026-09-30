@@ -64,19 +64,32 @@ class SigningSignatureStructure(
             offset++
             val s = der.copyOfRange(offset, offset + sLen)
 
-            return padOrTrim(r) + padOrTrim(s)
+            val unpaddedRLen = if (r.isNotEmpty() && r[0] == 0.toByte()) r.size - 1 else r.size
+            val unpaddedSLen = if (s.isNotEmpty() && s[0] == 0.toByte()) s.size - 1 else s.size
+            val componentSize = if (unpaddedRLen > P256_COMPONENT_SIZE ||
+                unpaddedSLen > P256_COMPONENT_SIZE
+            ) {
+                P384_COMPONENT_SIZE
+            } else {
+                P256_COMPONENT_SIZE
+            }
+
+            return padOrTrim(r, componentSize) + padOrTrim(s, componentSize)
         }
 
-        private fun padOrTrim(bytes: ByteArray): ByteArray = when {
-            bytes.size == P256_COMPONENT_SIZE + 1 && bytes[0] == 0.toByte() ->
+        private fun padOrTrim(bytes: ByteArray, componentSize: Int): ByteArray = when {
+            bytes.size == componentSize + 1 && bytes[0] == 0.toByte() ->
                 bytes.copyOfRange(1, bytes.size)
 
-            bytes.size < P256_COMPONENT_SIZE -> ByteArray(P256_COMPONENT_SIZE - bytes.size) + bytes
+            bytes.size < componentSize ->
+                ByteArray(componentSize - bytes.size) + bytes
 
-            else -> bytes.copyOfRange(bytes.size - P256_COMPONENT_SIZE, bytes.size)
+            else ->
+                bytes.copyOfRange(bytes.size - componentSize, bytes.size)
         }
 
         private const val P256_COMPONENT_SIZE = 32
+        private const val P384_COMPONENT_SIZE = 48
         private const val BYTE_MASK = 0xFF
     }
 }

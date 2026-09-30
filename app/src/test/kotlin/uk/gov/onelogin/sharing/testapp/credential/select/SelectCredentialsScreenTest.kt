@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.testapp.credential.select
 
+import android.content.Context
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.util.UUID
 import kotlin.test.Test
@@ -8,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.testapp.credential.MockCredentialData.mockCredentialState
+import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.ReaderRootCertificateProvider
 
 @RunWith(AndroidJUnit4::class)
 class SelectCredentialsScreenTest {
@@ -27,10 +30,15 @@ class SelectCredentialsScreenTest {
 
     @Test
     fun `Tapped credentials are passed to the lambda`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val provider = ReaderRootCertificateProvider(context)
+        val viewModel = SelectHolderCredentialsViewModel(provider)
+
         composeTestRule.run {
             setContent {
                 SelectCredentialsScreen(
                     credentials = credentials,
+                    viewModel = viewModel,
                     onSelectCredential = composeTestRule::updateMockCredentialState
                 )
             }

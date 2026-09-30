@@ -41,7 +41,7 @@ class CoseSignatureVerifierTest {
         return derToRaw(sig.sign())
     }
 
-    private fun derToRaw(der: ByteArray): ByteArray {
+    private fun derToRaw(der: ByteArray, componentLen: Int = 32): ByteArray {
         var offset = 2
         offset++
         val rLen = der[offset].toInt() and 0xFF
@@ -53,19 +53,19 @@ class CoseSignatureVerifierTest {
         offset++
         val sBytes = der.copyOfRange(offset, offset + sLen)
 
-        val raw = ByteArray(64)
-        val rTrimmed = if (rBytes.size > 32) {
-            rBytes.copyOfRange(rBytes.size - 32, rBytes.size)
+        val raw = ByteArray(componentLen * 2)
+        val rTrimmed = if (rBytes.size > componentLen) {
+            rBytes.copyOfRange(rBytes.size - componentLen, rBytes.size)
         } else {
             rBytes
         }
-        val sTrimmed = if (sBytes.size > 32) {
-            sBytes.copyOfRange(sBytes.size - 32, sBytes.size)
+        val sTrimmed = if (sBytes.size > componentLen) {
+            sBytes.copyOfRange(sBytes.size - componentLen, sBytes.size)
         } else {
             sBytes
         }
-        rTrimmed.copyInto(raw, 32 - rTrimmed.size)
-        sTrimmed.copyInto(raw, 64 - sTrimmed.size)
+        rTrimmed.copyInto(raw, componentLen - rTrimmed.size)
+        sTrimmed.copyInto(raw, componentLen * 2 - sTrimmed.size)
         return raw
     }
 
@@ -200,6 +200,56 @@ class CoseSignatureVerifierTest {
 
         assertThrows(InvalidSignature::class.java) {
             verifier.verify(coseSign1, publicKey, payload)
+        }
+    }
+
+    @Test
+    fun `verify succeeds with valid ES384 attached signature`() {
+        val p384KeyPair = KeyPairGenerator.getInstance("EC")
+            .apply { initialize(ECGenParameterSpec("secp384r1")) }
+            .generateKeyPair()
+        val p384PublicKey = p384KeyPair.public as ECPublicKey
+
+        val protectedHeader = buildProtectedHeader(-35L)
+        val payload = "p384 payload".toByteArray()
+
+        val sigStructure = verifier.buildSigStructure(protectedHeader, payload)
+        val sig = Signature.getInstance("SHA384withECDSA")
+        sig.initSign(p384KeyPair.private)
+        sig.update(sigStructure)
+        val signature = derToRaw(sig.sign(), componentLen = 48)
+
+        val coseSign1 = InternalCoseSign1(
+            protectedHeader,
+            buildEmptyMap(),
+            payload,
+            signature,
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
+
+        verifier.verify(coseSign1, p384PublicKey, payload)
+    }
+
+    @Test
+    fun `verify throws with key curve and algorithm mismatch`() {
+        val p384KeyPair = KeyPairGenerator.getInstance("EC")
+            .apply { initialize(ECGenParameterSpec("secp384r1")) }
+            .generateKeyPair()
+        val p384PublicKey = p384KeyPair.public as ECPublicKey
+
+        val protectedHeaderES256 = buildProtectedHeader(-7L)
+        val payload = "mismatch payload".toByteArray()
+
+        val coseSign1 = InternalCoseSign1(
+            protectedHeaderES256,
+            buildEmptyMap(),
+            payload,
+            ByteArray(64),
+            InternalCoseSign1.PayloadMode.ATTACHED
+        )
+
+        assertThrows(InvalidSignature::class.java) {
+            verifier.verify(coseSign1, p384PublicKey, payload)
         }
     }
 

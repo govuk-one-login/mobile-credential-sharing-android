@@ -58,12 +58,6 @@ class SelectCredentialAttributesScreenTest {
         INVALID_MISSING_PRIVACY_POLICY(ReaderAuthOption.INVALID_MISSING_PRIVACY_POLICY)
     }
 
-    /** DVS options that are unprovisioned placeholders in a non-pipeline build. */
-    enum class PlaceholderReaderAuthOption(val option: ReaderAuthOption) {
-        DVS_DEV(ReaderAuthOption.DVS_DEV),
-        DVS_INTEGRATION(ReaderAuthOption.DVS_INTEGRATION)
-    }
-
     @Test
     fun `Passes exact VerifierAttributeOption when tapping 'Verify credential' button`(
         @TestParameter option: VerifierAttributeOption
@@ -102,26 +96,6 @@ class SelectCredentialAttributesScreenTest {
             assertOptionIsSelected(provisioned.option)
             performVerifyCredentialClick()
             assertNotProvisionedWarningNotShown()
-        }
-    }
-
-    @Test
-    fun `Unprovisioned DVS options warn when verification is attempted`(
-        @TestParameter placeholder: PlaceholderReaderAuthOption
-    ) = runTest {
-        composeTestRule.run {
-            setContent {
-                SelectCredentialAttributesScreen(
-                    onSelectAttributeGroup = { updateConfirmedAttributeGroup(it.attributeGroup) },
-                    viewModel = viewModel
-                )
-            }
-
-            performReaderAuthClick(placeholder.option)
-            assertOptionIsSelected(placeholder.option)
-            assertNotProvisionedWarningNotShown()
-            performVerifyCredentialClick()
-            assertNotProvisionedWarningShown()
         }
     }
 

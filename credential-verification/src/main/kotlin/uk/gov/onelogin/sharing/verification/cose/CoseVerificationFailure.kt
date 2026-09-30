@@ -13,7 +13,7 @@ sealed class CoseVerificationFailure(
     /** The required x5chain (certificate chain) is missing from the COSE headers. */
     data object MissingX5Chain : CoseVerificationFailure()
 
-    /** The algorithm used in the COSE_Sign1 is not supported (only ES256 allowed). */
+    /** The algorithm used in the COSE_Sign1 is not supported (only ES256 and ES384 allowed). */
     data object UnsupportedAlgorithm : CoseVerificationFailure()
 
     /** The cryptographic signature could not be verified. */

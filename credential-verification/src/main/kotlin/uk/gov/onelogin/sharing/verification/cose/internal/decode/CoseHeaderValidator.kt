@@ -17,26 +17,28 @@ internal class CoseHeaderValidator {
 
     companion object {
         private const val COSE_ALG_LABEL = 1L
-        private const val COSE_ALG_ES256 = -7L
     }
 
-    fun validate(coseSign1: InternalCoseSign1) {
+    @Throws(UnsupportedAlgorithm::class)
+    fun validate(coseSign1: InternalCoseSign1): CoseAlgorithm {
         val protectedMap = decodeHeaderMap(coseSign1.protectedHeader)
         val unprotectedMap =
             coseSign1.unprotectedHeader?.let { decodeHeaderMap(it) } ?: emptyMap()
 
         val isValid = COSE_ALG_LABEL in protectedMap &&
             COSE_ALG_LABEL !in unprotectedMap &&
-            protectedMap.keys.none { it in unprotectedMap } &&
-            protectedMap[COSE_ALG_LABEL] == COSE_ALG_ES256
+            protectedMap.keys.none { it in unprotectedMap }
 
         if (!isValid) throw UnsupportedAlgorithm
+
+        val algId = protectedMap[COSE_ALG_LABEL] as? Long
+        return algId?.let { CoseAlgorithm.fromId(it) } ?: throw UnsupportedAlgorithm
     }
 
     private fun decodeHeaderMap(headerBytes: ByteArray): Map<Long, Any> {
         val node = try {
             cborMapper.readTree(headerBytes)
-        } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
+        } catch (_: com.fasterxml.jackson.core.JsonProcessingException) {
             null
         } ?: throw MalformedCoseSign1
 

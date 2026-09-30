@@ -5,20 +5,44 @@ import org.hamcrest.Matchers.equalTo
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure.InvalidSignature
+import uk.gov.onelogin.sharing.verification.cose.internal.decode.CoseAlgorithm
 
 class EcdsaSignatureTranscoderTest {
 
     @Test
-    fun `throws when signature is not 64 bytes`() {
+    fun `throws when signature size is invalid`() {
         assertThrows(InvalidSignature::class.java) {
             EcdsaSignatureTranscoder.rawToDer(ByteArray(32))
+        }
+        assertThrows(InvalidSignature::class.java) {
+            EcdsaSignatureTranscoder.rawToDer(ByteArray(80))
         }
     }
 
     @Test
-    fun `converts valid 64-byte signature to DER`() {
+    fun `throws when signature size does not match expected algorithm`() {
+        assertThrows(InvalidSignature::class.java) {
+            EcdsaSignatureTranscoder.rawToDer(ByteArray(96), CoseAlgorithm.ES256)
+        }
+        assertThrows(InvalidSignature::class.java) {
+            EcdsaSignatureTranscoder.rawToDer(ByteArray(64), CoseAlgorithm.ES384)
+        }
+    }
+
+    @Test
+    fun `converts valid 64-byte signature to DER for ES256`() {
         val raw = ByteArray(64) { 0x01 }
-        val der = EcdsaSignatureTranscoder.rawToDer(raw)
+        val der = EcdsaSignatureTranscoder.rawToDer(raw, CoseAlgorithm.ES256)
+
+        // DER: SEQUENCE { INTEGER(r), INTEGER(s) }
+        assertThat(der[0], equalTo(0x30.toByte()))
+        assertThat(der[2], equalTo(0x02.toByte())) // first INTEGER tag
+    }
+
+    @Test
+    fun `converts valid 96-byte signature to DER for ES384`() {
+        val raw = ByteArray(96) { 0x01 }
+        val der = EcdsaSignatureTranscoder.rawToDer(raw, CoseAlgorithm.ES384)
 
         // DER: SEQUENCE { INTEGER(r), INTEGER(s) }
         assertThat(der[0], equalTo(0x30.toByte()))
