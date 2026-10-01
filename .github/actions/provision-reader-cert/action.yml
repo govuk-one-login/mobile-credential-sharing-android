@@ -33,7 +33,7 @@ inputs:
   ec-curve:
     description: "Named elliptic curve for the generated keypair."
     required: false
-    default: "secp384r1"
+    default: "prime256v1"
 
 runs:
   using: "composite"
