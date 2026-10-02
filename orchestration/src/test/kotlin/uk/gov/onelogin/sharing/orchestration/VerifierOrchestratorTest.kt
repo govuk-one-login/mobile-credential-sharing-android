@@ -528,8 +528,11 @@ class VerifierOrchestratorTest {
     @Test
     fun `ConnectionStateStarted passes expected bytes to crypto service`() = runTest {
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
         orchestrator.processQrCode(VALID_MDOC_URI)
+        advanceUntilIdle()
         centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+        advanceUntilIdle()
 
         val expectedBytes = fakeCryptoService.buildItemsRequestBytes(mockk())
         assertArrayEquals(
@@ -558,7 +561,10 @@ class VerifierOrchestratorTest {
                 cryptoService = failingCryptoService
             )
             backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
             orchestrator.processQrCode(VALID_MDOC_URI)
+            advanceUntilIdle()
+
             centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
             centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
             advanceUntilIdle()
@@ -594,8 +600,12 @@ class VerifierOrchestratorTest {
     @Test
     fun `eReaderKey and encryptedDeviceRequest passed to buildSessionEstablishment`() = runTest {
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
         orchestrator.processQrCode(VALID_MDOC_URI)
+        advanceUntilIdle()
+
         centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
+        advanceUntilIdle()
 
         assertArrayEquals(byteArrayOf(), fakeCryptoService.lastEReaderKeyBytes)
         assertArrayEquals(
@@ -615,6 +625,7 @@ class VerifierOrchestratorTest {
         }
         val orchestrator = createOrchestrator(cryptoService = failingCryptoService)
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
         orchestrator.processQrCode(VALID_MDOC_URI)
         centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
         advanceUntilIdle()
@@ -645,6 +656,7 @@ class VerifierOrchestratorTest {
                 cryptoService = failingCryptoService
             )
             backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
             orchestrator.processQrCode(VALID_MDOC_URI)
             centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
             centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
@@ -669,6 +681,7 @@ class VerifierOrchestratorTest {
                 readerAuthProvider = { signedReaderAuth }
             )
             backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+            orchestrator.start()
             orchestrator.processQrCode(VALID_MDOC_URI)
             centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
             advanceUntilIdle()
@@ -690,6 +703,7 @@ class VerifierOrchestratorTest {
             }
         )
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
         orchestrator.processQrCode(VALID_MDOC_URI)
         centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
         centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
@@ -717,7 +731,10 @@ class VerifierOrchestratorTest {
         }
         val orchestrator = createOrchestrator(cryptoService = failingCryptoService)
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
         orchestrator.processQrCode(VALID_MDOC_URI)
+        advanceUntilIdle()
+
         centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
         centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
         advanceUntilIdle()
@@ -739,6 +756,7 @@ class VerifierOrchestratorTest {
     fun `sendMessage success completes transmission`() = runTest {
         centralBluetoothTransport.sendMessageToReturn = true
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
         orchestrator.processQrCode(VALID_MDOC_URI)
         centralBluetoothTransport.emitState(CentralBluetoothState.ConnectionStateStarted)
 
@@ -753,6 +771,7 @@ class VerifierOrchestratorTest {
     fun `sendMessage failure transitions to Failed with CannotSendMessage reason`() = runTest {
         centralBluetoothTransport.sendMessageToReturn = false
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
+        orchestrator.start()
         orchestrator.processQrCode(VALID_MDOC_URI)
         centralBluetoothTransport.emitState(CentralBluetoothState.Connected("address"))
         advanceUntilIdle()
@@ -797,6 +816,7 @@ class VerifierOrchestratorTest {
     fun `Navigates to failure state due to SessionDataStatus`(
         @TestParameter status: SessionDataStatus
     ) = runTest {
+        initialStates.addFirst(VerifierSessionState.Connecting)
         fakeCryptoService.sessionData = SessionData(status = status)
         centralBluetoothTransport.emitState(
             CentralBluetoothState.Message(
@@ -819,6 +839,7 @@ class VerifierOrchestratorTest {
     @Test
     fun `Navigates to failure state due to missing SessionData payload`() = runTest {
         fakeCryptoService.sessionData = SessionData()
+        initialStates.addFirst(VerifierSessionState.Connecting)
 
         centralBluetoothTransport.emitState(
             CentralBluetoothState.Message(
@@ -844,6 +865,7 @@ class VerifierOrchestratorTest {
             CborMapper.default.createParser(byteArrayOf()),
             "This is a unit test"
         )
+        initialStates.addFirst(VerifierSessionState.Connecting)
 
         centralBluetoothTransport.emitState(
             CentralBluetoothState.Message(
