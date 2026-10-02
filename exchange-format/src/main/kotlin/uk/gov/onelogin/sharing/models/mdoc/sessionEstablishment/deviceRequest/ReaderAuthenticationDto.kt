@@ -51,18 +51,19 @@ data class ReaderAuthenticationDto(
             provider: SerializerProvider
         ) {
             val cborGen = gen as CBORGenerator
-            cborGen.writeStartArray()
-            cborGen.writeString(LABEL)
             cborGen.flush()
             val out = cborGen.outputTarget as OutputStream
+            out.write(CBOR_ARRAY_3)
+            cborGen.writeString(LABEL)
+            cborGen.flush()
             out.write(value.sessionTranscript)
             out.write(value.itemsRequestBytes)
-            cborGen.writeEndArray()
         }
     }
 
     companion object {
         private const val LABEL = "ReaderAuthentication"
+        private const val CBOR_ARRAY_3 = 0x83
 
         /**
          * Builds Tag 24 wrapped ReaderAuthenticationBytes payload from the untagged active session transcript
