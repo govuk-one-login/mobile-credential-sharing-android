@@ -36,6 +36,8 @@ class TestCertificateGenerator(
     private var sigAlgorithm: String = "SHA256withECDSA"
     private var includeAki = true
     private var includeSki = true
+    private var skiCritical = false
+    private var akiCritical = false
     private var ekuOids: List<String>? = null
     private var ekuCritical = true
     private var includeIssuerAltName = true
@@ -167,6 +169,14 @@ class TestCertificateGenerator(
         includeSki = false
     }
 
+    fun withCriticalSki() = apply {
+        skiCritical = true
+    }
+
+    fun withCriticalAki() = apply {
+        akiCritical = true
+    }
+
     fun withExtension(oid: String, critical: Boolean, value: ByteArray) = apply {
         extraExtensions = extraExtensions + ExtensionSpec(oid, critical, value)
     }
@@ -220,14 +230,14 @@ class TestCertificateGenerator(
         if (includeSki) {
             builder.addExtension(
                 Extension.subjectKeyIdentifier,
-                false,
+                skiCritical,
                 extUtils.createSubjectKeyIdentifier(keyPair.public)
             )
         }
         if (includeAki) {
             builder.addExtension(
                 Extension.authorityKeyIdentifier,
-                false,
+                akiCritical,
                 extUtils.createAuthorityKeyIdentifier((akiKeyPair ?: issuerKeyPair).public)
             )
         }

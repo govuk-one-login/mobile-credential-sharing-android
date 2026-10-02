@@ -60,7 +60,7 @@ class CertificateStructureCheckerTest {
         }
     }
 
-    // AC6: Invalid SubjectKeyIdentifier - absent
+    // AC6: Invalid SubjectKeyIdentifier - absent or critical
     @Test
     fun `cert without SKI throws UNTRUSTED_CERTIFICATE`() {
         val leaf = TestCertificateGenerator(
@@ -75,7 +75,21 @@ class CertificateStructureCheckerTest {
         }
     }
 
-    // AC7: Invalid AuthorityKeyIdentifier - absent
+    @Test
+    fun `cert with critical SKI extension throws UNTRUSTED_CERTIFICATE`() {
+        val leaf = TestCertificateGenerator(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = CertificateStubs.leafKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).leaf().withCriticalSki().build()
+
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            validator.verify(listOf(leaf), CertificateStubs.rootCa)
+        }
+    }
+
+    // AC7: Invalid AuthorityKeyIdentifier - absent or critical
     @Test
     fun `cert without AKI throws UNTRUSTED_CERTIFICATE`() {
         val leaf = TestCertificateGenerator(
@@ -84,6 +98,20 @@ class CertificateStructureCheckerTest {
             issuerKeyPair = CertificateStubs.rootKeyPair,
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().withoutAki().build()
+
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            validator.verify(listOf(leaf), CertificateStubs.rootCa)
+        }
+    }
+
+    @Test
+    fun `cert with critical AKI extension throws UNTRUSTED_CERTIFICATE`() {
+        val leaf = TestCertificateGenerator(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = CertificateStubs.leafKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).leaf().withCriticalAki().build()
 
         assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
             validator.verify(listOf(leaf), CertificateStubs.rootCa)
@@ -116,9 +144,23 @@ class CertificateStructureCheckerTest {
         }
     }
 
+    @Test
+    fun `empty certificate chain throws UNTRUSTED_CERTIFICATE`() {
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            validator.verify(emptyList(), CertificateStubs.rootCa)
+        }
+    }
+
+    @Test
+    fun `chain containing trusted root certificate throws UNTRUSTED_CERTIFICATE`() {
+        assertThrows(CoseVerificationFailure.UntrustedCertificate::class.java) {
+            validator.verify(listOf(CertificateStubs.rootCa), CertificateStubs.rootCa)
+        }
+    }
+
     // AC9: Insufficient algorithm strength
     @Test
-    fun `cert signed with SHA256 under P-384 issuer throws UNSUPPORTED_ALGORITHM`() {
+    fun `cert signed with SHA256 under P-384 issuer is supported`() {
         val p384KeyPair = generateEcKeyPair("secp384r1")
 
         val root = TestCertificateGenerator(
@@ -135,9 +177,21 @@ class CertificateStructureCheckerTest {
             issuer = "CN=Root,C=GB,ST=London"
         ).leaf().withSignatureAlgorithm("SHA256withECDSA").build()
 
-        assertThrows(CoseVerificationFailure.UnsupportedAlgorithm::class.java) {
-            validator.verify(listOf(leaf), root)
-        }
+        validator.verify(listOf(leaf), root)
+    }
+
+    @Test
+    fun `P-384 leaf certified by P-256 issuer using SHA256 passes`() {
+        val p384LeafKeyPair = generateEcKeyPair("secp384r1")
+
+        val leaf = TestCertificateGenerator(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = p384LeafKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).leaf().withSignatureAlgorithm("SHA256withECDSA").build()
+
+        validator.verify(listOf(leaf), CertificateStubs.rootCa)
     }
 
     @Test

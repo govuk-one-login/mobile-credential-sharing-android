@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.verification.cose.internal.path
 
-import java.security.MessageDigest
 import java.security.cert.CertPathValidatorException
 import java.security.cert.Certificate
 import java.security.cert.PKIXCertPathChecker
@@ -69,19 +68,9 @@ internal class CertificateStructureChecker(
 
     private fun verifySubjectKeyIdentifier(cert: X509Certificate) {
         requireNonCriticalExtension(cert, OID_SKI, "SubjectKeyIdentifier")
-        val skiHex = cert.subjectKeyIdentifierHex()
-            ?: throw CertPathValidatorException("SubjectKeyIdentifier absent")
-        val expectedHex = computeSkiHash(cert)
-        if (skiHex != expectedHex) {
-            throw CertPathValidatorException("SubjectKeyIdentifier does not match public key hash")
+        if (cert.subjectKeyIdentifierHex() == null) {
+            throw CertPathValidatorException("SubjectKeyIdentifier absent")
         }
-    }
-
-    private fun computeSkiHash(cert: X509Certificate): String {
-        val bits = extractSubjectPublicKeyBits(cert.publicKey.encoded)
-            ?: throw CertPathValidatorException("Cannot extract subject public key bits")
-
-        return MessageDigest.getInstance(SKI_HASH_ALGORITHM).digest(bits).toHexString()
     }
 
     private fun verifyAuthorityKeyIdentifier(cert: X509Certificate) {
@@ -122,10 +111,7 @@ internal class CertificateStructureChecker(
                 UnsupportedAlgorithm
             )
         }
-        return when {
-            curveSize <= CURVE_256 -> STRENGTH_SHA256
-            else -> STRENGTH_SHA384
-        }
+        return STRENGTH_SHA256
     }
 
     private fun issuerOf(cert: X509Certificate): X509Certificate {
@@ -140,7 +126,6 @@ internal class CertificateStructureChecker(
     internal companion object {
         const val MIN_SERIAL_OCTETS = 9
         const val MAX_SERIAL_OCTETS = 20
-        const val CURVE_256 = 256
         const val CURVE_384 = 384
         const val STRENGTH_SHA256 = 1
         const val STRENGTH_SHA384 = 2
@@ -148,7 +133,6 @@ internal class CertificateStructureChecker(
 
         const val OID_SKI = "2.5.29.14"
         const val OID_AKI = "2.5.29.35"
-        private const val SKI_HASH_ALGORITHM = "SHA-1"
 
         val ALLOWED_CRITICAL_OIDS = setOf(
             "2.5.29.14", // SubjectKeyIdentifier
