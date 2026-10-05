@@ -32,13 +32,18 @@ class ReaderAuthenticationDtoTest {
     }
 
     @Test
-    fun `serializes to correct CBOR array structure`() {
+    fun `serializes to definite length CBOR array starting with 0x83`() {
         val bytes = dto.toCbor()
+        assertEquals(
+            0x83.toByte(),
+            bytes[0],
+            "CBOR array header must be 0x83 (definite-length 3-element array)"
+        )
+
         val node = CborMapper.default.readTree(bytes)
 
         assertTrue(node.isArray)
         assertEquals(3, node.size())
-        assertEquals("ReaderAuthentication", node.get(0).asText())
         assertEquals("ReaderAuthentication", node.get(0).asText())
 
         val manualBytes = CborMapper.default.writeValueAsBytes(dto)
