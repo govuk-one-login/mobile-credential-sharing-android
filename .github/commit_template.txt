@@ -40,6 +40,7 @@
 
 # Co-authored-by: Chadwick, Michael <231858949+michaelchadwick1-GDS@users.noreply.github.com>
 # Co-authored-by: Mahmood, Shabab <220208438+Shabab-GDS@users.noreply.github.com >
+# Co-authored-by: Harris, Blake <338030491+blakeharris-gds@users.noreply.github.com>
 
 # Optional: reference an organisation as part of a commit:
 # on-behalf-of: @organisation-handle <name@organization.com>"
