@@ -1,14 +1,15 @@
 package uk.gov.onelogin.sharing.analytics
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.StateFlow
 import uk.gov.logging.api.analytics.AnalyticsEvent
 import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 class SystemAnalyticsLogger(private val logger: Logger) : AnalyticsLogger {
-    val isEnabled = MutableStateFlow(true)
+    private val _isEnabled = MutableStateFlow(true)
+    val isEnabled: StateFlow<Boolean> = _isEnabled
 
     override fun logEvent(shouldLogEvent: Boolean, vararg events: AnalyticsEvent) {
         if (shouldLogEvent && isEnabled.value) {
@@ -29,7 +30,7 @@ class SystemAnalyticsLogger(private val logger: Logger) : AnalyticsLogger {
     }
 
     override fun setEnabled(isEnabled: Boolean) {
-        this.isEnabled.update { isEnabled }
+        this._isEnabled.value = isEnabled
     }
 
     private fun toLogMessage(event: AnalyticsEvent): String = "Received analytics event: $event"
