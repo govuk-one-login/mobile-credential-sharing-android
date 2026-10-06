@@ -89,6 +89,10 @@ dependencies {
     }
 
     listOf(
+        libs.uk.gov.logging.api
+    ).forEach(::api)
+
+    listOf(
         platform(libs.androidx.compose.bom),
         libs.androidx.navigation.testing,
         libs.bundles.testing.instrumentation,
@@ -120,7 +124,7 @@ dependencies {
         libs.bundles.uk.gov.ui,
         libs.hilt.android,
         libs.uk.gov.logging.impl,
-        libs.uk.gov.logging.api,
+        libs.uk.gov.logging.testdouble,
         libs.kotlinx.serialization.json
     ).forEach(::implementation)
     ksp(libs.hilt.compiler)
@@ -129,6 +133,7 @@ dependencies {
         libs.androidx.test.rules,
         libs.androidx.ui.test.junit4,
         libs.com.google.test.parameter.injector,
+        libs.uk.gov.logging.testdouble,
         testFixtures(projects.holder),
         testFixtures(projects.ui.uiImpl),
         testFixtures(projects.verifier),
