@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.testapp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
@@ -10,12 +11,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.api.analytics.parameters.data.TaxonomyLevel2
 import uk.gov.logging.api.v3dot1.logger.asLegacyEvent
+import uk.gov.logging.api.v3dot1.model.RequiredParameters
+import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.logging.testdouble.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.testapp.home.TestAppScreen
 import uk.gov.onelogin.sharing.testapp.home.TestAppViewModel
-import kotlin.test.assertTrue
-import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
-import uk.gov.logging.api.v3dot1.model.RequiredParameters
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {

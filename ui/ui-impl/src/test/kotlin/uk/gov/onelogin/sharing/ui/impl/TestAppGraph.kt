@@ -3,8 +3,8 @@ package uk.gov.onelogin.sharing.ui.impl
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import java.security.cert.X509Certificate
+import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger

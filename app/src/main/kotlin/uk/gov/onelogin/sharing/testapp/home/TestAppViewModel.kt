@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.testapp.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -11,13 +13,11 @@ import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v3dot1.logger.logEventV3Dot1
 import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class TestAppViewModel(
     private val analyticsLogger: AnalyticsLogger,
-    private val ioDispatcher: CoroutineContext,
+    private val ioDispatcher: CoroutineContext
 ) : ViewModel() {
     private val _events = MutableSharedFlow<NavigationEvent>()
 

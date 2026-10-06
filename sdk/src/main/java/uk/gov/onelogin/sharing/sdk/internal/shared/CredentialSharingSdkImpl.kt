@@ -2,8 +2,8 @@ package uk.gov.onelogin.sharing.sdk.internal.shared
 
 import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import java.security.cert.X509Certificate
+import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
@@ -25,7 +25,7 @@ class CredentialSharingSdkImpl(
     applicationContext: Context,
     logger: Logger,
     permissionChecker: PermissionChecker,
-    analyticsLogger: AnalyticsLogger = SystemAnalyticsLogger(logger),
+    analyticsLogger: AnalyticsLogger = SystemAnalyticsLogger(logger)
 ) : CredentialSharingSdk {
 
     private val _appGraph: CredentialSharingAppGraph =

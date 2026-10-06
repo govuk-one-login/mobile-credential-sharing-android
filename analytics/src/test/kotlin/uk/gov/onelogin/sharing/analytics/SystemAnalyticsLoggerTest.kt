@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import kotlin.test.Test
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -16,8 +18,6 @@ import uk.gov.logging.api.v3dot1.model.RequiredParameters
 import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.logging.testdouble.v2.LogEntry
 import uk.gov.logging.testdouble.v2.SystemLogger
-import kotlin.test.Test
-import kotlin.test.assertTrue
 
 @RunWith(TestParameterInjector::class)
 class SystemAnalyticsLoggerTest {
@@ -68,7 +68,7 @@ class SystemAnalyticsLoggerTest {
             },
             "Enabled logger that should send events, does" to Triple(true, true) {
                 it.any(containsEventState)
-            },
+            }
         )
     ) = runTest {
         val (shouldSend, isEnabled, assertion) = input

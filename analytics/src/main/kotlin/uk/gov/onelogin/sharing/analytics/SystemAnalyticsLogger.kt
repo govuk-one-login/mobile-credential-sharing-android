@@ -7,9 +7,7 @@ import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-class SystemAnalyticsLogger(
-    private val logger: Logger
-) : AnalyticsLogger {
+class SystemAnalyticsLogger(private val logger: Logger) : AnalyticsLogger {
     val isEnabled = MutableStateFlow(true)
 
     override fun logEvent(shouldLogEvent: Boolean, vararg events: AnalyticsEvent) {
@@ -34,6 +32,5 @@ class SystemAnalyticsLogger(
         this.isEnabled.update { isEnabled }
     }
 
-    private fun toLogMessage(event: AnalyticsEvent): String =
-        "Received analytics event: $event"
+    private fun toLogMessage(event: AnalyticsEvent): String = "Received analytics event: $event"
 }

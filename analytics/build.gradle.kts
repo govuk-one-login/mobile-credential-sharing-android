@@ -33,7 +33,7 @@ android {
 dependencies {
     listOf(
         libs.uk.gov.logging.api,
-        projects.core,
+        projects.core
     ).forEach(::api)
 
     listOf(
