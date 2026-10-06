@@ -2,8 +2,10 @@ package uk.gov.onelogin.sharing.sdk.internal.shared
 
 import android.content.Context
 import dev.zacsweers.metro.createGraphFactory
+import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import java.security.cert.X509Certificate
 import uk.gov.logging.api.v2.Logger
+import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
@@ -22,7 +24,8 @@ import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 class CredentialSharingSdkImpl(
     applicationContext: Context,
     logger: Logger,
-    permissionChecker: PermissionChecker
+    permissionChecker: PermissionChecker,
+    analyticsLogger: AnalyticsLogger = SystemAnalyticsLogger(logger),
 ) : CredentialSharingSdk {
 
     private val _appGraph: CredentialSharingAppGraph =
@@ -30,6 +33,7 @@ class CredentialSharingSdkImpl(
             .create(
                 applicationContext,
                 logger,
+                analyticsLogger,
                 permissionChecker
             )
 

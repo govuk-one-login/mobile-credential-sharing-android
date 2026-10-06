@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
+import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -24,6 +25,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ViewModelKey
 class HolderWelcomeViewModel(
     orchestrator: Orchestrator.Holder,
+    @Suppress("UnusedPrivateProperty")
+    private val analyticsLogger: AnalyticsLogger,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 

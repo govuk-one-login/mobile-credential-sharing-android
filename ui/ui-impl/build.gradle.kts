@@ -32,6 +32,10 @@ android {
 
 dependencies {
     listOf(
+        projects.analytics,
+    ).forEach(::api)
+    
+    listOf(
         libs.metro.viewmodel.compose,
         projects.holder,
         projects.sdk,

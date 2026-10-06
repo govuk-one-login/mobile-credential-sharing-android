@@ -3,6 +3,7 @@ import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
+import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
@@ -14,6 +15,7 @@ interface CredentialSharingAppGraph {
         fun create(
             @Provides applicationContext: Context,
             @Provides logger: Logger,
+            @Provides analyticsLogger: AnalyticsLogger,
             @Provides permissionChecker: PermissionChecker
         ): CredentialSharingAppGraph
     }
@@ -21,6 +23,8 @@ interface CredentialSharingAppGraph {
     fun applicationContext(): Context
 
     fun logger(): Logger
+
+    fun analyticsLogger(): AnalyticsLogger
 
     fun permissionChecker(): PermissionChecker
 }
