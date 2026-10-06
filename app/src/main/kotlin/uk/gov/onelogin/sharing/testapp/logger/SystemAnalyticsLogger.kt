@@ -10,10 +10,10 @@ import uk.gov.onelogin.sharing.core.logger.logTag
 class SystemAnalyticsLogger(
     private val logger: Logger
 ) : AnalyticsLogger {
-    private val isEnabled = MutableStateFlow(true)
+    val isEnabled = MutableStateFlow(true)
 
     override fun logEvent(shouldLogEvent: Boolean, vararg events: AnalyticsEvent) {
-        if (shouldLogEvent) {
+        if (shouldLogEvent && isEnabled.value) {
             events
                 .map(::toLogMessage)
                 .forEach {
