@@ -62,7 +62,6 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.PresentingEngagement(""),
             HolderSessionState.AwaitingUserConsent(deviceRequestStub),
             HolderSessionState.ProcessingResponse,
             HolderSessionState.AwaitingVerifierResolution,

@@ -60,6 +60,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val presentingEngagementTransitions = listOf(
             "User cancels from the QR code screen" to userCancellation,
             "QR generation fails" to userJourneyFailure,
+            "QR code engagement refreshes after timeout" to HolderSessionState.PresentingEngagement(""),
             "QR code handshake completes" to HolderSessionState.ProcessingEstablishment,
             "Handshake fails and begins termination" to HolderSessionState.SendingTermination
         ).map { (testName, transition) ->

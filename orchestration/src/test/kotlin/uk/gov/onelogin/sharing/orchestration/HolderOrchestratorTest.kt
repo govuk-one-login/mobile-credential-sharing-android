@@ -8,6 +8,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.mockk
 import java.security.GeneralSecurityException
 import java.security.cert.X509Certificate
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,6 +34,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.sessionTimer.FakeSessionTimer
+import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequest
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
@@ -174,7 +176,8 @@ class HolderOrchestratorTest {
         trustedReaderCertificates: List<X509Certificate> = emptyList(),
         authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory =
             FakeAuthenticatedReaderRequestFactory(),
-        readerAuthentication: ReaderAuthentication = fakeReaderAuthentication
+        readerAuthentication: ReaderAuthentication = fakeReaderAuthentication,
+        engagementTimer: SessionTimer = FakeSessionTimer()
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -190,7 +193,8 @@ class HolderOrchestratorTest {
         sessionTimer = sessionTimer,
         readerAuthentication = readerAuthentication,
         trustedReaderCertificates = trustedReaderCertificates,
-        authenticatedReaderRequestFactory = authenticatedReaderRequestFactory
+        authenticatedReaderRequestFactory = authenticatedReaderRequestFactory,
+        engagementTimer = engagementTimer
     )
 
     @Test
@@ -2078,6 +2082,32 @@ class HolderOrchestratorTest {
             transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
             transport.emitState(PeripheralBluetoothState.MessageReceived(bytes))
             advanceUntilIdle()
+        }
+    }
+
+    @Test
+    fun `engagement timeout refreshes QR code and resets session context`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val transport = FakePeripheralBluetoothTransport()
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            engagementTimer = engagementTimer
+        )
+
+        orchestrator.holderSessionState.test {
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+            orchestrator.start()
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
+            assertEquals(5.5.seconds as Any?, engagementTimer.lastDuration as Any?)
+
+            engagementTimer.onTimeout?.invoke()
+
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
+            assertEquals(2, engagementTimer.startCalls)
         }
     }
 }

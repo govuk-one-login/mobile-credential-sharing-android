@@ -53,6 +53,7 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
         PresentingEngagement::class
     ) + fullErrorHandling,
     PresentingEngagement::class to setOf(
+        PresentingEngagement::class,
         ProcessingEstablishment::class
     ) + fullErrorHandling,
     ProcessingEstablishment::class to setOf(

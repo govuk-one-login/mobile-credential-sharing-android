@@ -49,8 +49,8 @@ private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = M
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        HolderWelcomeText()
         contentState.qrData?.let {
-            HolderWelcomeText()
             QrCodeImage(
                 data = it,
                 size = QR_SIZE
