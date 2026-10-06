@@ -34,6 +34,11 @@ class SystemAnalyticsLoggerTest {
     private val containsEventState: (LogEntry) -> Boolean = { entry ->
         entry.message.contains("Received analytics event: $event")
     }
+    private val containsUnloggableEvent: (LogEntry) -> Boolean = { entry ->
+        entry.message.contains(
+            "Received an event that shouldn't be logged!"
+        )
+    }
 
     private val analyticsLogger by lazy {
         SystemAnalyticsLogger(
@@ -58,16 +63,20 @@ class SystemAnalyticsLoggerTest {
     fun `Logging events depend on internal state`(
         @TestParameter input: Triple<Boolean, Boolean, (SystemLogger) -> Boolean> = namedTestValues(
             "Disabled logger that shouldn't send events, doesn't" to Triple(false, false) {
-                !it.any(containsEventState)
+                it.any(containsUnloggableEvent) &&
+                    !it.any(containsEventState)
             },
             "Enabled logger that shouldn't send events, doesn't" to Triple(false, true) {
-                !it.any(containsEventState)
+                it.any(containsUnloggableEvent) &&
+                    !it.any(containsEventState)
             },
             "Disabled logger that should send events, doesn't" to Triple(true, false) {
-                !it.any(containsEventState)
+                it.any(containsUnloggableEvent) &&
+                    !it.any(containsEventState)
             },
             "Enabled logger that should send events, does" to Triple(true, true) {
-                it.any(containsEventState)
+                !it.any(containsUnloggableEvent) &&
+                    it.any(containsEventState)
             }
         )
     ) = runTest {
@@ -77,6 +86,11 @@ class SystemAnalyticsLoggerTest {
 
         analyticsLogger.logEvent(shouldSend, event)
         advanceUntilIdle()
+
+        assertThat(
+            logger.size,
+            equalTo(1)
+        )
 
         assertTrue(
             "Failed assertion due to logger contents: $logger"
