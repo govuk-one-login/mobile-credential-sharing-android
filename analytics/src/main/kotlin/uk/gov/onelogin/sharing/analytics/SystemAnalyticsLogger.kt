@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.testapp.logger
+package uk.gov.onelogin.sharing.analytics
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

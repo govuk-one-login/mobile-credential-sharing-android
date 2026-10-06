@@ -107,6 +107,7 @@ dependencies {
 
     listOf(
         libs.androidx.hilt.lifecycle.viewmodel.compose,
+        projects.analytics,
         projects.core, // Remove once SDK prerequisites screen handles permissions
         projects.sdk,
         projects.ui.uiApi,

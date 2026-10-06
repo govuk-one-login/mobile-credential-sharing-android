@@ -8,7 +8,7 @@ import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import javax.inject.Singleton
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.impl.v2.AndroidLogger
-import uk.gov.onelogin.sharing.testapp.logger.SystemAnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.testapp.logger.SystemCrashLogger
 
 @InstallIn(SingletonComponent::class)

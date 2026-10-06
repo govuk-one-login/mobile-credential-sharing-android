@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.testapp.logger
+package uk.gov.onelogin.sharing.analytics
 
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
