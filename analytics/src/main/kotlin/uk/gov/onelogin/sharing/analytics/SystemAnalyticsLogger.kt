@@ -7,9 +7,12 @@ import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
-class SystemAnalyticsLogger(private val logger: Logger) : AnalyticsLogger {
-    private val _isEnabled = MutableStateFlow(true)
-    val isEnabled: StateFlow<Boolean> = _isEnabled
+class SystemAnalyticsLogger @JvmOverloads constructor(
+    private val logger: Logger,
+    private val enabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
+) : AnalyticsLogger {
+
+    val isEnabled: StateFlow<Boolean> = enabled
 
     override fun logEvent(shouldLogEvent: Boolean, vararg events: AnalyticsEvent) {
         if (shouldLogEvent && isEnabled.value) {
@@ -30,7 +33,7 @@ class SystemAnalyticsLogger(private val logger: Logger) : AnalyticsLogger {
     }
 
     override fun setEnabled(isEnabled: Boolean) {
-        this._isEnabled.value = isEnabled
+        this.enabled.value = isEnabled
     }
 
     private fun toLogMessage(event: AnalyticsEvent): String = "Received analytics event: $event"

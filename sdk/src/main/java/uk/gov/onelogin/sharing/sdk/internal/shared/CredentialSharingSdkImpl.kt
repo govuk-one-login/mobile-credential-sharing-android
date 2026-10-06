@@ -21,7 +21,7 @@ import uk.gov.onelogin.sharing.sdk.internal.verifier.VerifyCredentialSdkImpl
 import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 import uk.gov.onelogin.sharing.verification.cose.CoseVerificationFailure
 
-class CredentialSharingSdkImpl(
+class CredentialSharingSdkImpl @JvmOverloads constructor(
     applicationContext: Context,
     logger: Logger,
     permissionChecker: PermissionChecker,
