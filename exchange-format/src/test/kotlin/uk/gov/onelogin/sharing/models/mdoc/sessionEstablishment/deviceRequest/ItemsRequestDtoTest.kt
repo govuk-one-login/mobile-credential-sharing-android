@@ -1,14 +1,21 @@
 package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest
 
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertThrows
+import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequestDtoMatchers.hasElementCount
 
+@RunWith(TestParameterInjector::class)
 class ItemsRequestDtoTest {
 
     private val dto = ItemsRequestDto(
@@ -125,5 +132,22 @@ class ItemsRequestDtoTest {
         val result = CborMapper.default.readValue(serialized, ItemsRequestDto::class.java)
 
         assertEquals(multiNamespaces, result)
+    }
+
+    @Test
+    fun `Element count changes based on property nullability`(
+        @TestParameter input: Pair<ItemsRequestDto, Matcher<in ItemsRequestDto>> = namedTestValues(
+            "Mandatory elements in the DTO" to Pair(
+                dto,
+                hasElementCount(2)
+            ),
+            "Request info affects element count" to Pair(
+                differentRequestInfo,
+                hasElementCount(3)
+            )
+        )
+    ) {
+        val (state, assertion) = input
+        assertThat(state, assertion)
     }
 }

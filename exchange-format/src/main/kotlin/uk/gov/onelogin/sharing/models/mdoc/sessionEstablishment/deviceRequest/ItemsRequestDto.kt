@@ -21,11 +21,14 @@ data class ItemsRequestDto(
     val requestInfo: ByteArray? = null
 ) : CborEncodable {
 
-    @JsonIgnore
-    internal val elementCount: Int = if (requestInfo == null) {
-        2
-    } else {
-        3
+    internal val elementCount: Int @JsonIgnore get() {
+        var result = 2
+
+        if (requestInfo != null) {
+            result++
+        }
+
+        return result
     }
 
     override fun equals(other: Any?): Boolean {
