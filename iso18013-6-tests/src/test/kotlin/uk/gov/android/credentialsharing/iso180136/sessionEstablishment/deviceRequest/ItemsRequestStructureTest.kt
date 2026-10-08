@@ -128,7 +128,6 @@ class ItemsRequestStructureTest {
      * [ItemsRequestDto.Deserializer] ignoring the optional fields when writing / reading CBOR.
      */
     @Test
-    @Ignore("Fails conformance test due to incomplete (de)serializer implementation")
     fun `There are no duplicate fields - Ignored fields`(
         @TestParameter propertyName: String = testValues(
             KEY_REQUEST_INFO

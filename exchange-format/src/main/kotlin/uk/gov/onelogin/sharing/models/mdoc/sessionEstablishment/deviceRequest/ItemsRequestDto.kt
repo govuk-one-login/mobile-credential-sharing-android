@@ -18,9 +18,15 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 data class ItemsRequestDto(
     val docType: String,
     val nameSpaces: Map<String, Map<String, Boolean>>,
-    @JsonIgnore
     val requestInfo: ByteArray? = null
 ) : CborEncodable {
+
+    @JsonIgnore
+    internal val elementCount: Int = if (requestInfo == null) {
+        2
+    } else {
+        3
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -68,7 +74,19 @@ data class ItemsRequestDto(
                 }
                 nameSpaces[ns] = elementMap
             }
-            return ItemsRequestDto(docType = docType, nameSpaces = nameSpaces)
+
+            return if (root.has(KEY_REQUEST_INFO)) {
+                ItemsRequestDto(
+                    docType = docType,
+                    nameSpaces = nameSpaces,
+                    root[KEY_REQUEST_INFO].binaryValue()
+                )
+            } else {
+                ItemsRequestDto(
+                    docType = docType,
+                    nameSpaces = nameSpaces
+                )
+            }
         }
     }
 
@@ -78,7 +96,7 @@ data class ItemsRequestDto(
             gen: JsonGenerator,
             provider: SerializerProvider?
         ) {
-            (gen as CBORGenerator).writeStartObject(2)
+            (gen as CBORGenerator).writeStartObject(value.elementCount)
             gen.writeFieldName(KEY_DOC_TYPE)
             gen.writeString(value.docType)
 
@@ -96,6 +114,12 @@ data class ItemsRequestDto(
                 gen.writeEndObject()
             }
             gen.writeEndObject()
+
+            value.requestInfo?.let {
+                gen.writeFieldName(KEY_REQUEST_INFO)
+                gen.writeBinary(value.requestInfo)
+            }
+
             gen.writeEndObject()
         }
     }
