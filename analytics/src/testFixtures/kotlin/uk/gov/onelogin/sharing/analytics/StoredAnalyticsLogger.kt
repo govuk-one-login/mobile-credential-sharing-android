@@ -5,7 +5,7 @@ import uk.gov.logging.api.analytics.AnalyticsEvent
 import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 
 class StoredAnalyticsLogger(
-    private val subLogger: AnalyticsLogger,
+    private val subLogger: AnalyticsLogger? = null,
     private val isEnabledFlag: MutableStateFlow<Boolean> = MutableStateFlow(true)
 ) : AnalyticsLogger,
     Iterable<AnalyticsEvent> {
@@ -27,12 +27,12 @@ class StoredAnalyticsLogger(
             _ignoredAnalyticsEvents.addAll(events)
         }
 
-        subLogger.logEvent(shouldLogEvent, *events)
+        subLogger?.logEvent(shouldLogEvent, *events)
     }
 
     override fun setEnabled(isEnabled: Boolean) {
         isEnabledFlag.value = isEnabled
-        subLogger.setEnabled(isEnabled)
+        subLogger?.setEnabled(isEnabled)
     }
 
     override fun iterator(): Iterator<AnalyticsEvent> = (

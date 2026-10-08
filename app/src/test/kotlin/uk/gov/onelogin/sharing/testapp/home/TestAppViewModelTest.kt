@@ -28,24 +28,17 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 
 @RunWith(TestParameterInjector::class)
 class TestAppViewModelTest {
-    @get:Rule
-    val dispatcherRule = MainDispatcherRule()
-
-    private val logger by lazy {
-        SystemLogger()
-    }
     private val analyticsLogger by lazy {
-        StoredAnalyticsLogger(SystemAnalyticsLogger(logger))
+        StoredAnalyticsLogger()
     }
     private val viewModel by lazy {
         TestAppViewModel(
-            analyticsLogger = analyticsLogger,
-            ioDispatcher = dispatcherRule.testDispatcher
+            analyticsLogger = analyticsLogger
         )
     }
 
     @Test
-    fun `Sends screen view events to log`() = runTest(dispatcherRule.testDispatcher) {
+    fun `Sends screen view events to log`() = runTest {
         viewModel.sendScreenEvent().join()
 
         assertThat(
@@ -59,7 +52,7 @@ class TestAppViewModelTest {
         @TestParameter navigationEvent: TestAppViewModel.NavigationEvent = namedTestValuesIn(
             navigationEvents
         )
-    ) = runTest(dispatcherRule.testDispatcher) {
+    ) = runTest {
         val expectedEvent = TrackEvent.Button(
             navigationEvent.buttonName,
             walletSharingRequiredParameters
@@ -77,7 +70,7 @@ class TestAppViewModelTest {
         @TestParameter navigationEvent: TestAppViewModel.NavigationEvent = namedTestValuesIn(
             navigationEvents
         )
-    ) = runTest(dispatcherRule.testDispatcher) {
+    ) = runTest {
         viewModel.events.test {
             viewModel.update(navigationEvent).join()
 
