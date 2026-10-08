@@ -63,13 +63,18 @@ class ItemsRequestDtoTest {
     }
 
     @Test
-    fun `Serialization process`() {
-        val serialized = CborMapper.default.writeValueAsBytes(dto)
+    fun `Serialization process`(
+        @TestParameter input: ItemsRequestDto = namedTestValues(
+            "Minimal working example" to dto,
+            "Includes Request info" to differentRequestInfo
+        )
+    ) {
+        val serialized = CborMapper.default.writeValueAsBytes(input)
         val result = CborMapper.default.readValue(serialized, ItemsRequestDto::class.java)
 
         assertThat(
             result,
-            equalTo(dto)
+            equalTo(input)
         )
     }
 
