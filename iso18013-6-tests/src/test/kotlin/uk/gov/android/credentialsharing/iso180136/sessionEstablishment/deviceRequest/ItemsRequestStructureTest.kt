@@ -123,9 +123,6 @@ class ItemsRequestStructureTest {
     /**
      * Scenario ID: mDLR_MS_DR_08
      * sub-scenario: Common_CBOR_03
-     *
-     * Fails conformance test due to [ItemsRequestDto.Serializer] and
-     * [ItemsRequestDto.Deserializer] ignoring the optional fields when writing / reading CBOR.
      */
     @Test
     fun `There are no duplicate fields - Ignored fields`(
