@@ -144,14 +144,7 @@ internal suspend fun convertSessionStateToNavigation(
                         }
                     }
                 }
-                // user approves, state = AwaitingVerifierResolition
-                // shows AwaitingVerifierResolutionScreen
-                // verifier closes session, state = HolderSessionState.Complete.Success(Approved)
-                // no-op, stay on AwaitingVerifierResolutionScreen - user is stuck
-                // user reorients, activity recreated, wallet shows unlock screen
-                // SharedCredential composed with fresh nav controller but old orchestrator with
-                // Approved state
-                // nav controller starts at HolderPrequieitesRoute which is just a spinner
+
                 SuccessReason.Approved -> {
                     {
                         navController.navigateToAwaitingVerifierResolutionScreen {
