@@ -16,6 +16,7 @@ import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.logging.testdouble.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.testapp.home.TestAppScreen
 import uk.gov.onelogin.sharing.testapp.home.TestAppViewModel
+import uk.gov.onelogin.sharing.testapp.home.TestAppViewModelTestData.expectedScreenEvent
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
@@ -61,21 +62,13 @@ class MainActivityTest {
 
     @Test
     fun `Launching the screen calls an analytics logger`() = runTest {
-        val expectedEvent = Screen(
-            name = "Credential Sharing Test App",
-            id = "TestAppScreen",
-            params = RequiredParameters(
-                taxonomyLevel2 = TaxonomyLevel2.WALLET
-            )
-        ).asLegacyEvent()
-
         composeTestRule.setContent {
             Render()
         }
         composeTestRule.waitForIdle()
 
         assertTrue {
-            expectedEvent in analyticsLogger
+            expectedScreenEvent in analyticsLogger
         }
     }
 

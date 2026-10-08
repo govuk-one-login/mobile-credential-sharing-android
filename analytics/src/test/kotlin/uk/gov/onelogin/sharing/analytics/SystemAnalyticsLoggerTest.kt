@@ -20,6 +20,8 @@ import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.logging.testdouble.v2.LogEntry
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.analytics.AnalyticsEventTestData.sampleLegacyScreenEvent
+import uk.gov.onelogin.sharing.analytics.SystemLoggerMatchers.containsEventState
+import uk.gov.onelogin.sharing.analytics.SystemLoggerMatchers.containsUnloggableEvent
 
 @RunWith(TestParameterInjector::class)
 class SystemAnalyticsLoggerTest {
@@ -73,43 +75,34 @@ class SystemAnalyticsLoggerTest {
     )
 
     companion object {
-        private val containsEventState: (LogEntry) -> Boolean = { entry ->
-            entry.message.contains("Received analytics event: $sampleLegacyScreenEvent")
-        }
-        private val containsUnloggableEvent: (LogEntry) -> Boolean = { entry ->
-            entry.message.contains(
-                "Received an event that shouldn't be logged!"
-            )
-        }
-
         val testInput: Map<String, SendEventTestData> = mapOf(
             "Disabled logger that shouldn't send events, doesn't" to SendEventTestData(
                 shouldSend = false,
                 isEnabled = false
             ) {
                 it.any(containsUnloggableEvent) &&
-                    !it.any(containsEventState)
+                    !it.any(containsEventState())
             },
             "Enabled logger that shouldn't send events, doesn't" to SendEventTestData(
                 shouldSend = false,
                 isEnabled = true
             ) {
                 it.any(containsUnloggableEvent) &&
-                    !it.any(containsEventState)
+                    !it.any(containsEventState())
             },
             "Disabled logger that should send events, doesn't" to SendEventTestData(
                 shouldSend = true,
                 isEnabled = false
             ) {
                 it.any(containsUnloggableEvent) &&
-                    !it.any(containsEventState)
+                    !it.any(containsEventState())
             },
             "Enabled logger that should send events, does" to SendEventTestData(
                 shouldSend = true,
                 isEnabled = true
             ) {
                 !it.any(containsUnloggableEvent) &&
-                    it.any(containsEventState)
+                    it.any(containsEventState())
             }
         )
     }

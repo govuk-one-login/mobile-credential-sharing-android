@@ -134,6 +134,7 @@ dependencies {
         libs.androidx.ui.test.junit4,
         libs.com.google.test.parameter.injector,
         libs.uk.gov.logging.testdouble,
+        testFixtures(projects.analytics),
         testFixtures(projects.holder),
         testFixtures(projects.ui.uiImpl),
         testFixtures(projects.verifier),
