@@ -30,6 +30,11 @@ sealed class VerifierSessionState :
         Verifying::class
     )
 
+    fun canHandleBluetoothStates(): Boolean = this::class in listOf(
+        Connecting::class,
+        Verifying::class
+    )
+
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification
      * journey yet.
@@ -79,7 +84,6 @@ sealed class VerifierSessionState :
     /**
      * State for when a User has finished a digital credential verification journey.
      */
-
     data object TerminatingSession : VerifierSessionState()
 
     sealed class Complete(val reason: String) : VerifierSessionState() {
