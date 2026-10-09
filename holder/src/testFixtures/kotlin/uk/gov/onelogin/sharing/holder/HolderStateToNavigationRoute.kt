@@ -154,6 +154,18 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 ).matches(
                     currentBackStackEntry?.toRoute<HolderCancellationScreenRoute>()
                 )
+            },
+            Triple(
+                "'Complete.Success(Approved)' -> AwaitingVerifierResolutionRoute",
+                HolderSessionState.Complete.Success(
+                    HolderSessionState.Complete.SuccessReason.Approved
+                )
+            ) {
+                instanceOf<AwaitingVerifierResolutionRoute>(
+                    AwaitingVerifierResolutionRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<AwaitingVerifierResolutionRoute>()
+                )
             }
         )
 
