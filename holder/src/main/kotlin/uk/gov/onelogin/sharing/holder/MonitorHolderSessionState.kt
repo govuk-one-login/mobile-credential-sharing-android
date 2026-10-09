@@ -146,7 +146,12 @@ internal suspend fun convertSessionStateToNavigation(
                 }
 
                 SuccessReason.Approved -> {
-                    {}
+                    {
+                        navController.navigateToAwaitingVerifierResolutionScreen {
+                            exitJourneyOptions()
+                            launchSingleTop = true
+                        }
+                    }
                 }
             }
         }
