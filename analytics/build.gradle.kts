@@ -37,7 +37,8 @@ dependencies {
     ).forEach(::api)
 
     listOf(
-        libs.com.google.test.parameter.injector
+        libs.com.google.test.parameter.injector,
+        testFixtures(projects.core)
     ).forEach(::testFixturesApi)
 }
 
