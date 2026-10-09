@@ -40,6 +40,7 @@ includeBuild("custom-plugins")
 
 rootProject.name = "Mobile-credential-sharing-android"
 listOf(
+    ":analytics",
     ":app",
     ":bluetooth",
     ":camera-service",

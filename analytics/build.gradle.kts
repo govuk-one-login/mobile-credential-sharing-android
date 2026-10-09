@@ -9,7 +9,7 @@ val androidMinSdk: Int by rootProject.extra
 val namespacePrefix: String by rootProject.extra
 
 android {
-    namespace = "$namespacePrefix.uiimpl"
+    namespace = "$namespacePrefix.analytics"
     compileSdk = androidCompileSdk
 
     defaultConfig {
@@ -32,38 +32,24 @@ android {
 
 dependencies {
     listOf(
-        projects.analytics
+        libs.uk.gov.logging.api,
+        projects.core
     ).forEach(::api)
 
     listOf(
-        libs.metro.viewmodel.compose,
-        projects.holder,
-        projects.sdk,
-        projects.ui.uiApi,
-        projects.verifier
-    ).forEach(::implementation)
-
-    listOf(
-        projects.sdk,
-        projects.ui.uiApi
+        libs.com.google.test.parameter.injector
     ).forEach(::testFixturesApi)
-
-    listOf(
-        projects.prerequisiteGateImpl,
-        testFixtures(projects.core),
-        testFixtures(projects.orchestration),
-        testFixtures(projects.holder),
-        testFixtures(projects.sdk),
-        testFixtures(projects.verifier)
-    ).forEach(::testImplementation)
 }
 
 mavenPublishingConfig {
     mavenConfigBlock {
-        name.set("GOV.UK One Login Wallet Sharing: UI implementation")
+        name.set(
+            "GOV.UK One Login Wallet Sharing: Analytics"
+        )
         description.set(
             """
-            Provides the UI implementation.
+            A module for holding analytics configuration that's common throughout the wallet
+            sharing code base.
             """.trimIndent()
         )
     }
