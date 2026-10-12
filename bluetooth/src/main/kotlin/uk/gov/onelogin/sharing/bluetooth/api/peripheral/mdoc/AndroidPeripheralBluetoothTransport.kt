@@ -117,7 +117,7 @@ class AndroidPeripheralBluetoothTransport(
                 notifySessionEnd(serviceUuid)
             }
             bluetoothStateMonitor.stop()
-            bleAdvertiser.stopAdvertise()
+            stopAdvertising()
             gattServerManager.close()
             _state.value = PeripheralBluetoothState.Idle
         }
@@ -130,6 +130,11 @@ class AndroidPeripheralBluetoothTransport(
             // allow time for the END notification to be sent before closing the GATT server
             delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
         }
+    }
+
+    override suspend fun stopAdvertising() {
+        bleAdvertiser.stopAdvertise()
+        logger.debug(logTag, "Advertising ${state::class.java.simpleName}")
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {

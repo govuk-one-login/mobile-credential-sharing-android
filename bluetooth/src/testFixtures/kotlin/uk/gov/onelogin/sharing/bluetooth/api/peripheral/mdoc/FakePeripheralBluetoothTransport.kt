@@ -13,6 +13,7 @@ class FakePeripheralBluetoothTransport(
 
     var startCalls = 0
     var stopCalls = 0
+    var stopAdvertisingCalls = 0
     var lastStopSendEndCommand: Boolean? = null
     var lastUuid: UUID? = null
 
@@ -24,6 +25,10 @@ class FakePeripheralBluetoothTransport(
     override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean) {
         stopCalls++
         lastStopSendEndCommand = sendEndCommand
+    }
+
+    override suspend fun stopAdvertising() {
+        stopAdvertisingCalls++
     }
 
     fun emitState(state: PeripheralBluetoothState) {

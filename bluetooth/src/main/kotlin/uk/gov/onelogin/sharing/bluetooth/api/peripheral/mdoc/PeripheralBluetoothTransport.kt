@@ -18,7 +18,7 @@ interface PeripheralBluetoothTransport :
      *
      * @param serviceUuid The [UUID] of the service to send the end command
      * @param sendEndCommand Used trigger the state end (0x02) command.
-     * If the peripheral tiggers the disconnection, it should send the end command
+     * If the peripheral triggers the disconnection, it should send the end command
      * before the teardown
      * If the disconnection is triggered from the other side, it shouldn't send the end command
      */
@@ -28,4 +28,6 @@ interface PeripheralBluetoothTransport :
      * Notifies the client to end the session with end code 0x02
      */
     suspend fun notifySessionEnd(serviceUuid: UUID)
+
+    suspend fun stopAdvertising()
 }

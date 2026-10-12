@@ -386,6 +386,31 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `stops advertising when a device connects`() = runTest {
+        val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            sessionFactory = sessionFactory,
+            peripheralBluetoothTransport = peripheralBluetoothTransport
+        )
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
+        orchestrator.start()
+
+        peripheralBluetoothTransport.emitState(
+            state = PeripheralBluetoothState.Connected(DEVICE_ADDRESS)
+        )
+        advanceUntilIdle()
+
+        assertEquals(1, peripheralBluetoothTransport.stopAdvertisingCalls)
+        assertThat(
+            orchestrator.holderSessionState.value,
+            isProcessingEstablishment()
+        )
+    }
+
+    @Test
     fun `ignores BLE state changes when session is already complete`() = runTest {
         initialStates = mutableListOf(
             HolderSessionState.Complete.Success()
