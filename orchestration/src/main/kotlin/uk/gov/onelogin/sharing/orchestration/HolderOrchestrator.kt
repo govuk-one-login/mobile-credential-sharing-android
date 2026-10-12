@@ -425,6 +425,20 @@ class HolderOrchestrator(
         }
     }
 
+    /**
+     * Phase 2 of engagement expiry: the 299s display timer has fired. Hide the QR (switch to the
+     * grace/spinner [HolderSessionState.PresentingEngagement] with `qrData = null`) while leaving
+     * the current session's BLE advertising active, so a Verifier that scanned moments earlier can
+     * still connect during the 1s grace window (AC2/AC3). Start a 1s grace timer; if it fires with
+     * no connection, refresh the session at the 300s deadline (AC4).
+     */
+    private fun enterGraceWindow() {
+        safeTransitionTo(HolderSessionState.PresentingEngagement(qrData = null))
+        engagementTimer.start(GRACE_TIMEOUT) {
+            refreshEngagementSession()
+        }
+    }
+
     private suspend fun refreshEngagementSession() {
         val oldUuid = currentContext.sessionUuid
         appCoroutineScope.launch {
@@ -960,12 +974,21 @@ class HolderOrchestrator(
 
         try {
             sessionFlow.value.transitionTo(state)
-            if (state is HolderSessionState.PresentingEngagement) {
-                engagementTimer.start(ENGAGEMENT_TIMEOUT) {
-                    refreshEngagementSession()
+            when {
+                // Phase 1: an active QR is on screen. Run the 299s display timer; when it fires,
+                // hide the QR (grace window) while keeping the current session advertising.
+                state is HolderSessionState.PresentingEngagement && state.qrData != null -> {
+                    engagementTimer.start(ENGAGEMENT_TIMEOUT) {
+                        enterGraceWindow()
+                    }
                 }
-            } else {
-                engagementTimer.stop()
+
+                // Phase 2 (grace window): QR hidden, spinner shown. The grace timer is managed by
+                // enterGraceWindow(); do not touch the engagement timer here or it would be
+                // cancelled/restarted and break the 1s refresh countdown.
+                state is HolderSessionState.PresentingEngagement && state.qrData == null -> Unit
+
+                else -> engagementTimer.stop()
             }
             if (state.isComplete()) {
                 sessionTimer.stop()
@@ -1127,8 +1150,14 @@ class HolderOrchestrator(
 
     private companion object {
         val INACTIVITY_TIMEOUT = 300.seconds
-        val ENGAGEMENT_TIMEOUT = 5.5.seconds
-        val REFRESH_BLANK_INTERVAL = 500.milliseconds
+
+        /** Phase 1: the QR is displayed for the first 299s (T - 1) of the 300s session deadline. */
+        val ENGAGEMENT_TIMEOUT = 299.seconds
+
+        /** Phase 2: the 1s grace window (299s -> 300s) where the QR is hidden but advertising
+         * continues before the session is refreshed at the 300s deadline. */
+        val GRACE_TIMEOUT = 1.seconds
+        val REFRESH_BLANK_INTERVAL = 1000.milliseconds
         const val UNKNOWN_ERROR = "Unknown error"
         const val PORTRAIT_POLICY_VIOLATION =
             "Policy violation: DeviceRequest does not request portrait attribute"

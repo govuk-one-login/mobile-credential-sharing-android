@@ -2086,7 +2086,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `engagement timeout refreshes QR code and resets session context`() = runTest {
+    fun `at 299s the QR is hidden (grace spinner) while advertising continues`() = runTest {
         val engagementTimer = FakeSessionTimer()
         val transport = FakePeripheralBluetoothTransport()
 
@@ -2101,13 +2101,91 @@ class HolderOrchestratorTest {
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
-            assertEquals(5.5.seconds as Any?, engagementTimer.lastDuration as Any?)
+            // AC1: QR displayed for the first 299 seconds.
+            assertEquals(299.seconds as Any?, engagementTimer.lastDuration as Any?)
 
+            val startCallsBeforeGrace = transport.startCalls
+            val stopCallsBeforeGrace = transport.stopCalls
+
+            // 299s elapse -> enter the grace window.
             engagementTimer.onTimeout?.invoke()
+
+            // AC2: QR is hidden (null qrData => spinner), advertising untouched, 1s grace timer set.
+            assertEquals(HolderSessionState.PresentingEngagement(null), awaitItem())
+            assertEquals(1.seconds as Any?, engagementTimer.lastDuration as Any?)
+            assertEquals(startCallsBeforeGrace, transport.startCalls)
+            assertEquals(stopCallsBeforeGrace, transport.stopCalls)
+        }
+    }
+
+    @Test
+    fun `connecting during the grace window cancels refresh and processes establishment`() =
+        runTest {
+            val engagementTimer = FakeSessionTimer()
+            val transport = FakePeripheralBluetoothTransport()
+
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                engagementTimer = engagementTimer
+            )
+
+            orchestrator.holderSessionState.test {
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+                orchestrator.start()
+                assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+                assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
+
+                // Enter the grace window at 299s.
+                engagementTimer.onTimeout?.invoke()
+                assertEquals(HolderSessionState.PresentingEngagement(null), awaitItem())
+
+                val stopCallsBeforeConnect = engagementTimer.stopCalls
+
+                // AC3: a Verifier connects during the grace window.
+                transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+
+                // Transitions to processing; no refresh / new QR generated.
+                assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
+                // The engagement (grace) timer is stopped so the pending refresh is cancelled.
+                assert(engagementTimer.stopCalls > stopCallsBeforeConnect)
+                // Only the original advertising start happened; no refresh re-advertise.
+                assertEquals(1, transport.startCalls)
+            }
+        }
+
+    @Test
+    fun `at 300s with no connection the session refreshes in place with a new QR`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val transport = FakePeripheralBluetoothTransport()
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            engagementTimer = engagementTimer
+        )
+
+        orchestrator.holderSessionState.test {
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+            orchestrator.start()
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
+
+            // 299s -> grace window.
+            engagementTimer.onTimeout?.invoke()
+            assertEquals(HolderSessionState.PresentingEngagement(null), awaitItem())
+
+            // AC4: 300s reached with no connection -> refresh in place.
+            engagementTimer.onTimeout?.invoke()
+            advanceUntilIdle()
 
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
-            assertEquals(2, engagementTimer.startCalls)
+            // Old advertising stopped and new advertising started (new session UUID).
+            assert(transport.stopCalls >= 1)
+            assertEquals(2, transport.startCalls)
+            // Three engagement-timer starts: initial 299s, grace 1s, and the refreshed 299s.
+            assertEquals(3, engagementTimer.startCalls)
         }
     }
 }
