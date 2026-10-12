@@ -5,8 +5,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v2.Logger
 import uk.gov.logging.impl.v2.AndroidLogger
+import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.testapp.logger.SystemCrashLogger
 
 @InstallIn(SingletonComponent::class)
@@ -15,4 +17,8 @@ class LoggerModule {
     @Provides
     @Singleton
     fun provideLogger(): Logger = AndroidLogger(SystemCrashLogger())
+
+    @Provides
+    @Singleton
+    fun provideAnalyticsLogger(logger: Logger): AnalyticsLogger = SystemAnalyticsLogger(logger)
 }

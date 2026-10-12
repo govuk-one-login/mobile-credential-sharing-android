@@ -502,6 +502,9 @@ class HolderOrchestrator(
                 sessionTimer.start(INACTIVITY_TIMEOUT) { cancel() }
 
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
+                appCoroutineScope.launch {
+                    peripheralBluetoothTransport.stopAdvertising()
+                }
                 logger.debug(logTag, "Mdoc - Connected: ${state.address}")
             }
 

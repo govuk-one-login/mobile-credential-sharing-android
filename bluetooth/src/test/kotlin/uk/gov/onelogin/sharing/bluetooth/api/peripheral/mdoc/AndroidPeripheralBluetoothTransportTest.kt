@@ -273,6 +273,16 @@ class AndroidPeripheralBluetoothTransportTest {
     }
 
     @Test
+    fun `stopAdvertising delegates to the advertiser`() = runTest(testScope.coroutineContext) {
+        transport.monitoringJob.start()
+
+        transport.stopAdvertising()
+        advanceUntilIdle()
+
+        assertEquals(1, advertiser.stopCalls)
+    }
+
+    @Test
     fun `stop calls advertiser stop and gatt server close`() = runTest(testScope.coroutineContext) {
         transport.monitoringJob.start()
         gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))

@@ -197,12 +197,8 @@ class DeviceRequestStructureTest {
 
     /**
      * Scenario: mDLR_MS_DR_04
-     *
-     * Fails conformance tests due to [DeviceRequestDto] `init` block only validating that the
-     * version isn't empty.
      */
     @Test
-    @Ignore("Fails conformance test due to minimal input validation")
     fun `Invalid versions throw exceptions`(
         @TestParameter version: String = namedTestValues(
             "Empty version" to "",

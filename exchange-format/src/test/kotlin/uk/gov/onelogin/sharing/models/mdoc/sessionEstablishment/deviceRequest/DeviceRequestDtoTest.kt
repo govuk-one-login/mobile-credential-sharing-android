@@ -34,10 +34,6 @@ class DeviceRequestDtoTest {
         readerAuthAll = byteArrayOf(3, 4)
     )
 
-    private val differentVersion = dto.copy(
-        version = "2.0"
-    )
-
     @Test
     fun `DeviceRequestDto preserves version`() {
         val decoded = CborMapper.default.readValue(encoded, DeviceRequestDto::class.java)
@@ -138,7 +134,6 @@ class DeviceRequestDtoTest {
         assertNotEquals(dto, differentDeviceRequestInfo)
         assertNotEquals(dto, differentDocRequest)
         assertNotEquals(dto, differentReaderAuth)
-        assertNotEquals(dto, differentVersion)
     }
 
     @Test
@@ -149,6 +144,5 @@ class DeviceRequestDtoTest {
         assertNotEquals(dto.hashCode(), differentDeviceRequestInfo.hashCode())
         assertNotEquals(dto.hashCode(), differentDocRequest.hashCode())
         assertNotEquals(dto.hashCode(), differentReaderAuth.hashCode())
-        assertNotEquals(dto.hashCode(), differentVersion.hashCode())
     }
 }
