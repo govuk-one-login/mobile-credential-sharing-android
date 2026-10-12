@@ -178,7 +178,7 @@ class AndroidCentralBluetoothTransportTest {
     }
 
     @Test
-    fun `gatt SessionEnd event maps to CentralBluetoothEnded state`() = runTest {
+    fun `gatt SessionEnd event maps to Ended state`() = runTest {
         transport.monitoringJob.start()
 
         transport.state.test {
@@ -186,7 +186,7 @@ class AndroidCentralBluetoothTransportTest {
 
             gattClientManager.emitEvent(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS))
             assertEquals(
-                CentralBluetoothState.CentralBluetoothEnded(SessionEndStates.SUCCESS),
+                CentralBluetoothState.Ended(SessionEndStates.SUCCESS),
                 awaitItem()
             )
         }

@@ -52,7 +52,7 @@ sealed interface CentralBluetoothState {
     /**
      * A session end command has been received.
      */
-    data class CentralBluetoothEnded(val status: SessionEndStates) : CentralBluetoothState
+    data class Ended(val status: SessionEndStates) : CentralBluetoothState
 
     /**
      * A data structure has been received from the other device.

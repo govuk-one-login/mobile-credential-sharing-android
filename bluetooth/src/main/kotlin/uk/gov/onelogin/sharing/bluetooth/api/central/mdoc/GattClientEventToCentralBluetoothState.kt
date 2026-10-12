@@ -23,7 +23,7 @@ class GattClientEventToCentralBluetoothState(private val logger: Logger) :
             CentralBluetoothTransportError.fromClientError(source.error)
         )
 
-        is GattClientEvent.SessionEnd -> CentralBluetoothState.CentralBluetoothEnded(
+        is GattClientEvent.SessionEnd -> CentralBluetoothState.Ended(
             source.sessionEndStates
         )
 

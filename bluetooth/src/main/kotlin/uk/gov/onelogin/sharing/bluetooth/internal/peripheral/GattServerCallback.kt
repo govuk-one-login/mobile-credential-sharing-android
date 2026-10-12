@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class GattServerCallback(
-    private val gatGattEventEmitter: GattEventEmitter,
+    private val gatGattEventEmitter: GattServerEventEmitter,
     private val logger: Logger,
     private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE,
     private var messages: MutableMap<UUID, ByteArray> = mutableMapOf()

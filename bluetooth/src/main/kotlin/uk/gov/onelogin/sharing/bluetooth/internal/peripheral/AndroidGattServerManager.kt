@@ -69,7 +69,7 @@ class AndroidGattServerManager(
     private var serviceUuid: UUID? = null
 
     @SuppressLint("MissingPermission")
-    private val eventEmitter = GattEventEmitter {
+    private val eventEmitter = GattServerEventEmitter {
         handleGattEvent(it)
     }
 

@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestMessage
 
 class GattServerCallbackMaxBufferSizeTest {
-    private val fakeEmitter = FakeGattEventEmitter()
+    private val fakeEmitter = FakeGattServerEventEmitter()
     private val device = mockk<BluetoothDevice>()
     private val characteristicUuid = GattUuids.CLIENT_2_SERVER_UUID
     private val characteristic = mockk<android.bluetooth.BluetoothGattCharacteristic> {

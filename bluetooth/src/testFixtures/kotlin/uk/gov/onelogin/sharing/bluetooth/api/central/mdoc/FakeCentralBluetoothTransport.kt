@@ -42,7 +42,7 @@ class FakeCentralBluetoothTransport(
 
             is CentralBluetoothState.Disconnected,
             is CentralBluetoothState.Error,
-            is CentralBluetoothState.CentralBluetoothEnded -> isBleOpen = false
+            is CentralBluetoothState.Ended -> isBleOpen = false
 
             else -> {}
         }

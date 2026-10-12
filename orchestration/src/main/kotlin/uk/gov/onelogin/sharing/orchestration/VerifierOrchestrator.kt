@@ -272,7 +272,7 @@ class VerifierOrchestrator(
 
             is CentralBluetoothState.Error -> handleError(bluetoothState, verifierState)
 
-            is CentralBluetoothState.CentralBluetoothEnded -> handleBluetoothEnded(verifierState)
+            is CentralBluetoothState.Ended -> handleBluetoothEnded(verifierState)
 
             is CentralBluetoothState.Message -> handleMessage(bluetoothState, verifierState)
 

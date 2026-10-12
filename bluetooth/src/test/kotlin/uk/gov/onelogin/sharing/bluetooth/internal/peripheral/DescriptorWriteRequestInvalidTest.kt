@@ -19,7 +19,7 @@ internal class DescriptorWriteRequestInvalidTest(
 
     @Test
     fun `emits Invalid event when required fields are null`() {
-        val emitter = FakeGattEventEmitter()
+        val emitter = FakeGattServerEventEmitter()
         val callback = GattServerCallback(emitter, logger = SystemLogger())
 
         callback.onDescriptorWriteRequest(

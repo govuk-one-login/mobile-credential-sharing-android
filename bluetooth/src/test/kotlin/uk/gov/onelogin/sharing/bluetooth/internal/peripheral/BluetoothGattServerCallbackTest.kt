@@ -19,7 +19,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.Chara
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestUnknown
 
 class BluetoothGattServerCallbackTest {
-    private val fakeEmitter = FakeGattEventEmitter()
+    private val fakeEmitter = FakeGattServerEventEmitter()
     private val callback = GattServerCallback(
         gatGattEventEmitter = fakeEmitter,
         logger = SystemLogger()

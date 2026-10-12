@@ -1598,7 +1598,7 @@ class VerifierOrchestratorTest {
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
 
         centralBluetoothTransport.emitState(
-            CentralBluetoothState.CentralBluetoothEnded(
+            CentralBluetoothState.Ended(
                 SessionEndStates.SUCCESS
             )
         )
@@ -1634,7 +1634,7 @@ class VerifierOrchestratorTest {
             )
         )
         centralBluetoothTransport.emitState(
-            CentralBluetoothState.CentralBluetoothEnded(
+            CentralBluetoothState.Ended(
                 SessionEndStates.SUCCESS
             )
         )
