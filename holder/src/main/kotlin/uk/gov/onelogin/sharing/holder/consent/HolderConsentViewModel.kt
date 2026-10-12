@@ -11,13 +11,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -25,14 +25,25 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ViewModelKey
 class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val isBusy: MutableStateFlow<Boolean> = MutableStateFlow(false)
 ) : ViewModel() {
-    val presentation: StateFlow<ConsentPresentation?> = orchestrator
+
+    val presentation: StateFlow<HolderConsentUiState?> = orchestrator
         .holderSessionState
         .map { state ->
             state as? HolderSessionState.AwaitingUserConsent
         }.map { consentState ->
             consentState?.presentation
+        }.combine(isBusy) { presentation, isBusy ->
+            presentation?.let {
+                HolderConsentUiState(
+                    privacyPolicyUrl = it.privacyPolicyUrl,
+                    documents = it.documents,
+                    normalisedOrganizationName = it.normalisedOrganizationName,
+                    isBusy = isBusy
+                )
+            }
         }.stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
@@ -52,10 +63,16 @@ class HolderConsentViewModel(
     }
 
     fun onAccept() = viewModelScope.launch(dispatcher) {
-        orchestrator.confirmConsent()
+        isBusy.value = true
+        orchestrator.confirmConsent().also {
+            isBusy.value = false
+        }
     }
 
     fun onDeny() = viewModelScope.launch(dispatcher) {
-        orchestrator.denyConsent()
+        isBusy.value = true
+        orchestrator.denyConsent().also {
+            isBusy.value = false
+        }
     }
 }
