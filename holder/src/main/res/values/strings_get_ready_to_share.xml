@@ -3,4 +3,7 @@
     <string name="get_ready_to_share_header" translatable="false">@string/get_ready_to_share</string>
     <string name="get_ready_to_share_allow_bluetooth" translatable="false">@string/allow_bluetooth</string>
     <string name="get_ready_to_share_find_out_more" translatable="false">@string/find_out_how_sharing_works</string>
+    <string name="get_ready_to_share_before_sharing" translatable="false">@string/allow_bluetooth_before_sharing_details</string>
+    <string name="get_ready_to_share_if_bluetooth_is_off" translatable="false">@string/you_will_need_to_turn_on_bluetooth</string>
+    <string name="get_ready_to_share_use_qr_to_connect" translatable="false">@string/you_will_connect_via_qr_later</string>
 </resources>

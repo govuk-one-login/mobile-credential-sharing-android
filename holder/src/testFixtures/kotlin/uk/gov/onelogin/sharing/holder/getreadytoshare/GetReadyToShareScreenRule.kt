@@ -38,6 +38,19 @@ class GetReadyToShareScreenRule(
         .assertWidthIsAtLeast(minimumTouchTarget)
         .assertHeightIsAtLeast(minimumTouchTarget)
 
+    fun assertValidBodyContents(
+        useUnmergedTree: Boolean = false
+    ) {
+        mapOf(
+            "first paragraph" to R.string.get_ready_to_share_before_sharing,
+            "second paragraph" to R.string.get_ready_to_share_if_bluetooth_is_off,
+            "third paragraph" to R.string.get_ready_to_share_use_qr_to_connect,
+        ).forEach { (description, resourceId) ->
+            onNodeWithText(resources.getString(resourceId), useUnmergedTree = useUnmergedTree)
+                .assertExists("Cannot find $description")
+        }
+    }
+
     fun assertValidFindOutMoreButton(
         useUnmergedTree: Boolean = false
     ) = onFindOutMoreButtons(useUnmergedTree)

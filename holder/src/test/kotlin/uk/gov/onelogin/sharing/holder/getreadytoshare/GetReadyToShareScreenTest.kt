@@ -81,6 +81,7 @@ class GetReadyToShareScreenTest {
         screenRule.run {
             setContent { Render() }
             assertValidHeader()
+            assertValidBodyContents()
             assertValidAllowBluetoothButton()
             assertValidFindOutMoreButton()
         }

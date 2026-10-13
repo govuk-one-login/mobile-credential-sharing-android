@@ -2,14 +2,11 @@ package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
@@ -17,23 +14,16 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import kotlinx.collections.immutable.immutableListOf
-import kotlinx.collections.immutable.persistentListOf
-import uk.gov.android.ui.componentsv2.heading.GdsHeading
-import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
+import kotlinx.collections.immutable.toPersistentList
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
-import uk.gov.onelogin.sharing.prerequisites.api.ui.RetryPrerequisitesContent
 
 @Composable
 internal fun GetReadyToShareScreen(
@@ -46,9 +36,6 @@ internal fun GetReadyToShareScreen(
     }
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val missingPrerequisites: List<Prerequisite>? by viewModel
-        .prerequisites
-        .collectAsStateWithLifecycle()
     val hasPreviouslyRecheckedPrerequisites: Boolean by viewModel
         .hasRecheckedPrerequisites
         .collectAsStateWithLifecycle()
@@ -71,14 +58,12 @@ internal fun GetReadyToShareScreen(
 
     GetReadyToShareContent(
         modifier = modifier,
-        missingPrerequisites = missingPrerequisites,
         onButtonClick = { viewModel.resolve(launcher) }
     )
 }
 
 @Composable
 internal fun GetReadyToShareContent(
-    missingPrerequisites: List<Prerequisite>?,
     modifier: Modifier = Modifier,
     onButtonClick: () -> Unit = {},
     onFindOutMoreButtonClick: () -> Unit = {},
@@ -86,7 +71,15 @@ internal fun GetReadyToShareContent(
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(R.string.get_ready_to_share_header),
-        body = persistentListOf(),
+        body = listOf(
+            R.string.get_ready_to_share_before_sharing,
+            R.string.get_ready_to_share_if_bluetooth_is_off,
+            R.string.get_ready_to_share_use_qr_to_connect,
+        ).map {
+            stringResource(it)
+        }.map {
+            LeftAlignedScreenBodyV2.Text(text = it)
+        }.toPersistentList(),
         primaryButton = LeftAlignedScreenButton(
             text = stringResource(R.string.get_ready_to_share_allow_bluetooth),
             onClick = onButtonClick
@@ -101,10 +94,8 @@ internal fun GetReadyToShareContent(
 
 @Preview(showBackground = true)
 @Composable
-fun GetReadyToSharePreview() {
+internal fun GetReadyToSharePreview() {
     GdsTheme {
-        GetReadyToShareContent(
-            missingPrerequisites = listOf(Prerequisite.BLUETOOTH),
-        )
+        GetReadyToShareContent()
     }
 }
