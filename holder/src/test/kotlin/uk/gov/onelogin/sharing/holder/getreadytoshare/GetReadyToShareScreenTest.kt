@@ -1,9 +1,14 @@
 package uk.gov.onelogin.sharing.holder.getreadytoshare
 
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.core.app.ActivityOptionsCompat
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,8 +38,10 @@ class GetReadyToShareScreenTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
+    private val accessibilityRule = createAndroidComposeRule<ComponentActivity>()
+
     @get:Rule
-    val screenRule = GetReadyToShareScreenRule(createComposeRule())
+    val screenRule = GetReadyToShareScreenRule(accessibilityRule)
 
     private var navigatorEvents = mutableListOf<NavigationEvent>()
     private var missingPrerequisites = mutableListOf(

@@ -40,7 +40,8 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
-        libs.com.google.test.parameter.injector
+        libs.com.google.test.parameter.injector,
+        libs.androidx.compose.ui.test.junit4.accessibility,
     ).forEach(::testFixturesApi)
 
     listOf(

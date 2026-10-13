@@ -61,24 +61,20 @@ dependencies {
 
     listOf(
         projects.sdk,
-        projects.prerequisiteGateImpl,
+    ).forEach(::testImplementation)
+
+    listOf(
+        libs.androidx.navigation.testing,
         testFixtures(libs.uk.gov.ui.android.componentsv2),
         testFixtures(projects.bluetooth),
         testFixtures(projects.cryptoService),
         testFixtures(projects.core),
-        testFixtures(projects.orchestration)
-    ).forEach(::testImplementation)
-
-    listOf(
-        libs.androidx.navigation.testing
+        testFixtures(projects.orchestration),
+        projects.prerequisiteGateImpl,
     ).forEach(::testFixturesApi)
 
     listOf(
         projects.bluetooth,
         projects.cryptoService,
-        testFixtures(projects.bluetooth),
-        testFixtures(projects.cryptoService),
-        testFixtures(projects.core),
-        testFixtures(projects.orchestration)
     ).forEach(::testFixturesImplementation)
 }
