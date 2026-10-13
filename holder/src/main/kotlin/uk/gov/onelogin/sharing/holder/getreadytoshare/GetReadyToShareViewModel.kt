@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.retry
+package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,7 +32,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavi
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 @ViewModelKey
-class RetryHolderPrerequisitesViewModel(
+class GetReadyToShareViewModel(
     navigator: RetryPrerequisitesNavigator<HolderSessionState>,
     private val orchestrator: Orchestrator.Holder,
     private val resolver: ResolvePrerequisiteAction<HolderSessionState>,
@@ -50,7 +50,7 @@ class RetryHolderPrerequisitesViewModel(
         .flowOn(dispatcher)
         .shareIn(
             viewModelScope.plus(dispatcher),
-            SharingStarted.Companion.Lazily
+            SharingStarted.Lazily
         )
 
     private val _hasRecheckedPrerequisites = MutableStateFlow(false)
@@ -63,7 +63,7 @@ class RetryHolderPrerequisitesViewModel(
         .flowOn(dispatcher)
         .stateIn(
             viewModelScope.plus(dispatcher),
-            SharingStarted.Companion.Eagerly,
+            SharingStarted.Eagerly,
             (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
                 ?.map(MissingPrerequisite::prerequisite)
         )

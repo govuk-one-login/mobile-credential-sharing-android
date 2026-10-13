@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.retry
+package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import app.cash.turbine.test
 import io.mockk.mockk
@@ -25,7 +25,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavi
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
-class RetryHolderPrerequisitesViewModelTest {
+class GetReadyToShareViewModelTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
@@ -51,7 +51,7 @@ class RetryHolderPrerequisitesViewModelTest {
     }
 
     private val viewModel by lazy {
-        RetryHolderPrerequisitesViewModel(
+        GetReadyToShareViewModel(
             navigator = RetryPrerequisitesNavigator.from(navigationEvents.asFlow()),
             orchestrator = orchestrator,
             resolver = {

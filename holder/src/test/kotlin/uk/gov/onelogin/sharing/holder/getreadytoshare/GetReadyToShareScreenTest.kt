@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.retry
+package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.prerequisites.ui.RetryPrerequisitesContentRule
 import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
 @RunWith(RobolectricTestParameterInjector::class)
-class RetryHolderPrerequisitesScreenTest {
+class GetReadyToShareScreenTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
@@ -66,7 +66,7 @@ class RetryHolderPrerequisitesScreenTest {
     }
 
     private val viewModel by lazy {
-        RetryHolderPrerequisitesViewModel(
+        GetReadyToShareViewModel(
             navigator = navigator,
             orchestrator = orchestrator,
             resolver = resolver,
@@ -92,7 +92,7 @@ class RetryHolderPrerequisitesScreenTest {
 
             setContent {
                 ProvideActivityResultRegistry(testRegistry) {
-                    RetryHolderPrerequisitesScreen(
+                    GetReadyToShareScreen(
                         viewModel = viewModel
                     )
                 }

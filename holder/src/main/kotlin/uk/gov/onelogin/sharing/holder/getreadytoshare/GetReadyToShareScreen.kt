@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.retry
+package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -12,17 +12,17 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
-import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
 import uk.gov.onelogin.sharing.prerequisites.api.ui.RetryPrerequisitesContent
 
 @Composable
-internal fun RetryHolderPrerequisitesScreen(
+internal fun GetReadyToShareScreen(
     modifier: Modifier = Modifier,
-    viewModel: RetryHolderPrerequisitesViewModel = metroViewModel(),
+    viewModel: GetReadyToShareViewModel = metroViewModel(),
     launcher: ActivityResultLauncher<PrerequisiteAction> = rememberLauncherForActivityResult(
         PrerequisiteActionContract
     ) {
@@ -37,7 +37,7 @@ internal fun RetryHolderPrerequisitesScreen(
         .hasRecheckedPrerequisites
         .collectAsStateWithLifecycle()
 
-    val metrics = rememberMetricsStateHolder()
+    val metrics = JankStatsHelper.rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("RetryHolderPrerequisitesScreen")
     }
