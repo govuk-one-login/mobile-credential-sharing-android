@@ -122,14 +122,13 @@ internal class CertificateProfileValidator {
 
     private fun validateValidityDuration(leaf: X509Certificate, purpose: CertificatePurpose) {
         val durationMs = leaf.notAfter.time - leaf.notBefore.time
-        val durationDays = TimeUnit.MILLISECONDS.toDays(durationMs)
-
         val maxAllowedDays = when (purpose) {
             CertificatePurpose.ISSUER_AUTH -> MAX_ISSUER_VALIDITY_DAYS
             CertificatePurpose.READER_AUTH -> MAX_READER_VALIDITY_DAYS
         }
+        val maxAllowedMs = TimeUnit.DAYS.toMillis(maxAllowedDays)
 
-        if (durationDays > maxAllowedDays) {
+        if (durationMs > maxAllowedMs) {
             throw CertificateProfileViolation(
                 CertificateProfileReason.INVALID_VALIDITY_PERIOD
             )

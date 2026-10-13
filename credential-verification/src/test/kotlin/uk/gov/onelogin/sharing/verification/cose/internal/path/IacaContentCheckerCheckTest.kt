@@ -186,6 +186,21 @@ class IacaContentCheckerCheckTest {
     }
 
     @Test
+    fun `check throws for leaf validity exceeding max days by 1 hour`() {
+        val now = System.currentTimeMillis()
+        val oneHourMs = 3_600_000L
+        val leaf = validLeaf()
+            .withValidity(
+                notBefore = Date(now),
+                notAfter = Date(now + IacaContentChecker.MAX_LEAF_VALIDITY_DAYS * 86400000L + oneHourMs)
+            )
+            .build()
+        assertThrows(CertPathValidatorException::class.java) {
+            checkerFor(leaf).check(leaf, mutableSetOf())
+        }
+    }
+
+    @Test
     fun `check passes for leaf validity at exactly max days`() {
         val now = System.currentTimeMillis()
         val leaf = validLeaf()

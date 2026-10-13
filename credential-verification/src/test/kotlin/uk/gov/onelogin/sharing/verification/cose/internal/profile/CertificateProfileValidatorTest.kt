@@ -147,6 +147,26 @@ class CertificateProfileValidatorTest {
     }
 
     @Test
+    fun `IssuerAuth leaf with duration exceeding 457 days by 1 hour fails with INVALID_VALIDITY_PERIOD`() {
+        val now = System.currentTimeMillis()
+        val oneHourMs = 3_600_000L
+        val longValidityLeaf = TestCertificateGenerator(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = CertificateStubs.leafKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).leaf()
+            .withValidity(Date(now), Date(now + 457L * 86400000L + oneHourMs))
+            .build()
+
+        val violation = assertThrows(CertificateProfileViolation::class.java) {
+            validator.validate(listOf(longValidityLeaf), CertificatePurpose.ISSUER_AUTH)
+        }
+
+        assertThat(violation.reason, equalTo(CertificateProfileReason.INVALID_VALIDITY_PERIOD))
+    }
+
+    @Test
     fun `ReaderAuth leaf with duration exceeding 1187 days fails with INVALID_VALIDITY_PERIOD`() {
         val now = System.currentTimeMillis()
         val longValidityReaderLeaf = TestCertificateGenerator(

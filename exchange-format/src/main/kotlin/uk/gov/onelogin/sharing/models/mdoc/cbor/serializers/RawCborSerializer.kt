@@ -9,14 +9,21 @@ import java.io.OutputStream
 /**
  * Writes pre-encoded CBOR bytes directly into the output stream with no tag or bstr wrapper.
  *
- * Used for [issuerAuth] (COSE_Sign1 array, starts with 0x84) which must be spliced inline
+ * Used for raw CBOR fields (like `issuerAuth` COSE_Sign1 array, starts with 0x84) which must be spliced inline
  * per ISO 18013-5, not wrapped in a byte string.
  */
 data class RawCbor(val encoded: ByteArray)
 
 class RawCborSerializer : StdSerializer<RawCbor>(RawCbor::class.java) {
+    private val verifyValueWriteMethod by lazy {
+        CBORGenerator::class.java.getDeclaredMethod("_verifyValueWrite", String::class.java).apply {
+            isAccessible = true
+        }
+    }
+
     override fun serialize(value: RawCbor, gen: JsonGenerator, provider: SerializerProvider) {
         val cborGen = gen as? CBORGenerator ?: error("RawCbor requires CBORGenerator")
+        verifyValueWriteMethod.invoke(cborGen, "write raw CBOR")
         cborGen.flush()
         (cborGen.outputTarget as OutputStream).write(value.encoded)
     }
