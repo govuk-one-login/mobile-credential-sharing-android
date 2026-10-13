@@ -304,11 +304,16 @@ class VerifierOrchestrator(
         verifierState: VerifierSessionState
     ) {
         if (verifierState is VerifierSessionState.Verifying) {
-            logger.debug(logTag, "Ignoring transport error while verifying: ${state.reason}")
+            logger.debug(
+                logTag,
+                "Ignoring transport error while verifying: ${state.reason.message}"
+            )
         } else {
             failWith(
-                "Bluetooth error: ${state.reason}",
-                InvalidBluetoothState(IllegalStateException("Bluetooth error: ${state.reason}"))
+                "Bluetooth error: ${state.reason.message}",
+                InvalidBluetoothState(
+                    IllegalStateException("Bluetooth error: ${state.reason.message}")
+                )
             )
         }
     }

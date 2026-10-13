@@ -2,18 +2,18 @@ package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 
-enum class CentralBluetoothTransportError {
-    BLUETOOTH_TURNED_OFF,
-    BLUETOOTH_PERMISSION_MISSING,
-    GATT_NOT_AVAILABLE,
-    SERVICE_NOT_FOUND,
-    INVALID_SERVICE,
-    FAILED_TO_SUBSCRIBE,
-    FAILED_TO_START,
-    SCAN_FAILED,
-    INVALID_MESSAGE_PREFIX,
-    SERVICE_CHANGED,
-    EXCEEDED_MAX_BUFFER_SIZE;
+enum class CentralBluetoothTransportError(val message: String) {
+    BLUETOOTH_TURNED_OFF("Bluetooth is currently turned off"),
+    BLUETOOTH_PERMISSION_MISSING("Bluetooth permission missing"),
+    GATT_NOT_AVAILABLE("GATT not available"),
+    SERVICE_NOT_FOUND("Failed to find the expected GATT service"),
+    INVALID_SERVICE("GATT service did not include the expected characteristics"),
+    FAILED_TO_SUBSCRIBE("Failed to subscribe to characteristics for communication"),
+    FAILED_TO_START("Failed to set the state characteristic to 'Start'"),
+    SCAN_FAILED("Bluetooth scan failed"),
+    INVALID_MESSAGE_PREFIX("Received message with an invalid prefix byte"),
+    SERVICE_CHANGED("GATT services changed during an active session"),
+    EXCEEDED_MAX_BUFFER_SIZE("Received data exceeded maximum buffer size");
 
     companion object {
         fun fromClientError(gattClientError: GattClientError): CentralBluetoothTransportError =
