@@ -17,8 +17,14 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.collections.immutable.immutableListOf
+import kotlinx.collections.immutable.persistentListOf
 import uk.gov.android.ui.componentsv2.heading.GdsHeading
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
+import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
+import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
+import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
+import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
@@ -75,18 +81,22 @@ internal fun GetReadyToShareContent(
     missingPrerequisites: List<Prerequisite>?,
     modifier: Modifier = Modifier,
     onButtonClick: () -> Unit = {},
+    onFindOutMoreButtonClick: () -> Unit = {},
 ) {
-    Column(modifier = modifier) {
-        GdsHeading(
-            modifier = Modifier.testTag("header"),
-            text = stringResource(R.string.get_ready_to_share_header),
-            textAlign = GdsHeadingAlignment.LeftAligned
-        )
-        RetryPrerequisitesContent(
-            missingPrerequisites = missingPrerequisites,
-            onButtonClick = onButtonClick
-        )
-    }
+    LeftAlignedScreenV2(
+        modifier = modifier,
+        title = stringResource(R.string.get_ready_to_share_header),
+        body = persistentListOf(),
+        primaryButton = LeftAlignedScreenButton(
+            text = stringResource(R.string.get_ready_to_share_allow_bluetooth),
+            onClick = onButtonClick
+        ),
+        secondaryButton = LeftAlignedScreenButton(
+            text = stringResource(R.string.get_ready_to_share_find_out_more),
+            onClick = onFindOutMoreButtonClick
+        ),
+        forceScroll = true
+    )
 }
 
 @Preview(showBackground = true)
@@ -95,7 +105,6 @@ fun GetReadyToSharePreview() {
     GdsTheme {
         GetReadyToShareContent(
             missingPrerequisites = listOf(Prerequisite.BLUETOOTH),
-            modifier = Modifier.padding(spacingSingle)
         )
     }
 }

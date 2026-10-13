@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="allow_bluetooth">Caniatáu Bluetooth</string>
+    <string name="find_out_how_sharing_works">Darganfyddwch sut mae rhannu yn gweithio</string>
     <string name="get_ready_to_share">Paratoi i rannu</string>
 </resources>

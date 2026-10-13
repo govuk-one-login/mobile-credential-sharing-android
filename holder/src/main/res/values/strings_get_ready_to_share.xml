@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="get_ready_to_share_header" translatable="false">@string/get_ready_to_share</string>
+    <string name="get_ready_to_share_allow_bluetooth" translatable="false">@string/allow_bluetooth</string>
+    <string name="get_ready_to_share_find_out_more" translatable="false">@string/find_out_how_sharing_works</string>
 </resources>

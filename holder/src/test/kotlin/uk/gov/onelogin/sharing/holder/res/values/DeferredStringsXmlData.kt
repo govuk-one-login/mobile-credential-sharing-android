@@ -12,6 +12,18 @@ enum class DeferredStringsXmlData(
     @param:StringRes val defersTo: Int,
     @param:StringRes val resourceId: Int
 ) {
+    GET_READY_TO_SHARE_ALLOW_BLUETOOTH(
+        defersTo = R.string.allow_bluetooth,
+        resourceId = R.string.get_ready_to_share_allow_bluetooth
+    ),
+    GET_READY_TO_SHARE_HEADER(
+        defersTo = R.string.get_ready_to_share,
+        resourceId = R.string.get_ready_to_share_header
+    ),
+    GET_READY_TO_SHARE_FIND_OUT_MORE(
+        defersTo = R.string.find_out_how_sharing_works,
+        resourceId = R.string.get_ready_to_share_find_out_more
+    ),
     HOLDER_PREREQUISITES_NOT_STARTED(
         defersTo = R.string.checking_journey_requirements,
         resourceId = R.string.holder_prerequisites_not_started
@@ -28,8 +40,5 @@ enum class DeferredStringsXmlData(
         defersTo = R.string.generating_qr_code_data,
         resourceId = R.string.holder_prerequisites_ready_to_present
     ),
-    GET_READY_TO_SHARE_HEADER(
-        defersTo = R.string.get_ready_to_share,
-        resourceId = R.string.get_ready_to_share_header
-    )
+
 }

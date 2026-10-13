@@ -34,9 +34,7 @@ class GetReadyToShareScreenTest {
     val dispatcherRule = MainDispatcherRule()
 
     @get:Rule
-    val composeTestRule = RetryPrerequisitesContentRule(createComposeRule())
-
-    val screenRule = GetReadyToShareScreenRule(composeTestRule)
+    val screenRule = GetReadyToShareScreenRule(createComposeRule())
 
     private var navigatorEvents = mutableListOf<NavigationEvent>()
     private var missingPrerequisites = mutableListOf(
@@ -79,8 +77,18 @@ class GetReadyToShareScreenTest {
     }
 
     @Test
+    fun `UI contains the correct elements`() = runTest {
+        screenRule.run {
+            setContent { Render() }
+            assertValidHeader()
+            assertValidAllowBluetoothButton()
+            assertValidFindOutMoreButton()
+        }
+    }
+
+    @Test
     fun `Tapping resolve action defers to an activity result contract`() = runTest {
-        composeTestRule.run {
+        screenRule.run {
             var hasCalledActivityResult = false
             val testRegistry = object : ActivityResultRegistry() {
                 override fun <I, O> onLaunch(
@@ -100,20 +108,11 @@ class GetReadyToShareScreenTest {
                 }
             }
 
-            performResolveActionClick()
+            performAllowActionClick()
 
             waitUntil("Hasn't called the activity result contract!") {
                 hasCalledActivityResult
             }
-        }
-    }
-
-    @Test
-    fun `UI contains a header`() = runTest {
-        screenRule.run {
-            setContent { Render() }
-
-            assertValidHeader()
         }
     }
 
