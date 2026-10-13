@@ -31,7 +31,7 @@ import org.junit.Rule
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
