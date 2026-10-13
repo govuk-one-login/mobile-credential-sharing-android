@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="get_ready_to_share_header" translatable="false">@string/get_ready_to_share</string>
+</resources>

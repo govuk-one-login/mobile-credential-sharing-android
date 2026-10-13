@@ -2,22 +2,28 @@ package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.android.ui.componentsv2.heading.GdsHeading
+import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
@@ -70,11 +76,17 @@ internal fun GetReadyToShareContent(
     modifier: Modifier = Modifier,
     onButtonClick: () -> Unit = {},
 ) {
-    RetryPrerequisitesContent(
-        missingPrerequisites = missingPrerequisites,
-        modifier = modifier,
-        onButtonClick = onButtonClick
-    )
+    Column(modifier = modifier) {
+        GdsHeading(
+            modifier = Modifier.testTag("header"),
+            text = stringResource(R.string.get_ready_to_share_header),
+            textAlign = GdsHeadingAlignment.LeftAligned
+        )
+        RetryPrerequisitesContent(
+            missingPrerequisites = missingPrerequisites,
+            onButtonClick = onButtonClick
+        )
+    }
 }
 
 @Preview(showBackground = true)

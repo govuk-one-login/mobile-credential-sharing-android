@@ -27,5 +27,9 @@ enum class DeferredStringsXmlData(
     HOLDER_PREREQUISITES_READY_TO_PRESENT(
         defersTo = R.string.generating_qr_code_data,
         resourceId = R.string.holder_prerequisites_ready_to_present
+    ),
+    GET_READY_TO_SHARE_HEADER(
+        defersTo = R.string.get_ready_to_share,
+        resourceId = R.string.get_ready_to_share_header
     )
 }

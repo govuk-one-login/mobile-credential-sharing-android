@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import kotlin.test.Test
@@ -11,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
@@ -33,6 +35,8 @@ class GetReadyToShareScreenTest {
 
     @get:Rule
     val composeTestRule = RetryPrerequisitesContentRule(createComposeRule())
+
+    val screenRule = GetReadyToShareScreenRule(composeTestRule)
 
     private var navigatorEvents = mutableListOf<NavigationEvent>()
     private var missingPrerequisites = mutableListOf(
@@ -92,9 +96,7 @@ class GetReadyToShareScreenTest {
 
             setContent {
                 ProvideActivityResultRegistry(testRegistry) {
-                    GetReadyToShareScreen(
-                        viewModel = viewModel
-                    )
+                    Render()
                 }
             }
 
@@ -103,6 +105,24 @@ class GetReadyToShareScreenTest {
             waitUntil("Hasn't called the activity result contract!") {
                 hasCalledActivityResult
             }
+        }
+    }
+
+    @Test
+    fun `UI contains a header`() = runTest {
+        screenRule.run {
+            setContent { Render() }
+
+            assertValidHeader()
+        }
+    }
+
+    @Composable
+    private fun Render() {
+        GdsTheme {
+            GetReadyToShareScreen(
+                viewModel = viewModel
+            )
         }
     }
 }
