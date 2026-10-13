@@ -48,7 +48,6 @@ class SessionTerminatorImpl(
 
                 val terminationBytes = verifierCryptoService.buildTerminationSessionData()
                 val sent = centralBluetoothTransport.sendMessage(
-                    serviceUuid = serviceUuid,
                     data = terminationBytes
                 )
 

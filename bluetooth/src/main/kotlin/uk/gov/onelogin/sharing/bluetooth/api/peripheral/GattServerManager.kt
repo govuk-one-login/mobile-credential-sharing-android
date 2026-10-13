@@ -16,5 +16,5 @@ interface GattServerManager :
      */
     fun cancelCurrentConnection()
 
-    fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued
+    fun notifySessionEnd(): SessionEndStateQueued
 }

@@ -44,7 +44,7 @@ class FakePeripheralBluetoothTransport(
 
     var sendMessageResultDeferred: CompletableDeferred<Boolean>? = null
 
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(data: ByteArray): Boolean {
         sendMessageCalls++
         return sendMessageResultDeferred?.await() ?: sendMessageResult
     }

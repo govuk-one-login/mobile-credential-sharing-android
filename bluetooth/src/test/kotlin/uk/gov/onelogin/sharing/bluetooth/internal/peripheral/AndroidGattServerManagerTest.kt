@@ -439,7 +439,7 @@ class AndroidGattServerManagerTest {
             BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = manager.notifySessionEnd(uuid)
+        val result = manager.notifySessionEnd()
 
         assertEquals(SessionEndStateQueued.Success, result)
     }
@@ -448,7 +448,7 @@ class AndroidGattServerManagerTest {
     fun `does not send BLE session end command when no device connected`() = runTest {
         manager.open(uuid)
 
-        val result = manager.notifySessionEnd(uuid)
+        val result = manager.notifySessionEnd()
 
         assertEquals(SessionEndStateQueued.NoDeviceConnected, result)
     }
@@ -476,7 +476,7 @@ class AndroidGattServerManagerTest {
             BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = manager.notifySessionEnd(uuid)
+        val result = manager.notifySessionEnd()
 
         assertEquals(SessionEndStateQueued.Failed, result)
     }
@@ -578,7 +578,7 @@ class AndroidGattServerManagerTest {
         )
 
         val data = byteArrayOf(0x01, 0x02, 0x03)
-        val result = manager.sendMessage(uuid, data)
+        val result = manager.sendMessage(data)
 
         assert(result)
         assertEquals(1, fakeGattWriter.sentChunks.size)
@@ -608,7 +608,7 @@ class AndroidGattServerManagerTest {
             )
 
             val data = ByteArray(40) { it.toByte() } // forces 3 chunks
-            val result = manager.sendMessage(uuid, data)
+            val result = manager.sendMessage(data)
 
             assert(result)
             val chunks = fakeGattWriter.sentChunks
@@ -637,7 +637,7 @@ class AndroidGattServerManagerTest {
             BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = manager.sendMessage(uuid, byteArrayOf())
+        val result = manager.sendMessage(byteArrayOf())
 
         assert(!result)
         assert(fakeGattWriter.sentChunks.isEmpty())
@@ -650,7 +650,7 @@ class AndroidGattServerManagerTest {
 
         manager.open(uuid)
 
-        val result = manager.sendMessage(uuid, byteArrayOf(0x01))
+        val result = manager.sendMessage(byteArrayOf(0x01))
 
         assert(!result)
         assert(fakeGattWriter.sentChunks.isEmpty())
@@ -683,7 +683,7 @@ class AndroidGattServerManagerTest {
             BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = manager.sendMessage(uuid, byteArrayOf(0x01, 0x02))
+        val result = manager.sendMessage(byteArrayOf(0x01, 0x02))
 
         assert(!result)
     }

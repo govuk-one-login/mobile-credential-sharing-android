@@ -126,7 +126,7 @@ class AndroidPeripheralBluetoothTransport(
     override suspend fun notifySessionEnd(serviceUuid: UUID): Unit = withContext(
         ioDispatcher + "$logTag.NotifySessionEnd".asCoroutineName()
     ) {
-        val result = gattServerManager.notifySessionEnd(serviceUuid)
+        val result = gattServerManager.notifySessionEnd()
         if (result == SessionEndStateQueued.Success) {
             // allow time for the END notification to be sent before closing the GATT server
             delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)

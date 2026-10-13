@@ -201,9 +201,10 @@ class AndroidGattClientManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(data: ByteArray): Boolean {
         val gatt = bluetoothGatt ?: return false
-        val characteristic = gatt.getService(serviceUuid)
+        val uuid = serviceUuid ?: return false
+        val characteristic = gatt.getService(uuid)
             ?.getCharacteristic(CLIENT_2_SERVER_UUID) ?: return false
 
         return sendChunkedMessage(data, mtu, logger) { chunk ->

@@ -307,7 +307,6 @@ class HolderOrchestrator(
         )
 
         val sent = peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
         sessionTimer.reset()
@@ -1059,7 +1058,6 @@ class HolderOrchestrator(
         var sent = sessionDataToSend == null
         if (sessionDataToSend != null) {
             sent = peripheralBluetoothTransport.sendMessage(
-                serviceUuid = context.sessionUuid,
                 data = sessionDataToSend
             )
             sessionTimer.reset()

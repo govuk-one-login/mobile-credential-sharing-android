@@ -694,7 +694,6 @@ class VerifierOrchestrator(
                 "SessionEstablishment bytes: ${sessionEstablishmentBytes.toHexString()}"
             )
             val sent = centralBluetoothTransport.sendMessage(
-                serviceUuid = context.serviceUuid,
                 data = sessionEstablishmentBytes
             )
             sessionTimer.reset()

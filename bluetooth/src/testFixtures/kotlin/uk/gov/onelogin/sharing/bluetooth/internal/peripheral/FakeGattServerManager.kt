@@ -28,18 +28,17 @@ class FakeGattServerManager : GattServerManager {
         disconnectCalls++
     }
 
-    override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued =
-        if (notifySessionEnd) {
-            _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
-            SessionEndStateQueued.Success
-        } else {
-            _events.tryEmit(
-                GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
-            )
-            SessionEndStateQueued.Success
-        }
+    override fun notifySessionEnd(): SessionEndStateQueued = if (notifySessionEnd) {
+        _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
+        SessionEndStateQueued.Success
+    } else {
+        _events.tryEmit(
+            GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
+        )
+        SessionEndStateQueued.Success
+    }
 
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(data: ByteArray): Boolean {
         sentMessages.add(data)
         return sendMessageResult
     }
