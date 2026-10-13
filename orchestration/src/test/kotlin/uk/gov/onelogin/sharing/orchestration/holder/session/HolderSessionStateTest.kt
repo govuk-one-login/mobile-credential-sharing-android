@@ -26,6 +26,7 @@ class HolderSessionStateTest {
     @Test
     fun `Certain states are cancellable by the User`(
         @TestParameter state: HolderSessionState = testValues(
+            Preflight(listOf()),
             AwaitingUserConsent(mockk(relaxed = true)),
             AwaitingVerifierResolution,
             ProcessingEstablishment,
@@ -44,7 +45,6 @@ class HolderSessionStateTest {
             Cancelled,
             Failed(mockk(relaxed = true)),
             NotStarted,
-            Preflight(listOf()),
             ReadyToPresent,
             Success(),
             HolderSessionState.SendingTermination
@@ -52,6 +52,13 @@ class HolderSessionStateTest {
     ) {
         assertFalse {
             state.userCanCancel()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require cancellation confirmation`() {
+        assertFalse {
+            Preflight(listOf()).shouldConfirmCancellation()
         }
     }
 }
