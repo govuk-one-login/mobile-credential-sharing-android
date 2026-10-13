@@ -6,6 +6,8 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.De
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 
 /**
  * Represents a digital credential verification journey's state for devices that contain digital
@@ -41,7 +43,15 @@ sealed class HolderSessionState :
         val missingPrerequisites: List<MissingPrerequisite>,
         val onComplete: () -> Unit = {}
     ) : HolderSessionState(),
-        Iterable<MissingPrerequisite> by missingPrerequisites
+        Iterable<MissingPrerequisite> by missingPrerequisites {
+        /**
+         * Check if device's Bluetooth is turned off, and the user can enable it
+         */
+        fun requiresBluetoothEnabled(): Boolean = missingPrerequisites.any {
+            it.prerequisite == Prerequisite.BLUETOOTH &&
+                    it.getAction() == PrerequisiteAction.EnableBluetooth
+        }
+    }
 
     /**
      * The User's completed the [Preflight] validations, so the device is ready to
