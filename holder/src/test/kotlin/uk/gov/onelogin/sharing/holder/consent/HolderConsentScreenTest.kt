@@ -47,7 +47,7 @@ class HolderConsentScreenTest {
     private val viewModel by lazy {
         HolderConsentViewModel(
             orchestrator = orchestrator,
-            dispatcher = dispatcherRule.testDispatcher,
+            dispatcher = dispatcherRule.testDispatcher
         )
     }
 

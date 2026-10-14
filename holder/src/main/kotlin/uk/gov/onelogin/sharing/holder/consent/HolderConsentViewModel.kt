@@ -25,7 +25,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ViewModelKey
 class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     val presentation: StateFlow<HolderConsentUiState?> = orchestrator
