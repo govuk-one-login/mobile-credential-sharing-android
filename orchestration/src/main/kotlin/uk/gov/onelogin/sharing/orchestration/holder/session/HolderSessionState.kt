@@ -51,6 +51,12 @@ sealed class HolderSessionState :
 
     /**
      * The holder device is now showing encoded engagement data.
+     *
+     * @param qrData The encoded Device Engagement QR payload to display. Always present while this
+     * state is active; the session is refreshed in place (new keys, new BLE UUID, new payload) at
+     * the 300s deadline, which emits a fresh [PresentingEngagement] via a new session. Hiding the
+     * QR shortly before refresh is a cosmetic UI concern owned by the presentation ViewModel and is
+     * not represented in the session state.
      */
     data class PresentingEngagement(val qrData: String) : HolderSessionState()
 

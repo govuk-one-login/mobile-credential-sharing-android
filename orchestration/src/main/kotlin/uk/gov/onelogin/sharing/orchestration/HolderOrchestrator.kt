@@ -8,11 +8,13 @@ import dev.zacsweers.metro.binding
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,8 +28,10 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.engagement.EngagementTimingPolicy
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
+import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimerImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
@@ -94,7 +98,9 @@ class HolderOrchestrator(
     private val sessionTimer: SessionTimer,
     private val trustedReaderCertificates: List<X509Certificate>,
     private val authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory,
-    private val readerAuthentication: ReaderAuthentication
+    private val readerAuthentication: ReaderAuthentication,
+    private val engagementTimer: SessionTimer = SessionTimerImpl(appCoroutineScope, logger),
+    private val engagementTimingPolicy: EngagementTimingPolicy = EngagementTimingPolicy()
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val consentInFlight = AtomicBoolean(false)
@@ -408,6 +414,7 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
+        engagementTimer.stop()
         signingJob?.cancel()
         consentInFlight.set(false)
         sessionFlow.update {
@@ -417,6 +424,35 @@ class HolderOrchestrator(
                     createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
                 )
             }
+        }
+    }
+
+    private suspend fun refreshEngagementSession() {
+        val oldUuid = currentContext.sessionUuid
+        appCoroutineScope.launch {
+            peripheralBluetoothTransport.stop(
+                serviceUuid = oldUuid,
+                sendEndCommand = false
+            )
+        }
+
+        val newSession = sessionFactory.create()
+
+        newSession.transitionTo(HolderSessionState.ReadyToPresent)
+        sessionFlow.value = newSession
+
+        delay(REFRESH_BLANK_INTERVAL)
+
+        val newUuid = newSession.sessionContext.sessionUuid
+        appCoroutineScope.launch {
+            peripheralBluetoothTransport.start(
+                serviceUuid = newUuid
+            )
+        }
+
+        val newQrCode = newSession.sessionContext.qrCode
+        if (newQrCode.isNotEmpty()) {
+            safeTransitionTo(HolderSessionState.PresentingEngagement(newQrCode))
         }
     }
 
@@ -929,6 +965,13 @@ class HolderOrchestrator(
 
         try {
             sessionFlow.value.transitionTo(state)
+            if (state is HolderSessionState.PresentingEngagement) {
+                engagementTimer.start(engagementTimingPolicy.deadline) {
+                    refreshEngagementSession()
+                }
+            } else {
+                engagementTimer.stop()
+            }
             if (state.isComplete()) {
                 sessionTimer.stop()
             }
@@ -1089,6 +1132,7 @@ class HolderOrchestrator(
 
     private companion object {
         val INACTIVITY_TIMEOUT = 300.seconds
+        val REFRESH_BLANK_INTERVAL = 1000.milliseconds
         const val UNKNOWN_ERROR = "Unknown error"
         const val PORTRAIT_POLICY_VIOLATION =
             "Policy violation: DeviceRequest does not request portrait attribute"
