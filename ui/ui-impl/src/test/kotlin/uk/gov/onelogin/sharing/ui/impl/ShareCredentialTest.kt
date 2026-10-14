@@ -69,7 +69,8 @@ class ShareCredentialTest {
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
             "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
+            "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -116,7 +117,8 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button cancels the journey for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Presenting QR code" to HolderSessionState.PresentingEngagement("")
+            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+            "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
         val orchestrator = FakeOrchestrator(
