@@ -67,7 +67,7 @@ class MainActivityTest {
         }
         composeTestRule.waitForIdle()
 
-        assertTrue {
+        composeTestRule.waitUntil {
             expectedScreenEvent in analyticsLogger
         }
     }
