@@ -38,12 +38,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.CLIENT_2_SERVER_UUID
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
+import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
+import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
@@ -107,7 +108,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.BLUETOOTH_PERMISSION_MISSING
+                    GattClientError.BLUETOOTH_PERMISSION_MISSING
                 ),
                 awaitItem()
             )
@@ -137,7 +138,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.BLUETOOTH_GATT_NOT_AVAILABLE
+                    GattClientError.BLUETOOTH_GATT_NOT_AVAILABLE
                 ),
                 awaitItem()
             )
@@ -170,7 +171,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.BLUETOOTH_PERMISSION_MISSING
+                    GattClientError.BLUETOOTH_PERMISSION_MISSING
                 ),
                 awaitItem()
             )
@@ -188,7 +189,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.Error(ClientError.SERVICE_DISCOVERED_ERROR),
+                GattClientEvent.Error(GattClientError.SERVICE_DISCOVERED_ERROR),
                 awaitItem()
             )
         }
@@ -205,7 +206,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.Error(ClientError.SERVICE_NOT_FOUND),
+                GattClientEvent.Error(GattClientError.SERVICE_NOT_FOUND),
                 awaitItem()
             )
         }
@@ -243,7 +244,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.INVALID_SERVICE
+                    GattClientError.INVALID_SERVICE
                 ),
                 awaitItem()
             )
@@ -348,7 +349,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.INVALID_SERVICE
+                    GattClientError.INVALID_SERVICE
                 ),
                 awaitItem()
             )
@@ -373,7 +374,7 @@ internal class AndroidGattClientManagerTest {
 
                 assertEquals(
                     GattClientEvent.Error(
-                        ClientError.INVALID_SERVICE
+                        GattClientError.INVALID_SERVICE
                     ),
                     awaitItem()
                 )
@@ -473,7 +474,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.INVALID_SERVICE
+                    GattClientError.INVALID_SERVICE
                 ),
                 awaitItem()
             )
@@ -498,7 +499,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.FAILED_TO_SUBSCRIBE
+                    GattClientError.FAILED_TO_SUBSCRIBE
                 ),
                 awaitItem()
             )
@@ -518,7 +519,7 @@ internal class AndroidGattClientManagerTest {
 
             assertEquals(
                 GattClientEvent.Error(
-                    ClientError.FAILED_TO_START
+                    GattClientError.FAILED_TO_START
                 ),
                 awaitItem()
             )
@@ -618,7 +619,7 @@ internal class AndroidGattClientManagerTest {
             callbackSlot.captured.onServiceChanged(bluetoothGatt)
 
             assertEquals(
-                GattClientEvent.Error(ClientError.SERVICE_CHANGED),
+                GattClientEvent.Error(GattClientError.SERVICE_CHANGED),
                 awaitItem()
             )
 
@@ -766,7 +767,7 @@ internal class AndroidGattClientManagerTest {
                     instanceOf(GattClientEvent.Error::class.java),
                     hasProperty(
                         "error",
-                        equalTo(ClientError.INVALID_MESSAGE_PREFIX)
+                        equalTo(GattClientError.INVALID_MESSAGE_PREFIX)
                     )
                 )
             )
@@ -804,7 +805,7 @@ internal class AndroidGattClientManagerTest {
             assertEquals(SessionEndStates.WRITE_TO_SERVER_FAILED, result)
 
             assertEquals(
-                GattClientEvent.Error(ClientError.INVALID_SERVICE),
+                GattClientEvent.Error(GattClientError.INVALID_SERVICE),
                 awaitItem()
             )
         }
@@ -1009,7 +1010,7 @@ internal class AndroidGattClientManagerTest {
             )
 
             assertEquals(
-                GattClientEvent.Error(ClientError.FAILED_TO_SUBSCRIBE),
+                GattClientEvent.Error(GattClientError.FAILED_TO_SUBSCRIBE),
                 awaitItem()
             )
         }
@@ -1100,8 +1101,8 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
         launch {
             repeat(1) {
@@ -1133,8 +1134,9 @@ internal class AndroidGattClientManagerTest {
             val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
             val service = mockk<BluetoothGattService>(relaxed = true)
             every { bluetoothGatt.getService(uuid) } returns service
-            every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-            every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+            every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns
+                characteristic
+            every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
             launch {
                 repeat(2) {
@@ -1161,7 +1163,7 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
 
         val result = mgr.sendMessage(uuid, data)
 
@@ -1178,8 +1180,8 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
         val result = mgr.sendMessage(uuid, data)
 
@@ -1193,8 +1195,8 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
         launch {
             repeat(1) {
@@ -1224,8 +1226,8 @@ internal class AndroidGattClientManagerTest {
         val characteristic = mockk<BluetoothGattCharacteristic>(relaxed = true)
         val service = mockk<BluetoothGattService>(relaxed = true)
         every { bluetoothGatt.getService(uuid) } returns service
-        every { service.getCharacteristic(CLIENT_2_SERVER_UUID) } returns characteristic
-        every { characteristic.uuid } returns CLIENT_2_SERVER_UUID
+        every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
+        every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
         launch {
             repeat(2) {

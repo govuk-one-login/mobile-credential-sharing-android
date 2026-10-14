@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
 
 enum class PeripheralBluetoothTransportError(val message: String) {
     BLUETOOTH_TURNED_OFF("Bluetooth is currently turned off"),

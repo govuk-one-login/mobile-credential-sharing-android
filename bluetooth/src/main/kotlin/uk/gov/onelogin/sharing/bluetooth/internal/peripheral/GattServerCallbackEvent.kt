@@ -1,13 +1,13 @@
-package uk.gov.onelogin.sharing.bluetooth.api.peripheral
+package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothProfile
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 
-sealed interface GattServerCallbackEvent {
+internal sealed interface GattServerCallbackEvent {
     data class ConnectionStateChange(
         val status: Int,
         val newState: Int,
