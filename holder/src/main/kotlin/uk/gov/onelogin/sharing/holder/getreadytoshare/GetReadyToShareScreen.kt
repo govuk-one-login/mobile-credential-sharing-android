@@ -2,10 +2,15 @@ package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,9 +20,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.launch
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
+import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
@@ -35,6 +42,7 @@ internal fun GetReadyToShareScreen(
         viewModel.recheckPrerequisites()
     }
 ) {
+    val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val hasPreviouslyRecheckedPrerequisites: Boolean by viewModel
         .hasRecheckedPrerequisites
@@ -56,9 +64,16 @@ internal fun GetReadyToShareScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    LaunchedEffect(Unit) {
+        scope.launch {
+            viewModel.sendScreenEvent()
+        }
+    }
+
     GetReadyToShareContent(
         modifier = modifier,
-        onButtonClick = { viewModel.resolve(launcher) }
+        onButtonClick = { viewModel.resolve(launcher) },
+        onFindOutMoreButtonClick = viewModel::onFindOutMore
     )
 }
 
@@ -92,10 +107,25 @@ internal fun GetReadyToShareContent(
     )
 }
 
-@Preview(showBackground = true)
+/**
+ * DCMAW-23663:
+ * - Matching the preview with what the `ShareCredential` modifier would potentially pass
+ *   causes strange indentation on either side of the device.
+ *
+ *   Do we need to update the UI library to be mindful of whether
+ *   [androidx.compose.foundation.layout.WindowInsets] have been consumed?
+ *   The underlying [uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen] composable
+ *   internally updates the `Modifier` instead of passing it through, increasing the padding.
+ */
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 internal fun GetReadyToSharePreview() {
     GdsTheme {
-        GetReadyToShareContent()
+        GetReadyToShareContent(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxSize()
+                .safeContentPadding()
+        )
     }
 }

@@ -12,6 +12,10 @@ import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.spacingDouble
 
 data object HolderCancellationDialogNavigationExt {
+    /**
+     * DCMAW-23663:
+     * - Update usages to perform the expected animation
+     */
     fun NavController.navigateToHolderUserCancellationDialog(
         options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(HolderCancellationDialogRoute, options)

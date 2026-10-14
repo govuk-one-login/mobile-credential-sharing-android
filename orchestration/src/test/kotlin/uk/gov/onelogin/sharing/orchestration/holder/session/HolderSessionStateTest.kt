@@ -29,6 +29,7 @@ class HolderSessionStateTest {
             AwaitingUserConsent(mockk(relaxed = true)),
             AwaitingVerifierResolution,
             ProcessingEstablishment,
+            Preflight(listOf()),
             PresentingEngagement("unit test"),
             ProcessingResponse
         )
@@ -44,7 +45,6 @@ class HolderSessionStateTest {
             Cancelled,
             Failed(mockk(relaxed = true)),
             NotStarted,
-            Preflight(listOf()),
             ReadyToPresent,
             Success(),
             HolderSessionState.SendingTermination

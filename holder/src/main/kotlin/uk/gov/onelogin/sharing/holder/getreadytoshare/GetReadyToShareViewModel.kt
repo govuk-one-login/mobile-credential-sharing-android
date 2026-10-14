@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import uk.gov.logging.api.analytics.logging.AnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -34,6 +36,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavi
 @ViewModelKey
 class GetReadyToShareViewModel(
     navigator: RetryPrerequisitesNavigator<HolderSessionState>,
+    private val analyticsLogger: AnalyticsLogger,
     private val orchestrator: Orchestrator.Holder,
     private val resolver: ResolvePrerequisiteAction<HolderSessionState>,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
@@ -72,5 +75,21 @@ class GetReadyToShareViewModel(
         _hasRecheckedPrerequisites.update { true }
         (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
             ?.onComplete()
+    }
+
+    /**
+     * DCMAW-23663:
+     * - Send screen view analytics event with [walletSharingRequiredParameters]
+     */
+    fun sendScreenEvent() {
+
+    }
+
+    /**
+     * DCMAW-23663:
+     * - Send button analytics events with [walletSharingRequiredParameters]
+     */
+    fun onFindOutMore(): Job = viewModelScope.launch(dispatcher) {
+
     }
 }
