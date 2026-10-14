@@ -490,6 +490,29 @@ class VerifierOrchestratorTest {
     }
 
     @Test
+    fun `bluetooth error while verifying is ignored and does not transition to Failed`() = runTest {
+        initialStates[0] = VerifierSessionState.Verifying
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Error(CentralBluetoothTransportError.SCAN_FAILED)
+        )
+        advanceUntilIdle()
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            equalTo(VerifierSessionState.Verifying)
+        )
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            not(isFailed())
+        )
+        assertEquals(0, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
     fun `cancel stops bluetooth transport`() = runTest {
         initialStates[0] = VerifierSessionState.Connecting
         backgroundScope.launch {

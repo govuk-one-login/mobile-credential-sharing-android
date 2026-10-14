@@ -657,6 +657,25 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
+    fun `sendMessage returns false when the service characteristic cannot be found`() = runTest {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+        every { gattServer.getService(uuid) } returns null
+
+        manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        val result = manager.sendMessage(byteArrayOf(0x01, 0x02))
+
+        assert(!result)
+        assert(fakeGattWriter.sentChunks.isEmpty())
+    }
+
+    @Test
     fun `sendMessage returns false when notify fails`() = runTest {
         val fakeGattWriter = FakeGattWriter(success = false)
         val manager = AndroidGattServerManager(
