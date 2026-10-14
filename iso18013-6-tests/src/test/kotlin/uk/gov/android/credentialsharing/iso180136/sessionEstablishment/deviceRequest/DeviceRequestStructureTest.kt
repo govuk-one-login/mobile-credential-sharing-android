@@ -104,7 +104,7 @@ class DeviceRequestStructureTest {
     ) {
         assertThat(
             deviceRequestHexString.chunked(2),
-            not(Matchers.contains(assertion))
+            not(Matchers.hasItem(assertion))
         )
     }
 

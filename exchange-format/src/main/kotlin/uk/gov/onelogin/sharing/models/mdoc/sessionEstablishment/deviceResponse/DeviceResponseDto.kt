@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
-import java.io.OutputStream
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
@@ -247,7 +246,7 @@ class DeviceResponseDto {
             if (value.documents != null) {
                 cborGen.writeFieldName(KEY_DOCUMENTS)
                 cborGen.writeStartArray(value.documents, value.documents.size)
-                value.documents.forEach { doc -> serializeDocument(doc, cborGen) }
+                value.documents.forEach { doc -> serializeDocument(doc, cborGen, provider) }
                 cborGen.writeEndArray()
             }
             if (value.documentErrors != null) {
@@ -264,15 +263,19 @@ class DeviceResponseDto {
             cborGen.writeEndObject()
         }
 
-        private fun serializeDocument(doc: DocumentDTO, gen: CBORGenerator) {
+        private fun serializeDocument(
+            doc: DocumentDTO,
+            gen: CBORGenerator,
+            provider: SerializerProvider
+        ) {
             val fieldCount = DOCUMENT_REQUIRED_FIELDS + (if (doc.errors != null) 1 else 0)
             gen.writeStartObject(fieldCount)
             gen.writeFieldName(KEY_DOC_TYPE)
             gen.writeString(doc.docType)
             gen.writeFieldName(KEY_ISSUER_SIGNED)
-            serializeIssuerSigned(doc.issuerSigned, gen)
+            serializeIssuerSigned(doc.issuerSigned, gen, provider)
             gen.writeFieldName(KEY_DEVICE_SIGNED)
-            serializeDeviceSigned(doc.deviceSigned, gen)
+            serializeDeviceSigned(doc.deviceSigned, gen, provider)
             if (doc.errors != null) {
                 gen.writeFieldName("errors")
                 gen.writeStartObject(doc.errors.size)
@@ -285,8 +288,14 @@ class DeviceResponseDto {
             gen.writeEndObject()
         }
 
-        private fun serializeIssuerSigned(issuerSigned: IssuerSignedDTO, gen: CBORGenerator) {
-            gen.writeStartObject()
+        private fun serializeIssuerSigned(
+            issuerSigned: IssuerSignedDTO,
+            gen: CBORGenerator,
+            provider: SerializerProvider
+        ) {
+            val fieldCount = (if (issuerSigned.nameSpaces != null) 1 else 0) + 1
+            gen.writeStartObject(fieldCount)
+
             if (issuerSigned.nameSpaces != null) {
                 gen.writeFieldName(KEY_NAME_SPACES)
                 gen.writeStartObject(issuerSigned.nameSpaces.size)
@@ -302,23 +311,26 @@ class DeviceResponseDto {
                 gen.writeEndObject()
             }
             gen.writeFieldName(KEY_ISSUER_AUTH)
-            gen.flush()
-            (gen.outputTarget as OutputStream).write(issuerSigned.issuerAuth.encoded)
+            provider.defaultSerializeValue(issuerSigned.issuerAuth, gen)
             gen.writeEndObject()
         }
 
-        private fun serializeDeviceSigned(deviceSigned: DeviceSignedDTO, gen: CBORGenerator) {
-            gen.writeStartObject()
+        private fun serializeDeviceSigned(
+            deviceSigned: DeviceSignedDTO,
+            gen: CBORGenerator,
+            provider: SerializerProvider
+        ) {
+            gen.writeStartObject(2)
+
             gen.writeFieldName(KEY_NAME_SPACES)
             gen.writeTag(EMBEDDED_CBOR_TAG)
             gen.writeBinary(deviceSigned.nameSpaces.encoded)
+
             gen.writeFieldName(KEY_DEVICE_AUTH)
-            gen.writeStartObject()
+            gen.writeStartObject(1)
+
             gen.writeFieldName(KEY_DEVICE_SIGNATURE)
-            gen.flush()
-            (gen.outputTarget as OutputStream).write(
-                deviceSigned.deviceAuth.deviceSignature.encoded
-            )
+            provider.defaultSerializeValue(deviceSigned.deviceAuth.deviceSignature, gen)
             gen.writeEndObject()
             gen.writeEndObject()
         }
