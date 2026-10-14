@@ -31,7 +31,6 @@ import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
-import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -210,7 +209,11 @@ class HolderOrchestrator(
         }
     }
 
-    override fun confirmConsent() {
+    override suspend fun confirmConsent() {
+        confirmConsentBehaviour()
+    }
+
+    private fun confirmConsentBehaviour() {
         // Guard against re-entry (e.g. double taps). Because signing now suspends on the
         // consumer's local-auth prompt, the session state remains AwaitingUserConsent until
         // execute() completes, so the state check alone cannot prevent concurrent submissions.
@@ -355,7 +358,11 @@ class HolderOrchestrator(
         }
     }
 
-    override fun denyConsent() {
+    override suspend fun denyConsent() {
+        denyConsentBehaviour()
+    }
+
+    private fun denyConsentBehaviour() {
         val state = holderSessionState.value
         val context = currentContext
         try {
