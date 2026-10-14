@@ -422,7 +422,6 @@ class HolderOrchestrator(
     private fun stopAdvertising(sendEndCommand: Boolean) {
         appCoroutineScope.launch {
             peripheralBluetoothTransport.stop(
-                serviceUuid = currentContext.sessionUuid,
                 sendEndCommand = sendEndCommand
             )
         }
@@ -1064,7 +1063,7 @@ class HolderOrchestrator(
         }
 
         if (sent && sessionDataToSend != null) {
-            holderSessionTerminator.terminate(context.sessionUuid)
+            holderSessionTerminator.terminate()
         } else {
             stopAdvertising(sendEndCommand = sendEndCommand)
         }

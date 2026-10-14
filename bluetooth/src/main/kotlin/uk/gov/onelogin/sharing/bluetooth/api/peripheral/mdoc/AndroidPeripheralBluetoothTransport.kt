@@ -111,11 +111,11 @@ class AndroidPeripheralBluetoothTransport(
         }
     }
 
-    override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean): Unit =
+    override suspend fun stop(sendEndCommand: Boolean): Unit =
         withContext(ioDispatcher + "$logTag.Stop".asCoroutineName()) {
             cancelCurrentJobs()
             if (sendEndCommand) {
-                notifySessionEnd(serviceUuid)
+                notifySessionEnd()
             }
             bluetoothStateMonitor.stop()
             stopAdvertising()
@@ -123,7 +123,7 @@ class AndroidPeripheralBluetoothTransport(
             _state.value = PeripheralBluetoothState.Idle
         }
 
-    override suspend fun notifySessionEnd(serviceUuid: UUID): Unit = withContext(
+    override suspend fun notifySessionEnd(): Unit = withContext(
         ioDispatcher + "$logTag.NotifySessionEnd".asCoroutineName()
     ) {
         val result = gattServerManager.notifySessionEnd()
