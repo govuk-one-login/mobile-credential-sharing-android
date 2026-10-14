@@ -19,7 +19,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class HolderConsentViewModelTest {
 
     @get:Rule

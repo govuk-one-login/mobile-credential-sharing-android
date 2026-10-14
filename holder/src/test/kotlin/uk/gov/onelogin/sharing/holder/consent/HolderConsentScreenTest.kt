@@ -44,13 +44,10 @@ class HolderConsentScreenTest {
 
     private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
 
-    private val isBusy = MutableStateFlow(false)
-
     private val viewModel by lazy {
         HolderConsentViewModel(
             orchestrator = orchestrator,
             dispatcher = dispatcherRule.testDispatcher,
-            isBusy = isBusy
         )
     }
 
@@ -341,11 +338,12 @@ class HolderConsentScreenTest {
     ) = runTest(
         dispatcherRule.testDispatcher
     ) {
-        isBusy.update { input.isBusy }
         holderState.update {
             HolderSessionState.AwaitingUserConsent(
                 request = DeviceRequestStub.deviceRequestStub,
-                presentation = presentationWithPrivacyPolicy
+                presentation = presentationWithPrivacyPolicy.copy(
+                    isBusy = input.isBusy
+                )
             )
         }
 

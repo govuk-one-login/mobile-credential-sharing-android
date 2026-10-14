@@ -26,7 +26,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
-    private val isBusy: MutableStateFlow<Boolean> = MutableStateFlow(false)
 ) : ViewModel() {
 
     val presentation: StateFlow<HolderConsentUiState?> = orchestrator
@@ -35,13 +34,13 @@ class HolderConsentViewModel(
             state as? HolderSessionState.AwaitingUserConsent
         }.map { consentState ->
             consentState?.presentation
-        }.combine(isBusy) { presentation, isBusy ->
+        }.map { presentation ->
             presentation?.let {
                 HolderConsentUiState(
                     privacyPolicyUrl = it.privacyPolicyUrl,
                     documents = it.documents,
                     normalisedOrganizationName = it.normalisedOrganizationName,
-                    isBusy = isBusy
+                    isBusy = it.isBusy
                 )
             }
         }.stateIn(
@@ -63,16 +62,10 @@ class HolderConsentViewModel(
     }
 
     fun onAccept() = viewModelScope.launch(dispatcher) {
-        isBusy.value = true
-        orchestrator.confirmConsent().also {
-            isBusy.value = false
-        }
+        orchestrator.confirmConsent()
     }
 
     fun onDeny() = viewModelScope.launch(dispatcher) {
-        isBusy.value = true
-        orchestrator.denyConsent().also {
-            isBusy.value = false
-        }
+        orchestrator.denyConsent()
     }
 }
