@@ -52,12 +52,13 @@ sealed class HolderSessionState :
     /**
      * The holder device is now showing encoded engagement data.
      *
-     * @param qrData The encoded Device Engagement QR payload to display. A `null` value represents
-     * the grace window (299s-300s): the QR is hidden and the UI shows a loading indicator while the
-     * current session continues BLE advertising, so a Verifier scanning moments earlier can still
-     * connect before the session is refreshed at the 300s deadline.
+     * @param qrData The encoded Device Engagement QR payload to display. Always present while this
+     * state is active; the session is refreshed in place (new keys, new BLE UUID, new payload) at
+     * the 300s deadline, which emits a fresh [PresentingEngagement] via a new session. Hiding the
+     * QR shortly before refresh is a cosmetic UI concern owned by the presentation ViewModel and is
+     * not represented in the session state.
      */
-    data class PresentingEngagement(val qrData: String?) : HolderSessionState()
+    data class PresentingEngagement(val qrData: String) : HolderSessionState()
 
     /**
      * State for when the Android-powered device is connected with another device and the

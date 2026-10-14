@@ -28,6 +28,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.engagement.EngagementTimingPolicy
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimerImpl
@@ -98,7 +99,8 @@ class HolderOrchestrator(
     private val trustedReaderCertificates: List<X509Certificate>,
     private val authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory,
     private val readerAuthentication: ReaderAuthentication,
-    private val engagementTimer: SessionTimer = SessionTimerImpl(appCoroutineScope, logger)
+    private val engagementTimer: SessionTimer = SessionTimerImpl(appCoroutineScope, logger),
+    private val engagementTimingPolicy: EngagementTimingPolicy = EngagementTimingPolicy()
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val consentInFlight = AtomicBoolean(false)
@@ -422,20 +424,6 @@ class HolderOrchestrator(
                     createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
                 )
             }
-        }
-    }
-
-    /**
-     * Phase 2 of engagement expiry: the 299s display timer has fired. Hide the QR (switch to the
-     * grace/spinner [HolderSessionState.PresentingEngagement] with `qrData = null`) while leaving
-     * the current session's BLE advertising active, so a Verifier that scanned moments earlier can
-     * still connect during the 1s grace window (AC2/AC3). Start a 1s grace timer; if it fires with
-     * no connection, refresh the session at the 300s deadline (AC4).
-     */
-    private fun enterGraceWindow() {
-        safeTransitionTo(HolderSessionState.PresentingEngagement(qrData = null))
-        engagementTimer.start(GRACE_TIMEOUT) {
-            refreshEngagementSession()
         }
     }
 
@@ -907,7 +895,7 @@ class HolderOrchestrator(
                     logger.debug(
                         logTag,
                         "Reader Authenticated: Org = ${authReq.readerOrganizationName}," +
-                            " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                                " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
                     )
                     if (!docRequestContainsPortrait(authReq.docRequest)) {
                         logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
@@ -977,21 +965,12 @@ class HolderOrchestrator(
 
         try {
             sessionFlow.value.transitionTo(state)
-            when {
-                // Phase 1: an active QR is on screen. Run the 299s display timer; when it fires,
-                // hide the QR (grace window) while keeping the current session advertising.
-                state is HolderSessionState.PresentingEngagement && state.qrData != null -> {
-                    engagementTimer.start(ENGAGEMENT_TIMEOUT) {
-                        enterGraceWindow()
-                    }
+            if (state is HolderSessionState.PresentingEngagement) {
+                engagementTimer.start(engagementTimingPolicy.deadline) {
+                    refreshEngagementSession()
                 }
-
-                // Phase 2 (grace window): QR hidden, spinner shown. The grace timer is managed by
-                // enterGraceWindow(); do not touch the engagement timer here or it would be
-                // cancelled/restarted and break the 1s refresh countdown.
-                state is HolderSessionState.PresentingEngagement && state.qrData == null -> Unit
-
-                else -> engagementTimer.stop()
+            } else {
+                engagementTimer.stop()
             }
             if (state.isComplete()) {
                 sessionTimer.stop()
@@ -1049,7 +1028,7 @@ class HolderOrchestrator(
     private fun docRequestContainsPortrait(docRequest: DocRequest): Boolean =
         docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
             namespace == DocumentType.Mdl.NAMESPACE &&
-                elements.containsKey(MdlAttribute.Portrait.value)
+                    elements.containsKey(MdlAttribute.Portrait.value)
         }
 
     private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {
@@ -1153,13 +1132,6 @@ class HolderOrchestrator(
 
     private companion object {
         val INACTIVITY_TIMEOUT = 300.seconds
-
-        /** Phase 1: the QR is displayed for the first 299s (T - 1) of the 300s session deadline. */
-        val ENGAGEMENT_TIMEOUT = 299.seconds
-
-        /** Phase 2: the 1s grace window (299s -> 300s) where the QR is hidden but advertising
-         * continues before the session is refreshed at the 300s deadline. */
-        val GRACE_TIMEOUT = 1.seconds
         val REFRESH_BLANK_INTERVAL = 1000.milliseconds
         const val UNKNOWN_ERROR = "Unknown error"
         const val PORTRAIT_POLICY_VIOLATION =

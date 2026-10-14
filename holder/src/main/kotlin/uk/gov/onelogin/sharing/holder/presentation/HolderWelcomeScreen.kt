@@ -50,19 +50,22 @@ private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = M
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HolderWelcomeText()
-        contentState.qrData?.let {
+        val qrData = contentState.qrData
+        if (qrData != null && contentState.showQr) {
             QrCodeImage(
-                data = it,
+                data = qrData,
                 size = QR_SIZE
             )
-        } ?: CircularProgressIndicator()
+        } else {
+            CircularProgressIndicator()
+        }
     }
 }
 
 @Composable
 @Preview(showBackground = true)
 internal fun HolderWelcomeScreenPreview() {
-    val contentState = HolderWelcomeUiState(qrData = "QR Data")
+    val contentState = HolderWelcomeUiState(qrData = "QR Data", showQr = true)
 
     QrContent(contentState, Modifier)
 }
