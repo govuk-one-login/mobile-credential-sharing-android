@@ -31,6 +31,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.util.MainDispatcherRule
@@ -168,6 +169,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
                 logger,
                 fakeWriteQueue,
                 testScope,
+                { max -> MessageReassembler(max, logger) },
                 maxReceiveBufferSize = 100
             )
 
@@ -286,6 +288,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
             logger,
             fakeWriteQueue,
             testScope,
+            MessageReassembler.Factory { max -> MessageReassembler(max, logger) },
             maxReceiveBufferSize = maxReceiveBufferSize
         )
     }

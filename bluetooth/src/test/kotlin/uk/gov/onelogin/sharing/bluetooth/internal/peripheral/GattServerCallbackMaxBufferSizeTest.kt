@@ -10,6 +10,7 @@ import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestMessage
 
@@ -27,13 +28,17 @@ class GattServerCallbackMaxBufferSizeTest {
         every { device.address } returns DEVICE_ADDRESS
     }
 
+    private fun callback(
+        maxReceiveBufferSize: Int = GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE
+    ) = GattServerCallback(
+        gatGattEventEmitter = fakeEmitter,
+        logger = SystemLogger(),
+        reassembler = MessageReassembler(maxReceiveBufferSize, SystemLogger())
+    )
+
     @Test
     fun `multi-part message within 64KB limit emits MessageReceived`() {
-        val callback = GattServerCallback(
-            gatGattEventEmitter = fakeEmitter,
-            logger = SystemLogger(),
-            maxReceiveBufferSize = GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE
-        )
+        val callback = callback()
 
         val chunk1 = byteArrayOf(NON_LAST_PART) + ByteArray(100) { 0x11 }
         sendChunk(callback, chunk1)
@@ -49,11 +54,7 @@ class GattServerCallbackMaxBufferSizeTest {
 
     @Test
     fun `single-part message within limit emits MessageReceived`() {
-        val callback = GattServerCallback(
-            gatGattEventEmitter = fakeEmitter,
-            logger = SystemLogger(),
-            maxReceiveBufferSize = GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE
-        )
+        val callback = callback()
 
         val message = byteArrayOf(LAST_PART) + ByteArray(200) { 0x33 }
         sendChunk(callback, message)
@@ -65,11 +66,7 @@ class GattServerCallbackMaxBufferSizeTest {
 
     @Test
     fun `chunk exceeding 64KB limit emits ExceededMaxBufferSize`() {
-        val callback = GattServerCallback(
-            gatGattEventEmitter = fakeEmitter,
-            logger = SystemLogger(),
-            maxReceiveBufferSize = GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE
-        )
+        val callback = callback()
 
         val almostFull =
             byteArrayOf(NON_LAST_PART) + ByteArray(64 * 1024) { 0x11 }
@@ -88,11 +85,7 @@ class GattServerCallbackMaxBufferSizeTest {
 
     @Test
     fun `single LAST_PART chunk exceeding limit emits ExceededMaxBufferSize`() {
-        val callback = GattServerCallback(
-            gatGattEventEmitter = fakeEmitter,
-            logger = SystemLogger(),
-            maxReceiveBufferSize = 10
-        )
+        val callback = callback(maxReceiveBufferSize = 10)
 
         val oversized = byteArrayOf(LAST_PART) + ByteArray(11) { 0x11 }
         sendChunk(callback, oversized)
@@ -106,11 +99,7 @@ class GattServerCallbackMaxBufferSizeTest {
 
     @Test
     fun `buffer is removed after exceeding limit`() {
-        val callback = GattServerCallback(
-            gatGattEventEmitter = fakeEmitter,
-            logger = SystemLogger(),
-            maxReceiveBufferSize = 100
-        )
+        val callback = callback(maxReceiveBufferSize = 100)
 
         val chunk = byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 }
         sendChunk(callback, chunk)
@@ -120,7 +109,6 @@ class GattServerCallbackMaxBufferSizeTest {
             fakeEmitter.events.single()
         )
 
-        // Clear emitter and send a LAST_PART
         fakeEmitter.events.clear()
         val lastPart = byteArrayOf(LAST_PART, 0x22)
         sendChunk(callback, lastPart)
@@ -134,12 +122,7 @@ class GattServerCallbackMaxBufferSizeTest {
 
     @Test
     fun `message exactly at custom limit is accepted`() {
-        val customLimit = 100
-        val callback = GattServerCallback(
-            gatGattEventEmitter = fakeEmitter,
-            logger = SystemLogger(),
-            maxReceiveBufferSize = customLimit
-        )
+        val callback = callback(maxReceiveBufferSize = 100)
 
         val firstPart =
             byteArrayOf(NON_LAST_PART) + ByteArray(50) { 0x11 }
