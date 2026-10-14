@@ -43,6 +43,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
@@ -86,7 +87,8 @@ internal class AndroidGattClientManagerTest {
         gattWriter,
         logger,
         writeQueue,
-        testScope
+        testScope,
+        MessageReassembler.Factory { max -> MessageReassembler(max, logger) }
     )
 
     @Before

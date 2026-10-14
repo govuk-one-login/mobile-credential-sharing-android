@@ -29,6 +29,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DEL
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
@@ -52,7 +53,8 @@ class AndroidGattServerManager(
     private val permissionsChecker: PermissionChecker,
     private val logger: Logger,
     private val gattWriter: GattWriter,
-    @param:ApplicationScope private val coroutineScope: CoroutineScope
+    @param:ApplicationScope private val coroutineScope: CoroutineScope,
+    private val reassemblerFactory: MessageReassembler.Factory
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
@@ -101,7 +103,10 @@ class AndroidGattServerManager(
             context,
             GattServerCallback(
                 gatGattEventEmitter = eventEmitter,
-                logger = logger
+                logger = logger,
+                reassembler = reassemblerFactory.create(
+                    GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE
+                )
             )
         )
 

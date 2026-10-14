@@ -13,6 +13,7 @@ import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestEmptyValue
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestStart
@@ -22,7 +23,11 @@ class BluetoothGattServerCallbackTest {
     private val fakeEmitter = FakeGattServerEventEmitter()
     private val callback = GattServerCallback(
         gatGattEventEmitter = fakeEmitter,
-        logger = SystemLogger()
+        logger = SystemLogger(),
+        reassembler = MessageReassembler(
+            GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE,
+            SystemLogger()
+        )
     )
     private val device = mockk<BluetoothDevice>()
     private val service = mockk<BluetoothGattService>()
