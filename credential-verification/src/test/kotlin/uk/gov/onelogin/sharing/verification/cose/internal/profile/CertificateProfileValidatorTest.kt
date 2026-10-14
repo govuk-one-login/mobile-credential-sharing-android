@@ -147,7 +147,7 @@ class CertificateProfileValidatorTest {
     }
 
     @Test
-    fun `IssuerAuth leaf with duration exceeding 457 days by 1 hour fails with INVALID_VALIDITY_PERIOD`() {
+    fun `leaf with duration exceeding 457 days by 1 hour fails with INVALID_VALIDITY_PERIOD`() {
         val now = System.currentTimeMillis()
         val oneHourMs = 3_600_000L
         val longValidityLeaf = TestCertificateGenerator(

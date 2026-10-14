@@ -192,7 +192,9 @@ class IacaContentCheckerCheckTest {
         val leaf = validLeaf()
             .withValidity(
                 notBefore = Date(now),
-                notAfter = Date(now + IacaContentChecker.MAX_LEAF_VALIDITY_DAYS * 86400000L + oneHourMs)
+                notAfter = Date(
+                    now + IacaContentChecker.MAX_LEAF_VALIDITY_DAYS * 86400000L + oneHourMs
+                )
             )
             .build()
         assertThrows(CertPathValidatorException::class.java) {

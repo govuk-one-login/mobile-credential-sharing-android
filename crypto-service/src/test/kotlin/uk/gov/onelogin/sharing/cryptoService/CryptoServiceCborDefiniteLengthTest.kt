@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService
 
 import java.security.Signature
 import java.security.cert.Certificate
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -63,7 +64,7 @@ class CryptoServiceCborDefiniteLengthTest {
     }
 
     @Test
-    fun `ECReaderAuthProvider produces COSE_Sign1 with strict definite-length CBOR`() = kotlinx.coroutines.test.runTest {
+    fun `ECReaderAuthProvider produces COSE_Sign1 with strict definite-length CBOR`() = runTest {
         val payload = byteArrayOf(0x01, 0x02, 0x03, 0x04)
         val coseSign1Bytes = readerAuthProvider.sign(payload)
 
@@ -113,7 +114,9 @@ class CryptoServiceCborDefiniteLengthTest {
             val addInfo = initial and 0x1F
 
             assertFalse(
-                "Indefinite-length CBOR header found in $description at offset $offset: 0x${"%02X".format(initial)} (majorType=$majorType, addInfo=$addInfo)",
+                "Indefinite-length CBOR header found in" +
+                    " $description at offset $offset: 0x${"%02X".format(initial)} " +
+                    "(majorType=$majorType, addInfo=$addInfo)",
                 addInfo == 31
             )
 
@@ -130,20 +133,24 @@ class CryptoServiceCborDefiniteLengthTest {
 
             when (majorType) {
                 0, 1, 7 -> {}
+
                 2, 3 -> {
                     offset += length
                 }
+
                 4 -> {
                     repeat(length) {
                         walkItem(description)
                     }
                 }
+
                 5 -> {
                     repeat(length) {
                         walkItem(description)
                         walkItem(description)
                     }
                 }
+
                 6 -> {
                     walkItem(description)
                 }
