@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 import java.security.cert.Certificate
@@ -53,21 +54,21 @@ class CoseSign1ProtectedHeaders(private val logger: Logger) : ProtectedHeaderGen
         generateProtectedHeaderData(leafCertificate).let { headers ->
             headers to ByteArrayOutputStream().also { out ->
                 CBORFactory().createGenerator(out).use { gen ->
-                    gen.writeStartObject(headers.size)
+                    val cborGen = gen as CBORGenerator
+                    cborGen.writeStartObject(headers.size)
 
                     val algorithm = headers[PROTECTED_HEADER_ALGORITHM] as Int
-                    gen.writeFieldId(PROTECTED_HEADER_ALGORITHM)
-                    gen.writeNumber(algorithm)
+                    cborGen.writeFieldId(PROTECTED_HEADER_ALGORITHM)
+                    cborGen.writeNumber(algorithm)
 
                     val x5tArray = headers[PROTECTED_HEADER_X5T] as Array<*>
-                    gen.writeFieldId(PROTECTED_HEADER_X5T)
-                    @Suppress("DEPRECATION")
-                    gen.writeStartArray(x5tArray.size)
-                    gen.writeNumber(x5tArray[0] as Int)
-                    gen.writeBinary(x5tArray[1] as ByteArray)
-                    gen.writeEndArray()
+                    cborGen.writeFieldId(PROTECTED_HEADER_X5T)
+                    cborGen.writeStartArray(null, x5tArray.size)
+                    cborGen.writeNumber(x5tArray[0] as Int)
+                    cborGen.writeBinary(x5tArray[1] as ByteArray)
+                    cborGen.writeEndArray()
 
-                    gen.writeEndObject()
+                    cborGen.writeEndObject()
                 }
             }.toByteArray()
         }

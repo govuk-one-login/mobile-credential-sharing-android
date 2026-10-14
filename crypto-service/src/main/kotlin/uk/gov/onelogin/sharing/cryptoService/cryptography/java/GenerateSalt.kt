@@ -6,10 +6,10 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 
 /**
  * Generate salt bytes via a cryptographic hashing function using SHA-256
- * over ISO/IEC 18013-5 SessionTranscriptBytes (#6.24(bstr .cbor SessionTranscript)).
  *
  * @return A [ByteArray] object representing the fixed length hashed bytes
  */
+
 fun generateSalt(byteArray: ByteArray): ByteArray {
     val saltInput = EmbeddedCbor(byteArray).toCbor()
     val result = MessageDigest.getInstance(HASH_ALGORITHM_SHA256).digest(saltInput)
