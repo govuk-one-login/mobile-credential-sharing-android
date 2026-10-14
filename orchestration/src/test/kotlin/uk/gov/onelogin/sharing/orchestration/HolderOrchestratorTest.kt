@@ -2126,17 +2126,21 @@ class HolderOrchestratorTest {
 
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
-            assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code"),
+                awaitItem()
+            )
 
-            // AC1/AC4: a single 300s deadline drives the in-place refresh. QR-hide at 299s is a
-            // cosmetic UI concern owned by the ViewModel, not the orchestrator.
-            assertEquals(300.seconds as Any?, engagementTimer.lastDuration as Any?)
+            assertEquals(
+                300.seconds as Any?,
+                engagementTimer.lastDuration as Any?
+            )
             assertEquals(1, engagementTimer.startCalls)
         }
     }
 
     @Test
-    fun `connecting before the deadline cancels the engagement timer and processes establishment`() =
+    fun `connect before the deadline cancels the engagement timer and processes establishment`() =
         runTest {
             val engagementTimer = FakeSessionTimer()
             val transport = FakePeripheralBluetoothTransport()
@@ -2151,15 +2155,16 @@ class HolderOrchestratorTest {
 
                 orchestrator.start()
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
-                assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code"),
+                    awaitItem()
+                )
 
                 val stopCallsBeforeConnect = engagementTimer.stopCalls
 
-                // AC3: a Verifier connects before the deadline.
                 transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
 
                 assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
-                // The engagement timer is stopped, so no refresh / new QR is generated.
                 assert(engagementTimer.stopCalls > stopCallsBeforeConnect)
                 assertEquals(1, transport.startCalls)
             }
@@ -2181,13 +2186,21 @@ class HolderOrchestratorTest {
 
                 orchestrator.start()
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
-                assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
+                assertEquals(
+                    HolderSessionState
+                        .PresentingEngagement("qr_code"),
+                    awaitItem()
+                )
 
                 engagementTimer.onTimeout?.invoke()
                 advanceUntilIdle()
 
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
-                assertEquals(HolderSessionState.PresentingEngagement("qr_code"), awaitItem())
+                assertEquals(
+                    HolderSessionState
+                        .PresentingEngagement("qr_code"),
+                    awaitItem()
+                )
                 assert(transport.stopCalls >= 1)
                 assertEquals(2, transport.startCalls)
                 assertEquals(2, engagementTimer.startCalls)
@@ -2198,7 +2211,6 @@ class HolderOrchestratorTest {
     fun `refreshing at the deadline replaces the old session instance with a new one`() = runTest {
         val engagementTimer = FakeSessionTimer()
         val transport = FakePeripheralBluetoothTransport()
-
 
         val firstSession = HolderSessionImpl(
             logger = logger,
@@ -2229,7 +2241,11 @@ class HolderOrchestratorTest {
 
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
-            assertEquals(HolderSessionState.PresentingEngagement("qr_code_first"), awaitItem())
+            assertEquals(
+                HolderSessionState
+                    .PresentingEngagement("qr_code_first"),
+                awaitItem()
+            )
 
             assert(sessionFactory.getCurrentSession() === firstSession)
             assertEquals(
@@ -2252,7 +2268,11 @@ class HolderOrchestratorTest {
             )
 
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
-            assertEquals(HolderSessionState.PresentingEngagement("qr_code_second"), awaitItem())
+            assertEquals(
+                HolderSessionState
+                    .PresentingEngagement("qr_code_second"),
+                awaitItem()
+            )
         }
     }
 }

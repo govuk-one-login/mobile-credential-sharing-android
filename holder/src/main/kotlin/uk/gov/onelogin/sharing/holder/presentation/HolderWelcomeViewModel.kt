@@ -14,9 +14,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.AnalyticsLogger
@@ -72,7 +72,4 @@ class HolderWelcomeViewModel(
  * @param showQr `true` to render the QR; `false` to show the loading spinner while the session is
  * about to be refreshed. Only meaningful when [qrData] is non-null.
  */
-data class HolderWelcomeUiState(
-    val qrData: String? = null,
-    val showQr: Boolean = false
-)
+data class HolderWelcomeUiState(val qrData: String? = null, val showQr: Boolean = false)
