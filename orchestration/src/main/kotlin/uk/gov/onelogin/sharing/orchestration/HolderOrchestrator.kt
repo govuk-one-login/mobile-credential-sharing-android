@@ -427,6 +427,20 @@ class HolderOrchestrator(
         }
     }
 
+    /**
+     * Phase 2 (grace window): the display timer elapsed. Hide the QR by flipping the
+     * [HolderSessionState.PresentingEngagement.showQr] hint to `false` in place (a non-validating
+     * state update, not a transition), while the current session keeps advertising so a Verifier
+     * that scanned moments earlier can still connect. Arm a [EngagementTimingPolicy.graceDelay]
+     * timer; if it fires with no connection, refresh the session at the deadline.
+     */
+    private fun enterGraceWindow() {
+        sessionFlow.value.updateEngagementDisplay(showQr = false)
+        engagementTimer.start(engagementTimingPolicy.graceDelay) {
+            refreshEngagementSession()
+        }
+    }
+
     private suspend fun refreshEngagementSession() {
         val oldUuid = currentContext.sessionUuid
         appCoroutineScope.launch {
@@ -895,7 +909,7 @@ class HolderOrchestrator(
                     logger.debug(
                         logTag,
                         "Reader Authenticated: Org = ${authReq.readerOrganizationName}," +
-                            " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                                " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
                     )
                     if (!docRequestContainsPortrait(authReq.docRequest)) {
                         logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
@@ -966,8 +980,8 @@ class HolderOrchestrator(
         try {
             sessionFlow.value.transitionTo(state)
             if (state is HolderSessionState.PresentingEngagement) {
-                engagementTimer.start(engagementTimingPolicy.deadline) {
-                    refreshEngagementSession()
+                engagementTimer.start(engagementTimingPolicy.qrVisibleDuration) {
+                    enterGraceWindow()
                 }
             } else {
                 engagementTimer.stop()
@@ -1028,7 +1042,7 @@ class HolderOrchestrator(
     private fun docRequestContainsPortrait(docRequest: DocRequest): Boolean =
         docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
             namespace == DocumentType.Mdl.NAMESPACE &&
-                elements.containsKey(MdlAttribute.Portrait.value)
+                    elements.containsKey(MdlAttribute.Portrait.value)
         }
 
     private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {

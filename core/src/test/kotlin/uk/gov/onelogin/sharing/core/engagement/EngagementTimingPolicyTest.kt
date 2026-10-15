@@ -16,12 +16,21 @@ class EngagementTimingPolicyTest {
     }
 
     @Test
-    fun `defaults are 300s deadline with a 1s grace delay`() {
+    fun `default qrVisibleDuration is the deadline minus the grace delay`() {
         val policy = EngagementTimingPolicy()
 
-        assertEquals(300.seconds, policy.deadline)
-        assertEquals(1.seconds, policy.graceDelay)
-        assertEquals(299.seconds, policy.qrVisibleDuration)
+        assertEquals(
+            EngagementTimingPolicy.DEFAULT_DEADLINE,
+            policy.deadline
+        )
+        assertEquals(
+            EngagementTimingPolicy.DEFAULT_GRACE_DELAY,
+            policy.graceDelay
+        )
+        assertEquals(
+            EngagementTimingPolicy.DEFAULT_DEADLINE - EngagementTimingPolicy.DEFAULT_GRACE_DELAY,
+            policy.qrVisibleDuration
+        )
     }
 
     @Test

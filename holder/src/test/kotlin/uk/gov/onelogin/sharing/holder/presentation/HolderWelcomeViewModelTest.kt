@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.holder.presentation
 
 import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -15,7 +14,6 @@ import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.core.engagement.EngagementTimingPolicy
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -27,20 +25,15 @@ class HolderWelcomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     val qrData = "QR code"
-    private var initialHolderState: HolderSessionState = HolderSessionState.PresentingEngagement(
-        qrData
-    )
 
-    // deadline 15ms, grace 5ms -> qrVisibleDuration = 10ms.
-    private val timingPolicy = EngagementTimingPolicy(
-        deadline = 15.milliseconds,
-        graceDelay = 5.milliseconds
+    private val holderState = MutableStateFlow<HolderSessionState>(
+        HolderSessionState.PresentingEngagement(qrData)
     )
 
     private val orchestrator by lazy {
         FakeOrchestrator(
             parser = FakeQrParser(),
-            initialHolderState = MutableStateFlow(initialHolderState)
+            initialHolderState = holderState
         )
     }
 
@@ -48,13 +41,12 @@ class HolderWelcomeViewModelTest {
         HolderWelcomeViewModel(
             orchestrator = orchestrator,
             analyticsLogger = SystemAnalyticsLogger(SystemLogger()),
-            dispatcher = mainDispatcherRule.testDispatcher,
-            timingPolicy = timingPolicy
+            dispatcher = mainDispatcherRule.testDispatcher
         )
     }
 
     @Test
-    fun `Shows the QR code during the 'PresentingEngagement' session state`() = runTest(
+    fun `Shows the QR when PresentingEngagement has showQr true`() = runTest(
         mainDispatcherRule.testDispatcher
     ) {
         viewModel.uiState.test {
@@ -65,11 +57,12 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `Hides the QR behind a spinner once the cosmetic display window elapses`() = runTest(
+    fun `Hides the QR (spinner) when the orchestrator flips showQr to false in place`() = runTest(
         mainDispatcherRule.testDispatcher
     ) {
         viewModel.uiState.test {
             assertThat(awaitItem().showQr, equalTo(true))
+            holderState.value = HolderSessionState.PresentingEngagement(qrData, showQr = false)
 
             val hidden = awaitItem()
             assertThat(hidden.qrData, equalTo(qrData))
@@ -78,10 +71,25 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
+    fun `Reflects a refreshed engagement with new QR data and showQr true`() = runTest(
+        mainDispatcherRule.testDispatcher
+    ) {
+        viewModel.uiState.test {
+            assertThat(awaitItem().qrData, equalTo(qrData))
+            holderState.value = HolderSessionState.PresentingEngagement(qrData, showQr = false)
+            assertThat(awaitItem().showQr, equalTo(false))
+            holderState.value = HolderSessionState.PresentingEngagement("new_qr")
+            val refreshed = awaitItem()
+            assertThat(refreshed.qrData, equalTo("new_qr"))
+            assertThat(refreshed.showQr, equalTo(true))
+        }
+    }
+
+    @Test
     fun `Has no QR data for inapplicable session states`() = runTest(
         mainDispatcherRule.testDispatcher
     ) {
-        initialHolderState = HolderSessionState.NotStarted
+        holderState.value = HolderSessionState.NotStarted
 
         viewModel.uiState.test {
             val item = awaitItem()

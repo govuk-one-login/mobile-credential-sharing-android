@@ -34,6 +34,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.engagement.EngagementTimingPolicy
 import uk.gov.onelogin.sharing.core.sessionTimer.FakeSessionTimer
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequest
@@ -2112,7 +2113,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `presenting engagement arms the 300s session deadline timer`() = runTest {
+    fun `presenting engagement arms the display-window timer with showQr true`() = runTest {
         val engagementTimer = FakeSessionTimer()
         val transport = FakePeripheralBluetoothTransport()
 
@@ -2127,12 +2128,12 @@ class HolderOrchestratorTest {
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code"),
+                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
                 awaitItem()
             )
 
             assertEquals(
-                300.seconds as Any?,
+                EngagementTimingPolicy().qrVisibleDuration as Any?,
                 engagementTimer.lastDuration as Any?
             )
             assertEquals(1, engagementTimer.startCalls)
@@ -2140,7 +2141,79 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `connect before the deadline cancels the engagement timer and processes establishment`() =
+    fun `grace window hides the QR in place and keeps advertising`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val transport = FakePeripheralBluetoothTransport()
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            engagementTimer = engagementTimer
+        )
+
+        orchestrator.holderSessionState.test {
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+            orchestrator.start()
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                awaitItem()
+            )
+
+            val startCallsBeforeGrace = transport.startCalls
+            val stopCallsBeforeGrace = transport.stopCalls
+
+            engagementTimer.onTimeout?.invoke()
+
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                awaitItem()
+            )
+            assertEquals(1.seconds as Any?, engagementTimer.lastDuration as Any?)
+            assertEquals(startCallsBeforeGrace, transport.startCalls)
+            assertEquals(stopCallsBeforeGrace, transport.stopCalls)
+        }
+    }
+
+    @Test
+    fun `connect during the grace window cancels refresh and processes establishment`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val transport = FakePeripheralBluetoothTransport()
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            engagementTimer = engagementTimer
+        )
+
+        orchestrator.holderSessionState.test {
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+            orchestrator.start()
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                awaitItem()
+            )
+
+            engagementTimer.onTimeout?.invoke()
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                awaitItem()
+            )
+
+            val stopCallsBeforeConnect = engagementTimer.stopCalls
+
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+
+            assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
+
+            assert(engagementTimer.stopCalls > stopCallsBeforeConnect)
+            assertEquals(1, transport.startCalls)
+        }
+    }
+
+    @Test
+    fun `at the deadline with no connection the session refreshes in place with a new QR`() =
         runTest {
             val engagementTimer = FakeSessionTimer()
             val transport = FakePeripheralBluetoothTransport()
@@ -2156,39 +2229,13 @@ class HolderOrchestratorTest {
                 orchestrator.start()
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
                 assertEquals(
-                    HolderSessionState.PresentingEngagement("qr_code"),
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
                     awaitItem()
                 )
 
-                val stopCallsBeforeConnect = engagementTimer.stopCalls
-
-                transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-
-                assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
-                assert(engagementTimer.stopCalls > stopCallsBeforeConnect)
-                assertEquals(1, transport.startCalls)
-            }
-        }
-
-    @Test
-    fun `at the 300s deadline with no connection the session refreshes in place with a new QR`() =
-        runTest {
-            val engagementTimer = FakeSessionTimer()
-            val transport = FakePeripheralBluetoothTransport()
-
-            val orchestrator = createOrchestrator(
-                peripheralBluetoothTransport = transport,
-                engagementTimer = engagementTimer
-            )
-
-            orchestrator.holderSessionState.test {
-                assertEquals(HolderSessionState.NotStarted, awaitItem())
-
-                orchestrator.start()
-                assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+                engagementTimer.onTimeout?.invoke()
                 assertEquals(
-                    HolderSessionState
-                        .PresentingEngagement("qr_code"),
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
                     awaitItem()
                 )
 
@@ -2197,13 +2244,12 @@ class HolderOrchestratorTest {
 
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
                 assertEquals(
-                    HolderSessionState
-                        .PresentingEngagement("qr_code"),
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
                     awaitItem()
                 )
                 assert(transport.stopCalls >= 1)
                 assertEquals(2, transport.startCalls)
-                assertEquals(2, engagementTimer.startCalls)
+                assertEquals(3, engagementTimer.startCalls)
             }
         }
 
@@ -2242,16 +2288,17 @@ class HolderOrchestratorTest {
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
-                HolderSessionState
-                    .PresentingEngagement("qr_code_first"),
+                HolderSessionState.PresentingEngagement("qr_code_first", showQr = true),
                 awaitItem()
             )
 
             assert(sessionFactory.getCurrentSession() === firstSession)
+            engagementTimer.onTimeout?.invoke()
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code_first"),
-                firstSession.currentState.value
+                HolderSessionState.PresentingEngagement("qr_code_first", showQr = false),
+                awaitItem()
             )
+            assert(sessionFactory.getCurrentSession() === firstSession)
 
             engagementTimer.onTimeout?.invoke()
             advanceUntilIdle()
@@ -2259,18 +2306,17 @@ class HolderOrchestratorTest {
             assert(sessionFactory.getCurrentSession() === secondSession)
             assert(sessionFactory.getCurrentSession() !== firstSession)
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code_first"),
+                HolderSessionState.PresentingEngagement("qr_code_first", showQr = false),
                 firstSession.currentState.value
             )
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code_second"),
+                HolderSessionState.PresentingEngagement("qr_code_second", showQr = true),
                 secondSession.currentState.value
             )
 
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
-                HolderSessionState
-                    .PresentingEngagement("qr_code_second"),
+                HolderSessionState.PresentingEngagement("qr_code_second", showQr = true),
                 awaitItem()
             )
         }
