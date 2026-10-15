@@ -58,9 +58,9 @@ class FakeOrchestrator(
         cancelCount++
     }
 
-    override fun confirmConsent() = onConfirmConsent()
+    override suspend fun confirmConsent() = onConfirmConsent()
 
-    override fun denyConsent() {
+    override suspend fun denyConsent() {
         cancelCount++
         denyConsentCount++
     }

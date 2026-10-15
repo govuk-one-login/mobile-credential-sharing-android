@@ -31,7 +31,6 @@ import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
-import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -210,7 +209,11 @@ class HolderOrchestrator(
         }
     }
 
-    override fun confirmConsent() {
+    override suspend fun confirmConsent() {
+        confirmConsentBehaviour()
+    }
+
+    private fun confirmConsentBehaviour() {
         // Guard against re-entry (e.g. double taps). Because signing now suspends on the
         // consumer's local-auth prompt, the session state remains AwaitingUserConsent until
         // execute() completes, so the state check alone cannot prevent concurrent submissions.
@@ -219,13 +222,20 @@ class HolderOrchestrator(
             return
         }
 
-        val state = holderSessionState.value
+        val state = holderSessionState.value as? HolderSessionState.AwaitingUserConsent
         val context = currentContext
         try {
             assert(state is HolderSessionState.AwaitingUserConsent) {
                 "confirmConsent called in an invalid state: $state"
             }
-            check(state is HolderSessionState.AwaitingUserConsent)
+            checkNotNull(state)
+            safeTransitionTo(
+                state.copy(
+                    presentation = state.presentation.copy(
+                        isBusy = true
+                    )
+                )
+            )
 
             val submission = PendingConsent(
                 sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
@@ -247,6 +257,13 @@ class HolderOrchestrator(
             }
         } catch (e: IllegalStateException) {
             consentInFlight.set(false)
+            state?.presentation?.let {
+                state.copy(
+                    presentation = it.copy(
+                        isBusy = true
+                    )
+                ).let(::safeTransitionTo)
+            }
             appCoroutineScope.launch {
                 sendTerminationAndFail(e)
             }
@@ -355,7 +372,11 @@ class HolderOrchestrator(
         }
     }
 
-    override fun denyConsent() {
+    override suspend fun denyConsent() {
+        denyConsentBehaviour()
+    }
+
+    private fun denyConsentBehaviour() {
         val state = holderSessionState.value
         val context = currentContext
         try {

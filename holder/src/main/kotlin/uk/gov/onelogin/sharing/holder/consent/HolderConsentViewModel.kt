@@ -11,13 +11,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -27,12 +27,22 @@ class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
-    val presentation: StateFlow<ConsentPresentation?> = orchestrator
+
+    val presentation: StateFlow<HolderConsentUiState?> = orchestrator
         .holderSessionState
         .map { state ->
             state as? HolderSessionState.AwaitingUserConsent
         }.map { consentState ->
             consentState?.presentation
+        }.map { presentation ->
+            presentation?.let {
+                HolderConsentUiState(
+                    privacyPolicyUrl = it.privacyPolicyUrl,
+                    documents = it.documents,
+                    normalisedOrganizationName = it.normalisedOrganizationName,
+                    isBusy = it.isBusy
+                )
+            }
         }.stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
