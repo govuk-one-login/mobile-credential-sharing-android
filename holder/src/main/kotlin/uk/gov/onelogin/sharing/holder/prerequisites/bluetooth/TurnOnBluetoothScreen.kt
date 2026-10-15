@@ -20,18 +20,16 @@ import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesViewModel
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
 
 @Composable
 internal fun TurnOnBluetoothScreen(
     modifier: Modifier = Modifier,
-    viewModel: RetryHolderPrerequisitesViewModel = metroViewModel(),
+    viewModel: TurnOnBluetoothViewModel = metroViewModel(),
     launcher: ActivityResultLauncher<PrerequisiteAction> = rememberLauncherForActivityResult(
-        PrerequisiteActionContract) {
-        viewModel.recheckPrerequisites()
-    }
+        PrerequisiteActionContract
+    ) { viewModel.recheckPrerequisites() }
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -42,6 +40,7 @@ internal fun TurnOnBluetoothScreen(
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("TurnOnBluetoothScreen")
+        viewModel.sendScreenEvent()
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -57,7 +56,7 @@ internal fun TurnOnBluetoothScreen(
 
     TurnOnBluetoothContent(
         modifier = modifier,
-        onTurnOnBluetooth = { viewModel.resolve(launcher) }
+        onTurnOnBluetooth = { viewModel.turnOnBluetooth(launcher) }
     )
 }
 
