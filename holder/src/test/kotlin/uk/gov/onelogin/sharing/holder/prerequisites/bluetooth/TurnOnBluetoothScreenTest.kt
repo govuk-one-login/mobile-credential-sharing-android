@@ -6,24 +6,22 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
-import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
-import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
-import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
+import kotlin.getValue
 import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
@@ -54,6 +52,10 @@ class TurnOnBluetoothScreenTest {
 
     private val logger = SystemLogger()
 
+    private val analyticsLogger by lazy {
+        StoredAnalyticsLogger()
+    }
+
     private val resolver by lazy {
         ResolveHolderPrerequisiteAction(
             logger = logger,
@@ -62,13 +64,9 @@ class TurnOnBluetoothScreenTest {
         )
     }
 
-    private val navigator by lazy {
-        RetryPrerequisitesNavigator.from<HolderSessionState>(emptyFlow())
-    }
-
     private val viewModel by lazy {
-        RetryHolderPrerequisitesViewModel(
-            navigator = navigator,
+        TurnOnBluetoothViewModel(
+            analyticsLogger = analyticsLogger,
             orchestrator = orchestrator,
             resolver = resolver,
             dispatcher = dispatcherRule.testDispatcher
