@@ -19,6 +19,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -145,6 +146,19 @@ class AndroidGattServerManagerMaxBufferSizeTest {
             sendChunk(byteArrayOf(LAST_PART) + ByteArray(10) { 0x22 })
             expectNoEvents()
         }
+    }
+
+    @Test
+    fun `logs buffer size details when limit exceeded`() = runTest {
+        testEvents {
+            sendChunk(byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 })
+            testScope.advanceUntilIdle()
+            awaitItem()
+        }
+
+        assertTrue(
+            "ExceededMaxBufferSize: 101 bytes exceeds limit of 100 bytes" in logger
+        )
     }
 
     private suspend fun testEvents(

@@ -55,7 +55,7 @@ class AndroidGattServerManager(
     private val gattWriter: GattWriter,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
     reassemblerFactory: MessageReassembler.Factory,
-    maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE
+    private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
@@ -199,7 +199,7 @@ class AndroidGattServerManager(
                 logger.debug(logTag, "received message part, expecting additional data")
 
             is MessageReassembler.Result.ExceededMaxBuffer ->
-                handleExceededMaxBufferSize()
+                handleExceededMaxBufferSize(result.bufferSize)
 
             is MessageReassembler.Result.Complete ->
                 _events.tryEmit(GattServerEvent.MessageReceived(result.message))
@@ -321,7 +321,11 @@ class AndroidGattServerManager(
      * and emits an error to trigger session failure and destruction.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun handleExceededMaxBufferSize() {
+    private fun handleExceededMaxBufferSize(bufferSize: Int) {
+        logger.error(
+            logTag,
+            "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
+        )
         isTerminating = true
         coroutineScope.launch {
             serviceUuid?.let { notifySessionEnd(it) }
