@@ -111,8 +111,6 @@ class HolderSessionImplTest {
     fun `updateEngagementDisplay hides the QR in place without a validated transition`() = runTest {
         initialState = HolderSessionState.PresentingEngagement(qrData = "qr", showQr = true)
 
-        // Guard: the transition map forbids PresentingEngagement -> PresentingEngagement, so this
-        // must NOT go through transitionTo. It uses the non-validating update() path.
         Assert.assertFalse(
             HolderSessionState.PresentingEngagement::class in session.getAvailableTransitions()
         )

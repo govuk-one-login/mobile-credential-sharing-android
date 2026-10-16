@@ -14,13 +14,6 @@ interface HolderSession :
 
     fun updateSessionContext(update: (HolderSessionContext) -> HolderSessionContext)
 
-    /**
-     * Updates the [HolderSessionState.PresentingEngagement.showQr] presentation hint in place when
-     * the current state is [HolderSessionState.PresentingEngagement]. This is not a state
-     * transition: the state class is unchanged, so it is applied via the non-validating
-     * [StateContainer.Transitional.update] rather than [StateContainer.Complete.transitionTo].
-     * No-op in any other state.
-     */
     fun updateEngagementDisplay(showQr: Boolean) {
         val current = currentState.value
         if (current is HolderSessionState.PresentingEngagement && current.showQr != showQr) {

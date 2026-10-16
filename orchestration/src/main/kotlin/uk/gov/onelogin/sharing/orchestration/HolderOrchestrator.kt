@@ -8,13 +8,11 @@ import dev.zacsweers.metro.binding
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECPrivateKey
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -427,13 +425,6 @@ class HolderOrchestrator(
         }
     }
 
-    /**
-     * Phase 2 (grace window): the display timer elapsed. Hide the QR by flipping the
-     * [HolderSessionState.PresentingEngagement.showQr] hint to `false` in place (a non-validating
-     * state update, not a transition), while the current session keeps advertising so a Verifier
-     * that scanned moments earlier can still connect. Arm a [EngagementTimingPolicy.graceDelay]
-     * timer; if it fires with no connection, refresh the session at the deadline.
-     */
     private fun enterGraceWindow() {
         sessionFlow.value.updateEngagementDisplay(showQr = false)
         engagementTimer.start(engagementTimingPolicy.graceDelay) {
@@ -442,27 +433,30 @@ class HolderOrchestrator(
     }
 
     private suspend fun refreshEngagementSession() {
-        val oldUuid = currentContext.sessionUuid
-        appCoroutineScope.launch {
-            peripheralBluetoothTransport.stop(
-                serviceUuid = oldUuid,
-                sendEndCommand = false
+        if (sessionFlow.value.currentState.value !is HolderSessionState.PresentingEngagement) {
+            logger.debug(
+                logTag,
+                "Skipping engagement refresh: session is no longer presenting engagement"
             )
+            return
         }
+
+        val oldUuid = currentContext.sessionUuid
+
+        peripheralBluetoothTransport.stop(
+            serviceUuid = oldUuid,
+            sendEndCommand = false
+        )
 
         val newSession = sessionFactory.create()
 
         newSession.transitionTo(HolderSessionState.ReadyToPresent)
         sessionFlow.value = newSession
 
-        delay(REFRESH_BLANK_INTERVAL)
-
         val newUuid = newSession.sessionContext.sessionUuid
-        appCoroutineScope.launch {
-            peripheralBluetoothTransport.start(
-                serviceUuid = newUuid
-            )
-        }
+        peripheralBluetoothTransport.start(
+            serviceUuid = newUuid
+        )
 
         val newQrCode = newSession.sessionContext.qrCode
         if (newQrCode.isNotEmpty()) {
@@ -909,7 +903,7 @@ class HolderOrchestrator(
                     logger.debug(
                         logTag,
                         "Reader Authenticated: Org = ${authReq.readerOrganizationName}," +
-                                " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                            " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
                     )
                     if (!docRequestContainsPortrait(authReq.docRequest)) {
                         logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
@@ -1042,7 +1036,7 @@ class HolderOrchestrator(
     private fun docRequestContainsPortrait(docRequest: DocRequest): Boolean =
         docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
             namespace == DocumentType.Mdl.NAMESPACE &&
-                    elements.containsKey(MdlAttribute.Portrait.value)
+                elements.containsKey(MdlAttribute.Portrait.value)
         }
 
     private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {
@@ -1146,7 +1140,6 @@ class HolderOrchestrator(
 
     private companion object {
         val INACTIVITY_TIMEOUT = 300.seconds
-        val REFRESH_BLANK_INTERVAL = 1000.milliseconds
         const val UNKNOWN_ERROR = "Unknown error"
         const val PORTRAIT_POLICY_VIOLATION =
             "Policy violation: DeviceRequest does not request portrait attribute"

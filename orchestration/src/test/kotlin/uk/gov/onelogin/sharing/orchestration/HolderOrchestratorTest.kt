@@ -2321,4 +2321,97 @@ class HolderOrchestratorTest {
             )
         }
     }
+
+    @Test
+    fun `refresh firing after a connection during grace does not replace the connected session`() =
+        runTest {
+            val engagementTimer = FakeSessionTimer()
+            val transport = FakePeripheralBluetoothTransport()
+            val sessionFactory = createSessionFactory()
+
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                sessionFactory = sessionFactory,
+                engagementTimer = engagementTimer
+            )
+
+            orchestrator.holderSessionState.test {
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+                orchestrator.start()
+                assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    awaitItem()
+                )
+
+                engagementTimer.onTimeout?.invoke()
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                    awaitItem()
+                )
+
+                val connectedSession = sessionFactory.getCurrentSession()
+
+                transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+                assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
+
+                val startCallsAfterConnect = transport.startCalls
+
+                engagementTimer.onTimeout?.invoke()
+                advanceUntilIdle()
+
+                assert(sessionFactory.getCurrentSession() === connectedSession)
+                assertEquals(
+                    HolderSessionState.ProcessingEstablishment,
+                    orchestrator.holderSessionState.value
+                )
+                assertEquals(startCallsAfterConnect, transport.startCalls)
+                expectNoEvents()
+            }
+        }
+
+    @Test
+    fun `refresh awaits stop of the old UUID before starting the new UUID advertising`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val stopGate = CompletableDeferred<Unit>()
+        val operations = mutableListOf<String>()
+        val delegate = FakePeripheralBluetoothTransport()
+        val transport = object : PeripheralBluetoothTransport by delegate {
+            override suspend fun stop(serviceUuid: java.util.UUID, sendEndCommand: Boolean) {
+                stopGate.await()
+                operations += "stop"
+                delegate.stop(serviceUuid, sendEndCommand)
+            }
+
+            override suspend fun start(serviceUuid: java.util.UUID) {
+                operations += "start"
+                delegate.start(serviceUuid)
+            }
+        }
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            engagementTimer = engagementTimer
+        )
+
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        orchestrator.start()
+        advanceUntilIdle()
+
+        operations.clear()
+
+        engagementTimer.onTimeout?.invoke()
+        val refreshTrigger = backgroundScope.launch { engagementTimer.onTimeout?.invoke() }
+        advanceUntilIdle()
+
+        assertEquals(emptyList<String>(), operations)
+
+        stopGate.complete(Unit)
+        advanceUntilIdle()
+        refreshTrigger.join()
+
+        assertEquals(listOf("stop", "start"), operations)
+    }
 }
