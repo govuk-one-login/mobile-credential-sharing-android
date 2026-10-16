@@ -54,7 +54,7 @@ class AndroidGattClientManager(
     private val logger: Logger,
     private val writeQueue: GattWriteQueue,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
-    private val reassemblerFactory: MessageReassembler.Factory,
+    reassemblerFactory: MessageReassembler.Factory,
     private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
