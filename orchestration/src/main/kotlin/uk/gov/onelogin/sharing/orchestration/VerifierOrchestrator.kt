@@ -19,6 +19,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
@@ -400,7 +401,8 @@ class VerifierOrchestrator(
             sessionData.status != SessionDataStatus.OK
 
     private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
-        logger.error(logTag, "Received SessionData with data and error status: $status")
+        val message = "Received SessionData with data and error status: $status"
+        logger.error(logTag, message, LoggerException(message))
         appCoroutineScope.launch {
             terminateSession(
                 bleOpen = centralBluetoothTransport.isBleOpen,
@@ -416,7 +418,7 @@ class VerifierOrchestrator(
     }
 
     private fun handleTerminationWithoutData(terminationAlreadyReceived: Boolean) {
-        logger.error(logTag, INVALID_SESSION_DATA)
+        logger.error(logTag, INVALID_SESSION_DATA, LoggerException(INVALID_SESSION_DATA))
         logger.debug(
             logTag,
             "Received status-only SessionData. Termination received: $terminationAlreadyReceived"
