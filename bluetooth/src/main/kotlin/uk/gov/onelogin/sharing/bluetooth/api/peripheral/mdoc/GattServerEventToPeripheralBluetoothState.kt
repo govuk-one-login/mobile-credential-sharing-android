@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.core.Transformer
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 class GattServerEventToPeripheralBluetoothState(private val logger: Logger) :
@@ -31,10 +32,9 @@ class GattServerEventToPeripheralBluetoothState(private val logger: Logger) :
         }
 
         is GattServerEvent.UnsupportedEvent -> {
-            logger.error(
-                logTag,
+            val message =
                 "Unsupported event - status: ${source.status} new state: ${source.newState}"
-            )
+            logger.error(logTag, message, LoggerException(message))
             null
         }
 

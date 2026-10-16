@@ -35,6 +35,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
@@ -213,7 +214,8 @@ class AndroidGattServerManager(
                 GattServerEvent.ServiceAdded(event.service)
             )
         } else {
-            logger.error(logTag, "Failed to add service, status: ${event.status}")
+            val message = "Failed to add service, status: ${event.status}"
+            logger.error(logTag, message, LoggerException(message))
             _events.tryEmit(
                 GattServerEvent.Error(GattServerError.SERVICE_REGISTRATION_FAILED)
             )
@@ -236,7 +238,8 @@ class AndroidGattServerManager(
                         GattServerError.DESCRIPTOR_WRITE_REQUEST_FAILED
                     )
                 )
-                logger.error(logTag, "Invalid descriptor write request: ${event.reason}")
+                val message = "Invalid descriptor write request: ${event.reason}"
+                logger.error(logTag, message, LoggerException(message))
             }
 
             is GattServerCallbackEvent.DescriptorWriteRequest.Valid ->
@@ -315,7 +318,8 @@ class AndroidGattServerManager(
             isSessionEnd = true
             SessionEndStateQueued.Success
         } else {
-            logger.error(logTag, "failed to notify client with END command: notification failed")
+            val message = "failed to notify client with END command: notification failed"
+            logger.error(logTag, message, LoggerException(message))
             SessionEndStateQueued.Failed
         }
     }
