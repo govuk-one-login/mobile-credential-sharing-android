@@ -8,9 +8,8 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 
 object TurnOnBluetoothNavigationExt {
-    fun NavController.navigateToTurnOnBluetooth(
-        options: NavOptionsBuilder.() -> Unit = {}
-    ) = navigate(TurnOnBluetoothRoute, options)
+    fun NavController.navigateToTurnOnBluetooth(options: NavOptionsBuilder.() -> Unit = {}) =
+        navigate(TurnOnBluetoothRoute, options)
 
     internal fun NavGraphBuilder.configureTurnOnBluetooth() {
         composable<TurnOnBluetoothRoute> {

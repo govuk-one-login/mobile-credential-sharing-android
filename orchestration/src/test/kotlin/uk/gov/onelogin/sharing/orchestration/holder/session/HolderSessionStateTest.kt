@@ -86,7 +86,9 @@ class HolderSessionStateTest {
     @Test
     fun `Preflight does not require Bluetooth enabling when permission denied permanently`() {
         assertFalse {
-            HolderSessionStateStubs.preflightWithBluetooth(BluetoothState.PermissionDeniedPermanently)
+            HolderSessionStateStubs.preflightWithBluetooth(
+                BluetoothState.PermissionDeniedPermanently
+            )
                 .requiresBluetoothEnabled()
         }
     }

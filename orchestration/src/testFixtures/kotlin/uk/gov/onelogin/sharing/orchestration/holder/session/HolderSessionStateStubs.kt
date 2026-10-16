@@ -18,9 +18,9 @@ object HolderSessionStateStubs {
             listOf(
                 // WET: rewriting MissingPrerequisites.Bluetooth data class to avoid new dependency
                 object :
-                MissingPrerequisite,
-                Recoverable by state,
-                Actionable<PrerequisiteAction> by state {
+                    MissingPrerequisite,
+                    Recoverable by state,
+                    Actionable<PrerequisiteAction> by state {
                     override val prerequisite: Prerequisite = Prerequisite.BLUETOOTH
                 }
             )

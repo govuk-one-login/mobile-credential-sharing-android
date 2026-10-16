@@ -49,7 +49,7 @@ sealed class HolderSessionState :
          */
         fun requiresBluetoothEnabled(): Boolean = missingPrerequisites.any {
             it.prerequisite == Prerequisite.BLUETOOTH &&
-                    it.getAction() == PrerequisiteAction.EnableBluetooth
+                it.getAction() == PrerequisiteAction.EnableBluetooth
         }
     }
 
