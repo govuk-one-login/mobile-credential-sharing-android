@@ -5,6 +5,8 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlin.getValue
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -21,8 +23,6 @@ import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
-import kotlin.getValue
-import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 class TurnOnBluetoothScreenTest {

@@ -65,7 +65,7 @@ internal fun TurnOnBluetoothScreen(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ) { CircularProgressIndicator()}
+        ) { CircularProgressIndicator() }
     } else {
         TurnOnBluetoothContent(
             modifier = modifier,
@@ -75,10 +75,7 @@ internal fun TurnOnBluetoothScreen(
 }
 
 @Composable
-internal fun TurnOnBluetoothContent(
-    modifier: Modifier = Modifier,
-    onTurnOnBluetooth: () -> Unit
-) {
+internal fun TurnOnBluetoothContent(onTurnOnBluetooth: () -> Unit, modifier: Modifier = Modifier) {
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(R.string.holder_turn_on_bluetooth),

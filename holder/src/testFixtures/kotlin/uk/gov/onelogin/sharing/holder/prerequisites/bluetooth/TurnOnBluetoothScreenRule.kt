@@ -22,9 +22,8 @@ class TurnOnBluetoothScreenRule(
 
     private val turnOnBluetoothText = resources.getString(R.string.holder_turn_on_bluetooth)
 
-    fun assertTitleIsDisplayed() =
-        onNode(hasText(turnOnBluetoothText) and isHeading())
-            .assertIsDisplayed()
+    fun assertTitleIsDisplayed() = onNode(hasText(turnOnBluetoothText) and isHeading())
+        .assertIsDisplayed()
 
     fun assertBodyIsDisplayed() {
         onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_1))

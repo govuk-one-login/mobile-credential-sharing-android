@@ -76,12 +76,11 @@ class TurnOnBluetoothViewModel(
         ).let(analyticsLogger::logEventV3Dot1)
     }
 
-    fun sendTurnOnBluetoothEvent(button: AnalyticsButton) =
-        viewModelScope.launch(dispatcher) {
-            TrackEvent.Button(
-                text = button.name,
-                params = walletSharingRequiredParameters
-            ).let(analyticsLogger::logEventV3Dot1)
+    fun sendTurnOnBluetoothEvent(button: AnalyticsButton) = viewModelScope.launch(dispatcher) {
+        TrackEvent.Button(
+            text = button.name,
+            params = walletSharingRequiredParameters
+        ).let(analyticsLogger::logEventV3Dot1)
     }
 
     sealed interface AnalyticsButton {
