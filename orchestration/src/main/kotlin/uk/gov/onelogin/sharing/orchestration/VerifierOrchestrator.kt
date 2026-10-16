@@ -254,9 +254,12 @@ class VerifierOrchestrator(
 
     private suspend fun handleCentralBluetoothState(bluetoothState: CentralBluetoothState) {
         val verifierState = sessionFlow.value.currentState.value
-        if (verifierState.isComplete() ||
-            verifierState is VerifierSessionState.TerminatingSession
-        ) {
+        if (verifierState.isComplete() || !verifierState.canHandleBluetoothStates()) {
+            logger.debug(
+                logTag,
+                "Skipped the handling of $bluetoothState due to invalid session state: " +
+                    verifierState
+            )
             return
         }
 
