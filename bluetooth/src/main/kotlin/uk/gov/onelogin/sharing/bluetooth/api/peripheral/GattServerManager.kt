@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 import java.util.UUID
 import kotlinx.coroutines.flow.SharedFlow
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
 
 interface GattServerManager :
     AutoCloseable,
@@ -17,5 +16,5 @@ interface GattServerManager :
      */
     fun cancelCurrentConnection()
 
-    fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued
+    fun notifySessionEnd(): SessionEndStateQueued
 }

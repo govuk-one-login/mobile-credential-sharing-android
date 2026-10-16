@@ -307,7 +307,6 @@ class HolderOrchestrator(
         )
 
         val sent = peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
         sessionTimer.reset()
@@ -423,7 +422,6 @@ class HolderOrchestrator(
     private fun stopAdvertising(sendEndCommand: Boolean) {
         appCoroutineScope.launch {
             peripheralBluetoothTransport.stop(
-                serviceUuid = currentContext.sessionUuid,
                 sendEndCommand = sendEndCommand
             )
         }
@@ -1059,14 +1057,13 @@ class HolderOrchestrator(
         var sent = sessionDataToSend == null
         if (sessionDataToSend != null) {
             sent = peripheralBluetoothTransport.sendMessage(
-                serviceUuid = context.sessionUuid,
                 data = sessionDataToSend
             )
             sessionTimer.reset()
         }
 
         if (sent && sessionDataToSend != null) {
-            holderSessionTerminator.terminate(context.sessionUuid)
+            holderSessionTerminator.terminate()
         } else {
             stopAdvertising(sendEndCommand = sendEndCommand)
         }
