@@ -13,6 +13,7 @@ import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
@@ -58,6 +59,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     RetryHolderPrerequisitesRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<RetryHolderPrerequisitesRoute>()
+                )
+            },
+            Triple(
+                "'Preflight (Bluetooth off)' -> TurnOnBluetoothRoute",
+                HolderSessionStateStubs.preflightWithoutBluetooth
+            ) {
+                instanceOf<TurnOnBluetoothRoute>(
+                    TurnOnBluetoothRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<TurnOnBluetoothRoute>()
                 )
             },
             Triple(
