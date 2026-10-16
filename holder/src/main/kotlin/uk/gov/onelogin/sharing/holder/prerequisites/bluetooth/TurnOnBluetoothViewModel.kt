@@ -11,9 +11,15 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.AnalyticsLogger
 import uk.gov.logging.api.v3dot1.logger.logEventV3Dot1
 import uk.gov.logging.api.v3dot1.model.TrackEvent
@@ -39,6 +45,17 @@ class TurnOnBluetoothViewModel(
 
     private val _hasRecheckedPrerequisites = MutableStateFlow(false)
     val hasRecheckedPrerequisites: StateFlow<Boolean> = _hasRecheckedPrerequisites
+
+    val isClosing: StateFlow<Boolean> = orchestrator
+        .holderSessionState
+        .map { it !is HolderSessionState.Preflight }
+        .distinctUntilChanged()
+        .flowOn(dispatcher)
+        .stateIn(
+            viewModelScope.plus(dispatcher),
+            SharingStarted.Eagerly,
+            orchestrator.holderSessionState.value !is HolderSessionState.Preflight
+        )
 
     fun recheckPrerequisites(): Job = viewModelScope.launch(dispatcher) {
         _hasRecheckedPrerequisites.update { true }

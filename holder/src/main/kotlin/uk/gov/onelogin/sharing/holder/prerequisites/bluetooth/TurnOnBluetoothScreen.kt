@@ -2,10 +2,14 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
@@ -37,6 +41,8 @@ internal fun TurnOnBluetoothScreen(
         .hasRecheckedPrerequisites
         .collectAsStateWithLifecycle()
 
+    val isLeaving: Boolean by viewModel.isClosing.collectAsStateWithLifecycle()
+
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("TurnOnBluetoothScreen")
@@ -54,10 +60,18 @@ internal fun TurnOnBluetoothScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    TurnOnBluetoothContent(
-        modifier = modifier,
-        onTurnOnBluetooth = { viewModel.turnOnBluetooth(launcher) }
-    )
+    if (isLeaving) {
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) { CircularProgressIndicator()}
+    } else {
+        TurnOnBluetoothContent(
+            modifier = modifier,
+            onTurnOnBluetooth = { viewModel.turnOnBluetooth(launcher) }
+        )
+    }
 }
 
 @Composable
