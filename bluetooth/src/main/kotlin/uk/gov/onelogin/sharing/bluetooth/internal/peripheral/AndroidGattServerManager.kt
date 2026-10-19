@@ -200,7 +200,7 @@ class AndroidGattServerManager(
                 logger.debug(logTag, "received message part, expecting additional data")
 
             is MessageReassembler.Result.ExceededMaxBuffer ->
-                handleExceededMaxBufferSize(result.bufferSize)
+                handleExceededMaxBufferSize()
 
             is MessageReassembler.Result.Complete ->
                 _events.tryEmit(GattServerEvent.MessageReceived(result.message))
@@ -324,11 +324,7 @@ class AndroidGattServerManager(
      * and emits an error to trigger session failure and destruction.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun handleExceededMaxBufferSize(bufferSize: Int) {
-        logger.error(
-            logTag,
-            "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
-        )
+    private fun handleExceededMaxBufferSize() {
         isTerminating = true
         coroutineScope.launch {
             notifySessionEnd()
