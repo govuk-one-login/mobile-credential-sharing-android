@@ -10,4 +10,8 @@
     <string name="generating_qr_code_data">Generating QR code data...</string>
     <string name="have_not_met_requirements">Haven’t met requirements...</string>
     <string name="holder_consent_organization_sentence">The person doing the check is using an approved app powered by %1$s</string>
+    <string name="details_shared_heading">Details Shared</string>
+    <string name="details_shared_body_1">The person will check the details you shared.</string>
+    <string name="details_shared_body_2">Your bluetooth connection with them will now end.</string>
+    <string name="details_shared_button_text">Go back to documents</string>
 </resources>

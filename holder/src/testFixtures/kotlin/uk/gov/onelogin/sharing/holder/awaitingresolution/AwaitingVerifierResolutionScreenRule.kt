@@ -2,20 +2,47 @@ package uk.gov.onelogin.sharing.holder.awaitingresolution
 
 import android.content.Context
 import android.content.res.Resources
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
+import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.holder.R
 
 class AwaitingVerifierResolutionScreenRule(
-    private val composeTestRule: ComposeContentTestRule = createComposeRule(),
-    private val resources: Resources =
-        ApplicationProvider.getApplicationContext<Context>().resources
+    private val composeTestRule: ComposeContentTestRule = createComposeRule()
 ) : ComposeContentTestRule by composeTestRule {
 
+    private val resources: Resources by lazy {
+        ApplicationProvider.getApplicationContext<Context>().resources
+    }
+
+    fun assertSuccessIconIsDisplayed() = onNodeWithContentDescription("Success")
+        .assertIsDisplayed()
+
     fun assertTitleIsDisplayed() = onNodeWithText(
-        resources.getString(R.string.holder_awaiting_resolution_title)
+        resources.getString(R.string.details_shared_heading)
     ).assertIsDisplayed()
+
+    fun assertBodyIsDisplayed() {
+        onNodeWithText(resources.getString(R.string.details_shared_body_1)).assertIsDisplayed()
+        onNodeWithText(resources.getString(R.string.details_shared_body_2)).assertIsDisplayed()
+    }
+
+    fun assertGoBackToDocumentsButtonIsDisplayed() {
+        onNode(
+            hasText(resources.getString(R.string.details_shared_button_text)) and
+                hasRole(Role.Button)
+        ).assertIsDisplayed()
+    }
+
+    fun performGoBackToDocumentsClick() = onNode(
+        hasText(resources.getString(R.string.details_shared_button_text)) and
+            hasRole(Role.Button)
+    ).performClick()
 }
