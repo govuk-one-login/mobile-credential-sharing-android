@@ -19,7 +19,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class HolderConsentViewModelTest {
 
     @get:Rule
@@ -65,18 +64,22 @@ class HolderConsentViewModelTest {
     @Test
     fun `Emits AwaitingUserConsent presentation when orchestrator transitions`() =
         runTest(dispatcherRule.testDispatcher) {
-            val presentation = ConsentPresentation(
-                documents = listOf(
-                    ConsentDocument(
-                        docType = "org.iso.18013.5.1.mDL",
-                        namespaces = listOf(
-                            ConsentNamespace(
-                                nameSpace = "org.iso.18013.5.1",
-                                attributes = listOf(ConsentAttribute("family_name", false))
-                            )
+            val documents = listOf(
+                ConsentDocument(
+                    docType = "org.iso.18013.5.1.mDL",
+                    namespaces = listOf(
+                        ConsentNamespace(
+                            nameSpace = "org.iso.18013.5.1",
+                            attributes = listOf(ConsentAttribute("family_name", false))
                         )
                     )
                 )
+            )
+            val presentation = ConsentPresentation(
+                documents = documents
+            )
+            val expected = HolderConsentUiState(
+                documents = documents
             )
 
             viewModel.presentation.test {
@@ -87,7 +90,7 @@ class HolderConsentViewModelTest {
                     presentation = presentation
                 )
 
-                assertThat(awaitItem(), equalTo(presentation))
+                assertThat(awaitItem(), equalTo(expected))
             }
         }
 }

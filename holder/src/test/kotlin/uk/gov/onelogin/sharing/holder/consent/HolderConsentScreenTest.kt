@@ -9,6 +9,7 @@ import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
+import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -331,8 +332,47 @@ class HolderConsentScreenTest {
             composeTestRule.assertPrivacyPolicyCloseIsDisplayed()
         }
 
+    @Test
+    fun `User actions aren't enabled when the view model is busy`(
+        @TestParameter input: ButtonEnablementTestData
+    ) = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        holderState.update {
+            HolderSessionState.AwaitingUserConsent(
+                request = DeviceRequestStub.deviceRequestStub,
+                presentation = presentationWithPrivacyPolicy.copy(
+                    isBusy = input.isBusy
+                )
+            )
+        }
+
+        composeTestRule.apply {
+            setContent { Render() }
+            input.acceptButtonAssertion(this)
+            input.denyButtonAssertion(this)
+        }
+    }
+
     @Composable
     private fun Render() {
         HolderConsentScreen(viewModel = viewModel)
+    }
+
+    enum class ButtonEnablementTestData(
+        val isBusy: Boolean,
+        val acceptButtonAssertion: HolderConsentScreenRule.() -> Unit,
+        val denyButtonAssertion: HolderConsentScreenRule.() -> Unit
+    ) {
+        BUTTONS_ENABLED(
+            isBusy = false,
+            acceptButtonAssertion = HolderConsentScreenRule::assertAcceptButtonIsEnabled,
+            denyButtonAssertion = HolderConsentScreenRule::assertDenyButtonIsEnabled
+        ),
+        BUTTONS_DISABLED(
+            isBusy = true,
+            acceptButtonAssertion = HolderConsentScreenRule::assertAcceptButtonIsNotEnabled,
+            denyButtonAssertion = HolderConsentScreenRule::assertDenyButtonIsNotEnabled
+        )
     }
 }

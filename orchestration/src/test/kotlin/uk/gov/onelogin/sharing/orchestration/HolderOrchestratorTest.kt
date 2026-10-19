@@ -1068,22 +1068,24 @@ class HolderOrchestratorTest {
                 exception = CredentialSigningException.Recoverable()
             )
         )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        orchestrator.holderSessionState.test {
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
+            peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+            peripheralTransport.emitState(
+                PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+            )
+            advanceUntilIdle()
 
-        orchestrator.confirmConsent()
-        advanceUntilIdle()
+            orchestrator.confirmConsent()
+            advanceUntilIdle()
 
-        assertEquals(0, peripheralTransport.sendMessageCalls)
-        assertEquals(null, fakeCryptoService.lastErrorSessionDataStatus)
-        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+            assertEquals(0, peripheralTransport.sendMessageCalls)
+            assertEquals(null, fakeCryptoService.lastErrorSessionDataStatus)
+            assertThat(expectMostRecentItem(), isAwaitingUserConsent())
+        }
     }
 
     @Test
