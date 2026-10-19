@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -25,7 +24,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ViewModelKey
 class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     val presentation: StateFlow<HolderConsentUiState?> = orchestrator
@@ -61,11 +60,11 @@ class HolderConsentViewModel(
         _showPrivacyPolicy.value = false
     }
 
-    fun onAccept() = viewModelScope.launch(dispatcher) {
+    fun onAccept() = viewModelScope.launch {
         orchestrator.confirmConsent()
     }
 
-    fun onDeny() = viewModelScope.launch(dispatcher) {
+    fun onDeny() = viewModelScope.launch {
         orchestrator.denyConsent()
     }
 }

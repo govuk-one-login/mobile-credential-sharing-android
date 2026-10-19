@@ -296,7 +296,15 @@ class HolderOrchestrator(
         } catch (e: CredentialSigningException.Recoverable) {
             // Neutral outcome: keep the session active on the consent screen.
             // The user can retry, deny, or cancel.
+            val state = holderSessionState.value as? HolderSessionState.AwaitingUserConsent
             consentInFlight.set(false)
+            state?.presentation?.let {
+                state.copy(
+                    presentation = it.copy(
+                        isBusy = true
+                    )
+                ).let(::safeTransitionTo)
+            }
             logger.debug(logTag, "$SIGNING_CANCELLED ${e.message ?: ""}".trimEnd())
         } catch (e: DeviceSignatureException) {
             handleFatalSigningFailure(e)
