@@ -187,6 +187,7 @@ val sdk = CredentialSharingSdkImpl(
 )
 
 val credentialProvider = MyCredentialProvider()
+
 val presenter = sdk.createCredentialPresenter(credentialProvider, trustedReaderCertificates)
 ```
 
