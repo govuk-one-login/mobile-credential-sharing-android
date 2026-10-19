@@ -38,14 +38,14 @@ object MainActivityRoutes {
             mockCredentials = mockCredentials
         )
         configureHolderJourneyWrapper { credential ->
-            @Suppress("DEPRECATION")
-            sharingSdk.presentCredentialSdk.presenter(credentialProviderFor(credential))
+//            @Suppress("DEPRECATION")
+//            sharingSdk.presentCredentialSdk.presenter(credentialProviderFor(credential))
 
-//            sharingSdk.createCredentialPresenter(
-//                credentialProvider = credentialProviderFor(credential),
-//                trustedReaderCertificates = readerRootCertificateProvider
-//                    .trustedReaderCertificates()
-//            )
+            sharingSdk.createCredentialPresenter(
+                credentialProvider = credentialProviderFor(credential),
+                trustedReaderCertificates = readerRootCertificateProvider
+                    .trustedReaderCertificates()
+            )
         }
         configureVerifierAttributesSelection(navController)
         configureVerifierJourneyWrapper { _, verificationRequest ->
