@@ -3,14 +3,13 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.LogEntry
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoderImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
+import uk.gov.onelogin.sharing.cryptoService.util.assertErrorLoggedWithThrowable
 import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromHexStringFile
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
@@ -72,7 +71,7 @@ class DeviceRequestDecoderImplTest {
             deviceRequestDecoderImpl.deviceRequestDecoder(trailingDataBytes)
         }
 
-        assertErrorLoggedWithThrowable(DeviceRequestDecodingException::class.java) {
+        logger.assertErrorLoggedWithThrowable(DeviceRequestDecodingException::class.java) {
             it.contains("Trailing data found")
         }
     }
@@ -84,7 +83,7 @@ class DeviceRequestDecoderImplTest {
         }
 
         assert(logger.any { it.message.startsWith("DeviceRequest CBOR decoding failed") })
-        assertErrorLoggedWithThrowable(DeviceRequestDecodingException::class.java) {
+        logger.assertErrorLoggedWithThrowable(DeviceRequestDecodingException::class.java) {
             it.startsWith("DeviceRequest CBOR decoding failed")
         }
     }
@@ -96,7 +95,7 @@ class DeviceRequestDecoderImplTest {
         }
 
         assert(logger.contains("DeviceRequest contains empty DocRequests"))
-        assertErrorLoggedWithThrowable(DeviceRequestValidationException::class.java) {
+        logger.assertErrorLoggedWithThrowable(DeviceRequestValidationException::class.java) {
             it == "DeviceRequest contains empty DocRequests"
         }
     }
@@ -172,7 +171,7 @@ class DeviceRequestDecoderImplTest {
             deviceRequestDecoderImpl.deviceRequestDecoder(duplicateKeyCbor)
         }
 
-        assertErrorLoggedWithThrowable(DeviceRequestDecodingException::class.java) {
+        logger.assertErrorLoggedWithThrowable(DeviceRequestDecodingException::class.java) {
             it.contains("Duplicate key")
         }
     }
@@ -184,20 +183,6 @@ class DeviceRequestDecoderImplTest {
             }
         }
         return -1
-    }
-
-    private fun assertErrorLoggedWithThrowable(
-        throwableType: Class<out Throwable>,
-        messagePredicate: (String) -> Boolean
-    ) {
-        assertTrue(
-            logger.any { entry ->
-                entry is LogEntry.ErrorNoKeys &&
-                    throwableType.isInstance(entry.throwable) &&
-                    messagePredicate(entry.message)
-            },
-            "Expected an error log with a ${throwableType.simpleName} throwable"
-        )
     }
 
     private fun assertDeviceRequestParsedCorrectly(deviceRequest: DeviceRequest) {
