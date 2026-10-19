@@ -197,13 +197,22 @@ class AndroidGattServerManager(
 
         when (val result = reassembler.accept(event.characteristicUuid, event.value)) {
             is MessageReassembler.Result.Incomplete ->
-                logger.debug(logTag, "received message part, expecting additional data")
+                logger.debug(
+                    logTag,
+                    "Chunked 'Client2Server' characteristic update: " +
+                        "${event.value.drop(1).size} bytes received"
+                )
 
             is MessageReassembler.Result.ExceededMaxBuffer ->
                 handleExceededMaxBufferSize()
 
             is MessageReassembler.Result.Complete ->
-                _events.tryEmit(GattServerEvent.MessageReceived(result.message))
+                _events.tryEmit(GattServerEvent.MessageReceived(result.message)).also {
+                    logger.debug(
+                        logTag,
+                        "Completed 'Client2Server' message transfer: ${result.message.size} bytes"
+                    )
+                }
 
             is MessageReassembler.Result.InvalidPrefix ->
                 logger.error(logTag, "invalid message received from remote device")

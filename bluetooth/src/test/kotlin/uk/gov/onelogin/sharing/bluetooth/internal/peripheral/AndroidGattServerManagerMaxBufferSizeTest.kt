@@ -94,6 +94,22 @@ class AndroidGattServerManagerMaxBufferSizeTest {
     }
 
     @Test
+    fun `logs message sizes during reassembly`() = runTest {
+        testEvents {
+            sendChunk(byteArrayOf(NON_LAST_PART) + ByteArray(30) { 0x11 })
+            sendChunk(byteArrayOf(LAST_PART) + ByteArray(30) { 0x22 })
+            awaitItem()
+        }
+
+        assertTrue(
+            "Chunked 'Client2Server' characteristic update: 30 bytes received" in logger
+        )
+        assertTrue(
+            "Completed 'Client2Server' message transfer: 60 bytes" in logger
+        )
+    }
+
+    @Test
     fun `message exactly at limit is accepted`() = runTest {
         testEvents {
             sendChunk(byteArrayOf(NON_LAST_PART) + ByteArray(50) { 0x11 })

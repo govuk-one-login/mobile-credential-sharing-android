@@ -537,7 +537,7 @@ class AndroidGattClientManager(
             logger.debug(
                 logTag,
                 "Chunked 'Server2Client' characteristic update: " +
-                    value.drop(1).toByteArray().toHexString()
+                    "${value.drop(1).size} bytes received"
             )
             // don't emit a message event until the message is complete.
             null
@@ -552,16 +552,8 @@ class AndroidGattClientManager(
             GattClientEvent.Message(uuid = characteristic.uuid, value = result.message).also {
                 logger.debug(
                     logTag,
-                    "Completed 'Server2Client' message transfer:"
+                    "Completed 'Server2Client' message transfer: ${it.value.size} bytes"
                 )
-                it.value.toHexString()
-                    .chunked(THREE_KILOBYTE_CHAR_LENGTH)
-                    .forEach { chunkedMessage ->
-                        logger.debug(
-                            logTag,
-                            chunkedMessage
-                        )
-                    }
             }
         }
 
@@ -596,12 +588,6 @@ class AndroidGattClientManager(
 
         /** Fallback (ms) for the START write confirmation so a missing callback cannot stall setup. */
         const val START_CONFIRMATION_TIMEOUT: Long = 200L
-
-        /**
-         * The [String] length for 3 kilobytes of data, as kotlin uses 16 bits per [Char].
-         * This is used for chunking long log messages due to android limitations of
-         */
-        const val THREE_KILOBYTE_CHAR_LENGTH = 192
 
         /**
          * Default maximum receive buffer size for the verifier role (2MB).

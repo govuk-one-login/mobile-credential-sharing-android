@@ -704,13 +704,13 @@ internal class AndroidGattClientManagerTest {
 
             inputBytes.dropLast(1).forEach { chunk ->
                 assertTrue(
-                    "Chunked 'Server2Client' characteristic update: ${chunk.toHexString()}"
+                    "Chunked 'Server2Client' characteristic update: ${chunk.size} bytes received"
                         in logger
                 )
             }
 
             assertTrue(
-                "Completed 'Server2Client' message transfer:" in logger
+                "Completed 'Server2Client' message transfer: ${expectedBytes.size} bytes" in logger
             )
         }
     }
@@ -742,7 +742,7 @@ internal class AndroidGattClientManagerTest {
         }
 
         assertTrue(
-            "Completed 'Server2Client' message transfer:" in logger
+            "Completed 'Server2Client' message transfer: ${expectedBytes.size} bytes" in logger
         )
     }
 
