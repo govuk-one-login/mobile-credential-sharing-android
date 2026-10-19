@@ -301,7 +301,7 @@ class HolderOrchestrator(
             state?.presentation?.let {
                 state.copy(
                     presentation = it.copy(
-                        isBusy = true
+                        isBusy = false
                     )
                 ).let(::safeTransitionTo)
             }
