@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.awaitingresolution
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,11 +11,6 @@ import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -42,18 +36,6 @@ internal fun AwaitingVerifierResolutionScreen(
     viewModel: AwaitingVerifierResolutionViewModel = metroViewModel(),
     onExitJourney: () -> Unit = {}
 ) {
-    var isExiting by remember { mutableStateOf(false) }
-    val currentOnExitJourney by rememberUpdatedState(onExitJourney)
-
-    BackHandler(enabled = !isExiting) { }
-
-    LaunchedEffect(isExiting) {
-        if (isExiting) {
-            viewModel.reset()
-            currentOnExitJourney()
-        }
-    }
-
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("AwaitingVerifierResolutionScreen")
@@ -61,7 +43,10 @@ internal fun AwaitingVerifierResolutionScreen(
 
     AwaitingVerifierResolutionContent(
         modifier = modifier,
-        onGoBackToDocuments = { isExiting = true }
+        onGoBackToDocuments = {
+            viewModel.reset()
+            onExitJourney()
+        }
     )
 }
 

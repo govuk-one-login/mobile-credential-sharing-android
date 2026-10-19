@@ -27,7 +27,6 @@ class HolderSessionStateTest {
     fun `Certain states are cancellable by the User`(
         @TestParameter state: HolderSessionState = testValues(
             AwaitingUserConsent(mockk(relaxed = true)),
-            AwaitingVerifierResolution,
             ProcessingEstablishment,
             PresentingEngagement("unit test"),
             ProcessingResponse
@@ -46,6 +45,7 @@ class HolderSessionStateTest {
             NotStarted,
             Preflight(listOf()),
             ReadyToPresent,
+            AwaitingVerifierResolution,
             Success(),
             HolderSessionState.SendingTermination
         )
