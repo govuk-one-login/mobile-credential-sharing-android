@@ -543,7 +543,7 @@ class AndroidGattClientManager(
         }
 
         is MessageReassembler.Result.ExceededMaxBuffer -> {
-            handleExceededMaxBufferSize(result.bufferSize)
+            handleExceededMaxBufferSize()
             null
         }
 
@@ -581,10 +581,7 @@ class AndroidGattClientManager(
      * an error to trigger session failure and destruction.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun handleExceededMaxBufferSize(bufferSize: Int) {
-        val message =
-            "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
-        logger.error(logTag, message, LoggerException(message))
+    private fun handleExceededMaxBufferSize() {
         isTerminating = true
         coroutineScope.launch {
             notifySessionEnd()

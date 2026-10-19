@@ -61,7 +61,7 @@ internal class GattServerCallback(
                     }
 
                     is MessageReassembler.Result.ExceededMaxBuffer -> {
-                        emitExceededMaxBufferSize(result.bufferSize)
+                        emitExceededMaxBufferSize()
                     }
 
                     is MessageReassembler.Result.Complete -> {
@@ -167,9 +167,7 @@ internal class GattServerCallback(
         )
     }
 
-    private fun emitExceededMaxBufferSize(bufferSize: Int) {
-        val message = "ExceededMaxBufferSize: accumulated $bufferSize bytes exceeds limit"
-        logger.error(logTag, message, LoggerException(message))
+    private fun emitExceededMaxBufferSize() {
         gatGattEventEmitter.emit(GattServerCallbackEvent.ExceededMaxBufferSize)
     }
 

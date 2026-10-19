@@ -65,6 +65,17 @@ class MessageReassemblerTest {
     }
 
     @Test
+    fun `overflow logs buffer size error`() {
+        val reassembler = reassembler(maxReceiveBufferSize = 2)
+
+        reassembler.accept(uuid, byteArrayOf(LAST_PART) + ByteArray(3) { 0x01 })
+
+        assertTrue(
+            "ExceededMaxBuffer: 3 bytes exceeds limit of 2 bytes" in logger
+        )
+    }
+
+    @Test
     fun `message exactly at the limit is accepted`() {
         val reassembler = reassembler(maxReceiveBufferSize = 4)
 

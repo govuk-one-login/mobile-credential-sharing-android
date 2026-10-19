@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import uk.gov.logging.testdouble.v2.SystemLogger
@@ -18,6 +19,7 @@ class GattServerCallbackMaxBufferSizeTest {
     private val fakeEmitter = FakeGattServerEventEmitter()
     private val device = mockk<BluetoothDevice>()
     private val characteristicUuid = GattUuids.CLIENT_2_SERVER_UUID
+    private val logger = SystemLogger()
     private val characteristic = mockk<android.bluetooth.BluetoothGattCharacteristic> {
         every { uuid } returns characteristicUuid
     }
@@ -32,8 +34,8 @@ class GattServerCallbackMaxBufferSizeTest {
         maxReceiveBufferSize: Int = GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE
     ) = GattServerCallback(
         gatGattEventEmitter = fakeEmitter,
-        logger = SystemLogger(),
-        reassembler = MessageReassembler(maxReceiveBufferSize, SystemLogger())
+        logger = logger,
+        reassembler = MessageReassembler(maxReceiveBufferSize, logger)
     )
 
     @Test
@@ -94,6 +96,18 @@ class GattServerCallbackMaxBufferSizeTest {
         assertEquals(
             GattServerCallbackEvent.ExceededMaxBufferSize,
             fakeEmitter.events.single()
+        )
+    }
+
+    @Test
+    fun `logs buffer size details when limit exceeded`() {
+        val callback = callback(maxReceiveBufferSize = 100)
+
+        val chunk = byteArrayOf(NON_LAST_PART) + ByteArray(101) { 0x11 }
+        sendChunk(callback, chunk)
+
+        assertTrue(
+            "ExceededMaxBuffer: 101 bytes exceeds limit of 100 bytes" in logger
         )
     }
 

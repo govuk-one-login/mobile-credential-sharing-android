@@ -202,7 +202,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
         }
 
         assertTrue(
-            "ExceededMaxBufferSize: 101 bytes exceeds limit of 100 bytes" in logger
+            "ExceededMaxBuffer: 101 bytes exceeds limit of 100 bytes" in logger
         )
     }
 
