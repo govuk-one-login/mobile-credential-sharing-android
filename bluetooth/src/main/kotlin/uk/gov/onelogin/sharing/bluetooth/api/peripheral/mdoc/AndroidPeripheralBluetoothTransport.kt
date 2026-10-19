@@ -27,8 +27,8 @@ import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingExcepti
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStateMonitor
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerManager
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.core.coroutines.CoroutineNameExt.asCoroutineName
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
@@ -117,7 +117,7 @@ class AndroidPeripheralBluetoothTransport(
                 notifySessionEnd(serviceUuid)
             }
             bluetoothStateMonitor.stop()
-            bleAdvertiser.stopAdvertise()
+            stopAdvertising()
             gattServerManager.close()
             _state.value = PeripheralBluetoothState.Idle
         }
@@ -130,6 +130,11 @@ class AndroidPeripheralBluetoothTransport(
             // allow time for the END notification to be sent before closing the GATT server
             delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
         }
+    }
+
+    override suspend fun stopAdvertising() {
+        bleAdvertiser.stopAdvertise()
+        logger.debug(logTag, "Advertising ${state::class.java.simpleName}")
     }
 
     private fun handleAdvertiserState(state: AdvertiserState) {

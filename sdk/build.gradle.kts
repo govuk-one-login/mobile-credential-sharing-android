@@ -21,6 +21,7 @@ android {
 
 dependencies {
     listOf(
+        projects.analytics,
         projects.orchestration
     ).forEach(::api)
 

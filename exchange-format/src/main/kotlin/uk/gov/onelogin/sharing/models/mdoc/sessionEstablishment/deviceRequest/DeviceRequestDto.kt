@@ -35,7 +35,8 @@ data class DeviceRequestDto(
     val readerAuthAll: ByteArray? = null
 ) : CborEncodable {
     init {
-        require(version.isNotEmpty()) { "DeviceRequest: version must not be empty" }
+        require(version == "1.0") { "DeviceRequest: version must be '1.0'" }
+        require(docRequest.isNotEmpty()) { "DeviceRequest: docRequests cannot be empty" }
     }
 
     override fun equals(other: Any?): Boolean {

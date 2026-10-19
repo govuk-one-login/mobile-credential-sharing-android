@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -29,7 +29,7 @@ import uk.gov.onelogin.sharing.testapp.home.TestAppViewModel.NavigationEvent
 @Composable
 fun TestAppScreen(
     modifier: Modifier = Modifier,
-    viewModel: TestAppViewModel = viewModel(),
+    viewModel: TestAppViewModel = hiltViewModel(),
     onStartHolderJourney: () -> Unit = {},
     onStartVerifierJourney: () -> Unit = {}
 ) {
@@ -47,6 +47,12 @@ fun TestAppScreen(
                 is NavigationEvent.Holder -> currentOnStartHolderJourney()
                 is NavigationEvent.Verifier -> currentOnStartVerifierJourney()
             }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            viewModel.sendScreenEvent()
         }
     }
 

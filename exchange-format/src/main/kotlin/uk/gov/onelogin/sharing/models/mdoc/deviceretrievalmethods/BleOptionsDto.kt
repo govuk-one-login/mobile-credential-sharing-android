@@ -28,13 +28,16 @@ data class BleOptionsDto(
             gen: JsonGenerator,
             provider: SerializerProvider
         ) {
-            (gen as CBORGenerator).writeStartObject(FIELD_COUNT)
+            val fieldCount = 2 + (if (value.peripheralServerModeUuid != null) 1 else 0)
+            (gen as CBORGenerator).writeStartObject(fieldCount)
             gen.writeFieldId(SERVER_MODE_KEY)
             gen.writeBoolean(value.serverMode)
             gen.writeFieldId(CLIENT_MODE_KEY)
             gen.writeBoolean(value.clientMode)
-            gen.writeFieldId(PERIPHERAL_UUID_KEY)
-            provider.defaultSerializeValue(value.peripheralServerModeUuid, gen)
+            value.peripheralServerModeUuid?.let { uuidBytes ->
+                gen.writeFieldId(PERIPHERAL_UUID_KEY)
+                gen.writeBinary(uuidBytes)
+            }
             gen.writeEndObject()
         }
     }
@@ -55,7 +58,6 @@ data class BleOptionsDto(
     }
 
     companion object {
-        private const val FIELD_COUNT = 3
         const val SERVER_MODE_KEY = 0L
         const val CLIENT_MODE_KEY = 1L
         const val PERIPHERAL_UUID_KEY = 10L

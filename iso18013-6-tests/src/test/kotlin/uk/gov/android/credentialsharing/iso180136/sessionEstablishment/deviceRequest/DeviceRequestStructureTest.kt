@@ -104,7 +104,7 @@ class DeviceRequestStructureTest {
     ) {
         assertThat(
             deviceRequestHexString.chunked(2),
-            not(Matchers.contains(assertion))
+            not(Matchers.hasItem(assertion))
         )
     }
 
@@ -197,12 +197,8 @@ class DeviceRequestStructureTest {
 
     /**
      * Scenario: mDLR_MS_DR_04
-     *
-     * Fails conformance tests due to [DeviceRequestDto] `init` block only validating that the
-     * version isn't empty.
      */
     @Test
-    @Ignore("Fails conformance test due to minimal input validation")
     fun `Invalid versions throw exceptions`(
         @TestParameter version: String = namedTestValues(
             "Empty version" to "",
@@ -222,12 +218,8 @@ class DeviceRequestStructureTest {
 
     /**
      * Scenario: mDLR_MS_DR_05
-     *
-     * Fails conformance test due to [DeviceRequestDto] `init` block performing no validation on
-     * [DeviceRequestDto.docRequest].
      */
     @Test
-    @Ignore("Fails conformance test due to lack of input validation")
     fun `Document requests cannot be empty`() {
         assertThrows(IllegalArgumentException::class.java) {
             deviceRequest = deviceRequest.copy(

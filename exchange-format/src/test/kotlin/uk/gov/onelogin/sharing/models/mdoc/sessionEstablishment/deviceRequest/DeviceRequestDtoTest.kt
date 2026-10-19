@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -34,10 +35,6 @@ class DeviceRequestDtoTest {
         readerAuthAll = byteArrayOf(3, 4)
     )
 
-    private val differentVersion = dto.copy(
-        version = "2.0"
-    )
-
     @Test
     fun `DeviceRequestDto preserves version`() {
         val decoded = CborMapper.default.readValue(encoded, DeviceRequestDto::class.java)
@@ -48,6 +45,13 @@ class DeviceRequestDtoTest {
     fun `DeviceRequestDto preserves docRequest count`() {
         val decoded = CborMapper.default.readValue(encoded, DeviceRequestDto::class.java)
         assertEquals(1, decoded.docRequest.size)
+    }
+
+    @Test
+    fun `DeviceRequestDto throws when docRequest is empty`() {
+        assertFailsWith<IllegalArgumentException> {
+            dto.copy(docRequest = emptyList())
+        }
     }
 
     @Test
@@ -138,7 +142,6 @@ class DeviceRequestDtoTest {
         assertNotEquals(dto, differentDeviceRequestInfo)
         assertNotEquals(dto, differentDocRequest)
         assertNotEquals(dto, differentReaderAuth)
-        assertNotEquals(dto, differentVersion)
     }
 
     @Test
@@ -149,6 +152,5 @@ class DeviceRequestDtoTest {
         assertNotEquals(dto.hashCode(), differentDeviceRequestInfo.hashCode())
         assertNotEquals(dto.hashCode(), differentDocRequest.hashCode())
         assertNotEquals(dto.hashCode(), differentReaderAuth.hashCode())
-        assertNotEquals(dto.hashCode(), differentVersion.hashCode())
     }
 }
