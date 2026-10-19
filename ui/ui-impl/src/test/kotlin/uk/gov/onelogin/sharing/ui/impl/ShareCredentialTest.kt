@@ -300,7 +300,7 @@ class ShareCredentialTest {
                 ?.contains("AwaitingVerifierResolution") == true
         }
 
-        composeTestRule.onNodeWithText("Details Shared").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progressIndicator").assertDoesNotExist()
         assertEquals(0, orchestrator.startCount)
     }
