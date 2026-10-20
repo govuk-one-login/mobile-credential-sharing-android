@@ -294,7 +294,6 @@ class AndroidPeripheralBluetoothTransportTest {
         )
 
         transport.stop(
-            serviceUuid = uuid,
             sendEndCommand = true
         )
         advanceUntilIdle()

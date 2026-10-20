@@ -24,7 +24,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerManager
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.STATE_UUID
@@ -280,7 +280,7 @@ class AndroidGattServerManager(
     private fun handleExceededMaxBufferSize() {
         isTerminating = true
         coroutineScope.launch {
-            serviceUuid?.let { notifySessionEnd(it) }
+            notifySessionEnd()
             delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
             cancelCurrentConnection()
             _events.tryEmit(GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE))
@@ -293,10 +293,11 @@ class AndroidGattServerManager(
      * the readers characteristic.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued {
+    override fun notifySessionEnd(): SessionEndStateQueued {
         val server = gattServer ?: return SessionEndStateQueued.Failed
+        val uuid = serviceUuid ?: return SessionEndStateQueued.Failed
         val characteristic: BluetoothGattCharacteristic =
-            server.getService(serviceUuid)?.getCharacteristic(STATE_UUID)
+            server.getService(uuid)?.getCharacteristic(STATE_UUID)
                 ?: return SessionEndStateQueued.Failed
         val endValue = byteArrayOf(MdocState.END.code)
 
@@ -325,10 +326,11 @@ class AndroidGattServerManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(data: ByteArray): Boolean {
         val server = gattServer ?: return false
         val device = connectedDevice ?: return false
-        val characteristic = server.getService(serviceUuid)
+        val uuid = serviceUuid ?: return false
+        val characteristic = server.getService(uuid)
             ?.getCharacteristic(SERVER_2_CLIENT_UUID) ?: return false
 
         return sendChunkedMessage(data, mtu, logger) { chunk ->
