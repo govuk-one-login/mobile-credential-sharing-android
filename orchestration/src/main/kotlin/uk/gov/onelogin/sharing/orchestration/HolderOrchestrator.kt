@@ -26,8 +26,10 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.engagement.EngagementTimingPolicy
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
+import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimerImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
@@ -93,7 +95,9 @@ class HolderOrchestrator(
     private val sessionTimer: SessionTimer,
     private val trustedReaderCertificates: List<X509Certificate>,
     private val authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory,
-    private val readerAuthentication: ReaderAuthentication
+    private val readerAuthentication: ReaderAuthentication,
+    private val engagementTimer: SessionTimer = SessionTimerImpl(appCoroutineScope, logger),
+    private val engagementTimingPolicy: EngagementTimingPolicy = EngagementTimingPolicy()
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val consentInFlight = AtomicBoolean(false)
@@ -437,6 +441,7 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
+        engagementTimer.stop()
         signingJob?.cancel()
         consentInFlight.set(false)
         sessionFlow.update {
@@ -446,6 +451,45 @@ class HolderOrchestrator(
                     createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
                 )
             }
+        }
+    }
+
+    private fun enterGraceWindow() {
+        sessionFlow.value.updateEngagementDisplay(showQr = false)
+        engagementTimer.start(engagementTimingPolicy.graceDelay) {
+            refreshEngagementSession()
+        }
+    }
+
+    private suspend fun refreshEngagementSession() {
+        if (sessionFlow.value.currentState.value !is HolderSessionState.PresentingEngagement) {
+            logger.debug(
+                logTag,
+                "Skipping engagement refresh: session is no longer presenting engagement"
+            )
+            return
+        }
+
+        val oldUuid = currentContext.sessionUuid
+
+        peripheralBluetoothTransport.stop(
+            serviceUuid = oldUuid,
+            sendEndCommand = false
+        )
+
+        val newSession = sessionFactory.create()
+
+        newSession.transitionTo(HolderSessionState.ReadyToPresent)
+        sessionFlow.value = newSession
+
+        val newUuid = newSession.sessionContext.sessionUuid
+        peripheralBluetoothTransport.start(
+            serviceUuid = newUuid
+        )
+
+        val newQrCode = newSession.sessionContext.qrCode
+        if (newQrCode.isNotEmpty()) {
+            safeTransitionTo(HolderSessionState.PresentingEngagement(newQrCode))
         }
     }
 
@@ -958,6 +1002,13 @@ class HolderOrchestrator(
 
         try {
             sessionFlow.value.transitionTo(state)
+            if (state is HolderSessionState.PresentingEngagement) {
+                engagementTimer.start(engagementTimingPolicy.qrVisibleDuration) {
+                    enterGraceWindow()
+                }
+            } else {
+                engagementTimer.stop()
+            }
             if (state.isComplete()) {
                 sessionTimer.stop()
             }
