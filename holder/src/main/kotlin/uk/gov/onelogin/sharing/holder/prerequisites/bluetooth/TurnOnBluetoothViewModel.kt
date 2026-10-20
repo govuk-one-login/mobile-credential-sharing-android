@@ -71,7 +71,7 @@ class TurnOnBluetoothViewModel(
     fun sendScreenEvent() = viewModelScope.launch(dispatcher) {
         ViewEvent.Screen(
             name = "Turn on Bluetooth",
-            id = "TurnOnBluetoothScreen",
+            id = "d64962b9-def5-4b13-9c3c-128d51353fe7",
             params = walletSharingRequiredParameters
         ).let(analyticsLogger::logEventV3Dot1)
     }

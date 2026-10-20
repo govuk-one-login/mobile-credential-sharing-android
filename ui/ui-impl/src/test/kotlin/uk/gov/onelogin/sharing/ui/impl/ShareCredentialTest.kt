@@ -25,6 +25,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.logging.api.analytics.parameters.data.TaxonomyLevel2
+import uk.gov.logging.api.v3dot1.logger.asLegacyEvent
+import uk.gov.logging.api.v3dot1.model.RequiredParameters
+import uk.gov.logging.api.v3dot1.model.TrackEvent
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -38,9 +43,16 @@ class ShareCredentialTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val analyticsLogger = StoredAnalyticsLogger()
+
     private val appGraph by lazy {
-        createTestAppGraph()
+        createTestAppGraph(analyticsLogger = analyticsLogger)
     }
+
+    private val expectedCloseEvent = TrackEvent.Button(
+        text = "Close",
+        params = RequiredParameters(taxonomyLevel2 = TaxonomyLevel2.WALLET)
+    ).asLegacyEvent()
 
     private val holderGraph by lazy {
         createTestHolderGraph(appGraph)
@@ -168,6 +180,27 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
+    fun `Close button sends a button analytics event`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Preflight" to HolderSessionState.Preflight(emptyList()),
+            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true))
+        )
+    ) = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(state)
+            )
+        )
+        performCloseJourneyViaButton(presenter)
+        composeTestRule.waitUntil {
+            expectedCloseEvent in analyticsLogger.sentAnalyticsEvents
+        }
+    }
+
+    @Test
+    @UiThreadTest
     fun `Denied success resets orchestrator`() = runTest {
         val orchestrator = FakeOrchestrator(
             initialHolderState = MutableStateFlow(
@@ -251,6 +284,7 @@ class ShareCredentialTest {
             }
 
             ShareCredential(
+                analyticsLogger = analyticsLogger,
                 orchestrator = orchestrator,
                 holderSessionState = orchestrator.holderSessionState,
                 viewModelFactory = uiGraph.metroViewModelFactory,
@@ -287,6 +321,7 @@ class ShareCredentialTest {
             }
 
             ShareCredential(
+                analyticsLogger = analyticsLogger,
                 orchestrator = orchestrator,
                 holderSessionState = orchestrator.holderSessionState,
                 viewModelFactory = uiGraph.metroViewModelFactory,
@@ -330,6 +365,7 @@ class ShareCredentialTest {
         val orchestrator = uiGraph.holderOrchestrator()
 
         ShareCredential(
+            analyticsLogger = presenter.appGraph.analyticsLogger(),
             orchestrator = orchestrator,
             holderSessionState = presenter.orchestrator.holderSessionState,
             navController = controller,

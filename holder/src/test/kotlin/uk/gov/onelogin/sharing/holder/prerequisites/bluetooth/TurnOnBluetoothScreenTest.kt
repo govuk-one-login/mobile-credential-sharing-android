@@ -9,11 +9,14 @@ import kotlin.getValue
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.hasItem
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -110,6 +113,10 @@ class TurnOnBluetoothScreenTest {
             waitUntil { launchedAction != null }
             assertEquals(PrerequisiteAction.EnableBluetooth, launchedAction)
         }
+        assertThat(
+            analyticsLogger,
+            hasSentEvents(hasItem(TurnOnBluetoothViewModelTestData.expectedTurnOnBluetoothEvent))
+        )
     }
 
     @Test
@@ -127,5 +134,17 @@ class TurnOnBluetoothScreenTest {
                 hasRecheckedPrerequisites
             }
         }
+    }
+
+    @Test
+    fun `Displaying the screen sends a screen view event`() = runTest {
+        composeTestRule.run {
+            setContent { TurnOnBluetoothScreen(viewModel = viewModel) }
+            waitUntil { analyticsLogger.sentAnalyticsEvents.isNotEmpty() }
+        }
+        assertThat(
+            analyticsLogger,
+            hasSentEvents(hasItem(TurnOnBluetoothViewModelTestData.expectedScreenEvent))
+        )
     }
 }
