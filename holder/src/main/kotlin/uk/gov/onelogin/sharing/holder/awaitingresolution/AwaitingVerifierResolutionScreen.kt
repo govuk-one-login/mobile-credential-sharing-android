@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.holder.awaitingresolution
 
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +12,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
@@ -36,6 +43,31 @@ internal fun AwaitingVerifierResolutionScreen(
     viewModel: AwaitingVerifierResolutionViewModel = metroViewModel(),
     onExitJourney: () -> Unit = {}
 ) {
+    val currentViewModel by rememberUpdatedState(viewModel)
+    val currentOnExitJourney by rememberUpdatedState(onExitJourney)
+
+    /**
+     * Handles both system back and "Go back to documents" buttons so journey is reset before
+     * control is handed back to host app
+     */
+    val exitCallback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (!isEnabled) return
+                isEnabled = false
+                currentViewModel.reset()
+                currentOnExitJourney()
+            }
+        }
+    }
+
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(backDispatcher, lifecycleOwner) {
+        backDispatcher?.addCallback(lifecycleOwner, exitCallback)
+        onDispose { exitCallback.remove() }
+    }
+
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("AwaitingVerifierResolutionScreen")
@@ -46,12 +78,12 @@ internal fun AwaitingVerifierResolutionScreen(
         modifier = modifier,
         onGoBackToDocuments = {
             viewModel.logGoBackToDocuments()
-            viewModel.reset()
-            onExitJourney()
+            exitCallback.handleOnBackPressed()
         }
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 internal fun AwaitingVerifierResolutionContent(
     modifier: Modifier = Modifier,

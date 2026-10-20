@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -328,6 +330,33 @@ class ShareCredentialTest {
         composeTestRule.onNode(
             hasText("Go back to documents") and hasRole(Role.Button)
         ).performClick()
+        composeTestRule.waitForIdle()
+
+        assertEquals(1, orchestrator.resetCount)
+        assertEquals(1, hostBackPresses)
+    }
+
+    @Test
+    @UiThreadTest
+    fun `System back resets and hands control back to the host app`() = runTest {
+        var hostBackPresses = 0
+        lateinit var dispatcher: OnBackPressedDispatcher
+
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(HolderSessionState.Complete.Success())
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent {
+            dispatcher = LocalOnBackPressedDispatcherOwner.current!!.onBackPressedDispatcher
+            BackHandler { hostBackPresses++ }
+            ShareCredential(presenter)
+        }
+        composeTestRule.waitForIdle()
+        dispatcher.onBackPressed()
         composeTestRule.waitForIdle()
 
         assertEquals(1, orchestrator.resetCount)

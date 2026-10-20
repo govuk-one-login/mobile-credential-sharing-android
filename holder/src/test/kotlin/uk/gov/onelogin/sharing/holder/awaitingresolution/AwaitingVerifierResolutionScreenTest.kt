@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.awaitingresolution
 
+import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -9,6 +10,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import io.mockk.mockk
 import kotlin.test.assertEquals
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -17,6 +19,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(RobolectricTestParameterInjector::class)
 class AwaitingVerifierResolutionScreenTest {
@@ -28,7 +31,6 @@ class AwaitingVerifierResolutionScreenTest {
     val composeTestRule = AwaitingVerifierResolutionScreenRule()
 
     private val orchestrator = FakeOrchestrator()
-    private val viewModelFactory: MetroViewModelFactory = mockk(relaxed = true)
     private val analyticsLogger = StoredAnalyticsLogger()
     private val viewModel = AwaitingVerifierResolutionViewModel(analyticsLogger, orchestrator)
     private var exitJourneyCount = 0
@@ -61,7 +63,7 @@ class AwaitingVerifierResolutionScreenTest {
         }
 
     @Test
-    fun `System back is handed to host app on go back to documents click`() =
+    fun `System back resets the journey and hands back press to the host app`() =
         runTest(dispatcherRule.testDispatcher) {
             var hostBackPresses = 0
 
@@ -71,13 +73,19 @@ class AwaitingVerifierResolutionScreenTest {
                 setContent {
                     backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
                     BackHandler { hostBackPresses++ }
-                    Render()
+                    AwaitingVerifierResolutionScreen(
+                        viewModel = viewModel,
+                        onExitJourney = {
+                            backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
+                        }
+                    )
                 }
 
                 runOnUiThread {
                     backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
                 }
                 waitForIdle()
+                assertEquals(1, orchestrator.resetCount, "Journey was not reset")
                 assertEquals(1, hostBackPresses, "Host app did not press back")
             }
         }
