@@ -76,10 +76,57 @@ class CertificateProfileValidatorTest {
     }
 
     @Test
-    fun `intermediate with extra KeyUsage bits fails with INVALID_KEY_USAGE`() {
+    fun `IssuerAuth intermediate with extra KeyUsage bits is approved`() {
+        // Intermediate KeyUsage = keyCertSign + cRLSign + digitalSignature (extra bit allowed).
+        val result = validator.validate(
+            listOf(validIssuerLeaf, CertificateStubs.caWithExtraKeyUsageBits),
+            CertificatePurpose.ISSUER_AUTH
+        )
+
+        assertThat(result, equalTo(validIssuerLeaf))
+    }
+
+    @Test
+    fun `IssuerAuth leaf with extra KeyUsage bits is approved`() {
+        // Leaf KeyUsage = digitalSignature + keyEncipherment (extra bit allowed), issuer EKU.
+        val leaf = TestCertificateGenerator(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = CertificateStubs.leafKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).leafWithExtraBits()
+            .withEkuOids(listOf(ISSUER_AUTH_EKU))
+            .build()
+
+        val result = validator.validate(listOf(leaf), CertificatePurpose.ISSUER_AUTH)
+
+        assertThat(result, equalTo(leaf))
+    }
+
+    @Test
+    fun `IssuerAuth leaf missing digitalSignature fails with INVALID_KEY_USAGE`() {
+        // Leaf KeyUsage = keyCertSign + cRLSign only (no digitalSignature).
+        val leaf = TestCertificateGenerator(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = CertificateStubs.leafKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).caKeyUsage()
+            .withEkuOids(listOf(ISSUER_AUTH_EKU))
+            .build()
+
+        val violation = assertThrows(CertificateProfileViolation::class.java) {
+            validator.validate(listOf(leaf), CertificatePurpose.ISSUER_AUTH)
+        }
+
+        assertThat(violation.reason, equalTo(CertificateProfileReason.INVALID_KEY_USAGE))
+    }
+
+    @Test
+    fun `IssuerAuth intermediate missing cRLSign fails with INVALID_KEY_USAGE`() {
         val violation = assertThrows(CertificateProfileViolation::class.java) {
             validator.validate(
-                listOf(validIssuerLeaf, CertificateStubs.caWithExtraKeyUsageBits),
+                listOf(validIssuerLeaf, CertificateStubs.caKeyCertSignOnly),
                 CertificatePurpose.ISSUER_AUTH
             )
         }
@@ -88,12 +135,104 @@ class CertificateProfileValidatorTest {
     }
 
     @Test
-    fun `leaf with extra KeyUsage bits fails with INVALID_KEY_USAGE`() {
+    fun `IssuerAuth leaf without KeyUsage extension fails with INVALID_KEY_USAGE`() {
+        val leaf = TestCertificateGenerator(
+            subject = "CN=Leaf,C=GB,ST=London",
+            keyPair = CertificateStubs.leafKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).noKeyUsage()
+            .withEkuOids(listOf(ISSUER_AUTH_EKU))
+            .build()
+
+        val violation = assertThrows(CertificateProfileViolation::class.java) {
+            validator.validate(listOf(leaf), CertificatePurpose.ISSUER_AUTH)
+        }
+
+        assertThat(violation.reason, equalTo(CertificateProfileReason.INVALID_KEY_USAGE))
+    }
+
+    // --- ReaderAuth KeyUsage: "must contain" (extra bits permitted) ---
+
+    private fun readerLeaf(configure: TestCertificateGenerator.() -> TestCertificateGenerator) =
+        TestCertificateGenerator(
+            subject = "CN=Reader Leaf,C=GB,ST=London",
+            keyPair = CertificateStubs.leafKeyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root,C=GB,ST=London"
+        ).configure().withEkuOids(listOf(READER_AUTH_EKU)).build()
+
+    @Test
+    fun `ReaderAuth leaf with extra KeyUsage bits is approved`() {
+        // Leaf KeyUsage = digitalSignature + keyEncipherment (extra bit allowed for ReaderAuth).
+        val leaf = readerLeaf { leafWithExtraBits() }
+
+        val result = validator.validate(listOf(leaf), CertificatePurpose.READER_AUTH)
+
+        assertThat(result, equalTo(leaf))
+    }
+
+    @Test
+    fun `ReaderAuth intermediate with extra KeyUsage bits is approved`() {
+        // Intermediate KeyUsage = keyCertSign + cRLSign + digitalSignature (extra bit allowed).
+        val leaf = readerLeaf { leaf() }
+
+        val result = validator.validate(
+            listOf(leaf, CertificateStubs.caWithExtraKeyUsageBits),
+            CertificatePurpose.READER_AUTH
+        )
+
+        assertThat(result, equalTo(leaf))
+    }
+
+    @Test
+    fun `ReaderAuth leaf missing digitalSignature fails with INVALID_KEY_USAGE`() {
+        // Leaf KeyUsage = keyCertSign + cRLSign only (no digitalSignature).
+        val leaf = readerLeaf { caKeyUsage() }
+
+        val violation = assertThrows(CertificateProfileViolation::class.java) {
+            validator.validate(listOf(leaf), CertificatePurpose.READER_AUTH)
+        }
+
+        assertThat(violation.reason, equalTo(CertificateProfileReason.INVALID_KEY_USAGE))
+    }
+
+    @Test
+    fun `ReaderAuth intermediate missing cRLSign fails with INVALID_KEY_USAGE`() {
+        // Intermediate KeyUsage = keyCertSign only (missing cRLSign).
+        val leaf = readerLeaf { leaf() }
+
         val violation = assertThrows(CertificateProfileViolation::class.java) {
             validator.validate(
-                listOf(CertificateStubs.leafWithExtraBits),
-                CertificatePurpose.ISSUER_AUTH
+                listOf(leaf, CertificateStubs.caKeyCertSignOnly),
+                CertificatePurpose.READER_AUTH
             )
+        }
+
+        assertThat(violation.reason, equalTo(CertificateProfileReason.INVALID_KEY_USAGE))
+    }
+
+    @Test
+    fun `ReaderAuth intermediate with only leaf KeyUsage fails with INVALID_KEY_USAGE`() {
+        // Intermediate KeyUsage = digitalSignature only (missing keyCertSign + cRLSign).
+        val leaf = readerLeaf { leaf() }
+
+        val violation = assertThrows(CertificateProfileViolation::class.java) {
+            validator.validate(
+                listOf(leaf, CertificateStubs.caWithLeafKeyUsage),
+                CertificatePurpose.READER_AUTH
+            )
+        }
+
+        assertThat(violation.reason, equalTo(CertificateProfileReason.INVALID_KEY_USAGE))
+    }
+
+    @Test
+    fun `ReaderAuth leaf without KeyUsage extension fails with INVALID_KEY_USAGE`() {
+        val leaf = readerLeaf { noKeyUsage() }
+
+        val violation = assertThrows(CertificateProfileViolation::class.java) {
+            validator.validate(listOf(leaf), CertificatePurpose.READER_AUTH)
         }
 
         assertThat(violation.reason, equalTo(CertificateProfileReason.INVALID_KEY_USAGE))
@@ -211,5 +350,10 @@ class CertificateProfileValidatorTest {
         }
 
         assertThat(violation.reason, equalTo(CertificateProfileReason.CROSS_PURPOSE_REJECTION))
+    }
+
+    private companion object {
+        const val READER_AUTH_EKU = "1.0.18013.5.1.6"
+        const val ISSUER_AUTH_EKU = "1.0.18013.5.1.2"
     }
 }

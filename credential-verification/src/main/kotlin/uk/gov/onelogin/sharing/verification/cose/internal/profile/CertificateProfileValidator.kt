@@ -79,17 +79,23 @@ internal class CertificateProfileValidator {
         }
     }
 
+    /**
+     * Validates the X.509 KeyUsage extension for a certificate in the candidate path.
+     *
+     * KeyUsage is always required (a certificate with no KeyUsage extension is rejected) and uses
+     * "must contain" semantics for both IssuerAuth and ReaderAuth:
+     *
+     * - The leaf (end-entity) must include `digitalSignature`.
+     * - Every CA (intermediate/root) must include `keyCertSign` and `cRLSign`.
+     *
+     * Additional KeyUsage bits beyond the required ones are tolerated.
+     */
     private fun validateKeyUsage(cert: X509Certificate, isLeaf: Boolean) {
         val usage = cert.keyUsage
         val isValid = usage != null && if (isLeaf) {
-            usage[BIT_DIGITAL_SIGNATURE] &&
-                usage.indices.filter { it != BIT_DIGITAL_SIGNATURE }.none { usage[it] }
+            usage[BIT_DIGITAL_SIGNATURE]
         } else {
-            usage[BIT_KEY_CERT_SIGN] &&
-                usage[BIT_CRL_SIGN] &&
-                usage.indices.filter {
-                    it != BIT_KEY_CERT_SIGN && it != BIT_CRL_SIGN
-                }.none { usage[it] }
+            usage[BIT_KEY_CERT_SIGN] && usage[BIT_CRL_SIGN]
         }
 
         if (!isValid) {
