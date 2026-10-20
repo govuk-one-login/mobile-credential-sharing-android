@@ -8,6 +8,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 
 @RunWith(Parameterized::class)
 internal class DescriptorWriteRequestInvalidTest(
@@ -20,7 +21,14 @@ internal class DescriptorWriteRequestInvalidTest(
     @Test
     fun `emits Invalid event when required fields are null`() {
         val emitter = FakeGattServerEventEmitter()
-        val callback = GattServerCallback(emitter, logger = SystemLogger())
+        val callback = GattServerCallback(
+            emitter,
+            logger = SystemLogger(),
+            reassembler = MessageReassembler(
+                GattServerCallback.DEFAULT_MAX_RECEIVE_BUFFER_SIZE,
+                SystemLogger()
+            )
+        )
 
         callback.onDescriptorWriteRequest(
             device = device,

@@ -36,6 +36,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
@@ -70,6 +71,9 @@ class AndroidGattServerManagerTest {
     private val fakePermissionChecker = FakePermissionChecker { permissionResponse }
     private val fakeGattWriter = FakeGattWriter()
     private val logger = SystemLogger()
+    private val reassemblerFactory = MessageReassembler.Factory { max ->
+        MessageReassembler(max, logger)
+    }
 
     private lateinit var manager: AndroidGattServerManager
     private val uuid = UUID.randomUUID()
@@ -83,7 +87,8 @@ class AndroidGattServerManagerTest {
             permissionsChecker = fakePermissionChecker,
             logger = logger,
             gattWriter = fakeGattWriter,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            reassemblerFactory = reassemblerFactory
         )
     }
 
@@ -463,7 +468,8 @@ class AndroidGattServerManagerTest {
             permissionsChecker = fakePermissionChecker,
             logger = logger,
             gattWriter = fakeGattWriter,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            reassemblerFactory = reassemblerFactory
         )
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
@@ -685,7 +691,8 @@ class AndroidGattServerManagerTest {
             permissionsChecker = fakePermissionChecker,
             logger = logger,
             gattWriter = fakeGattWriter,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            reassemblerFactory = reassemblerFactory
         )
         val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
         val server2ClientChar = mockk<BluetoothGattCharacteristic>()
@@ -774,7 +781,8 @@ class AndroidGattServerManagerTest {
                 permissionsChecker = fakePermissionChecker,
                 logger = logger,
                 gattWriter = failingGattWriter,
-                coroutineScope = testScope
+                coroutineScope = testScope,
+                reassemblerFactory = reassemblerFactory
             )
             val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 

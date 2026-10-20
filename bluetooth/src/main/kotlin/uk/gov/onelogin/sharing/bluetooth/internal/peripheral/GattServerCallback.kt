@@ -5,19 +5,16 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
-import java.util.UUID
 import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
-import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class GattServerCallback(
     private val gatGattEventEmitter: GattServerEventEmitter,
     private val logger: Logger,
-    private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE,
-    private var messages: MutableMap<UUID, ByteArray> = mutableMapOf()
+    private val reassembler: MessageReassembler
 ) : BluetoothGattServerCallback() {
     override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
         logger.debug(logTag, "Address: ${device.address}")
@@ -58,50 +55,27 @@ internal class GattServerCallback(
             }
 
             else -> {
-                // join messages until 0x00
-                val previousMessages = messages[characteristic.uuid] ?: byteArrayOf()
-
-                val indicator = value.firstOrNull()
-
-                val message = value.drop(1)
-                val newMessage = ByteArray(message.count()) { message[it] }
-
-                when (indicator) {
-                    NON_LAST_PART -> {
-                        val accumulated = previousMessages + newMessage
-                        if (accumulated.size > maxReceiveBufferSize) {
-                            messages.remove(characteristic.uuid)
-                            emitExceededMaxBufferSize(accumulated.size)
-                        } else {
-                            messages[characteristic.uuid] = accumulated
-                            logger.debug(
-                                logTag,
-                                "received message part, expecting additional data"
-                            )
-                        }
+                when (val result = reassembler.accept(characteristic.uuid, value)) {
+                    is MessageReassembler.Result.Incomplete -> {
+                        logger.debug(logTag, "received message part, expecting additional data")
                     }
 
-                    LAST_PART -> {
-                        messages.remove(characteristic.uuid)
+                    is MessageReassembler.Result.ExceededMaxBuffer -> {
+                        emitExceededMaxBufferSize()
+                    }
 
-                        val fullMessage = previousMessages + newMessage
-
-                        if (fullMessage.size > maxReceiveBufferSize) {
-                            emitExceededMaxBufferSize(fullMessage.size)
-                            return
-                        }
-
+                    is MessageReassembler.Result.Complete -> {
                         gatGattEventEmitter.emit(
-                            GattServerCallbackEvent.MessageReceived(device, fullMessage)
+                            GattServerCallbackEvent.MessageReceived(device, result.message)
                         )
 
-                        val fullMessageString = fullMessage
+                        val fullMessageString = result.message
                             .joinToString { BYTE_TO_HEX_FORMAT.format(it) }
 
                         logger.debug(logTag, "received message: $fullMessageString")
                     }
 
-                    else -> {
+                    is MessageReassembler.Result.InvalidPrefix -> {
                         val message = "invalid message received from remote device"
                         logger.error(logTag, message, LoggerException(message))
                     }
@@ -193,10 +167,7 @@ internal class GattServerCallback(
         )
     }
 
-    private fun emitExceededMaxBufferSize(bufferSize: Int) {
-        val message =
-            "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
-        logger.error(logTag, message, LoggerException(message))
+    private fun emitExceededMaxBufferSize() {
         gatGattEventEmitter.emit(GattServerCallbackEvent.ExceededMaxBufferSize)
     }
 
