@@ -399,6 +399,62 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
+    fun `emits no event when unknown opcode written to state characteristic`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+
+        manager.events.test {
+            CharacteristicWriteRequestStub.writeRequestUnknown(
+                bluetoothDevice = device,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.STATE_UUID
+                }
+            ).run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `emits no event when empty value written to state characteristic`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+
+        manager.events.test {
+            CharacteristicWriteRequestStub.writeRequestEmptyValue(
+                bluetoothDevice = device,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.STATE_UUID
+                }
+            ).run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun `emits session end event when end command received`() = runTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 

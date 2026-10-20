@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothProfile
+import java.util.UUID
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 
 internal sealed interface GattServerCallbackEvent {
@@ -35,21 +36,27 @@ internal sealed interface GattServerCallbackEvent {
 
     data class ServiceAdded(val status: Int, val service: BluetoothGattService) :
         GattServerCallbackEvent
-    data class MessageReceived(val device: BluetoothDevice, val byteArray: ByteArray) :
-        GattServerCallbackEvent {
+
+    /** Raw characteristic write (ISO header byte + payload); interpreted by the manager. */
+    data class CharacteristicWriteRequest(
+        val device: BluetoothDevice,
+        val characteristicUuid: UUID,
+        val value: ByteArray
+    ) : GattServerCallbackEvent {
         override fun equals(other: Any?): Boolean {
-            val other = other as? MessageReceived ?: return false
-            return this.device == other.device && this.byteArray.contentEquals(other.byteArray)
+            val other = other as? CharacteristicWriteRequest ?: return false
+            return this.device == other.device &&
+                this.characteristicUuid == other.characteristicUuid &&
+                this.value.contentEquals(other.value)
         }
 
         override fun hashCode(): Int {
             var result = device.hashCode()
-            result = 31 * result + byteArray.contentHashCode()
+            result = 31 * result + characteristicUuid.hashCode()
+            result = 31 * result + value.contentHashCode()
             return result
         }
     }
-
-    data object ConnectionStateStarted : GattServerCallbackEvent
 
     data class MtuChanged(val device: BluetoothDevice?, val mtu: Int) : GattServerCallbackEvent
 
@@ -69,8 +76,4 @@ internal sealed interface GattServerCallbackEvent {
             enum class Reason { NullDevice, NullDescriptor, EmptyValue }
         }
     }
-
-    data object SessionEnd : GattServerCallbackEvent
-
-    data object ExceededMaxBufferSize : GattServerCallbackEvent
 }
