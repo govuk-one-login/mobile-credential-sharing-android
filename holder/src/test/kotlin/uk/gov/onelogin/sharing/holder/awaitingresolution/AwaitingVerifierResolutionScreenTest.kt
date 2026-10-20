@@ -18,6 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
@@ -32,7 +33,8 @@ class AwaitingVerifierResolutionScreenTest {
 
     private val orchestrator = FakeOrchestrator()
     private val viewModelFactory: MetroViewModelFactory = mockk(relaxed = true)
-    private val viewModel = AwaitingVerifierResolutionViewModel(orchestrator)
+    private val analyticsLogger = StoredAnalyticsLogger()
+    private val viewModel = AwaitingVerifierResolutionViewModel(analyticsLogger, orchestrator)
     private var exitJourneyCount = 0
 
     @Test

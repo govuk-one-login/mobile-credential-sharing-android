@@ -39,11 +39,13 @@ internal fun AwaitingVerifierResolutionScreen(
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("AwaitingVerifierResolutionScreen")
+        viewModel.logScreenView()
     }
 
     AwaitingVerifierResolutionContent(
         modifier = modifier,
         onGoBackToDocuments = {
+            viewModel.logGoBackToDocuments()
             viewModel.reset()
             onExitJourney()
         }
