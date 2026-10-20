@@ -1,9 +1,12 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -25,6 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -302,6 +306,32 @@ class ShareCredentialTest {
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progressIndicator").assertDoesNotExist()
         assertEquals(0, orchestrator.startCount)
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Go back to documents resets and hands control back to the host app`() = runTest {
+        var hostBackPresses = 0
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(HolderSessionState.Complete.Success())
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent {
+            BackHandler { hostBackPresses++ }
+            ShareCredential(presenter)
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNode(
+            hasText("Go back to documents") and hasRole(Role.Button)
+        ).performClick()
+        composeTestRule.waitForIdle()
+
+        assertEquals(1, orchestrator.resetCount)
+        assertEquals(1, hostBackPresses)
     }
 
     private fun performCloseJourneyViaButton(presenter: FakeCredentialPresenter) {

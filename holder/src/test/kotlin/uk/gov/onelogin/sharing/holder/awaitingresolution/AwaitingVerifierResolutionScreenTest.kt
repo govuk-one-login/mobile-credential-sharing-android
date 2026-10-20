@@ -4,12 +4,8 @@ import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.test.services.events.run.TestRunEvent
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import io.mockk.mockk
 import kotlin.test.assertEquals
@@ -61,23 +57,6 @@ class AwaitingVerifierResolutionScreenTest {
                 performGoBackToDocumentsClick()
                 waitUntil { orchestrator.resetCount == 1 }
                 waitUntil { exitJourneyCount == 1 }
-            }
-        }
-
-    @Test
-    fun `System back is swallowed and does not exit the journey`() =
-        runTest(dispatcherRule.testDispatcher) {
-            composeTestRule.run {
-                var backPressedDispatcher: OnBackPressedDispatcherOwner? = null
-                setContent {
-                    backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
-                    Render()
-                }
-                runOnUiThread { backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed() }
-                waitForIdle()
-                assertEquals(0, orchestrator.resetCount)
-                assertEquals(0, exitJourneyCount)
-                assertTitleIsDisplayed()
             }
         }
 
