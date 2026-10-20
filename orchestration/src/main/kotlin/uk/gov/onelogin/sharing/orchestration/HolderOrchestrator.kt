@@ -26,6 +26,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
@@ -525,7 +526,7 @@ class HolderOrchestrator(
                 handlePeerTermination(type.status)
 
             is InboundMessageType.Unknown -> {
-                logger.error(logTag, UNRECOGNISED_MESSAGE)
+                logger.error(logTag, UNRECOGNISED_MESSAGE, LoggerException(UNRECOGNISED_MESSAGE))
                 appCoroutineScope.launch {
                     sendTerminationAndFail(
                         IllegalStateException(UNRECOGNISED_MESSAGE)
@@ -539,7 +540,8 @@ class HolderOrchestrator(
         if (state.status == SessionEndStates.SUCCESS) {
             logger.debug(logTag, "Mdoc - Ending session")
         } else {
-            logger.error(logTag, "Mdoc - Error while ending session: ${state.status}")
+            val message = "Mdoc - Error while ending session: ${state.status}"
+            logger.error(logTag, message, LoggerException(message))
         }
 
         handleConnectionLoss(isGattEnd = true)

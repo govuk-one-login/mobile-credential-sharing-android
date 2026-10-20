@@ -10,6 +10,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 internal class GattServerCallback(
@@ -101,7 +102,8 @@ internal class GattServerCallback(
                     }
 
                     else -> {
-                        logger.error(logTag, "invalid message received from remote device")
+                        val message = "invalid message received from remote device"
+                        logger.error(logTag, message, LoggerException(message))
                     }
                 }
             }
@@ -192,10 +194,9 @@ internal class GattServerCallback(
     }
 
     private fun emitExceededMaxBufferSize(bufferSize: Int) {
-        logger.error(
-            logTag,
+        val message =
             "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
-        )
+        logger.error(logTag, message, LoggerException(message))
         gatGattEventEmitter.emit(GattServerCallbackEvent.ExceededMaxBufferSize)
     }
 

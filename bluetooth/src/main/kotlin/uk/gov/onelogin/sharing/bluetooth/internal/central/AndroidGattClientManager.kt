@@ -39,6 +39,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ServiceValidator
 import uk.gov.onelogin.sharing.bluetooth.internal.validator.ValidationResult
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
@@ -477,7 +478,7 @@ class AndroidGattClientManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleError(error: GattClientError, reason: String) {
-        logger.error(logTag, reason)
+        logger.error(logTag, reason, LoggerException(reason))
 
         _events.tryEmit(
             GattClientEvent.Error(
@@ -596,10 +597,9 @@ class AndroidGattClientManager(
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleExceededMaxBufferSize(bufferSize: Int) {
-        logger.error(
-            logTag,
+        val message =
             "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
-        )
+        logger.error(logTag, message, LoggerException(message))
         isTerminating = true
         coroutineScope.launch {
             notifySessionEnd()

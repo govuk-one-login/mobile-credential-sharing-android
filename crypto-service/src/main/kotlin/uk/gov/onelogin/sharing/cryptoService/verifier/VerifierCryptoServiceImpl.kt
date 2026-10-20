@@ -229,8 +229,9 @@ class VerifierCryptoServiceImpl(
         if (deviceCurve != readerCurve) {
             val message = "Error computing shared secret due to " +
                 "EDeviceKey.Pub with incompatible curve: $deviceCurve"
-            logger.error(logTag, message)
-            throw SharedSecretException.IncompatibleCurve(deviceCurve.toString())
+            val exception = SharedSecretException.IncompatibleCurve(deviceCurve.toString())
+            logger.error(logTag, message, exception)
+            throw exception
         }
 
         return try {
