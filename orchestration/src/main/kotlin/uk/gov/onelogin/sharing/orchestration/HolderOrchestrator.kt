@@ -26,12 +26,12 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
-import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
 import uk.gov.onelogin.sharing.cryptoService.cryptography.usecases.DecryptDeviceRequestUseCase
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -210,7 +210,11 @@ class HolderOrchestrator(
         }
     }
 
-    override fun confirmConsent() {
+    override suspend fun confirmConsent() {
+        confirmConsentBehaviour()
+    }
+
+    private fun confirmConsentBehaviour() {
         // Guard against re-entry (e.g. double taps). Because signing now suspends on the
         // consumer's local-auth prompt, the session state remains AwaitingUserConsent until
         // execute() completes, so the state check alone cannot prevent concurrent submissions.
@@ -219,13 +223,20 @@ class HolderOrchestrator(
             return
         }
 
-        val state = holderSessionState.value
+        val state = holderSessionState.value as? HolderSessionState.AwaitingUserConsent
         val context = currentContext
         try {
             assert(state is HolderSessionState.AwaitingUserConsent) {
                 "confirmConsent called in an invalid state: $state"
             }
-            check(state is HolderSessionState.AwaitingUserConsent)
+            checkNotNull(state)
+            safeTransitionTo(
+                state.copy(
+                    presentation = state.presentation.copy(
+                        isBusy = true
+                    )
+                )
+            )
 
             val submission = PendingConsent(
                 sessionTranscript = checkNotNull(context.sessionTranscriptBytes) {
@@ -247,6 +258,13 @@ class HolderOrchestrator(
             }
         } catch (e: IllegalStateException) {
             consentInFlight.set(false)
+            state?.presentation?.let {
+                state.copy(
+                    presentation = it.copy(
+                        isBusy = true
+                    )
+                ).let(::safeTransitionTo)
+            }
             appCoroutineScope.launch {
                 sendTerminationAndFail(e)
             }
@@ -279,7 +297,15 @@ class HolderOrchestrator(
         } catch (e: CredentialSigningException.Recoverable) {
             // Neutral outcome: keep the session active on the consent screen.
             // The user can retry, deny, or cancel.
+            val state = holderSessionState.value as? HolderSessionState.AwaitingUserConsent
             consentInFlight.set(false)
+            state?.presentation?.let {
+                state.copy(
+                    presentation = it.copy(
+                        isBusy = false
+                    )
+                ).let(::safeTransitionTo)
+            }
             logger.debug(logTag, "$SIGNING_CANCELLED ${e.message ?: ""}".trimEnd())
         } catch (e: DeviceSignatureException) {
             handleFatalSigningFailure(e)
@@ -307,7 +333,6 @@ class HolderOrchestrator(
         )
 
         val sent = peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
         sessionTimer.reset()
@@ -355,7 +380,11 @@ class HolderOrchestrator(
         }
     }
 
-    override fun denyConsent() {
+    override suspend fun denyConsent() {
+        denyConsentBehaviour()
+    }
+
+    private fun denyConsentBehaviour() {
         val state = holderSessionState.value
         val context = currentContext
         try {
@@ -423,7 +452,6 @@ class HolderOrchestrator(
     private fun stopAdvertising(sendEndCommand: Boolean) {
         appCoroutineScope.launch {
             peripheralBluetoothTransport.stop(
-                serviceUuid = currentContext.sessionUuid,
                 sendEndCommand = sendEndCommand
             )
         }
@@ -496,7 +524,7 @@ class HolderOrchestrator(
                 handlePeerTermination(type.status)
 
             is InboundMessageType.Unknown -> {
-                logger.error(logTag, UNRECOGNISED_MESSAGE)
+                logger.error(logTag, UNRECOGNISED_MESSAGE, LoggerException(UNRECOGNISED_MESSAGE))
                 appCoroutineScope.launch {
                     sendTerminationAndFail(
                         IllegalStateException(UNRECOGNISED_MESSAGE)
@@ -510,7 +538,8 @@ class HolderOrchestrator(
         if (state.status == SessionEndStates.SUCCESS) {
             logger.debug(logTag, "Mdoc - Ending session")
         } else {
-            logger.error(logTag, "Mdoc - Error while ending session: ${state.status}")
+            val message = "Mdoc - Error while ending session: ${state.status}"
+            logger.error(logTag, message, LoggerException(message))
         }
 
         handleConnectionLoss(isGattEnd = true)
@@ -1059,14 +1088,13 @@ class HolderOrchestrator(
         var sent = sessionDataToSend == null
         if (sessionDataToSend != null) {
             sent = peripheralBluetoothTransport.sendMessage(
-                serviceUuid = context.sessionUuid,
                 data = sessionDataToSend
             )
             sessionTimer.reset()
         }
 
         if (sent && sessionDataToSend != null) {
-            holderSessionTerminator.terminate(context.sessionUuid)
+            holderSessionTerminator.terminate()
         } else {
             stopAdvertising(sendEndCommand = sendEndCommand)
         }

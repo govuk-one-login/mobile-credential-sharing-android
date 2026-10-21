@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 
 import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.UnprotectedHeaderGenerator.Companion.UNPROTECTED_HEADER_X5_CHAIN
 
 private const val UNPROTECTED_HEADER_MAP_SIZE = 1
@@ -10,10 +11,11 @@ private const val UNPROTECTED_HEADER_MAP_SIZE = 1
  * [gen], delegating the `x5chain` value encoding to [writeX5Chain].
  */
 internal fun writeUnprotectedHeaderMap(gen: JsonGenerator, chain: List<ByteArray>) {
-    gen.writeStartObject(UNPROTECTED_HEADER_MAP_SIZE)
-    gen.writeFieldId(UNPROTECTED_HEADER_X5_CHAIN)
-    writeX5Chain(gen, chain)
-    gen.writeEndObject()
+    val cborGen = gen as? CBORGenerator ?: error("CBORGenerator required")
+    cborGen.writeStartObject(UNPROTECTED_HEADER_MAP_SIZE)
+    cborGen.writeFieldId(UNPROTECTED_HEADER_X5_CHAIN)
+    writeX5Chain(cborGen, chain)
+    cborGen.writeEndObject()
 }
 
 /**
@@ -21,13 +23,13 @@ internal fun writeUnprotectedHeaderMap(gen: JsonGenerator, chain: List<ByteArray
  * bare CBOR byte string, while two or more certificates are encoded as an array of byte strings.
  */
 internal fun writeX5Chain(gen: JsonGenerator, chain: List<ByteArray>) {
+    val cborGen = gen as? CBORGenerator ?: error("CBORGenerator required")
     require(chain.isNotEmpty()) { "x5chain must contain at least one certificate" }
     if (chain.size == 1) {
-        gen.writeBinary(chain.single())
+        cborGen.writeBinary(chain.single())
     } else {
-        @Suppress("DEPRECATION")
-        gen.writeStartArray(chain.size)
-        chain.forEach(gen::writeBinary)
-        gen.writeEndArray()
+        cborGen.writeStartArray(null, chain.size)
+        chain.forEach(cborGen::writeBinary)
+        cborGen.writeEndArray()
     }
 }

@@ -19,6 +19,7 @@ import uk.gov.logging.api.v2.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
@@ -272,7 +273,7 @@ class VerifierOrchestrator(
 
             is CentralBluetoothState.Error -> handleError(bluetoothState, verifierState)
 
-            is CentralBluetoothState.CentralBluetoothEnded -> handleBluetoothEnded(verifierState)
+            is CentralBluetoothState.Ended -> handleBluetoothEnded(verifierState)
 
             is CentralBluetoothState.Message -> handleMessage(bluetoothState, verifierState)
 
@@ -304,11 +305,16 @@ class VerifierOrchestrator(
         verifierState: VerifierSessionState
     ) {
         if (verifierState is VerifierSessionState.Verifying) {
-            logger.debug(logTag, "Ignoring transport error while verifying: ${state.reason}")
+            logger.debug(
+                logTag,
+                "Ignoring transport error while verifying: ${state.reason.message}"
+            )
         } else {
             failWith(
-                "Bluetooth error: ${state.reason}",
-                InvalidBluetoothState(IllegalStateException("Bluetooth error: ${state.reason}"))
+                "Bluetooth error: ${state.reason.message}",
+                InvalidBluetoothState(
+                    IllegalStateException("Bluetooth error: ${state.reason.message}")
+                )
             )
         }
     }
@@ -400,7 +406,8 @@ class VerifierOrchestrator(
             sessionData.status != SessionDataStatus.OK
 
     private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
-        logger.error(logTag, "Received SessionData with data and error status: $status")
+        val message = "Received SessionData with data and error status: $status"
+        logger.error(logTag, message, LoggerException(message))
         appCoroutineScope.launch {
             terminateSession(
                 bleOpen = centralBluetoothTransport.isBleOpen,
@@ -416,7 +423,7 @@ class VerifierOrchestrator(
     }
 
     private fun handleTerminationWithoutData(terminationAlreadyReceived: Boolean) {
-        logger.error(logTag, INVALID_SESSION_DATA)
+        logger.error(logTag, INVALID_SESSION_DATA, LoggerException(INVALID_SESSION_DATA))
         logger.debug(
             logTag,
             "Received status-only SessionData. Termination received: $terminationAlreadyReceived"
@@ -689,7 +696,6 @@ class VerifierOrchestrator(
                 "SessionEstablishment bytes: ${sessionEstablishmentBytes.toHexString()}"
             )
             val sent = centralBluetoothTransport.sendMessage(
-                serviceUuid = context.serviceUuid,
                 data = sessionEstablishmentBytes
             )
             sessionTimer.reset()

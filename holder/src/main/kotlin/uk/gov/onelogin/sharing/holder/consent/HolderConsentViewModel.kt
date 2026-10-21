@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -25,14 +24,24 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ViewModelKey
 class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
-    val presentation: StateFlow<ConsentPresentation?> = orchestrator
+
+    val presentation: StateFlow<HolderConsentUiState?> = orchestrator
         .holderSessionState
         .map { state ->
             state as? HolderSessionState.AwaitingUserConsent
         }.map { consentState ->
             consentState?.presentation
+        }.map { presentation ->
+            presentation?.let {
+                HolderConsentUiState(
+                    privacyPolicyUrl = it.privacyPolicyUrl,
+                    documents = it.documents,
+                    normalisedOrganizationName = it.normalisedOrganizationName,
+                    isBusy = it.isBusy
+                )
+            }
         }.stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
@@ -51,11 +60,11 @@ class HolderConsentViewModel(
         _showPrivacyPolicy.value = false
     }
 
-    fun onAccept() = viewModelScope.launch(dispatcher) {
+    fun onAccept() = viewModelScope.launch {
         orchestrator.confirmConsent()
     }
 
-    fun onDeny() = viewModelScope.launch(dispatcher) {
+    fun onDeny() = viewModelScope.launch {
         orchestrator.denyConsent()
     }
 }

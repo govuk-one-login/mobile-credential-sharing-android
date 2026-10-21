@@ -30,7 +30,7 @@ class FakeCentralBluetoothTransport(
         stopCalls++
     }
 
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(data: ByteArray): Boolean {
         lastSentData = data
         return sendMessageToReturn
     }
@@ -42,7 +42,7 @@ class FakeCentralBluetoothTransport(
 
             is CentralBluetoothState.Disconnected,
             is CentralBluetoothState.Error,
-            is CentralBluetoothState.CentralBluetoothEnded -> isBleOpen = false
+            is CentralBluetoothState.Ended -> isBleOpen = false
 
             else -> {}
         }

@@ -39,7 +39,6 @@ import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 
 @Composable
 internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
@@ -53,7 +52,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
 
     presentation?.let {
         HolderConsentContent(
-            presentation = it,
+            state = it,
             showPrivacyPolicy = showPrivacyPolicy,
             onShowPrivacyPolicy = viewModel::onShowPrivacyPolicy,
             onClosePrivacyPolicy = viewModel::onClosePrivacyPolicy,
@@ -66,7 +65,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
 @Suppress("LongMethod")
 @Composable
 internal fun HolderConsentContent(
-    presentation: ConsentPresentation,
+    state: HolderConsentUiState,
     showPrivacyPolicy: Boolean = false,
     onShowPrivacyPolicy: () -> Unit = {},
     onClosePrivacyPolicy: () -> Unit = {},
@@ -76,7 +75,7 @@ internal fun HolderConsentContent(
     val scope = rememberCoroutineScope()
     var showDenyDialog by remember { mutableStateOf(false) }
 
-    val privacyPolicyUrl = presentation.privacyPolicyUrl
+    val privacyPolicyUrl = state.privacyPolicyUrl
     if (showPrivacyPolicy && privacyPolicyUrl != null) {
         PrivacyPolicyWebView(
             url = privacyPolicyUrl,
@@ -106,13 +105,13 @@ internal fun HolderConsentContent(
             style = MaterialTheme.typography.headlineSmall
         )
 
-        presentation.documents.forEach { document ->
+        state.documents.forEach { document ->
             ConsentDocumentSection(document)
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        presentation.normalisedOrganizationName?.let { orgName ->
+        state.normalisedOrganizationName?.let { orgName ->
             Text(
                 text = stringResource(R.string.holder_consent_organization_sentence, orgName),
                 style = MaterialTheme.typography.bodyMedium,
@@ -132,11 +131,17 @@ internal fun HolderConsentContent(
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = { showDenyDialog = true }) {
+            Button(
+                enabled = !state.isBusy,
+                onClick = { showDenyDialog = true }
+            ) {
                 Text(stringResource(R.string.holder_consent_deny))
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { scope.launch { onAccept() } }) {
+            Button(
+                enabled = !state.isBusy,
+                onClick = { scope.launch { onAccept() } }
+            ) {
                 Text(stringResource(R.string.holder_consent_accept))
             }
         }
@@ -221,7 +226,7 @@ private fun DenyConfirmationDialog(onConfirmDeny: () -> Unit, onDismiss: () -> U
 @Preview(showBackground = true)
 internal fun HolderConsentScreenPreview() {
     HolderConsentContent(
-        presentation = ConsentPresentation(
+        state = HolderConsentUiState(
             documents = listOf(
                 ConsentDocument(
                     docType = "org.iso.18013.5.1.mDL",
@@ -238,7 +243,7 @@ internal fun HolderConsentScreenPreview() {
                 )
             ),
             privacyPolicyUrl = "https://verifier.example/privacy",
-            organizationName = "Organisation Ltd"
+            normalisedOrganizationName = "Organisation Ltd."
         )
     )
 }

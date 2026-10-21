@@ -1,9 +1,10 @@
-package uk.gov.onelogin.sharing.bluetooth.api.scanner
+package uk.gov.onelogin.sharing.bluetooth.internal.scanner
 
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
 
-interface ScannerCallback {
+internal interface ScannerCallback {
     val onBatchResults: (List<ScanResult>) -> Unit
     val onFailure: (ScannerFailure) -> Unit
     val onResult: (Int, ScanResult) -> Unit

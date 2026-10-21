@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -44,6 +45,13 @@ class DeviceRequestDtoTest {
     fun `DeviceRequestDto preserves docRequest count`() {
         val decoded = CborMapper.default.readValue(encoded, DeviceRequestDto::class.java)
         assertEquals(1, decoded.docRequest.size)
+    }
+
+    @Test
+    fun `DeviceRequestDto throws when docRequest is empty`() {
+        assertFailsWith<IllegalArgumentException> {
+            dto.copy(docRequest = emptyList())
+        }
     }
 
     @Test
