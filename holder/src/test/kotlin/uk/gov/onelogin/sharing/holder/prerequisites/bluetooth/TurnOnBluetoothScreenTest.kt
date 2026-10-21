@@ -2,12 +2,25 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
 import kotlin.getValue
+import kotlin.reflect.KClass
 import kotlin.test.assertEquals
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasItem
@@ -37,6 +50,7 @@ class TurnOnBluetoothScreenTest {
     val composeTestRule = TurnOnBluetoothScreenRule(createComposeRule())
 
     private var hasRecheckedPrerequisites = false
+    private var recheckCount = 0
 
     private val initialHolderState: HolderSessionState by lazy {
         HolderSessionState.Preflight(
@@ -45,12 +59,14 @@ class TurnOnBluetoothScreenTest {
             )
         ) {
             hasRecheckedPrerequisites = true
+            recheckCount++
         }
     }
+    private val holderState by lazy {
+        MutableStateFlow(initialHolderState)
+    }
     private val orchestrator by lazy {
-        FakeOrchestrator(
-            initialHolderState = MutableStateFlow(initialHolderState)
-        )
+        FakeOrchestrator(initialHolderState = holderState)
     }
 
     private val logger = SystemLogger()
@@ -76,6 +92,18 @@ class TurnOnBluetoothScreenTest {
         )
     }
 
+    private val viewModelFactory = object : MetroViewModelFactory() {
+        override val viewModelProviders: Map<KClass<out ViewModel>, () -> ViewModel>
+            get() = mapOf(TurnOnBluetoothViewModel::class to { viewModel })
+
+        override val assistedFactoryProviders:
+            Map<KClass<out ViewModel>, () -> ViewModelAssistedFactory>
+            get() = emptyMap()
+
+        override val manualAssistedFactoryProviders:
+            Map<KClass<out ManualViewModelAssistedFactory>, () -> ManualViewModelAssistedFactory>
+            get() = emptyMap()
+    }
     var launchedAction: Any? = null
     val testRegistry = object : ActivityResultRegistry() {
         override fun <I, O> onLaunch(
@@ -142,6 +170,91 @@ class TurnOnBluetoothScreenTest {
             setContent { TurnOnBluetoothScreen(viewModel = viewModel) }
             waitUntil { analyticsLogger.sentAnalyticsEvents.isNotEmpty() }
         }
+        assertThat(
+            analyticsLogger,
+            hasSentEvents(hasItem(TurnOnBluetoothViewModelTestData.expectedScreenEvent))
+        )
+    }
+
+    @Test
+    fun `Closing the journey shows a loading spinner`() = runTest {
+        composeTestRule.run {
+            setContent { TurnOnBluetoothScreen(viewModel = viewModel) }
+            assertTitleIsDisplayed()
+            holderState.update { HolderSessionState.SendingTermination }
+            waitUntilLoadingSpinnerExists()
+            assertLoadingSpinnerIsDisplayed()
+            assertTitleDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `Prerequisites are rechecked on resume after tapping Turn on Bluetooth`() = runTest {
+        val lifecycleOwner = TestLifecycleOwner(
+            initialState = Lifecycle.State.RESUMED,
+            coroutineDispatcher = Dispatchers.Unconfined
+        )
+
+        composeTestRule.run {
+            setContent {
+                CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
+                    ProvideActivityResultRegistry(testRegistry) {
+                        TurnOnBluetoothScreen(viewModel = viewModel)
+                    }
+                }
+            }
+
+            performTurnOnBluetoothClick()
+            waitUntil { recheckCount == 1 }
+
+            runOnIdle {
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            }
+
+            waitUntil { recheckCount == 2 }
+        }
+    }
+
+    @Test
+    fun `Prerequisites are not rechecked on resume before tapping Turn on Bluetooth`() = runTest {
+        val lifecycleOwner = TestLifecycleOwner(
+            initialState = Lifecycle.State.RESUMED,
+            coroutineDispatcher = Dispatchers.Unconfined
+        )
+
+        composeTestRule.run {
+            setContent {
+                CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
+                    ProvideActivityResultRegistry(testRegistry) {
+                        TurnOnBluetoothScreen(viewModel = viewModel)
+                    }
+                }
+            }
+
+            runOnIdle {
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            }
+            waitForIdle()
+        }
+
+        assertEquals(0, recheckCount)
+    }
+
+    @Test
+    fun `Injectted viewmodel is used by default`() = runTest {
+        composeTestRule.run {
+            setContent {
+                CompositionLocalProvider(LocalMetroViewModelFactory provides viewModelFactory) {
+                    TurnOnBluetoothScreen()
+                }
+            }
+
+            assertTitleIsDisplayed()
+            waitUntil { analyticsLogger.sentAnalyticsEvents.isNotEmpty() }
+        }
+
         assertThat(
             analyticsLogger,
             hasSentEvents(hasItem(TurnOnBluetoothViewModelTestData.expectedScreenEvent))

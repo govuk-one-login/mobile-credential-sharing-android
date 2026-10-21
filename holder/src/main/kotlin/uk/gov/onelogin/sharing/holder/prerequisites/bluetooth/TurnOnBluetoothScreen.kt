@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -26,6 +27,8 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
+
+internal const val LOADING_SPINNER_TEST_TAG = "loadingSpinner"
 
 @Composable
 internal fun TurnOnBluetoothScreen(
@@ -65,7 +68,9 @@ internal fun TurnOnBluetoothScreen(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ) { CircularProgressIndicator() }
+        ) {
+            CircularProgressIndicator(modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG))
+        }
     } else {
         TurnOnBluetoothContent(
             modifier = modifier,
