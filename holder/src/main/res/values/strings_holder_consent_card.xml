@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_consent_card_heading">You’ll share %1$d details from your %2$s</string>
+
+    <string name="holder_consent_card_will_keep">%1$s will keep these details as a record of this check:</string>
+    <string name="holder_consent_card_will_not_keep">%1$s will not keep:</string>
+
+    <string name="holder_consent_card_all_kept">%1$s will keep these details as a record of this check.</string>
+
+    <string name="holder_consent_card_none_kept">These details will only be used for this check. They will not be saved.</string>
+
+    <string name="holder_consent_doc_mdl">UK driving licence</string>
+
+    <string name="holder_consent_attr_document_number">Licence number</string>
+    <string name="holder_consent_attr_portrait">Photo</string>
+    <string name="holder_consent_attr_title">Title</string>
+    <string name="holder_consent_attr_family_name">Last name</string>
+    <string name="holder_consent_attr_given_name">First name(s)</string>
+    <string name="holder_consent_attr_expiry_date">Date of expiry</string>
+    <string name="holder_consent_attr_birth_date">Date of birth</string>
+    <string name="holder_consent_attr_age_over">If you’re over %1$d</string>
+    <string name="holder_consent_attr_birth_place">Place of birth</string>
+    <string name="holder_consent_attr_resident_address">Street address</string>
+    <string name="holder_consent_attr_resident_city">Town or city (address)</string>
+    <string name="holder_consent_attr_resident_postal_code">Postcode</string>
+    <string name="holder_consent_attr_issue_date">Date of issue</string>
+    <string name="holder_consent_attr_issuing_authority">Issuing authority</string>
+    <string name="holder_consent_attr_issuing_country">Issuing country</string>
+    <string name="holder_consent_attr_un_distinguishing_sign">Issuing country (UN distinguishing sign)</string>
+    <string name="holder_consent_attr_driving_privileges">Vehicles you can drive</string>
+    <string name="holder_consent_attr_provisional_driving_privileges">Vehicles you can drive with your provisional licence</string>
+    <string name="holder_consent_attr_welsh_licence">If your licence is bilingual (English and Welsh)</string>
+</resources>
