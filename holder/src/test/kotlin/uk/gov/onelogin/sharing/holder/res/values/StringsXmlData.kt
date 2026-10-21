@@ -45,10 +45,6 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Bluetooth permissions were denied",
         resourceId = R.string.bluetooth_permission_denied
     ),
-    HOLDER_AWAITING_RESOLUTION_TITLE(
-        expected = "Details shared",
-        resourceId = R.string.holder_awaiting_resolution_title
-    ),
     HOLDER_CONSENT_DENY_DIALOG_TITLE(
         expected = "Are you sure you want to deny this request?",
         resourceId = R.string.holder_consent_deny_dialog_title
