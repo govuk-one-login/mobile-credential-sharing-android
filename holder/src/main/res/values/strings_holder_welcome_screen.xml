@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_welcome_heading">Find out which details you need to share</string>
+    <string name="holder_welcome_body_1">Show the QR code to the person doing the check.</string>
+    <string name="holder_welcome_body_2">It lets them send you a list of the details they need to check.</string>
+    <string name="holder_welcome_body_3">You’ll review this list before agreeing to share your details with them.</string>
+</resources>
