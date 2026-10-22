@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValuesIn
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -17,7 +18,6 @@ import uk.gov.logging.api.v3.matchers.MemorisedLoggerMatchers.hasSize
 import uk.gov.onelogin.sharing.analytics.AnalyticsEventTestData.sampleLegacyScreenEvent
 import uk.gov.onelogin.sharing.analytics.SystemLoggerMatchers.containsEventState
 import uk.gov.onelogin.sharing.analytics.SystemLoggerMatchers.containsUnloggableEvent
-import kotlin.test.Test
 
 @RunWith(TestParameterInjector::class)
 class SystemAnalyticsLoggerTest {

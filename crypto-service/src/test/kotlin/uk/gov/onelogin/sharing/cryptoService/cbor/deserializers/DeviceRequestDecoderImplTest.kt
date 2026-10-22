@@ -1,11 +1,11 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 
-import org.hamcrest.CoreMatchers.containsString
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.startsWith
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import org.hamcrest.CoreMatchers.containsString
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.startsWith
 import org.junit.Test
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR

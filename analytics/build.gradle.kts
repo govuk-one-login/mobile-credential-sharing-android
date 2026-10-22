@@ -38,8 +38,8 @@ dependencies {
 
     listOf(
         libs.com.google.test.parameter.injector,
-        testFixtures(libs.uk.gov.logging.api),
-        ).forEach(::testFixturesApi)
+        testFixtures(libs.uk.gov.logging.api)
+    ).forEach(::testFixturesApi)
 }
 
 mavenPublishingConfig {

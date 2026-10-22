@@ -1,8 +1,8 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 
+import kotlin.test.assertFailsWith
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
-import kotlin.test.assertFailsWith
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized

@@ -66,7 +66,7 @@ class VerifierCryptoServiceImpl(
             logger.error(
                 logTag,
                 "error constructing SessionTranscript array due to" +
-                        " DeviceEngagementBytes is blank",
+                    " DeviceEngagementBytes is blank",
                 e
             )
             throw e

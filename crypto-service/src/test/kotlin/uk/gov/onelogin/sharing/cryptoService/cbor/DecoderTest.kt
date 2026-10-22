@@ -6,11 +6,11 @@ import java.security.InvalidKeyException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import junit.framework.TestCase.assertTrue
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.containsString
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -172,7 +172,7 @@ class DecoderTest {
         assert(
             logger.any {
                 it.message.contains("Illegal parameter") ||
-                        it.message.contains("Failed to deserialize CBOR")
+                    it.message.contains("Failed to deserialize CBOR")
             }
         )
         assertNull(result)
