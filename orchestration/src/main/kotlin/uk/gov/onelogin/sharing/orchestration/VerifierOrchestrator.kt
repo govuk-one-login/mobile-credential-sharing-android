@@ -69,7 +69,7 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 private const val INVALID_SESSION_DATA = "Received invalid SessionData instance"
 
 @Keep
-@Suppress("LongParameterList", "TooManyFunctions", "UnusedPrivateProperty")
+@Suppress("LongParameterList", "TooManyFunctions", "UnusedPrivateProperty", "LargeClass")
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 @SingleIn(AppScope::class)
 class VerifierOrchestrator(
