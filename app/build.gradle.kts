@@ -125,8 +125,9 @@ dependencies {
         libs.bundles.uk.gov.ui,
         libs.hilt.android,
         libs.uk.gov.logging.impl,
-        libs.kotlinx.serialization.json
-    ).forEach(::implementation)
+        libs.kotlinx.serialization.json,
+        testFixtures(libs.uk.gov.logging.api),
+        ).forEach(::implementation)
     ksp(libs.hilt.compiler)
 
     listOf(
@@ -134,6 +135,7 @@ dependencies {
         libs.androidx.ui.test.junit4,
         libs.com.google.test.parameter.injector,
         libs.uk.gov.logging.testdouble,
+        testFixtures(libs.uk.gov.logging.api),
         testFixtures(projects.analytics),
         testFixtures(projects.holder),
         testFixtures(projects.ui.uiImpl),

@@ -6,6 +6,9 @@ import java.security.InvalidKeyException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import junit.framework.TestCase.assertTrue
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.containsString
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.junit.After
@@ -14,7 +17,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import org.junit.internal.matchers.ThrowableCauseMatcher
+import org.junit.internal.matchers.ThrowableMessageMatcher
+import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.logging.api.v3.matchers.LogEntryMatchers.hasMessage
+import uk.gov.logging.api.v3.matchers.MemorisedLoggerMatchers.hasSize
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.validDeviceEngagementDto
@@ -27,6 +34,8 @@ import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.expectedSe
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidKeyPair
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidUnsupportedKeyPair
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.getSharedSecret
+import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.securityLogger
+import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.sessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_ALGORITHM
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.ELLIPTIC_CURVE_PARAMETER_SPEC
@@ -36,22 +45,7 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.CborErrors
 class DecoderTest {
 
     private val outContent = ByteArrayOutputStream()
-    private val errContent = ByteArrayOutputStream()
-    private val originalOut = System.out
-    private val originalErr = System.err
-    private val logger = SystemLogger()
-
-    @Before
-    fun setUpStreams() {
-        System.setOut(PrintStream(outContent))
-        System.setErr(PrintStream(errContent))
-    }
-
-    @After
-    fun restoreStreams() {
-        System.setOut(originalOut)
-        System.setErr(originalErr)
-    }
+    private val logger = MemorisedLogger()
 
     @Test
     fun `successfully decodes device engagement from base64 url cbor`() {
@@ -60,8 +54,11 @@ class DecoderTest {
             logger = logger
         )
 
-        val actualOutput = outContent.toString()
-        assertTrue(actualOutput.contains("Successfully deserialized DeviceEngagementDto:"))
+        assertTrue(
+            logger.any {
+                it.message.contains("Successfully deserialized DeviceEngagementDto:")
+            }
+        )
 
         assertNotNull(result)
         assertEquals(validDeviceEngagementDto.version, result.version)
@@ -110,8 +107,16 @@ class DecoderTest {
             logger
         )
 
-        val actualReaderHexLog = outContent.toString()
-        assertTrue(actualReaderHexLog.contains(MOCK_E_READER_KEY))
+        assertThat(
+            logger,
+            contains(
+                hasMessage(
+                    containsString(
+                        MOCK_E_READER_KEY
+                    )
+                )
+            )
+        )
     }
 
     @Test
@@ -167,7 +172,7 @@ class DecoderTest {
         assert(
             logger.any {
                 it.message.contains("Illegal parameter") ||
-                    it.message.contains("Failed to deserialize CBOR")
+                        it.message.contains("Failed to deserialize CBOR")
             }
         )
         assertNull(result)
@@ -205,15 +210,18 @@ class DecoderTest {
         val readerKeyPair = generateValidKeyPair()
         val holderKeyPair = generateValidUnsupportedKeyPair()
 
-        assertThrows(InvalidKeyException::class.java) {
-            getSharedSecret(
+        val exception = assertThrows(InvalidKeyException::class.java) {
+            sessionSecurity.generateSharedSecret(
                 holderKeyPair?.private as ECPrivateKey,
                 readerKeyPair?.public as ECPublicKey
             )
         }
-        val actualErrorMessage = outContent.toString()
 
-        assert(actualErrorMessage.contains("Unable to create shared secret"))
+        assertTrue(
+            securityLogger.any {
+                it.message.contains("Unable to create shared secret")
+            }
+        )
     }
 
     @Test

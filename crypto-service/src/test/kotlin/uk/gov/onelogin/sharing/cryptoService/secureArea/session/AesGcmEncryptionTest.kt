@@ -7,7 +7,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import org.junit.Before
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.expectedSessionEstablishmentDto
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateSessionKey
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
@@ -15,14 +15,10 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionStubs.VAL
 
 class AesGcmEncryptionTest {
 
-    private lateinit var logger: SystemLogger
+    private val logger = MemorisedLogger()
 
-    private lateinit var aesEncryption: AesGcmEncryption
-
-    @Before
-    fun setup() {
-        logger = SystemLogger()
-        aesEncryption = AesGcmEncryption(logger)
+    private val aesEncryption by lazy {
+        AesGcmEncryption(logger)
     }
 
     @Test

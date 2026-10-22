@@ -19,7 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientManager

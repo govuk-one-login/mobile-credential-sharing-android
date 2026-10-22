@@ -14,7 +14,7 @@ import javax.inject.Singleton
 import kotlin.io.encoding.Base64
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSigStructureGenerator
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1ProtectedHeaders
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1UnprotectedHeaderGenerator

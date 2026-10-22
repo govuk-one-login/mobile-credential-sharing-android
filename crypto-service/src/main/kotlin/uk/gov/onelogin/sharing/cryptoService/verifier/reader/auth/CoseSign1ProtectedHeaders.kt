@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 import java.security.cert.Certificate
 import java.security.interfaces.ECPublicKey
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants
 import uk.gov.onelogin.sharing.cryptoService.holder.ES256_ALGORITHM

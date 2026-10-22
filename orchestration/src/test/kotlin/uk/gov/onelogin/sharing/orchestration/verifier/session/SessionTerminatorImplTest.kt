@@ -13,7 +13,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.verifier.FakeVerifierCryptoService
@@ -26,7 +26,7 @@ class SessionTerminatorImplTest {
 
     private val fakeTransport = FakeCentralBluetoothTransport()
     private val fakeCryptoService = FakeVerifierCryptoService()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private lateinit var terminator: SessionTerminatorImpl
 

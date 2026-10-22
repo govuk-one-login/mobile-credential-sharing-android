@@ -1,23 +1,28 @@
 package uk.gov.onelogin.sharing.cryptoService.util
 
-import org.junit.Assert.assertTrue
-import uk.gov.logging.testdouble.v2.LogEntry
-import uk.gov.logging.testdouble.v2.SystemLogger
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.Matcher
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers
+import uk.gov.logging.api.v3.LogEntry
+import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.logging.api.v3.matchers.LogEntryMatchers.hasException
+import uk.gov.logging.api.v3.matchers.LogEntryMatchers.hasMessage
 
-/**
- * Asserts that an error entry was logged carrying a throwable of [throwableType]
- * whose message satisfies [messagePredicate].
- */
-fun SystemLogger.assertErrorLoggedWithThrowable(
+fun MemorisedLogger.assertErrorLoggedWithThrowable(
     throwableType: Class<out Throwable>,
-    messagePredicate: (String) -> Boolean
+    messageMatcher: Matcher<String>
 ) {
-    assertTrue(
+    assertThat(
         "Expected an error log with a ${throwableType.simpleName} throwable",
-        any { entry ->
-            entry is LogEntry.ErrorNoKeys &&
-                throwableType.isInstance(entry.throwable) &&
-                messagePredicate(entry.message)
-        }
+        this,
+        Matchers.contains(
+            allOf(
+                instanceOf(LogEntry.Error::class.java),
+                hasException(instanceOf(throwableType)),
+                hasMessage(messageMatcher)
+            )
+        )
     )
 }

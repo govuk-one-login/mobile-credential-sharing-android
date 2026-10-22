@@ -1,12 +1,12 @@
 package uk.gov.onelogin.sharing.cryptoService
 
+import uk.gov.logging.api.v3.MemorisedLogger
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
-import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.cryptoService.secureArea.SessionSecurityImpl
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.EcKeyPairGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.ALGORITHM
@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.HkdfSessionKeyGe
 import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenerator.Companion.DeviceRole
 
 object SessionSecurityTestStub {
-    private val securityLogger = SystemLogger()
+    val securityLogger = MemorisedLogger()
 
     val keyPairGenerator = EcKeyPairGenerator(securityLogger)
     val secretGenerator = EcdhSharedSecretGenerator(securityLogger)

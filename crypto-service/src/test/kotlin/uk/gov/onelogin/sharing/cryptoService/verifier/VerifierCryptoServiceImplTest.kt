@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.validDeviceEngagementDto
 import uk.gov.onelogin.sharing.cryptoService.secureArea.KeyPairGenerator as KPGenerator
@@ -31,7 +31,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.D
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.Status
 
 class VerifierCryptoServiceImplTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private var encrypter = FakeEncryptDeviceRequestUseCase()
     private var decrypter: DecryptDeviceResponseUseCase =
         DecryptDeviceResponseUseCase { _, _, _ -> DeviceResponse() }

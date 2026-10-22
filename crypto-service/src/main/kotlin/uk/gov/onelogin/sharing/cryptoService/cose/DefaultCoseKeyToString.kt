@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.cryptoService.cose
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cose.toDto
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor

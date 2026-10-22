@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
@@ -64,6 +64,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 import uk.gov.onelogin.sharing.verification.document.DocumentVerifier
 import uk.gov.onelogin.sharing.verification.format.document.result.VerificationResult
+import java.util.MissingResourceException
 
 private const val INVALID_SESSION_DATA = "Received invalid SessionData instance"
 
@@ -517,7 +518,13 @@ class VerifierOrchestrator(
 
                 )
             }
-            logger.error(logTag, "DeviceRequest processing error: status ${status.code}")
+            "DeviceRequest processing error: status ${status.code}".let {
+                logger.error(
+                    logTag,
+                    it,
+                    RuntimeException(it)
+                )
+            }
             return
         }
 
@@ -536,7 +543,13 @@ class VerifierOrchestrator(
                     )
                 )
             }
-            logger.error(logTag, "Document not returned: status ${status.code}")
+            "Document not returned: status ${status.code}".let {
+                logger.error(
+                    logTag,
+                    it,
+                    IllegalArgumentException(it)
+                )
+            }
             return
         }
 

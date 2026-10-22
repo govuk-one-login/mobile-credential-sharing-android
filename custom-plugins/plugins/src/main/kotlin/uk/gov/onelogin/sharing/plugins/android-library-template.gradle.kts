@@ -93,6 +93,12 @@ dependencies {
     }
 
     listOf(
+        "uk-gov-logging-api"
+    ).map { libs.findLibrary(it).get().get() }.forEach {
+        testFixturesApi(testFixtures(it))
+    }
+
+    listOf(
         "uk-gov-ui-android-componentsv2",
         "uk-gov-ui-android-patterns",
         "uk-gov-ui-android-theme",

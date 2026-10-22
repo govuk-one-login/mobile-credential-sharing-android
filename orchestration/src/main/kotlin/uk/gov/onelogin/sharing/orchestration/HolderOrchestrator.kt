@@ -5,10 +5,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import java.security.cert.X509Certificate
-import java.security.interfaces.ECPrivateKey
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,7 +16,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothStateException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
@@ -74,6 +70,10 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationResult
+import java.security.cert.X509Certificate
+import java.security.interfaces.ECPrivateKey
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -594,7 +594,11 @@ class HolderOrchestrator(
                 }
 
                 if (!deviceRequestContainsPortrait(deviceRequest)) {
-                    logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                    logger.error(
+                        logTag,
+                        PORTRAIT_POLICY_VIOLATION,
+                        IllegalArgumentException(PORTRAIT_POLICY_VIOLATION)
+                    )
                     appCoroutineScope.launch {
                         handlePolicyViolation()
                     }
@@ -638,9 +642,11 @@ class HolderOrchestrator(
         val currentState = holderSessionState.value
 
         if (currentState !is HolderSessionState.ProcessingEstablishment) {
+            val message = "Sequencing violation: message received in state $currentState"
             logger.error(
                 logTag,
-                "Sequencing violation: message received in state $currentState"
+                message,
+                IllegalStateException(message)
             )
             appCoroutineScope.launch {
                 sendTerminationAndFail(
@@ -891,8 +897,14 @@ class HolderOrchestrator(
                             " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
                     )
                     if (!docRequestContainsPortrait(authReq.docRequest)) {
-                        logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
-                        return IllegalStateException(PORTRAIT_POLICY_VIOLATION)
+                        val exception = IllegalStateException(PORTRAIT_POLICY_VIOLATION)
+
+                        logger.error(
+                            logTag,
+                            PORTRAIT_POLICY_VIOLATION,
+                            exception
+                        )
+                        return exception
                     }
 
                     sessionFlow.value.updateSessionContext {
@@ -904,7 +916,11 @@ class HolderOrchestrator(
                         requestAndValidateCredential(requestedDocType, candidateDeviceRequest)
                         null
                     } catch (e: CredentialRequestException) {
-                        logger.error(logTag, "Candidate failed attribute matching: ${e.message}")
+                        logger.error(
+                            logTag,
+                            "Candidate failed attribute matching: ${e.message}",
+                            e
+                        )
                         e
                     }
                 }
@@ -933,7 +949,7 @@ class HolderOrchestrator(
     }
 
     private fun failWith(message: String, reason: SessionErrorReason) {
-        logger.error(logTag, message)
+        logger.warning(logTag, message)
         appCoroutineScope.launch {
             terminateSession(
                 finalState = HolderSessionState.Complete.Failed(

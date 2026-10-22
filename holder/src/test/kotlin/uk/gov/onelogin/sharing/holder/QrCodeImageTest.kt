@@ -15,7 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.engagement.Engagement
@@ -32,7 +32,7 @@ class QrCodeImageTest {
     val composeTestRule = createComposeRule()
 
     private val testTag = "qrCode"
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     @Test
     fun showsQrCode() {

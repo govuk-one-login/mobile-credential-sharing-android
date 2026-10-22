@@ -20,7 +20,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerManager
@@ -215,7 +215,13 @@ class AndroidGattServerManager(
                 }
 
             is MessageReassembler.Result.InvalidPrefix ->
-                logger.error(logTag, "invalid message received from remote device")
+                logger.error(
+                    logTag,
+                    "invalid message received from remote device",
+                    IllegalArgumentException(
+                        "Invalid message received from remote device"
+                    )
+                )
         }
     }
 
