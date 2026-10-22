@@ -39,38 +39,25 @@ import uk.gov.android.ui.theme.m3.toMappedColors
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 
 private val CARD_CORNER_RADIUS = 16.dp
 private val DOCUMENT_ICON_WIDTH = 70.dp
 private val DOCUMENT_ICON_HEIGHT = 50.dp
 private val DIVIDER_THICKNESS = 1.dp
 
-/** The retention variant for the card, derived from the attributes' `intentToRetain` flags.
- * - [NO_DETAILS_KEPT]: heading, then all attributes, then a retention footer band.
- * - [ALL_DETAILS_KEPT]: heading, then all attributes, then a retention footer band.
- * - [SOME_DETAILS_KEPT]: heading, a "will keep" band, kept attributes, a "will not keep"
- * */
-private enum class RetentionVariant { NO_DETAILS_KEPT, ALL_DETAILS_KEPT, SOME_DETAILS_KEPT }
-
 /**
- * Renders the 'Agree to Share' card.
+ * Renders the 'Agree to Share' card from an already resolved [ConsentCard]. All ordering,
+ * label resolution and retention grouping happen in the view model; this composable only renders.
  *
- * @param document The consented document whose namespaces supply the attributes to display.
+ * @param card The resolved, display-ready model for a single document.
  * @param organizationName The verified Verifier (DVS) organisation name.
  */
 @Composable
 internal fun AgreeToShareCard(
-    document: ConsentDocument,
+    card: ConsentCard,
     organizationName: String?,
     modifier: Modifier = Modifier
 ) {
-    val resolved = ConsentAttributeResolver.toDisplayAttributes(
-        document.namespaces.flatMap(ConsentNamespace::attributes)
-    )
-    val variant = resolved.toRetentionVariant()
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -81,12 +68,12 @@ internal fun AgreeToShareCard(
                 shape = RoundedCornerShape(CARD_CORNER_RADIUS)
             )
     ) {
-        CardHeading(count = resolved.size)
+        CardHeading(count = card.attributeCount)
 
-        when (variant) {
+        when (card.retentionVariant) {
             RetentionVariant.NO_DETAILS_KEPT -> {
                 SectionDivider()
-                AttributeList(resolved)
+                AttributeList(card.attributes)
                 SectionDivider()
                 RetentionBand {
                     RetentionText(stringResource(R.string.holder_consent_card_none_kept))
@@ -95,7 +82,7 @@ internal fun AgreeToShareCard(
 
             RetentionVariant.ALL_DETAILS_KEPT -> {
                 SectionDivider()
-                AttributeList(resolved)
+                AttributeList(card.attributes)
                 organizationName?.let {
                     SectionDivider()
                     RetentionBand {
@@ -111,7 +98,7 @@ internal fun AgreeToShareCard(
                         RetentionText(stringResource(R.string.holder_consent_card_will_keep, it))
                     }
                     SectionDivider()
-                    AttributeList(resolved.filter { attr -> attr.intentToRetain })
+                    AttributeList(card.keptAttributes)
                     SectionDivider()
                     RetentionBand {
                         RetentionText(
@@ -119,7 +106,7 @@ internal fun AgreeToShareCard(
                         )
                     }
                     SectionDivider()
-                    AttributeList(resolved.filterNot { attr -> attr.intentToRetain })
+                    AttributeList(card.notKeptAttributes)
                 }
             }
         }
@@ -238,12 +225,6 @@ private fun RowDivider() {
 private fun DisplayAttribute.label(): String =
     labelArg?.let { stringResource(labelRes, it) } ?: stringResource(labelRes)
 
-private fun List<DisplayAttribute>.toRetentionVariant(): RetentionVariant = when {
-    all { !it.intentToRetain } -> RetentionVariant.NO_DETAILS_KEPT
-    all { it.intentToRetain } -> RetentionVariant.ALL_DETAILS_KEPT
-    else -> RetentionVariant.SOME_DETAILS_KEPT
-}
-
 private fun AnnotatedString.Builder.emphasise(source: String, substring: String, style: SpanStyle) {
     if (substring.isEmpty()) return
     val start = source.indexOf(substring)
@@ -272,17 +253,14 @@ private class AgreeToShareCardPreviewProvider : PreviewParameterProvider<Map<Str
 private fun AgreeToShareCardPreview(
     @PreviewParameter(AgreeToShareCardPreviewProvider::class) elements: Map<String, Boolean>
 ) {
+    val card = ConsentCard.from(
+        ConsentAttributeResolver.toDisplayAttributes(
+            elements.map { (id, retain) -> ConsentAttribute(id, retain) }
+        )
+    )
     GdsTheme {
         AgreeToShareCard(
-            document = ConsentDocument(
-                docType = "org.iso.18013.5.1.mDL",
-                namespaces = listOf(
-                    ConsentNamespace(
-                        nameSpace = "org.iso.18013.5.1",
-                        attributes = elements.map { (id, retain) -> ConsentAttribute(id, retain) }
-                    )
-                )
-            ),
+            card = card,
             organizationName = "Example Organisation.",
             modifier = Modifier.padding(spacingDouble)
         )
