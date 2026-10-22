@@ -77,7 +77,6 @@ class CertificateProfileValidatorTest {
 
     @Test
     fun `IssuerAuth intermediate with extra KeyUsage bits is approved`() {
-        // Intermediate KeyUsage = keyCertSign + cRLSign + digitalSignature (extra bit allowed).
         val result = validator.validate(
             listOf(validIssuerLeaf, CertificateStubs.caWithExtraKeyUsageBits),
             CertificatePurpose.ISSUER_AUTH
@@ -88,7 +87,6 @@ class CertificateProfileValidatorTest {
 
     @Test
     fun `IssuerAuth leaf with extra KeyUsage bits is approved`() {
-        // Leaf KeyUsage = digitalSignature + keyEncipherment (extra bit allowed), issuer EKU.
         val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = CertificateStubs.leafKeyPair,
@@ -105,7 +103,6 @@ class CertificateProfileValidatorTest {
 
     @Test
     fun `IssuerAuth leaf missing digitalSignature fails with INVALID_KEY_USAGE`() {
-        // Leaf KeyUsage = keyCertSign + cRLSign only (no digitalSignature).
         val leaf = TestCertificateGenerator(
             subject = "CN=Leaf,C=GB,ST=London",
             keyPair = CertificateStubs.leafKeyPair,
@@ -152,8 +149,6 @@ class CertificateProfileValidatorTest {
         assertThat(violation.reason, equalTo(CertificateProfileReason.INVALID_KEY_USAGE))
     }
 
-    // --- ReaderAuth KeyUsage: "must contain" (extra bits permitted) ---
-
     private fun readerLeaf(configure: TestCertificateGenerator.() -> TestCertificateGenerator) =
         TestCertificateGenerator(
             subject = "CN=Reader Leaf,C=GB,ST=London",
@@ -164,7 +159,6 @@ class CertificateProfileValidatorTest {
 
     @Test
     fun `ReaderAuth leaf with extra KeyUsage bits is approved`() {
-        // Leaf KeyUsage = digitalSignature + keyEncipherment (extra bit allowed for ReaderAuth).
         val leaf = readerLeaf { leafWithExtraBits() }
 
         val result = validator.validate(listOf(leaf), CertificatePurpose.READER_AUTH)
@@ -174,7 +168,6 @@ class CertificateProfileValidatorTest {
 
     @Test
     fun `ReaderAuth intermediate with extra KeyUsage bits is approved`() {
-        // Intermediate KeyUsage = keyCertSign + cRLSign + digitalSignature (extra bit allowed).
         val leaf = readerLeaf { leaf() }
 
         val result = validator.validate(
@@ -187,7 +180,6 @@ class CertificateProfileValidatorTest {
 
     @Test
     fun `ReaderAuth leaf missing digitalSignature fails with INVALID_KEY_USAGE`() {
-        // Leaf KeyUsage = keyCertSign + cRLSign only (no digitalSignature).
         val leaf = readerLeaf { caKeyUsage() }
 
         val violation = assertThrows(CertificateProfileViolation::class.java) {
@@ -199,7 +191,6 @@ class CertificateProfileValidatorTest {
 
     @Test
     fun `ReaderAuth intermediate missing cRLSign fails with INVALID_KEY_USAGE`() {
-        // Intermediate KeyUsage = keyCertSign only (missing cRLSign).
         val leaf = readerLeaf { leaf() }
 
         val violation = assertThrows(CertificateProfileViolation::class.java) {
@@ -214,7 +205,6 @@ class CertificateProfileValidatorTest {
 
     @Test
     fun `ReaderAuth intermediate with only leaf KeyUsage fails with INVALID_KEY_USAGE`() {
-        // Intermediate KeyUsage = digitalSignature only (missing keyCertSign + cRLSign).
         val leaf = readerLeaf { leaf() }
 
         val violation = assertThrows(CertificateProfileViolation::class.java) {
