@@ -44,7 +44,6 @@ import uk.gov.onelogin.sharing.models.mdoc.cbor.CborErrors
 
 class DecoderTest {
 
-    private val outContent = ByteArrayOutputStream()
     private val logger = MemorisedLogger()
 
     @Test
