@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.holder.consent
 import app.cash.turbine.test
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
@@ -79,7 +78,11 @@ class HolderConsentViewModelTest {
                 documents = documents
             )
             val expected = HolderConsentUiState(
-                documents = documents
+                card = ConsentCard.from(
+                    ConsentAttributeResolver.toDisplayAttributes(
+                        listOf(ConsentAttribute("family_name", false))
+                    )
+                )
             )
 
             viewModel.presentation.test {
