@@ -9,7 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_ARRAY_4
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_BSTR_1
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCaseStub.CBOR_EMPTY_MAP

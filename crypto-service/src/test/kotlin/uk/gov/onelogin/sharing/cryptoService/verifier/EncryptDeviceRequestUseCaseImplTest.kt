@@ -6,7 +6,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.NIST_INITIALISATION_VECTOR_SIZE
 import uk.gov.onelogin.sharing.cryptoService.cryptography.createNistInitialisationVector
@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 
 class EncryptDeviceRequestUseCaseImplTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val plaintext = ByteArray(32) { it.toByte() }
     private val skReader = ByteArray(32) { 0x01 }
     private val encryptCounter = 1u

@@ -3,8 +3,8 @@ package uk.gov.onelogin.sharing.analytics
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import uk.gov.logging.api.analytics.AnalyticsEvent
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 class SystemAnalyticsLogger @JvmOverloads constructor(

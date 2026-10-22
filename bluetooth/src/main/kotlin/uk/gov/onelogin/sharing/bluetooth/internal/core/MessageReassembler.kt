@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
 import java.util.UUID
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 
 private const val LOG_TAG = "MessageReassembler"
 
@@ -45,7 +45,7 @@ class MessageReassembler(
         val previousMessages = messages[uuid] ?: byteArrayOf()
         val payload = value.drop(1).toByteArray()
 
-        return when (value.firstOrNull()) {
+        return when (val prefix = value.firstOrNull()) {
             NON_LAST_PART -> {
                 val accumulated = previousMessages + payload
                 if (accumulated.size > maxReceiveBufferSize) {
@@ -73,7 +73,14 @@ class MessageReassembler(
             }
 
             else -> {
-                logger.error(LOG_TAG, "invalid message prefix received from remote device")
+                val error = IllegalArgumentException(
+                    "invalid message prefix received from remote device: ${prefix?.toHexString()}"
+                )
+                logger.error(
+                    LOG_TAG,
+                    "invalid message prefix received from remote device",
+                    error
+                )
                 Result.InvalidPrefix
             }
         }
@@ -89,9 +96,13 @@ class MessageReassembler(
     }
 
     private fun logOverflow(bufferSize: Int) {
+        val message =
+            "ExceededMaxBuffer: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
+        val thrown = IllegalStateException(message)
         logger.error(
             LOG_TAG,
-            "ExceededMaxBuffer: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
+            message,
+            thrown
         )
     }
 

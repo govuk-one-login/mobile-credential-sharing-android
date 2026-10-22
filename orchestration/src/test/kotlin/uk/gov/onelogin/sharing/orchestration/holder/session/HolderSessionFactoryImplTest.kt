@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
 import org.hamcrest.Matcher
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.engagement.FakeEngagementGenerator
 import uk.gov.onelogin.sharing.orchestration.holder.session.matchers.HolderSessionStateMatchers
@@ -12,7 +12,7 @@ import uk.gov.onelogin.sharing.orchestration.session.matchers.StateContainerMatc
 class HolderSessionFactoryImplTest :
     SessionFactoryImplTest<StateContainer<in HolderSessionState>> {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     override val factory: HolderSessionFactory = HolderSessionFactory(
         logger = logger,
         sessionSecurity = FakeSessionSecurity(),

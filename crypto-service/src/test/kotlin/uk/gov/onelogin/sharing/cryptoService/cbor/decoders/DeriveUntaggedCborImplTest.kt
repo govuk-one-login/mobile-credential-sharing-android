@@ -5,7 +5,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_E_READER_KEY
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
@@ -16,7 +16,7 @@ class DeriveUntaggedCborImplTest {
 
     private lateinit var cborMapper: ObjectMapper
     private lateinit var deriveUntaggedCbor: DeriveUntaggedCbor
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     @Before
     fun setUp() {

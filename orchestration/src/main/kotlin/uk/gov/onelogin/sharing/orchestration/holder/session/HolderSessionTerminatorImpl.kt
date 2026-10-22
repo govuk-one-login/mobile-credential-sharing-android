@@ -6,7 +6,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.core.logger.logTag
 

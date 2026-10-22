@@ -24,7 +24,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
@@ -111,7 +111,7 @@ class HolderOrchestratorTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val resetOrchestratorSessionLog = "Cleared Orchestrator holder session"
     private val startSessionAfterCompletionLog =
         "Starting an Orchestrator holder session after completing the previous journey"

@@ -6,7 +6,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueue
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueueImpl
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids

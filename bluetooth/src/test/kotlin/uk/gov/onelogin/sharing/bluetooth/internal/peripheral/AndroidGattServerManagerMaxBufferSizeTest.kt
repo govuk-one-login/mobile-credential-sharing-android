@@ -23,7 +23,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
@@ -54,7 +54,7 @@ class AndroidGattServerManagerMaxBufferSizeTest {
     )
     private val fakePermissionChecker = FakePermissionChecker { emptyList() }
     private val fakeGattWriter = FakeGattWriter()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val uuid = UUID.randomUUID()
 
     private lateinit var manager: AndroidGattServerManager

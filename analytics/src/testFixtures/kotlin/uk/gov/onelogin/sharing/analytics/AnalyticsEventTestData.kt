@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.analytics
 
 import uk.gov.logging.api.analytics.parameters.data.TaxonomyLevel2
-import uk.gov.logging.api.v3dot1.logger.asLegacyEvent
+import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.RequiredParameters
 import uk.gov.logging.api.v3dot1.model.ViewEvent
 

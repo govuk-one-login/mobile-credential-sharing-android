@@ -9,7 +9,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 
@@ -20,7 +20,7 @@ class HolderSessionTerminatorImplTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val fakeTransport = FakePeripheralBluetoothTransport()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private lateinit var terminator: HolderSessionTerminatorImpl
 

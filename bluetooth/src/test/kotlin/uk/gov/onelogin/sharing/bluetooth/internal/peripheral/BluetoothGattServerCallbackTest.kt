@@ -9,7 +9,7 @@ import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub.writeRequestMessage
@@ -19,7 +19,7 @@ class BluetoothGattServerCallbackTest {
     private val fakeEmitter = FakeGattServerEventEmitter()
     private val callback = GattServerCallback(
         gatGattEventEmitter = fakeEmitter,
-        logger = SystemLogger()
+        logger = MemorisedLogger()
     )
     private val device = mockk<BluetoothDevice>()
     private val service = mockk<BluetoothGattService>()

@@ -5,7 +5,7 @@ import kotlin.test.assertNotNull
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.CoseKeyStub.D_3_1_EDEVICE_KEY
 import uk.gov.onelogin.sharing.cryptoService.CoseKeyStub.D_3_1_EDEVICE_KEY_HEX
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
@@ -15,7 +15,7 @@ import uk.gov.onelogin.sharing.cryptoService.cose.toDto
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
 
 class CoseKeyTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     @Test
     fun `should convert EcPublicKey to CoseKey with key type EC2`() {
@@ -82,7 +82,7 @@ class CoseKeyTest {
     fun `parseEReaderPublicKey with valid key returns ECPublicKey`() {
         val sessionEstablishment = decodeSessionEstablishmentModel(
             MOCK_SESSION_ESTABLISHMENT_DATA.hexToByteArray(),
-            SystemLogger()
+            MemorisedLogger()
         ).toSessionEstablishment()
 
 //        val untagReaderKey = deriveUntaggedCbor(sessionEstablishment.eReaderKey)

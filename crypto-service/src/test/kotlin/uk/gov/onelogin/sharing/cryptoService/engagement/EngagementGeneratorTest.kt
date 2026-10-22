@@ -2,14 +2,14 @@ package uk.gov.onelogin.sharing.cryptoService.engagement
 
 import org.junit.Assert.assertNotNull
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.engagement.EngagementGeneratorStub.qrCodeEngagementUuid
 
 class EngagementGeneratorTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val engagementGenerator: EngagementGenerator = EngagementGenerator(
         logger = logger
     )

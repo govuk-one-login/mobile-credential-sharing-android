@@ -10,8 +10,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 import org.junit.Before
 import org.junit.Test
-import uk.gov.logging.api.v2.Logger
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.Logger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.orchestration.FakeCredentialProvider
 import uk.gov.onelogin.sharing.sdk.api.shared.CredentialSharingSdk
 import uk.gov.onelogin.sharing.sdk.internal.presenter.CredentialPresenterImpl
@@ -24,7 +24,7 @@ class CredentialSharingSdkImplTest {
 
     @Before
     fun setUp() {
-        logger = SystemLogger()
+        logger = MemorisedLogger()
 
         val mockBluetoothManager = mockk<BluetoothManager>(relaxed = true)
         val mockContext = mockk<Context>(relaxed = true) {

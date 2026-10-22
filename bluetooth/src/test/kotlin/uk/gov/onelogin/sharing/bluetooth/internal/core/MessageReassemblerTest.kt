@@ -4,10 +4,10 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 
 class MessageReassemblerTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val uuid: UUID = UUID.randomUUID()
 
     private fun reassembler(maxReceiveBufferSize: Int = 1024) =

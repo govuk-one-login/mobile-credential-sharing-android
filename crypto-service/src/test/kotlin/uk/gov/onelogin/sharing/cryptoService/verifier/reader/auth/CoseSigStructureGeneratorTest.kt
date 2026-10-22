@@ -14,7 +14,7 @@ import org.hamcrest.Matchers.arrayContaining
 import org.hamcrest.Matchers.startsWith
 import org.hamcrest.Matchers.stringContainsInOrder
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.models.mdoc.cbor.HexFormatter
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
 import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGenerator
@@ -22,7 +22,7 @@ import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGe
 @RunWith(TestParameterInjector::class)
 class CoseSigStructureGeneratorTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private var protectedHeaders: ByteArray = byteArrayOf(1, 2, 3)
     private var readerAuthenticationPayload: ByteArray = byteArrayOf(2, 3, 4)
 

@@ -9,11 +9,11 @@ import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 import org.junit.Assert.assertThrows
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.validKeyPair
 
 class EcdhSharedSecretGeneratorTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val generator by lazy {
         EcdhSharedSecretGenerator(logger)

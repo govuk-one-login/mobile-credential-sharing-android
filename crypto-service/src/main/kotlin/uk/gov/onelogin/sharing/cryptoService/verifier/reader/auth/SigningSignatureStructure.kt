@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 import java.security.PrivateKey
 import java.security.Signature
 import java.security.cert.Certificate
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 /**

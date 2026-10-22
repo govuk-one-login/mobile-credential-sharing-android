@@ -9,7 +9,7 @@ import kotlin.test.assertNotEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.getSharedSecret
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionStubs.VAL
 
 class HkdfSessionKeyGeneratorTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val sessionKeyGenerator = HkdfSessionKeyGenerator(logger)
 
