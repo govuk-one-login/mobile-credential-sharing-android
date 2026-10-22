@@ -11,13 +11,14 @@ fun QrCodeImage(
     data: String,
     size: Int,
     modifier: Modifier = Modifier,
-    margin: Int = 4
+    margin: Int = 4,
+    contentDescription: String = "QR Code"
 ) {
     qrCodeGenerator(data, size, margin)?.asImageBitmap()?.let {
         Image(
             modifier = modifier,
             bitmap = it,
-            contentDescription = "QR Code",
+            contentDescription = contentDescription,
             contentScale = ContentScale.Fit
         )
     }

@@ -4,4 +4,5 @@
     <string name="holder_welcome_body_1">Show the QR code to the person doing the check.</string>
     <string name="holder_welcome_body_2">It lets them send you a list of the details they need to check.</string>
     <string name="holder_welcome_body_3">You’ll review this list before agreeing to share your details with them.</string>
+    <string name="holder_welcome_qr_code_alt_text">QR code to get the list of details you need to share</string>
 </resources>

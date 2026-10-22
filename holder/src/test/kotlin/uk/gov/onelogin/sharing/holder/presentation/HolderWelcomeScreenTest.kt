@@ -1,21 +1,21 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.api.v3.MemorisedLogger
-import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HolderWelcomeScreenTest {
     @get:Rule
@@ -28,6 +28,8 @@ class HolderWelcomeScreenTest {
         "This is a unit test"
     )
 
+    private val holderState = MutableStateFlow(initialHolderState)
+
     private val orchestrator by lazy {
         FakeOrchestrator(
             initialHolderState = MutableStateFlow(initialHolderState)
@@ -37,7 +39,7 @@ class HolderWelcomeScreenTest {
     private val viewModel by lazy {
         HolderWelcomeViewModel(
             dispatcher = dispatcherRule.testDispatcher,
-            analyticsLogger = SystemAnalyticsLogger(MemorisedLogger()),
+            analyticsLogger = StoredAnalyticsLogger(),
             orchestrator = orchestrator
         )
     }
@@ -46,16 +48,41 @@ class HolderWelcomeScreenTest {
     fun `Shows QR code whilst presenting engagement`() = runTest(dispatcherRule.testDispatcher) {
         composeTestRule.run {
             setContent { Render() }
-            assertWelcomeTextIsDisplayed()
             assertQrCodeIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `Shows a loading spinner before QR code is ready`() = runTest {
+        initialHolderState = HolderSessionState.NotStarted
+        composeTestRule.run {
+            setContent { Render() }
+            assertLoadingSpinnerIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `Closing the journey shows a loading spinner`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+            composeTestRule.assertHeadingIsDisplayed()
+            composeTestRule.assertQrCodeIsDisplayed()
+            composeTestRule.assertBodyIsDisplayed()
+            holderState.update { HolderSessionState.SendingTermination }
+            waitUntil {
+                onAllNodes(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate))
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            assertLoadingSpinnerIsDisplayed()
         }
     }
 
     @Test
     fun `Preview only shows QR content`() = runTest(dispatcherRule.testDispatcher) {
         composeTestRule.run {
-            setContent { HolderWelcomeScreenPreview() }
-            assertWelcomeTextIsDisplayed()
+            setContent {}
+            assertHeadingIsDisplayed()
             assertQrCodeIsDisplayed()
         }
     }
