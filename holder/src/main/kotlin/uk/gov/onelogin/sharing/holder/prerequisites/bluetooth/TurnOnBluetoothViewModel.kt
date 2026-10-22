@@ -20,15 +20,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
-import uk.gov.logging.api.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.logging.api.v3dot1.model.TrackEvent
 import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.ResolvePrerequisiteAction
 

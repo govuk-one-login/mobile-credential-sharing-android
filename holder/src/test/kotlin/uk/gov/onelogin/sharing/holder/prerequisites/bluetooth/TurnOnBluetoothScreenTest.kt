@@ -3,7 +3,6 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
@@ -27,7 +26,7 @@ import org.hamcrest.Matchers.hasItem
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -69,7 +68,7 @@ class TurnOnBluetoothScreenTest {
         FakeOrchestrator(initialHolderState = holderState)
     }
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val analyticsLogger by lazy {
         StoredAnalyticsLogger()
@@ -243,7 +242,7 @@ class TurnOnBluetoothScreenTest {
     }
 
     @Test
-    fun `Injectted viewmodel is used by default`() = runTest {
+    fun `Injected viewmodel is used by default`() = runTest {
         composeTestRule.run {
             setContent {
                 CompositionLocalProvider(LocalMetroViewModelFactory provides viewModelFactory) {

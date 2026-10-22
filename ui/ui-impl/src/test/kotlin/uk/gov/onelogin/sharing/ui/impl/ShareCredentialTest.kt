@@ -25,10 +25,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import uk.gov.logging.api.analytics.parameters.data.TaxonomyLevel2
-import uk.gov.logging.api.v3dot1.logger.asLegacyEvent
-import uk.gov.logging.api.v3dot1.model.RequiredParameters
+import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.TrackEvent
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -51,7 +50,7 @@ class ShareCredentialTest {
 
     private val expectedCloseEvent = TrackEvent.Button(
         text = "Close",
-        params = RequiredParameters(taxonomyLevel2 = TaxonomyLevel2.WALLET)
+        params = walletSharingRequiredParameters
     ).asLegacyEvent()
 
     private val holderGraph by lazy {

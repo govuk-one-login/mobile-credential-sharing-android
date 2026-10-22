@@ -29,8 +29,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
-import uk.gov.logging.api.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.logging.api.v3dot1.model.TrackEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.holder.HolderRoutes

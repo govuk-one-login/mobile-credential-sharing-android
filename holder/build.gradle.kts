@@ -77,6 +77,7 @@ dependencies {
     listOf(
         projects.bluetooth,
         projects.cryptoService,
+        testFixtures(projects.analytics),
         testFixtures(projects.bluetooth),
         testFixtures(projects.cryptoService),
         testFixtures(projects.core),

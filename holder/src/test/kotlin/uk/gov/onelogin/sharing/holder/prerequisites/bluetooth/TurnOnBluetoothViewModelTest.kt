@@ -13,7 +13,7 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.junit.Rule
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -32,7 +32,7 @@ class TurnOnBluetoothViewModelTest {
     val dispatcherRule = MainDispatcherRule()
 
     private val analyticsLogger = StoredAnalyticsLogger()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private var recheckCount = 0
     private val holderState = MutableStateFlow<HolderSessionState>(
         HolderSessionState.Preflight(
