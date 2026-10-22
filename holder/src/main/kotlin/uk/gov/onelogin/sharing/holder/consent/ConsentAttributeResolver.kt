@@ -5,11 +5,9 @@ import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
 /**
- * Maps DocType and DataElementIdentifier values to GDS-aligned labels and the display order.
+ * Maps DataElementIdentifier values to labels and the display order.
  */
 object ConsentAttributeResolver {
-
-    const val DOC_TYPE_MDL = "org.iso.18013.5.1.mDL"
 
     private const val AGE_OVER_PREFIX = "age_over_"
 
@@ -39,12 +37,6 @@ object ConsentAttributeResolver {
         displayOrder.withIndex().associate { (index, key) -> key to index }
 
     @StringRes
-    fun documentNameRes(docType: String): Int? = when (docType) {
-        DOC_TYPE_MDL -> R.string.holder_consent_doc_mdl
-        else -> null
-    }
-
-    @StringRes
     private fun attributeLabelRes(elementIdentifier: String): Int? {
         if (elementIdentifier.startsWith(AGE_OVER_PREFIX)) {
             return R.string.holder_consent_attr_age_over
@@ -60,7 +52,7 @@ object ConsentAttributeResolver {
             null
         }
 
-    /** Canonical sort index for an identifier; unknown identifiers sort to the end. */
+    /** Sort index for an identifier; unknown identifiers sort to the end. */
     private fun orderIndexOf(elementIdentifier: String): Int {
         val key = if (elementIdentifier.startsWith(AGE_OVER_PREFIX)) {
             AGE_OVER_PREFIX
@@ -71,13 +63,13 @@ object ConsentAttributeResolver {
     }
 
     /**
-     * Resolves and orders attributes into the display order.
+     * Gets strings and orders attributes into the display order.
      */
-    fun resolveAndOrder(attributes: List<ConsentAttribute>): List<ResolvedAttribute> = attributes
+    fun toDisplayAttributes(attributes: List<ConsentAttribute>): List<DisplayAttribute> = attributes
         .mapNotNull { attribute ->
             val labelRes = attributeLabelRes(attribute.elementIdentifier)
                 ?: return@mapNotNull null
-            orderIndexOf(attribute.elementIdentifier) to ResolvedAttribute(
+            orderIndexOf(attribute.elementIdentifier) to DisplayAttribute(
                 labelRes = labelRes,
                 labelArg = ageOverValue(attribute.elementIdentifier),
                 intentToRetain = attribute.intentToRetain
@@ -110,11 +102,11 @@ object ConsentAttributeResolver {
 }
 
 /**
- * An attribute resolved to its GDS-aligned label, ready to render on the Agree to Share card.
+ * A consent attribute resolved to its label, ready to render on the Agree to Share card.
  *
  * @param labelArg The NN value for an `age_over_NN` label. `null` for labels that take no argument.
  */
-data class ResolvedAttribute(
+data class DisplayAttribute(
     @param:StringRes val labelRes: Int,
     val labelArg: Int? = null,
     val intentToRetain: Boolean

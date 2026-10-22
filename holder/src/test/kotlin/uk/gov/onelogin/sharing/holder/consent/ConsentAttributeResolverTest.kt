@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.holder.consent
 
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import org.junit.Test
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
@@ -10,7 +9,7 @@ class ConsentAttributeResolverTest {
 
     @Test
     fun `resolves known attributes to strings res IDs`() {
-        val resolved = ConsentAttributeResolver.resolveAndOrder(
+        val resolved = ConsentAttributeResolver.toDisplayAttributes(
             listOf(
                 ConsentAttribute("family_name", false),
                 ConsentAttribute("welsh_licence", false)
@@ -28,21 +27,12 @@ class ConsentAttributeResolverTest {
 
     @Test
     fun `resolves any age_over_NN to the age label with its NN arg`() {
-        val resolved = ConsentAttributeResolver.resolveAndOrder(
+        val resolved = ConsentAttributeResolver.toDisplayAttributes(
             listOf(ConsentAttribute("age_over_21", false))
         ).single()
 
         assertEquals(R.string.holder_consent_attr_age_over, resolved.labelRes)
         assertEquals(21, resolved.labelArg)
-    }
-
-    @Test
-    fun `document name resolves for mDL and is null otherwise`() {
-        assertEquals(
-            R.string.holder_consent_doc_mdl,
-            ConsentAttributeResolver.documentNameRes(ConsentAttributeResolver.DOC_TYPE_MDL)
-        )
-        assertNull(ConsentAttributeResolver.documentNameRes("org.unknown.doc"))
     }
 
     @Test
@@ -57,7 +47,7 @@ class ConsentAttributeResolverTest {
             ConsentAttribute("family_name", false)
         )
 
-        val ordered = ConsentAttributeResolver.resolveAndOrder(requested).map { it.labelRes }
+        val ordered = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.labelRes }
 
         assertEquals(
             listOf(
@@ -80,7 +70,7 @@ class ConsentAttributeResolverTest {
             ConsentAttribute("age_over_18", false)
         )
 
-        val ages = ConsentAttributeResolver.resolveAndOrder(requested).map { it.labelArg }
+        val ages = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.labelArg }
 
         assertEquals(listOf(18, 21), ages)
     }
@@ -93,7 +83,7 @@ class ConsentAttributeResolverTest {
             ConsentAttribute("mystery", false)
         )
 
-        val ordered = ConsentAttributeResolver.resolveAndOrder(requested).map { it.labelRes }
+        val ordered = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.labelRes }
 
         assertEquals(listOf(R.string.holder_consent_attr_family_name), ordered)
     }
@@ -105,7 +95,7 @@ class ConsentAttributeResolverTest {
             ConsentAttribute("given_name", false)
         )
 
-        val resolved = ConsentAttributeResolver.resolveAndOrder(requested)
+        val resolved = ConsentAttributeResolver.toDisplayAttributes(requested)
 
         assertEquals(true, resolved[0].intentToRetain)
         assertEquals(false, resolved[1].intentToRetain)
