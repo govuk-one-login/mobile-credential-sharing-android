@@ -9,7 +9,7 @@ import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.api.v3dot1.logger.asLegacyEvent
+import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
