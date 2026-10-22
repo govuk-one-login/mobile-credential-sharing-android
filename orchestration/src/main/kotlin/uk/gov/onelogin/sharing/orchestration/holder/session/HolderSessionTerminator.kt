@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
-import java.util.UUID
-
 /**
  * Manages the ISO 18013-5 session termination protocol for the holder.
  *
@@ -11,8 +9,6 @@ import java.util.UUID
 fun interface HolderSessionTerminator {
     /**
      * Executes the termination protocol.
-     *
-     * @param serviceUuid The active GATT service UUID.
      */
-    suspend fun terminate(serviceUuid: UUID)
+    suspend fun terminate()
 }

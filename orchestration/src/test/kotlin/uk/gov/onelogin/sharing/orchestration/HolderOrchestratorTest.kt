@@ -1016,6 +1016,54 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `cancel then restart during signing discards the late device response`() = runTest {
+        val consentGate = CompletableDeferred<Unit>()
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            sessionFactory = sessionFactory,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // Begin signing on the first session; it suspends on the local-auth gate.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Cancel the in-flight session (marks the originating session complete) and then
+        // restart a fresh journey while the first signing job is still suspended.
+        orchestrator.cancel()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isCancelled())
+
+        orchestrator.start()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, inPresentingEngagement())
+
+        // Late completion of the original signing job must not reach the restarted session:
+        // no device response is sent and no encryption is performed against the new session.
+        consentGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(0, peripheralTransport.sendMessageCalls)
+        assertEquals(null, fakeCryptoService.lastEncryptCounter)
+        assertThat(orchestrator.holderSessionState.value, inPresentingEngagement())
+    }
+
+    @Test
     fun `deny during signing cancels signing and shares no credential`() = runTest {
         val consentGate = CompletableDeferred<Unit>()
         val fakeCryptoService = FakeHolderCryptoService()

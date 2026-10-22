@@ -43,6 +43,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
 import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
@@ -86,7 +87,8 @@ internal class AndroidGattClientManagerTest {
         gattWriter,
         logger,
         writeQueue,
-        testScope
+        testScope,
+        MessageReassembler.Factory { max -> MessageReassembler(max, logger) }
     )
 
     @Before
@@ -702,13 +704,13 @@ internal class AndroidGattClientManagerTest {
 
             inputBytes.dropLast(1).forEach { chunk ->
                 assertTrue(
-                    "Chunked 'Server2Client' characteristic update: ${chunk.toHexString()}"
+                    "Chunked 'Server2Client' characteristic update: ${chunk.size} bytes received"
                         in logger
                 )
             }
 
             assertTrue(
-                "Completed 'Server2Client' message transfer:" in logger
+                "Completed 'Server2Client' message transfer: ${expectedBytes.size} bytes" in logger
             )
         }
     }
@@ -740,7 +742,7 @@ internal class AndroidGattClientManagerTest {
         }
 
         assertTrue(
-            "Completed 'Server2Client' message transfer:" in logger
+            "Completed 'Server2Client' message transfer: ${expectedBytes.size} bytes" in logger
         )
     }
 
@@ -1113,7 +1115,7 @@ internal class AndroidGattClientManagerTest {
                 )
             }
         }
-        val result = mgr.sendMessage(uuid, data)
+        val result = mgr.sendMessage(data)
 
         assertEquals(true, result)
         assertEquals(1, fakeGattWriter.writes)
@@ -1147,7 +1149,7 @@ internal class AndroidGattClientManagerTest {
                     )
                 }
             }
-            val result = mgr.sendMessage(uuid, data)
+            val result = mgr.sendMessage(data)
 
             assertEquals(true, result)
             assertEquals(2, fakeGattWriter.writes)
@@ -1165,7 +1167,7 @@ internal class AndroidGattClientManagerTest {
         every { bluetoothGatt.getService(uuid) } returns service
         every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
 
-        val result = mgr.sendMessage(uuid, data)
+        val result = mgr.sendMessage(data)
 
         assertEquals(false, result)
         assertEquals(1, failingWriter.writes)
@@ -1183,7 +1185,7 @@ internal class AndroidGattClientManagerTest {
         every { service.getCharacteristic(GattUuids.CLIENT_2_SERVER_UUID) } returns characteristic
         every { characteristic.uuid } returns GattUuids.CLIENT_2_SERVER_UUID
 
-        val result = mgr.sendMessage(uuid, data)
+        val result = mgr.sendMessage(data)
 
         assertEquals(false, result)
     }
@@ -1207,7 +1209,7 @@ internal class AndroidGattClientManagerTest {
                 )
             }
         }
-        mgr.sendMessage(uuid, data)
+        mgr.sendMessage(data)
 
         assert(logger.contains("Final SessionEstablishment chunk generated and sent"))
         assert(logger.contains("SessionEstablishment transmission complete"))
@@ -1238,7 +1240,7 @@ internal class AndroidGattClientManagerTest {
                 )
             }
         }
-        mgr.sendMessage(uuid, data)
+        mgr.sendMessage(data)
 
         assert(
             logger.contains(
