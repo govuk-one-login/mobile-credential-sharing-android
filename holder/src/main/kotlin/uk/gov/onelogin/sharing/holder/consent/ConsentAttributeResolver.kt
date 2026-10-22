@@ -62,9 +62,7 @@ object ConsentAttributeResolver {
         return orderIndex[key] ?: Int.MAX_VALUE
     }
 
-    /**
-     * Gets strings and orders attributes into the display order.
-     */
+    /** Gets strings and orders attributes into the display order.*/
     fun toDisplayAttributes(attributes: List<ConsentAttribute>): List<DisplayAttribute> = attributes
         .mapNotNull { attribute ->
             val labelRes = attributeLabelRes(attribute.elementIdentifier)
