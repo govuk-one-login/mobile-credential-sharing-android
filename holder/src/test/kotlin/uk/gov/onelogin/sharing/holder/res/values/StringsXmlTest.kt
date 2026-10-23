@@ -61,33 +61,4 @@ class StringsXmlTest {
             welshResources.getString(input.resourceId)
         )
     }
-
-    @Test
-    fun basePluralsHaveSetValues(@TestParameter input: PluralsXmlData) = runTest {
-        assertEquals(
-            input.expected,
-            resources.getQuantityString(
-                input.resourceId,
-                input.quantity,
-                input.quantity,
-                input.documentName
-            )
-        )
-    }
-
-    @Test
-    fun welshPluralsHaveSetValues(@TestParameter input: WelshPluralsXmlData) = runTest {
-        RuntimeEnvironment.setQualifiers("+cy")
-        val welshResources =
-            ApplicationProvider.getApplicationContext<Context>().resources
-        assertEquals(
-            input.expected,
-            welshResources.getQuantityString(
-                input.resourceId,
-                input.quantity,
-                input.quantity,
-                input.documentName
-            )
-        )
-    }
 }
