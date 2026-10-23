@@ -238,6 +238,13 @@ class AndroidCentralBluetoothTransportTest {
                 hasMonitoringJob(isActive(false))
             )
         )
+
+        transport.state.test {
+            assertThat(
+                expectMostRecentItem(),
+                equalTo(CentralBluetoothState.Idle)
+            )
+        }
     }
 
     @Test
