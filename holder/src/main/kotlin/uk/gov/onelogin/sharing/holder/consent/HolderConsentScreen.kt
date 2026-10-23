@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.launch
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
@@ -198,11 +199,13 @@ internal fun HolderConsentScreenPreview() {
             )
         )
     )
-    HolderConsentContent(
-        state = HolderConsentUiState(
-            card = card,
-            privacyPolicyUrl = "https://verifier.example/privacy",
-            normalisedOrganizationName = "Organisation Ltd."
+    GdsTheme {
+        HolderConsentContent(
+            state = HolderConsentUiState(
+                card = card,
+                privacyPolicyUrl = "https://verifier.example/privacy",
+                normalisedOrganizationName = "Organisation Ltd."
+            )
         )
-    )
+    }
 }
