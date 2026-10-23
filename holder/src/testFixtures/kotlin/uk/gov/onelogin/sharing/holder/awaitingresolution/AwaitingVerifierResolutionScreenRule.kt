@@ -3,6 +3,10 @@ package uk.gov.onelogin.sharing.holder.awaitingresolution
 import android.content.Context
 import android.content.res.Resources
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -22,27 +26,38 @@ class AwaitingVerifierResolutionScreenRule(
         ApplicationProvider.getApplicationContext<Context>().resources
     }
 
-    fun assertSuccessIconIsDisplayed() = onNodeWithContentDescription("Success")
-        .assertIsDisplayed()
+    // node finders
 
-    fun assertTitleIsDisplayed() = onNodeWithText(
-        resources.getString(R.string.details_shared)
-    ).assertIsDisplayed()
+    fun onSuccessIcon() = onNodeWithContentDescription("Success")
+    fun onHeading() = onNodeWithText(resources.getString(R.string.details_shared))
+    fun onFirstParagraph() =
+        onNodeWithText(resources.getString(R.string.person_will_check_details_shared))
+    fun onSecondParagraph() =
+        onNodeWithText(resources.getString(R.string.bluetooth_connection_will_end))
+    fun onGoBackToDocumentsButton() = onNode(
+        hasText(resources.getString(R.string.go_back_to_documents)) and hasRole(Role.Button)
+    )
+
+    // assertions
+    fun assertSuccessIconIsDisplayed() = onSuccessIcon().assertIsDisplayed()
+
+    fun assertTitleIsDisplayed() = onHeading()
+        .assertIsDisplayed()
+        .assert(
+            SemanticsMatcher.expectValue(
+                SemanticsProperties.Heading,
+                Unit
+            )
+        )
 
     fun assertBodyIsDisplayed() {
-        onNodeWithText(resources.getString(R.string.person_will_check_details_shared)).assertIsDisplayed()
-        onNodeWithText(resources.getString(R.string.bluetooth_connection_will_end)).assertIsDisplayed()
+        onFirstParagraph().assertIsDisplayed()
+        onSecondParagraph().assertIsDisplayed()
     }
 
-    fun assertGoBackToDocumentsButtonIsDisplayed() {
-        onNode(
-            hasText(resources.getString(R.string.go_back_to_documents)) and
-                hasRole(Role.Button)
-        ).assertIsDisplayed()
-    }
+    fun assertGoBackToDocumentsButtonIsDisplayed() = onGoBackToDocumentsButton()
+        .assertHasClickAction()
+        .assertIsDisplayed()
 
-    fun performGoBackToDocumentsClick() = onNode(
-        hasText(resources.getString(R.string.go_back_to_documents)) and
-            hasRole(Role.Button)
-    ).performClick()
+    fun performGoBackToDocumentsClick() = onGoBackToDocumentsButton().performClick()
 }
