@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
 import android.content.Context
 import android.content.res.Resources
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
@@ -22,13 +23,25 @@ class TurnOnBluetoothScreenRule(
         ApplicationProvider.getApplicationContext<Context>().resources
 ) : ComposeContentTestRule by composeTestRule {
 
-    private val turnOnBluetoothText = resources.getString(R.string.turn_on_bluetooth)
+    // node finders
+    fun onTitle() = onNode(
+        hasText(resources.getString(R.string.holder_turn_on_bluetooth_title))
+                and isHeading()
+    )
 
-    fun assertTitleIsDisplayed() = onNode(hasText(turnOnBluetoothText) and isHeading())
-        .assertIsDisplayed()
+    fun onFirstParagraph() = onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_1))
 
-    fun assertTitleDoesNotExist() = onNode(hasText(turnOnBluetoothText) and isHeading())
-        .assertDoesNotExist()
+    fun onSecondParagraph() = onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_2))
+
+    fun onTurnOnBluetoothButton() = onNode(
+        hasText(resources.getString(R.string.holder_turn_on_bluetooth_button))
+                and hasRole(Role.Button)
+    )
+
+    // assertions
+    fun assertTitleIsDisplayed() = onTitle().assertIsDisplayed()
+
+    fun assertTitleDoesNotExist() = onTitle().assertDoesNotExist()
 
     fun assertLoadingSpinnerIsDisplayed() = onNodeWithTag(LOADING_SPINNER_TEST_TAG)
         .assertIsDisplayed()
@@ -38,17 +51,13 @@ class TurnOnBluetoothScreenRule(
     }
 
     fun assertBodyIsDisplayed() {
-        onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_1))
-            .assertIsDisplayed()
-        onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_2))
-            .assertIsDisplayed()
+        onFirstParagraph().assertIsDisplayed()
+        onSecondParagraph().assertIsDisplayed()
     }
 
-    fun assertTurnOnBluetoothButtonIsDisplayed() =
-        onNode(hasText(turnOnBluetoothText) and hasRole(Role.Button))
-            .assertIsDisplayed()
+    fun assertTurnOnBluetoothButtonIsDisplayed() = onTurnOnBluetoothButton()
+        .assertHasClickAction()
+        .assertIsDisplayed()
 
-    fun performTurnOnBluetoothClick() =
-        onNode(hasText(turnOnBluetoothText) and hasRole(Role.Button))
-            .performClick()
+    fun performTurnOnBluetoothClick() = onTurnOnBluetoothButton().performClick()
 }
