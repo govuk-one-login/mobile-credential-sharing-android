@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="holder_welcome_heading">Find out which details you need to share</string>
-    <string name="holder_welcome_body_1">Show the QR code to the person doing the check.</string>
-    <string name="holder_welcome_body_2">It lets them send you a list of the details they need to check.</string>
-    <string name="holder_welcome_body_3">You’ll review this list before agreeing to share your details with them.</string>
-    <string name="holder_welcome_qr_code_alt_text">QR code to get the list of details you need to share</string>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+    <string name="holder_welcome_heading">@string/find_out_which_details_to_share</string>
+    <string name="holder_welcome_body_1">@string/show_qr_code_person_doing_check</string>
+    <string name="holder_welcome_body_2">@string/qr_code_lets_them_send_list_of_details</string>
+    <string name="holder_welcome_body_3">@string/review_list_before_agreeing_to_share</string>
+    <string name="holder_welcome_qr_code_alt_text">@string/qr_code_to_get_list_of_details</string>
 </resources>
