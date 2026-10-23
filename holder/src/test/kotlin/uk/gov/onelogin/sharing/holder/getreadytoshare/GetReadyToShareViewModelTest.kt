@@ -15,6 +15,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Rule
+import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -50,8 +51,13 @@ class GetReadyToShareViewModelTest {
         )
     }
 
+    private val analyticsLogger by lazy {
+        FakeAnalyticsLogger()
+    }
+
     private val viewModel by lazy {
         GetReadyToShareViewModel(
+            analyticsLogger = analyticsLogger,
             navigator = RetryPrerequisitesNavigator.from(navigationEvents.asFlow()),
             orchestrator = orchestrator,
             resolver = {
@@ -142,5 +148,15 @@ class GetReadyToShareViewModelTest {
         viewModel.hasRecheckedPrerequisites.test {
             assertTrue { awaitItem() }
         }
+    }
+
+    @Test
+    fun `Sends screen analytics events to the analytics logger`() = runTest {
+        viewModel.sendScreenEvent().join()
+
+        assertThat(
+            analyticsLogger,
+            contains(GetReadyToShareTestData.expectedScreenEvent)
+        )
     }
 }

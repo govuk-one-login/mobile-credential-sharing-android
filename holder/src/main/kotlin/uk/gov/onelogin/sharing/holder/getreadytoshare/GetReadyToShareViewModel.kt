@@ -21,7 +21,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -76,13 +78,13 @@ class GetReadyToShareViewModel(
         (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
             ?.onComplete()
     }
-
-    /**
-     * DCMAW-23663:
-     * - Send screen view analytics event with [walletSharingRequiredParameters]
-     */
-    fun sendScreenEvent() {
-
+    
+    fun sendScreenEvent() = viewModelScope.launch {
+        Screen(
+            name = "Get ready to share",
+            id = "3f5c1d0b-8068-4e19-8300-37f7bb468ff5",
+            params = walletSharingRequiredParameters
+        ).let(analyticsLogger::logEventV3Dot1)
     }
 
     /**

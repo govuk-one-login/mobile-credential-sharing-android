@@ -112,16 +112,6 @@ internal fun GetReadyToShareContent(
     )
 }
 
-/**
- * DCMAW-23663:
- * - Matching the preview with what the `ShareCredential` modifier would potentially pass
- *   causes strange indentation on either side of the device.
- *
- *   Do we need to update the UI library to be mindful of whether
- *   [androidx.compose.foundation.layout.WindowInsets] have been consumed?
- *   The underlying [uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen] composable
- *   internally updates the `Modifier` instead of passing it through, increasing the padding.
- */
 @WalletSharingPreview
 @Composable
 internal fun GetReadyToSharePreview() {

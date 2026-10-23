@@ -4,20 +4,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.core.app.ActivityOptionsCompat
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
@@ -29,7 +28,6 @@ import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavi
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
-import uk.gov.onelogin.sharing.prerequisites.ui.RetryPrerequisitesContentRule
 import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -74,8 +72,13 @@ class GetReadyToShareScreenTest {
         )
     }
 
+    private val analyticsLogger by lazy {
+        FakeAnalyticsLogger()
+    }
+
     private val viewModel by lazy {
         GetReadyToShareViewModel(
+            analyticsLogger = analyticsLogger,
             navigator = navigator,
             orchestrator = orchestrator,
             resolver = resolver,
@@ -92,6 +95,19 @@ class GetReadyToShareScreenTest {
             assertValidAllowBluetoothButton()
             assertValidFindOutMoreButton()
         }
+    }
+
+    @Test
+    fun `Rendering the UI sends an analytics event`() = runTest {
+        screenRule.run {
+            setContent { Render() }
+            waitUntil { analyticsLogger.size != 0 }
+        }
+
+        assertThat(
+            analyticsLogger,
+            contains(GetReadyToShareTestData.expectedScreenEvent)
+        )
     }
 
     @Test

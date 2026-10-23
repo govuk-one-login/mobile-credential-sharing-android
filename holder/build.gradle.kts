@@ -74,6 +74,7 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
+        projects.analytics,
         projects.bluetooth,
         projects.cryptoService,
     ).forEach(::testFixturesImplementation)
