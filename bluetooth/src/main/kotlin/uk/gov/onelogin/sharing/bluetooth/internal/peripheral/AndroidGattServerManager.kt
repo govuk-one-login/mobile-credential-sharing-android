@@ -20,24 +20,23 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattEventEmitter
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.STATE_UUID
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriter
+import uk.gov.logging.api.v3.Logger
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.STATE_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.AndroidGattServiceBuilder
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.service.GattServiceSpec
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.BluetoothPermissions.getBluetoothPermissions
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
@@ -55,7 +54,9 @@ class AndroidGattServerManager(
     private val permissionsChecker: PermissionChecker,
     private val logger: Logger,
     private val gattWriter: GattWriter,
-    @param:ApplicationScope private val coroutineScope: CoroutineScope
+    @param:ApplicationScope private val coroutineScope: CoroutineScope,
+    reassemblerFactory: MessageReassembler.Factory,
+    private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE
 ) : GattServerManager {
     private val _events = MutableSharedFlow<GattServerEvent>(
         extraBufferCapacity = 32 // queue events if consumer is slow
@@ -72,7 +73,7 @@ class AndroidGattServerManager(
     private var serviceUuid: UUID? = null
 
     @SuppressLint("MissingPermission")
-    private val eventEmitter = GattEventEmitter {
+    private val eventEmitter = GattServerEventEmitter {
         handleGattEvent(it)
     }
 
@@ -85,11 +86,15 @@ class AndroidGattServerManager(
     @Volatile
     private var isTerminating = false
 
+    private val reassembler: MessageReassembler =
+        reassemblerFactory.create(maxReceiveBufferSize)
+
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun open(serviceUuid: UUID) {
         val gattService = gattServiceFactory(serviceUuid)
         this.serviceUuid = serviceUuid
         isTerminating = false
+        reassembler.clear()
 
         if (permissionsChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
@@ -134,27 +139,54 @@ class AndroidGattServerManager(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun handleGattEvent(event: GattServerCallbackEvent) {
-        if (isTerminating &&
-            (
-                event is GattServerCallbackEvent.MessageReceived ||
-                    event is GattServerCallbackEvent.ExceededMaxBufferSize
-                )
-        ) {
-            return
-        }
         when (event) {
             is GattServerCallbackEvent.ConnectionStateChange -> handleConnectionStateChange(event)
-            is GattServerCallbackEvent.ConnectionStateStarted -> handleConnectionStateStarted()
+
             is GattServerCallbackEvent.ServiceAdded -> handleServiceAdded(event)
-            is GattServerCallbackEvent.MessageReceived -> handleMessageReceived(event)
+
+            is GattServerCallbackEvent.CharacteristicWriteRequest ->
+                handleCharacteristicWriteRequest(event)
+
             is GattServerCallbackEvent.MtuChanged -> mtu = event.mtu
+
             is GattServerCallbackEvent.DescriptorWriteRequest -> handleDescriptorWriteRequest(event)
-            is GattServerCallbackEvent.SessionEnd -> handleSessionEndReceived()
-            is GattServerCallbackEvent.ExceededMaxBufferSize -> handleExceededMaxBufferSize()
         }
     }
 
-    private fun handleMessageReceived(event: GattServerCallbackEvent.MessageReceived) {
+    /**
+     * Interprets a raw characteristic write: STATE writes become session signals and data writes
+     * are passed to the reassembler, mirroring the central's [AndroidGattClientManager].
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleCharacteristicWriteRequest(
+        event: GattServerCallbackEvent.CharacteristicWriteRequest
+    ) {
+        if (isTerminating) return
+
+        when (event.characteristicUuid) {
+            STATE_UUID -> handleStateUpdate(event.device, event.value)
+            else -> handleDataWrite(event)
+        }
+    }
+
+    private fun handleStateUpdate(device: BluetoothDevice, value: ByteArray) {
+        when (value.firstOrNull()?.let { MdocState.fromByte(it) }) {
+            MdocState.START -> {
+                logger.debug(logTag, "Received START command from ${device.address}")
+                handleConnectionStateStarted()
+            }
+
+            MdocState.END -> {
+                logger.debug(logTag, "GATT: Received Write Request 0x02 on State")
+                handleSessionEndReceived()
+            }
+
+            null -> logger.debug(logTag, "Unknown or empty command on State characteristic")
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun handleDataWrite(event: GattServerCallbackEvent.CharacteristicWriteRequest) {
         if (connectedDevice == null || event.device.address != connectedDevice?.address) {
             logger.debug(
                 logTag,
@@ -162,7 +194,35 @@ class AndroidGattServerManager(
             )
             return
         }
-        _events.tryEmit(GattServerEvent.MessageReceived(event.byteArray))
+
+        when (val result = reassembler.accept(event.characteristicUuid, event.value)) {
+            is MessageReassembler.Result.Incomplete ->
+                logger.debug(
+                    logTag,
+                    "Chunked 'Client2Server' characteristic update: " +
+                        "${event.value.drop(1).size} bytes received"
+                )
+
+            is MessageReassembler.Result.ExceededMaxBuffer ->
+                handleExceededMaxBufferSize()
+
+            is MessageReassembler.Result.Complete ->
+                _events.tryEmit(GattServerEvent.MessageReceived(result.message)).also {
+                    logger.debug(
+                        logTag,
+                        "Completed 'Client2Server' message transfer: ${result.message.size} bytes"
+                    )
+                }
+
+            is MessageReassembler.Result.InvalidPrefix ->
+                logger.error(
+                    logTag,
+                    "invalid message received from remote device",
+                    IllegalArgumentException(
+                        "Invalid message received from remote device"
+                    )
+                )
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -216,7 +276,8 @@ class AndroidGattServerManager(
                 GattServerEvent.ServiceAdded(event.service)
             )
         } else {
-            logger.error(logTag, "Failed to add service, status: ${event.status}")
+            val message = "Failed to add service, status: ${event.status}"
+            logger.error(logTag, message, LoggerException(message))
             _events.tryEmit(
                 GattServerEvent.Error(GattServerError.SERVICE_REGISTRATION_FAILED)
             )
@@ -239,7 +300,8 @@ class AndroidGattServerManager(
                         GattServerError.DESCRIPTOR_WRITE_REQUEST_FAILED
                     )
                 )
-                logger.error(logTag, "Invalid descriptor write request: ${event.reason}")
+                val message = "Invalid descriptor write request: ${event.reason}"
+                logger.error(logTag, message, LoggerException(message))
             }
 
             is GattServerCallbackEvent.DescriptorWriteRequest.Valid ->
@@ -280,7 +342,7 @@ class AndroidGattServerManager(
     private fun handleExceededMaxBufferSize() {
         isTerminating = true
         coroutineScope.launch {
-            serviceUuid?.let { notifySessionEnd(it) }
+            notifySessionEnd()
             delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)
             cancelCurrentConnection()
             _events.tryEmit(GattServerEvent.Error(GattServerError.EXCEEDED_MAX_BUFFER_SIZE))
@@ -293,10 +355,11 @@ class AndroidGattServerManager(
      * the readers characteristic.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued {
+    override fun notifySessionEnd(): SessionEndStateQueued {
         val server = gattServer ?: return SessionEndStateQueued.Failed
+        val uuid = serviceUuid ?: return SessionEndStateQueued.Failed
         val characteristic: BluetoothGattCharacteristic =
-            server.getService(serviceUuid)?.getCharacteristic(STATE_UUID)
+            server.getService(uuid)?.getCharacteristic(STATE_UUID)
                 ?: return SessionEndStateQueued.Failed
         val endValue = byteArrayOf(MdocState.END.code)
 
@@ -318,16 +381,18 @@ class AndroidGattServerManager(
             isSessionEnd = true
             SessionEndStateQueued.Success
         } else {
-            logger.error(logTag, "failed to notify client with END command: notification failed")
+            val message = "failed to notify client with END command: notification failed"
+            logger.error(logTag, message, LoggerException(message))
             SessionEndStateQueued.Failed
         }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(data: ByteArray): Boolean {
         val server = gattServer ?: return false
         val device = connectedDevice ?: return false
-        val characteristic = server.getService(serviceUuid)
+        val uuid = serviceUuid ?: return false
+        val characteristic = server.getService(uuid)
             ?.getCharacteristic(SERVER_2_CLIENT_UUID) ?: return false
 
         return sendChunkedMessage(data, mtu, logger) { chunk ->
@@ -338,5 +403,10 @@ class AndroidGattServerManager(
                 chunk
             )
         }
+    }
+
+    companion object {
+        /** Default maximum receive buffer size for the holder role. */
+        const val DEFAULT_MAX_RECEIVE_BUFFER_SIZE: Int = 64 * 1024
     }
 }

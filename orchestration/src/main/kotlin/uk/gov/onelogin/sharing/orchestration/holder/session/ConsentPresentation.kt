@@ -13,7 +13,8 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 data class ConsentPresentation(
     val documents: List<ConsentDocument>,
     val privacyPolicyUrl: String? = null,
-    val organizationName: String? = null
+    val organizationName: String? = null,
+    val isBusy: Boolean = false
 ) {
     /**
      * The organisation name with punctuation normalised so that, once placed into a sentence, it

@@ -13,13 +13,13 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.hamcrest.collection.IsMapContaining.hasEntry
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.cryptography.Constants.HASH_ALGORITHM_SHA256
 import uk.gov.onelogin.sharing.verification.cose.internal.path.CertificateStubs
 import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGenerator
 
 class CoseSign1ProtectedHeadersTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val leafCertificate: Certificate = TestCertificateGenerator(
         subject = "CN=Leaf,ST=London",
         keyPair = CertificateStubs.leafKeyPair,

@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
@@ -33,7 +33,7 @@ class ResolveHolderPrerequisiteActionTest {
         )
     }
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val permissionChecker = FakePermissionChecker()
 
     private val resolver by lazy {

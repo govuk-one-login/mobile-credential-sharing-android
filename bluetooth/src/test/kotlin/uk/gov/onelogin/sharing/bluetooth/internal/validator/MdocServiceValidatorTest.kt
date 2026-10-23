@@ -6,12 +6,12 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
+import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
 
 class MdocServiceValidatorTest {
 
-    private val fakeLogger = SystemLogger()
+    private val fakeLogger = MemorisedLogger()
     private val validator = MdocServiceValidator(
         logger = fakeLogger
     )

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.dataformat.cbor.CBORParser
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
@@ -23,10 +23,10 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
     } catch (e: DeviceRequestDecodingException) {
         throw e
     } catch (e: JsonProcessingException) {
-        logger.error(logger.logTag, "DeviceRequest CBOR decoding failed: ${e.message}")
+        logger.error(logger.logTag, "DeviceRequest CBOR decoding failed: ${e.message}", e)
         throw DeviceRequestDecodingException(e.message ?: "CBOR decoding error", e)
     } catch (e: IllegalArgumentException) {
-        logger.error(logger.logTag, "DeviceRequest CBOR decoding failed: ${e.message}")
+        logger.error(logger.logTag, "DeviceRequest CBOR decoding failed: ${e.message}", e)
         throw DeviceRequestDecodingException(e.message ?: "CBOR decoding error", e)
     }
 
@@ -61,24 +61,27 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
     private fun validateRootMap(p: CBORParser) {
         if (p.nextToken() != JsonToken.START_OBJECT) {
             val errorMessage = "DeviceRequest CBOR decoding failed: Root must be a map"
-            logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            val exception = DeviceRequestDecodingException(errorMessage)
+            logger.error(logger.logTag, errorMessage, exception)
+            throw exception
         }
     }
 
     private fun parseDocRequestsArray(p: CBORParser, bytes: ByteArray): List<DocRequest> {
         if (p.currentToken != JsonToken.START_ARRAY) {
             val errorMessage = "DeviceRequest CBOR decoding failed: docRequests must be an array"
-            logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            val exception = DeviceRequestDecodingException(errorMessage)
+            logger.error(logger.logTag, errorMessage, exception)
+            throw exception
         }
         val list = mutableListOf<DocRequest>()
         while (p.nextToken() != JsonToken.END_ARRAY) {
             if (p.currentToken != JsonToken.START_OBJECT) {
                 val errorMessage =
                     "DeviceRequest CBOR decoding failed: DocRequest item must be a map"
-                logger.error(logger.logTag, errorMessage)
-                throw DeviceRequestDecodingException(errorMessage)
+                val exception = DeviceRequestDecodingException(errorMessage)
+                logger.error(logger.logTag, errorMessage, exception)
+                throw exception
             }
             list.add(parseDocRequest(p, bytes))
         }
@@ -90,8 +93,9 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         if (endOffset < sourceSize) {
             val errorMessage =
                 "DeviceRequest CBOR decoding failed: Trailing data found in DeviceRequest CBOR"
-            logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            val exception = DeviceRequestDecodingException(errorMessage)
+            logger.error(logger.logTag, errorMessage, exception)
+            throw exception
         }
     }
 
@@ -99,13 +103,15 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         if (version.isNullOrEmpty()) {
             val errorMessage =
                 "DeviceRequest CBOR decoding failed: Missing or empty version in DeviceRequest"
-            logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            val exception = DeviceRequestDecodingException(errorMessage)
+            logger.error(logger.logTag, errorMessage, exception)
+            throw exception
         }
         if (docRequests.isEmpty()) {
             val errorMessage = "DeviceRequest contains empty DocRequests"
-            logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestValidationException(errorMessage)
+            val exception = DeviceRequestValidationException(errorMessage)
+            logger.error(logger.logTag, errorMessage, exception)
+            throw exception
         }
     }
 
@@ -136,8 +142,9 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         if (itemsRequest == null || itemsRequestBytes == null) {
             val errorMessage =
                 "DeviceRequest CBOR decoding failed: Missing or invalid itemsRequest in DocRequest"
-            logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            val exception = DeviceRequestDecodingException(errorMessage)
+            logger.error(logger.logTag, errorMessage, exception)
+            throw exception
         }
 
         return DocRequest(
@@ -164,8 +171,9 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         if (payload == null || startOffset !in 0..endOffset || endOffset > source.size) {
             val errorMessage =
                 "DeviceRequest CBOR decoding failed: itemsRequest must be Tag 24 wrapped bytes"
-            logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            val exception = DeviceRequestDecodingException(errorMessage)
+            logger.error(logger.logTag, errorMessage, exception)
+            throw exception
         }
 
         val itemsBytes = source.copyOfRange(startOffset, endOffset)
@@ -184,8 +192,9 @@ class DeviceRequestDecoderImpl(val logger: Logger) : DeviceRequestDecoder {
         if (!seenKeys.add(key)) {
             val errorMessage =
                 "DeviceRequest CBOR decoding failed: Duplicate key in $contextName: $key"
-            logger.error(logger.logTag, errorMessage)
-            throw DeviceRequestDecodingException(errorMessage)
+            val exception = DeviceRequestDecodingException(errorMessage)
+            logger.error(logger.logTag, errorMessage, exception)
+            throw exception
         }
     }
 

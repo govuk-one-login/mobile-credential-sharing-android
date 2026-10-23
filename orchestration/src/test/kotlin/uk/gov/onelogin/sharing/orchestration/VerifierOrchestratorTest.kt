@@ -29,12 +29,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransportError
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.FakeCentralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids.SERVER_2_CLIENT_UUID
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.sessionTimer.FakeSessionTimer
@@ -101,7 +101,7 @@ class VerifierOrchestratorTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val resetOrchestratorSessionLog = "Cleared Orchestrator verifier session"
     private val startSessionAfterCompletionLog =
         "Starting an Orchestrator verifier session after completing the previous journey"
@@ -487,6 +487,29 @@ class VerifierOrchestratorTest {
             isFailed()
         )
         assertEquals(1, centralBluetoothTransport.stopCalls)
+    }
+
+    @Test
+    fun `bluetooth error while verifying is ignored and does not transition to Failed`() = runTest {
+        initialStates[0] = VerifierSessionState.Verifying
+        backgroundScope.launch {
+            orchestrator.verifierSessionState.collect {}
+        }
+
+        centralBluetoothTransport.emitState(
+            CentralBluetoothState.Error(CentralBluetoothTransportError.SCAN_FAILED)
+        )
+        advanceUntilIdle()
+
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            equalTo(VerifierSessionState.Verifying)
+        )
+        assertThat(
+            orchestrator.verifierSessionState.value,
+            not(isFailed())
+        )
+        assertEquals(0, centralBluetoothTransport.stopCalls)
     }
 
     @Test
@@ -1598,7 +1621,7 @@ class VerifierOrchestratorTest {
         backgroundScope.launch { orchestrator.verifierSessionState.collect {} }
 
         centralBluetoothTransport.emitState(
-            CentralBluetoothState.CentralBluetoothEnded(
+            CentralBluetoothState.Ended(
                 SessionEndStates.SUCCESS
             )
         )
@@ -1634,7 +1657,7 @@ class VerifierOrchestratorTest {
             )
         )
         centralBluetoothTransport.emitState(
-            CentralBluetoothState.CentralBluetoothEnded(
+            CentralBluetoothState.Ended(
                 SessionEndStates.SUCCESS
             )
         )

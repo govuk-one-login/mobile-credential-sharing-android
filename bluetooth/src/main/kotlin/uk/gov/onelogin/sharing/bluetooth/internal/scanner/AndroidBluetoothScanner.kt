@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.scanner
+package uk.gov.onelogin.sharing.bluetooth.internal.scanner
 
 import android.Manifest
 import android.bluetooth.le.ScanCallback
@@ -14,10 +14,14 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
-import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerCallback.Companion.toLeScanCallback
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.BluetoothScanner
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
+import uk.gov.onelogin.sharing.bluetooth.internal.scanner.ScannerCallback.Companion.toLeScanCallback
 import uk.gov.onelogin.sharing.core.VerifierUiScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(AppScope::class)
@@ -36,7 +40,8 @@ class AndroidBluetoothScanner(
         lateinit var leScanCallback: ScanCallback
         when {
             isScanning -> {
-                logger.error(logTag, "Scan failed: A scan is already in progress")
+                val message = "Scan failed: A scan is already in progress"
+                logger.error(logTag, message, LoggerException(message))
                 trySend(ScanEvent.ScanFailed(ScannerFailure.ALREADY_STARTED_SCANNING))
                 awaitClose {
                     cancel(CancellationException("Scan failed: A scan is already in progress"))
@@ -45,7 +50,8 @@ class AndroidBluetoothScanner(
             }
 
             scanner == null -> {
-                logger.error(logTag, "Scan failed: Scanner is null")
+                val message = "Scan failed: Scanner is null"
+                logger.error(logTag, message, LoggerException(message))
                 trySend(ScanEvent.ScanFailed(ScannerFailure.INTERNAL_ERROR))
                 awaitClose { cancel(CancellationException("Scan failed: Scanner is null")) }
                 return@callbackFlow

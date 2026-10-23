@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
+package uk.gov.onelogin.sharing.bluetooth.api.peripheral
 
 sealed interface SessionEndStateQueued {
     data object Success : SessionEndStateQueued

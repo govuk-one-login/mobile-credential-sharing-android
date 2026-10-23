@@ -3,8 +3,11 @@ package uk.gov.onelogin.sharing.ui.impl
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
@@ -258,6 +261,48 @@ class ShareCredentialTest {
         composeTestRule.waitUntil {
             assertion(controller)
         }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Approved session restores Details shared on a fresh nav graph`() = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(HolderSessionState.Complete.Success())
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent {
+            val uiGraph = remember(presenter.appGraph, presenter.orchestrator) {
+                createGraphFactory<HolderUiGraph.Factory>()
+                    .create(presenter.appGraph, presenter.orchestrator)
+            }
+            controller = TestNavHostController(LocalContext.current).apply {
+                navigatorProvider.addNavigator(ComposeNavigator())
+                navigatorProvider.addNavigator(DialogNavigator())
+            }
+
+            ShareCredential(
+                orchestrator = orchestrator,
+                holderSessionState = orchestrator.holderSessionState,
+                viewModelFactory = uiGraph.metroViewModelFactory,
+                navController = controller
+            )
+        }
+
+        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(
+            "Current route: ${controller.currentDestination?.route}"
+        ) {
+            controller.currentDestination?.route
+                ?.contains("AwaitingVerifierResolution") == true
+        }
+
+        composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("progressIndicator").assertDoesNotExist()
+        assertEquals(0, orchestrator.startCount)
     }
 
     private fun performCloseJourneyViaButton(presenter: FakeCredentialPresenter) {

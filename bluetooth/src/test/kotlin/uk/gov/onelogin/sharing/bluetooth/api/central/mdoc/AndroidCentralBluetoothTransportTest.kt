@@ -14,13 +14,13 @@ import org.hamcrest.Matchers.nullValue
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.AndroidCentralBluetoothTransportMatchers.hasMonitoringJob
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.AndroidCentralBluetoothTransportMatchers.hasScanJob
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.isError
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.ClientError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.FakeAndroidBluetoothScanner
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
@@ -41,7 +41,7 @@ class AndroidCentralBluetoothTransportTest {
     private val scanner = FakeAndroidBluetoothScanner(scannerFlow)
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
     private val testScope = TestScope(dispatcherRule.testDispatcher)
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val transport by lazy {
         AndroidCentralBluetoothTransport(
@@ -169,7 +169,7 @@ class AndroidCentralBluetoothTransportTest {
         transport.state.test {
             assertEquals(CentralBluetoothState.Idle, awaitItem())
 
-            gattClientManager.emitEvent(GattClientEvent.Error(ClientError.SERVICE_NOT_FOUND))
+            gattClientManager.emitEvent(GattClientEvent.Error(GattClientError.SERVICE_NOT_FOUND))
             assertEquals(
                 CentralBluetoothState.Error(CentralBluetoothTransportError.SERVICE_NOT_FOUND),
                 awaitItem()
@@ -178,7 +178,7 @@ class AndroidCentralBluetoothTransportTest {
     }
 
     @Test
-    fun `gatt SessionEnd event maps to CentralBluetoothEnded state`() = runTest {
+    fun `gatt SessionEnd event maps to Ended state`() = runTest {
         transport.monitoringJob.start()
 
         transport.state.test {
@@ -186,7 +186,7 @@ class AndroidCentralBluetoothTransportTest {
 
             gattClientManager.emitEvent(GattClientEvent.SessionEnd(SessionEndStates.SUCCESS))
             assertEquals(
-                CentralBluetoothState.CentralBluetoothEnded(SessionEndStates.SUCCESS),
+                CentralBluetoothState.Ended(SessionEndStates.SUCCESS),
                 awaitItem()
             )
         }

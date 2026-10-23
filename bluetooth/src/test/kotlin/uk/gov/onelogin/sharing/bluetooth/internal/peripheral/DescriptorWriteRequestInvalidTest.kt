@@ -7,13 +7,10 @@ import kotlin.test.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.FakeGattEventEmitter
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallbackEvent
+import uk.gov.logging.api.v3.MemorisedLogger
 
 @RunWith(Parameterized::class)
-class DescriptorWriteRequestInvalidTest(
+internal class DescriptorWriteRequestInvalidTest(
     private val device: BluetoothDevice?,
     private val descriptor: BluetoothGattDescriptor?,
     private val value: ByteArray?,
@@ -22,8 +19,11 @@ class DescriptorWriteRequestInvalidTest(
 
     @Test
     fun `emits Invalid event when required fields are null`() {
-        val emitter = FakeGattEventEmitter()
-        val callback = GattServerCallback(emitter, logger = SystemLogger())
+        val emitter = FakeGattServerEventEmitter()
+        val callback = GattServerCallback(
+            emitter,
+            logger = MemorisedLogger()
+        )
 
         callback.onDescriptorWriteRequest(
             device = device,

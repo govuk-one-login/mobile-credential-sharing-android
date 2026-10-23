@@ -8,11 +8,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SessionTimerImplTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     @Test
     fun `timer executes action after delay`() = runTest {

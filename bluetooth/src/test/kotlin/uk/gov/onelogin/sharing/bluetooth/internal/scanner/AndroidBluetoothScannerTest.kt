@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.bluetooth.api.scanner
+package uk.gov.onelogin.sharing.bluetooth.internal.scanner
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.BluetoothLeScanner
@@ -20,8 +20,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
+import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 
 @RunWith(AndroidJUnit4::class)
@@ -29,7 +31,7 @@ class AndroidBluetoothScannerTest {
     private lateinit var mockBluetoothAdapterProvider: BluetoothAdapterProvider
     private lateinit var mockBluetoothLeScanner: BluetoothLeScanner
     private lateinit var scanner: AndroidBluetoothScanner
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     @Before
     fun setUp() {

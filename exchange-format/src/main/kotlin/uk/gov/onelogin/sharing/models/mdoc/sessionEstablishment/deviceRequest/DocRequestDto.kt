@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator
-import java.io.OutputStream
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborEncodable
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCborSerializer.Companion.EMBEDDED_CBOR_TAG
@@ -62,7 +61,8 @@ data class DocRequestDto(
             provider: SerializerProvider
         ) {
             val cborGen = gen as CBORGenerator
-            cborGen.writeStartObject()
+            val fieldCount = 1 + if (value.readerAuth != null) 1 else 0
+            cborGen.writeStartObject(fieldCount)
 
             cborGen.writeFieldName(ITEMS_REQUEST_KEY)
             if (value.itemsRequestBytes != null) {
@@ -73,13 +73,9 @@ data class DocRequestDto(
             }
 
             value.readerAuth?.let {
-                cborGen.flush()
-                val out = cborGen.outputTarget as OutputStream
-                out.write(CBOR_TEXT_STRING_LENGTH_10)
-                out.write(READER_AUTH_KEY.toByteArray())
-                out.write(it)
+                cborGen.writeFieldName(READER_AUTH_KEY)
+                provider.defaultSerializeValue(RawCbor(it), gen)
             }
-
             cborGen.writeEndObject()
         }
     }
@@ -111,7 +107,5 @@ data class DocRequestDto(
     companion object {
         const val ITEMS_REQUEST_KEY = "itemsRequest"
         const val READER_AUTH_KEY: String = "readerAuth"
-
-        private const val CBOR_TEXT_STRING_LENGTH_10 = 0x6A
     }
 }

@@ -1,8 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
-import uk.gov.logging.api.v2.Logger
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
+import uk.gov.logging.api.v3.Logger
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 
 private const val LOG_TAG = "MessageChunker"
 
@@ -24,7 +23,8 @@ internal suspend fun sendChunkedMessage(
     writeChunk: suspend (chunk: ByteArray) -> Boolean
 ): Boolean {
     if (data.isEmpty()) {
-        logger.error(LOG_TAG, "sendChunkedMessage called with empty data")
+        val message = "sendChunkedMessage called with empty data"
+        logger.error(LOG_TAG, message, LoggerException(message))
         return false
     }
 
@@ -39,7 +39,8 @@ internal suspend fun sendChunkedMessage(
         val chunk = byteArrayOf(header) + data.copyOfRange(offset, end)
 
         if (!writeChunk(chunk)) {
-            logger.error(LOG_TAG, "Failed to write SessionEstablishment packet at offset $offset")
+            val message = "Failed to write SessionEstablishment packet at offset $offset"
+            logger.error(LOG_TAG, message, LoggerException(message))
             return false
         }
 

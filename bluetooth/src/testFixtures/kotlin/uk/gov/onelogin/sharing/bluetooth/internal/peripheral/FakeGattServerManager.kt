@@ -3,9 +3,9 @@ package uk.gov.onelogin.sharing.bluetooth.internal.peripheral
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerManager
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.NOTIFY_CLIENT_FAILED
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates.SUCCESS
 
@@ -28,18 +28,17 @@ class FakeGattServerManager : GattServerManager {
         disconnectCalls++
     }
 
-    override fun notifySessionEnd(serviceUuid: UUID): SessionEndStateQueued =
-        if (notifySessionEnd) {
-            _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
-            SessionEndStateQueued.Success
-        } else {
-            _events.tryEmit(
-                GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
-            )
-            SessionEndStateQueued.Success
-        }
+    override fun notifySessionEnd(): SessionEndStateQueued = if (notifySessionEnd) {
+        _events.tryEmit(GattServerEvent.SessionEnd(SUCCESS))
+        SessionEndStateQueued.Success
+    } else {
+        _events.tryEmit(
+            GattServerEvent.SessionEnd(NOTIFY_CLIENT_FAILED)
+        )
+        SessionEndStateQueued.Success
+    }
 
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(data: ByteArray): Boolean {
         sentMessages.add(data)
         return sendMessageResult
     }

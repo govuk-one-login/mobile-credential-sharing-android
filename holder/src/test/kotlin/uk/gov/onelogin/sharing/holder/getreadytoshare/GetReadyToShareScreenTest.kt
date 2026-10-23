@@ -18,7 +18,7 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -48,7 +48,7 @@ class GetReadyToShareScreenTest {
         MissingPrerequisites.Bluetooth(state = BluetoothState.PermissionNotGranted)
     )
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val orchestrator by lazy {
         FakeOrchestrator(

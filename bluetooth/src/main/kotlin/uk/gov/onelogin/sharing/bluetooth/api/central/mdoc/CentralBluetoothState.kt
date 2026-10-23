@@ -1,7 +1,7 @@
 package uk.gov.onelogin.sharing.bluetooth.api.central.mdoc
 
 import java.util.UUID
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.central.GattClientEvent
+import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 
 /**
@@ -52,7 +52,7 @@ sealed interface CentralBluetoothState {
     /**
      * A session end command has been received.
      */
-    data class CentralBluetoothEnded(val status: SessionEndStates) : CentralBluetoothState
+    data class Ended(val status: SessionEndStates) : CentralBluetoothState
 
     /**
      * A data structure has been received from the other device.

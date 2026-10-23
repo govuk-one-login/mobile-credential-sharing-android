@@ -41,7 +41,7 @@ object CentralBluetoothStateMatchers {
 
     fun isBluetoothEnded(matcher: Matcher<in SessionEndStates>): Matcher<in CentralBluetoothState> =
         CentralBluetoothStateMatcher(matcher) {
-            (it as? CentralBluetoothState.CentralBluetoothEnded)?.status
+            (it as? CentralBluetoothState.Ended)?.status
         }
 
     fun isConnected(

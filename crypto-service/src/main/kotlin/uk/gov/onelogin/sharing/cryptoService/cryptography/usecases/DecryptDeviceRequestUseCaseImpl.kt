@@ -7,7 +7,7 @@ import java.security.PrivateKey
 import java.security.interfaces.ECPrivateKey
 import kotlin.collections.component1
 import kotlin.collections.component2
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeSessionEstablishmentModel
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoder

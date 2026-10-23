@@ -28,15 +28,16 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
-import uk.gov.logging.testdouble.v2.SystemLogger
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerError
-import uk.gov.onelogin.sharing.bluetooth.api.gatt.peripheral.GattServerEvent
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerCallback.Companion.NON_LAST_PART
-import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.SessionEndStateQueued
+import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.central.FakeGattWriter
-import uk.gov.onelogin.sharing.bluetooth.internal.central.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
+import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.CharacteristicWriteRequestStub
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.gattcallbacks.DescriptorWriteRequestStub.OnDescriptorWriteRequestArgs
@@ -69,7 +70,10 @@ class AndroidGattServerManagerTest {
     private val permissionResponse = mutableListOf<PermissionChecker.PermissionCheckResult>()
     private val fakePermissionChecker = FakePermissionChecker { permissionResponse }
     private val fakeGattWriter = FakeGattWriter()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
+    private val reassemblerFactory = MessageReassembler.Factory { max ->
+        MessageReassembler(max, logger)
+    }
 
     private lateinit var manager: AndroidGattServerManager
     private val uuid = UUID.randomUUID()
@@ -83,7 +87,8 @@ class AndroidGattServerManagerTest {
             permissionsChecker = fakePermissionChecker,
             logger = logger,
             gattWriter = fakeGattWriter,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            reassemblerFactory = reassemblerFactory
         )
     }
 
@@ -394,6 +399,62 @@ class AndroidGattServerManagerTest {
     }
 
     @Test
+    fun `emits no event when unknown opcode written to state characteristic`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+
+        manager.events.test {
+            CharacteristicWriteRequestStub.writeRequestUnknown(
+                bluetoothDevice = device,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.STATE_UUID
+                }
+            ).run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `emits no event when empty value written to state characteristic`() = runTest {
+        val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
+
+        manager.open(uuid)
+
+        manager.events.test {
+            CharacteristicWriteRequestStub.writeRequestEmptyValue(
+                bluetoothDevice = device,
+                characteristic = mockk {
+                    every { uuid } returns GattUuids.STATE_UUID
+                }
+            ).run {
+                callbackSlot.captured.onCharacteristicWriteRequest(
+                    device,
+                    requestId,
+                    characteristic,
+                    preparedWrite,
+                    responseNeeded,
+                    offset,
+                    value
+                )
+            }
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun `emits session end event when end command received`() = runTest {
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
@@ -439,7 +500,7 @@ class AndroidGattServerManagerTest {
             BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = manager.notifySessionEnd(uuid)
+        val result = manager.notifySessionEnd()
 
         assertEquals(SessionEndStateQueued.Success, result)
     }
@@ -448,7 +509,7 @@ class AndroidGattServerManagerTest {
     fun `does not send BLE session end command when no device connected`() = runTest {
         manager.open(uuid)
 
-        val result = manager.notifySessionEnd(uuid)
+        val result = manager.notifySessionEnd()
 
         assertEquals(SessionEndStateQueued.NoDeviceConnected, result)
     }
@@ -463,7 +524,8 @@ class AndroidGattServerManagerTest {
             permissionsChecker = fakePermissionChecker,
             logger = logger,
             gattWriter = fakeGattWriter,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            reassemblerFactory = reassemblerFactory
         )
         val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 
@@ -476,7 +538,7 @@ class AndroidGattServerManagerTest {
             BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = manager.notifySessionEnd(uuid)
+        val result = manager.notifySessionEnd()
 
         assertEquals(SessionEndStateQueued.Failed, result)
     }
@@ -578,7 +640,7 @@ class AndroidGattServerManagerTest {
         )
 
         val data = byteArrayOf(0x01, 0x02, 0x03)
-        val result = manager.sendMessage(uuid, data)
+        val result = manager.sendMessage(data)
 
         assert(result)
         assertEquals(1, fakeGattWriter.sentChunks.size)
@@ -608,7 +670,7 @@ class AndroidGattServerManagerTest {
             )
 
             val data = ByteArray(40) { it.toByte() } // forces 3 chunks
-            val result = manager.sendMessage(uuid, data)
+            val result = manager.sendMessage(data)
 
             assert(result)
             val chunks = fakeGattWriter.sentChunks
@@ -637,7 +699,7 @@ class AndroidGattServerManagerTest {
             BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = manager.sendMessage(uuid, byteArrayOf())
+        val result = manager.sendMessage(byteArrayOf())
 
         assert(!result)
         assert(fakeGattWriter.sentChunks.isEmpty())
@@ -650,7 +712,26 @@ class AndroidGattServerManagerTest {
 
         manager.open(uuid)
 
-        val result = manager.sendMessage(uuid, byteArrayOf(0x01))
+        val result = manager.sendMessage(byteArrayOf(0x01))
+
+        assert(!result)
+        assert(fakeGattWriter.sentChunks.isEmpty())
+    }
+
+    @Test
+    fun `sendMessage returns false when the service characteristic cannot be found`() = runTest {
+        val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
+        every { gattServer.getService(uuid) } returns null
+
+        manager.open(uuid)
+        callbackSlot.captured.onServiceAdded(BluetoothGatt.GATT_SUCCESS, fakeGattService)
+        callbackSlot.captured.onConnectionStateChange(
+            device,
+            BluetoothGatt.GATT_SUCCESS,
+            BluetoothProfile.STATE_CONNECTED
+        )
+
+        val result = manager.sendMessage(byteArrayOf(0x01, 0x02))
 
         assert(!result)
         assert(fakeGattWriter.sentChunks.isEmpty())
@@ -666,7 +747,8 @@ class AndroidGattServerManagerTest {
             permissionsChecker = fakePermissionChecker,
             logger = logger,
             gattWriter = fakeGattWriter,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            reassemblerFactory = reassemblerFactory
         )
         val (callbackSlot, gattServer) = setupOpenGattServer(bluetoothManager, context)
         val server2ClientChar = mockk<BluetoothGattCharacteristic>()
@@ -683,7 +765,7 @@ class AndroidGattServerManagerTest {
             BluetoothProfile.STATE_CONNECTED
         )
 
-        val result = manager.sendMessage(uuid, byteArrayOf(0x01, 0x02))
+        val result = manager.sendMessage(byteArrayOf(0x01, 0x02))
 
         assert(!result)
     }
@@ -755,7 +837,8 @@ class AndroidGattServerManagerTest {
                 permissionsChecker = fakePermissionChecker,
                 logger = logger,
                 gattWriter = failingGattWriter,
-                coroutineScope = testScope
+                coroutineScope = testScope,
+                reassemblerFactory = reassemblerFactory
             )
             val (callbackSlot) = setupOpenGattServer(bluetoothManager, context)
 

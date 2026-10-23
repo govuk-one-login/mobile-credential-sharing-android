@@ -46,12 +46,11 @@ internal class IacaContentChecker(
     }
 
     private fun verifyLeafContent(leaf: X509Certificate) {
-        val durationDays = TimeUnit.MILLISECONDS.toDays(
-            leaf.notAfter.time - leaf.notBefore.time
-        )
-        if (durationDays > MAX_LEAF_VALIDITY_DAYS) {
+        val durationMs = leaf.notAfter.time - leaf.notBefore.time
+        val maxAllowedMs = TimeUnit.DAYS.toMillis(MAX_LEAF_VALIDITY_DAYS)
+        if (durationMs > maxAllowedMs) {
             throw CertPathValidatorException(
-                "Leaf validity exceeds $MAX_LEAF_VALIDITY_DAYS days: $durationDays"
+                "Leaf validity exceeds $MAX_LEAF_VALIDITY_DAYS days"
             )
         }
 
