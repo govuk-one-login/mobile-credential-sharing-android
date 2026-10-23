@@ -232,23 +232,7 @@ private fun AnnotatedString.Builder.emphasise(source: String, substring: String,
     addStyle(style, start, start + substring.length)
 }
 
-private class AgreeToShareCardPreviewProvider : PreviewParameterProvider<Map<String, Boolean>> {
-    override val values: Sequence<Map<String, Boolean>> = sequenceOf(
-        // No details kept.
-        mapOf("family_name" to false, "given_name" to false, "portrait" to false),
-        // All details kept.
-        mapOf("family_name" to true, "given_name" to true, "document_number" to true),
-        // Some details kept.
-        mapOf(
-            "document_number" to true,
-            "family_name" to true,
-            "portrait" to false,
-            "age_over_18" to false
-        )
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Preview(showBackground = true)
 @Composable
 private fun AgreeToShareCardPreview(
     @PreviewParameter(AgreeToShareCardPreviewProvider::class) elements: Map<String, Boolean>
@@ -265,4 +249,17 @@ private fun AgreeToShareCardPreview(
             modifier = Modifier.padding(spacingDouble)
         )
     }
+}
+
+private class AgreeToShareCardPreviewProvider : PreviewParameterProvider<Map<String, Boolean>> {
+    override val values: Sequence<Map<String, Boolean>> = sequenceOf(
+        mapOf("family_name" to false, "given_name" to false, "portrait" to false),
+        mapOf("family_name" to true, "given_name" to true, "document_number" to true),
+        mapOf(
+            "document_number" to true,
+            "family_name" to true,
+            "portrait" to false,
+            "age_over_18" to false
+        )
+    )
 }

@@ -5,9 +5,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
+import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.ORGANIZATION_NAME
+import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.card
 
 @RunWith(RobolectricTestRunner::class)
 class AgreeToShareCardTest {
@@ -15,26 +15,18 @@ class AgreeToShareCardTest {
     @get:Rule
     val composeTestRule = AgreeToShareCardRule()
 
-    private val organizationName = "Example Organisation."
-
-    private fun card(vararg attributes: Pair<String, Boolean>): ConsentCard = ConsentCard.from(
-        ConsentAttributeResolver.toDisplayAttributes(
-            attributes.map { (id, retain) -> ConsentAttribute(id, retain) }
-        )
-    )
-
     private fun setCard(card: ConsentCard) {
         composeTestRule.setContent { Render(card) }
     }
 
     @Composable
     private fun Render(card: ConsentCard) {
-        AgreeToShareCard(card = card, organizationName = organizationName)
+        AgreeToShareCard(card = card, organizationName = ORGANIZATION_NAME)
     }
 
     @Test
     fun `heading shows the attribute count and document name`() {
-        setCard(card("family_name" to false, "given_name" to false, "portrait" to false))
+        setCard(card(AgreeToShareCardSamples.noDetailsKept))
 
         composeTestRule.assertDocumentNameIsDisplayed()
         composeTestRule.assertAttributeCountIsDisplayed(3)
@@ -42,24 +34,24 @@ class AgreeToShareCardTest {
 
     @Test
     fun `no details kept variant shows the none-kept retention copy`() {
-        setCard(card("family_name" to false, "portrait" to false))
+        setCard(card(AgreeToShareCardSamples.noDetailsKept))
 
         composeTestRule.assertNoneKeptCopyIsDisplayed()
     }
 
     @Test
     fun `all details kept variant shows the all-kept retention copy`() {
-        setCard(card("family_name" to true, "given_name" to true))
+        setCard(card(AgreeToShareCardSamples.allDetailsKept))
 
-        composeTestRule.assertAllKeptCopyIsDisplayed(organizationName)
+        composeTestRule.assertAllKeptCopyIsDisplayed(ORGANIZATION_NAME)
     }
 
     @Test
     fun `some details kept variant shows both will-keep and will-not-keep copy`() {
-        setCard(card("family_name" to true, "portrait" to false))
+        setCard(card(AgreeToShareCardSamples.someDetailsKept))
 
-        composeTestRule.assertWillKeepCopyIsDisplayed(organizationName)
-        composeTestRule.assertWillNotKeepCopyIsDisplayed(organizationName)
+        composeTestRule.assertWillKeepCopyIsDisplayed(ORGANIZATION_NAME)
+        composeTestRule.assertWillNotKeepCopyIsDisplayed(ORGANIZATION_NAME)
     }
 
     @Test
