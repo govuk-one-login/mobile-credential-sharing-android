@@ -72,5 +72,9 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     USE_QR_CODE_TO_CONNECT_NEXT(
         expected = "You will not connect with a device yet. You’ll use a QR code to do that next.",
         resourceId = R.string.use_qr_code_to_connect_next
+    ),
+    TURN_ON_BLUETOOTH_BUTTON(
+        expected = "Turn on Bluetooth",
+        resourceId = R.string.turn_on_bluetooth_button
     )
 }

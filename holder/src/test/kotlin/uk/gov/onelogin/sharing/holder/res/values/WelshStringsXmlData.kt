@@ -16,5 +16,9 @@ enum class WelshStringsXmlData(val expected: String, @param:StringRes val resour
         expected = "Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i " +
             "wneud hynny nesaf.",
         resourceId = R.string.use_qr_code_to_connect_next
+    ),
+    TURN_ON_BLUETOOTH_BUTTON(
+        expected = "Troi Bluetooth ymlaen",
+        resourceId = R.string.turn_on_bluetooth_button
     )
 }

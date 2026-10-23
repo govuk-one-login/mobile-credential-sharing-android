@@ -40,13 +40,14 @@ class TurnOnBluetoothScreenRule(
             and hasRole(Role.Button)
     )
 
+    fun onLoadingSpinner() = onNodeWithTag(LOADING_SPINNER_TEST_TAG)
+
     // assertions
     fun assertTitleIsDisplayed() = onTitle().assertIsDisplayed()
 
     fun assertTitleDoesNotExist() = onTitle().assertDoesNotExist()
 
-    fun assertLoadingSpinnerIsDisplayed() = onNodeWithTag(LOADING_SPINNER_TEST_TAG)
-        .assertIsDisplayed()
+    fun assertLoadingSpinnerIsDisplayed() = onLoadingSpinner().assertIsDisplayed()
 
     fun waitUntilLoadingSpinnerExists() = waitUntil {
         onAllNodesWithTag(LOADING_SPINNER_TEST_TAG).fetchSemanticsNodes().isNotEmpty()
