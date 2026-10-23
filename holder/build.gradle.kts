@@ -50,6 +50,8 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.androidx.compose.material.icons.core,
+        libs.androidx.compose.material.icons.extended,
         libs.androidx.lifecycle.viewmodel.compose,
         libs.metro.viewmodel.compose,
         libs.zxing.core,
@@ -63,6 +65,7 @@ dependencies {
         projects.sdk,
         projects.prerequisiteGateImpl,
         testFixtures(libs.uk.gov.ui.android.componentsv2),
+        testFixtures(projects.analytics),
         testFixtures(projects.bluetooth),
         testFixtures(projects.cryptoService),
         testFixtures(projects.core),

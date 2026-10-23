@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
     <string name="enable_bluetooth_permission">Please enable bluetooth permissions to continue</string>
     <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
     <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>
@@ -10,4 +11,8 @@
     <string name="generating_qr_code_data">Generating QR code data...</string>
     <string name="have_not_met_requirements">Haven’t met requirements...</string>
     <string name="holder_consent_organization_sentence">The person doing the check is using an approved app powered by %1$s</string>
+    <string name="details_shared">Details shared</string>
+    <string name="person_will_check_details_shared">The person will check the details you shared.</string>
+    <string name="bluetooth_connection_will_end">Your bluetooth connection with them will now end.</string>
+    <string name="go_back_to_documents">Go back to documents</string>
 </resources>
