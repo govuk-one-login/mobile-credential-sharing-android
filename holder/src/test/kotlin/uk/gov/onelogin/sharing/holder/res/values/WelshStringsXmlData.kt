@@ -5,11 +5,11 @@ import uk.gov.onelogin.sharing.holder.R
 
 enum class WelshStringsXmlData(val expected: String, @param:StringRes val resourceId: Int) {
     DETAILS_SHARED(
-        expected = "Manylion wedi'u rhannu",
+        expected = "Manylion wedi’u rhannu",
         resourceId = R.string.details_shared
     ),
     PERSON_WILL_CHECK_DETAILS_SHARED(
-        expected = "Bydd y person yn gwirio'r manylion rydych wedi'u rhannu.",
+        expected = "Bydd y person yn gwirio’r manylion rydych wedi’u rhannu.",
         resourceId = R.string.person_will_check_details_shared
     ),
     BLUETOOTH_CONNECTION_WILL_END(

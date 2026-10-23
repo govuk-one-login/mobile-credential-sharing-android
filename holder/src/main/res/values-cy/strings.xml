@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="details_shared">Manylion wedi\'u rhannu</string>
-    <string name="person_will_check_details_shared">Bydd y person yn gwirio\'r manylion rydych wedi\'u rhannu.</string>
+    <string name="details_shared">Manylion wedi’u rhannu</string>
+    <string name="person_will_check_details_shared">Bydd y person yn gwirio’r manylion rydych wedi’u rhannu.</string>
     <string name="bluetooth_connection_will_end">Bydd eich cysylltiad Bluetooth gyda hwy nawr yn dod i ben.</string>
     <string name="go_back_to_documents">Ewch yn ôl i dogfennau</string>
 </resources>
