@@ -3,5 +3,5 @@
     <string name="turn_on_bluetooth">Troi Bluetooth ymlaen</string>
     <string name="turn_on_bluetooth_before_sharing">Cyn y gallwch rannu, mae angen i chi droi Bluetooth ymlaen.</string>
     <string name="use_qr_code_to_connect_next">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf.</string>
-    <string name="turn_on_bluetooth_button">@string/turn_on_bluetooth</string>
+    <string name="turn_on_bluetooth_button">@string/holder_turn_on_bluetooth_title</string>
 </resources>

@@ -14,5 +14,5 @@
     <string name="turn_on_bluetooth">Turn on Bluetooth</string>
     <string name="turn_on_bluetooth_before_sharing">Before you can share, you need to turn on Bluetooth.</string>
     <string name="use_qr_code_to_connect_next">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
-    <string name="turn_on_bluetooth_button">@string/turn_on_bluetooth</string>
+    <string name="turn_on_bluetooth_button">@string/holder_turn_on_bluetooth_title</string>
 </resources>
