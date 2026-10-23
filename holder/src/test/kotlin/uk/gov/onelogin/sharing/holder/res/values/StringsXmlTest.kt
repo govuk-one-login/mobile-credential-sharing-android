@@ -8,6 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestParameterInjector::class)
 class StringsXmlTest {
@@ -29,4 +30,15 @@ class StringsXmlTest {
                 resources.getString(input.resourceId)
             )
         }
+
+    @Test
+    fun welshStringsHaveSetValues(@TestParameter input: WelshStringsXmlData) = runTest {
+        RuntimeEnvironment.setQualifiers("+cy")
+        val welshResources =
+            ApplicationProvider.getApplicationContext<Context>().resources
+        assertEquals(
+            input.expected,
+            welshResources.getString(input.resourceId)
+        )
+    }
 }
