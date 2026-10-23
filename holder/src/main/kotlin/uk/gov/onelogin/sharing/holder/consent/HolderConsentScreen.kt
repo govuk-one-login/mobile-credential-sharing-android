@@ -16,6 +16,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,10 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.launch
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
@@ -222,28 +226,34 @@ private fun DenyConfirmationDialog(onConfirmDeny: () -> Unit, onDismiss: () -> U
     )
 }
 
+@PreviewLightDark
+@PreviewFontScale
+@Preview(name = "Welsh", locale = "cy", showBackground = true)
 @Composable
-@Preview(showBackground = true)
 internal fun HolderConsentScreenPreview() {
-    HolderConsentContent(
-        state = HolderConsentUiState(
-            documents = listOf(
-                ConsentDocument(
-                    docType = "org.iso.18013.5.1.mDL",
-                    namespaces = listOf(
-                        ConsentNamespace(
-                            nameSpace = "org.iso.18013.5.1",
-                            attributes = listOf(
-                                ConsentAttribute("family_name", false),
-                                ConsentAttribute("document_number", false),
-                                ConsentAttribute("age_over_21", true)
+    GdsTheme {
+        Surface {
+            HolderConsentContent(
+                state = HolderConsentUiState(
+                    documents = listOf(
+                        ConsentDocument(
+                            docType = "org.iso.18013.5.1.mDL",
+                            namespaces = listOf(
+                                ConsentNamespace(
+                                    nameSpace = "org.iso.18013.5.1",
+                                    attributes = listOf(
+                                        ConsentAttribute("family_name", false),
+                                        ConsentAttribute("document_number", false),
+                                        ConsentAttribute("age_over_21", true)
+                                    )
+                                )
                             )
                         )
-                    )
+                    ),
+                    privacyPolicyUrl = "https://verifier.example/privacy",
+                    normalisedOrganizationName = "Organisation Ltd."
                 )
-            ),
-            privacyPolicyUrl = "https://verifier.example/privacy",
-            normalisedOrganizationName = "Organisation Ltd."
-        )
-    )
+            )
+        }
+    }
 }
