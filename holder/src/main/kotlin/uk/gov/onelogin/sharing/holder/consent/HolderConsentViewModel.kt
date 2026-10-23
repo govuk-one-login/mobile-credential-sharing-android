@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -37,7 +38,13 @@ class HolderConsentViewModel(
             presentation?.let {
                 HolderConsentUiState(
                     privacyPolicyUrl = it.privacyPolicyUrl,
-                    documents = it.documents,
+                    card = it.documents.firstOrNull()?.let { document ->
+                        ConsentCard.from(
+                            ConsentAttributeResolver.toDisplayAttributes(
+                                document.namespaces.flatMap(ConsentNamespace::attributes)
+                            )
+                        )
+                    },
                     normalisedOrganizationName = it.normalisedOrganizationName,
                     isBusy = it.isBusy
                 )

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Consent card -->
+    <string name="consent_card_heading">Byddwch yn rhannu manylion %1$d o’ch %2$s</string>
+    <string name="consent_card_will_keep">Bydd %1$s yn cadw’r manylion hyn fel cofnod o’r gwiriad hwn:</string>
+    <string name="consent_card_will_not_keep">Ni fydd %1$s yn cadw:</string>
+    <string name="consent_card_all_kept">Bydd %1$s yn cadw’r manylion hyn fel cofnod o’r gwiriad hwn.</string>
+    <string name="consent_card_none_kept">Dim ond ar gyfer y gwiriad hwn y defnyddir y manylion hyn. Ni fyddant yn cael eu harbed.</string>
+    <string name="consent_doc_mdl">trwydded yrru’r DU</string>
+    <string name="consent_attr_document_number">Rhif y drwydded</string>
+    <string name="consent_attr_portrait">Llun</string>
+    <string name="consent_attr_title">Teitl</string>
+    <string name="consent_attr_family_name">Cyfenw</string>
+    <string name="consent_attr_given_name">Enw(au) cyntaf</string>
+    <string name="consent_attr_expiry_date">Dyddiad daw i ben</string>
+    <string name="consent_attr_birth_date">Dyddiad geni</string>
+    <string name="consent_attr_age_over">Os ydych dros %1$d</string>
+    <string name="consent_attr_birth_place">Lleoliad geni</string>
+    <string name="consent_attr_resident_address">Cyfeiriad stryd</string>
+    <string name="consent_attr_resident_city">Tref neu ddinas (cyfeiriad)</string>
+    <string name="consent_attr_resident_postal_code">Cod post</string>
+    <string name="consent_attr_issue_date">Dyddiad cyhoeddi</string>
+    <string name="consent_attr_issuing_authority">Awdurdod cyhoeddi</string>
+    <string name="consent_attr_issuing_country">Gwlad gyhoeddi</string>
+    <string name="consent_attr_un_distinguishing_sign">Gwlad gyhoeddi (arwydd gwahaniaethu’r Cenhedloedd Unedig)</string>
+    <string name="consent_attr_driving_privileges">Cerbydau y gallwch eu gyrru</string>
+    <string name="consent_attr_provisional_driving_privileges">Cerbydau y gallwch eu gyrru gyda’ch trwydded dros dro</string>
+    <string name="consent_attr_welsh_licence">Os yw’ch trwydded yn ddwyieithog (Saesneg a Chymraeg)</string>
+</resources>

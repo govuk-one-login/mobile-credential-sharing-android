@@ -20,8 +20,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import org.robolectric.annotation.Config
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
+import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.ORGANIZATION_NAME
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
@@ -30,6 +32,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(RobolectricTestParameterInjector::class)
+@Config(qualifiers = "w411dp-h1600dp-xhdpi")
 class HolderConsentScreenTest {
 
     @get:Rule
@@ -76,6 +79,7 @@ class HolderConsentScreenTest {
     )
 
     private fun consentPresentation(elements: Map<String, Boolean>) = ConsentPresentation(
+        organizationName = ORGANIZATION_NAME,
         documents = listOf(
             ConsentDocument(
                 docType = "org.iso.18013.5.1.mDL",
@@ -116,10 +120,12 @@ class HolderConsentScreenTest {
             composeTestRule.assertTitleIsDisplayed()
             composeTestRule.assertAcceptButtonIsDisplayed()
             composeTestRule.assertDenyButtonIsDisplayed()
-            composeTestRule.assertElementsDisplayed("family_name")
-            composeTestRule.assertElementsDisplayed("document_number")
-            composeTestRule.assertElementsDisplayed("portrait")
-            composeTestRule.assertElementsDisplayed("false")
+            composeTestRule.assertElementsDisplayed("Last name")
+            composeTestRule.assertElementsDisplayed("Licence number")
+            composeTestRule.assertElementsDisplayed("Photo")
+            composeTestRule.assertElementsDisplayed(
+                "These details will only be used for this check. They will not be saved."
+            )
         }
 
     @Test
@@ -135,37 +141,43 @@ class HolderConsentScreenTest {
             composeTestRule.setContent { Render() }
 
             composeTestRule.assertTitleIsDisplayed()
-            composeTestRule.assertElementsDisplayed("family_name — Intent to retain: true")
-            composeTestRule.assertElementsDisplayed("portrait — Intent to retain: false")
+            composeTestRule.assertElementsDisplayed(
+                "$ORGANIZATION_NAME will keep these details as a record of this check:"
+            )
+            composeTestRule.assertElementsDisplayed("$ORGANIZATION_NAME will not keep:")
+            composeTestRule.assertElementsDisplayed("Last name")
+            composeTestRule.assertElementsDisplayed("Photo")
         }
 
     @Test
-    fun `Displays docType from the DeviceRequest`() = runTest(dispatcherRule.testDispatcher) {
-        holderState.update {
-            HolderSessionState.AwaitingUserConsent(
-                request = DeviceRequestStub.deviceRequestStub,
-                presentation = presentationWithoutRetain
-            )
+    fun `Displays the GDS document name in the card heading`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.assertElementsDisplayed("UK driving licence")
         }
-
-        composeTestRule.setContent { Render() }
-
-        composeTestRule.assertElementsDisplayed("org.iso.18013.5.1.mDL")
-    }
 
     @Test
-    fun `Displays namespace from the DeviceRequest`() = runTest(dispatcherRule.testDispatcher) {
-        holderState.update {
-            HolderSessionState.AwaitingUserConsent(
-                request = DeviceRequestStub.deviceRequestStub,
-                presentation = presentationWithoutRetain
-            )
+    fun `Displays the shared attribute count in the card heading`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.assertElementsDisplayed("6")
         }
-
-        composeTestRule.setContent { Render() }
-
-        composeTestRule.assertElementsDisplayed("org.iso.18013.5.1")
-    }
 
     @Test
     fun `Preview renders without errors`() = runTest(dispatcherRule.testDispatcher) {
