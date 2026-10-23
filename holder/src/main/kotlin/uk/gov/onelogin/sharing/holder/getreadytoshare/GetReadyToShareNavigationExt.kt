@@ -8,10 +8,6 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 
 object GetReadyToShareNavigationExt {
-    /**
-     * DCMAW-23663:
-     * - Update usages to perform expected animations when navigated to
-     */
     fun NavController.navigateToGetReadyToShare(
         options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(GetReadyToShareRoute, options)

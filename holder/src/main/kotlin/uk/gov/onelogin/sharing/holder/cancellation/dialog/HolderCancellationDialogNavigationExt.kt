@@ -4,6 +4,7 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -12,10 +13,6 @@ import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.spacingDouble
 
 data object HolderCancellationDialogNavigationExt {
-    /**
-     * DCMAW-23663:
-     * - Update usages to perform the expected animation
-     */
     fun NavController.navigateToHolderUserCancellationDialog(
         options: NavOptionsBuilder.() -> Unit = {}
     ) = navigate(HolderCancellationDialogRoute, options)

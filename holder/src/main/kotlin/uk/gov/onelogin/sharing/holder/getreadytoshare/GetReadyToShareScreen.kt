@@ -14,6 +14,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -26,6 +30,7 @@ import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.onelogin.sharing.core.WalletSharingPreview
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.holder.R
@@ -117,7 +122,7 @@ internal fun GetReadyToShareContent(
  *   The underlying [uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen] composable
  *   internally updates the `Modifier` instead of passing it through, increasing the padding.
  */
-@Preview(showSystemUi = true, showBackground = true)
+@WalletSharingPreview
 @Composable
 internal fun GetReadyToSharePreview() {
     GdsTheme {
