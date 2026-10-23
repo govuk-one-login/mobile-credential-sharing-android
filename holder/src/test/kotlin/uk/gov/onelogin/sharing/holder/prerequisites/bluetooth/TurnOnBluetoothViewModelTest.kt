@@ -69,9 +69,7 @@ class TurnOnBluetoothViewModelTest {
 
     @Test
     fun `Logs Turn on Bluetooth button event`() = runTest {
-        viewModel.sendTurnOnBluetoothEvent(
-            TurnOnBluetoothViewModel.AnalyticsButton.TurnOnBluetooth
-        ).join()
+        viewModel.sendTurnOnBluetoothEvent().join()
         assertThat(
             analyticsLogger,
             hasSentEvents(contains(TurnOnBluetoothViewModelTestData.expectedTurnOnBluetoothEvent))

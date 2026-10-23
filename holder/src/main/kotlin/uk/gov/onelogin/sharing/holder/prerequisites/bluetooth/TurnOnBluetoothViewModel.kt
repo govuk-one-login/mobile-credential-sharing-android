@@ -22,9 +22,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
-import uk.gov.logging.api.v3dot1.model.TrackEvent
-import uk.gov.logging.api.v3dot1.model.ViewEvent
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
+import uk.gov.onelogin.sharing.analytics.WalletSharingButton
+import uk.gov.onelogin.sharing.analytics.WalletSharingScreen
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -63,30 +62,19 @@ class TurnOnBluetoothViewModel(
     }
 
     fun turnOnBluetooth(launcher: ActivityResultLauncher<PrerequisiteAction>) {
-        sendTurnOnBluetoothEvent(AnalyticsButton.TurnOnBluetooth)
+        sendTurnOnBluetoothEvent()
         resolve(launcher)
     }
 
     fun sendScreenEvent() = viewModelScope.launch(dispatcher) {
-        ViewEvent.Screen(
-            name = "Turn on Bluetooth",
-            id = "d64962b9-def5-4b13-9c3c-128d51353fe7",
-            params = walletSharingRequiredParameters
-        ).let(analyticsLogger::logEventV3Dot1)
+        WalletSharingScreen.TURN_ON_BLUETOOTH
+            .screenViewEvent
+            .let(analyticsLogger::logEventV3Dot1)
     }
 
-    fun sendTurnOnBluetoothEvent(button: AnalyticsButton) = viewModelScope.launch(dispatcher) {
-        TrackEvent.Button(
-            text = button.name,
-            params = walletSharingRequiredParameters
-        ).let(analyticsLogger::logEventV3Dot1)
-    }
-
-    sealed interface AnalyticsButton {
-        val name: String
-
-        data object TurnOnBluetooth : AnalyticsButton {
-            override val name: String get() = "Turn on Bluetooth"
-        }
+    fun sendTurnOnBluetoothEvent() = viewModelScope.launch(dispatcher) {
+        WalletSharingButton.TURN_ON_BLUETOOTH
+            .buttonEvent
+            .let(analyticsLogger::logEventV3Dot1)
     }
 }
