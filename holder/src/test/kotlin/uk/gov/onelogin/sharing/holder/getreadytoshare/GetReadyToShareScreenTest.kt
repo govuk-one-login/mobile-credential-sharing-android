@@ -6,9 +6,12 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.core.app.ActivityOptionsCompat
+import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
@@ -17,7 +20,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.logging.api.analytics.logging.MemorisedAnalyticsLogger
 import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -103,11 +109,6 @@ class GetReadyToShareScreenTest {
             setContent { Render() }
             waitUntil { analyticsLogger.size != 0 }
         }
-
-        assertThat(
-            analyticsLogger,
-            contains(GetReadyToShareTestData.expectedScreenEvent)
-        )
     }
 
     @Test
@@ -137,6 +138,29 @@ class GetReadyToShareScreenTest {
             waitUntil("Hasn't called the activity result contract!") {
                 hasCalledActivityResult
             }
+        }
+    }
+
+    @Test
+    fun `Allowing bluetooth sends an analytics event`() = runTest {
+        screenRule.run {
+            setContent {
+                ProvideActivityResultRegistry(mockk(relaxed = true)) {
+                    Render()
+                }
+            }
+            waitUntil { analyticsLogger.size == 1 }
+
+            performAllowActionClick()
+            waitUntil { analyticsLogger.size == 2 }
+
+            assertThat(
+                analyticsLogger,
+                contains(
+                    GetReadyToShareTestData.expectedScreenEvent,
+                    GetReadyToShareTestData.expectedAllowBluetoothButtonEvent
+                )
+            )
         }
     }
 

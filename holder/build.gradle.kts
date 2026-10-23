@@ -66,6 +66,7 @@ dependencies {
     listOf(
         libs.androidx.navigation.testing,
         testFixtures(libs.uk.gov.ui.android.componentsv2),
+        testFixtures(projects.analytics),
         testFixtures(projects.bluetooth),
         testFixtures(projects.cryptoService),
         testFixtures(projects.core),

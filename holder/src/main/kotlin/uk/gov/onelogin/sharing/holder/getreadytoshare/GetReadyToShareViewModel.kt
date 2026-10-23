@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.getreadytoshare
 
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.ContributesIntoMap
@@ -21,8 +22,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
 import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
@@ -30,6 +33,7 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.ResolvePrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
 
@@ -41,9 +45,8 @@ class GetReadyToShareViewModel(
     private val analyticsLogger: AnalyticsLogger,
     private val orchestrator: Orchestrator.Holder,
     private val resolver: ResolvePrerequisiteAction<HolderSessionState>,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : ViewModel(),
-    ResolvePrerequisiteAction<HolderSessionState> by resolver {
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+) : ViewModel() {
 
     val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent> = navigator
         .events
@@ -78,11 +81,22 @@ class GetReadyToShareViewModel(
         (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
             ?.onComplete()
     }
-    
+
     fun sendScreenEvent() = viewModelScope.launch {
         Screen(
             name = "Get ready to share",
             id = "3f5c1d0b-8068-4e19-8300-37f7bb468ff5",
+            params = walletSharingRequiredParameters
+        ).let(analyticsLogger::logEventV3Dot1)
+    }
+
+    fun onAllowBluetooth(
+        launcher: ActivityResultLauncher<PrerequisiteAction>
+    ) = viewModelScope.launch {
+        resolver.resolve(launcher)
+
+        Button(
+            text = "Allow bluetooth",
             params = walletSharingRequiredParameters
         ).let(analyticsLogger::logEventV3Dot1)
     }

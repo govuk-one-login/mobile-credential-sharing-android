@@ -71,7 +71,7 @@ class GetReadyToShareViewModelTest {
     fun `Resolving prerequisite actions defer to the resolver`() = runTest(
         dispatcherRule.testDispatcher
     ) {
-        viewModel.resolve(mockk())
+        viewModel.onAllowBluetooth(mockk())
 
         assertTrue { hasCalledResolver }
     }
@@ -157,6 +157,16 @@ class GetReadyToShareViewModelTest {
         assertThat(
             analyticsLogger,
             contains(GetReadyToShareTestData.expectedScreenEvent)
+        )
+    }
+
+    @Test
+    fun `Sends a button analytics event to the analytics logger`() = runTest {
+        viewModel.onAllowBluetooth(mockk(relaxed = true)).join()
+
+        assertThat(
+            analyticsLogger,
+            contains(GetReadyToShareTestData.expectedAllowBluetoothButtonEvent)
         )
     }
 }

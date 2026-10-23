@@ -13,11 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewDynamicColors
-import androidx.compose.ui.tooling.preview.PreviewFontScale
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -28,7 +23,6 @@ import kotlinx.coroutines.launch
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
-import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.WalletSharingPreview
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
@@ -77,7 +71,9 @@ internal fun GetReadyToShareScreen(
 
     GetReadyToShareContent(
         modifier = modifier,
-        onButtonClick = { viewModel.resolve(launcher) },
+        onAllowBluetoothClick = {
+            viewModel.onAllowBluetooth(launcher)
+        },
         onFindOutMoreButtonClick = viewModel::onFindOutMore
     )
 }
@@ -85,7 +81,7 @@ internal fun GetReadyToShareScreen(
 @Composable
 internal fun GetReadyToShareContent(
     modifier: Modifier = Modifier,
-    onButtonClick: () -> Unit = {},
+    onAllowBluetoothClick: () -> Unit = {},
     onFindOutMoreButtonClick: () -> Unit = {},
 ) {
     LeftAlignedScreenV2(
@@ -102,7 +98,7 @@ internal fun GetReadyToShareContent(
         }.toPersistentList(),
         primaryButton = LeftAlignedScreenButton(
             text = stringResource(R.string.get_ready_to_share_allow_bluetooth),
-            onClick = onButtonClick
+            onClick = onAllowBluetoothClick
         ),
         secondaryButton = LeftAlignedScreenButton(
             text = stringResource(R.string.get_ready_to_share_find_out_more),
