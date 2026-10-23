@@ -62,7 +62,8 @@ dependencies {
     ).forEach(::testFixturesApi)
 
     listOf(
-        libs.mockk
+        libs.mockk,
+        projects.prerequisiteGateImpl
     ).forEach(::testFixturesImplementation)
 
     listOf(

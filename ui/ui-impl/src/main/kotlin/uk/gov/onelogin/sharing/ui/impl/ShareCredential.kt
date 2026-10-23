@@ -29,6 +29,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.v3dot1.model.TrackEvent
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
+import uk.gov.onelogin.sharing.analytics.WalletSharingButton
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
@@ -57,6 +62,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     val orchestrator = uiGraph.holderOrchestrator()
 
     ShareCredential(
+        analyticsLogger = uiGraph.appGraph().analyticsLogger(),
         orchestrator = orchestrator,
         holderSessionState = orchestrator.holderSessionState,
         modifier = modifier,
@@ -65,8 +71,13 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     )
 }
 
+private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) = WalletSharingButton.CLOSE
+    .buttonEvent
+    .let(analyticsLogger::logEventV3Dot1)
+
 @Composable
 internal fun ShareCredential(
+    analyticsLogger: AnalyticsLogger,
     orchestrator: Orchestrator.Holder,
     holderSessionState: StateFlow<HolderSessionState>,
     viewModelFactory: MetroViewModelFactory,
@@ -113,7 +124,12 @@ internal fun ShareCredential(
                     .safeContentPadding()
             ) {
                 if (state.userCanCancel()) {
-                    IconButton(onClick = onCancel) {
+                    IconButton(
+                        onClick = {
+                            scope.launch { logCloseButtonEvent(analyticsLogger) }
+                            onCancel()
+                        }
+                    ) {
                         Icon(
                             painter = painterResource(ic_menu_close_clear_cancel),
                             contentDescription = "Close"
