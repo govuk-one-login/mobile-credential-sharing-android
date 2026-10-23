@@ -22,7 +22,7 @@ class TurnOnBluetoothScreenRule(
         ApplicationProvider.getApplicationContext<Context>().resources
 ) : ComposeContentTestRule by composeTestRule {
 
-    private val turnOnBluetoothText = resources.getString(R.string.holder_turn_on_bluetooth)
+    private val turnOnBluetoothText = resources.getString(R.string.turn_on_bluetooth)
 
     fun assertTitleIsDisplayed() = onNode(hasText(turnOnBluetoothText) and isHeading())
         .assertIsDisplayed()

@@ -83,7 +83,7 @@ internal fun TurnOnBluetoothScreen(
 internal fun TurnOnBluetoothContent(onTurnOnBluetooth: () -> Unit, modifier: Modifier = Modifier) {
     LeftAlignedScreenV2(
         modifier = modifier,
-        title = stringResource(R.string.holder_turn_on_bluetooth),
+        title = stringResource(R.string.holder_turn_on_bluetooth_title),
         body = persistentListOf(
             LeftAlignedScreenBodyV2.Text(
                 stringResource(R.string.holder_turn_on_bluetooth_body_1)
@@ -93,7 +93,7 @@ internal fun TurnOnBluetoothContent(onTurnOnBluetooth: () -> Unit, modifier: Mod
             )
         ),
         primaryButton = LeftAlignedScreenButton(
-            text = stringResource(R.string.holder_turn_on_bluetooth),
+            text = stringResource(R.string.holder_turn_on_bluetooth_button),
             onClick = onTurnOnBluetooth
         ),
         forceScroll = false
