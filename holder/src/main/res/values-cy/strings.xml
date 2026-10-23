@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="find_out_which_details_to_share">Darganfyddwch pa fanylion y mae angen i chi eu rhannu</string>
+    <string name="show_qr_code_person_doing_check">Dangoswch y cod QR i\'r person sy\'n gwneud y gwiriad.</string>
+    <string name="qr_code_lets_them_send_list_of_details">Mae\'n caniatáu iddynt anfon rhestr atoch o\'r manylion maent angen eu gwirio.</string>
+    <string name="review_list_before_agreeing_to_share">Byddwch yn adolygu\'r rhestr hon cyn cytuno i rannu\'ch manylion gyda hwy.</string>
+    <string name="qr_code_to_get_list_of_details">Cod QR i gael y rhestr o fanylion y mae angen i chi eu rhannu</string>
+</resources>

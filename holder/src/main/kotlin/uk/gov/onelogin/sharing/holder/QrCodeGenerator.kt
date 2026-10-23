@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 
 /**
@@ -18,10 +19,12 @@ import com.google.zxing.qrcode.QRCodeWriter
 private const val TAG = "QRCodeGenerator"
 private const val QR_CODE_BLACK = 0xFF000000.toInt()
 private const val QR_CODE_WHITE = 0xFFFFFFFF.toInt()
+private const val DEFAULT_QR_MARGIN = 4
 
-fun qrCodeGenerator(data: String, size: Int): Bitmap? = try {
+fun qrCodeGenerator(data: String, size: Int, margin: Int = DEFAULT_QR_MARGIN): Bitmap? = try {
     val writer = QRCodeWriter()
-    val bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, size, size)
+    val hints = mapOf(EncodeHintType.MARGIN to margin)
+    val bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, size, size, hints)
     val width = bitMatrix.width
     val height = bitMatrix.height
     val pixels = IntArray(width * height) { i ->

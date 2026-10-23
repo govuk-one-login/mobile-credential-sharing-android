@@ -7,12 +7,18 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 
 @Composable
-fun QrCodeImage(data: String, size: Int, modifier: Modifier = Modifier) {
-    qrCodeGenerator(data, size)?.asImageBitmap()?.let {
+fun QrCodeImage(
+    data: String,
+    size: Int,
+    modifier: Modifier = Modifier,
+    margin: Int = 4,
+    contentDescription: String = "QR Code"
+) {
+    qrCodeGenerator(data, size, margin)?.asImageBitmap()?.let {
         Image(
             modifier = modifier,
             bitmap = it,
-            contentDescription = "QR Code",
+            contentDescription = contentDescription,
             contentScale = ContentScale.Fit
         )
     }
