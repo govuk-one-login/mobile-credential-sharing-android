@@ -22,6 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -33,6 +36,7 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.images.GdsIcon
 import uk.gov.android.ui.patterns.centrealignedscreen.CentreAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
@@ -92,7 +96,7 @@ internal fun AwaitingVerifierResolutionContent(
     CentreAlignedScreen(
         title = { padding ->
             GdsHeading(
-                text = stringResource(R.string.details_shared_heading),
+                text = stringResource(R.string.holder_awaiting_verifier_resolution_title),
                 textAlign = GdsHeadingAlignment.CenterAligned,
                 modifier = Modifier.padding(horizontal = padding)
             )
@@ -119,7 +123,7 @@ internal fun AwaitingVerifierResolutionContent(
         body = { padding ->
             item {
                 Text(
-                    text = stringResource(R.string.details_shared_body_1),
+                    text = stringResource(R.string.holder_awaiting_verifier_resolution_body_1),
                     textAlign = TextAlign.Center,
                     fontSize = 17.sp,
                     modifier = Modifier
@@ -129,7 +133,7 @@ internal fun AwaitingVerifierResolutionContent(
             }
             item {
                 Text(
-                    text = stringResource(R.string.details_shared_body_2),
+                    text = stringResource(R.string.holder_awaiting_verifier_resolution_body_2),
                     textAlign = TextAlign.Center,
                     fontSize = 17.sp,
                     modifier = Modifier
@@ -140,7 +144,7 @@ internal fun AwaitingVerifierResolutionContent(
         },
         primaryButton = {
             GdsButton(
-                text = stringResource(R.string.details_shared_button_text),
+                text = stringResource(R.string.holder_awaiting_verifier_resolution_button),
                 buttonType = ButtonTypeV2.Primary(),
                 onClick = onGoBackToDocuments,
                 modifier = Modifier.fillMaxWidth()

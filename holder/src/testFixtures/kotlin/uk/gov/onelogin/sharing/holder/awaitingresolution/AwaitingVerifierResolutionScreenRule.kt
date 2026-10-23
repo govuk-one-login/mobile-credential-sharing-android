@@ -26,23 +26,23 @@ class AwaitingVerifierResolutionScreenRule(
         .assertIsDisplayed()
 
     fun assertTitleIsDisplayed() = onNodeWithText(
-        resources.getString(R.string.details_shared_heading)
+        resources.getString(R.string.details_shared)
     ).assertIsDisplayed()
 
     fun assertBodyIsDisplayed() {
-        onNodeWithText(resources.getString(R.string.details_shared_body_1)).assertIsDisplayed()
-        onNodeWithText(resources.getString(R.string.details_shared_body_2)).assertIsDisplayed()
+        onNodeWithText(resources.getString(R.string.person_will_check_details_shared)).assertIsDisplayed()
+        onNodeWithText(resources.getString(R.string.bluetooth_connection_will_end)).assertIsDisplayed()
     }
 
     fun assertGoBackToDocumentsButtonIsDisplayed() {
         onNode(
-            hasText(resources.getString(R.string.details_shared_button_text)) and
+            hasText(resources.getString(R.string.go_back_to_documents)) and
                 hasRole(Role.Button)
         ).assertIsDisplayed()
     }
 
     fun performGoBackToDocumentsClick() = onNode(
-        hasText(resources.getString(R.string.details_shared_button_text)) and
+        hasText(resources.getString(R.string.go_back_to_documents)) and
             hasRole(Role.Button)
     ).performClick()
 }

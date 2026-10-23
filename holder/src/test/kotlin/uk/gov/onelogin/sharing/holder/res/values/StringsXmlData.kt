@@ -56,5 +56,21 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     HOLDER_SUCCESS_UNFULFILLABLE_REQUEST_TITLE(
         expected = "Unfulfillable request",
         resourceId = R.string.holder_success_unfulfillable_request_title
+    ),
+    DETAILS_SHARED(
+        expected = "Details shared",
+        resourceId = R.string.details_shared
+    ),
+    PERSON_WILL_CHECK_DETAILS_SHARED(
+        expected = "The person will check the details you shared.",
+        resourceId = R.string.person_will_check_details_shared
+    ),
+    BLUETOOTH_CONNECTION_WILL_END(
+        expected = "Your bluetooth connection with them will now end.",
+        resourceId = R.string.bluetooth_connection_will_end
+    ),
+    GO_BACK_TO_DOCUMENTS(
+        expected = "Go back to documents",
+        resourceId = R.string.go_back_to_documents
     )
 }
