@@ -46,7 +46,6 @@ internal fun AwaitingVerifierResolutionScreen(
     viewModel: AwaitingVerifierResolutionViewModel = metroViewModel(),
     onExitJourney: () -> Unit = {}
 ) {
-    val currentViewModel by rememberUpdatedState(viewModel)
     val currentOnExitJourney by rememberUpdatedState(onExitJourney)
 
     /**
@@ -58,7 +57,7 @@ internal fun AwaitingVerifierResolutionScreen(
             override fun handleOnBackPressed() {
                 if (!isEnabled) return
                 isEnabled = false
-                currentViewModel.reset()
+                viewModel.reset()
                 currentOnExitJourney()
             }
         }

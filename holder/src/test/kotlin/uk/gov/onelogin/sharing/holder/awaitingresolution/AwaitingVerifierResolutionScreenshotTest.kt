@@ -10,13 +10,13 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.Density
 import com.github.takahirom.roborazzi.captureRoboImage
+import kotlin.test.Test
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import uk.gov.android.ui.theme.m3.GdsTheme
-import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
