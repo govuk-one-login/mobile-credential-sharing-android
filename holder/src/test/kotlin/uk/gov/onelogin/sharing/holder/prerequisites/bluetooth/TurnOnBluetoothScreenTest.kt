@@ -259,4 +259,22 @@ class TurnOnBluetoothScreenTest {
             hasSentEvents(hasItem(TurnOnBluetoothViewModelTestData.expectedScreenEvent))
         )
     }
+
+    @Test
+    fun `Content preview renders the screen content`() = runTest {
+        composeTestRule.run {
+            setContent { TurnOnBluetoothContentPreview() }
+            assertTitleIsDisplayed()
+            assertBodyIsDisplayed()
+            assertTurnOnBluetoothButtonIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `Loading preview renders the loading content`() = runTest {
+        composeTestRule.run {
+            setContent { TurnOnBluetoothLoadingContentPreview() }
+            assertLoadingSpinnerIsDisplayed()
+        }
+    }
 }

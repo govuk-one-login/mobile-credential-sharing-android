@@ -7,8 +7,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.annotation.Config
 import org.robolectric.RobolectricTestParameterInjector
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestParameterInjector::class)
 @Config(qualifiers = "cy")

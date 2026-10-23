@@ -13,7 +13,8 @@ enum class WelshStringsXmlData(val expected: String, @param:StringRes val resour
         resourceId = R.string.turn_on_bluetooth_before_sharing
     ),
     USE_QR_CODE_TO_CONNECT_NEXT(
-        expected = "Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf.",
+        expected = "Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i " +
+            "wneud hynny nesaf.",
         resourceId = R.string.use_qr_code_to_connect_next
     )
 }

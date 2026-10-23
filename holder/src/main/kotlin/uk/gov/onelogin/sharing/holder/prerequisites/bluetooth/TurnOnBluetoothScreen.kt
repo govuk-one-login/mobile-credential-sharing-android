@@ -4,7 +4,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -13,6 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -22,6 +27,7 @@ import kotlinx.collections.immutable.persistentListOf
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
@@ -64,13 +70,7 @@ internal fun TurnOnBluetoothScreen(
     }
 
     if (isLeaving) {
-        Column(
-            modifier = modifier,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CircularProgressIndicator(modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG))
-        }
+        TurnOnBluetoothLoadingContent(modifier = modifier)
     } else {
         TurnOnBluetoothContent(
             modifier = modifier,
@@ -98,4 +98,41 @@ internal fun TurnOnBluetoothContent(onTurnOnBluetooth: () -> Unit, modifier: Mod
         ),
         forceScroll = false
     )
+}
+
+@Composable
+internal fun TurnOnBluetoothLoadingContent(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG))
+    }
+}
+
+@PreviewLightDark
+@PreviewFontScale
+@PreviewScreenSizes
+@Composable
+internal fun TurnOnBluetoothContentPreview() {
+    GdsTheme {
+        Surface {
+            TurnOnBluetoothContent(
+                onTurnOnBluetooth = {},
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@PreviewScreenSizes
+@Composable
+internal fun TurnOnBluetoothLoadingContentPreview() {
+    GdsTheme {
+        Surface {
+            TurnOnBluetoothLoadingContent(modifier = Modifier.fillMaxSize())
+        }
+    }
 }

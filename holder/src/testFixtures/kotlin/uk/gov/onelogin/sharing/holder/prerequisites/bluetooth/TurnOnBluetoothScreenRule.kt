@@ -26,16 +26,18 @@ class TurnOnBluetoothScreenRule(
     // node finders
     fun onTitle() = onNode(
         hasText(resources.getString(R.string.holder_turn_on_bluetooth_title))
-                and isHeading()
+            and isHeading()
     )
 
-    fun onFirstParagraph() = onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_1))
+    fun onFirstParagraph() =
+        onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_1))
 
-    fun onSecondParagraph() = onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_2))
+    fun onSecondParagraph() =
+        onNodeWithText(resources.getString(R.string.holder_turn_on_bluetooth_body_2))
 
     fun onTurnOnBluetoothButton() = onNode(
         hasText(resources.getString(R.string.holder_turn_on_bluetooth_button))
-                and hasRole(Role.Button)
+            and hasRole(Role.Button)
     )
 
     // assertions
