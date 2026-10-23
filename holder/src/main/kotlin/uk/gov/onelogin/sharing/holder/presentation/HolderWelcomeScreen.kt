@@ -9,10 +9,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.Dispatchers
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.presentation.component.LandscapeQrContent
@@ -61,21 +64,11 @@ private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = M
 }
 
 @Composable
-@Preview(
-    showBackground = true,
-    widthDp = 360,
-    heightDp = 858
-)
+@PreviewLightDark
+@PreviewFontScale
+@PreviewScreenSizes
 private fun HolderWelcomeScreenPortraitPreview() {
-    QrContent(HolderWelcomeUiState(qrData = "QR Data"))
-}
-
-@Composable
-@Preview(
-    showBackground = true,
-    widthDp = 858,
-    heightDp = 360
-)
-private fun HolderWelcomeScreenLandscapePreview() {
-    QrContent(HolderWelcomeUiState(qrData = "QR Data"))
+    GdsTheme {
+        QrContent(HolderWelcomeUiState(qrData = "QR Data"))
+    }
 }
