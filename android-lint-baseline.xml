@@ -1,11 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
     <!--
-        Temporarily disabled: adding values-cy for the Agree to Share card (DCMAW-23850) caused
-        lint to flag every pre-existing untranslated string as MissingTranslation. Re-enable once
-        Welsh translations are provided for the remaining strings.
+        Scoped suppression for strings that do not yet have a Welsh (values-cy) translation.
+        Remove each entry below as the corresponding Welsh translation is provided, and
+        delete the whole block once all strings are translated.
     -->
-    <issue id="MissingTranslation" severity="ignore" />
+    <issue id="MissingTranslation">
+        <ignore regexp="&quot;bluetooth_permission_denied&quot; is not translated" />
+        <ignore regexp="&quot;bluetooth_permission_permanently_denied&quot; is not translated" />
+        <ignore regexp="&quot;bluetooth_turned_off_holder&quot; is not translated" />
+        <ignore regexp="&quot;checking_journey_requirements&quot; is not translated" />
+        <ignore regexp="&quot;creating_qr_code&quot; is not translated" />
+        <ignore regexp="&quot;enable_bluetooth_permission&quot; is not translated" />
+        <ignore regexp="&quot;generating_qr_code_data&quot; is not translated" />
+        <ignore regexp="&quot;have_not_met_requirements&quot; is not translated" />
+        <ignore regexp="&quot;holder_awaiting_resolution_title&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_accept&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_deny&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_deny_dialog_dismiss&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_deny_dialog_title&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_intent_to_retain&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_organization_sentence&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_privacy_policy_close&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_privacy_policy_link&quot; is not translated" />
+        <ignore regexp="&quot;holder_consent_title&quot; is not translated" />
+        <ignore regexp="&quot;holder_prerequisites_not_started&quot; is not translated" />
+        <ignore regexp="&quot;holder_prerequisites_preflight&quot; is not translated" />
+        <ignore regexp="&quot;holder_prerequisites_presenting_engagement&quot; is not translated" />
+        <ignore regexp="&quot;holder_prerequisites_ready_to_present&quot; is not translated" />
+        <ignore regexp="&quot;holder_success_unfulfillable_request_title&quot; is not translated" />
+        <ignore regexp="&quot;open_app_permissions&quot; is not translated" />
+    </issue>
     <issue id="InvalidPackage">
         <ignore path="**/com.android.tools/common/31.13.0/**" />
         <ignore path="**/com.android.tools.layoutlib/layoutlib-api/31.13.0/**" />
