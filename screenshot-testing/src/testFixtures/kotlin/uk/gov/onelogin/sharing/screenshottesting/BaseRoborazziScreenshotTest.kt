@@ -32,7 +32,7 @@ import sergio.sastre.composable.preview.scanner.core.preview.ComposablePreview
  * ) : BaseRoborazziScreenshotTest(preview)
  * ```
  *
- * Baselines are written under `src/test/snapshots/images/<module-relative-package>/<name>.png`
+ * Baselines are written under `src/test/snapshots/<module-relative-package>/<name>.png`
  * (the common `uk.gov.onelogin.sharing` prefix is stripped so folders mirror the package tree).
  */
 @RunWith(RobolectricTestParameterInjector::class)
@@ -62,7 +62,7 @@ abstract class BaseRoborazziScreenshotTest(
             .ignoreMethodName()
             .build()
         val name = "${className}_${preview.methodName}_$configId"
-        return "src/test/snapshots/images/$packagePath/$name.png"
+        return "src/test/snapshots/$packagePath/$name.png"
     }
 
     private companion object {
