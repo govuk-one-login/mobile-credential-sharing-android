@@ -29,9 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewFontScale
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -39,6 +36,7 @@ import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
@@ -226,9 +224,7 @@ private fun DenyConfirmationDialog(onConfirmDeny: () -> Unit, onDismiss: () -> U
     )
 }
 
-@PreviewLightDark
-@PreviewFontScale
-@Preview(name = "Welsh", locale = "cy", showBackground = true)
+@PreviewContent
 @Composable
 internal fun HolderConsentScreenPreview() {
     GdsTheme {
