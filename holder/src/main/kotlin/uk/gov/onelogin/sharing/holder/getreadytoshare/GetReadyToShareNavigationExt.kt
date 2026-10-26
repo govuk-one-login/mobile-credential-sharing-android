@@ -8,9 +8,8 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 
 object GetReadyToShareNavigationExt {
-    fun NavController.navigateToGetReadyToShare(
-        options: NavOptionsBuilder.() -> Unit = {}
-    ) = navigate(GetReadyToShareRoute, options)
+    fun NavController.navigateToGetReadyToShare(options: NavOptionsBuilder.() -> Unit = {}) =
+        navigate(GetReadyToShareRoute, options)
 
     internal fun NavGraphBuilder.configureGetReadyToShare() {
         composable<GetReadyToShareRoute> {

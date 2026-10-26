@@ -23,25 +23,23 @@ class StringsXmlTest {
     }
 
     @Test
-    fun translatableStringsMatchEnglishValues(
-        @TestParameter input: TranslatableStringsData
-    ) = runTest {
-        assertEquals(
-            input["en"],
-            resources.getString(input.resourceId)
-        )
-    }
+    fun translatableStringsMatchEnglishValues(@TestParameter input: TranslatableStringsData) =
+        runTest {
+            assertEquals(
+                input["en"],
+                resources.getString(input.resourceId)
+            )
+        }
 
     @Config(qualifiers = "cy")
     @Test
-    fun translatableStringsMatchWelshValues(
-        @TestParameter input: TranslatableStringsData
-    ) = runTest {
-        assertEquals(
-            input["cy"],
-            resources.getString(input.resourceId)
-        )
-    }
+    fun translatableStringsMatchWelshValues(@TestParameter input: TranslatableStringsData) =
+        runTest {
+            assertEquals(
+                input["cy"],
+                resources.getString(input.resourceId)
+            )
+        }
 
     @Test
     fun screenSpecificStringsDeferToBaseValues(@TestParameter input: DeferredStringsXmlData) =

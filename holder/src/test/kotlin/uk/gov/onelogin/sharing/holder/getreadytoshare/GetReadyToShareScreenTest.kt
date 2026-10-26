@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.test.Test
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -89,7 +89,7 @@ class GetReadyToShareScreenTest {
             orchestrator = orchestrator,
             resolver = resolver,
             dispatcher = dispatcherRule.testDispatcher,
-            mainDispatcher = dispatcherRule.testDispatcher,
+            mainDispatcher = dispatcherRule.testDispatcher
         )
     }
 

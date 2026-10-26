@@ -91,18 +91,17 @@ class GetReadyToShareViewModel(
         ).let(analyticsLogger::logEventV3Dot1)
     }
 
-    fun onAllowBluetooth(
-        launcher: ActivityResultLauncher<PrerequisiteAction>
-    ): Job = viewModelScope.launch {
-        withContext(mainDispatcher) {
-            resolver.resolve(launcher)
-        }
+    fun onAllowBluetooth(launcher: ActivityResultLauncher<PrerequisiteAction>): Job =
+        viewModelScope.launch {
+            withContext(mainDispatcher) {
+                resolver.resolve(launcher)
+            }
 
-        Button(
-            text = "Allow bluetooth",
-            params = walletSharingRequiredParameters
-        ).let(analyticsLogger::logEventV3Dot1)
-    }
+            Button(
+                text = "Allow bluetooth",
+                params = walletSharingRequiredParameters
+            ).let(analyticsLogger::logEventV3Dot1)
+        }
 
     fun onFindOutMore(): Job = viewModelScope.launch {
         Button(

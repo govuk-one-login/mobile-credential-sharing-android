@@ -82,7 +82,7 @@ internal fun GetReadyToShareScreen(
 internal fun GetReadyToShareContent(
     modifier: Modifier = Modifier,
     onAllowBluetoothClick: () -> Unit = {},
-    onFindOutMoreButtonClick: () -> Unit = {},
+    onFindOutMoreButtonClick: () -> Unit = {}
 ) {
     LeftAlignedScreenV2(
         modifier = modifier,
@@ -90,7 +90,7 @@ internal fun GetReadyToShareContent(
         body = listOf(
             R.string.get_ready_to_share_before_sharing,
             R.string.get_ready_to_share_if_bluetooth_is_off,
-            R.string.get_ready_to_share_use_qr_to_connect,
+            R.string.get_ready_to_share_use_qr_to_connect
         ).map {
             stringResource(it)
         }.map {

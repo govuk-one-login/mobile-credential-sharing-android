@@ -27,40 +27,36 @@ class GetReadyToShareScreenRule(
         .getApplicationContext<Context>().resources
 ) : ComposeContentTestRule by composeTestRule {
 
-    fun assertValidAllowBluetoothButton(
-        useUnmergedTree: Boolean = false
-    ) = onAllowActionButtons(useUnmergedTree)
-        .onFirst()
-        .assertExists()
-        .assertHasClickAction()
-        .assertIsEnabled()
-        .assertIsDisplayed()
-        .assertWidthIsAtLeast(minimumTouchTarget)
-        .assertHeightIsAtLeast(minimumTouchTarget)
+    fun assertValidAllowBluetoothButton(useUnmergedTree: Boolean = false) =
+        onAllowActionButtons(useUnmergedTree)
+            .onFirst()
+            .assertExists()
+            .assertHasClickAction()
+            .assertIsEnabled()
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(minimumTouchTarget)
+            .assertHeightIsAtLeast(minimumTouchTarget)
 
-    fun assertValidBodyContents(
-        useUnmergedTree: Boolean = false
-    ) {
+    fun assertValidBodyContents(useUnmergedTree: Boolean = false) {
         mapOf(
             "first paragraph" to R.string.get_ready_to_share_before_sharing,
             "second paragraph" to R.string.get_ready_to_share_if_bluetooth_is_off,
-            "third paragraph" to R.string.get_ready_to_share_use_qr_to_connect,
+            "third paragraph" to R.string.get_ready_to_share_use_qr_to_connect
         ).forEach { (description, resourceId) ->
             onNodeWithText(resources.getString(resourceId), useUnmergedTree = useUnmergedTree)
                 .assertExists("Cannot find $description")
         }
     }
 
-    fun assertValidFindOutMoreButton(
-        useUnmergedTree: Boolean = false
-    ) = onFindOutMoreButtons(useUnmergedTree)
-        .onFirst()
-        .assertExists()
-        .assertHasClickAction()
-        .assertIsEnabled()
-        .assertIsDisplayed()
-        .assertWidthIsAtLeast(minimumTouchTarget)
-        .assertHeightIsAtLeast(minimumTouchTarget)
+    fun assertValidFindOutMoreButton(useUnmergedTree: Boolean = false) =
+        onFindOutMoreButtons(useUnmergedTree)
+            .onFirst()
+            .assertExists()
+            .assertHasClickAction()
+            .assertIsEnabled()
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(minimumTouchTarget)
+            .assertHeightIsAtLeast(minimumTouchTarget)
 
     fun assertValidHeader(useUnmergedTree: Boolean = false) = onHeader(useUnmergedTree)
         .assertExists()
@@ -85,15 +81,13 @@ class GetReadyToShareScreenRule(
         useUnmergedTree = useUnmergedTree
     )
 
-    fun performAllowActionClick(
-        useUnmergedTree: Boolean = false
-    ) = onAllowActionButtons(useUnmergedTree)
-        .onFirst()
-        .performClick()
+    fun performAllowActionClick(useUnmergedTree: Boolean = false) =
+        onAllowActionButtons(useUnmergedTree)
+            .onFirst()
+            .performClick()
 
-    fun performFindOutMoreClick(
-        useUnmergedTree: Boolean = false
-    ) = onFindOutMoreButtons(useUnmergedTree)
-        .onFirst()
-        .performClick()
+    fun performFindOutMoreClick(useUnmergedTree: Boolean = false) =
+        onFindOutMoreButtons(useUnmergedTree)
+            .onFirst()
+            .performClick()
 }

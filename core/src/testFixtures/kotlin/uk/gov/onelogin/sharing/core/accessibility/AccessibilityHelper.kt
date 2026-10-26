@@ -22,7 +22,10 @@ object AccessibilityHelper {
     }
 
     @SuppressLint("ObsoleteSdkInt", "NewApi")
-    fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.performAccessibilityCheck(
+    fun <
+        R : TestRule,
+        A : ComponentActivity
+        > AndroidComposeTestRule<R, A>.performAccessibilityCheck(
         content: @Composable () -> Unit
     ) {
         assumeTrue(

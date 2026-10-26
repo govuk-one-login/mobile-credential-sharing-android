@@ -73,7 +73,7 @@ class GetReadyToShareScreenAccessibilityTest {
             analyticsLogger = analyticsLogger,
             navigator = navigator,
             orchestrator = orchestrator,
-            resolver = resolver,
+            resolver = resolver
         )
     }
 

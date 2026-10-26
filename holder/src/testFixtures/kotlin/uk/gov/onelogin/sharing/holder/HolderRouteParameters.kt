@@ -9,8 +9,8 @@ import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRout
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
-import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 
 class HolderRouteParameters : TestParametersValuesProvider() {

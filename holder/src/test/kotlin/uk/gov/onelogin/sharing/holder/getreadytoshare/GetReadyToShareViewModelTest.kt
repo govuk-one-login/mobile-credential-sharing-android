@@ -2,6 +2,11 @@ package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import app.cash.turbine.test
 import io.mockk.mockk
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
@@ -25,11 +30,6 @@ import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavi
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class GetReadyToShareViewModelTest {
 
@@ -69,7 +69,7 @@ class GetReadyToShareViewModelTest {
                 hasCalledResolver = true
             },
             dispatcher = dispatcherRule.testDispatcher,
-            mainDispatcher = dispatcherRule.testDispatcher,
+            mainDispatcher = dispatcherRule.testDispatcher
         )
     }
 
@@ -181,10 +181,7 @@ class GetReadyToShareViewModelTest {
      * Test parameters couldn't be used due to issues with calling view model functions as
      * input parameters.
      */
-    private fun verifyAnalyticsEvent(
-        job: Job,
-        expectedEvent: AnalyticsEvent
-    ) = runTest {
+    private fun verifyAnalyticsEvent(job: Job, expectedEvent: AnalyticsEvent) = runTest {
         job.join()
         assertThat(
             analyticsLogger,

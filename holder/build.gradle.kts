@@ -72,12 +72,12 @@ dependencies {
         testFixtures(projects.cryptoService),
         testFixtures(projects.core),
         testFixtures(projects.orchestration),
-        projects.prerequisiteGateImpl,
+        projects.prerequisiteGateImpl
     ).forEach(::testFixturesApi)
 
     listOf(
         projects.analytics,
         projects.bluetooth,
-        projects.cryptoService,
+        projects.cryptoService
     ).forEach(::testFixturesImplementation)
 }
